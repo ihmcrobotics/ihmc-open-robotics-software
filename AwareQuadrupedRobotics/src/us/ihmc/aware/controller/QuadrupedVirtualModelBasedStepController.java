@@ -6,9 +6,7 @@ import us.ihmc.aware.controller.common.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
-import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
-import us.ihmc.aware.vmc.QuadrupedJointLimits;
-import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
+import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -93,6 +91,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
 
    // controllers
    private final QuadrupedVirtualModelController virtualModelController;
+   private final QuadrupedContactForceOptimization contactForceOptimization;
+   private final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings;
    private final PIDController comHeightController;
    private final AxisAngleOrientationController bodyOrientationController;
    private final DivergentComponentOfMotionController dcmPositionController;
@@ -240,6 +240,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
 
       // controllers
       this.virtualModelController = virtualModelController;
+      contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames);
+      contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
       comHeightController = new PIDController("bodyHeight", registry);
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
       dcmPositionController = new DivergentComponentOfMotionController("dcm", comFrame, controlDT, mass, gravity, params.get(COM_HEIGHT_NOMINAL), registry);
@@ -564,10 +566,21 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
          footStateMachine.get(robotQuadrant).doAction();
       }
 
-      // compute joint torques using virtual model control
-      virtualModelController.setComForceCommand(comForceSetpoint);
-      virtualModelController.setComTorqueCommand(bodyTorqueSetpoint);
-      virtualModelController.compute(jointLimits, contactForceLimits);
+      // compute optimal contact forces
+      contactForceOptimization.setComForceCommand(comForceSetpoint);
+      contactForceOptimization.setComTorqueCommand(bodyTorqueSetpoint);
+      contactForceOptimization.solve(contactForceLimits, contactForceOptimizationSettings);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+      }
+
+      // compute leg joint torques using virtual model control
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+      }
+      virtualModelController.compute(jointLimits);
    }
 
    private void readYoVariables()
@@ -679,15 +692,15 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       }
 
       // initialize controllers and state machines
-      virtualModelController.reinitialize();
+      virtualModelController.reset();
+      contactForceOptimization.reset();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         virtualModelController.setContactState(robotQuadrant, true);
-         virtualModelController.setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
+         contactForceOptimization.setContactState(robotQuadrant, true);
+         contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
       }
-      virtualModelController.setComForceCommandWeights(1.0, 1.0, 1.0);
-      virtualModelController.setComTorqueCommandWeights(1.0, 1.0, 1.0);
-
+      contactForceOptimizationSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
+      contactForceOptimizationSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       bodyOrientationController.reset();
       bodyOrientationController.setProportionalGains(params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS));
       bodyOrientationController.setIntegralGains(params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS), params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR));
@@ -713,7 +726,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
       yoGraphicsListRegistry.hideArtifacts();
       yoGraphicsList.setVisible(true);
       artifactList.setVisible(true);
-      virtualModelController.setVisible(true);
+      virtualModelController.setVisible(false);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
+      }
    }
 
    @Override public void onExit()
@@ -749,21 +766,16 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedContro
          soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
          swingPositionController.get(robotQuadrant)
                .compute(soleForceSetpoint.get(robotQuadrant), solePositionSetpoint.get(robotQuadrant), soleLinearVelocitySetpoint.get(robotQuadrant), soleLinearVelocityEstimate.get(robotQuadrant), soleForceFeedforwardSetpoint.get(robotQuadrant));
-         virtualModelController.setSwingForceCommand(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
       }
 
       @Override public void doTransitionIntoAction()
       {
          // initialize controllers
          swingPositionController.get(robotQuadrant).reset();
-
-         // initialize contact state
-         virtualModelController.setContactState(robotQuadrant, false);
       }
 
       @Override public void doTransitionOutOfAction()
       {
-         virtualModelController.setContactState(robotQuadrant, true);
       }
 
       private class SwingToSupportCondition implements StateTransitionCondition
