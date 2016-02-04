@@ -1,9 +1,8 @@
 package us.ihmc.humanoidRobotics.model;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.vecmath.Point2d;
 
@@ -13,19 +12,30 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class CenterOfPressureDataHolder
 {
-   private final List<RigidBody> rigidBodies;
+   private final Map<String, RigidBody> nameToRigidBodyMap = new LinkedHashMap<String, RigidBody>();
    private final Map<RigidBody, ReferenceFrame> soleFrames;
    private final Map<RigidBody, Point2d> centerOfPressures = new LinkedHashMap<>();
 
    public CenterOfPressureDataHolder(Map<RigidBody, ReferenceFrame> soleFrames)
    {
-      rigidBodies = new ArrayList<>(soleFrames.keySet());
       this.soleFrames = soleFrames;
+      
+      for(RigidBody rigidBody : soleFrames.keySet())
+      {
+         nameToRigidBodyMap.put(rigidBody.getName(), rigidBody);
+         centerOfPressures.put(rigidBody, new Point2d());
+      }
    }
 
    public void setCenterOfPressure(Point2d centerOfPressure, RigidBody foot)
    {
       centerOfPressures.get(foot).set(centerOfPressure);
+   }
+   
+   public void setCenterOfPressureByName(Point2d centerOfPressure, RigidBody foot)
+   {
+      RigidBody footFromNameMap = nameToRigidBodyMap.get(foot.getName());
+      setCenterOfPressure(centerOfPressure, footFromNameMap);
    }
 
    public void setCenterOfPressure(FramePoint2d centerOfPressure, RigidBody foot)
@@ -40,10 +50,22 @@ public class CenterOfPressureDataHolder
          centerOfPressures.get(foot).set(Double.NaN, Double.NaN);
       }
    }
+   
+   public void setCenterOfPressureByName(FramePoint2d centerOfPressure, RigidBody foot)
+   {
+      RigidBody footFromNameMap = nameToRigidBodyMap.get(foot.getName());
+      setCenterOfPressure(centerOfPressure, footFromNameMap);
+   }
 
    public void getCenterOfPressure(Point2d centerOfPressureToPack, RigidBody foot)
    {
       centerOfPressureToPack.set(centerOfPressures.get(foot));
+   }
+   
+   public void getCenterOfPressureByName(Point2d centerOfPressureToPack, RigidBody foot)
+   {      
+      RigidBody footFromNameMap = nameToRigidBodyMap.get(foot.getName());
+      getCenterOfPressure(centerOfPressureToPack, footFromNameMap);
    }
    
    public void getCenterOfPressure(FramePoint2d centerOfPressureToPack, RigidBody foot)
@@ -51,8 +73,14 @@ public class CenterOfPressureDataHolder
       centerOfPressureToPack.setIncludingFrame(soleFrames.get(foot), centerOfPressures.get(foot));
    }
    
-   public List<RigidBody> getRigidBodies()
+   public void getCenterOfPressureByName(FramePoint2d centerOfPressureToPack, RigidBody foot)
    {
-      return rigidBodies;
+      RigidBody footFromNameMap = nameToRigidBodyMap.get(foot.getName());
+      getCenterOfPressure(centerOfPressureToPack, footFromNameMap);
+   }
+   
+   public Set<RigidBody> getRigidBodies()
+   {
+      return soleFrames.keySet();
    }
 }
