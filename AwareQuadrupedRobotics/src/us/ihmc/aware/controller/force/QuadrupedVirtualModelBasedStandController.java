@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -194,7 +195,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
 
       // utilities
-      jointLimits = new QuadrupedJointLimits(); // FIXME (pass in robot specific joint limits)
+      jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
       contactForceLimits = new QuadrupedContactForceLimits();
       referenceFrames = virtualModelController.getReferenceFrames();
       comFrame = referenceFrames.getCenterOfMassZUpFrame();

@@ -19,6 +19,7 @@ import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
@@ -225,7 +226,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
 
       // utilities
-      jointLimits = new QuadrupedJointLimits(); // FIXME (pass in robot specific joint limits)
+      jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
       contactForceLimits = new QuadrupedContactForceLimits();
       referenceFrames = virtualModelController.getReferenceFrames();
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
@@ -718,7 +719,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmPositionController.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-//       footStateMachine.get(robotQuadrant).reset(); // FIXME (reset state machine)
+         footStateMachine.get(robotQuadrant).reset();
          swingPositionController.get(robotQuadrant).setProportionalGains(params.getVolatileArray(SWING_POSITION_PROPORTIONAL_GAINS));
          swingPositionController.get(robotQuadrant).setIntegralGains(params.getVolatileArray(SWING_POSITION_INTEGRAL_GAINS), params.get(SWING_POSITION_MAX_INTEGRAL_ERROR));
          swingPositionController.get(robotQuadrant).setDerivativeGains(params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS));
