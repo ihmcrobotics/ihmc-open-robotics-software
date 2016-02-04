@@ -1,20 +1,18 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
-
-import com.github.quickhull3d.Vector3d;
-
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import org.junit.Test;
+
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class BoundingBox3dTest
 {
@@ -24,9 +22,7 @@ public class BoundingBox3dTest
    @Test(timeout = 30000)
    public void testCreateUsingCenterAndPlusMinusVector()
    {
-      BoundingBox3d box = BoundingBox3d.createUsingCenterAndPlusMinusVector(new Point3d(0.0, 0.0, 0.0), new Tuple3d(1, 1, 1)
-      {
-      } );
+      BoundingBox3d box = BoundingBox3d.createUsingCenterAndPlusMinusVector(new Point3d(0.0, 0.0, 0.0), new Vector3d(1, 1, 1));
 
       assertEquals(box.getXMin(), -1.0, 1e-7);
       assertEquals(box.getXMax(), 1.0, 1e-7);
