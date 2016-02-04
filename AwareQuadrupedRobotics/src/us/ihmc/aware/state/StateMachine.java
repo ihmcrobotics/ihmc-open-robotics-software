@@ -21,6 +21,11 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    private S state;
 
+   /**
+    * Whether or not the initial state's {@link StateMachineState#onEntry()} method has been called.
+    */
+   private boolean initialized = false;
+
    public StateMachine(Map<S, StateMachineState<E>> states, List<StateMachineTransition<S, E>> transitions,
          S initialState)
    {
@@ -61,6 +66,14 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    public void process()
    {
+      // Call the initial state's onEntry if it has not been called yet.
+      if(!initialized)
+      {
+         StateMachineState<E> instance = getInstanceForEnum(state);
+         instance.onEntry();
+         initialized = true;
+      }
+
       StateMachineState<E> instance = states.get(state);
 
       // Run the current state and see if it generates an event.
