@@ -1,12 +1,12 @@
 package us.ihmc.quadrupedRobotics.sliderboard;
 
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class QuadrupedLegJointSliderBoardConfiguration
 {
@@ -16,27 +16,21 @@ public class QuadrupedLegJointSliderBoardConfiguration
    {
       final EnumYoVariable<RobotQuadrant> sliderBoardMode = new EnumYoVariable<RobotQuadrant>("SliderBoardSelectedRobotQuadrant", scs.getRootRegistry(), RobotQuadrant.class);
 
-      
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          //TODO: figure out slider min/max
          String prefix = quadrant.toString().toLowerCase();
-         
-      double LOW_SOFT_LIMIT_FRONT_RIGHT_HIP_ROLL = -0.5;
-      double LOW_SOFT_LIMIT_FRONT_RIGHT_HIP_PITCH = -0.5;
-      double LOW_SOFT_LIMIT_FRONT_RIGHT_KNEE_PITCH = -1.2; // modified
-      
-      double HIGH_SOFT_LIMIT_FRONT_RIGHT_HIP_ROLL = 0.3;
-      double HIGH_SOFT_LIMIT_FRONT_RIGHT_HIP_PITCH = 0.87;
-      double HIGH_SOFT_LIMIT_FRONT_RIGHT_KNEE_PITCH = -0.4; // modified
 
-      
+         double LOW_SOFT_LIMIT_FRONT_RIGHT_HIP_ROLL = -0.5;
+         double LOW_SOFT_LIMIT_FRONT_RIGHT_HIP_PITCH = -0.5;
+         double LOW_SOFT_LIMIT_FRONT_RIGHT_KNEE_PITCH = -1.2; // modified
 
+         double HIGH_SOFT_LIMIT_FRONT_RIGHT_HIP_ROLL = 0.3;
+         double HIGH_SOFT_LIMIT_FRONT_RIGHT_HIP_PITCH = 0.87;
+         double HIGH_SOFT_LIMIT_FRONT_RIGHT_KNEE_PITCH = -0.4; // modified
 
-
-         
-         double min = -Math.PI/2;
-         double max = Math.PI/2;
+         double min = -Math.PI / 2;
+         double max = Math.PI / 2;
 
          sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0.0, 3.0);
          sliderBoardConfigurationManager.setSlider(1, scs.getVariable("QuadrupedLegJointSliderBoardController", prefix + "_hip_roll_q_d"), LOW_SOFT_LIMIT_FRONT_RIGHT_HIP_ROLL, HIGH_SOFT_LIMIT_FRONT_RIGHT_HIP_ROLL);
@@ -53,9 +47,10 @@ public class QuadrupedLegJointSliderBoardConfiguration
 
       VariableChangedListener listener = new VariableChangedListener()
       {
-         @Override public void variableChanged(YoVariable<?> v)
+         @Override
+         public void variableChanged(YoVariable<?> v)
          {
-            System.out.println(defaultConfiguration + ": selected " + RobotQuadrant.class.getSimpleName() + " changed to " + sliderBoardMode.getStringValue());
+            PrintTools.info(QuadrupedLegJointSliderBoardConfiguration.this, defaultConfiguration + ": selected " + RobotQuadrant.class.getSimpleName() + " changed to " + sliderBoardMode.getStringValue());
             sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().getCamelCaseNameForStartOfExpression() + defaultConfiguration);
          }
       };
