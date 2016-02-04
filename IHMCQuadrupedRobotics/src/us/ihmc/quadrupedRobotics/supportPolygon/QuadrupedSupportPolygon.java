@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -26,7 +25,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    private final QuadrantDependentFootstepList footsteps = new QuadrantDependentFootstepList();
    
-   private final FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
    private final FramePoint temporaryFramePoint = new FramePoint();
    private final FramePoint temporaryFramePoint2 = new FramePoint();
@@ -451,31 +450,18 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       footsteps.clear();
    }
-   
-   private void computeFramePolygonConvex2d()
-   {
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
-      for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
-      {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
-      }
-      frameConvexPolygon2d.update();
-   }
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
-   {
-      FrameConvexPolygon2d frameConvexPolygon2d = yoFrameConvexPolygon2d.getFrameConvexPolygon2d();
-      
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+   {      
+      tempFrameConvexPolygon2d.clear();
+      tempFrameConvexPolygon2d.changeFrame(getReferenceFrame());
       for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
       {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+         tempFrameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
       }
-      frameConvexPolygon2d.update();
-      
-      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
+      tempFrameConvexPolygon2d.update();
+
+      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
    }
 
    /**
@@ -536,21 +522,6 @@ public class QuadrupedSupportPolygon implements Serializable
          }
       }
       return closestQuadrant;
-   }
-
-   /**
-    * This will return the vector normal for each edge. The normal of an
-    * edge points outward of the support polygon. The ordering is of the edges
-    * starts with the FL and goes clockwise. E.g., if the swing leg is the FR,
-    * the edges will be: FL-HR, HR-HL, HL-FL
-    *
-    * @return Vector2d[]
-    */
-   public void getEdgeNormals2d(FrameVector2d[] normalsToPack)
-   {
-      computeFramePolygonConvex2d();
-      
-      frameConvexPolygon2d.getOutwardEdgeNormals(normalsToPack);
    }
 
    public void getCentroid2d(FramePoint centroidToPack)
