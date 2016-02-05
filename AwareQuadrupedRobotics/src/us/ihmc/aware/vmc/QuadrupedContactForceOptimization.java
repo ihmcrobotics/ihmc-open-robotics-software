@@ -399,6 +399,11 @@ public class QuadrupedContactForceOptimization
 
    private void computeConstrainedContactForceSolution()
    {
+      if (getNumberOfContacts() == 0)
+      {
+         return;
+      }
+
       // min_u 1/2 * u'Au + b'u
       // s.t. Ain u + bin >= 0
       DenseMatrix64F u = contactForceSolutionVector;
@@ -422,6 +427,11 @@ public class QuadrupedContactForceOptimization
 
    private void computeUnconstrainedContactForceSolution()
    {
+      if (getNumberOfContacts() == 0)
+      {
+         return;
+      }
+
       // min_u 1/2 * u'Au + b'u
       DenseMatrix64F u = contactForceSolutionVector;
       DenseMatrix64F b = qpCostVector;
