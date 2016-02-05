@@ -3,6 +3,7 @@ package us.ihmc.aware.vmc;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.aware.util.ContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
@@ -26,7 +27,7 @@ public class QuadrupedContactForceOptimization
    private final QuadrantDependentList<FrameVector> contactForceCommand;
    private final QuadrantDependentList<FrameVector> contactForceSolution;
    private final QuadrantDependentList<FramePoint> contactPosition;
-   private final QuadrantDependentList<boolean[]> contactState;
+   private final QuadrantDependentList<ContactState> contactState;
 
    private final DenseMatrix64F comWrenchCommandVector;
    private final DenseMatrix64F comWrenchSolutionVector;
@@ -63,7 +64,7 @@ public class QuadrupedContactForceOptimization
          contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
          contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
          contactPosition.set(robotQuadrant, new FramePoint(comFrame));
-         contactState.set(robotQuadrant, new boolean[1]);
+         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
 
       comWrenchCommandVector = new DenseMatrix64F(6, 1);
@@ -91,7 +92,7 @@ public class QuadrupedContactForceOptimization
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactForceCommand.get(robotQuadrant).setToZero();
-         contactState.get(robotQuadrant)[0] = true;
+         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
    }
 
@@ -110,9 +111,9 @@ public class QuadrupedContactForceOptimization
       contactForceCommand.get(robotQuadrant).setIncludingFrame(contactForce);
    }
 
-   public void setContactState(RobotQuadrant robotQuadrant, boolean inContact)
+   public void setContactState(RobotQuadrant robotQuadrant, ContactState state)
    {
-      contactState.get(robotQuadrant)[0] = inContact;
+      contactState.set(robotQuadrant, state);
    }
 
    public void solve(QuadrupedContactForceLimits contactForceLimits, QuadrupedContactForceOptimizationSettings optimizationSettings)
@@ -138,7 +139,7 @@ public class QuadrupedContactForceOptimization
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (contactState.get(robotQuadrant)[0])
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
             contactForceSolution.get(robotQuadrant).changeFrame(comFrame);
             contactForceSolution.get(robotQuadrant).setX(contactForceSolutionVector.get(0 + rowOffset, 0));
@@ -181,12 +182,12 @@ public class QuadrupedContactForceOptimization
       comForce.setIncludingFrame(comForceSolution);
    }
 
-   private int getNumberOfContacts(QuadrantDependentList<boolean[]> contactState)
+   private int getNumberOfContacts()
    {
       int numberOfContacts = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (contactState.get(robotQuadrant)[0])
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
             numberOfContacts++;
          }
@@ -197,7 +198,7 @@ public class QuadrupedContactForceOptimization
    private void initializeComWrenchMapMatrix()
    {
       // compute map from contact forces to centroidal forces and torques
-      int numberOfContacts = getNumberOfContacts(contactState);
+      int numberOfContacts = getNumberOfContacts();
       comWrenchMapMatrix.zero();
       comWrenchMapMatrix.reshape(6, 3 * numberOfContacts);
       int columnOffset = 0;
@@ -205,7 +206,7 @@ public class QuadrupedContactForceOptimization
       {
          contactPosition.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
          contactPosition.get(robotQuadrant).changeFrame(comFrame);
-         if (contactState.get(robotQuadrant)[0])
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
             comWrenchMapMatrix.set(0, 1 + columnOffset, -contactPosition.get(robotQuadrant).getZ()); // mX row
             comWrenchMapMatrix.set(0, 2 + columnOffset, contactPosition.get(robotQuadrant).getY());
@@ -235,14 +236,14 @@ public class QuadrupedContactForceOptimization
 
    private void initializeContactForceCommandVector()
    {
-      int numberOfContacts = getNumberOfContacts(contactState);
+      int numberOfContacts = getNumberOfContacts();
 
       contactForceCommandVector.reshape(3 * numberOfContacts, 1);
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactForceCommand.get(robotQuadrant).changeFrame(comFrame);
-         if (contactState.get(robotQuadrant)[0])
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
             contactForceCommandVector.set(rowOffset++, 0, contactForceCommand.get(robotQuadrant).getX());
             contactForceCommandVector.set(rowOffset++, 0, contactForceCommand.get(robotQuadrant).getY());
@@ -254,7 +255,7 @@ public class QuadrupedContactForceOptimization
 
    private void initializeOptimizationWeights(QuadrupedContactForceOptimizationSettings optimizationSettings)
    {
-      int numberOfContacts = getNumberOfContacts(contactState);
+      int numberOfContacts = getNumberOfContacts();
 
       comWrenchWeightMatrix.reshape(6, 6);
       for (int i = 0; i < 3; i++)
@@ -273,7 +274,7 @@ public class QuadrupedContactForceOptimization
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          double[] contactForceCommandWeights = optimizationSettings.getContactForceCommandWeights(robotQuadrant);
-         if (contactState.get(robotQuadrant)[0])
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
             for (int i = 0; i < 3; i++)
             {
@@ -352,7 +353,7 @@ public class QuadrupedContactForceOptimization
       int columnOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (contactState.get(robotQuadrant)[0])
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
             // compute inequality constraints to enforce pressure limits and friction pyramids
             double mu = contactForceLimits.getCoefficientOfFriction(robotQuadrant);
@@ -439,7 +440,7 @@ public class QuadrupedContactForceOptimization
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (contactState.get(robotQuadrant)[0])
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
             double mu = contactForceLimits.getCoefficientOfFriction(robotQuadrant);
             double fx = contactForceSolutionVector.get(0 + rowOffset, 0);
