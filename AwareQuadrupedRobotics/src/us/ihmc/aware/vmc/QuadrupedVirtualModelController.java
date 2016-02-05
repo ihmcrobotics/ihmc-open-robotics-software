@@ -30,7 +30,7 @@ import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 public class QuadrupedVirtualModelController
 {
    private final YoVariableRegistry registry;
-   private final QuadrupedJointNameMap jointMap;
+   private final QuadrupedJointNameMap jointNameMap;
 
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
@@ -53,14 +53,14 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoGraphicVector> yoSoleVirtualForceViz;
    private final QuadrantDependentList<YoGraphicVector> yoSoleContactForceViz;
 
-   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      jointMap = robotParameters.getJointMap();
+      this.jointNameMap = jointNameMap;
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
       // initialize reference frames
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, robotParameters.getPhysicalProperties());
+      this.referenceFrames = referenceFrames;
       worldFrame = ReferenceFrame.getWorldFrame();
       soleFrame = referenceFrames.getFootReferenceFrames();
 
@@ -95,7 +95,7 @@ public class QuadrupedVirtualModelController
       legEffortVector = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String jointBeforeFootName = robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant);
+         String jointBeforeFootName = jointNameMap.getJointBeforeFootName(robotQuadrant);
          OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBody foot = jointBeforeFoot.getSuccessor();
@@ -112,10 +112,13 @@ public class QuadrupedVirtualModelController
       yoSoleContactForceViz = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {
-         yoSoleVirtualForceViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleVirtualForce",
-               yoSolePosition.get(robotQuadrant), yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.OrangeRed()));
-         yoSoleContactForceViz.set(robotQuadrant, new YoGraphicVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleContactForce",
-               yoSolePosition.get(robotQuadrant), yoSoleContactForce.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
+         String prefix = parentRegistry.getName();
+         yoSoleVirtualForceViz.set(robotQuadrant,
+               new YoGraphicVector(prefix + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + "SoleVirtualForce", yoSolePosition.get(robotQuadrant),
+                     yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.OrangeRed()));
+         yoSoleContactForceViz.set(robotQuadrant,
+               new YoGraphicVector(prefix + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + "SoleContactForce", yoSolePosition.get(robotQuadrant),
+                     yoSoleContactForce.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
          yoGraphicsList.add(yoSoleVirtualForceViz.get(robotQuadrant));
          yoGraphicsList.add(yoSoleContactForceViz.get(robotQuadrant));
       }
@@ -153,7 +156,7 @@ public class QuadrupedVirtualModelController
       soleVirtualForce.get(robotQuadrant).scale(-1.0);
    }
 
-   public void compute(QuadrupedJointLimits jointLimits)
+   public void compute(QuadrupedJointLimits jointLimits, QuadrupedVirtualModelControllerSettings controllerSettings)
    {
       // compute sole positions and jacobians
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -178,15 +181,20 @@ public class QuadrupedVirtualModelController
          int index = 0;
          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
          {
-            // apply joint position and torque limits
-            QuadrupedJointName jointName = jointMap.getJointNameForSDFName(joint.getName());
-            double tauPositionLowerLimit = jointLimits.getSoftPositionLimitStiffness(jointName)
-                  * (jointLimits.getSoftPositionLowerLimit(jointName) - joint.getQ()) - jointLimits.getSoftPositionLimitDamping(jointName) * joint.getQd();
-            double tauPositionUpperLimit = jointLimits.getSoftPositionLimitStiffness(jointName)
-                  * (jointLimits.getSoftPositionUpperLimit(jointName) - joint.getQ()) - jointLimits.getSoftPositionLimitDamping(jointName) * joint.getQd();
+            QuadrupedJointName jointName = jointNameMap.getJointNameForSDFName(joint.getName());
+
+            // compute joint torque and with damping
+            double tau = legEffortVector.get(robotQuadrant).get(index, 0) - controllerSettings.getJointDamping(jointName) * joint.getQd();
+
+            // apply position and torque limits
+            double tauPositionLowerLimit =
+                  controllerSettings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionLowerLimit(jointName) - joint.getQ())
+                        - controllerSettings.getJointPositionLimitDamping(jointName) * joint.getQd();
+            double tauPositionUpperLimit =
+                  controllerSettings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionUpperLimit(jointName) - joint.getQ())
+                        - controllerSettings.getJointPositionLimitDamping(jointName) * joint.getQd();
             double tauEffortLowerLimit = -jointLimits.getEffortLimit(jointName);
             double tauEffortUpperLimit = jointLimits.getEffortLimit(jointName);
-            double tau = legEffortVector.get(robotQuadrant).get(index, 0);
             tau = Math.min(Math.max(tau, tauPositionLowerLimit), tauPositionUpperLimit);
             tau = Math.min(Math.max(tau, tauEffortLowerLimit), tauEffortUpperLimit);
 
@@ -223,11 +231,6 @@ public class QuadrupedVirtualModelController
    public void setSoleContactForceVisible(RobotQuadrant robotQuadrant, boolean visible)
    {
       yoSoleContactForceViz.get(robotQuadrant).setVisible(visible);
-   }
-
-   public QuadrupedReferenceFrames getReferenceFrames()
-   {
-      return referenceFrames;
    }
 
    public YoVariableRegistry getRegistry()

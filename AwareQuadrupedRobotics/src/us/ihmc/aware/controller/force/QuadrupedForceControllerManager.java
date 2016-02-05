@@ -34,13 +34,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(
             runtimeEnvironment, parameters);
-      QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(
-            runtimeEnvironment.getFullRobotModel(), parameters, registry, runtimeEnvironment.getGraphicsListRegistry());
       QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController();
       QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(
-            runtimeEnvironment, parameters, paramMapRepository, virtualModelController);
+            runtimeEnvironment, parameters, paramMapRepository);
       QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters,
-            paramMapRepository, virtualModelController);
+            paramMapRepository);
 
       StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>();
 
