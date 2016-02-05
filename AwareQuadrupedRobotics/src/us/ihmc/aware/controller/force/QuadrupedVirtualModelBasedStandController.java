@@ -5,6 +5,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
+import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -596,7 +597,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       contactForceOptimizationSettings.setDefaults();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactForceOptimization.setContactState(robotQuadrant, true);
+         contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
          contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
       }
       contactForceOptimizationSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
