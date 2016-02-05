@@ -2,8 +2,6 @@ plugins {
    id 'us.ihmc.gradle.ihmc-build' version '0.0.9'
 }
 
-
-
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
