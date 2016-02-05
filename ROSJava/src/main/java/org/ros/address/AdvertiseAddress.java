@@ -21,7 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.Callable;
 
-import org.ros.exception.RosRuntimeException;
+import org.ros.exception.RosMessageRuntimeException;
 
 import com.google.common.base.Preconditions;
 
@@ -79,7 +79,7 @@ public class AdvertiseAddress {
     try {
       return portCallable.call();
     } catch (Exception e) {
-      throw new RosRuntimeException(e);
+      throw new RosMessageRuntimeException(e);
     }
   }
 
@@ -97,7 +97,7 @@ public class AdvertiseAddress {
       InetAddress address = toInetAddress();
       return new InetSocketAddress(address, portCallable.call());
     } catch (Exception e) {
-      throw new RosRuntimeException(e);
+      throw new RosMessageRuntimeException(e);
     }
   }
 
@@ -106,7 +106,7 @@ public class AdvertiseAddress {
     try {
       return new URI(scheme, null, host, portCallable.call(), "/", null, null);
     } catch (Exception e) {
-      throw new RosRuntimeException("Failed to create URI: " + this, e);
+      throw new RosMessageRuntimeException("Failed to create URI: " + this, e);
     }
   }
 
@@ -120,7 +120,7 @@ public class AdvertiseAddress {
     try {
       return "AdvertiseAddress<" + host + ", " + portCallable.call() + ">";
     } catch (Exception e) {
-      throw new RosRuntimeException(e);
+      throw new RosMessageRuntimeException(e);
     }
   }
 
@@ -133,7 +133,7 @@ public class AdvertiseAddress {
     try {
       result = prime * result + portCallable.call();
     } catch (Exception e) {
-      throw new RosRuntimeException(e);
+      throw new RosMessageRuntimeException(e);
     }
     return result;
   }
@@ -157,7 +157,7 @@ public class AdvertiseAddress {
       if (portCallable.call() != other.portCallable.call())
         return false;
     } catch (Exception e) {
-      throw new RosRuntimeException(e);
+      throw new RosMessageRuntimeException(e);
     }
     return true;
   }

@@ -24,7 +24,7 @@ import us.ihmc.utilities.ros.documentation.enums.EnumDocumentationFactory;
 
 public class ROSMessageGenerator
 {
-   private static String messageFolder = ("../ROSJavaBootstrap/ROSMessagesAndServices/ihmc_msgs/msg/").replace("/", File.separator);
+   public static String messageFolder = ("../IHMCROSTools/ROSMessagesAndServices/ihmc_msgs/msg/").replace("/", File.separator);
    boolean overwriteSubMessages;
 
    public ROSMessageGenerator(boolean overwriteSubMessages)
