@@ -63,8 +63,6 @@ dependencies {
 	//compile group: 'org.ros.rosjava_messages', name: 'actionlib', version: '1.11.3'
 	//compile group: 'org.ros.rosjava_messages', name: 'actionlib', version: '1.11.7'
 	
- 	//compile ihmc.getProjectDependency(":ROSJavaMessages")
-
  	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")

@@ -32,7 +32,6 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-    //compile ihmc.getProjectDependency(":ROSJavaMessages")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":SDFLoader")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
