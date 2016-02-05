@@ -39,13 +39,12 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
       {
          DoubleYoVariable qDesired = new DoubleYoVariable(key + "_q_d", sliderBoardRegistry);
          DoubleYoVariable qDesiredAlpha = new DoubleYoVariable(key + "_q_d_alpha", sliderBoardRegistry);
-         qDesiredAlpha.set(0.95);
+         qDesiredAlpha.set(0.99);
          AlphaFilteredYoVariable alphaFilteredQDesired = new AlphaFilteredYoVariable(key + "_alpha_filtered_q_d", sliderBoardRegistry, qDesiredAlpha, qDesired);
          alphaFilteredQDesiredMap.put(key, alphaFilteredQDesired);
          QDesiredMap.put(key, qDesired);
          jointInitialized.put(key, new BooleanYoVariable(key + "_initialized", sliderBoardRegistry));
          jointOnline.put(key, new BooleanYoVariable(key + "_online", sliderBoardRegistry));
-         //         jointInitialized.put(key, online);
 
       }
       parentRegistry.addChild(sliderBoardRegistry);
@@ -88,12 +87,15 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
    @Override
    public void doTransitionIntoAction()
    {
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (int i = 0; i < jointMapKeySet.size(); i++)
       {
-         DoubleYoVariable desiredQ = QDesiredMap.get(joint.getName());
+         String key = jointMapKeySet.get(i);
+         OneDoFJoint joint = jointMap.get(key);
+
+         DoubleYoVariable desiredQ = QDesiredMap.get(key);
          desiredQ.set(joint.getQ());
          joint.setUnderPositionControl(true);
-         jointInitialized.get(joint).set(false);
+         jointInitialized.get(key).set(false);
       }
    }
 
