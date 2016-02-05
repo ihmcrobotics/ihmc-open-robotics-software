@@ -28,7 +28,7 @@ evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCROSTools"))
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
 
 	compile group: 'us.ihmc.thirdparty.com.centralnexus', name: 'joystick', version: '0.7'
@@ -38,7 +38,7 @@ dependencies {
 	compile group: 'com.jroller.santhosh', name: 'JResizable', version: '1.0'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
-	//compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.1'
+	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.1'
 
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
