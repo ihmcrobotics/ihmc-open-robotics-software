@@ -26,10 +26,10 @@ public class QuadrupedContactForceOptimizationSettings
       {
          contactForceCommandWeights.set(robotQuadrant, new double[3]);
       }
-      setDefaultSettings();
+      setDefaults();
    }
 
-   public void setDefaultSettings()
+   public void setDefaults()
    {
       for (int i = 0; i < 3; i++)
       {

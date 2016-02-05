@@ -81,6 +81,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    // controllers
    private final QuadrupedVirtualModelController virtualModelController;
+   private final QuadrupedVirtualModelControllerSettings virtualModelControllerSettings;
    private final QuadrupedContactForceOptimization contactForceOptimization;
    private final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings;
    private final PIDController comHeightController;
@@ -168,7 +169,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    // temporary
    private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
-   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedVirtualModelController virtualModelController)
+   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -197,7 +198,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // utilities
       jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
       contactForceLimits = new QuadrupedContactForceLimits();
-      referenceFrames = virtualModelController.getReferenceFrames();
+      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointNameMap, robotParameters.getPhysicalProperties());
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       worldFrame = referenceFrames.getWorldFrame();
@@ -214,7 +215,8 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
 
       // controllers
-      this.virtualModelController = virtualModelController;
+      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);
+      virtualModelControllerSettings = new QuadrupedVirtualModelControllerSettings();
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames);
       contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
       comHeightController = new PIDController("bodyHeight", registry);
@@ -478,7 +480,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       {
          virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
       }
-      virtualModelController.compute(jointLimits);
+      virtualModelController.compute(jointLimits, virtualModelControllerSettings);
    }
 
    private void readYoVariables()
@@ -591,6 +593,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // initialize controllers and state machines
       virtualModelController.reset();
       contactForceOptimization.reset();
+      contactForceOptimizationSettings.setDefaults();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactForceOptimization.setContactState(robotQuadrant, true);
