@@ -1,6 +1,6 @@
 package us.ihmc.kalman.imu;
 
-import Jama.Matrix;
+import org.ejml.data.DenseMatrix64F;
 
 /**
  * <p>Title: </p>
@@ -19,11 +19,11 @@ public interface QuaternionBasedFullIMUKalmanFilter
    /**
     * initialize
     *
-    * @param accel Matrix
-    * @param pqr Matrix
+    * @param accel DenseMatrix64F
+    * @param pqr DenseMatrix64F
     * @param d double
     */
-   public void initialize(Matrix accel, Matrix pqr, double d);
+   public void initialize(DenseMatrix64F accel, DenseMatrix64F pqr, double d);
 
    /**
     * reset
@@ -43,15 +43,15 @@ public interface QuaternionBasedFullIMUKalmanFilter
     *
     * @param pqr Matrix
     */
-   public void imuUpdate(Matrix pqr);
+   public void imuUpdate(DenseMatrix64F pqr);
 
    /**
     * compassUpdate
     *
     * @param d double
-    * @param accel Matrix
+    * @param accel DenseMatrix64F
     */
-   public void compassUpdate(double d, Matrix accel);
+   public void compassUpdate(double d, DenseMatrix64F accel);
 
    /**
     * getBias
@@ -64,9 +64,9 @@ public interface QuaternionBasedFullIMUKalmanFilter
    /**
     * getQuaternion
     *
-    * @return Matrix
+    * @return DenseMatrix64F
     */
-   public void getQuaternion(Matrix quaternionMatrix);
+   public void getQuaternion(DenseMatrix64F quaternionMatrix);
 
    /**
     * accel2quaternions
@@ -75,6 +75,6 @@ public interface QuaternionBasedFullIMUKalmanFilter
     * @param d double
     * @return double[]
     */
-   public void accel2quaternions(Matrix accel, double d, double[] quaternions);
+   public void accel2quaternions(DenseMatrix64F accel, double d, double[] quaternions);
 
 }

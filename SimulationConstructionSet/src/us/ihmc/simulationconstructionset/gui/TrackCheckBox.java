@@ -10,13 +10,14 @@ import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
 
 public class TrackCheckBox extends JCheckBox implements ActionListener
 {
+   private static final String TRACK = "Track";
    private static final long serialVersionUID = -9012772363648771937L;
    private ActiveCameraHolder cameraHolder;
 
    public TrackCheckBox(ActiveCameraHolder cameraHolder)
    {
-      super("Track");
-      this.setName("Track");
+      super(TRACK);
+      this.setName(TRACK);
 
       this.cameraHolder = cameraHolder;
 

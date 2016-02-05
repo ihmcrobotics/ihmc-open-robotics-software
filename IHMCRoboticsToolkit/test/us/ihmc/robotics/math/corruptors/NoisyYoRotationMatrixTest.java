@@ -33,7 +33,7 @@ public class NoisyYoRotationMatrixTest
       double yaw = random.nextDouble();
       double pitch = random.nextDouble();
       double roll = random.nextDouble();
-      RotationTools.setYawPitchRoll(in, yaw, pitch, roll);
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, in);
       
       mat.update(in);
       Matrix3d out = mat.getMatrix3d();

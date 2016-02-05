@@ -277,7 +277,7 @@ public class HandCompliantControlHelper
       desiredPosition.sub(totalLinearCorrection);
 
       totalAngularCorrection.negate();
-      RotationTools.setAxisAngleBasedOnRotationVector(angularDisplacementAsAxisAngle, totalAngularCorrection.getVector());
+      RotationTools.convertRotationVectorToAxisAngle(totalAngularCorrection.getVector(), angularDisplacementAsAxisAngle);
       angularDisplacementAsMatrix.set(angularDisplacementAsAxisAngle);
       desiredOrientation.getMatrix3d(correctedRotationMatrix);
       correctedRotationMatrix.mul(angularDisplacementAsMatrix, correctedRotationMatrix);

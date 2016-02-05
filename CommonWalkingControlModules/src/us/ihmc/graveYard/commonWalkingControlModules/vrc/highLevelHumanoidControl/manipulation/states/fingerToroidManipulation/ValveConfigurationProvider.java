@@ -78,7 +78,7 @@ public class ValveConfigurationProvider implements SE3ConfigurationProvider
       rotation.setColumn(2, 0.0, 1.0, 0.0);
 
       Matrix3d postRotation = new Matrix3d();
-      RotationTools.setYawPitchRoll(postRotation, robotSide.negateIfRightSide(outwardRotation.getDoubleValue()), 0.0, 0.0);
+      RotationTools.convertYawPitchRollToMatrix(robotSide.negateIfRightSide(outwardRotation.getDoubleValue()), 0.0, 0.0, postRotation);
 
       rotation.mul(postRotation);
 

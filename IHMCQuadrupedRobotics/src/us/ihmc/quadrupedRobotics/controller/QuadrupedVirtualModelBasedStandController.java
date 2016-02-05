@@ -237,6 +237,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       {
          supportPolygon.setFootstep(robotQuadrant, yoSolePositionEstimate.get(robotQuadrant).getFrameTuple());
       }
+
       supportPolygon.packYoFrameConvexPolygon2d(yoSupportPolygon);
 
       // compute support frame (centroid and nominal orientation)
