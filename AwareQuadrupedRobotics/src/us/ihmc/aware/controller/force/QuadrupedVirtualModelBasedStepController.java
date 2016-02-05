@@ -11,6 +11,7 @@ import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
+import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -458,19 +459,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       if (stepQueue.size() > 0)
       {
          QuadrupedTimedStep currentStep = stepQueue.getHead();
-         double currentTime = robotTimestamp.getDoubleValue();
-         double currentStepStartTime = currentStep.getTimeInterval().getStartTime();
          RobotQuadrant robotQuadrant = currentStep.getRobotQuadrant();
-         if (currentTime > currentStepStartTime)
-         {
-            // dequeue step
-            if (footStateMachine.get(robotQuadrant).getState() == FootState.SUPPORT_STATE)
-            {
-               stepCache.get(robotQuadrant).set(currentStep);
-               stepQueue.dequeue();
-               footStateMachine.get(robotQuadrant).trigger(FootEvent.LIFT_OFF);
-            }
-         }
+         stepCache.get(robotQuadrant).set(currentStep);
+         stepQueue.dequeue();
+
       }
    }
 
@@ -566,26 +558,18 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       comForceSetpoint.changeFrame(worldFrame);
       comForceSetpoint.setZ(comForceZ);
 
-      // compute virtual forces to track swing foot trajectories
+      // compute optimal contact forces
+      contactForceOptimization.setComForceCommand(comForceSetpoint);
+      contactForceOptimization.setComTorqueCommand(bodyTorqueSetpoint);
+      contactForceOptimization.solve(contactForceLimits, contactForceOptimizationSettings);
+
+      // compute virtual foot forces
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          footStateMachine.get(robotQuadrant).process();
       }
 
-      // compute optimal contact forces
-      contactForceOptimization.setComForceCommand(comForceSetpoint);
-      contactForceOptimization.setComTorqueCommand(bodyTorqueSetpoint);
-      contactForceOptimization.solve(contactForceLimits, contactForceOptimizationSettings);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-      }
-
       // compute leg joint torques using virtual model control
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-      }
       virtualModelController.compute(jointLimits, virtualModelControllerSettings);
    }
 
@@ -703,7 +687,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       contactForceOptimizationSettings.setDefaults();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactForceOptimization.setContactState(robotQuadrant, true);
+         contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
          contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
       }
       contactForceOptimizationSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
@@ -759,8 +743,9 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       @Override public void onEntry()
       {
-         // initialize controllers
+         // initialize swing foot controller and contact state
          swingPositionController.get(robotQuadrant).reset();
+         contactForceOptimization.setContactState(robotQuadrant, ContactState.NO_CONTACT);
       }
 
       @Override public FootEvent process()
@@ -775,6 +760,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
          swingPositionController.get(robotQuadrant)
                .compute(soleForceSetpoint.get(robotQuadrant), solePositionSetpoint.get(robotQuadrant), soleLinearVelocitySetpoint.get(robotQuadrant), soleLinearVelocityEstimate.get(robotQuadrant), soleForceFeedforwardSetpoint.get(robotQuadrant));
+         virtualModelController.setSoleVirtualForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+
          return null;
       }
 
@@ -794,11 +781,22 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       @Override public void onEntry()
       {
+         // initialize contact state
+         contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
 
       @Override public FootEvent process()
       {
-         return null;
+         contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+         virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+
+         // trigger events
+         double currentTime = robotTimestamp.getDoubleValue();
+         double liftOffTime = stepCache.get(robotQuadrant).getTimeInterval().getStartTime();
+         if (currentTime > liftOffTime)
+            return FootEvent.LIFT_OFF;
+         else
+            return null;
       }
 
       @Override public void onExit()
