@@ -7,7 +7,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import Jama.Matrix;
 
@@ -38,48 +37,6 @@ public class MatrixTest
 
       // Invert Matrix
       matrixInverted = matrix.inverse();    // with jama
-      if (VERBOSE) displayMatrix(matrixInverted, "matrixInverted");
-
-      // Matrix * Matrix inverted * Matrix should be equal to Matrix
-      matrixMultiplicationResult = matrix.times(matrixInverted).times(matrix);    // with jama
-      if (VERBOSE) displayMatrix(matrixMultiplicationResult, "matrixMultiplicationResult");
-
-      boolean numberAreCloseEnough = false;
-
-      for (int i = 0; i < matrixMultiplicationResult.getRowDimension(); i++)
-      {
-         for (int j = 0; j < matrixMultiplicationResult.getColumnDimension(); j++)
-         {
-            // We lost precision during the multiplication so result can not be exactly the same
-            if ((matrixMultiplicationResult.get(i, j) * 1.001 > matrix.get(i, j)) && (matrixMultiplicationResult.get(i, j) * 0.999 < matrix.get(i, j)))
-               numberAreCloseEnough = true;
-            else
-               numberAreCloseEnough = false;
-
-            assertFalse("Error at i = " + i + " j = " + j, !numberAreCloseEnough);
-         }
-      }
-
-      assertTrue("Matrix Inversion works well", true);
-   }
-
-	@DeployableTestMethod
-	@Test(timeout=300000)
-   public void testPseudoInvert()
-   {
-      if (VERBOSE)
-      {
-         System.out.println("");
-         System.out.println("Matrix Pseudo Inversion test");
-      }
-      
-      fillMatrix(rowDimension, columnDimension);
-      if (VERBOSE) displayMatrix(matrix, "matrix");
-
-      Matrix matrixMultiplicationResult = new Matrix(rowDimension, columnDimension);
-
-      // Invert Matrix
-      matrixInverted = MatrixTools.pseudoinverse(matrix);
       if (VERBOSE) displayMatrix(matrixInverted, "matrixInverted");
 
       // Matrix * Matrix inverted * Matrix should be equal to Matrix

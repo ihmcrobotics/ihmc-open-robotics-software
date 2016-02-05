@@ -1,32 +1,78 @@
-import java.nio.file.Files
-import java.nio.file.Paths
-import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
-    }
+plugins {
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.9'
 }
-apply plugin: 'java'
-apply from: 'gradleScripts/util.gradle'
-evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+
+
+
+if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
-version = "${project(':IHMCOpenRoboticsSoftware').version}"
-project.ext.fullVersion = "${project(':IHMCOpenRoboticsSoftware').ext.fullVersion}"
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
-setupDefaultDirectoryStructure()
+repositories ihmc.ihmcDefaultArtifactProxies()
 
-setupDefaultRepositories()
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
-setupProjectSpecificDependencies()
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("CommonWalkingControlModules"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("Graphics3DAdapter"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCWholeBodyController"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCHumanoidRobotics"))
+evaluationDependsOn(ihmc.getProjectDependencyGradlePath("SensorProcessing"))
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
+    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+
+	compile group: 'org.ejml', name: 'all', version: '0.28'
+    compile group: 'org.georegression' , name: 'georegression', version: '0.8'
+    compile group: 'org.boofcv', name: 'all', version: '0.19'
+    //compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.0'
+	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
+    compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
+    compile group: 'org.apache.ant', name: 'ant', version: '1.9.0'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+    compile group: 'colt', name: 'colt', version: '1.2.0'
+    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
+
+    compile ihmc.getProjectDependency(":CommonWalkingControlModules")
+    compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+    compile ihmc.getProjectDependency(":Graphics3DAdapter")
+    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+    compile ihmc.getProjectDependency(":IHMCCommunication")
+
+    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCPerception")
+    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+    compile ihmc.getProjectDependency(":IHMCROSTools")
+
+    compile ihmc.getProjectDependency(":IHMCWholeBodyController")
+    compile ihmc.getProjectDependency(":ImageProcessing")
+    compile ihmc.getProjectDependency(":RobotDataCommunication")
+    compile ihmc.getProjectDependency(":RobotiqHandDrivers")
+    compile ihmc.getProjectDependency(":ROSJava")
+    compile ihmc.getProjectDependency(":SDFLoader")
+    compile ihmc.getProjectDependency(":SensorProcessing")
+    compile ihmc.getProjectDependency(":SimulationConstructionSet")
+
+	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+    testCompile ihmc.getProjectDependency(":CommonWalkingControlModules").sourceSets.test.output
+    testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
+    testCompile ihmc.getProjectDependency(":IHMCCommunication").sourceSets.test.output
+    testCompile ihmc.getProjectDependency(":IHMCHumanoidRobotics").sourceSets.test.output
+	testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
+    testCompile ihmc.getProjectDependency(":IHMCWholeBodyController").sourceSets.test.output
+    testCompile ihmc.getProjectDependency(":SensorProcessing").sourceSets.test.output
+  }
 
 apply plugin: 'application'
 
@@ -90,62 +136,4 @@ startScripts {
 
 applicationDistribution.from(startScripts.outputDir) {
     into "bin"
-}
-
-
-task awsDeploySim(type: S3Sync, dependsOn: distTar) {
-    description = "Push current API release to AWS S3"
-    configFile "aws.properties"
-
-    from "${buildDir}/distributions"
-    into "ihmc/api_releases"
-
-    keepFiles true
-
-    doFirst {
-        if (!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey")) {
-            throw new TaskExecutionException(tasks.tasks.awsDeploySim, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
-        }
-
-        accessKey awsAccessKey
-        secretKey awsSecretKey
-
-        def verManifestFile = new File("${buildDir}/distributions/atlas-version")
-
-        verManifestFile.text = version
-    }
-}
-
-task gfeDevCompile(dependsOn: distTar) << {
-    if (!project.hasProperty("ihmcRosPackageLocation")) {
-        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("gfeDevCompile requires the project property ihmcRosPackageLocation to be set. Check your gradle.properties or set \"-PihmcRosPackageLocation=<absolute path>\" from the command line."))
-    }
-
-    if (ihmcRosPackageLocation.startsWith("~")) {
-        ihmcRosPackageLocation = ihmcRosPackageLocation.replace("~", System.getProperty("user.home"))
-    }
-
-    String buildName = applicationName.toString() + "-" + version;
-    java.nio.file.Path messagesLocation = Paths.get(project(':ROSJavaBootstrap').projectDir.absolutePath, "ROSMessagesAndServices", "ihmc_msgs", "msg")
-    java.nio.file.Path ihmcRosPackageLocationPath = Paths.get("$ihmcRosPackageLocation")
-    java.nio.file.Path ihmcMsgsLocation = ihmcRosPackageLocationPath.resolve("ihmc_msgs")
-    java.nio.file.Path ihmcSimLocation = ihmcRosPackageLocationPath.resolve("ihmc_atlas")
-    java.nio.file.Path archiveLocation = Paths.get(project.buildDir.absolutePath, "distributions", buildName + ".tar")
-
-    if (!Files.exists(ihmcMsgsLocation)) {
-        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("ihmc_msgs not in ihmc_ros directory. Check out ihmc_ros from BitBucket."))
-    }
-
-    copy {
-        println "Copying ROS messages from ROSJavaBootstrop in to ihmc_ros"
-        from messagesLocation.toAbsolutePath().toString()
-        into ihmcMsgsLocation.resolve("msg").toAbsolutePath().toString()
-        exclude { details -> !details.file.name.endsWith(".msg") }
-    }
-
-    copy {
-        println "Expanding the distribution archive in to ihmc_sim/scripts"
-        from tarTree(archiveLocation.toAbsolutePath().toString())
-        into ihmcSimLocation.toAbsolutePath().toString()
-    }
 }

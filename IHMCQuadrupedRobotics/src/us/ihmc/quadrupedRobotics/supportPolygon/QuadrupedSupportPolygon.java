@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -26,7 +25,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    private final QuadrantDependentFootstepList footsteps = new QuadrantDependentFootstepList();
    
-   private final FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
    private final FramePoint temporaryFramePoint = new FramePoint();
    private final FramePoint temporaryFramePoint2 = new FramePoint();
@@ -451,31 +450,18 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       footsteps.clear();
    }
-   
-   private void computeFramePolygonConvex2d()
-   {
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
-      for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
-      {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
-      }
-      frameConvexPolygon2d.update();
-   }
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
-   {
-      FrameConvexPolygon2d frameConvexPolygon2d = yoFrameConvexPolygon2d.getFrameConvexPolygon2d();
-      
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+   {      
+      tempFrameConvexPolygon2d.clear();
+      tempFrameConvexPolygon2d.changeFrame(getReferenceFrame());
       for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
       {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+         tempFrameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
       }
-      frameConvexPolygon2d.update();
-      
-      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
+      tempFrameConvexPolygon2d.update();
+
+      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
    }
 
    /**
@@ -538,24 +524,9 @@ public class QuadrupedSupportPolygon implements Serializable
       return closestQuadrant;
    }
 
-   /**
-    * This will return the vector normal for each edge. The normal of an
-    * edge points outward of the support polygon. The ordering is of the edges
-    * starts with the FL and goes clockwise. E.g., if the swing leg is the FR,
-    * the edges will be: FL-HR, HR-HL, HL-FL
-    *
-    * @return Vector2d[]
-    */
-   public void getEdgeNormals2d(FrameVector2d[] normalsToPack)
-   {
-      computeFramePolygonConvex2d();
-      
-      frameConvexPolygon2d.getOutwardEdgeNormals(normalsToPack);
-   }
-
    public void getCentroid2d(FramePoint centroidToPack)
    {
-      centroidToPack.setToZero();
+      centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
@@ -640,6 +611,13 @@ public class QuadrupedSupportPolygon implements Serializable
       newFeet.set(RobotQuadrant.HIND_RIGHT, footPoint);
 
       return new QuadrupedSupportPolygon(newFeet);
+   }
+   
+   public double getLowestFootStepZHeight()
+   {
+      RobotQuadrant lowestFootstepQuadrant = getLowestFootstep();
+      FramePoint lowestFootstep = getFootstep(lowestFootstepQuadrant);
+      return lowestFootstep.getZ();
    }
 
    /**
@@ -1309,26 +1287,10 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getStanceWidthFrontLegs()
    {
-      if (size() != 4)
-      {
-         throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthFrontLegs()");
-      }
-
-      double heading = getNominalYaw();
-      Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
-
-      FramePoint frontLeft = getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frontRight = getFootstep(RobotQuadrant.FRONT_RIGHT);
-
-      frontLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      frontRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-
-      double vectorX = frontLeft.getX() - frontRight.getX();
-      double vectorY = frontLeft.getY() - frontRight.getY();
-
-      Vector2d rightToLeft = new Vector2d(vectorX, vectorY);
-
-      return Math.abs(rightToLeft.dot(perpendicularHeadingVecetor));
+      if (!containsFootstep(RobotQuadrant.FRONT_LEFT) || !containsFootstep(RobotQuadrant.FRONT_RIGHT))
+         throw new RuntimeException("Must have both front feet.");
+      
+      return getFootstep(RobotQuadrant.FRONT_LEFT).distance(getFootstep(RobotQuadrant.FRONT_RIGHT));
    }
 
    /**
@@ -1338,26 +1300,10 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getStanceWidthHindLegs()
    {
-      if (size() != 4)
-      {
-         throw new RuntimeException("Need 4 legs for SupportPolygon.getStanceWidthHindLegs()");
-      }
-
-      double heading = getNominalYaw();
-      Vector2d perpendicularHeadingVecetor = new Vector2d(-Math.sin(heading), Math.cos(heading));
-
-      FramePoint hindLeft = getFootstep(RobotQuadrant.HIND_LEFT);
-      FramePoint hindRight = getFootstep(RobotQuadrant.HIND_RIGHT);
-
-      hindLeft.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      hindRight.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-
-      double vectorX = hindLeft.getX() - hindRight.getX();
-      double vectorY = hindLeft.getY() - hindRight.getY();
-
-      Vector2d rightToLeft = new Vector2d(vectorX, vectorY);
-
-      return Math.abs(rightToLeft.dot(perpendicularHeadingVecetor));
+      if (!containsFootstep(RobotQuadrant.HIND_LEFT) || !containsFootstep(RobotQuadrant.HIND_RIGHT))
+         throw new RuntimeException("Must have both hind feet.");
+      
+      return getFootstep(RobotQuadrant.HIND_LEFT).distance(getFootstep(RobotQuadrant.HIND_RIGHT));
    }
 
 //   /**

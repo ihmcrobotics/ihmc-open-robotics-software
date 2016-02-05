@@ -78,11 +78,6 @@ public class PelvisRotationalStateUpdater
       angularVelocityRootJointFrameRelativeToWorld = new FrameVector(rootJointFrame);
    }
 
-   public IMUSensorReadOnly getIMUUsedForEstimation()
-   {
-      return imuProcessedOutput;
-   }
-
    private void checkNumberOfSensors(List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
       if (imuProcessedOutputs.size() > 1)
@@ -117,7 +112,7 @@ public class PelvisRotationalStateUpdater
 
 
       yoRootJointFrameQuaternion.getYawPitchRoll(lastComputedYawPitchRoll);
-      double currentYaw = RotationTools.getYaw(rotationFromRootJointFrameToWorld);
+      double currentYaw = RotationTools.computeYaw(rotationFromRootJointFrameToWorld);
 
       double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(lastComputedYawPitchRoll[0], currentYaw);
       rootJointYawOffsetFromFrozenState.set(yawDifference);

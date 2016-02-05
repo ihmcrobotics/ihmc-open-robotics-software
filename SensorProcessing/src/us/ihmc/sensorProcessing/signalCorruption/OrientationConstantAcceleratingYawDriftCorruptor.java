@@ -52,6 +52,6 @@ public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalC
       tempRotation.mul(yawDriftRotation, signal);
       signal.set(tempRotation);
       
-      corruptedIMUYawAngle.set(RotationTools.getYaw(tempRotation));
+      corruptedIMUYawAngle.set(RotationTools.computeYaw(tempRotation));
    }
 }

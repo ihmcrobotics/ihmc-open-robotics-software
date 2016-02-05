@@ -102,9 +102,9 @@ public class MicroStrain3DMRobot extends Robot
       rotation.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, temporaryMatrix);
       
       ms3DM.setRotation(rotation);
-      yaw.set(RotationTools.getYaw(rotation));
-      pitch.set(RotationTools.getPitch(rotation));
-      roll.set(RotationTools.getRoll(rotation));
+      yaw.set(RotationTools.computeYaw(rotation));
+      pitch.set(RotationTools.computePitch(rotation));
+      roll.set(RotationTools.computeRoll(rotation));
       
       xdd.set(accel.getX() * MicroStrainData.MICROSTRAIN_GRAVITY);
       ydd.set(accel.getY() * MicroStrainData.MICROSTRAIN_GRAVITY);

@@ -1,17 +1,10 @@
 package us.ihmc.robotics;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -19,10 +12,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class MathToolsTest
 {
@@ -810,24 +812,25 @@ public class MathToolsTest
 //    assertEquals("return value", expectedReturn, actualReturn);
 // }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testProjectionOntoPlane()
-   {
-      // test by projecting on plane spanning x,y through z=0.1
-
-      Vector3d p1 = new Vector3d(Math.random(), Math.random(), 0.1);
-      Vector3d p2 = new Vector3d(Math.random(), Math.random(), 0.1);
-      Vector3d p3 = new Vector3d(Math.random(), Math.random(), 0.1);
-
-      Vector3d p = new Vector3d(Math.random(), Math.random(), Math.random());
-
-      Vector3d proj = GeometryTools.getProjectionOntoPlane(p1, p2, p3, p);
-
-      assertEquals(p.getX(), proj.getX(), Double.MIN_VALUE);
-      assertEquals(p.getY(), proj.getY(), Double.MIN_VALUE);
-      assertEquals(0.1, proj.getZ(), 10e-10);
-   }
+   // Needs to be reimplemented with EJML and without generating garbage. 
+//   @DeployableTestMethod(estimatedDuration = 0.0)
+//   @Test(timeout = 30000)
+//   public void testProjectionOntoPlane()
+//   {
+//      // test by projecting on plane spanning x,y through z=0.1
+//
+//      Vector3d p1 = new Vector3d(Math.random(), Math.random(), 0.1);
+//      Vector3d p2 = new Vector3d(Math.random(), Math.random(), 0.1);
+//      Vector3d p3 = new Vector3d(Math.random(), Math.random(), 0.1);
+//
+//      Vector3d p = new Vector3d(Math.random(), Math.random(), Math.random());
+//
+//      Vector3d proj = GeometryTools.getProjectionOntoPlane(p1, p2, p3, p);
+//
+//      assertEquals(p.getX(), proj.getX(), Double.MIN_VALUE);
+//      assertEquals(p.getY(), proj.getY(), Double.MIN_VALUE);
+//      assertEquals(0.1, proj.getZ(), 10e-10);
+//   }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)

@@ -65,7 +65,7 @@ public class DRCGraspCylinderEnvironment implements CommonAvatarEnvironmentInter
       Point3d position = new Point3d(x, y, z);
       Quat4d orientation = new Quat4d();
 
-      RotationTools.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(pitch_degrees), Math.toRadians(0));
+      RotationTools.convertYawPitchRollToQuaternion(Math.toRadians(yaw_degrees), Math.toRadians(pitch_degrees), Math.toRadians(0), orientation);
       cylinderPose.setPose(position, orientation);
       
       RigidBodyTransform cylinderTransformToWorld = new RigidBodyTransform();

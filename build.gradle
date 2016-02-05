@@ -1,134 +1,143 @@
-apply plugin: 'java'
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:1.4.0-rc.1'
+    }
+}
+
 apply plugin: 'maven-publish'
 
-sourceCompatibility = 1.7
+import org.ajoberstar.grgit.*
+
+project.ext.repo = Grgit.open(projectDir)
+
 version = '0.7.0'
 
 project.ext.fullVersion = version
-project.ext.vcsUrl = "https://bitbucket.org/ihmcrobotics/ihmc-open-robotics-software.git"
+project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
 project.ext.snapshotCounter = 1
 project.ext.releaseCandidateCounter = 1
 
-getGitInfo()
-
 getDate()
 
-if(buildType.equals("NIGHTLY"))
-{
-  project.ext.fullVersion = version += "-NIGHTLY+date.${project.ext.date}.rev.${project.ext.revision}"
+if (buildType.equals("NIGHTLY")) {
+    project.ext.fullVersion = version += "-NIGHTLY+date.${project.ext.date}.rev.${repo.head().abbreviatedId}"
 }
 
-if(buildType.equals("SNAPSHOT"))
-{
-  project.ext.fullVersion = version += "-SNAPSHOT${project.ext.snapshotCounter}.rev.${project.ext.revision}"
+if (buildType.equals("LOCAL")) {
+    project.ext.fullVersion = "LOCAL"
 }
 
-if(buildType.equals("RC"))
-{
-  project.ext.fullVersion = version += "-RC${project.ext.releaseCandidateCounter}.rev.${project.ext.revision}"
+if (buildType.equals("SNAPSHOT")) {
+    project.ext.fullVersion = version += "-SNAPSHOT${project.ext.snapshotCounter}.rev.${repo.head().abbreviatedId}"
 }
 
-if(buildType.equals("RELEASE"))
-{
-  if(!project.ext.branch.equals("master"))
-  {
-      throw new GradleException("Cannot make RELEASE build from branch \"${project.ext.branch}\", it is not the branch used for stable releases!")
-  }
+if (buildType.equals("RC")) {
+    project.ext.fullVersion = version += "-RC${project.ext.releaseCandidateCounter}.rev.${repo.head().abbreviatedId}"
 }
 
-buildscript {
-  repositories {
-    mavenLocal()
-	  jcenter()
-	  mavenCentral()
-  }
+if (buildType.equals("RELEASE")) {
+    if (!project.ext.repo.branch.current.name.equals("master")) {
+        throw new GradleException("Cannot make RELEASE build from branch \"${project.ext.repo.branch.current.name}\", it is not the branch used for stable releases!")
+    }
 }
 
 repositories {
-  mavenLocal()
+    mavenLocal()
 
-  maven {
-    url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
-  }
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
+    }
 
-  maven {
-      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
-  }
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
 
-  maven {
-      url "https://bengal.ihmc.us/nexus/content/repositories/central/"
-  }
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+    }
 
-  jcenter()
+    jcenter()
 
-  mavenCentral()
+    mavenCentral()
 }
 
-subprojects {
-  apply plugin: 'java'
-  apply plugin: 'maven-publish'
-
-  buildscript {
-    repositories {
-      mavenLocal()
-  	  jcenter()
-  	  mavenCentral()
+task publishAllToMavenLocal(type: GradleBuild) {
+    buildFile "build.gradle"
+    def allTasks = new ArrayList<String>()
+    buildType = "LOCAL"
+    project.ext.fullVersion = "LOCAL"
+    subprojects.each { subproject ->
+//        subproject.buildType = "LOCAL"
+        subproject.ext.fullVersion = "LOCAL"
+        allTasks.add(":" + subproject.name + ":publishToMavenLocal")
     }
-  }
 
-  jar {
-    from (project.projectDir) {
-      include 'LICENSE*txt'
-    }
-  }
-
-  task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-  }
-
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-
-        groupId 'us.ihmc'
-        artifactId "${project.name}"
-        version "${project.ext.fullVersion}"
-
-        from components.java
-
-        artifact sourceJar {
-          classifier "sources"
-        }
-
-        pom.withXml {
-          def licenseNode = asNode().appendNode('licenses').appendNode('license')
-          licenseNode.appendNode('name', project.ext.licenseName)
-          licenseNode.appendNode('url', project.ext.licenseURL)
-        }
-      }
-    }
-  }
+    tasks = allTasks
 }
 
-def getGitInfo() {
-  getGitHash()
-  getGitBranch()
+subprojects { subproject ->
+
+    apply plugin: 'maven-publish'
+    apply plugin: 'java'
+
+    subproject.ext {
+        getOpenRoboticsSoftwareProject = {
+            if (subproject.getParent().name.equals(rootProject.name)) {
+                return rootProject
+            } else {
+                return project(':IHMCOpenRoboticsSoftware')
+            }
+        }
+
+        getOpenRoboticsSoftwareGradlePath = {
+            if (subproject.getParent().name.equals(rootProject.name)) {
+                return ""
+            } else {
+                return ":IHMCOpenRoboticsSoftware"
+            }
+        }
+    }
+
+    jar {
+        from(project.projectDir) {
+            include 'LICENSE*txt'
+        }
+    }
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allJava
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+
+                groupId 'us.ihmc'
+                artifactId "${project.name}"
+                version "${project.ext.fullVersion}"
+
+                from components.java
+
+                artifact sourceJar {
+                    classifier "sources"
+                }
+
+                pom.withXml {
+                    def licenseNode = asNode().appendNode('licenses').appendNode('license')
+                    licenseNode.appendNode('name', project.ext.licenseName)
+                    licenseNode.appendNode('url', project.ext.licenseURL)
+                }
+            }
+        }
+    }
 }
 
 def getDate() {
     def date = new Date()
     def formattedDate = date.format('yyyy.MM.dd')
     project.ext.date = formattedDate
-}
-
-def getGitHash() {
-  def cmd = "git rev-parse --short HEAD"
-  def proc = cmd.execute()
-  project.ext.revision = proc.text.trim()
-}
-
-def getGitBranch() {
-  def cmd = "git rev-parse --abbrev-ref HEAD"
-  def proc = cmd.execute()
-  project.ext.branch = proc.text.trim()
 }

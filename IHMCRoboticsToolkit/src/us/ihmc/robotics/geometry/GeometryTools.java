@@ -10,9 +10,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import Jama.Matrix;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -255,6 +253,20 @@ public class GeometryTools
       average.scale(0.5);
 
       return average;
+   }
+
+   /**
+    * Returns the average of two 3D points
+    *
+    * @param a FramePoint
+    * @param b FramePoint
+    * @param avgToPack FramePoint
+    */
+   public static void averagePoints(FramePoint a, FramePoint b, FramePoint avgToPack)
+   {
+      avgToPack.setIncludingFrame(a);
+      avgToPack.add(b);
+      avgToPack.scale(0.5);
    }
 
    // TODO ensure consistant with line 2D
@@ -1651,33 +1663,34 @@ public class GeometryTools
       return Math.hypot(cathetusA, cathetusB);
    }
 
+   // Needs to be reimplemented with EJML and without generating garbage. 
    /*
     * Projects point p onto the plane defined by p1, p2, and p3
     */
-   public static Vector3d getProjectionOntoPlane(Vector3d p1, Vector3d p2, Vector3d p3, Vector3d p)
-   {
-      Vector3d p2_minus_p1 = new Vector3d(p2);
-      p2_minus_p1.sub(p1);
-
-      Vector3d p3_minus_p1 = new Vector3d(p3);
-      p3_minus_p1.sub(p1);
-
-      Vector3d n = new Vector3d(p2_minus_p1);
-      n.cross(n, p3_minus_p1);
-      n.normalize();
-
-      // convert to matrix so the following calculation is cleaner
-      Matrix P = MatrixTools.vector3dToMatrix(p);
-      Matrix P1 = MatrixTools.vector3dToMatrix(p1);
-      Matrix N = MatrixTools.vector3dToMatrix(n);
-
-      double scale = (((P1.minus(P)).transpose()).times(N)).get(0, 0);
-      Matrix Perp = N.times(scale);
-
-      Matrix Proj = P.plus(Perp);
-
-      return new Vector3d(Proj.get(0, 0), Proj.get(1, 0), Proj.get(2, 0));
-   }
+//   public static Vector3d getProjectionOntoPlane(Vector3d p1, Vector3d p2, Vector3d p3, Vector3d p)
+//   {
+//      Vector3d p2_minus_p1 = new Vector3d(p2);
+//      p2_minus_p1.sub(p1);
+//
+//      Vector3d p3_minus_p1 = new Vector3d(p3);
+//      p3_minus_p1.sub(p1);
+//
+//      Vector3d n = new Vector3d(p2_minus_p1);
+//      n.cross(n, p3_minus_p1);
+//      n.normalize();
+//
+//      // convert to matrix so the following calculation is cleaner
+//      Matrix P = MatrixTools.vector3dToMatrix(p);
+//      Matrix P1 = MatrixTools.vector3dToMatrix(p1);
+//      Matrix N = MatrixTools.vector3dToMatrix(n);
+//
+//      double scale = (((P1.minus(P)).transpose()).times(N)).get(0, 0);
+//      Matrix Perp = N.times(scale);
+//
+//      Matrix Proj = P.plus(Perp);
+//
+//      return new Vector3d(Proj.get(0, 0), Proj.get(1, 0), Proj.get(2, 0));
+//   }
 
    public static double minimumDistance(FramePoint testPoint, List<FramePoint> points)
    {
