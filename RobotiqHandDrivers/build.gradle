@@ -16,6 +16,11 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 
 apply plugin: 'application'
 
+repositories {
+	maven {
+	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+	}
+}
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
