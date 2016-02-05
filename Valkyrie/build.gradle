@@ -55,7 +55,6 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCROSTools")
 
 	compile ihmc.getProjectDependency(":RobotDataCommunication")
-	compile ihmc.getProjectDependency(":ROSJavaMessages")
 	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")

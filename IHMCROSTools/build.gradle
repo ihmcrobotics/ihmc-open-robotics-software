@@ -12,6 +12,28 @@ project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
+project.sourceSets {
+    main {
+        java {
+            srcDirs = ['src', 'generated-src']
+        }
+
+        resources {
+            srcDirs = ['src', 'resources']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test']
+        }
+
+        resources {
+            srcDirs = ['testResources']
+        }
+    }
+}
+
 repositories {
 	maven {
 	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
@@ -22,7 +44,6 @@ repositories ihmc.ihmcDefaultArtifactProxies()
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
-//evaluationDependsOn(ihmc.getProjectDependencyGradlePath("ROSJava"))
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
@@ -37,15 +58,12 @@ dependencies {
 	compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
 	compile group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.2.1'
 	
-	//compile ihmc.getProjectDependency(":ROSJava")
-	//testCompile ihmc.getProjectDependency(":ROSJava").sourceSets.test.output
- 	//compile ihmc.getProjectDependency(":ROSJavaBootstrap")
- 	compile ihmc.getProjectDependency(":ROSJavaMessages")
- 	//compile ihmc.getProjectDependency(":ROSJavaGeometry")
- 	//compile ihmc.getProjectDependency(":Graphics3DAdapter")
-
+	// ROS Messages
+	//compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
+	//compile group: 'org.ros.rosjava_messages', name: 'actionlib', version: '1.11.3'
+	//compile group: 'org.ros.rosjava_messages', name: 'actionlib', version: '1.11.7'
+	
  	compile ihmc.getProjectDependency(":IHMCCommunication")
- 	//compile ihmc.getProjectDependency(":Vicon")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")

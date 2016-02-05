@@ -7,6 +7,6 @@
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.utilities.ros.bootstrap.MessageAndServiceInterfaceGenerator"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="../ROSJavaMessages/generated-src ROSMessagesAndServices"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="../IHMCROSTools/generated-src ROSMessagesAndServices"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="IHMCROSTools"/>
 </launchConfiguration>
