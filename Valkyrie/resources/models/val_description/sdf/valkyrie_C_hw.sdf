@@ -76,7 +76,7 @@
             </accel>
           </noise>
         </imu>
-        <pose frame=''>0.03 0.065 -0.083 0 -1.57 0</pose>
+        <pose frame=''>-0.075844901 0.0 -0.111056426 -3.14159 -0.476467 0.0</pose>
       </sensor>
     </link>
     <link name='leftHipYawLink'>
@@ -1072,7 +1072,7 @@
             </accel>
           </noise>
         </imu>
-        <pose frame=''>-0.046863 0.134239 0.363068 1.57 4.33681e-19 3.14</pose>
+        <pose frame=''>-0.0627634 0.134239 0.3630676 -1.5707 0.0 0.0</pose>
       </sensor>
       <gravity>1</gravity>
       <velocity_decay/>
