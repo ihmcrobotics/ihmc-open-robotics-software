@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -20,6 +21,8 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
    
    private final OneDoFJoint[] sensorOneDoFJoints;
+   
+   private final BooleanYoVariable enableDrives;
    
    public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullRobotModel sdfFullRobotModel, QuadrupedJointNameMap jointMap)
    {
@@ -44,6 +47,19 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
             }
          }
       }
+      
+      enableDrives = new BooleanYoVariable("enableDrives", getYoVariableRegistry());
+   }
+   
+   @Override
+   public void read()
+   {
+      for(int i = 0; i < sensorOneDoFJoints.length; i++)
+      {
+        sensorOneDoFJoints[i].setEnabled(enableDrives.getBooleanValue());
+      }
+
+      super.read();
    }
 
    @Override
