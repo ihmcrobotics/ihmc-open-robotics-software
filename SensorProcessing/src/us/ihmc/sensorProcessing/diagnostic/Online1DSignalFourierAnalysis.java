@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import org.ejml.data.DenseMatrix64F;
 
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import org.jtransforms.fft.DoubleFFT_1D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
