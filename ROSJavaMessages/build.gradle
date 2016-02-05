@@ -48,8 +48,6 @@ dependencies {
     
 	compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
 	compile group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.2.1'
-    
-    //compile ihmc.getProjectDependency(":ROSJavaBootstrap")
 }
 jar {
     manifest {
