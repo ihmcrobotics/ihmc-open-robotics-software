@@ -6,6 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import us.ihmc.tools.testing.TestPlanSuite;
 import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
 import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.utilities.ros.ROSMessageFolderExistsTest;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
@@ -14,7 +15,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.utilities.ros.AddTwoIntsServiceTest.class,
    us.ihmc.utilities.ros.RosPointCloudPublisherSubscriberTest.class,
-   us.ihmc.utilities.ros.RosTopicPublisherSubscriberTest.class
+   us.ihmc.utilities.ros.RosTopicPublisherSubscriberTest.class,
+   ROSMessageFolderExistsTest.class
 })
 
 public class IHMCROSToolsAFlakyTestSuite
