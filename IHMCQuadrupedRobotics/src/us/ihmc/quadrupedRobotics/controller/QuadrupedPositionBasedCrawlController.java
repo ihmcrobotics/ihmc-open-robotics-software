@@ -272,8 +272,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable maximumCoMTrajectoryDuration = new DoubleYoVariable("maximumCoMTrajectoryDuration", registry);
    private final DoubleYoVariable minimumCoMTrajectoryDuration = new DoubleYoVariable("minimumCoMTrajectoryDuration", registry);
    
-   private VectorProvider desiredVelocityProvider;
-   private DoubleProvider desiredYawRateProvider;
+   private DesiredVelocityProvider desiredVelocityProvider;
+   private DesiredYawRateProvider desiredYawRateProvider;
    
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
          QuadrupedStateEstimator stateEstimator, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
@@ -1646,6 +1646,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    @Override
    public void doTransitionIntoAction()
    {
+      desiredVelocityProvider.setToZero();
+      desiredYawRateProvider.setToZero();
+      
       for(OneDoFJoint oneDofJoint : fullRobotModel.getOneDoFJoints())
       {
          oneDofJoint.setUnderPositionControl(true);
