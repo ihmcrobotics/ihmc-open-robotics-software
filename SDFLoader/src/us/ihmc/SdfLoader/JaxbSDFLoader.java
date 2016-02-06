@@ -18,8 +18,10 @@ import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
+import us.ihmc.SdfLoader.SDFExoskeleton;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.sensors.ContactSensorType;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class JaxbSDFLoader
 {
@@ -131,6 +133,26 @@ public class JaxbSDFLoader
       GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
 
       return new SDFHumanoidRobot(generalizedSDFRobotModel, generalizedSDFRobotModel.getSDFDescriptionMutator(), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+   }
+   
+   public SDFExoskeleton createExoskeleton(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   {
+      return createExoskeleton(sdfJointNameMap.getModelName(), sdfJointNameMap, useCollisionMeshes);
+   }
+   
+   private SDFExoskeleton createExoskeleton(String modelName, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   {
+      return createExoskeleton(modelName, sdfJointNameMap, useCollisionMeshes, true, true);
+   }
+   
+   public SDFExoskeleton createExoskeleton(String modelName, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
+		   boolean enableDamping)
+   {
+	   checkModelName(modelName);
+	   
+	   GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
+	   
+	   return new SDFExoskeleton(generalizedSDFRobotModel, generalizedSDFRobotModel.getSDFDescriptionMutator(), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
    }
 
    public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
