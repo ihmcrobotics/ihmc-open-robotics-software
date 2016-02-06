@@ -240,8 +240,8 @@ public class QuadrupedContactForceOptimization
    {
       // compute map from contact forces to centroidal forces and torques
       int numberOfContacts = getNumberOfContacts();
-      comWrenchMapMatrix.zero();
       comWrenchMapMatrix.reshape(6, 3 * numberOfContacts);
+      comWrenchMapMatrix.zero();
       int columnOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -280,6 +280,7 @@ public class QuadrupedContactForceOptimization
       int numberOfContacts = getNumberOfContacts();
 
       contactForceCommandVector.reshape(3 * numberOfContacts, 1);
+      contactForceCommandVector.zero();
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -292,6 +293,7 @@ public class QuadrupedContactForceOptimization
          }
       }
       contactForceSolutionVector.reshape(3 * numberOfContacts, 1);
+      contactForceSolutionVector.zero();
    }
 
    private void initializeOptimizationWeights(QuadrupedContactForceOptimizationSettings optimizationSettings)
@@ -299,6 +301,7 @@ public class QuadrupedContactForceOptimization
       int numberOfContacts = getNumberOfContacts();
 
       comWrenchWeightMatrix.reshape(6, 6);
+      comWrenchWeightMatrix.zero();
       for (int i = 0; i < 3; i++)
       {
          double[] comTorqueCommandWeights = optimizationSettings.getComTorqueCommandWeights();
@@ -311,6 +314,7 @@ public class QuadrupedContactForceOptimization
       }
 
       contactForceWeightMatrix.reshape(3 * numberOfContacts, 3 * numberOfContacts);
+      contactForceWeightMatrix.zero();
       int rowOffset = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
