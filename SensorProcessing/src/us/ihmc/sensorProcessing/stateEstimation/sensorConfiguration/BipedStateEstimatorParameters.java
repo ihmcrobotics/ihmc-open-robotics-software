@@ -1,7 +1,8 @@
-package us.ihmc.sensorProcessing.stateEstimation;
+package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 
 public interface BipedStateEstimatorParameters extends SensorProcessingConfiguration
 {
