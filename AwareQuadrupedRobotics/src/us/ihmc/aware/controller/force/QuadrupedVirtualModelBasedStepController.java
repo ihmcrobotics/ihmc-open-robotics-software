@@ -250,7 +250,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // controllers
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);
       virtualModelControllerSettings = new QuadrupedVirtualModelControllerSettings();
-      contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames);
+      contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
       contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
       comHeightController = new PIDController("bodyHeight", registry);
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
