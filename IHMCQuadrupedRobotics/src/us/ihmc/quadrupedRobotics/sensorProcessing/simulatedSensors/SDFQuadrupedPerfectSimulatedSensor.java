@@ -49,6 +49,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       }
       
       enableDrives = new BooleanYoVariable("enableDrives", getYoVariableRegistry());
+      enableDrives.set(true);
    }
    
    @Override
