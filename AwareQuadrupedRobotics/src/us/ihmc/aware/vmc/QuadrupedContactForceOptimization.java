@@ -7,8 +7,12 @@ import us.ihmc.aware.util.ContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -18,16 +22,27 @@ public class QuadrupedContactForceOptimization
 {
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
+   private final ReferenceFrame worldFrame;
    private final ConstrainedQPSolver qpSolver;
 
    private final FrameVector comTorqueCommand;
    private final FrameVector comTorqueSolution;
    private final FrameVector comForceCommand;
    private final FrameVector comForceSolution;
-   private final QuadrantDependentList<FrameVector> contactForceCommand;
-   private final QuadrantDependentList<FrameVector> contactForceSolution;
-   private final QuadrantDependentList<FramePoint> contactPosition;
-   private final QuadrantDependentList<ContactState> contactState;
+   private final QuadrantDependentList<FrameVector> contactForceCommand = new QuadrantDependentList<>();
+   private final QuadrantDependentList<FrameVector> contactForceSolution = new QuadrantDependentList<>();
+   private final QuadrantDependentList<FramePoint> contactPosition = new QuadrantDependentList<>();
+   private final QuadrantDependentList<ContactState> contactState = new QuadrantDependentList<>();
+
+   private final YoVariableRegistry registry;
+   private final YoFrameVector yoComTorqueCommand;
+   private final YoFrameVector yoComTorqueSolution;
+   private final YoFrameVector yoComForceCommand;
+   private final YoFrameVector yoComForceSolution;
+   private final QuadrantDependentList<YoFrameVector> yoContactForceCommand = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFrameVector> yoContactForceSolution = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFramePoint> yoContactPosition = new QuadrantDependentList<>();
+   private final QuadrantDependentList<EnumYoVariable<ContactState>> yoContactState = new QuadrantDependentList<>();
 
    private final DenseMatrix64F comWrenchCommandVector;
    private final DenseMatrix64F comWrenchSolutionVector;
@@ -45,26 +60,37 @@ public class QuadrupedContactForceOptimization
    private final DenseMatrix64F temporaryMatrixA;
    private final DenseMatrix64F temporaryMatrixB;
 
-   public QuadrupedContactForceOptimization(QuadrupedReferenceFrames referenceFrames)
+   public QuadrupedContactForceOptimization(QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
+      registry = new YoVariableRegistry(getClass().getSimpleName());
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       soleFrame = referenceFrames.getFootReferenceFrames();
+      worldFrame = ReferenceFrame.getWorldFrame();
       qpSolver = new QuadProgSolver(null);
 
       comTorqueCommand = new FrameVector(comFrame);
       comTorqueSolution = new FrameVector(comFrame);
       comForceCommand = new FrameVector(comFrame);
       comForceSolution = new FrameVector(comFrame);
-      contactForceCommand = new QuadrantDependentList<>();
-      contactForceSolution = new QuadrantDependentList<>();
-      contactPosition = new QuadrantDependentList<>();
-      contactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
          contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
          contactPosition.set(robotQuadrant, new FramePoint(comFrame));
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
+      }
+
+      yoComTorqueCommand = new YoFrameVector("ComTorqueCommand", worldFrame, registry);
+      yoComTorqueSolution = new YoFrameVector("ComTorqueSolution", worldFrame, registry);
+      yoComForceCommand = new YoFrameVector("ComForceCommand", worldFrame, registry);
+      yoComForceSolution = new YoFrameVector("ComForceSolution", worldFrame, registry);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
+         yoContactForceCommand.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceCommand", worldFrame, registry));
+         yoContactForceSolution.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceSolution", worldFrame, registry));
+         yoContactPosition.set(robotQuadrant, new YoFramePoint(prefix + "ContactPosition", worldFrame, registry));
+         yoContactState.set(robotQuadrant, new EnumYoVariable<>(prefix + "ContactState", registry, ContactState.class));
       }
 
       comWrenchCommandVector = new DenseMatrix64F(6, 1);
@@ -82,6 +108,8 @@ public class QuadrupedContactForceOptimization
       qpInequalityMatrix = new DenseMatrix64F(24, 12);
       temporaryMatrixA = new DenseMatrix64F(12, 12);
       temporaryMatrixB = new DenseMatrix64F(12, 12);
+
+      parentRegistry.addChild(registry);
    }
 
    public void reset()
@@ -165,6 +193,19 @@ public class QuadrupedContactForceOptimization
       comForceSolution.setX(comWrenchSolutionVector.get(3, 0));
       comForceSolution.setY(comWrenchSolutionVector.get(4, 0));
       comForceSolution.setZ(comWrenchSolutionVector.get(5, 0));
+
+      // update yo variables
+      yoComTorqueCommand.setAndMatchFrame(comTorqueCommand);
+      yoComTorqueSolution.setAndMatchFrame(comTorqueSolution);
+      yoComForceCommand.setAndMatchFrame(comForceCommand);
+      yoComForceSolution.setAndMatchFrame(comForceSolution);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         yoContactForceCommand.get(robotQuadrant).setAndMatchFrame(contactForceCommand.get(robotQuadrant));
+         yoContactForceSolution.get(robotQuadrant).setAndMatchFrame(contactForceSolution.get(robotQuadrant));
+         yoContactPosition.get(robotQuadrant).setAndMatchFrame(contactPosition.get(robotQuadrant));
+         yoContactState.get(robotQuadrant).set(contactState.get(robotQuadrant));
+      }
    }
 
    public void getContactForceSolution(RobotQuadrant robotQuadrant, FrameVector contactForce)
