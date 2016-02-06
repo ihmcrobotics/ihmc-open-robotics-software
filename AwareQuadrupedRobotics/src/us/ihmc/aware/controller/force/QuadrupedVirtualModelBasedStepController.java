@@ -12,6 +12,7 @@ import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
+import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -105,11 +106,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    // state machines
    public enum FootState
    {
-      SUPPORT_STATE, SWING_STATE
+      SUPPORT_STATE, TRANSFER_STATE, SWING_STATE
    }
    public enum FootEvent
    {
-      LIFT_OFF, TOUCH_DOWN
+      TRANSFER, LIFT_OFF, TOUCH_DOWN
    }
    private final QuadrantDependentList<StateMachine<FootState, FootEvent>> footStateMachine;
 
@@ -268,8 +269,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
          StateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new StateMachineBuilder<>(FootState.class, prefix + "FootState", registry);
          stateMachineBuilder.addState(FootState.SUPPORT_STATE, new SupportState(robotQuadrant));
+         stateMachineBuilder.addState(FootState.TRANSFER_STATE, new TransferState(robotQuadrant));
          stateMachineBuilder.addState(FootState.SWING_STATE, new SwingState(robotQuadrant));
-         stateMachineBuilder.addTransition(FootEvent.LIFT_OFF, FootState.SUPPORT_STATE, FootState.SWING_STATE);
+         stateMachineBuilder.addTransition(FootEvent.TRANSFER, FootState.SUPPORT_STATE, FootState.TRANSFER_STATE);
+         stateMachineBuilder.addTransition(FootEvent.LIFT_OFF, FootState.TRANSFER_STATE, FootState.SWING_STATE);
          stateMachineBuilder.addTransition(FootEvent.TOUCH_DOWN, FootState.SWING_STATE, FootState.SUPPORT_STATE);
          footStateMachine.set(robotQuadrant, stateMachineBuilder.build(FootState.SUPPORT_STATE));
       }
@@ -411,9 +414,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    public boolean addStep(QuadrupedTimedStep quadrupedTimedStep)
    {
-      if (quadrupedTimedStep.getTimeInterval().getStartTime() > robotTimestamp.getDoubleValue() && stepQueue.enqueue())
+      if ((quadrupedTimedStep.getTimeInterval().getStartTime() > robotTimestamp.getDoubleValue()) && stepQueue.enqueue())
       {
-
          stepQueue.getTail().set(quadrupedTimedStep);
          return true;
       }
@@ -459,11 +461,14 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    {
       if (stepQueue.size() > 0)
       {
-         QuadrupedTimedStep currentStep = stepQueue.getHead();
-         RobotQuadrant robotQuadrant = currentStep.getRobotQuadrant();
-         stepCache.get(robotQuadrant).set(currentStep);
-         stepQueue.dequeue();
-
+         QuadrupedTimedStep step = stepQueue.getHead();
+         RobotQuadrant robotQuadrant = step.getRobotQuadrant();
+         if (footStateMachine.get(robotQuadrant).getState() == FootState.SUPPORT_STATE)
+         {
+            stepCache.get(robotQuadrant).set(step);
+            stepQueue.dequeue();
+            footStateMachine.get(robotQuadrant).trigger(FootEvent.TRANSFER);
+         }
       }
    }
 
@@ -666,6 +671,15 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    @Override public void onEntry()
    {
+      System.out.println("Step : entry " + robotTimestamp.getDoubleValue());
+
+      // show graphics
+      yoGraphicsListRegistry.hideYoGraphics();
+      yoGraphicsListRegistry.hideArtifacts();
+      yoGraphicsList.setVisible(true);
+      artifactList.setVisible(true);
+      virtualModelController.setVisible(false);
+
       // initialize desired values (provider inputs)
       yoBodyOrientationDesired.setYawPitchRoll(0.0, 0.0, 0.0);
       yoComHeightDesired.set(params.get(COM_HEIGHT_NOMINAL));
@@ -713,16 +727,14 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          swingPositionController.get(robotQuadrant).setDerivativeGains(params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS));
       }
 
-      // show graphics
-      yoGraphicsListRegistry.hideYoGraphics();
-      yoGraphicsListRegistry.hideArtifacts();
-      yoGraphicsList.setVisible(true);
-      artifactList.setVisible(true);
-      virtualModelController.setVisible(false);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
-      }
+      // FIXME: hack to test stepping
+      double currentTime = robotTimestamp.getDoubleValue();
+      QuadrupedTimedStep timedStep = new QuadrupedTimedStep(
+         RobotQuadrant.FRONT_RIGHT,
+         new FramePoint(soleFrame.get(RobotQuadrant.FRONT_RIGHT)),
+         new TimeInterval(currentTime + 5.0, currentTime + 6.0)
+      );
+      addStep(timedStep);
    }
 
    @Override public void onExit()
@@ -731,6 +743,74 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoGraphicsList.setVisible(false);
       artifactList.setVisible(false);
       virtualModelController.setVisible(false);
+   }
+
+   private class SupportState implements StateMachineState<FootEvent>
+   {
+      private final RobotQuadrant robotQuadrant;
+
+      public SupportState(RobotQuadrant robotQuadrant)
+      {
+         this.robotQuadrant = robotQuadrant;
+      }
+
+      @Override public void onEntry()
+      {
+         // initialize contact state
+         contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
+         virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
+         virtualModelController.setSoleVirtualForceVisible(robotQuadrant, false);
+         System.out.println("SupportState : entry " + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + robotTimestamp.getDoubleValue());
+      }
+
+      @Override public FootEvent process()
+      {
+         // compute sole force setpoint
+         contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
+         contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+         virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+         return null;
+      }
+
+      @Override public void onExit()
+      {
+         System.out.println("SupportState : exit");
+      }
+   }
+
+   private class TransferState implements StateMachineState<FootEvent>
+   {
+      private final RobotQuadrant robotQuadrant;
+
+      public TransferState(RobotQuadrant robotQuadrant)
+      {
+         this.robotQuadrant = robotQuadrant;
+      }
+
+      @Override public void onEntry()
+      {
+         System.out.println("TransferState : entry " + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + robotTimestamp.getDoubleValue());
+      }
+
+      @Override public FootEvent process()
+      {
+         // compute sole force setpoint
+         contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+         virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+
+         // trigger lift off event
+         double currentTime = robotTimestamp.getDoubleValue();
+         double liftOffTime = stepCache.get(robotQuadrant).getTimeInterval().getStartTime();
+         if (currentTime > liftOffTime)
+            return FootEvent.LIFT_OFF;
+         else
+            return null;
+      }
+
+      @Override public void onExit()
+      {
+         System.out.println("TransferState : exit");
+      }
    }
 
    private class SwingState implements StateMachineState<FootEvent>
@@ -747,11 +827,16 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          // initialize swing foot controller and contact state
          swingPositionController.get(robotQuadrant).reset();
          contactForceOptimization.setContactState(robotQuadrant, ContactState.NO_CONTACT);
+//       contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
+         virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
+         virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
+         System.out.println("SwingState : entry " + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + robotTimestamp.getDoubleValue());
       }
 
       @Override public FootEvent process()
       {
-         // compute sole force setpoints to track swing trajectory
+         // compute sole force setpoint to track swing trajectory
+         /*
          soleForceSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
          solePositionSetpoint.get(robotQuadrant).changeFrame(soleFrame.get(robotQuadrant));
          soleLinearVelocitySetpoint.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
@@ -762,48 +847,22 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          swingPositionController.get(robotQuadrant)
                .compute(soleForceSetpoint.get(robotQuadrant), solePositionSetpoint.get(robotQuadrant), soleLinearVelocitySetpoint.get(robotQuadrant), soleLinearVelocityEstimate.get(robotQuadrant), soleForceFeedforwardSetpoint.get(robotQuadrant));
          virtualModelController.setSoleVirtualForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+         */
 
-         return null;
-      }
-
-      @Override public void onExit()
-      {
-      }
-   }
-
-   private class SupportState implements StateMachineState<FootEvent>
-   {
-      private final RobotQuadrant robotQuadrant;
-
-      public SupportState(RobotQuadrant robotQuadrant)
-      {
-         this.robotQuadrant = robotQuadrant;
-      }
-
-      @Override public void onEntry()
-      {
-         // initialize contact state
-         contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-      }
-
-      @Override public FootEvent process()
-      {
-         contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-         virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-
-         // trigger events
+         // trigger touch down event
          double currentTime = robotTimestamp.getDoubleValue();
-         double liftOffTime = stepCache.get(robotQuadrant).getTimeInterval().getStartTime();
-         if (currentTime > liftOffTime)
-            return FootEvent.LIFT_OFF;
+         double touchDownTime = stepCache.get(robotQuadrant).getTimeInterval().getEndTime();
+         if (currentTime > touchDownTime)
+            return FootEvent.TOUCH_DOWN;
          else
             return null;
       }
 
       @Override public void onExit()
       {
-
+         System.out.println("SwingState : exit " + robotQuadrant.getCamelCaseNameForMiddleOfExpression());
       }
    }
+
 
 }

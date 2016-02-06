@@ -47,13 +47,13 @@ public class QuadrupedTimedStep extends QuadrupedStep
       this.timeInterval = new TimeInterval(quadrupedTimedStep.timeInterval);
    }
 
-   void set(QuadrupedTimedStep quadrupedTimedStep)
+   public void set(QuadrupedTimedStep quadrupedTimedStep)
    {
       super.set(quadrupedTimedStep);
       this.timeInterval.set(quadrupedTimedStep.timeInterval);
    }
 
-   void get(QuadrupedTimedStep quadrupedTimedStep)
+   public void get(QuadrupedTimedStep quadrupedTimedStep)
    {
       super.get(quadrupedTimedStep);
       this.timeInterval.get(quadrupedTimedStep.timeInterval);
