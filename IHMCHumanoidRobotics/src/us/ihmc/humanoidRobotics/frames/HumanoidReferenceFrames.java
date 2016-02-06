@@ -55,7 +55,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final ReferenceFrame centerOfMassFrame;
 
-   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel) 
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -65,35 +65,38 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       RobotSpecificJointNames robotJointNames = fullRobotModel.getRobotSpecificJointNames();
 
-      for (NeckJointName neckJointName : robotJointNames.getNeckJointNames())
-      {
-         this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
+      if (robotJointNames.getNeckJointNames() != null) {
+         for (NeckJointName neckJointName : robotJointNames.getNeckJointNames()) {
+            this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
+         }
       }
 
-      for (SpineJointName spineJointName : robotJointNames.getSpineJointNames())
-      {
-         this.spineReferenceFrames.put(spineJointName, fullRobotModel.getSpineJoint(spineJointName).getFrameAfterJoint());
+      if (robotJointNames.getSpineJointNames() != null) {
+         for (SpineJointName spineJointName : robotJointNames.getSpineJointNames()) {
+            this.spineReferenceFrames.put(spineJointName, fullRobotModel.getSpineJoint(spineJointName).getFrameAfterJoint());
+         }
       }
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (robotJointNames.getArmJointNames() != null) {
+         for (RobotSide robotSide : RobotSide.values) {
+            for (ArmJointName armJointName : robotJointNames.getArmJointNames()) {
+               this.armJointFrames.get(robotSide).put(armJointName, fullRobotModel.getArmJoint(robotSide, armJointName).getFrameAfterJoint());
+            }
+         }
+      }
+
+      if (robotJointNames.getLegJointNames() != null)
       {
-         for (ArmJointName armJointName : robotJointNames.getArmJointNames())
-         {
-            this.armJointFrames.get(robotSide).put(armJointName, fullRobotModel.getArmJoint(robotSide, armJointName).getFrameAfterJoint());
+         for (RobotSide robotSide : RobotSide.values) {
+            for (LegJointName legJointName : robotJointNames.getLegJointNames()) {
+               ReferenceFrame legJointFrame = fullRobotModel.getFrameAfterLegJoint(robotSide, legJointName);
+               legJointFrames.get(robotSide).put(legJointName, legJointFrame);
+            }
          }
       }
 
       for (RobotSide robotSide : RobotSide.values)
-      {
-         for (LegJointName legJointName : robotJointNames.getLegJointNames())
-         {
-            ReferenceFrame legJointFrame = fullRobotModel.getFrameAfterLegJoint(robotSide, legJointName);
-            legJointFrames.get(robotSide).put(legJointName, legJointFrame);
-         }
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
+     {
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
          soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));

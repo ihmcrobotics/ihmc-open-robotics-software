@@ -139,6 +139,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                count = counters.get(jointName);
 
             Vector3d gcOffset = jointContactPoint.getRight();
+            
 
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
                   this.getRobotsYoVariableRegistry());
