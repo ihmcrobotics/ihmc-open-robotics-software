@@ -55,12 +55,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final ReferenceFrame centerOfMassFrame;
 
-   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel) {
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel) 
+   {
       this.fullRobotModel = fullRobotModel;
 
       pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-//      chestFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
-      chestFrame = null;
+      chestFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
       pelvisZUpFrame = new ZUpFrame(worldFrame, pelvisFrame, "pelvisZUpFrame");
 
       RobotSpecificJointNames robotJointNames = fullRobotModel.getRobotSpecificJointNames();
