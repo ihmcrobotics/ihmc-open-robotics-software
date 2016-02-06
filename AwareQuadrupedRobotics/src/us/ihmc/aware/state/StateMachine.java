@@ -3,6 +3,9 @@ package us.ihmc.aware.state;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+
 public class StateMachine<S extends Enum<S>, E extends Enum<E>>
 {
    private final Map<S, StateMachineState<E>> states;
@@ -21,7 +24,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    /**
     * The present state.
     */
-   private S state;
+   private EnumYoVariable<S> state;
 
    /**
     * Whether or not the initial state's {@link StateMachineState#onEntry()} method has been called.
@@ -29,12 +32,12 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    private boolean initialized = false;
 
    public StateMachine(Map<S, StateMachineState<E>> states, List<StateMachineTransition<S, E>> transitions,
-         S initialState)
+         S initialState, Class<S> enumType, String yoVariableName, YoVariableRegistry registry)
    {
       this.states = states;
       this.transitions = transitions;
       this.initialState = initialState;
-      this.state = initialState;
+      this.state = new EnumYoVariable<>(yoVariableName, registry, enumType);
    }
 
    /**
@@ -51,7 +54,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
          StateMachineTransition<S, E> transition = transitions.get(i);
 
          // Check if this transition matches the source state and event.
-         if (transition.getFrom() == state && event == transition.getEvent())
+         if (transition.getFrom() == getState() && event == transition.getEvent())
          {
             transition(transition.getFrom(), transition.getTo());
          }
@@ -66,12 +69,12 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
       // Call the initial state's onEntry if it has not been called yet.
       if (!initialized)
       {
-         StateMachineState<E> instance = getInstanceForEnum(state);
+         StateMachineState<E> instance = getInstanceForEnum(getState());
          instance.onEntry();
          initialized = true;
       }
 
-      StateMachineState<E> instance = states.get(state);
+      StateMachineState<E> instance = states.get(getState());
 
       // Run the current state and see if it generates an event.
       E event = instance.process();
@@ -86,7 +89,12 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    public S getState()
    {
-      return state;
+      return state.getEnumValue();
+   }
+
+   public void setState(S state)
+   {
+      this.state.set(state);
    }
 
    /**
@@ -94,7 +102,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    public void reset()
    {
-      transition(state, initialState);
+      transition(getState(), initialState);
    }
 
    private StateMachineState<E> getInstanceForEnum(S state)
@@ -114,7 +122,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
 
       // It does, so transition to the next state.
       fromInstance.onExit();
-      state = to;
+      setState(to);
       toInstance.onEntry();
    }
 }
