@@ -265,7 +265,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       footStateMachine = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         StateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new StateMachineBuilder<>();
+         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
+         StateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new StateMachineBuilder<>(FootState.class, prefix + "FootState", registry);
          stateMachineBuilder.addState(FootState.SUPPORT_STATE, new SupportState(robotQuadrant));
          stateMachineBuilder.addState(FootState.SWING_STATE, new SwingState(robotQuadrant));
          stateMachineBuilder.addTransition(FootEvent.LIFT_OFF, FootState.SUPPORT_STATE, FootState.SWING_STATE);

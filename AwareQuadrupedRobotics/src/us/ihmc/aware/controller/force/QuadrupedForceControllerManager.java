@@ -7,7 +7,6 @@ import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
-import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -36,12 +35,13 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             runtimeEnvironment, parameters);
       QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(
             runtimeEnvironment, parameters, paramMapRepository);
-      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(
-            runtimeEnvironment, parameters, paramMapRepository);
+      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment,
+            parameters, paramMapRepository);
       QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters,
             paramMapRepository);
 
-      StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>();
+      StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(
+            QuadrupedForceControllerState.class, "forceControllerState", registry);
 
       builder.addState(QuadrupedForceControllerState.JOINT_INITIALIZATION, jointInitializationController);
       builder.addState(QuadrupedForceControllerState.STAND_PREP, standPrepController);
