@@ -43,7 +43,7 @@ public class TimeInterval
 
    public double getDuration()
    {
-      return startTime - endTime;
+      return endTime - startTime;
    }
 
    public double getStartTime()
@@ -62,7 +62,15 @@ public class TimeInterval
    }
 
    public void setEndTime(double endTime)
+
    {
       this.endTime = endTime;
+   }
+
+   public TimeInterval shiftInterval(double shiftTime)
+   {
+      this.startTime = this.startTime + shiftTime;
+      this.endTime = this.endTime + shiftTime;
+      return this;
    }
 }

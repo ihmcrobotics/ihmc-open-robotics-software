@@ -5,7 +5,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
-public class SwingFootTrajectory
+public class ThreeDoFSwingFootTrajectory
 {
    final private MinimumJerkTrajectory xTrajectory;
    final private MinimumJerkTrajectory yTrajectory;
@@ -16,7 +16,7 @@ public class SwingFootTrajectory
    private ReferenceFrame referenceFrame;
    private boolean moveInitialized;
 
-   public SwingFootTrajectory()
+   public ThreeDoFSwingFootTrajectory()
    {
       xTrajectory = new MinimumJerkTrajectory();
       yTrajectory = new MinimumJerkTrajectory();

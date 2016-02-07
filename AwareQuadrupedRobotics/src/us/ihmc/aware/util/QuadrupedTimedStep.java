@@ -1,6 +1,5 @@
-package us.ihmc.aware.planning;
+package us.ihmc.aware.util;
 
-import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
