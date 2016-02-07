@@ -5,6 +5,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
+import us.ihmc.aware.planning.SingleStepDCMTrajectory;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
 import us.ihmc.aware.state.StateMachine;
@@ -92,6 +93,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final CenterOfMassJacobian comJacobian;
    private final TwistCalculator twistCalculator;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
+   private final SingleStepDCMTrajectory dcmTrajectory;
 
    // controllers
    private final QuadrupedVirtualModelController virtualModelController;
@@ -218,7 +220,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 10);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.075);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
       params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
       params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
@@ -252,6 +254,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       {
          swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
       }
+      dcmTrajectory = new SingleStepDCMTrajectory(gravity, params.get(COM_HEIGHT_NOMINAL), registry);
 
       // controllers
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);
@@ -467,13 +470,23 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    {
       if (stepQueue.size() > 0)
       {
+         boolean inTransfer = false;
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (footStateMachine.get(robotQuadrant).getState() == FootState.TRANSFER)
+               inTransfer = true;
+         }
          QuadrupedTimedStep step = stepQueue.getHead();
          RobotQuadrant robotQuadrant = step.getRobotQuadrant();
-         if (footStateMachine.get(robotQuadrant).getState() == FootState.SUPPORT)
+         double currentTime = robotTimestamp.getDoubleValue();
+         double transferTime = step.getTimeInterval().getStartTime() - currentTime;
+         if (!inTransfer && transferTime < 1.5)
          {
             stepCache.get(robotQuadrant).set(step);
             stepQueue.dequeue();
             footStateMachine.get(robotQuadrant).trigger(FootEvent.TRANSFER);
+            dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+            dcmTrajectory.setStepPameters(currentTime, dcmPositionSetpoint, dcmVelocitySetpoint, supportPolygonEstimate, step);
          }
       }
    }
@@ -536,11 +549,13 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // compute center of mass height
       comPositionEstimate.changeFrame(worldFrame);
       supportCentroidEstimate.changeFrame(worldFrame);
-      comHeightEstimate = comPositionEstimate.getZ() - supportCentroidEstimate.getZ();
+      comHeightEstimate = comPositionEstimate.getZ() - supportPolygonEstimate.getLowestFootStepZHeight();
    }
 
    private void updateSetpoints()
    {
+      double currentTime = robotTimestamp.getDoubleValue();
+
       // compute capture point natural frequency
       double comHeight = Math.max(comHeightSetpoint, params.get(COM_HEIGHT_NOMINAL) / 5);
       dcmPositionController.setComHeight(comHeight);
@@ -560,6 +575,19 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
       dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
       dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (footStateMachine.get(robotQuadrant).getState() != FootState.SUPPORT)
+         {
+            // compute dynamic dcm trajectory if robot taking a step
+            dcmTrajectory.computeTrajectory(currentTime);
+            dcmTrajectory.getPosition(dcmPositionSetpoint);
+            dcmTrajectory.getVelocity(dcmVelocitySetpoint);
+            icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
+            icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
+            icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
+         }
+      }
       dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
       // compute vertical force to track desired center of mass height
@@ -691,26 +719,37 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       }
 
       // FIXME: provide an external interface to test steps
-      double strideLength = 0.35;
-      double stepDuration = 0.5;
-      double stepTimeShift =  1.0;
-      double currentTime = robotTimestamp.getDoubleValue();
+      double stanceWidth = 0.35;
+      double stanceLength = 1.2;
+      double stepDuration = 0.75;
+      double stepTimeShift = 1.5;
+      double strideLength = 0.3;
 
       updateEstimates();
+      double currentTime = robotTimestamp.getDoubleValue();
       TimeInterval timeInterval = new TimeInterval(0, stepDuration).shiftInterval(currentTime);
-      FramePoint hindRightGoalPosition = new FramePoint(solePositionEstimate.get(RobotQuadrant.HIND_RIGHT));
-      FramePoint frontRightGoalPosition = new FramePoint(solePositionEstimate.get(RobotQuadrant.FRONT_RIGHT));
-      FramePoint hindLeftGoalPosition = new FramePoint(solePositionEstimate.get(RobotQuadrant.HIND_LEFT));
-      FramePoint frontLeftGoalPosition = new FramePoint(solePositionEstimate.get(RobotQuadrant.FRONT_LEFT));
+      FramePoint hindRightGoalPosition = new FramePoint(supportCentroidEstimate);
+      FramePoint frontRightGoalPosition = new FramePoint(supportCentroidEstimate);
+      FramePoint hindLeftGoalPosition = new FramePoint(supportCentroidEstimate);
+      FramePoint frontLeftGoalPosition = new FramePoint(supportCentroidEstimate);
       hindRightGoalPosition.changeFrame(comFrame);
       frontRightGoalPosition.changeFrame(comFrame);
       hindLeftGoalPosition.changeFrame(comFrame);
       frontLeftGoalPosition.changeFrame(comFrame);
+
+      hindRightGoalPosition.add(-stanceLength/2, -stanceWidth/2, 0);
+      frontRightGoalPosition.add(stanceLength/2, -stanceWidth/2, 0);
+      hindLeftGoalPosition.add(-stanceLength/2, stanceWidth/2, 0);
+      frontLeftGoalPosition.add(stanceLength/2, stanceWidth/2, 0);
+      addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_RIGHT, hindRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+      addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_RIGHT, frontRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+      addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_LEFT, hindLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+      addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_LEFT, frontLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+
       hindRightGoalPosition.add(strideLength, 0, 0);
       frontRightGoalPosition.add(strideLength, 0, 0);
       hindLeftGoalPosition.add(strideLength,  0, 0);
       frontLeftGoalPosition.add(strideLength, 0, 0);
-
       addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_RIGHT, hindRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
       addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_RIGHT, frontRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
       addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_LEFT, hindLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
