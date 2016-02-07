@@ -1,6 +1,7 @@
-package us.ihmc.aware.planning;
+package us.ihmc.aware.util;
 
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStep
@@ -11,31 +12,34 @@ public class QuadrupedStep
    public QuadrupedStep()
    {
       this.robotQuadrant = RobotQuadrant.FRONT_RIGHT;
-      this.goalPosition = new FramePoint();
+      this.goalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
    }
 
    public QuadrupedStep(RobotQuadrant robotQuadrant)
    {
       this.robotQuadrant = robotQuadrant;
-      this.goalPosition = new FramePoint();
+      this.goalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
    }
 
    public QuadrupedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition)
    {
       this.robotQuadrant = robotQuadrant;
       this.goalPosition = new FramePoint(goalPosition);
+      this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    public QuadrupedStep(QuadrupedStep quadrupedStep)
    {
       this.robotQuadrant = quadrupedStep.robotQuadrant;
       this.goalPosition = new FramePoint(quadrupedStep.goalPosition);
+      this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    public void set(QuadrupedStep quadrupedStep)
    {
       this.robotQuadrant = quadrupedStep.robotQuadrant;
       this.goalPosition.setIncludingFrame(quadrupedStep.goalPosition);
+      this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    public void get(QuadrupedStep quadrupedStep)
@@ -67,5 +71,6 @@ public class QuadrupedStep
    public void setGoalPosition(FramePoint goalPosition)
    {
       this.goalPosition.setIncludingFrame(goalPosition);
+      this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
    }
 }

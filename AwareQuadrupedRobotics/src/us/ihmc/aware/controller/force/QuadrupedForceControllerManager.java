@@ -56,6 +56,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // Manually triggered events to transition to main controllers.
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.STAND_PREP,
             QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.STEP,
+            QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND_PREP,
             QuadrupedForceControllerState.STEP);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND,

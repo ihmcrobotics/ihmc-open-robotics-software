@@ -12,7 +12,6 @@ import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
@@ -168,7 +167,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final ArtifactList artifactList;
 
    // temporary
-   private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
+   private final Twist twistStorage = new Twist();
 
    public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository)
    {
@@ -181,7 +180,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       this.mass = fullRobotModel.getTotalMass();
 
       // parameters
-      this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStepController.class);
+      this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStandController.class);
       params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 2500);
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
@@ -377,8 +376,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    private void updateEstimates()
    {
-      Twist twist = pool.lease(Twist.class);
-
       // update frames and twists
       referenceFrames.updateFrames();
       twistCalculator.compute();
@@ -387,10 +384,10 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // compute sole poses and twists
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         twistCalculator.packTwistOfBody(twist, footRigidBody.get(robotQuadrant));
-         twist.changeFrame(soleFrame.get(robotQuadrant));
-         twist.packAngularPart(soleAngularVelocityEstimate.get(robotQuadrant));
-         twist.packLinearPart(soleLinearVelocityEstimate.get(robotQuadrant));
+         twistCalculator.packTwistOfBody(twistStorage, footRigidBody.get(robotQuadrant));
+         twistStorage.changeFrame(soleFrame.get(robotQuadrant));
+         twistStorage.packAngularPart(soleAngularVelocityEstimate.get(robotQuadrant));
+         twistStorage.packLinearPart(soleLinearVelocityEstimate.get(robotQuadrant));
          soleOrientationEstimate.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
          solePositionEstimate.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
       }
@@ -410,10 +407,10 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
 
       // compute body pose and twist
-      twistCalculator.packTwistOfBody(twist, fullRobotModel.getPelvis());
-      twist.changeFrame(bodyFrame);
-      twist.packAngularPart(bodyAngularVelocityEstimate);
-      twist.packLinearPart(bodyLinearVelocityEstimate);
+      twistCalculator.packTwistOfBody(twistStorage, fullRobotModel.getPelvis());
+      twistStorage.changeFrame(bodyFrame);
+      twistStorage.packAngularPart(bodyAngularVelocityEstimate);
+      twistStorage.packLinearPart(bodyLinearVelocityEstimate);
       bodyOrientationEstimate.setToZero(bodyFrame);
       bodyPositionEstimate.setToZero(bodyFrame);
 
@@ -492,80 +489,44 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    private void writeYoVariables()
    {
-      // update frames
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePositionSetpoint.get(robotQuadrant).changeFrame(yoSolePositionSetpoint.get(robotQuadrant).getReferenceFrame());
-         soleLinearVelocitySetpoint.get(robotQuadrant).changeFrame(yoSoleLinearVelocitySetpoint.get(robotQuadrant).getReferenceFrame());
-         soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(yoSoleForceFeedforwardSetpoint.get(robotQuadrant).getReferenceFrame());
-         soleForceSetpoint.get(robotQuadrant).changeFrame(yoSoleForceSetpoint.get(robotQuadrant).getReferenceFrame());
+         yoSolePositionSetpoint.get(robotQuadrant).setAndMatchFrame(solePositionSetpoint.get(robotQuadrant));
+         yoSoleLinearVelocitySetpoint.get(robotQuadrant).setAndMatchFrame(soleLinearVelocitySetpoint.get(robotQuadrant));
+         yoSoleForceFeedforwardSetpoint.get(robotQuadrant).setAndMatchFrame(soleForceFeedforwardSetpoint.get(robotQuadrant));
+         yoSoleForceSetpoint.get(robotQuadrant).setAndMatchFrame(soleForceSetpoint.get(robotQuadrant));
       }
-      bodyOrientationSetpoint.changeFrame(yoBodyOrientationSetpoint.getReferenceFrame());
-      bodyAngularVelocitySetpoint.changeFrame(yoBodyAngularVelocitySetpoint.getReferenceFrame());
-      bodyTorqueFeedforwardSetpoint.changeFrame(yoBodyTorqueFeedforwardSetpoint.getReferenceFrame());
-      bodyTorqueSetpoint.changeFrame(yoBodyTorqueSetpoint.getReferenceFrame());
-      icpPositionSetpoint.changeFrame(yoIcpPositionSetpoint.getReferenceFrame());
-      cmpPositionSetpoint.changeFrame(yoCmpPositionSetpoint.getReferenceFrame());
-      vrpPositionSetpoint.changeFrame(yoVrpPositionSetpoint.getReferenceFrame());
-      comForceSetpoint.changeFrame(yoComForceSetpoint.getReferenceFrame());
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         soleOrientationEstimate.get(robotQuadrant).changeFrame(yoSoleOrientationEstimate.get(robotQuadrant).getReferenceFrame());
-         solePositionEstimate.get(robotQuadrant).changeFrame(yoSolePositionEstimate.get(robotQuadrant).getReferenceFrame());
-         soleAngularVelocityEstimate.get(robotQuadrant).changeFrame(yoSoleAngularVelocityEstimate.get(robotQuadrant).getReferenceFrame());
-         soleLinearVelocityEstimate.get(robotQuadrant).changeFrame(yoSoleLinearVelocityEstimate.get(robotQuadrant).getReferenceFrame());
-      }
-      supportCentroidEstimate.changeFrame(yoSupportCentroidEstimate.getReferenceFrame());
-      supportOrientationEstimate.changeFrame(yoSupportOrientationEstimate.getReferenceFrame());
-      bodyOrientationEstimate.changeFrame(yoBodyOrientationEstimate.getReferenceFrame());
-      bodyPositionEstimate.changeFrame(yoBodyPositionEstimate.getReferenceFrame());
-      bodyAngularVelocityEstimate.changeFrame(yoBodyAngularVelocityEstimate.getReferenceFrame());
-      bodyLinearVelocityEstimate.changeFrame(yoBodyLinearVelocityEstimate.getReferenceFrame());
-      comPositionEstimate.changeFrame(yoComPositionEstimate.getReferenceFrame());
-      comVelocityEstimate.changeFrame(yoComVelocityEstimate.getReferenceFrame());
-      icpPositionEstimate.changeFrame(yoIcpPositionEstimate.getReferenceFrame());
-
-      // copy variables
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         solePositionSetpoint.get(robotQuadrant).changeFrame(yoSolePositionSetpoint.get(robotQuadrant).getReferenceFrame());
-         soleLinearVelocitySetpoint.get(robotQuadrant).changeFrame(yoSoleLinearVelocitySetpoint.get(robotQuadrant).getReferenceFrame());
-         soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(yoSoleForceFeedforwardSetpoint.get(robotQuadrant).getReferenceFrame());
-         soleForceSetpoint.get(robotQuadrant).changeFrame(yoSoleForceSetpoint.get(robotQuadrant).getReferenceFrame());
-      }
-      yoBodyOrientationSetpoint.set(bodyOrientationSetpoint);
-      yoBodyAngularVelocitySetpoint.set(bodyAngularVelocitySetpoint);
-      yoBodyTorqueFeedforwardSetpoint.set(bodyTorqueFeedforwardSetpoint);
-      yoBodyTorqueSetpoint.set(bodyTorqueSetpoint);
-      yoIcpPositionSetpoint.set(icpPositionSetpoint);
-      yoCmpPositionSetpoint.set(cmpPositionSetpoint);
-      yoVrpPositionSetpoint.set(vrpPositionSetpoint);
-      yoComForceSetpoint.set(comForceSetpoint);
+      yoBodyOrientationSetpoint.setAndMatchFrame(bodyOrientationSetpoint);
+      yoBodyAngularVelocitySetpoint.setAndMatchFrame(bodyAngularVelocitySetpoint);
+      yoBodyTorqueFeedforwardSetpoint.setAndMatchFrame(bodyTorqueFeedforwardSetpoint);
+      yoBodyTorqueSetpoint.setAndMatchFrame(bodyTorqueSetpoint);
+      yoIcpPositionSetpoint.setAndMatchFrame(icpPositionSetpoint);
+      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
+      yoVrpPositionSetpoint.setAndMatchFrame(vrpPositionSetpoint);
+      yoComForceSetpoint.setAndMatchFrame(comForceSetpoint);
       yoComHeightSetpoint.set(comHeightSetpoint);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSoleOrientationEstimate.get(robotQuadrant).set(soleOrientationEstimate.get(robotQuadrant));
-         yoSolePositionEstimate.get(robotQuadrant).set(solePositionEstimate.get(robotQuadrant));
-         yoSoleAngularVelocityEstimate.get(robotQuadrant).set(soleAngularVelocityEstimate.get(robotQuadrant));
-         yoSoleLinearVelocityEstimate.get(robotQuadrant).set(soleLinearVelocityEstimate.get(robotQuadrant));
+         yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(soleOrientationEstimate.get(robotQuadrant));
+         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(solePositionEstimate.get(robotQuadrant));
+         yoSoleAngularVelocityEstimate.get(robotQuadrant).setAndMatchFrame(soleAngularVelocityEstimate.get(robotQuadrant));
+         yoSoleLinearVelocityEstimate.get(robotQuadrant).setAndMatchFrame(soleLinearVelocityEstimate.get(robotQuadrant));
       }
       supportPolygonEstimate.packYoFrameConvexPolygon2d(yoSupportPolygonEstimate);
-      yoSupportCentroidEstimate.set(supportCentroidEstimate);
-      yoSupportOrientationEstimate.set(supportOrientationEstimate);
-      yoBodyOrientationEstimate.set(bodyOrientationEstimate);
-      yoBodyAngularVelocityEstimate.set(bodyAngularVelocityEstimate);
-      yoBodyLinearVelocityEstimate.set(bodyLinearVelocityEstimate);
-      yoComPositionEstimate.set(comPositionEstimate);
-      yoComVelocityEstimate.set(comVelocityEstimate);
-      yoIcpPositionEstimate.set(icpPositionEstimate);
+      yoSupportCentroidEstimate.setAndMatchFrame(supportCentroidEstimate);
+      yoSupportOrientationEstimate.setAndMatchFrame(supportOrientationEstimate);
+      yoBodyOrientationEstimate.setAndMatchFrame(bodyOrientationEstimate);
+      yoBodyAngularVelocityEstimate.setAndMatchFrame(bodyAngularVelocityEstimate);
+      yoBodyLinearVelocityEstimate.setAndMatchFrame(bodyLinearVelocityEstimate);
+      yoComPositionEstimate.setAndMatchFrame(comPositionEstimate);
+      yoComVelocityEstimate.setAndMatchFrame(comVelocityEstimate);
+      yoIcpPositionEstimate.setAndMatchFrame(icpPositionEstimate);
       yoComHeightEstimate.set(comHeightEstimate);
    }
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      pool.evict();
       readYoVariables();
       updateEstimates();
       updateSetpoints();
@@ -575,6 +536,17 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    @Override public void onEntry()
    {
+      // show graphics
+      yoGraphicsListRegistry.hideYoGraphics();
+      yoGraphicsListRegistry.hideArtifacts();
+      yoGraphicsList.setVisible(true);
+      artifactList.setVisible(true);
+      virtualModelController.setVisible(false);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
+      }
+
       // initialize desired values (provider inputs)
       yoBodyOrientationDesired.setYawPitchRoll(0.0, 0.0, 0.0);
       yoComHeightDesired.set(params.get(COM_HEIGHT_NOMINAL));
@@ -614,17 +586,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionController.reset();
       dcmPositionController.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
       dcmPositionController.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
-
-      // show graphics
-      yoGraphicsListRegistry.hideYoGraphics();
-      yoGraphicsListRegistry.hideArtifacts();
-      yoGraphicsList.setVisible(true);
-      artifactList.setVisible(true);
-      virtualModelController.setVisible(false);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
-      }
    }
 
    @Override public void onExit()

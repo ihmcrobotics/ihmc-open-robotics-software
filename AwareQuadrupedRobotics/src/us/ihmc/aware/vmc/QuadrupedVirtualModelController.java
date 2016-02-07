@@ -135,7 +135,6 @@ public class QuadrupedVirtualModelController
          soleVirtualForce.get(robotQuadrant).setToZero();
          soleContactForce.get(robotQuadrant).setToZero();
       }
-      setVisible(false);
    }
 
    public void setSoleVirtualForce(RobotQuadrant robotQuadrant, FrameVector virtualForce)

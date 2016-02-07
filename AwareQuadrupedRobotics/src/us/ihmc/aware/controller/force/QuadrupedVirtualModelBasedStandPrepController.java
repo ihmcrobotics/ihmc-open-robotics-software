@@ -93,7 +93,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
             environment.getGraphicsListRegistryForDetachedOverhead());
 
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStandPrepController.class);
-      params.setDefault(PARAM_TRAJECTORY_TIME, 3.0);
+      params.setDefault(PARAM_TRAJECTORY_TIME, 1.0);
 
       params.setDefault(PARAM_JOINT_DAMPING, 15.0);
 
@@ -104,7 +104,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
       params.setDefault(PARAM_STANCE_LENGTH, 1.0);
       params.setDefault(PARAM_STANCE_WIDTH, 0.5);
-      params.setDefault(PARAM_STANCE_HEIGHT, 0.55);
+      params.setDefault(PARAM_STANCE_HEIGHT, 0.6);
       params.setDefault(PARAM_STANCE_X_OFFSET, 0.0);
       params.setDefault(PARAM_STANCE_Y_OFFSET, 0.0);
 
