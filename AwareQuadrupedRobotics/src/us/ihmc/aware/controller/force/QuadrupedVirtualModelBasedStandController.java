@@ -432,7 +432,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // compute center of mass height
       comPositionEstimate.changeFrame(worldFrame);
       supportCentroidEstimate.changeFrame(worldFrame);
-      comHeightEstimate = comPositionEstimate.getZ() - supportCentroidEstimate.getZ();
+      comHeightEstimate = comPositionEstimate.getZ() - supportPolygonEstimate.getLowestFootStepZHeight();
    }
 
    private void updateSetpoints()
