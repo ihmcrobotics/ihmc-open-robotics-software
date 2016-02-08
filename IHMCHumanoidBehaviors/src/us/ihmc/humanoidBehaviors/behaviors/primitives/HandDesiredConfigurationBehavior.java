@@ -10,7 +10,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class FingerStateBehavior extends BehaviorInterface
+public class HandDesiredConfigurationBehavior extends BehaviorInterface
 {
    private HandDesiredConfigurationMessage outgoingFingerStatePacket;
    private final BooleanYoVariable hasInputBeenSet;
@@ -23,7 +23,7 @@ public class FingerStateBehavior extends BehaviorInterface
    
    private final boolean DEBUG = false;
 
-   public FingerStateBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
+   public HandDesiredConfigurationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridgeInterface);
       this.yoTime = yoTime;

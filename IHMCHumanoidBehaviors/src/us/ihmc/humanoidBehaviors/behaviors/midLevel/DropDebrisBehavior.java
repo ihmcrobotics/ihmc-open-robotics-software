@@ -5,7 +5,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -32,7 +32,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private final HandPoseBehavior handPoseBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
    private final ChestOrientationBehavior chestOrientationBehavior;
 
@@ -57,7 +57,7 @@ public class DropDebrisBehavior extends BehaviorInterface
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
       chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
 

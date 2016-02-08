@@ -10,7 +10,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
@@ -48,7 +48,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private final ArrayList<BehaviorInterface> childBehaviors = new ArrayList<BehaviorInterface>();
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
    private final WholeBodyPacketBehavior wholeBodyPacketBehavior;
    private final ChestOrientationBehavior chestOrientationBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
@@ -85,7 +85,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       childBehaviors.add(wholeBodyIKBehavior);
       
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(fingerStateBehavior);
       
       wholeBodyPacketBehavior = new WholeBodyPacketBehavior(outgoingCommunicationBridge, yoTime, wholeBodyControllerParameters);

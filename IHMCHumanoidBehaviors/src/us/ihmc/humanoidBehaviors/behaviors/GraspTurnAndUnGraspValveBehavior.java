@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveTurnDirection;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspMethod;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -45,7 +45,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
    private final RotateHandAboutAxisBehavior rotateGraspedValveBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable tippingDetected;
@@ -67,7 +67,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
       childBehaviors.add(graspValveBehavior);
       rotateGraspedValveBehavior = new RotateHandAboutAxisBehavior("", outgoingCommunicationBridge, fullRobotModel, yoTime);
       childBehaviors.add(rotateGraspedValveBehavior);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(fingerStateBehavior);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(handPoseBehavior);
