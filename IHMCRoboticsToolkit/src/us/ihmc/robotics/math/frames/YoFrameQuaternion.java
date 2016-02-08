@@ -112,12 +112,6 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       quat.set(quaternion);
    }
 
-   //   public void get(Quat4f quat)
-   //   {
-   //      putYoValuesIntoQuat4d();
-   //      quat.set(quaternion);
-   //   }
-
    public void get(Matrix3d matrix)
    {
       putYoValuesIntoQuat4d();
@@ -224,6 +218,24 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       checkReferenceFrameMatch(frameOrientation.getReferenceFrame());
       frameOrientation.getQuaternion(tempQuaternion2);
       mul(tempQuaternion2);
+   }
+
+   /**
+    * Compute the dot product between this quaternion and the orhter quaternion: this . other = qx * other.qx + qy * other.qy + qz * other.qz + qs * other.qs.
+    * @param other
+    * @return
+    */
+   public double dot(YoFrameQuaternion other)
+   {
+      return qx.getDoubleValue() * other.qx.getDoubleValue() + qy.getDoubleValue() * other.qy.getDoubleValue() + qz.getDoubleValue() * other.qz.getDoubleValue() + qs.getDoubleValue() * other.qs.getDoubleValue();
+   }
+
+   public void negate()
+   {
+      qx.set(- qx.getDoubleValue());
+      qy.set(- qy.getDoubleValue());
+      qz.set(- qz.getDoubleValue());
+      qs.set(- qs.getDoubleValue());
    }
 
    @Override
