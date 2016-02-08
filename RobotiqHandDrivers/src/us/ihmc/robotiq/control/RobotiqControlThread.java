@@ -142,7 +142,7 @@ class RobotiqControlThread extends HandControlThread
             if (fingerStateProvider.isNewFingerStateAvailable())
             {
                HandDesiredConfigurationMessage packet = fingerStateProvider.pullPacket();
-               HandConfiguration state = packet.getFingerState();
+               HandConfiguration state = packet.getHandDesiredConfiguration();
                
                switch (state)
                {

@@ -7,7 +7,7 @@ public class FingerStatePacketToHandleControlMessageConverter
 {
    public static void convertFingerStatePacket(HandDesiredConfigurationMessage packet, HandleControl message)
    {
-      switch (packet.getFingerState())
+      switch (packet.getHandDesiredConfiguration())
       {
          case CLOSE :
             message.setType(new int[] {2, 2, 2, 2, 2});

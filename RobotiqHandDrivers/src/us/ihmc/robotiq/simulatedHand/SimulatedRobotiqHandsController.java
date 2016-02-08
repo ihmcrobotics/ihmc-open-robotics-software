@@ -214,7 +214,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          {
             IndividualRobotiqHandController individualRobotiqHandController = individualHandControllers.get(robotSide);
 
-            HandConfiguration fingerState = fingerStateProvider.pullPacket().getFingerState();
+            HandConfiguration fingerState = fingerStateProvider.pullPacket().getHandDesiredConfiguration();
             
             if (DEBUG)
                PrintTools.debug(this, "Recieved new FingerState Packet: " + fingerState);

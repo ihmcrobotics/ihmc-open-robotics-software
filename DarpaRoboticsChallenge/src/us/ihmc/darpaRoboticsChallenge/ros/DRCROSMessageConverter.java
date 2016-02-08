@@ -774,7 +774,7 @@ public class DRCROSMessageConverter
       FingerStatePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FingerStatePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
       ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      ret.setFingerState(convertEnumToByte(packet.getFingerState()));
+      ret.setFingerState(convertEnumToByte(packet.getHandDesiredConfiguration()));
 
       return ret;
    }
