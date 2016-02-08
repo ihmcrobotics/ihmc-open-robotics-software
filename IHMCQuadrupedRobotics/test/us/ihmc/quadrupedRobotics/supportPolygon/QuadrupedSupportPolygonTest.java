@@ -219,8 +219,8 @@ public class QuadrupedSupportPolygonTest
    public void testGetWhichFootstepHasMoved()
    {
       RobotQuadrant swingLegFromHereToNextPolygon;
-      QuadrupedSupportPolygon firstPoly = createSimplePolygon();
-      QuadrupedSupportPolygon secondPoly = createSimplePolygon();
+      final QuadrupedSupportPolygon firstPoly = createSimplePolygon();
+      final QuadrupedSupportPolygon secondPoly = createSimplePolygon();
       
       JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
       {

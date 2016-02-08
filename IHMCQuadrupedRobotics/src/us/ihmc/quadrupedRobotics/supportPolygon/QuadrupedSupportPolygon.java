@@ -855,26 +855,6 @@ public class QuadrupedSupportPolygon implements Serializable
       GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, tempPointListForInCirclePoint[1], v2p, tempPointListForInCirclePoint[2], v3p);
    }
 
-   public int getNumberOfFootstepsOnTopOfEachOther()
-   {
-      int total = 0;
-      RobotQuadrant[] quadrants = RobotQuadrant.values;
-      for (int i = 0; i < quadrants.length; i++)
-      {
-         if(containsFootstep(quadrants[i]))
-         {
-            for (int j = i + 1; j < quadrants.length; j++)
-            {
-               if(getFootstep(quadrants[i]).epsilonEquals(getFootstep(quadrants[j]), 0.001))
-               {
-                  total++;
-               }
-            }
-         }
-      }
-      return total;
-   }
-
    /**
     * Get the distance of the point inside of the in circle.
     *
