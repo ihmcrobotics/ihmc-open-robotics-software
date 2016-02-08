@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -86,7 +86,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, FingerState.STOP);
+         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopFingerStatePacket.setDestination(PacketDestination.UI);
          sendPacketToController(stopFingerStatePacket);
          sendPacketToNetworkProcessor(stopFingerStatePacket);
@@ -104,7 +104,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, FingerState.STOP);
+         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopFingerStatePacket.setDestination(PacketDestination.UI);
          sendPacketToController(stopFingerStatePacket);
          sendPacketToNetworkProcessor(stopFingerStatePacket);

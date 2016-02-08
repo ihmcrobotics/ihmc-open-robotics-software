@@ -8,7 +8,7 @@ import java.util.List;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -214,7 +214,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          {
             IndividualRobotiqHandController individualRobotiqHandController = individualHandControllers.get(robotSide);
 
-            FingerState fingerState = fingerStateProvider.pullPacket().getFingerState();
+            HandConfiguration fingerState = fingerStateProvider.pullPacket().getFingerState();
             
             if (DEBUG)
                PrintTools.debug(this, "Recieved new FingerState Packet: " + fingerState);

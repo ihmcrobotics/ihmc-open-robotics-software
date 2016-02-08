@@ -51,7 +51,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingSpeed;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
@@ -190,7 +190,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ManipulationAbortedStatus.class);
       registerPacketClass(HandStatePacket.class);
       registerPacketClass(HandDesiredConfigurationMessage.class);
-      registerPacketField(FingerState.class);
+      registerPacketField(HandConfiguration.class);
       registerPacketClass(HandLoadBearingPacket.class);
       registerPacketFields(RobotSide.class);
       registerPacketFields(HandPosePacket.Frame.class);

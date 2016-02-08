@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.ObjectWeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyIKTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DrillPacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -160,7 +160,7 @@ public class DrillPickUpBehavior extends BehaviorInterface
 
       pipeLine.submitTaskForPallelPipesStage(wholeBodyIKTrajectoryBehavior, new WholeBodyIKTrajectoryTask(wholeBodyIKTrajectoryBehavior, yoTime,
             grabSide, handPose, ControlledDoF.DOF_3P3R));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(grabSide, FingerState.OPEN, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(grabSide, HandConfiguration.OPEN, fingerStateBehavior, yoTime));
       pipeLine.requestNewStage();
 
       // stage: move hand closer to drill
@@ -171,7 +171,7 @@ public class DrillPickUpBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       // stage: close hand
-      pipeLine.submitSingleTaskStage(new FingerStateTask(grabSide, FingerState.CLOSE, fingerStateBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(new FingerStateTask(grabSide, HandConfiguration.CLOSE, fingerStateBehavior, yoTime));
       pipeLine.requestNewStage();
       
       // stage: tell controller about weight in hand

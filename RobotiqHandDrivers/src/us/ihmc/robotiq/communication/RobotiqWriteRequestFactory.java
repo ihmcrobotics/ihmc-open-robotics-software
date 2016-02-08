@@ -1,7 +1,7 @@
 package us.ihmc.robotiq.communication;
 
 import net.wimpi.modbus.procimg.Register;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rACT;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rGTO;
@@ -42,7 +42,7 @@ public class RobotiqWriteRequestFactory
       return registers;
    }
    
-   public Register[] createWholeHandPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
+   public Register[] createWholeHandPositionRequest(RobotiqGraspMode graspMode, HandConfiguration fingerState)
    {
       robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
       robotiqRequest.getFingerAPositionRequest().setFingerPosition(graspMode, fingerState);
@@ -55,7 +55,7 @@ public class RobotiqWriteRequestFactory
       return registers;
    }
    
-   public Register[] createFingersPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
+   public Register[] createFingersPositionRequest(RobotiqGraspMode graspMode, HandConfiguration fingerState)
    {
       robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
       robotiqRequest.getFingerBPositionRequest().setFingerPosition(graspMode, fingerState);
@@ -67,7 +67,7 @@ public class RobotiqWriteRequestFactory
       return registers;
    }
    
-   public Register[] createThumbPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
+   public Register[] createThumbPositionRequest(RobotiqGraspMode graspMode, HandConfiguration fingerState)
    {
       robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
       robotiqRequest.getFingerAPositionRequest().setFingerPosition(graspMode, fingerState);

@@ -21,7 +21,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyPacketTask;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -135,11 +135,11 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       computeWholeBodyIK(graspingDebrisRobot, approachingDebrisRobot, 0, approachPose, 0.02, 0.1, ControlledDoF.DOF_3P3R);
       pipeLine.submitSingleTaskStage(new WholeBodyPacketTask(approachingDebrisRobot, yoTime, wholeBodyPacketBehavior, trajectoryTime));
 
-      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, HandConfiguration.OPEN, fingerStateBehavior, yoTime));
 
       pipeLine.submitSingleTaskStage(new WholeBodyPacketTask(graspingDebrisRobot, yoTime, wholeBodyPacketBehavior, trajectoryTime));
 
-      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSide, HandConfiguration.CLOSE, fingerStateBehavior, yoTime));
 
       FramePose prepareToDropPose = new FramePose(midFeetZUpFrame);
       prepareToDropPose.setPosition(0.55, robotSide.negateIfRightSide(0.2), 1.2);

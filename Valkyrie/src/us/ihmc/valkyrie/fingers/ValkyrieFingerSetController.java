@@ -4,7 +4,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -50,8 +50,8 @@ public class ValkyrieFingerSetController implements RobotController
    private final EnumMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
    private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
    
-   private final EnumYoVariable<FingerState> fingerState;
-   private final EnumYoVariable<FingerState> desiredFingerState;
+   private final EnumYoVariable<HandConfiguration> fingerState;
+   private final EnumYoVariable<HandConfiguration> desiredFingerState;
    private StateMachine<GraspState> stateMachine;
          
    public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFFullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
@@ -84,10 +84,10 @@ public class ValkyrieFingerSetController implements RobotController
       yoPolynomial = new YoPolynomial(sidePrefix + name, 4, registry);
       yoPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
 
-      fingerState = new EnumYoVariable<>(sidePrefix + "ValkyrieFingerState", registry, FingerState.class);
-      fingerState.set(FingerState.OPEN);
-      desiredFingerState = new EnumYoVariable<>(sidePrefix + "ValkyrieDesiredFingerState", registry, FingerState.class);
-      desiredFingerState.set(FingerState.OPEN);
+      fingerState = new EnumYoVariable<>(sidePrefix + "ValkyrieFingerState", registry, HandConfiguration.class);
+      fingerState.set(HandConfiguration.OPEN);
+      desiredFingerState = new EnumYoVariable<>(sidePrefix + "ValkyrieDesiredFingerState", registry, HandConfiguration.class);
+      desiredFingerState.set(HandConfiguration.OPEN);
       
       stateMachine = new StateMachine<>(sidePrefix + "ValkyrieGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
       setupStateMachine();
@@ -136,7 +136,7 @@ public class ValkyrieFingerSetController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+            return desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN);
          }
       };
       
@@ -145,7 +145,7 @@ public class ValkyrieFingerSetController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredFingerState.getEnumValue().equals(FingerState.CLOSE);
+            return desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE);
          }
       };
       
@@ -172,7 +172,7 @@ public class ValkyrieFingerSetController implements RobotController
       public void doTransitionIntoAction()
       {
          isStopped.set(false);
-         fingerState.set(FingerState.OPEN);
+         fingerState.set(HandConfiguration.OPEN);
          computeAllFinalDesiredAngles(1.0, ValkyrieFingerPoseDefinitions.getOpenDesiredDefinition(robotSide));
       }
 
@@ -198,7 +198,7 @@ public class ValkyrieFingerSetController implements RobotController
       public void doTransitionIntoAction()
       {
          isStopped.set(false);
-         fingerState.set(FingerState.CLOSE);
+         fingerState.set(HandConfiguration.CLOSE);
          computeAllFinalDesiredAngles(1.0, ValkyrieFingerPoseDefinitions.getClosedDesiredDefinition(robotSide));
       }
 
@@ -218,12 +218,12 @@ public class ValkyrieFingerSetController implements RobotController
 
    public void open()
    {
-      desiredFingerState.set(FingerState.OPEN);
+      desiredFingerState.set(HandConfiguration.OPEN);
    }
    
    public void close()
    {
-      desiredFingerState.set(FingerState.CLOSE);
+      desiredFingerState.set(HandConfiguration.CLOSE);
    }
    
    public void stop()

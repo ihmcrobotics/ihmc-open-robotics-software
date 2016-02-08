@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -113,8 +113,8 @@ public class DropDebrisBehavior extends BehaviorInterface
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side.getOppositeSide(), desiredArmJointAngles, yoTime, handPoseBehavior,
             trajectoryTime));
 
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.RESET, fingerStateBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side.getOppositeSide(), FingerState.RESET, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.RESET, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side.getOppositeSide(), HandConfiguration.RESET, fingerStateBehavior, yoTime));
 
       pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime),
             yoTime, pelvisPoseBehavior));
@@ -126,7 +126,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    {
       handPoseToPack.setPose(tempPosition, tempOrientation);
       handPoseToPack.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, (new FingerStateTask(side, FingerState.OPEN, fingerStateBehavior, yoTime)));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, (new FingerStateTask(side, HandConfiguration.OPEN, fingerStateBehavior, yoTime)));
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, trajectoryTime, handPoseToPack, Frame.WORLD, handPoseBehavior, yoTime));
 
    }
