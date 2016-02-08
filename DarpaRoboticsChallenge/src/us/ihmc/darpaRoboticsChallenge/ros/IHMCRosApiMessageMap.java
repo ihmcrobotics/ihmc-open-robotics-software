@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTraje
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
@@ -54,7 +54,7 @@ public class IHMCRosApiMessageMap
       LegCompliancePacket.class,
       WholeBodyTrajectoryPacket.class,
       StopMotionPacket.class,
-      FingerStatePacket.class
+      HandDesiredConfigurationMessage.class
    };
 
    public static final Class[] INPUT_PACKET_LIST =

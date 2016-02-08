@@ -13,7 +13,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
@@ -162,7 +162,7 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				manager.sendHandCommand(new FingerStatePacket(RobotSide.LEFT, FingerState.CALIBRATE));
+				manager.sendHandCommand(new HandDesiredConfigurationMessage(RobotSide.LEFT, FingerState.CALIBRATE));
 			}
 		});
 		
@@ -171,7 +171,7 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				manager.sendHandCommand(new FingerStatePacket(RobotSide.LEFT, FingerState.RESET));
+				manager.sendHandCommand(new HandDesiredConfigurationMessage(RobotSide.LEFT, FingerState.RESET));
 			}
 		});
 	}

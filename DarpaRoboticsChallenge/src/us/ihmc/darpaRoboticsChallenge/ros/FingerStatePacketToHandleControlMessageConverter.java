@@ -1,11 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
 import handle_msgs.HandleControl;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 
 public class FingerStatePacketToHandleControlMessageConverter
 {
-   public static void convertFingerStatePacket(FingerStatePacket packet, HandleControl message)
+   public static void convertFingerStatePacket(HandDesiredConfigurationMessage packet, HandleControl message)
    {
       switch (packet.getFingerState())
       {

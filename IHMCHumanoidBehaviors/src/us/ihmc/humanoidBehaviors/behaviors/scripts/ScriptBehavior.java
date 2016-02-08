@@ -33,7 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandStatePacket;
@@ -448,7 +448,7 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.HIGH_LEVEL_STATE;
       }
-      else if (scriptObject instanceof FingerStatePacket)
+      else if (scriptObject instanceof HandDesiredConfigurationMessage)
       {
          ret = PrimitiveBehaviorType.FINGER_STATE;
       }
@@ -530,7 +530,7 @@ public class ScriptBehavior extends BehaviorInterface
       else if (behaviorType.equals(PrimitiveBehaviorType.FINGER_STATE))
       {
          fingerStateBehavior.initialize();
-         fingerStateBehavior.setInput((FingerStatePacket) inputPacket.getScriptObject());
+         fingerStateBehavior.setInput((HandDesiredConfigurationMessage) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.IDLE))
       {

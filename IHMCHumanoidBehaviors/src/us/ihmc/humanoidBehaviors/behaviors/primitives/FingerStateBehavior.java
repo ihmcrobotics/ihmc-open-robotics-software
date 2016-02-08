@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -12,7 +12,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class FingerStateBehavior extends BehaviorInterface
 {
-   private FingerStatePacket outgoingFingerStatePacket;
+   private HandDesiredConfigurationMessage outgoingFingerStatePacket;
    private final BooleanYoVariable hasInputBeenSet;
    private final BooleanYoVariable hasPacketBeenSet;
 
@@ -39,7 +39,7 @@ public class FingerStateBehavior extends BehaviorInterface
       trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
    }
 
-   public void setInput(FingerStatePacket fingerStatePacket)
+   public void setInput(HandDesiredConfigurationMessage fingerStatePacket)
    {
       this.outgoingFingerStatePacket = fingerStatePacket;
       hasInputBeenSet.set(true);
@@ -86,7 +86,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         FingerStatePacket stopFingerStatePacket = new FingerStatePacket(robotSide, FingerState.STOP);
+         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, FingerState.STOP);
          stopFingerStatePacket.setDestination(PacketDestination.UI);
          sendPacketToController(stopFingerStatePacket);
          sendPacketToNetworkProcessor(stopFingerStatePacket);
@@ -104,7 +104,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         FingerStatePacket stopFingerStatePacket = new FingerStatePacket(robotSide, FingerState.STOP);
+         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, FingerState.STOP);
          stopFingerStatePacket.setDestination(PacketDestination.UI);
          sendPacketToController(stopFingerStatePacket);
          sendPacketToNetworkProcessor(stopFingerStatePacket);

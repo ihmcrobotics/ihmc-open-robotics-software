@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -104,7 +104,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
             FingerStateProvider fingerStateProvider = new FingerStateProvider(robotSide);
             fingerStateProviders.put(robotSide, fingerStateProvider);
             if (globalDataProducer != null)
-               globalDataProducer.attachListener(FingerStatePacket.class, fingerStateProvider);
+               globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, fingerStateProvider);
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide, handControllerTime, fingerTrajectoryTime,
                   simulatedRobot, registry);

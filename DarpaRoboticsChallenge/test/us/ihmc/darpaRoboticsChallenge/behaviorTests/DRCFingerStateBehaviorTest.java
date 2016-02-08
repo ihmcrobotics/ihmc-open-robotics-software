@@ -20,7 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -98,7 +98,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double trajectoryTime = 2.0;
 
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
-      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new FingerStatePacket(robotSide, FingerState.CLOSE), trajectoryTime);
+      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, FingerState.CLOSE), trajectoryTime);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(fingerStateBehavior);
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
@@ -128,7 +128,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new FingerStatePacket(robotSide, FingerState.CLOSE), trajectoryTime);
+      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, FingerState.CLOSE), trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -168,7 +168,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new FingerStatePacket(robotSide, FingerState.CLOSE), trajectoryTime);
+      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, FingerState.CLOSE), trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -203,7 +203,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-   private FingerStatePacket getRandomClosedTypeFingerStatePacket(RobotSide robotSide)
+   private HandDesiredConfigurationMessage getRandomClosedTypeFingerStatePacket(RobotSide robotSide)
    {
       ArrayList<FingerState> closedFingerConfigs = new ArrayList<FingerState>();
       closedFingerConfigs.add(FingerState.CLOSE);
@@ -220,7 +220,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
          PrintTools.debug(this, fingerState.name());
       }
 
-      return new FingerStatePacket(robotSide, fingerState);
+      return new HandDesiredConfigurationMessage(robotSide, fingerState);
    }
 
    private double getTotalFingerJointQ(RobotSide robotSide)
@@ -322,7 +322,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       return size;
    }
 
-   private FingerStateBehavior testFingerStateBehavior(FingerStatePacket fingerStatePacket, double trajectoryTime)
+   private FingerStateBehavior testFingerStateBehavior(HandDesiredConfigurationMessage fingerStatePacket, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
       final FingerStateBehavior fingerStateBehavior = new FingerStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),

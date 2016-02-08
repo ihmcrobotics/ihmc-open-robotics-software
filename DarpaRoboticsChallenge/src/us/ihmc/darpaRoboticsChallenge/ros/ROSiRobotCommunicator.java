@@ -9,7 +9,7 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 
 import handle_msgs.HandleControl;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -85,7 +85,7 @@ public class ROSiRobotCommunicator extends AbstractNodeMain
       handControlMessages.put(RobotSide.RIGHT, rightHandControlMessage);
    }
 
-   public void sendHandCommand(FingerStatePacket packet)
+   public void sendHandCommand(HandDesiredConfigurationMessage packet)
    {
       FingerStatePacketToHandleControlMessageConverter.convertFingerStatePacket(packet, handControlMessages.get(packet.getRobotSide()));
       handCommandPublishers.get(packet.getRobotSide()).publish(handControlMessages.get(packet.getRobotSide()));
