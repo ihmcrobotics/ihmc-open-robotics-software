@@ -14,22 +14,22 @@ public class HandDesiredConfigurationMessage extends IHMCRosApiPacket<HandDesire
    @FieldDocumentation(value = "Specifies the side of the robot that will execute the trajectory")
    public RobotSide robotSide;
    @FieldDocumentation(value = "Specifies the grasp to perform")
-   public HandConfiguration fingerState;
+   public HandConfiguration handDesiredConfiguration;
 
    public HandDesiredConfigurationMessage()
    {
       // Empty constructor for deserialization
    }
 
-   public HandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration fingerState)
+   public HandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration handDesiredConfiguration)
    {
       this.robotSide = robotSide;
-      this.fingerState = fingerState;
+      this.handDesiredConfiguration = handDesiredConfiguration;
    }
 
-   public HandConfiguration getFingerState()
+   public HandConfiguration getHandDesiredConfiguration()
    {
-      return fingerState;
+      return handDesiredConfiguration;
    }
 
    public RobotSide getRobotSide()
@@ -38,22 +38,22 @@ public class HandDesiredConfigurationMessage extends IHMCRosApiPacket<HandDesire
    }
 
    @Override
-   public boolean equals(Object obj)
+   public boolean equals(Object other)
    {
-      return ((obj instanceof HandDesiredConfigurationMessage) && this.epsilonEquals((HandDesiredConfigurationMessage) obj, 0));
+      return ((other instanceof HandDesiredConfigurationMessage) && this.epsilonEquals((HandDesiredConfigurationMessage) other, 0));
    }
 
    @Override
    public String toString()
    {
-      return robotSide.toString() + " State= " + fingerState.toString();
+      return robotSide.toString() + " State= " + handDesiredConfiguration.toString();
    }
 
    @Override
    public boolean epsilonEquals(HandDesiredConfigurationMessage other, double epsilon)
    {
       boolean ret = (this.getRobotSide() == other.getRobotSide());
-      ret &= (this.getFingerState().equals(other.getFingerState()));
+      ret &= (this.getHandDesiredConfiguration().equals(other.getHandDesiredConfiguration()));
 
       return ret;
    }
