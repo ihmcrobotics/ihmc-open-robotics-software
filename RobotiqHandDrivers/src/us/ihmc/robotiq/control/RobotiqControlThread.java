@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandInterface;
@@ -43,7 +43,7 @@ class RobotiqControlThread extends HandControlThread
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
-      packetCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
+      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, fingerStateProvider);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
 
@@ -126,7 +126,7 @@ class RobotiqControlThread extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
+         fingerStateProvider.receivedPacket(new HandDesiredConfigurationMessage(robotSide, FingerState.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -141,7 +141,7 @@ class RobotiqControlThread extends HandControlThread
 
             if (fingerStateProvider.isNewFingerStateAvailable())
             {
-               FingerStatePacket packet = fingerStateProvider.pullPacket();
+               HandDesiredConfigurationMessage packet = fingerStateProvider.pullPacket();
                FingerState state = packet.getFingerState();
                
                switch (state)

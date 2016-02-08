@@ -59,7 +59,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
@@ -128,8 +128,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((WholeBodyTrajectoryPacket) packet);
       else if (packet instanceof StopMotionPacket)
          return convertToRosMessage((StopMotionPacket) packet);
-      else if (packet instanceof FingerStatePacket)
-         return convertToRosMessage((FingerStatePacket) packet);
+      else if (packet instanceof HandDesiredConfigurationMessage)
+         return convertToRosMessage((HandDesiredConfigurationMessage) packet);
       else
          return null;
    }
@@ -769,7 +769,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FingerStatePacketMessage convertToRosMessage(FingerStatePacket packet)
+   public static FingerStatePacketMessage convertToRosMessage(HandDesiredConfigurationMessage packet)
    {
       FingerStatePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FingerStatePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -779,9 +779,9 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FingerStatePacket convertToPacket(FingerStatePacketMessage message)
+   public static HandDesiredConfigurationMessage convertToPacket(FingerStatePacketMessage message)
    {
-      FingerStatePacket ret = new FingerStatePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()),
+      HandDesiredConfigurationMessage ret = new HandDesiredConfigurationMessage(convertByteToEnum(RobotSide.class, message.getRobotSide()),
             convertByteToEnum(FingerState.class, message.getFingerState()));
       ret.setUniqueId(message.getUniqueId());
 

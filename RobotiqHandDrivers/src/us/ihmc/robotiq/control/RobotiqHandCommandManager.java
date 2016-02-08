@@ -20,7 +20,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -38,9 +38,9 @@ public class RobotiqHandCommandManager extends HandCommandManager
 
    protected void setupInboundPacketListeners()
    {
-      handManagerPacketCommunicator.attachListener(FingerStatePacket.class, new PacketConsumer<FingerStatePacket>()
+      handManagerPacketCommunicator.attachListener(HandDesiredConfigurationMessage.class, new PacketConsumer<HandDesiredConfigurationMessage>()
       {
-         public void receivedPacket(FingerStatePacket object)
+         public void receivedPacket(HandDesiredConfigurationMessage object)
          {
             sendHandCommand(object);
          }
@@ -103,7 +103,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
             @Override
             public void actionPerformed(ActionEvent e)
             {
-               handModuleCommunicator.send(new FingerStatePacket(robotSide, (FingerState) (stateToSend.getSelectedItem())));
+               handModuleCommunicator.send(new HandDesiredConfigurationMessage(robotSide, (FingerState) (stateToSend.getSelectedItem())));
             }
          });
          

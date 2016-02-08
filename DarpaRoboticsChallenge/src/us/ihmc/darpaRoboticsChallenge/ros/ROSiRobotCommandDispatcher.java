@@ -9,7 +9,7 @@ import org.ros.node.NodeMainExecutor;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommandDispatcher implements Runnable
@@ -20,7 +20,7 @@ public class ROSiRobotCommandDispatcher implements Runnable
 
    public ROSiRobotCommandDispatcher(PacketCommunicator objectCommunicator, String rosHostIP)
    {
-      objectCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
+      objectCommunicator.attachListener(HandDesiredConfigurationMessage.class, fingerStateProvider);
       
       String rosURI = "http://" + rosHostIP + ":11311";
       
@@ -45,7 +45,7 @@ public class ROSiRobotCommandDispatcher implements Runnable
       {
          if (fingerStateProvider.isNewFingerStateAvailable())
          {
-            FingerStatePacket packet = fingerStateProvider.pullPacket();
+            HandDesiredConfigurationMessage packet = fingerStateProvider.pullPacket();
             rosHandCommunicator.sendHandCommand(packet);
          }
       }

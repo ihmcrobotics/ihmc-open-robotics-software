@@ -66,7 +66,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.BatchedDesire
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
@@ -189,7 +189,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(AutomaticManipulationAbortPacket.class);
       registerPacketClass(ManipulationAbortedStatus.class);
       registerPacketClass(HandStatePacket.class);
-      registerPacketClass(FingerStatePacket.class);
+      registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketField(FingerState.class);
       registerPacketClass(HandLoadBearingPacket.class);
       registerPacketFields(RobotSide.class);
@@ -352,7 +352,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(DrivingStatePacket.class);
       registerPacketField(DrivingStatePacket.DrivingState.class);
       registerPacketClass(CalibrateArmPacket.class);
-      registerPacketClass(FingerStatePacket.class);
+      registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketClass(ManualHandControlPacket.class);
       registerPacketClass(MultisenseParameterPacket.class);
       registerPacketClass(TestbedClientPacket.class);
