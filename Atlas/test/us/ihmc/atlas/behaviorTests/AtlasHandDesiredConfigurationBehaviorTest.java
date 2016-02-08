@@ -13,11 +13,11 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.Slow})
-public class AtlasFingerStateBehaviorTest extends HandDesiredConfigurationBehaviorTest
+public class AtlasHandDesiredConfigurationBehaviorTest extends HandDesiredConfigurationBehaviorTest
 {
    private final AtlasRobotModel robotModel;
 
-   public AtlasFingerStateBehaviorTest()
+   public AtlasHandDesiredConfigurationBehaviorTest()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
    }
