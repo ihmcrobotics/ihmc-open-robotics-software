@@ -3,11 +3,11 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 import handle_msgs.HandleControl;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 
-public class FingerStatePacketToHandleControlMessageConverter
+public class HandDesiredConfigurationMessageToHandleControlMessageConverter
 {
-   public static void convertFingerStatePacket(HandDesiredConfigurationMessage packet, HandleControl message)
+   public static void convertHandDesiredConfigurationMessage(HandDesiredConfigurationMessage ihmcMessage, HandleControl message)
    {
-      switch (packet.getHandDesiredConfiguration())
+      switch (ihmcMessage.getHandDesiredConfiguration())
       {
          case CLOSE :
             message.setType(new int[] {2, 2, 2, 2, 2});

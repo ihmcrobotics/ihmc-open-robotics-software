@@ -87,7 +87,7 @@ public class ROSiRobotCommunicator extends AbstractNodeMain
 
    public void sendHandCommand(HandDesiredConfigurationMessage packet)
    {
-      FingerStatePacketToHandleControlMessageConverter.convertFingerStatePacket(packet, handControlMessages.get(packet.getRobotSide()));
+      HandDesiredConfigurationMessageToHandleControlMessageConverter.convertHandDesiredConfigurationMessage(packet, handControlMessages.get(packet.getRobotSide()));
       handCommandPublishers.get(packet.getRobotSide()).publish(handControlMessages.get(packet.getRobotSide()));
    }
 }
