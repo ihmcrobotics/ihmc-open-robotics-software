@@ -270,6 +270,25 @@ public class QuadrupedSupportPolygonTest
          }
       });
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testContainsSameQuadrants()
+   {
+      QuadrupedSupportPolygon poly1 = createSimplePolygon();
+      QuadrupedSupportPolygon poly2 = createSimplePolygon();
+      assertTrue("not same feet", poly1.containsSameQuadrants(poly2));
+      
+      poly2.removeFootstep(RobotQuadrant.FRONT_LEFT);
+      assertFalse("same feet", poly1.containsSameQuadrants(poly2));
+      
+      poly1.removeFootstep(RobotQuadrant.FRONT_RIGHT);
+      assertFalse("same feet", poly1.containsSameQuadrants(poly2));
+      
+      poly2.removeFootstep(RobotQuadrant.FRONT_RIGHT);
+      poly1.removeFootstep(RobotQuadrant.FRONT_LEFT);
+      assertTrue("not same feet", poly1.containsSameQuadrants(poly2));
+   }
 
    private Random random = new Random(9123090L);
 
