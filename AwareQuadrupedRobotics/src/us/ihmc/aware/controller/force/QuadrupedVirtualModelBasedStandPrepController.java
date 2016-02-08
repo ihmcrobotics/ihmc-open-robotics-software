@@ -38,9 +38,9 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
    private static final String PARAM_STANCE_LENGTH = "stanceLength";
    private static final String PARAM_STANCE_WIDTH = "stanceWidth";
+   private static final String PARAM_STANCE_HEIGHT = "stanceHeight";
    private static final String PARAM_STANCE_X_OFFSET = "stanceXOffset";
    private static final String PARAM_STANCE_Y_OFFSET = "stanceYOffset";
-   private static final String PARAM_STANCE_HEIGHT = "stanceZOffset";
 
    private final QuadrupedRuntimeEnvironment environment;
    private final QuadrupedRobotParameters robotParameters;
@@ -105,7 +105,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       params.setDefault(PARAM_STANCE_LENGTH, 1.0);
       params.setDefault(PARAM_STANCE_WIDTH, 0.5);
       params.setDefault(PARAM_STANCE_HEIGHT, 0.6);
-      params.setDefault(PARAM_STANCE_X_OFFSET, 0.0);
+      params.setDefault(PARAM_STANCE_X_OFFSET, 0.05);
       params.setDefault(PARAM_STANCE_Y_OFFSET, 0.0);
 
       SDFFullRobotModel fullRobotModel = environment.getFullRobotModel();
