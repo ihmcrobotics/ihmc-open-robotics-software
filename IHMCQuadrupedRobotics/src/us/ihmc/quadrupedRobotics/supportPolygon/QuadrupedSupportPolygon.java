@@ -1459,8 +1459,8 @@ public class QuadrupedSupportPolygon implements Serializable
          throw new UndefinedOperationException("Swing legs should be on same side.");
 
       // verify exactly two legs epsilon match
-      if (getNumberOfMatchinfFootsteps(polygonToCompare) != 2)
-         throw new UndefinedOperationException("There must be exactly two similar foosteps not " + getNumberOfMatchinfFootsteps(polygonToCompare));
+      if (getNumberOfEqualFootsteps(polygonToCompare) != 2)
+         throw new UndefinedOperationException("There must be exactly two similar foosteps not " + getNumberOfEqualFootsteps(polygonToCompare));
 
       // verify specified swing leg name is one of the swinging (same side) leg names
       if ((quadrantForIntersection != thisSwingLeg) && (quadrantForIntersection != compareSwingLeg))
@@ -1485,22 +1485,18 @@ public class QuadrupedSupportPolygon implements Serializable
     *
     * @return int the number of footsteps that epsilon match
     */
-   public int getNumberOfMatchinfFootsteps(QuadrupedSupportPolygon polygon)
+   public int getNumberOfEqualFootsteps(QuadrupedSupportPolygon polygonToCompare)
    {
-      // check the number of null legs
-      int numberOfMatching = 0;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      int numberOfEqual = 0;
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         FramePoint thisFootStep = getFootstep(robotQuadrant);
-         FramePoint otherFootStep = polygon.getFootstep(robotQuadrant);
-         
-         if (thisFootStep != null && thisFootStep.epsilonEquals(otherFootStep, 0.0005))
+         if (getFootstep(robotQuadrant).epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
          {
-            numberOfMatching++;
+            ++numberOfEqual;
          }
       }
    
-      return numberOfMatching;
+      return numberOfEqual;
    }
 
    /**
