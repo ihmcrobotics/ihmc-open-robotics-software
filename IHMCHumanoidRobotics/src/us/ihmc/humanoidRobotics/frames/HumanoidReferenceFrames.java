@@ -59,26 +59,44 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    {
       this.fullRobotModel = fullRobotModel;
 
-      pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-      chestFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
+      if (fullRobotModel.getPelvis() != null)
+      {
+         pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
+      }
+      else
+      {
+         pelvisFrame = null;
+      }
+      if (fullRobotModel.getChest() != null)
+      {
+         chestFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
+      }
+      else
+      {
+         chestFrame = null;
+      }
       pelvisZUpFrame = new ZUpFrame(worldFrame, pelvisFrame, "pelvisZUpFrame");
 
       RobotSpecificJointNames robotJointNames = fullRobotModel.getRobotSpecificJointNames();
 
-      if (robotJointNames.getNeckJointNames() != null) {
+      if (robotJointNames.getNeckJointNames() != null)
+      {
          for (NeckJointName neckJointName : robotJointNames.getNeckJointNames()) {
             this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
          }
       }
 
-      if (robotJointNames.getSpineJointNames() != null) {
+      if (robotJointNames.getSpineJointNames() != null)
+      {
          for (SpineJointName spineJointName : robotJointNames.getSpineJointNames()) {
             this.spineReferenceFrames.put(spineJointName, fullRobotModel.getSpineJoint(spineJointName).getFrameAfterJoint());
          }
       }
 
-      if (robotJointNames.getArmJointNames() != null) {
-         for (RobotSide robotSide : RobotSide.values) {
+      if (robotJointNames.getArmJointNames() != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
             for (ArmJointName armJointName : robotJointNames.getArmJointNames()) {
                this.armJointFrames.get(robotSide).put(armJointName, fullRobotModel.getArmJoint(robotSide, armJointName).getFrameAfterJoint());
             }
@@ -87,7 +105,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       if (robotJointNames.getLegJointNames() != null)
       {
-         for (RobotSide robotSide : RobotSide.values) {
+         for (RobotSide robotSide : RobotSide.values)
+         {
             for (LegJointName legJointName : robotJointNames.getLegJointNames()) {
                ReferenceFrame legJointFrame = fullRobotModel.getFrameAfterLegJoint(robotSide, legJointName);
                legJointFrames.get(robotSide).put(legJointName, legJointFrame);
