@@ -1,9 +1,0 @@
-<package>
-  <description brief="rosjava_tutorial_services">
-     rosjava_tutorial_services is a simple example project.
-  </description>
-  <author>Damon Kohler</author>
-  <license>Apache 2.0</license>
-  <review status="unreviewed" notes="" />
-  <url>http://ros.org/wiki/rosjava_tutorial_services</url>
-</package>

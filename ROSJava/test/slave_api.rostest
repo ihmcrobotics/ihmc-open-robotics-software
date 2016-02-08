@@ -1,4 +1,0 @@
-<launch>
-  <node pkg="rosjava" type="SlaveApiTestNode" name="test_node" />
-  <test pkg="test_ros" type="test_slave_api.py" test-name="rosjava_slave_api" args="--profile=$(find rosjava)/test/rosjava_profile.yaml" />
-</launch>
