@@ -89,15 +89,15 @@ public class QuadrupedSupportPolygon implements Serializable
          // remove
          if (element == null && containsQuadrant(robotQuadrant))
          {
-            framePointsForStorageWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
             super.set(robotQuadrant, element);
             return;
          }
          // add
          else if (element != null && !containsQuadrant(robotQuadrant))
          {
-            framePointsForStorageWhenNull[robotQuadrant.ordinal()].setIncludingFrame(element);
-            super.set(robotQuadrant, element);
+            FramePoint storageWhenNull = framePointsForStorageWhenNull[robotQuadrant.ordinal()];
+            storageWhenNull.setIncludingFrame(element);
+            super.set(robotQuadrant, storageWhenNull);
             return;
          }
          // replace
@@ -1602,49 +1602,51 @@ public class QuadrupedSupportPolygon implements Serializable
    }
    
    /**
-    * If this and the given supportPolygon differ only by one footstep, this returns the leg that differs.
-    * Else it returns null
-    * @param supportPolygonEnd SupportPolygon
-    * @return LegName
+    *  If the two polygons differ only in that one footstep has moved, return that quadrant.
+    *  
+    * @param next polygon
+    * @return quadrant that has moved
     */
-   public RobotQuadrant getSwingLegFromHereToNextPolygon(QuadrupedSupportPolygon nextSupportPolygon)
+   public RobotQuadrant getWhichFootstepHasMoved(QuadrupedSupportPolygon nextPolygon)
    {
-      RobotQuadrant swingLeg = null;
-
-      // First Check using ==
-      for (RobotQuadrant legName : RobotQuadrant.values())
+      if (size() == nextPolygon.size())
       {
-         if (getFootstep(legName) != nextSupportPolygon.getFootstep(legName))
+         for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
          {
-            if (swingLeg != null)
+            if (!nextPolygon.containsFootstep(robotQuadrant))
             {
-               swingLeg = null;
-
-               break;
+               throw new IllegalArgumentException("Polygons contain different feet");
             }
-
-            swingLeg = legName;
          }
-      }
-
-      if (swingLeg != null)
+         
+         RobotQuadrant swingLeg = null;
+         
+         for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+         {
+            if (!getFootstep(robotQuadrant).epsilonEquals(nextPolygon.getFootstep(robotQuadrant), 1e-5))
+            {
+               if (swingLeg == null)
+               {
+                  swingLeg = robotQuadrant;
+               }
+               else // make sure only one foot differs
+               {
+                  throw new IllegalArgumentException("More than one foot differs");
+               }
+            }
+         }
+         
+         if (swingLeg == null)
+         {
+            throw new IllegalArgumentException("No feet were different");
+         }
+         
          return swingLeg;
-
-      // If that doesn't give an answer, then check using isEpsilonEqualTo
-      for (RobotQuadrant legName : RobotQuadrant.values())
-      {
-         if (!getFootstep(legName).epsilonEquals(nextSupportPolygon.getFootstep(legName), 1e-5))
-         {
-            if (swingLeg != null)
-            {
-               return null;
-            }
-
-            swingLeg = legName;
-         }
       }
-
-      return swingLeg;
+      else
+      {
+         throw new IllegalArgumentException("Polygons must be the same size");
+      }
    }
 
    public double distanceInsideTrotLine(FramePoint framePoint)
