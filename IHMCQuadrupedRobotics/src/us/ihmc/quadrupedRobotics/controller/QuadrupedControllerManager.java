@@ -71,38 +71,28 @@ public class QuadrupedControllerManager implements RobotController
       builder.addDoNothingController();
       builder.addStandPrepController();
 
-      if (startState == QuadrupedControllerState.STAND_READY)
-      {
-         builder.addStandReadyController();
-      }
-      if (startState == QuadrupedControllerState.POSITION_CRAWL)
-      {
-         builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
-      }
-      if (startState == QuadrupedControllerState.VMC_STAND)
-      {
-         builder.addVirtualModelBasedStandController(virtualModelController);
-      }
-      if (startState == QuadrupedControllerState.TROT_WALK)
-      {
-         builder.addTrotWalkController();
-      }
-      if (startState == QuadrupedControllerState.SLIDER_BOARD)
-      {
-         builder.addSliderBoardController();
-      }
-
-      builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
-      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, startState);
+      builder.addStandReadyController();
+      builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
+      builder.addVirtualModelBasedStandController(virtualModelController);
+      builder.addTrotWalkController();
+      builder.addSliderBoardController();
+      
+      builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.SLIDER_BOARD);
+      builder.addPermissibleTransition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
+      builder.addPermissibleTransition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.SLIDER_BOARD);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.POSITION_CRAWL);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.TROT_WALK);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.SLIDER_BOARD);
+      builder.addPermissibleTransition(QuadrupedControllerState.SLIDER_BOARD, QuadrupedControllerState.STAND_PREP);
 
       this.stateMachine = builder.build();
 
       // Transition to the start state. The entry action must be triggered manually.
-      stateMachine.setCurrentState(QuadrupedControllerState.STAND_PREP);
+      stateMachine.setCurrentState(startState);
       stateMachine.getCurrentState().doTransitionIntoAction();
 
       // Set the initial requested state to the actual start state.
-      requestedState.set(QuadrupedControllerState.STAND_PREP);
+      requestedState.set(startState);
    }
 
    @Override

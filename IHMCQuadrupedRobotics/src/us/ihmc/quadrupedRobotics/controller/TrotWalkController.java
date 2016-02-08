@@ -327,10 +327,6 @@ public class TrotWalkController extends QuadrupedController
          footLocation.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, footLocation);
          feetLocations.get(robotQuadrant).set(footLocation);
-         // TODO Figure why polygon foot has different value than feetLocations foot
-         // System.out.println("orig" + footLocation);
-         // System.out.println("polygon" + fourFootSupportPolygon.getFootstep(RobotQuadrant.FRONT_LEFT));
-         // System.out.println("quadList" + feetLocations.get(RobotQuadrant.FRONT_LEFT));
       }
 
       //update centroid

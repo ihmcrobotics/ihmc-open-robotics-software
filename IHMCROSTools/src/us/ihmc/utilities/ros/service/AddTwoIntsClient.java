@@ -1,8 +1,8 @@
 package us.ihmc.utilities.ros.service;
 
-import test_ros.AddTwoInts;
-import test_ros.AddTwoIntsRequest;
-import test_ros.AddTwoIntsResponse;
+import test_rosmaster.AddTwoIntsRequest;
+import test_rosmaster.AddTwoInts;
+import test_rosmaster.AddTwoIntsResponse;
 import us.ihmc.utilities.ros.RosServiceClient;
 
 public class AddTwoIntsClient extends RosServiceClient<AddTwoIntsRequest, AddTwoIntsResponse>

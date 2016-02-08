@@ -3,6 +3,8 @@ package us.ihmc.quadrupedRobotics.controller;
 import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
@@ -11,42 +13,57 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
  */
 public class QuadrupedDoNothingController extends QuadrupedController implements QuadrupedJointInitializer
 {
-   private final FullRobotModel fullRobotModel;
-
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the
     * {@link FullRobotModel#getOneDoFJoints()} array.
     */
-   private final boolean initialized[];
+   private final BooleanYoVariable initialized[];
 
-   public QuadrupedDoNothingController(FullRobotModel fullRobotModel)
+   private final OneDoFJoint[] oneDoFJoints;   
+   
+   public QuadrupedDoNothingController(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
       super(QuadrupedControllerState.DO_NOTHING);
 
-      this.fullRobotModel = fullRobotModel;
-      this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];
+      YoVariableRegistry registry = new YoVariableRegistry("QuadrupedDoNothingController");
+      oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      
+      this.initialized = new BooleanYoVariable[oneDoFJoints.length];
+      for(int i = 0; i < initialized.length; i++)
+      {
+         initialized[i] = new BooleanYoVariable(oneDoFJoints[i].getName() + "_initialized", registry);
+      }
+      
+      parentRegistry.addChild(registry);
+         
    }
 
    @Override
    public void doAction()
    {
-      for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
+      for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
+         OneDoFJoint joint = oneDoFJoints[i];
 
          // Only set a desired if the actuator has just come online.
-         if (!initialized[i] && joint.isOnline())
+         
+         if(!joint.isEnabled())
          {
             joint.setqDesired(joint.getQ());
-            initialized[i] = true;
          }
+         else if(!initialized[i].getBooleanValue())
+         {
+            joint.setqDesired(joint.getQ());
+            initialized[i].set(true);;
+         }
+         
       }
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJoint joint : oneDoFJoints)
       {
          joint.setUnderPositionControl(true);
       }
@@ -66,7 +83,15 @@ public class QuadrupedDoNothingController extends QuadrupedController implements
    @Override
    public boolean allJointsInitialized()
    {
-      return !Booleans.contains(initialized, false);
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         if(!initialized[i].getBooleanValue())
+         {
+            return false;
+         }
+      }
+      
+      return true;
    }
 }
 

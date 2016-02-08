@@ -15,6 +15,11 @@ project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
+repositories {
+	maven {
+	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+	}
+}
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
@@ -25,14 +30,13 @@ evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
-	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
-	//testCompile ihmc.getProjectDependency(":CommonWalkingControlModules").sourceSets.test.output
-	//test.sourceSets.test.output
-	testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
 
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
+	//testCompile ihmc.getProjectDependency(":CommonWalkingControlModules").sourceSets.test.output
 	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+	testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
 
 	compile ihmc.getProjectDependency(":SDFLoader")
@@ -45,7 +49,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
 
 remotes {
