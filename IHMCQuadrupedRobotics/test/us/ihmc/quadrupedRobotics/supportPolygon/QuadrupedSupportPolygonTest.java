@@ -196,14 +196,14 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon match1 = create3LegPolygon();
       QuadrupedSupportPolygon match2 = create3LegPolygon();
-      
+
       assertEquals("3 legs don't match", 3, match1.getNumberOfEqualFootsteps(match2));
-      
+
       match1 = createSimplePolygon();
       match2 = createSimplePolygon();
-      
+
       assertEquals("4 legs don't match", 4, match1.getNumberOfEqualFootsteps(match2));
-      
+
       match1.getFootstep(RobotQuadrant.FRONT_LEFT).add(2.0, 0.0, 0.0);
       assertEquals("3 legs don't match", 3, match1.getNumberOfEqualFootsteps(match2));
       match1.getFootstep(RobotQuadrant.FRONT_RIGHT).add(2.0, 0.0, 1.0);
@@ -212,10 +212,67 @@ public class QuadrupedSupportPolygonTest
       assertEquals("1 legs don't match", 1, match1.getNumberOfEqualFootsteps(match2));
       match1.getFootstep(RobotQuadrant.HIND_RIGHT).add(2.0, -3.0, 1.0);
       assertEquals("0 legs don't match", 0, match1.getNumberOfEqualFootsteps(match2));
-    }
+   }
    
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetWhichFootstepHasMoved()
+   {
+      RobotQuadrant swingLegFromHereToNextPolygon;
+      QuadrupedSupportPolygon firstPoly = createSimplePolygon();
+      QuadrupedSupportPolygon secondPoly = createSimplePolygon();
+      
+      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            firstPoly.getWhichFootstepHasMoved(secondPoly);
+         }
+      });
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         secondPoly.getFootstep(robotQuadrant).add(1.0, 0.0, 0.0);
+         swingLegFromHereToNextPolygon = firstPoly.getWhichFootstepHasMoved(secondPoly);
+         assertEquals("not swing", robotQuadrant, swingLegFromHereToNextPolygon);
+         firstPoly.getFootstep(robotQuadrant).add(1.0, 0.0, 0.0);
+      }
+      
+      secondPoly.getFootstep(RobotQuadrant.FRONT_LEFT).add(1.0, 0.0, 0.0);
+      secondPoly.getFootstep(RobotQuadrant.FRONT_RIGHT).add(1.0, 0.0, 0.0);
+      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            firstPoly.getWhichFootstepHasMoved(secondPoly);
+         }
+      });
+      
+      secondPoly.removeFootstep(RobotQuadrant.HIND_LEFT);
+      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            firstPoly.getWhichFootstepHasMoved(secondPoly);
+         }
+      });
+      
+      firstPoly.removeFootstep(RobotQuadrant.HIND_RIGHT);
+      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            firstPoly.getWhichFootstepHasMoved(secondPoly);
+         }
+      });
+   }
+
    private Random random = new Random(9123090L);
-   
+
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testPackPointIntoMultipleStructuresAndCompare()
