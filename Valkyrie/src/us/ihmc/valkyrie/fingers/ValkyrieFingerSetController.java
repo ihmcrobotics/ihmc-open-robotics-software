@@ -50,8 +50,8 @@ public class ValkyrieFingerSetController implements RobotController
    private final EnumMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
    private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
    
-   private final EnumYoVariable<HandConfiguration> fingerState;
-   private final EnumYoVariable<HandConfiguration> desiredFingerState;
+   private final EnumYoVariable<HandConfiguration> handConfiguration;
+   private final EnumYoVariable<HandConfiguration> handDesiredConfiguration;
    private StateMachine<GraspState> stateMachine;
          
    public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFFullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
@@ -84,10 +84,10 @@ public class ValkyrieFingerSetController implements RobotController
       yoPolynomial = new YoPolynomial(sidePrefix + name, 4, registry);
       yoPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
 
-      fingerState = new EnumYoVariable<>(sidePrefix + "ValkyrieFingerState", registry, HandConfiguration.class);
-      fingerState.set(HandConfiguration.OPEN);
-      desiredFingerState = new EnumYoVariable<>(sidePrefix + "ValkyrieDesiredFingerState", registry, HandConfiguration.class);
-      desiredFingerState.set(HandConfiguration.OPEN);
+      handConfiguration = new EnumYoVariable<>(sidePrefix + "ValkyrieHandConfiguration", registry, HandConfiguration.class);
+      handConfiguration.set(HandConfiguration.OPEN);
+      handDesiredConfiguration = new EnumYoVariable<>(sidePrefix + "ValkyrieHandDesiredConfiguration", registry, HandConfiguration.class);
+      handDesiredConfiguration.set(HandConfiguration.OPEN);
       
       stateMachine = new StateMachine<>(sidePrefix + "ValkyrieGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
       setupStateMachine();
@@ -136,7 +136,7 @@ public class ValkyrieFingerSetController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN);
+            return handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
          }
       };
       
@@ -145,7 +145,7 @@ public class ValkyrieFingerSetController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE);
+            return handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
          }
       };
       
@@ -172,7 +172,7 @@ public class ValkyrieFingerSetController implements RobotController
       public void doTransitionIntoAction()
       {
          isStopped.set(false);
-         fingerState.set(HandConfiguration.OPEN);
+         handConfiguration.set(HandConfiguration.OPEN);
          computeAllFinalDesiredAngles(1.0, ValkyrieFingerPoseDefinitions.getOpenDesiredDefinition(robotSide));
       }
 
@@ -198,7 +198,7 @@ public class ValkyrieFingerSetController implements RobotController
       public void doTransitionIntoAction()
       {
          isStopped.set(false);
-         fingerState.set(HandConfiguration.CLOSE);
+         handConfiguration.set(HandConfiguration.CLOSE);
          computeAllFinalDesiredAngles(1.0, ValkyrieFingerPoseDefinitions.getClosedDesiredDefinition(robotSide));
       }
 
@@ -218,12 +218,12 @@ public class ValkyrieFingerSetController implements RobotController
 
    public void open()
    {
-      desiredFingerState.set(HandConfiguration.OPEN);
+      handDesiredConfiguration.set(HandConfiguration.OPEN);
    }
    
    public void close()
    {
-      desiredFingerState.set(HandConfiguration.CLOSE);
+      handDesiredConfiguration.set(HandConfiguration.CLOSE);
    }
    
    public void stop()

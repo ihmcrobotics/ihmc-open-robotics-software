@@ -219,7 +219,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
          {
             HandConfiguration handDesiredConfiguration = handDesiredConfigurationSubscribers.get(robotSide).pullMessage().getHandDesiredConfiguration();
             
-            PrintTools.debug(DEBUG, this, "Recieved new FingerState Packet: " + handDesiredConfiguration);
+            PrintTools.debug(DEBUG, this, "Recieved new HandDesiredConfigurationMessage: " + handDesiredConfiguration);
             
             switch (handDesiredConfiguration)
             {
