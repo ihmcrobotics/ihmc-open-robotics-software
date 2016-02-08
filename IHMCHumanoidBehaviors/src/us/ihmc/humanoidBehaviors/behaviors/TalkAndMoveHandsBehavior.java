@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -95,7 +95,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.CRUSH, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.CRUSH, fingerStateBehavior, yoTime));
    }
 
    private void performFistPump(RobotSide side)
@@ -115,8 +115,8 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.HALF_CLOSE, fingerStateBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.CLOSE_THUMB, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.HALF_CLOSE, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.CLOSE_THUMB, fingerStateBehavior, yoTime));
 
    }
 
@@ -153,7 +153,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       handPose.setPosition(0.25, side.negateIfLeftSide(0.25), 0.0);
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.PINCH_GRIP, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.PINCH_GRIP, fingerStateBehavior, yoTime));
    }
 
    //hands in towards chest
@@ -172,7 +172,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
          handPose.setOrientation(pointAtChestRotation);
          handPose.changeFrame(ReferenceFrame.getWorldFrame());
          pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.PINCH_GRIP, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.PINCH_GRIP, fingerStateBehavior, yoTime));
          System.out.println("running in parallel!");
       }
    }
@@ -200,22 +200,22 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       switch(numberOfFingers)
       {
       case 3:
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.OPEN, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.OPEN, fingerStateBehavior, yoTime));
          break;
          
       case 2: 
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.OPEN_INDEX, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.OPEN_MIDDLE, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.CLOSE_THUMB, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.OPEN_INDEX, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.OPEN_MIDDLE, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.CLOSE_THUMB, fingerStateBehavior, yoTime));
          break;
       
       case 1: 
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.OPEN_INDEX, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.CRUSH_MIDDLE, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.CLOSE_THUMB, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.OPEN_INDEX, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.CRUSH_MIDDLE, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.CLOSE_THUMB, fingerStateBehavior, yoTime));
 
       default:
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, FingerState.CLOSE, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(side, HandConfiguration.CLOSE, fingerStateBehavior, yoTime));
       }
    }
 

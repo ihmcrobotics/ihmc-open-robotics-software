@@ -2,7 +2,7 @@ package us.ihmc.robotiq.communication.registers;
 
 import org.apache.commons.collections.map.MultiKeyMap;
 
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
@@ -11,45 +11,45 @@ public class FingerPositionRequestRegister extends RobotiqOutputRegister
 {
    private MultiKeyMap fingerPositionMap = new MultiKeyMap();
    {
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN, Finger.FINGER_A, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN, Finger.FINGER_B, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN, Finger.FINGER_C, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN, Finger.SCISSOR, (byte)0x8C);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.OPEN, Finger.FINGER_A, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.OPEN, Finger.FINGER_B, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.OPEN, Finger.FINGER_C, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.OPEN, Finger.SCISSOR, (byte)0x8C);
       
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.CLOSE, Finger.FINGER_A, (byte)0xFF);
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.CLOSE, Finger.FINGER_B, (byte)0xFF);
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.CLOSE, Finger.FINGER_C, (byte)0xFF);
-      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.CLOSE, Finger.SCISSOR, (byte)0x8C);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.CLOSE, Finger.FINGER_A, (byte)0xFF);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.CLOSE, Finger.FINGER_B, (byte)0xFF);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.CLOSE, Finger.FINGER_C, (byte)0xFF);
+      fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, HandConfiguration.CLOSE, Finger.SCISSOR, (byte)0x8C);
       
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.OPEN, Finger.FINGER_A, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.OPEN, Finger.FINGER_B, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.OPEN, Finger.FINGER_C, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.OPEN, Finger.SCISSOR, (byte)0xDC);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.OPEN, Finger.FINGER_A, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.OPEN, Finger.FINGER_B, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.OPEN, Finger.FINGER_C, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.OPEN, Finger.SCISSOR, (byte)0xDC);
       
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.CLOSE, Finger.FINGER_A, (byte)0x78);
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.CLOSE, Finger.FINGER_B, (byte)0x78);
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.CLOSE, Finger.FINGER_C, (byte)0x78);
-      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, FingerState.CLOSE, Finger.SCISSOR, (byte)0xDC);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.CLOSE, Finger.FINGER_A, (byte)0x78);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.CLOSE, Finger.FINGER_B, (byte)0x78);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.CLOSE, Finger.FINGER_C, (byte)0x78);
+      fingerPositionMap.put(RobotiqGraspMode.PINCH_MODE, HandConfiguration.CLOSE, Finger.SCISSOR, (byte)0xDC);
       
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.OPEN, Finger.FINGER_A, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.OPEN, Finger.FINGER_B, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.OPEN, Finger.FINGER_C, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.OPEN, Finger.SCISSOR, (byte)0x19);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.OPEN, Finger.FINGER_A, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.OPEN, Finger.FINGER_B, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.OPEN, Finger.FINGER_C, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.OPEN, Finger.SCISSOR, (byte)0x19);
       
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.CLOSE, Finger.FINGER_A, (byte)0xFF);
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.CLOSE, Finger.FINGER_B, (byte)0xFF);
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.CLOSE, Finger.FINGER_C, (byte)0xFF);
-      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, FingerState.CLOSE, Finger.SCISSOR, (byte)0x19);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.CLOSE, Finger.FINGER_A, (byte)0xFF);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.CLOSE, Finger.FINGER_B, (byte)0xFF);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.CLOSE, Finger.FINGER_C, (byte)0xFF);
+      fingerPositionMap.put(RobotiqGraspMode.WIDE_MODE, HandConfiguration.CLOSE, Finger.SCISSOR, (byte)0x19);
       
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.OPEN, Finger.FINGER_A, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.OPEN, Finger.FINGER_B, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.OPEN, Finger.FINGER_C, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.OPEN, Finger.SCISSOR, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.OPEN, Finger.FINGER_A, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.OPEN, Finger.FINGER_B, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.OPEN, Finger.FINGER_C, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.OPEN, Finger.SCISSOR, (byte)0x00);
       
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.CLOSE, Finger.FINGER_A, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.CLOSE, Finger.FINGER_B, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.CLOSE, Finger.FINGER_C, (byte)0x00);
-      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, FingerState.CLOSE, Finger.SCISSOR, (byte)0xFF);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.CLOSE, Finger.FINGER_A, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.CLOSE, Finger.FINGER_B, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.CLOSE, Finger.FINGER_C, (byte)0x00);
+      fingerPositionMap.put(RobotiqGraspMode.SCISSOR_MODE, HandConfiguration.CLOSE, Finger.SCISSOR, (byte)0xFF);
    }
    
    private final Finger finger;
@@ -80,7 +80,7 @@ public class FingerPositionRequestRegister extends RobotiqOutputRegister
       position = (byte)0x00;
    }
    
-   public void setFingerPosition(RobotiqGraspMode graspMode, FingerState fingerState)
+   public void setFingerPosition(RobotiqGraspMode graspMode, HandConfiguration fingerState)
    {
       byte position = (byte)fingerPositionMap.get(graspMode, fingerState, finger);
       this.position = position;

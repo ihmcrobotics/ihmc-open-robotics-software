@@ -19,7 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.random.RandomTools;
@@ -98,7 +98,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double trajectoryTime = 2.0;
 
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
-      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, FingerState.CLOSE), trajectoryTime);
+      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(fingerStateBehavior);
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
@@ -128,7 +128,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, FingerState.CLOSE), trajectoryTime);
+      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -168,7 +168,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, FingerState.CLOSE), trajectoryTime);
+      FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -205,16 +205,16 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
 
    private HandDesiredConfigurationMessage getRandomClosedTypeFingerStatePacket(RobotSide robotSide)
    {
-      ArrayList<FingerState> closedFingerConfigs = new ArrayList<FingerState>();
-      closedFingerConfigs.add(FingerState.CLOSE);
-      closedFingerConfigs.add(FingerState.CLOSE_FINGERS);
-      closedFingerConfigs.add(FingerState.CLOSE_THUMB);
-      closedFingerConfigs.add(FingerState.CRUSH);
-      closedFingerConfigs.add(FingerState.CRUSH_INDEX);
-      closedFingerConfigs.add(FingerState.CRUSH_MIDDLE);
-      closedFingerConfigs.add(FingerState.CRUSH_THUMB);
+      ArrayList<HandConfiguration> closedFingerConfigs = new ArrayList<HandConfiguration>();
+      closedFingerConfigs.add(HandConfiguration.CLOSE);
+      closedFingerConfigs.add(HandConfiguration.CLOSE_FINGERS);
+      closedFingerConfigs.add(HandConfiguration.CLOSE_THUMB);
+      closedFingerConfigs.add(HandConfiguration.CRUSH);
+      closedFingerConfigs.add(HandConfiguration.CRUSH_INDEX);
+      closedFingerConfigs.add(HandConfiguration.CRUSH_MIDDLE);
+      closedFingerConfigs.add(HandConfiguration.CRUSH_THUMB);
 
-      FingerState fingerState = closedFingerConfigs.get(RandomTools.generateRandomInt(new Random(), 0, closedFingerConfigs.size() - 1));
+      HandConfiguration fingerState = closedFingerConfigs.get(RandomTools.generateRandomInt(new Random(), 0, closedFingerConfigs.size() - 1));
       if (DEBUG)
       {
          PrintTools.debug(this, fingerState.name());

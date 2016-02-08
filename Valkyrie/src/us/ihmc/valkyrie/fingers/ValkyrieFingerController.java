@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -217,7 +217,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (fingerStateProviders.get(robotSide).isNewFingerStateAvailable())
          {
-            FingerState fingerState = fingerStateProviders.get(robotSide).pullPacket().getFingerState();
+            HandConfiguration fingerState = fingerStateProviders.get(robotSide).pullPacket().getFingerState();
             
             PrintTools.debug(DEBUG, this, "Recieved new FingerState Packet: " + fingerState);
             

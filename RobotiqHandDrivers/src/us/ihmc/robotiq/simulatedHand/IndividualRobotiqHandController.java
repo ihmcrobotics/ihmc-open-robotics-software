@@ -7,7 +7,7 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.FingerName;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -64,8 +64,8 @@ public class IndividualRobotiqHandController implements RobotController
    
    private final EnumYoVariable<RobotiqGraspMode> graspMode;
    private final EnumYoVariable<RobotiqGraspMode> desiredGraspMode;
-   private final EnumYoVariable<FingerState> fingerState;
-   private final EnumYoVariable<FingerState> desiredFingerState;
+   private final EnumYoVariable<HandConfiguration> fingerState;
+   private final EnumYoVariable<HandConfiguration> desiredFingerState;
    
    private StateMachine<GraspState> stateMachine;
 
@@ -138,10 +138,10 @@ public class IndividualRobotiqHandController implements RobotController
       graspMode.set(RobotiqGraspMode.BASIC_MODE);
       desiredGraspMode = new EnumYoVariable<>(sidePrefix + "RobotiqDesiredGraspMode", registry, RobotiqGraspMode.class);
       desiredGraspMode.set(RobotiqGraspMode.BASIC_MODE);
-      fingerState = new EnumYoVariable<>(sidePrefix + "RobotiqFingerState", registry, FingerState.class);
-      fingerState.set(FingerState.OPEN);
-      desiredFingerState = new EnumYoVariable<>(sidePrefix + "RobotiqDesiredFingerState", registry, FingerState.class);
-      desiredFingerState.set(FingerState.OPEN);
+      fingerState = new EnumYoVariable<>(sidePrefix + "RobotiqFingerState", registry, HandConfiguration.class);
+      fingerState.set(HandConfiguration.OPEN);
+      desiredFingerState = new EnumYoVariable<>(sidePrefix + "RobotiqDesiredFingerState", registry, HandConfiguration.class);
+      desiredFingerState.set(HandConfiguration.OPEN);
       
       stateMachine = new StateMachine<>(sidePrefix + "RobotiqGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
       setupStateMachine();
@@ -183,7 +183,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN);
          }
       };
       
@@ -192,7 +192,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN_THUMB);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
          }
       };
       
@@ -201,7 +201,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN_FINGERS);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
          }
       };
       
@@ -210,7 +210,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE);
          }
       };
       
@@ -219,7 +219,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE_THUMB);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
          }
       };
       
@@ -228,7 +228,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE_FINGERS);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
          }
       };
       
@@ -237,7 +237,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN);
          }
       };
       
@@ -246,7 +246,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN_THUMB);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
          }
       };
       
@@ -255,7 +255,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN_FINGERS);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
          }
       };
       
@@ -264,7 +264,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE);
          }
       };
       
@@ -273,7 +273,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE_THUMB);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
          }
       };
       
@@ -282,7 +282,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE_FINGERS);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
          }
       };
       
@@ -291,7 +291,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN);
          }
       };
       
@@ -300,7 +300,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN_THUMB);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
          }
       };
       
@@ -309,7 +309,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN_FINGERS);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
          }
       };
       
@@ -318,7 +318,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE);
          }
       };
       
@@ -327,7 +327,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE_THUMB);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
          }
       };
       
@@ -336,7 +336,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE_FINGERS);
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
          }
       };
       
@@ -345,7 +345,7 @@ public class IndividualRobotiqHandController implements RobotController
          @Override
          public boolean checkCondition()
          {
-            return desiredFingerState.getEnumValue().equals(FingerState.HOOK);
+            return desiredFingerState.getEnumValue().equals(HandConfiguration.HOOK);
          }
       };
       
@@ -468,7 +468,7 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
-         fingerState.set(FingerState.OPEN);
+         fingerState.set(HandConfiguration.OPEN);
          computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide));
       }
 
@@ -495,14 +495,14 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
-         if(desiredFingerState.getEnumValue().equals(FingerState.OPEN_THUMB))
+         if(desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_THUMB))
          {
-            fingerState.set(FingerState.OPEN_THUMB);
+            fingerState.set(HandConfiguration.OPEN_THUMB);
             computeThumbFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide));
          }
-         else if(desiredFingerState.getEnumValue().equals(FingerState.CLOSE_FINGERS))
+         else if(desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS))
          {
-            fingerState.set(FingerState.CLOSE_FINGERS);
+            fingerState.set(HandConfiguration.CLOSE_FINGERS);
             computeIndexFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
             computeMiddleFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
          }
@@ -531,7 +531,7 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
-         fingerState.set(FingerState.CLOSE);
+         fingerState.set(HandConfiguration.CLOSE);
          computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
       }
 
@@ -558,14 +558,14 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
-         if(desiredFingerState.getEnumValue().equals(FingerState.CLOSE_THUMB))
+         if(desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_THUMB))
          {
-            fingerState.set(FingerState.CLOSE_THUMB);
+            fingerState.set(HandConfiguration.CLOSE_THUMB);
             computeThumbFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
          }
-         else if(desiredFingerState.getEnumValue().equals(FingerState.OPEN_FINGERS))
+         else if(desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_FINGERS))
          {
-            fingerState.set(FingerState.OPEN_FINGERS);
+            fingerState.set(HandConfiguration.OPEN_FINGERS);
             computeIndexFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide));
             computeMiddleFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide));
          }
@@ -594,7 +594,7 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
-         fingerState.set(FingerState.OPEN);
+         fingerState.set(HandConfiguration.OPEN);
          computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide));
       }
 
@@ -621,14 +621,14 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
-         if(desiredFingerState.getEnumValue().equals(FingerState.OPEN_THUMB))
+         if(desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_THUMB))
          {
-            fingerState.set(FingerState.OPEN_THUMB);
+            fingerState.set(HandConfiguration.OPEN_THUMB);
             computeThumbFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide));
          }
-         else if(desiredFingerState.getEnumValue().equals(FingerState.CLOSE_FINGERS))
+         else if(desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS))
          {
-            fingerState.set(FingerState.CLOSE_FINGERS);
+            fingerState.set(HandConfiguration.CLOSE_FINGERS);
             computeIndexFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedPinchGripDesiredConfiguration(robotSide));
             computeMiddleFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedPinchGripDesiredConfiguration(robotSide));
          }
@@ -657,7 +657,7 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
-         fingerState.set(FingerState.CLOSE);
+         fingerState.set(HandConfiguration.CLOSE);
          computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedPinchGripDesiredConfiguration(robotSide));
       }
 
@@ -684,14 +684,14 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
-         if(desiredFingerState.getEnumValue().equals(FingerState.CLOSE_THUMB))
+         if(desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_THUMB))
          {
-            fingerState.set(FingerState.CLOSE_THUMB);
+            fingerState.set(HandConfiguration.CLOSE_THUMB);
             computeThumbFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedPinchGripDesiredConfiguration(robotSide));
          }
-         else if(desiredFingerState.getEnumValue().equals(FingerState.OPEN_FINGERS))
+         else if(desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_FINGERS))
          {
-            fingerState.set(FingerState.OPEN_FINGERS);
+            fingerState.set(HandConfiguration.OPEN_FINGERS);
             computeIndexFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide));
             computeMiddleFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide));
          }
@@ -720,7 +720,7 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
-         fingerState.set(FingerState.OPEN);
+         fingerState.set(HandConfiguration.OPEN);
          computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenWideGripDesiredConfiguration(robotSide));
       }
 
@@ -747,14 +747,14 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
-         if(desiredFingerState.getEnumValue().equals(FingerState.OPEN_THUMB))
+         if(desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_THUMB))
          {
-            fingerState.set(FingerState.OPEN_THUMB);
+            fingerState.set(HandConfiguration.OPEN_THUMB);
             computeThumbFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenWideGripDesiredConfiguration(robotSide));
          }
-         else if(desiredFingerState.getEnumValue().equals(FingerState.CLOSE_FINGERS))
+         else if(desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS))
          {
-            fingerState.set(FingerState.CLOSE_FINGERS);
+            fingerState.set(HandConfiguration.CLOSE_FINGERS);
             computeIndexFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedWideGripDesiredConfiguration(robotSide));
             computeMiddleFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedWideGripDesiredConfiguration(robotSide));
          }
@@ -783,7 +783,7 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
-         fingerState.set(FingerState.CLOSE);
+         fingerState.set(HandConfiguration.CLOSE);
          computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedWideGripDesiredConfiguration(robotSide));
       }
 
@@ -810,14 +810,14 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
-         if(desiredFingerState.getEnumValue().equals(FingerState.CLOSE_THUMB))
+         if(desiredFingerState.getEnumValue().equals(HandConfiguration.CLOSE_THUMB))
          {
-            fingerState.set(FingerState.CLOSE_THUMB);
+            fingerState.set(HandConfiguration.CLOSE_THUMB);
             computeThumbFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedWideGripDesiredConfiguration(robotSide));
          }
-         else if(desiredFingerState.getEnumValue().equals(FingerState.OPEN_FINGERS))
+         else if(desiredFingerState.getEnumValue().equals(HandConfiguration.OPEN_FINGERS))
          {
-            fingerState.set(FingerState.OPEN_FINGERS);
+            fingerState.set(HandConfiguration.OPEN_FINGERS);
             computeIndexFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenWideGripDesiredConfiguration(robotSide));
             computeMiddleFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenWideGripDesiredConfiguration(robotSide));
          }
@@ -847,7 +847,7 @@ public class IndividualRobotiqHandController implements RobotController
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
-         fingerState.set(FingerState.HOOK);
+         fingerState.set(HandConfiguration.HOOK);
          computeIndexFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide));
          computeMiddleFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
          computeThumbFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
@@ -869,37 +869,37 @@ public class IndividualRobotiqHandController implements RobotController
    
    public void open()
    {
-      desiredFingerState.set(FingerState.OPEN);
+      desiredFingerState.set(HandConfiguration.OPEN);
    }
    
    public void openThumb()
    {
-      desiredFingerState.set(FingerState.OPEN_THUMB);
+      desiredFingerState.set(HandConfiguration.OPEN_THUMB);
    }
    
    public void openFingers()
    {
-      desiredFingerState.set(FingerState.OPEN_FINGERS);
+      desiredFingerState.set(HandConfiguration.OPEN_FINGERS);
    }
    
    public void close()
    {
-      desiredFingerState.set(FingerState.CLOSE);
+      desiredFingerState.set(HandConfiguration.CLOSE);
    }
    
    public void closeThumb()
    {
-      desiredFingerState.set(FingerState.CLOSE_THUMB);
+      desiredFingerState.set(HandConfiguration.CLOSE_THUMB);
    }
    
    public void closeFingers()
    {
-      desiredFingerState.set(FingerState.CLOSE_FINGERS);
+      desiredFingerState.set(HandConfiguration.CLOSE_FINGERS);
    }
    
    public void hook()
    {
-      desiredFingerState.set(FingerState.HOOK);
+      desiredFingerState.set(HandConfiguration.HOOK);
    }
 
    public void crush()

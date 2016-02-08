@@ -6,7 +6,7 @@ import us.ihmc.tools.DocumentedEnum;
 * @author twan
 *         Date: 6/8/13
 */
-public enum FingerState implements DocumentedEnum<FingerState>
+public enum HandConfiguration implements DocumentedEnum<HandConfiguration>
 {
    STOP,
    OPEN,
@@ -40,9 +40,10 @@ public enum FingerState implements DocumentedEnum<FingerState>
    CREEPY_GRASPING_HARD,
    SLOW_CLOSE;
 
-   @Override public String getDocumentation(FingerState var)
+   @Override
+   public String getDocumentation(HandConfiguration handConfiguration)
    {
-      switch (var)
+      switch (handConfiguration)
       {
       case STOP:
          return "stops the fingers at their current position";
@@ -77,24 +78,9 @@ public enum FingerState implements DocumentedEnum<FingerState>
       }
    }
 
-   @Override public FingerState[] getDocumentedValues()
+   @Override
+   public HandConfiguration[] getDocumentedValues()
    {
-      return new FingerState[]
-            {
-                  STOP,
-                  OPEN,
-                  CLOSE,
-                  CRUSH,
-                  HOOK,
-                  BASIC_GRIP,
-                  PINCH_GRIP,
-                  WIDE_GRIP,
-                  SCISSOR_GRIP,
-                  RESET,
-                  OPEN_FINGERS,
-                  OPEN_THUMB,
-                  CLOSE_FINGERS,
-                  CLOSE_THUMB
-            };
+      return new HandConfiguration[] {STOP, OPEN, CLOSE, CRUSH, HOOK, BASIC_GRIP, PINCH_GRIP, WIDE_GRIP, SCISSOR_GRIP, RESET, OPEN_FINGERS, OPEN_THUMB, CLOSE_FINGERS, CLOSE_THUMB};
    }
 }

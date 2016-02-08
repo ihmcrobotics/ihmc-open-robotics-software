@@ -17,7 +17,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -110,12 +110,12 @@ public class GraspValveBehavior extends BehaviorInterface
       
       double comHeightDesiredOffset = finalGraspHandFramePose.getZ() - 1.27;
       CoMHeightTask comHeightTask = new CoMHeightTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
-      FingerStateTask openHandTask = new FingerStateTask(robotSideOfGraspingHand, FingerState.OPEN, fingerStateBehavior, yoTime);
+      FingerStateTask openHandTask = new FingerStateTask(robotSideOfGraspingHand, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
       HandPoseTask moveHandToFavorableGraspApproachLocation = new HandPoseTask(robotSideOfGraspingHand, 1.0, preGraspHandFramePose, Frame.WORLD,
             handPoseBehavior, yoTime);
       HandPoseTask movePalmToBeInContactWithValveRim = new HandPoseTask(robotSideOfGraspingHand, 1.0, finalGraspHandFramePose, Frame.WORLD, handPoseBehavior,
             yoTime, stopHandIfCollision);
-      FingerStateTask closeHandTask = new FingerStateTask(robotSideOfGraspingHand, FingerState.CLOSE, fingerStateBehavior, yoTime);
+      FingerStateTask closeHandTask = new FingerStateTask(robotSideOfGraspingHand, HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
 
       pipeLine.clearAll();
       pipeLine.submitSingleTaskStage(comHeightTask);
@@ -227,7 +227,7 @@ public class GraspValveBehavior extends BehaviorInterface
 	      CoMHeightTask comHeightTask = new CoMHeightTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
 	      
 
-	      FingerStateTask openHandTask = new FingerStateTask(robotSideOfGraspingHand, FingerState.OPEN, fingerStateBehavior, yoTime);
+	      FingerStateTask openHandTask = new FingerStateTask(robotSideOfGraspingHand, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
 
 
 	      WholeBodyInverseKinematicTask moveHandToFavorableGraspApproachLocation = new WholeBodyInverseKinematicTask(robotSideOfGraspingHand, yoTime,
@@ -237,7 +237,7 @@ public class GraspValveBehavior extends BehaviorInterface
 	            wholeBodyInverseKinematicBehavior, graspPoses.get(1), 2.0, 10, ControlledDoF.DOF_3P3R, false);
 
 
-	      FingerStateTask closeHandTask = new FingerStateTask(robotSideOfGraspingHand, FingerState.CLOSE, fingerStateBehavior, yoTime);
+	      FingerStateTask closeHandTask = new FingerStateTask(robotSideOfGraspingHand, HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
 
 	      pipeLine.clearAll();
 	      pipeLine.submitSingleTaskStage(openHandTask);

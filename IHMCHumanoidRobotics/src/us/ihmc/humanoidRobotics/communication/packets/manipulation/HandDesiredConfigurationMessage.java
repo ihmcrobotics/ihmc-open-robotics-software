@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation(value = "Packet for commanding the hands to perform various predefined grasps.")
@@ -14,20 +14,20 @@ public class HandDesiredConfigurationMessage extends IHMCRosApiPacket<HandDesire
    @FieldDocumentation(value = "Specifies the side of the robot that will execute the trajectory")
    public RobotSide robotSide;
    @FieldDocumentation(value = "Specifies the grasp to perform")
-   public FingerState fingerState;
+   public HandConfiguration fingerState;
 
    public HandDesiredConfigurationMessage()
    {
       // Empty constructor for deserialization
    }
 
-   public HandDesiredConfigurationMessage(RobotSide robotSide, FingerState fingerState)
+   public HandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration fingerState)
    {
       this.robotSide = robotSide;
       this.fingerState = fingerState;
    }
 
-   public FingerState getFingerState()
+   public HandConfiguration getFingerState()
    {
       return fingerState;
    }
@@ -60,7 +60,7 @@ public class HandDesiredConfigurationMessage extends IHMCRosApiPacket<HandDesire
 
    public HandDesiredConfigurationMessage(Random random)
    {
-      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, FingerState.values()[random.nextInt(FingerState.BASIC_GRIP.getDocumentedValues().length)]);
+      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, HandConfiguration.values()[random.nextInt(HandConfiguration.BASIC_GRIP.getDocumentedValues().length)]);
 
    }
 }

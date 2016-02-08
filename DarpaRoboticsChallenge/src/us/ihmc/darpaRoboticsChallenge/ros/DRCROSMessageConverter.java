@@ -52,7 +52,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
@@ -782,7 +782,7 @@ public class DRCROSMessageConverter
    public static HandDesiredConfigurationMessage convertToPacket(FingerStatePacketMessage message)
    {
       HandDesiredConfigurationMessage ret = new HandDesiredConfigurationMessage(convertByteToEnum(RobotSide.class, message.getRobotSide()),
-            convertByteToEnum(FingerState.class, message.getFingerState()));
+            convertByteToEnum(HandConfiguration.class, message.getFingerState()));
       ret.setUniqueId(message.getUniqueId());
 
       return ret;

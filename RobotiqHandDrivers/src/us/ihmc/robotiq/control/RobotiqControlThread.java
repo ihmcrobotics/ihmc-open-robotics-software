@@ -13,7 +13,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -126,7 +126,7 @@ class RobotiqControlThread extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         fingerStateProvider.receivedPacket(new HandDesiredConfigurationMessage(robotSide, FingerState.CALIBRATE));
+         fingerStateProvider.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -142,7 +142,7 @@ class RobotiqControlThread extends HandControlThread
             if (fingerStateProvider.isNewFingerStateAvailable())
             {
                HandDesiredConfigurationMessage packet = fingerStateProvider.pullPacket();
-               FingerState state = packet.getFingerState();
+               HandConfiguration state = packet.getFingerState();
                
                switch (state)
                {
