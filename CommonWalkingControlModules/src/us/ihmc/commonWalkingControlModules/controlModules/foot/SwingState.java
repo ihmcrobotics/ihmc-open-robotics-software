@@ -158,7 +158,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    public void setInitialDesireds(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
    {
       hasInitialAngularConfigurationBeenProvided.set(true);
-      this.initialAngularVelocity.setIncludingFrame(initialAngularVelocity);
+      orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
    }
 
    @Override
