@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.tools.testing.TestPlanTarget.Fast;
 
+import java.util.Random;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
@@ -13,10 +16,13 @@ import com.google.caliper.Benchmark;
 import com.google.caliper.api.VmOptions;
 import com.google.caliper.runner.CaliperMain;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.testing.JUnitTools;
@@ -183,6 +189,59 @@ public class QuadrupedSupportPolygonTest
       FramePoint expected = new FramePoint(WORLD, 0.5, 0.5, 0.0);
       assertTrue("not equal expected " + expected + " actual " + inCircle, expected.epsilonEquals(inCircle, 1e-7));
       assertEquals("not correct radius", 0.5, radius, 1e-7);
+   }
+   
+   private Random random = new Random(9123090L);
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testPackPointIntoMultipleStructuresAndCompare()
+   {
+      QuadrantDependentList<ReferenceFrame> frames = new QuadrantDependentList<>();
+      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      QuadrantDependentList<YoFramePoint> quadrantDependentList = new QuadrantDependentList<YoFramePoint>();
+      
+      for (RobotQuadrant robotQuadrant2 : RobotQuadrant.values)
+      {
+         TranslationReferenceFrame testFrame = new TranslationReferenceFrame("testFrame" + robotQuadrant2, ReferenceFrame.getWorldFrame());
+         testFrame.updateTranslation(new Vector3d(randomScalar(), randomScalar(), randomScalar()));
+         
+         frames.set(robotQuadrant2, testFrame);
+         
+         quadrantDependentList.set(robotQuadrant2, new YoFramePoint("yo" + robotQuadrant2, ReferenceFrame.getWorldFrame(), registry));
+      }
+      
+      TranslationReferenceFrame testFrame = new TranslationReferenceFrame("testFrame", ReferenceFrame.getWorldFrame());
+      testFrame.updateTranslation(new Vector3d(randomScalar(), randomScalar(), randomScalar()));
+      
+      FramePoint framePoint = new FramePoint(testFrame, randomScalar(), randomScalar(), randomScalar());
+      
+      QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            TranslationReferenceFrame frame = (TranslationReferenceFrame) frames.get(robotQuadrant);
+            
+            frame.updateTranslation(new Vector3d(randomScalar(), randomScalar(), randomScalar()));
+            
+            framePoint.setToZero(frame);
+            framePoint.changeFrame(ReferenceFrame.getWorldFrame());
+            
+            quadrupedSupportPolygon.setFootstep(robotQuadrant, framePoint);
+            quadrantDependentList.get(robotQuadrant).set(framePoint);
+            
+            assertTrue("orig not equal poly", framePoint.epsilonEquals(quadrupedSupportPolygon.getFootstep(robotQuadrant), 1e-7));
+            assertTrue("orig not equal list", framePoint.epsilonEquals(quadrantDependentList.get(robotQuadrant).getFrameTuple(), 1e-7));
+            assertTrue("poly not equal list", quadrupedSupportPolygon.getFootstep(robotQuadrant).epsilonEquals(quadrupedSupportPolygon.getFootstep(robotQuadrant), 1e-7));
+         }
+      }
+   }
+   
+   private double randomScalar()
+   {
+      return 500.0 * random.nextDouble();
    }
    
    @Benchmark
