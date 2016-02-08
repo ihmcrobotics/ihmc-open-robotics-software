@@ -1,8 +1,7 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.testing.TestPlanTarget.Fast;
+import static org.junit.Assert.*;
+import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 import java.util.Random;
 
@@ -190,6 +189,30 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not equal expected " + expected + " actual " + inCircle, expected.epsilonEquals(inCircle, 1e-7));
       assertEquals("not correct radius", 0.5, radius, 1e-7);
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testMatchingFootsteps()
+   {
+      QuadrupedSupportPolygon match1 = create3LegPolygon();
+      QuadrupedSupportPolygon match2 = create3LegPolygon();
+      
+      assertEquals("3 legs don't match", 3, match1.getNumberOfEqualFootsteps(match2));
+      
+      match1 = createSimplePolygon();
+      match2 = createSimplePolygon();
+      
+      assertEquals("4 legs don't match", 4, match1.getNumberOfEqualFootsteps(match2));
+      
+      match1.getFootstep(RobotQuadrant.FRONT_LEFT).add(2.0, 0.0, 0.0);
+      assertEquals("3 legs don't match", 3, match1.getNumberOfEqualFootsteps(match2));
+      match1.getFootstep(RobotQuadrant.FRONT_RIGHT).add(2.0, 0.0, 1.0);
+      assertEquals("2 legs don't match", 2, match1.getNumberOfEqualFootsteps(match2));
+      match1.getFootstep(RobotQuadrant.HIND_LEFT).add(2.0, 3.0, 1.0);
+      assertEquals("1 legs don't match", 1, match1.getNumberOfEqualFootsteps(match2));
+      match1.getFootstep(RobotQuadrant.HIND_RIGHT).add(2.0, -3.0, 1.0);
+      assertEquals("0 legs don't match", 0, match1.getNumberOfEqualFootsteps(match2));
+    }
    
    private Random random = new Random(9123090L);
    
