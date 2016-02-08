@@ -14,13 +14,13 @@ import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommandDispatcher implements Runnable
 {
-   private final HandDesiredConfigurationSubscriber fingerStateProvider = new HandDesiredConfigurationSubscriber(null);
+   private final HandDesiredConfigurationSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationSubscriber(null);
 
    private final ROSiRobotCommunicator rosHandCommunicator;
 
-   public ROSiRobotCommandDispatcher(PacketCommunicator objectCommunicator, String rosHostIP)
+   public ROSiRobotCommandDispatcher(PacketCommunicator ihmcMessageCommunicator, String rosHostIP)
    {
-      objectCommunicator.attachListener(HandDesiredConfigurationMessage.class, fingerStateProvider);
+      ihmcMessageCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
       
       String rosURI = "http://" + rosHostIP + ":11311";
       
@@ -43,10 +43,10 @@ public class ROSiRobotCommandDispatcher implements Runnable
    {
       while (true)
       {
-         if (fingerStateProvider.isNewDesiredConfigurationAvailable())
+         if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
          {
-            HandDesiredConfigurationMessage packet = fingerStateProvider.pullMessage();
-            rosHandCommunicator.sendHandCommand(packet);
+            HandDesiredConfigurationMessage ihmcMessage = handDesiredConfigurationSubscriber.pullMessage();
+            rosHandCommunicator.sendHandCommand(ihmcMessage);
          }
       }
    }
