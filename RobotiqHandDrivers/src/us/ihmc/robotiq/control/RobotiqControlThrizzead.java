@@ -26,7 +26,7 @@ public class RobotiqControlThrizzead extends HandControlThread
    
    private final RobotSide robotSide;
    private final RobotiqHandCommunicator robotiqHand;
-   private final HandDesiredConfigurationSubscriber fingerStateProvider;
+   private final HandDesiredConfigurationSubscriber handDesiredConfigurationSubscriber;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private RobotiqHandSensorDizzata handStatus;
@@ -36,11 +36,11 @@ public class RobotiqControlThrizzead extends HandControlThread
       super(robotSide);
       this.robotSide = robotSide;
       robotiqHand = new RobotiqHandCommunicator(robotSide);
-      fingerStateProvider = new HandDesiredConfigurationSubscriber(robotSide);
+      handDesiredConfigurationSubscriber = new HandDesiredConfigurationSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
-      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, fingerStateProvider);
+      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
 
@@ -71,7 +71,7 @@ public class RobotiqControlThrizzead extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         fingerStateProvider.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
+         handDesiredConfigurationSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -84,9 +84,9 @@ public class RobotiqControlThrizzead extends HandControlThread
 //            System.out.println(handStatus.getFaultStatus().name());
          }
          
-         if (fingerStateProvider.isNewDesiredConfigurationAvailable())
+         if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
          {
-            HandDesiredConfigurationMessage packet = fingerStateProvider.pullMessage();
+            HandDesiredConfigurationMessage packet = handDesiredConfigurationSubscriber.pullMessage();
             HandConfiguration state = packet.getHandDesiredConfiguration();
             
             switch (state)

@@ -48,7 +48,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private final ArrayList<BehaviorInterface> childBehaviors = new ArrayList<BehaviorInterface>();
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
    private final WholeBodyPacketBehavior wholeBodyPacketBehavior;
    private final ChestOrientationBehavior chestOrientationBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
@@ -85,8 +85,8 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       childBehaviors.add(wholeBodyIKBehavior);
       
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
-      childBehaviors.add(fingerStateBehavior);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(handDesiredConfigurationBehavior);
       
       wholeBodyPacketBehavior = new WholeBodyPacketBehavior(outgoingCommunicationBridge, yoTime, wholeBodyControllerParameters);
       childBehaviors.add(wholeBodyPacketBehavior);
@@ -135,11 +135,11 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       computeWholeBodyIK(graspingDebrisRobot, approachingDebrisRobot, 0, approachPose, 0.02, 0.1, ControlledDoF.DOF_3P3R);
       pipeLine.submitSingleTaskStage(new WholeBodyPacketTask(approachingDebrisRobot, yoTime, wholeBodyPacketBehavior, trajectoryTime));
 
-      pipeLine.submitSingleTaskStage(new HandDesiredConfigurationTask(robotSide, HandConfiguration.OPEN, fingerStateBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(new HandDesiredConfigurationTask(robotSide, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime));
 
       pipeLine.submitSingleTaskStage(new WholeBodyPacketTask(graspingDebrisRobot, yoTime, wholeBodyPacketBehavior, trajectoryTime));
 
-      pipeLine.submitSingleTaskStage(new HandDesiredConfigurationTask(robotSide, HandConfiguration.CLOSE, fingerStateBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(new HandDesiredConfigurationTask(robotSide, HandConfiguration.CLOSE, handDesiredConfigurationBehavior, yoTime));
 
       FramePose prepareToDropPose = new FramePose(midFeetZUpFrame);
       prepareToDropPose.setPosition(0.55, robotSide.negateIfRightSide(0.2), 1.2);

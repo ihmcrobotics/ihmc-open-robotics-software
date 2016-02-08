@@ -30,7 +30,7 @@ public class RobotiqHandCommunicator
    private final RobotiqHandSensorDizzata handSensorData = new RobotiqHandSensorDizzata();
    
    private RobotiqGraspMode graspMode = RobotiqGraspMode.BASIC_MODE;
-   private HandConfiguration fingerState = HandConfiguration.OPEN;
+   private HandConfiguration handConfiguration = HandConfiguration.OPEN;
    
    private boolean connected = false;
    
@@ -100,22 +100,22 @@ public class RobotiqHandCommunicator
       }
    }
    
-   public void sendHandCommand(HandConfiguration fingerState)
+   public void sendHandCommand(HandConfiguration handConfiguration)
    {
-      handleGraspModes(fingerState);
-      sendCommand(writeRequestFactory.createWholeHandPositionRequest(graspMode, this.fingerState));
+      handleGraspModes(handConfiguration);
+      sendCommand(writeRequestFactory.createWholeHandPositionRequest(graspMode, this.handConfiguration));
    }
    
-   public void sendFingersCommand(HandConfiguration fingerState)
+   public void sendFingersCommand(HandConfiguration handConfiguration)
    {
-      handleGraspModes(fingerState);
-      sendCommand(writeRequestFactory.createFingersPositionRequest(graspMode, this.fingerState));
+      handleGraspModes(handConfiguration);
+      sendCommand(writeRequestFactory.createFingersPositionRequest(graspMode, this.handConfiguration));
    }
    
-   public void sendThumbCommand(HandConfiguration fingerState)
+   public void sendThumbCommand(HandConfiguration handConfiguration)
    {
-      handleGraspModes(fingerState);
-      sendCommand(writeRequestFactory.createThumbPositionRequest(graspMode, this.fingerState));
+      handleGraspModes(handConfiguration);
+      sendCommand(writeRequestFactory.createThumbPositionRequest(graspMode, this.handConfiguration));
    }
    
    private void sendCommand(Register[] request)
@@ -132,13 +132,13 @@ public class RobotiqHandCommunicator
       }
       catch (ModbusException | SocketTimeoutException e)
       {
-         System.err.println(getClass().getSimpleName() + ": Failed to write " + graspMode.name() + " " + fingerState.name() + " command. Consider resetting hand.");
+         System.err.println(getClass().getSimpleName() + ": Failed to write " + graspMode.name() + " " + handConfiguration.name() + " command. Consider resetting hand.");
       }
    }
    
-   private void handleGraspModes(HandConfiguration fingerState)
+   private void handleGraspModes(HandConfiguration handConfiguration)
    {
-      switch(fingerState)
+      switch(handConfiguration)
       {
          case BASIC_GRIP:
             graspMode = RobotiqGraspMode.BASIC_MODE;
@@ -155,14 +155,14 @@ public class RobotiqHandCommunicator
          case CLOSE_FINGERS:
          case CLOSE_THUMB:
          case CRUSH:
-            this.fingerState = HandConfiguration.CLOSE;
+            this.handConfiguration = HandConfiguration.CLOSE;
             break;
          case OPEN_FINGERS:
          case OPEN_THUMB:
-            this.fingerState = HandConfiguration.OPEN;
+            this.handConfiguration = HandConfiguration.OPEN;
             break;
          default:
-            this.fingerState = fingerState;
+            this.handConfiguration = handConfiguration;
       }
    }
    

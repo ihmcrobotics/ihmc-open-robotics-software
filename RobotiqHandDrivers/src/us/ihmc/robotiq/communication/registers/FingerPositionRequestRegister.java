@@ -80,9 +80,9 @@ public class FingerPositionRequestRegister extends RobotiqOutputRegister
       position = (byte)0x00;
    }
    
-   public void setFingerPosition(RobotiqGraspMode graspMode, HandConfiguration fingerState)
+   public void setFingerPosition(RobotiqGraspMode graspMode, HandConfiguration handConfiguration)
    {
-      byte position = (byte)fingerPositionMap.get(graspMode, fingerState, finger);
+      byte position = (byte)fingerPositionMap.get(graspMode, handConfiguration, finger);
       this.position = position;
    }
    

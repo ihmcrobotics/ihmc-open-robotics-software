@@ -32,7 +32,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private final HandPoseBehavior handPoseBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
    private final ChestOrientationBehavior chestOrientationBehavior;
 
@@ -57,7 +57,7 @@ public class DropDebrisBehavior extends BehaviorInterface
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
       chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
 
@@ -113,8 +113,8 @@ public class DropDebrisBehavior extends BehaviorInterface
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side.getOppositeSide(), desiredArmJointAngles, yoTime, handPoseBehavior,
             trajectoryTime));
 
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.RESET, fingerStateBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side.getOppositeSide(), HandConfiguration.RESET, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.RESET, handDesiredConfigurationBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side.getOppositeSide(), HandConfiguration.RESET, handDesiredConfigurationBehavior, yoTime));
 
       pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime),
             yoTime, pelvisPoseBehavior));
@@ -126,7 +126,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    {
       handPoseToPack.setPose(tempPosition, tempOrientation);
       handPoseToPack.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, (new HandDesiredConfigurationTask(side, HandConfiguration.OPEN, fingerStateBehavior, yoTime)));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, (new HandDesiredConfigurationTask(side, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime)));
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, trajectoryTime, handPoseToPack, Frame.WORLD, handPoseBehavior, yoTime));
 
    }
@@ -155,14 +155,14 @@ public class DropDebrisBehavior extends BehaviorInterface
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
       handPoseBehavior.consumeObjectFromNetworkProcessor(object);
-      fingerStateBehavior.consumeObjectFromNetworkProcessor(object);
+      handDesiredConfigurationBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
       handPoseBehavior.consumeObjectFromController(object);
-      fingerStateBehavior.consumeObjectFromController(object);
+      handDesiredConfigurationBehavior.consumeObjectFromController(object);
    }
 
    @Override

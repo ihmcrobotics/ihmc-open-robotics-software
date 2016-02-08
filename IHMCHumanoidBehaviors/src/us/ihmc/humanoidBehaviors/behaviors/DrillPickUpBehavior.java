@@ -46,7 +46,7 @@ public class DrillPickUpBehavior extends BehaviorInterface
 
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
    private final WalkToLocationBehavior walkToLocationBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
    private final ObjectWeightBehavior objectWeightBehavior;
    
    private final WholeBodyIKTrajectoryBehavior wholeBodyIKTrajectoryBehavior;
@@ -70,8 +70,8 @@ public class DrillPickUpBehavior extends BehaviorInterface
               wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
 
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
-      behaviors.add(fingerStateBehavior);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      behaviors.add(handDesiredConfigurationBehavior);
       
       objectWeightBehavior = new ObjectWeightBehavior(outgoingCommunicationBridge);
       behaviors.add(objectWeightBehavior);
@@ -160,7 +160,7 @@ public class DrillPickUpBehavior extends BehaviorInterface
 
       pipeLine.submitTaskForPallelPipesStage(wholeBodyIKTrajectoryBehavior, new WholeBodyIKTrajectoryTask(wholeBodyIKTrajectoryBehavior, yoTime,
             grabSide, handPose, ControlledDoF.DOF_3P3R));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(grabSide, HandConfiguration.OPEN, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(grabSide, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime));
       pipeLine.requestNewStage();
 
       // stage: move hand closer to drill
@@ -171,7 +171,7 @@ public class DrillPickUpBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       // stage: close hand
-      pipeLine.submitSingleTaskStage(new HandDesiredConfigurationTask(grabSide, HandConfiguration.CLOSE, fingerStateBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(new HandDesiredConfigurationTask(grabSide, HandConfiguration.CLOSE, handDesiredConfigurationBehavior, yoTime));
       pipeLine.requestNewStage();
       
       // stage: tell controller about weight in hand

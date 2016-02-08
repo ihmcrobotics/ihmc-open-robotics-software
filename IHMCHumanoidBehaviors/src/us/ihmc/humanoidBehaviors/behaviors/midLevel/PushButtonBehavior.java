@@ -51,7 +51,7 @@ public class PushButtonBehavior extends BehaviorInterface
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HandPoseBehavior handPoseBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
    private HandDesiredConfigurationTask closeHandTask;
 
 
@@ -118,9 +118,9 @@ public class PushButtonBehavior extends BehaviorInterface
       }
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
-      closeHandTask = new HandDesiredConfigurationTask(robotSide,HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
+      closeHandTask = new HandDesiredConfigurationTask(robotSide,HandConfiguration.CLOSE, handDesiredConfigurationBehavior, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
       haveInputsBeenSet.set(false);
@@ -278,7 +278,7 @@ public class PushButtonBehavior extends BehaviorInterface
       pipeLine.clearAll();
 
       // Form fist:
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, closeHandTask);
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, closeHandTask);
 
       // Set initial pose:
       submitSingleTaskStageHandPose(initialHandPose,robotSide);
@@ -383,14 +383,14 @@ public class PushButtonBehavior extends BehaviorInterface
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
       handPoseBehavior.consumeObjectFromNetworkProcessor(object);
-      fingerStateBehavior.consumeObjectFromNetworkProcessor(object);
+      handDesiredConfigurationBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
       handPoseBehavior.consumeObjectFromController(object);
-      fingerStateBehavior.consumeObjectFromController(object);
+      handDesiredConfigurationBehavior.consumeObjectFromController(object);
    }
 
    @Override

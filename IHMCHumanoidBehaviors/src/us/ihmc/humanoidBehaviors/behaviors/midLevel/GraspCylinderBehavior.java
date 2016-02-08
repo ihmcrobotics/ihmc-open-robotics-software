@@ -29,7 +29,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
    private final ComHeightBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 
    private final BooleanYoVariable haveInputsBeenSet;
    private final DoubleYoVariable yoTime;
@@ -48,7 +48,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
 
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
 
@@ -72,7 +72,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
       graspPoint.changeFrame(worldFrame);
 
       CoMHeightTask comHeightTask = new CoMHeightTask(graspPoint.getZ() - 0.9, yoTime, comHeightBehavior, 1.0);
-      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSide, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSide, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime);
 
       OrientPalmToGraspCylinderTask orientPalmForGraspingTask = new OrientPalmToGraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis,
             fullRobotModel, yoTime, handPoseBehavior, 3.0);
@@ -80,7 +80,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
       GraspCylinderTask movePalmToContactCylinder = new GraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis, fullRobotModel, yoTime,
             handPoseBehavior, 1.0);
 
-      HandDesiredConfigurationTask closeHandTask = new HandDesiredConfigurationTask(robotSide, HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask closeHandTask = new HandDesiredConfigurationTask(robotSide, HandConfiguration.CLOSE, handDesiredConfigurationBehavior, yoTime);
 
       pipeLine.clearAll();
       pipeLine.submitSingleTaskStage(comHeightTask);
@@ -124,7 +124,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    public void stop()
    {
       handPoseBehavior.stop();
-      fingerStateBehavior.stop();
+      handDesiredConfigurationBehavior.stop();
       comHeightBehavior.stop();
    }
 
@@ -138,7 +138,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    public void pause()
    {
       handPoseBehavior.pause();
-      fingerStateBehavior.pause();
+      handDesiredConfigurationBehavior.pause();
       comHeightBehavior.pause();
    }
 
@@ -146,7 +146,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    public void resume()
    {
       handPoseBehavior.resume();
-      fingerStateBehavior.resume();
+      handDesiredConfigurationBehavior.resume();
       comHeightBehavior.resume();
    }
 

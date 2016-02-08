@@ -45,7 +45,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
    private final RotateHandAboutAxisBehavior rotateGraspedValveBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable tippingDetected;
@@ -67,8 +67,8 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
       childBehaviors.add(graspValveBehavior);
       rotateGraspedValveBehavior = new RotateHandAboutAxisBehavior("", outgoingCommunicationBridge, fullRobotModel, yoTime);
       childBehaviors.add(rotateGraspedValveBehavior);
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
-      childBehaviors.add(fingerStateBehavior);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(handDesiredConfigurationBehavior);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(handPoseBehavior);
       wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel,
@@ -110,7 +110,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
       RotateHandAboutAxisTask rotateGraspedValveTask = new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior,
               valveTransformToWorld, valvePinJointAxisInValveFrame, false, turnValveAngle, valveRotationRateRadPerSec, stopHandIfTurnCollision);
 
-      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfHandToUse, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfHandToUse, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime);
 
       HandPoseRelativeToCurrentTask moveHandAwayFromValveTask = new HandPoseRelativeToCurrentTask(robotSideOfHandToUse, -0.3, fullRobotModel, yoTime,
             handPoseBehavior, trajectoryTimeMoveHandAwayFromValve);
@@ -196,7 +196,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
 
       handPoseBehavior.doPostBehaviorCleanup();
       graspValveBehavior.doPostBehaviorCleanup();
-      fingerStateBehavior.doPostBehaviorCleanup();
+      handDesiredConfigurationBehavior.doPostBehaviorCleanup();
    }
 
    @Override

@@ -90,7 +90,7 @@ public class ScriptBehavior extends BehaviorInterface
    private final BumStateBehavior bumStateBehavior;
    private final ThighStateBehavior thighStateBehavior;
    private final HighLevelStateBehavior highLevelStateBehavior;
-   public final HandDesiredConfigurationBehavior fingerStateBehavior;
+   public final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
@@ -134,7 +134,7 @@ public class ScriptBehavior extends BehaviorInterface
       bumStateBehavior = new BumStateBehavior(outgoingCommunicationBridge);
       thighStateBehavior = new ThighStateBehavior(outgoingCommunicationBridge);
       highLevelStateBehavior = new HighLevelStateBehavior(outgoingCommunicationBridge);
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
 
@@ -171,7 +171,7 @@ public class ScriptBehavior extends BehaviorInterface
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.BUM_STATE, bumStateBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.THIGH_STATE, thighStateBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HIGH_LEVEL_STATE, highLevelStateBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FINGER_STATE, fingerStateBehavior);
+      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FINGER_STATE, handDesiredConfigurationBehavior);
 
       stateMachine.setCurrentState(PrimitiveBehaviorType.IDLE);
    }
@@ -529,8 +529,8 @@ public class ScriptBehavior extends BehaviorInterface
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.FINGER_STATE))
       {
-         fingerStateBehavior.initialize();
-         fingerStateBehavior.setInput((HandDesiredConfigurationMessage) inputPacket.getScriptObject());
+         handDesiredConfigurationBehavior.initialize();
+         handDesiredConfigurationBehavior.setInput((HandDesiredConfigurationMessage) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.IDLE))
       {
@@ -615,7 +615,7 @@ public class ScriptBehavior extends BehaviorInterface
       bumStateBehavior.consumeObjectFromNetworkProcessor(object);
       thighStateBehavior.consumeObjectFromNetworkProcessor(object);
       highLevelStateBehavior.consumeObjectFromNetworkProcessor(object);
-      fingerStateBehavior.consumeObjectFromNetworkProcessor(object);
+      handDesiredConfigurationBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
@@ -634,7 +634,7 @@ public class ScriptBehavior extends BehaviorInterface
       bumStateBehavior.consumeObjectFromController(object);
       thighStateBehavior.consumeObjectFromController(object);
       highLevelStateBehavior.consumeObjectFromController(object);
-      fingerStateBehavior.consumeObjectFromController(object);
+      handDesiredConfigurationBehavior.consumeObjectFromController(object);
    }
 
    @Override
