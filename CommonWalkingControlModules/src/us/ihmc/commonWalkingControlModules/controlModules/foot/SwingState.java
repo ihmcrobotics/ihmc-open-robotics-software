@@ -27,7 +27,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.TwoWaypointTrajectoryGeneratorParameters;
-import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
 import us.ihmc.robotics.trajectories.providers.CurrentAngularVelocityProvider;
 import us.ihmc.robotics.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.robotics.trajectories.providers.CurrentLinearVelocityProvider;
@@ -49,7 +48,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
    private final VelocityConstrainedOrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
-   private final CurrentConfigurationProvider stanceConfigurationProvider;
    private final CurrentConfigurationProvider initialConfigurationProvider;
    private final VectorProvider initialVelocityProvider;
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
@@ -65,12 +63,15 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final DoubleYoVariable currentTimeWithSwingSpeedUp;
 
    private final VectorProvider currentAngularVelocityProvider;
+   private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameVector initialAngularVelocity = new FrameVector();
 
    private final BooleanYoVariable hasInitialAngularConfigurationBeenProvided;
 
    private final DoubleYoVariable finalSwingHeightOffset;
    private final double controlDT;
+
+   private final ReferenceFrame footFrame;
 
    public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
                      VectorProvider touchdownAccelerationProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
@@ -92,13 +93,13 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
 
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
+      footFrame = referenceFrames.getFootFrame(robotSide);
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
       ReferenceFrame stanceFootFrame = referenceFrames.getFootFrame(robotSide.getOppositeSide());
-      stanceConfigurationProvider = new CurrentConfigurationProvider(stanceFootFrame);
+      CurrentConfigurationProvider stanceConfigurationProvider = new CurrentConfigurationProvider(stanceFootFrame);
       initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -123,10 +124,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       positionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, registry);
 
       currentAngularVelocityProvider = new CurrentAngularVelocityProvider(footFrame, rigidBody, twistCalculator);
-      VectorProvider initialAngularVelocityProvider = new ConstantVectorProvider(initialAngularVelocity);
-      VectorProvider finalAngularVelocityProvider = new ConstantVectorProvider(new FrameVector(footFrame));
-      orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
-            initialConfigurationProvider, initialAngularVelocityProvider, finalConfigurationProvider, finalAngularVelocityProvider, registry);
+      orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, registry);
       hasInitialAngularConfigurationBeenProvided = new BooleanYoVariable(namePrefix + "HasInitialAngularConfigurationBeenProvided", registry);
 
       swingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "SwingTimeSpeedUpFactor", registry);
@@ -160,14 +158,21 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    public void setInitialDesireds(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
    {
       hasInitialAngularConfigurationBeenProvided.set(true);
-      this.initialAngularVelocity.setIncludingFrame(initialAngularVelocity);
+      orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
    }
 
    @Override
    protected void initializeTrajectory()
    {
       if (!hasInitialAngularConfigurationBeenProvided.getBooleanValue())
+      {
          currentAngularVelocityProvider.get(initialAngularVelocity);
+         initialOrientation.setToZero(footFrame);
+         orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
+      }
+
+      orientationTrajectoryGenerator.setTrajectoryTime(swingTimeProvider.getValue());
+      
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
 
@@ -225,6 +230,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
    private final FramePose newFootstepPose = new FramePose();
    private final FramePoint oldFootstepPosition = new FramePoint();
+
    @Override
    public void setFootstep(Footstep footstep)
    {
@@ -234,6 +240,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       newFootstepPose.setZ(newFootstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
       finalConfigurationProvider.setPose(newFootstepPose);
       initialConfigurationProvider.get(oldFootstepPosition);
+      orientationTrajectoryGenerator.setFinalOrientation(newFootstepPose);
+      orientationTrajectoryGenerator.setFinalVelocityToZero();
 
       newFootstepPose.changeFrame(worldFrame);
       oldFootstepPosition.changeFrame(worldFrame);
