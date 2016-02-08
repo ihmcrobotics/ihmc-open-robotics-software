@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -17,7 +18,6 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
 
    private final BooleanYoVariable hasBeenCalled;
 
-   private final FrameOrientation currentFrameOrientation = new FrameOrientation();
    private final Matrix3d currentOrientationMatrix = new Matrix3d();
    private final Matrix3d previousOrientationMatrix = new Matrix3d();
    private final Matrix3d deltaOrientationMatrix = new Matrix3d();
@@ -56,19 +56,40 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
                + "orientation variable to call update(), otherwise use update(FrameOrientation)");
       }
 
-      orientation.getFrameOrientationIncludingFrame(currentFrameOrientation);
-      update(currentFrameOrientation);
+      orientation.get(currentOrientationMatrix);
+      update(currentOrientationMatrix);
    }
 
    public void update(FrameOrientation currentOrientation)
    {
+      checkReferenceFrameMatch(currentOrientation);
+
+      currentOrientation.getMatrix3d(currentOrientationMatrix);
+      update(currentOrientationMatrix);
+   }
+
+   public void update(Quat4d currentOrientation)
+   {
+      currentOrientationMatrix.set(currentOrientation);
+      update(currentOrientationMatrix);
+   }
+
+   public void update(AxisAngle4d currentOrientation)
+   {
+      currentOrientationMatrix.set(currentOrientation);
+      update(currentOrientationMatrix);
+   }
+
+   public void update(Matrix3d rotationMatrix)
+   {
       if (!hasBeenCalled.getBooleanValue())
       {
-         orientationPreviousValue.set(currentOrientation);
+         orientationPreviousValue.set(rotationMatrix);
          hasBeenCalled.set(true);
       }
 
-      currentOrientation.getMatrix3d(currentOrientationMatrix);
+      if (rotationMatrix != currentOrientationMatrix)
+         currentOrientationMatrix.set(rotationMatrix);
       orientationPreviousValue.get(previousOrientationMatrix);
       deltaOrientationMatrix.mulTransposeRight(currentOrientationMatrix, previousOrientationMatrix);
       deltaAxisAngle.set(deltaOrientationMatrix);
@@ -76,6 +97,6 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
       set(deltaAxisAngle.getX(), deltaAxisAngle.getY(), deltaAxisAngle.getZ());
       scale(deltaAxisAngle.getAngle() / dt);
 
-      orientationPreviousValue.set(currentOrientation);
+      orientationPreviousValue.set(currentOrientationMatrix);
    }
 }

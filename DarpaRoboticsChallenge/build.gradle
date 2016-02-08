@@ -14,6 +14,11 @@ project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
+repositories {
+	maven {
+	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+	}
+}
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
@@ -28,7 +33,7 @@ evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCROSTools"))
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
 
 	compile group: 'us.ihmc.thirdparty.com.centralnexus', name: 'joystick', version: '0.7'
@@ -38,7 +43,7 @@ dependencies {
 	compile group: 'com.jroller.santhosh', name: 'JResizable', version: '1.0'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
-	//compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.1'
+	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.1'
 
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
@@ -52,6 +57,10 @@ dependencies {
 	compile group: 'org.bidib.jbidib.org.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
+	compile group: 'org.ros.rosjava_core', name: 'rosjava_geometry', version: '0.2.1'
+	compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
+	compile group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.2.1'
 
 	compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
@@ -62,11 +71,9 @@ dependencies {
 	compile ihmc.getProjectDependency(":ImageProcessing")
     compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":RobotDataCommunication")
-	compile ihmc.getProjectDependency(":ROSJava")
 	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
-	compile ihmc.getProjectDependency(":ROSJavaGeometry")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidBehaviors")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
