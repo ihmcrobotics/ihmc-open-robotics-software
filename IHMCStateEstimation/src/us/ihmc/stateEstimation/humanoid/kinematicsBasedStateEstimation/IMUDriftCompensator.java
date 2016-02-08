@@ -1,5 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import java.util.Map;
+
 import javax.vecmath.AxisAngle4d;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -16,6 +18,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -61,7 +64,7 @@ public class IMUDriftCompensator
    private final AlphaFilteredYoFrameVector footAngularVelocityAverageFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("footAngularVelocityAverageFiltered", "", registry, alphaFilterFootAngularVelocityAverage, footAngularVelocityAverage);
    private final YoFrameVector footAngularVelocityDifferenceThresholdToEstimateIMUDrift = new YoFrameVector("footAngularVelocityDifferenceThresholdToEstimateIMUDrift", worldFrame, registry);
 
-   private final SideDependentList<ReferenceFrame> footFrames;
+   private final Map<RigidBody, ReferenceFrame> footFrames;
 
    private final double estimatorDT;
 
@@ -70,12 +73,12 @@ public class IMUDriftCompensator
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
 
-   private final SideDependentList<FootSwitchInterface> footSwitches;
+   private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final DoubleYoVariable totalLoadPercentageOnFeet = new DoubleYoVariable("totalLoadPercentageOnFeet", registry);
    private final DoubleYoVariable loadPercentageOnFeetThresholdForIMUDrift = new DoubleYoVariable("loadPercentageOnFeetThresholdForIMUDrift", registry);
    
-   public IMUDriftCompensator(SideDependentList<ReferenceFrame> footFrames, FullInverseDynamicsStructure inverseDynamicsStructure,
-         SideDependentList<FootSwitchInterface> footSwitches, double estimatorDT, YoVariableRegistry parentRegistry)
+   public IMUDriftCompensator(Map<RigidBody, ReferenceFrame> footFrames, FullInverseDynamicsStructure inverseDynamicsStructure,
+         Map<RigidBody, FootSwitchInterface> footSwitches, double estimatorDT, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.footFrames = footFrames;
@@ -232,8 +235,8 @@ public class IMUDriftCompensator
    private boolean areFeetLoadedEnough()
    {
       double totalLoadPercentage = 0.0;
-      for (RobotSide robotSide : RobotSide.values)
-         totalLoadPercentage += footSwitches.get(robotSide).computeFootLoadPercentage();
+      for (RigidBody foot : footSwitches.keySet())
+         totalLoadPercentage += footSwitches.get(foot).computeFootLoadPercentage();
       totalLoadPercentageOnFeet.set(totalLoadPercentage);
       boolean areFeetLoadedEnough = totalLoadPercentageOnFeet.getDoubleValue() > loadPercentageOnFeetThresholdForIMUDrift.getDoubleValue();
       isIMUDriftFeetLoadedEnough.set(areFeetLoadedEnough);
@@ -301,33 +304,33 @@ public class IMUDriftCompensator
    
    private void updateFootOrientations()
    {
-      for (RobotSide robotSide : RobotSide.values)
+      for (RigidBody foot : footFrames.keySet())
       {
-         FrameOrientation footOrientation = footOrientations.get(robotSide);
-         footOrientationsPrevValue.get(robotSide).set(footOrientation);
+         FrameOrientation footOrientation = footOrientations.get(foot);
+         footOrientationsPrevValue.get(foot).set(footOrientation);
          
-         footOrientation.setToZero(footFrames.get(robotSide));
+         footOrientation.setToZero(footFrames.get(foot));
          footOrientation.changeFrame(worldFrame);
          
-         YoFrameQuaternion footOrientationInWorld = footOrientationsInWorld.get(robotSide);
+         YoFrameQuaternion footOrientationInWorld = footOrientationsInWorld.get(foot);
          footOrientationInWorld.set(footOrientation);
          
-         YoFrameVector footAxisAngleInWorld = footAxisAnglesInWorld.get(robotSide);
-         footAxisAngleInWorld.getFrameTuple(footAxisAnglesPrevValue.get(robotSide));
+         YoFrameVector footAxisAngleInWorld = footAxisAnglesInWorld.get(foot);
+         footAxisAngleInWorld.getFrameTuple(footAxisAnglesPrevValue.get(foot));
          footOrientationInWorld.get(footAxisAngle);
          footAxisAngleInWorld.set(footAxisAngle.getX(), footAxisAngle.getY(), footAxisAngle.getZ());
          footAxisAngleInWorld.scale(footAxisAngle.getAngle());
          
 
-         YoFrameVector footAngularVelocityInWorld = footAngularVelocitiesInWorld.get(robotSide);
-         footAngularVelocityInWorld.setX(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getX(), footAxisAnglesPrevValue.get(robotSide).getX()));
-         footAngularVelocityInWorld.setY(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getY(), footAxisAnglesPrevValue.get(robotSide).getY()));
-         footAngularVelocityInWorld.setZ(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getZ(), footAxisAnglesPrevValue.get(robotSide).getZ()));
+         YoFrameVector footAngularVelocityInWorld = footAngularVelocitiesInWorld.get(foot);
+         footAngularVelocityInWorld.setX(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getX(), footAxisAnglesPrevValue.get(foot).getX()));
+         footAngularVelocityInWorld.setY(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getY(), footAxisAnglesPrevValue.get(foot).getY()));
+         footAngularVelocityInWorld.setZ(AngleTools.computeAngleDifferenceMinusPiToPi(footAxisAngleInWorld.getZ(), footAxisAnglesPrevValue.get(foot).getZ()));
          footAngularVelocityInWorld.scale(1.0 / estimatorDT);
 
-         footAngularVelocitiesInWorldFilteredX.get(robotSide).update(footAngularVelocityInWorld.getX());
-         footAngularVelocitiesInWorldFilteredY.get(robotSide).update(footAngularVelocityInWorld.getY());
-         footAngularVelocitiesInWorldFilteredZ.get(robotSide).update(footAngularVelocityInWorld.getZ());
+         footAngularVelocitiesInWorldFilteredX.get(foot).update(footAngularVelocityInWorld.getX());
+         footAngularVelocitiesInWorldFilteredY.get(foot).update(footAngularVelocityInWorld.getY());
+         footAngularVelocitiesInWorldFilteredZ.get(foot).update(footAngularVelocityInWorld.getZ());
       }
 
       footAngularVelocityDifference.setX(Math.abs(footAngularVelocitiesInWorldFilteredX.get(RobotSide.LEFT).getDoubleValue() - footAngularVelocitiesInWorldFilteredX.get(RobotSide.RIGHT).getDoubleValue()));
