@@ -81,6 +81,7 @@ public class QuadrupedControllerManager implements RobotController
       builder.addPermissibleTransition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
       builder.addPermissibleTransition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.SLIDER_BOARD);
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.POSITION_CRAWL);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.TROT_WALK);
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.SLIDER_BOARD);
       builder.addPermissibleTransition(QuadrupedControllerState.SLIDER_BOARD, QuadrupedControllerState.STAND_PREP);
 
