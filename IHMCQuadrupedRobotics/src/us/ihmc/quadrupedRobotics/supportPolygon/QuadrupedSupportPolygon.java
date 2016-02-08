@@ -1220,17 +1220,25 @@ public class QuadrupedSupportPolygon implements Serializable
       return distances;
    }
 
-   public boolean hasSameFootsteps(QuadrupedSupportPolygon polyTwo)
+   /**
+    * Check if the polygons are same size and contain the same quadrants.
+    * 
+    * @param polygonToCompare
+    * @return contain same quadrants
+    */
+   public boolean containsSameQuadrants(QuadrupedSupportPolygon polygonToCompare)
    {
-      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      if (size() != polygonToCompare.size())
+         return false;
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         FramePoint thisFootstep = getFootstep(robotQuadrant);
-         FramePoint otherFootstep = polyTwo.getFootstep(robotQuadrant);
-         if(!thisFootstep.epsilonEquals(otherFootstep, 0.005))
+         if (!polygonToCompare.containsFootstep(robotQuadrant))
          {
             return false;
          }
       }
+      
       return true;
    }
 
@@ -1609,44 +1617,34 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public RobotQuadrant getWhichFootstepHasMoved(QuadrupedSupportPolygon nextPolygon)
    {
-      if (size() == nextPolygon.size())
+      if (!containsSameQuadrants(nextPolygon))
       {
-         for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+         throw new IllegalArgumentException("Polygons contain different quadrants");
+      }
+      
+      RobotQuadrant swingLeg = null;
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         if (!getFootstep(robotQuadrant).epsilonEquals(nextPolygon.getFootstep(robotQuadrant), 1e-5))
          {
-            if (!nextPolygon.containsFootstep(robotQuadrant))
+            if (swingLeg == null)
             {
-               throw new IllegalArgumentException("Polygons contain different feet");
+               swingLeg = robotQuadrant;
+            }
+            else // make sure only one foot differs
+            {
+               throw new IllegalArgumentException("More than one foot differs");
             }
          }
-         
-         RobotQuadrant swingLeg = null;
-         
-         for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
-         {
-            if (!getFootstep(robotQuadrant).epsilonEquals(nextPolygon.getFootstep(robotQuadrant), 1e-5))
-            {
-               if (swingLeg == null)
-               {
-                  swingLeg = robotQuadrant;
-               }
-               else // make sure only one foot differs
-               {
-                  throw new IllegalArgumentException("More than one foot differs");
-               }
-            }
-         }
-         
-         if (swingLeg == null)
-         {
-            throw new IllegalArgumentException("No feet were different");
-         }
-         
-         return swingLeg;
       }
-      else
+      
+      if (swingLeg == null)
       {
-         throw new IllegalArgumentException("Polygons must be the same size");
+         throw new IllegalArgumentException("No feet were different");
       }
+      
+      return swingLeg;
    }
 
    public double distanceInsideTrotLine(FramePoint framePoint)
