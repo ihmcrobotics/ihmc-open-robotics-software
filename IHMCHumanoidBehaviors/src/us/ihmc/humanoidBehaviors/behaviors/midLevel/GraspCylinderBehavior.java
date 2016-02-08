@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspCylinderTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.OrientPalmToGraspCylinderTask;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.GraspCylinderPacket;
@@ -72,7 +72,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
       graspPoint.changeFrame(worldFrame);
 
       CoMHeightTask comHeightTask = new CoMHeightTask(graspPoint.getZ() - 0.9, yoTime, comHeightBehavior, 1.0);
-      FingerStateTask openHandTask = new FingerStateTask(robotSide, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSide, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
 
       OrientPalmToGraspCylinderTask orientPalmForGraspingTask = new OrientPalmToGraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis,
             fullRobotModel, yoTime, handPoseBehavior, 3.0);
@@ -80,7 +80,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
       GraspCylinderTask movePalmToContactCylinder = new GraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis, fullRobotModel, yoTime,
             handPoseBehavior, 1.0);
 
-      FingerStateTask closeHandTask = new FingerStateTask(robotSide, HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask closeHandTask = new HandDesiredConfigurationTask(robotSide, HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
 
       pipeLine.clearAll();
       pipeLine.submitSingleTaskStage(comHeightTask);

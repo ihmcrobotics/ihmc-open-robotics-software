@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBe
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ButtonData;
@@ -52,7 +52,7 @@ public class PushButtonBehavior extends BehaviorInterface
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HandPoseBehavior handPoseBehavior;
    private final HandDesiredConfigurationBehavior fingerStateBehavior;
-   private FingerStateTask closeHandTask;
+   private HandDesiredConfigurationTask closeHandTask;
 
 
    private ArrayList<Vector3d> pushDirections = new ArrayList<Vector3d>();
@@ -120,7 +120,7 @@ public class PushButtonBehavior extends BehaviorInterface
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
-      closeHandTask = new FingerStateTask(robotSide,HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
+      closeHandTask = new HandDesiredConfigurationTask(robotSide,HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
       haveInputsBeenSet.set(false);
