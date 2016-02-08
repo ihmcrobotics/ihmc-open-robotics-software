@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBe
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspValveTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseRelativeToCurrentTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
@@ -110,7 +110,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
       RotateHandAboutAxisTask rotateGraspedValveTask = new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior,
               valveTransformToWorld, valvePinJointAxisInValveFrame, false, turnValveAngle, valveRotationRateRadPerSec, stopHandIfTurnCollision);
 
-      FingerStateTask openHandTask = new FingerStateTask(robotSideOfHandToUse, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfHandToUse, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
 
       HandPoseRelativeToCurrentTask moveHandAwayFromValveTask = new HandPoseRelativeToCurrentTask(robotSideOfHandToUse, -0.3, fullRobotModel, yoTime,
             handPoseBehavior, trajectoryTimeMoveHandAwayFromValve);

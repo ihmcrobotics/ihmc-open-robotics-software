@@ -48,7 +48,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
 
-   private final SideDependentList<HandDesiredConfigurationSubscriber> fingerStateProviders = new SideDependentList<>();
+   private final SideDependentList<HandDesiredConfigurationSubscriber> handDesiredConfigurationSubscribers = new SideDependentList<>();
    private final SideDependentList<ValkyrieFingerSetController> fingerSetControllers = new SideDependentList<>();
 
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
@@ -123,9 +123,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
             }
          }
          
-         fingerStateProviders.put(robotSide, new HandDesiredConfigurationSubscriber(robotSide));
+         handDesiredConfigurationSubscribers.put(robotSide, new HandDesiredConfigurationSubscriber(robotSide));
          if (globalDataProducer != null)
-            globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, fingerStateProviders.get(robotSide));
+            globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscribers.get(robotSide));
          fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry, controllerRegistry));
          
          jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, globalDataProducer, closeableAndDisposableRegistry));
@@ -203,7 +203,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    @Override
    public void run()
    {
-      checkForNewFingerStateRequested();
+      checkForNewHandDesiredConfigurationRequested();
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -211,17 +211,17 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       }
    }
    
-   private void checkForNewFingerStateRequested()
+   private void checkForNewHandDesiredConfigurationRequested()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (fingerStateProviders.get(robotSide).isNewDesiredConfigurationAvailable())
+         if (handDesiredConfigurationSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration fingerState = fingerStateProviders.get(robotSide).pullMessage().getHandDesiredConfiguration();
+            HandConfiguration handDesiredConfiguration = handDesiredConfigurationSubscribers.get(robotSide).pullMessage().getHandDesiredConfiguration();
             
-            PrintTools.debug(DEBUG, this, "Recieved new FingerState Packet: " + fingerState);
+            PrintTools.debug(DEBUG, this, "Recieved new FingerState Packet: " + handDesiredConfiguration);
             
-            switch (fingerState)
+            switch (handDesiredConfiguration)
             {
                case OPEN:
                   fingerSetControllers.get(robotSide).open();
