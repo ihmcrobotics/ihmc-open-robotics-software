@@ -6,7 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyIKTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -46,7 +46,7 @@ public class DrillPickUpBehavior extends BehaviorInterface
 
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
    private final WalkToLocationBehavior walkToLocationBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
    private final ObjectWeightBehavior objectWeightBehavior;
    
    private final WholeBodyIKTrajectoryBehavior wholeBodyIKTrajectoryBehavior;
@@ -70,7 +70,7 @@ public class DrillPickUpBehavior extends BehaviorInterface
               wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
 
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       behaviors.add(fingerStateBehavior);
       
       objectWeightBehavior = new ObjectWeightBehavior(outgoingCommunicationBridge);

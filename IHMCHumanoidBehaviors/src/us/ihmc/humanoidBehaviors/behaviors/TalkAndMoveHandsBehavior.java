@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -33,7 +33,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
    private final HandPoseBehavior handPoseBehavior;
    private final HandPoseListBehavior handPoseListBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
 
    private final SideDependentList<FramePose> handTargets = new SideDependentList<FramePose>();
 
@@ -65,7 +65,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       handPoseListBehavior = new HandPoseListBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       //		this.attachNetworkProcessorListeningQueue(inputListeningQueue, VideoPacket.class);
    }
 

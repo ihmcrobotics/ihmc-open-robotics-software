@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -29,7 +29,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
    private final ComHeightBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
 
    private final BooleanYoVariable haveInputsBeenSet;
    private final DoubleYoVariable yoTime;
@@ -48,7 +48,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
 
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
 

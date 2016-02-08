@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -11,9 +11,9 @@ public class FingerStateTask extends BehaviorTask
    private static final boolean DEBUG = false;
 
    private final HandDesiredConfigurationMessage fingerStatePacket;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
 
-   public FingerStateTask(RobotSide robotSide, HandConfiguration fingerState, FingerStateBehavior fingerStateBehavior, DoubleYoVariable yoTime)
+   public FingerStateTask(RobotSide robotSide, HandConfiguration fingerState, HandDesiredConfigurationBehavior fingerStateBehavior, DoubleYoVariable yoTime)
    {
       super(fingerStateBehavior, yoTime);
       this.fingerStatePacket = new HandDesiredConfigurationMessage(robotSide, fingerState);

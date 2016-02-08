@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.BumStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
@@ -90,7 +90,7 @@ public class ScriptBehavior extends BehaviorInterface
    private final BumStateBehavior bumStateBehavior;
    private final ThighStateBehavior thighStateBehavior;
    private final HighLevelStateBehavior highLevelStateBehavior;
-   public final FingerStateBehavior fingerStateBehavior;
+   public final HandDesiredConfigurationBehavior fingerStateBehavior;
 
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
@@ -134,7 +134,7 @@ public class ScriptBehavior extends BehaviorInterface
       bumStateBehavior = new BumStateBehavior(outgoingCommunicationBridge);
       thighStateBehavior = new ThighStateBehavior(outgoingCommunicationBridge);
       highLevelStateBehavior = new HighLevelStateBehavior(outgoingCommunicationBridge);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
 

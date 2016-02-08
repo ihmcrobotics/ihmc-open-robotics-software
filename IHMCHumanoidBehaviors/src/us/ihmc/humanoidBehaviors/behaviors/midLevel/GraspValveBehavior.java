@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveTurnDirection;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -47,7 +47,7 @@ public class GraspValveBehavior extends BehaviorInterface
    private final ComHeightBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
 
    private final BooleanYoVariable haveInputsBeenSet;
    private final BooleanYoVariable reachedMidPoint;
@@ -73,7 +73,7 @@ public class GraspValveBehavior extends BehaviorInterface
       this.handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters,
             fullRobotModel, yoTime);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
       reachedMidPoint = new BooleanYoVariable("reachedMidPoint", registry);

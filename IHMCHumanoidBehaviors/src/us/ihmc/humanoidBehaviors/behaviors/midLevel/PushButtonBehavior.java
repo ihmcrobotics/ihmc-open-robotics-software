@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -51,7 +51,7 @@ public class PushButtonBehavior extends BehaviorInterface
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HandPoseBehavior handPoseBehavior;
-   private final FingerStateBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior fingerStateBehavior;
    private FingerStateTask closeHandTask;
 
 
@@ -118,7 +118,7 @@ public class PushButtonBehavior extends BehaviorInterface
       }
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
       closeHandTask = new FingerStateTask(robotSide,HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
 
