@@ -644,24 +644,28 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
          OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
 
-         oneDoFJointFeedforward.setQ(oneDoFJoint.getQ());
+         oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
       }
+      
+      feedForwardReferenceFrames.updateFrames();
       
       SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
       
-      centerOfMassFramePoint.setToZero(comFrame);
+      rootJoint.getJointTransform3D(rootJointPose);
+      feedForwardRootJoint.setPositionAndRotation(rootJointPose);
+      
+      feedForwardReferenceFrames.updateFrames();
+      
+      centerOfMassFramePoint.setToZero(feedForwardReferenceFrames.getCenterOfMassFrame());
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassPosition.set(centerOfMassFramePoint);
       desiredCoMPosition.set(centerOfMassPosition);
       
-      rootJoint.getJointTransform3D(rootJointPose);
-      feedForwardRootJoint.setPositionAndRotation(rootJointPose);
       filteredDesiredCoMYaw.reset();
       filteredDesiredCoMPitch.reset();
       filteredDesiredCoMRoll.reset();
       
-      feedForwardReferenceFrames.updateFrames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ReferenceFrame footFrame = feedForwardReferenceFrames.getFootFrame(robotQuadrant);
@@ -676,7 +680,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       desiredCoMHeight.set(comHeight);
       filteredDesiredCoMHeight.reset();
-      
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
