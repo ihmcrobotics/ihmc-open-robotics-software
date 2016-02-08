@@ -28,7 +28,7 @@ class RobotiqControlThread extends HandControlThread
    
    private final RobotSide robotSide;
    private final RobotiqHandInterface robotiqHand;
-   private final HandDesiredConfigurationSubscriber fingerStateProvider;
+   private final HandDesiredConfigurationSubscriber handDesiredConfigurationSubscriber;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private int errorCount = 0;
@@ -39,11 +39,11 @@ class RobotiqControlThread extends HandControlThread
       super(robotSide);
       this.robotSide = robotSide;
       robotiqHand = new RobotiqHandInterface(robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand));
-      fingerStateProvider = new HandDesiredConfigurationSubscriber(robotSide);
+      handDesiredConfigurationSubscriber = new HandDesiredConfigurationSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
-      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, fingerStateProvider);
+      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
 
@@ -126,7 +126,7 @@ class RobotiqControlThread extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         fingerStateProvider.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
+         handDesiredConfigurationSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -139,9 +139,9 @@ class RobotiqControlThread extends HandControlThread
             if (handStatus.hasError())
                handStatus.printError();
 
-            if (fingerStateProvider.isNewDesiredConfigurationAvailable())
+            if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
             {
-               HandDesiredConfigurationMessage packet = fingerStateProvider.pullMessage();
+               HandDesiredConfigurationMessage packet = handDesiredConfigurationSubscriber.pullMessage();
                HandConfiguration state = packet.getHandDesiredConfiguration();
                
                switch (state)

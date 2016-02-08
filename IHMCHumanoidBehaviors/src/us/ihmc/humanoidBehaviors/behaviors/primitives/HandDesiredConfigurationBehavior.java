@@ -12,7 +12,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class HandDesiredConfigurationBehavior extends BehaviorInterface
 {
-   private HandDesiredConfigurationMessage outgoingFingerStatePacket;
+   private HandDesiredConfigurationMessage outgoingHandDesiredConfigurationMessage;
    private final BooleanYoVariable hasInputBeenSet;
    private final BooleanYoVariable hasPacketBeenSet;
 
@@ -39,35 +39,35 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
       trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
    }
 
-   public void setInput(HandDesiredConfigurationMessage fingerStatePacket)
+   public void setInput(HandDesiredConfigurationMessage handDesiredConfigurationMessage)
    {
-      this.outgoingFingerStatePacket = fingerStatePacket;
+      this.outgoingHandDesiredConfigurationMessage = handDesiredConfigurationMessage;
       hasInputBeenSet.set(true);
       
       if (DEBUG)
-         PrintTools.debug(this, "Input has been set: " + outgoingFingerStatePacket);
+         PrintTools.debug(this, "Input has been set: " + outgoingHandDesiredConfigurationMessage);
    }
 
    @Override
    public void doControl()
    {
-      if (!hasPacketBeenSet.getBooleanValue() && outgoingFingerStatePacket != null)
-         sendFingerStateToController();
+      if (!hasPacketBeenSet.getBooleanValue() && outgoingHandDesiredConfigurationMessage != null)
+         sendHandDesiredConfigurationToController();
    }
 
-   private void sendFingerStateToController()
+   private void sendHandDesiredConfigurationToController()
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingFingerStatePacket.setDestination(PacketDestination.CONTROLLER);
+         outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.CONTROLLER);
 
-         sendPacketToController(outgoingFingerStatePacket);
-         sendPacketToNetworkProcessor(outgoingFingerStatePacket);
+         sendPacketToController(outgoingHandDesiredConfigurationMessage);
+         sendPacketToNetworkProcessor(outgoingHandDesiredConfigurationMessage);
          hasPacketBeenSet.set(true);
          startTime.set(yoTime.getDoubleValue());
          
          if (DEBUG)
-            PrintTools.debug(this, "Sending FingerState Packet to Controller: " + outgoingFingerStatePacket);
+            PrintTools.debug(this, "Sending HandDesiredConfigurationMessage to Controller: " + outgoingHandDesiredConfigurationMessage);
       }
    }
 
@@ -86,10 +86,10 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
-         stopFingerStatePacket.setDestination(PacketDestination.UI);
-         sendPacketToController(stopFingerStatePacket);
-         sendPacketToNetworkProcessor(stopFingerStatePacket);
+         HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
+         stopMessage.setDestination(PacketDestination.UI);
+         sendPacketToController(stopMessage);
+         sendPacketToNetworkProcessor(stopMessage);
       }
       isStopped.set(true);
    }
@@ -104,10 +104,10 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopFingerStatePacket = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
-         stopFingerStatePacket.setDestination(PacketDestination.UI);
-         sendPacketToController(stopFingerStatePacket);
-         sendPacketToNetworkProcessor(stopFingerStatePacket);
+         HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
+         stopMessage.setDestination(PacketDestination.UI);
+         sendPacketToController(stopMessage);
+         sendPacketToNetworkProcessor(stopMessage);
       }
       isPaused.set(true);
       
@@ -122,7 +122,7 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
       hasPacketBeenSet.set(false);
       if (hasInputBeenSet())
       {
-         sendFingerStateToController();
+         sendHandDesiredConfigurationToController();
       }
       if (DEBUG)
          PrintTools.debug(this, "Resuming Behavior");
@@ -161,7 +161,7 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
    {
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);
-      outgoingFingerStatePacket = null;
+      outgoingHandDesiredConfigurationMessage = null;
       isPaused.set(false);
       isStopped.set(false);
 

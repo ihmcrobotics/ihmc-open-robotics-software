@@ -13,7 +13,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -33,7 +32,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
    private final HandPoseBehavior handPoseBehavior;
    private final HandPoseListBehavior handPoseListBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 
    private final SideDependentList<FramePose> handTargets = new SideDependentList<FramePose>();
 
@@ -65,7 +64,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       handPoseListBehavior = new HandPoseListBehavior(outgoingCommunicationBridge, yoTime);
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       //		this.attachNetworkProcessorListeningQueue(inputListeningQueue, VideoPacket.class);
    }
 
@@ -95,7 +94,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CRUSH, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CRUSH, handDesiredConfigurationBehavior, yoTime));
    }
 
    private void performFistPump(RobotSide side)
@@ -115,8 +114,8 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.HALF_CLOSE, fingerStateBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE_THUMB, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.HALF_CLOSE, handDesiredConfigurationBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE_THUMB, handDesiredConfigurationBehavior, yoTime));
 
    }
 
@@ -153,7 +152,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       handPose.setPosition(0.25, side.negateIfLeftSide(0.25), 0.0);
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.PINCH_GRIP, fingerStateBehavior, yoTime));
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.PINCH_GRIP, handDesiredConfigurationBehavior, yoTime));
    }
 
    //hands in towards chest
@@ -172,7 +171,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
          handPose.setOrientation(pointAtChestRotation);
          handPose.changeFrame(ReferenceFrame.getWorldFrame());
          pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.PINCH_GRIP, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.PINCH_GRIP, handDesiredConfigurationBehavior, yoTime));
          System.out.println("running in parallel!");
       }
    }
@@ -200,22 +199,22 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       switch(numberOfFingers)
       {
       case 3:
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime));
          break;
          
       case 2: 
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN_INDEX, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN_MIDDLE, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE_THUMB, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN_INDEX, handDesiredConfigurationBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN_MIDDLE, handDesiredConfigurationBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE_THUMB, handDesiredConfigurationBehavior, yoTime));
          break;
       
       case 1: 
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN_INDEX, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CRUSH_MIDDLE, fingerStateBehavior, yoTime));
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE_THUMB, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.OPEN_INDEX, handDesiredConfigurationBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CRUSH_MIDDLE, handDesiredConfigurationBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE_THUMB, handDesiredConfigurationBehavior, yoTime));
 
       default:
-         pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE, fingerStateBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, new HandDesiredConfigurationTask(side, HandConfiguration.CLOSE, handDesiredConfigurationBehavior, yoTime));
       }
    }
 

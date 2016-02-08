@@ -47,7 +47,7 @@ public class GraspValveBehavior extends BehaviorInterface
    private final ComHeightBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
-   private final HandDesiredConfigurationBehavior fingerStateBehavior;
+   private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 
    private final BooleanYoVariable haveInputsBeenSet;
    private final BooleanYoVariable reachedMidPoint;
@@ -73,7 +73,7 @@ public class GraspValveBehavior extends BehaviorInterface
       this.handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters,
             fullRobotModel, yoTime);
-      fingerStateBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
       reachedMidPoint = new BooleanYoVariable("reachedMidPoint", registry);
@@ -110,17 +110,17 @@ public class GraspValveBehavior extends BehaviorInterface
       
       double comHeightDesiredOffset = finalGraspHandFramePose.getZ() - 1.27;
       CoMHeightTask comHeightTask = new CoMHeightTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
-      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime);
       HandPoseTask moveHandToFavorableGraspApproachLocation = new HandPoseTask(robotSideOfGraspingHand, 1.0, preGraspHandFramePose, Frame.WORLD,
             handPoseBehavior, yoTime);
       HandPoseTask movePalmToBeInContactWithValveRim = new HandPoseTask(robotSideOfGraspingHand, 1.0, finalGraspHandFramePose, Frame.WORLD, handPoseBehavior,
             yoTime, stopHandIfCollision);
-      HandDesiredConfigurationTask closeHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
+      HandDesiredConfigurationTask closeHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.CLOSE, handDesiredConfigurationBehavior, yoTime);
 
       pipeLine.clearAll();
       pipeLine.submitSingleTaskStage(comHeightTask);
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, moveHandToFavorableGraspApproachLocation);
-      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, openHandTask);
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, openHandTask);
       pipeLine.submitSingleTaskStage(movePalmToBeInContactWithValveRim);
 
       if (!graspLocation.equals(ValveGraspLocation.CENTER))
@@ -227,7 +227,7 @@ public class GraspValveBehavior extends BehaviorInterface
 	      CoMHeightTask comHeightTask = new CoMHeightTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
 	      
 
-	      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.OPEN, fingerStateBehavior, yoTime);
+	      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime);
 
 
 	      WholeBodyInverseKinematicTask moveHandToFavorableGraspApproachLocation = new WholeBodyInverseKinematicTask(robotSideOfGraspingHand, yoTime,
@@ -237,7 +237,7 @@ public class GraspValveBehavior extends BehaviorInterface
 	            wholeBodyInverseKinematicBehavior, graspPoses.get(1), 2.0, 10, ControlledDoF.DOF_3P3R, false);
 
 
-	      HandDesiredConfigurationTask closeHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.CLOSE, fingerStateBehavior, yoTime);
+	      HandDesiredConfigurationTask closeHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.CLOSE, handDesiredConfigurationBehavior, yoTime);
 
 	      pipeLine.clearAll();
 	      pipeLine.submitSingleTaskStage(openHandTask);
@@ -289,7 +289,7 @@ public class GraspValveBehavior extends BehaviorInterface
    public void stop()
    {
       handPoseBehavior.stop();
-      fingerStateBehavior.stop();
+      handDesiredConfigurationBehavior.stop();
    }
 
    @Override
@@ -302,14 +302,14 @@ public class GraspValveBehavior extends BehaviorInterface
    public void pause()
    {
       handPoseBehavior.pause();
-      fingerStateBehavior.pause();
+      handDesiredConfigurationBehavior.pause();
    }
 
    @Override
    public void resume()
    {
       handPoseBehavior.resume();
-      fingerStateBehavior.resume();
+      handDesiredConfigurationBehavior.resume();
    }
 
    @Override
