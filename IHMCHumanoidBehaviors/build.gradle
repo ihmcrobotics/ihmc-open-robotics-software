@@ -14,6 +14,11 @@ project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
+repositories {
+	maven {
+	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+	}
+}
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
@@ -21,7 +26,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
 
 

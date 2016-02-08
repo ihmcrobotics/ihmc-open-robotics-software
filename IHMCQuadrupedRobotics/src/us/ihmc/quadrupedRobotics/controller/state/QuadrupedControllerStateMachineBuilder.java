@@ -41,13 +41,13 @@ public class QuadrupedControllerStateMachineBuilder
 
    public void addDoNothingController()
    {
-      controllers.add(new QuadrupedDoNothingController(commonControllerParameters.getFullRobotModel()));
+      controllers.add(new QuadrupedDoNothingController(commonControllerParameters.getFullRobotModel(), commonControllerParameters.getParentRegistry()));
    }
 
    public void addStandPrepController()
    {
       controllers.add(new QuadrupedStandPrepController(robotParameters, commonControllerParameters.getFullRobotModel(),
-            commonControllerParameters.getControlDt()));
+            commonControllerParameters.getControlDt(), commonControllerParameters.getParentRegistry()));
    }
 
    public void addStandReadyController()

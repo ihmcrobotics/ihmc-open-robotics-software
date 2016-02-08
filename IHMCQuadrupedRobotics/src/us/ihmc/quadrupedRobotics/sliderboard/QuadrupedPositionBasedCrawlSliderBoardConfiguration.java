@@ -33,7 +33,7 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       sliderBoardConfigurationManager.setSlider(4, "desiredCoMHeight", scs, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(5, "filteredDesiredCoMHeightAlphaBreakFrequency", scs, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(6, "subCircleRadius", scs, 0.0, 0.3);
-      sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
+//      sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
       sliderBoardConfigurationManager.saveConfiguration(positionCrawlCoMShift);
       
       
@@ -45,7 +45,7 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       sliderBoardConfigurationManager.setKnob(5, "subCircleRadius", scs, 0.0, 0.3);
       sliderBoardConfigurationManager.setKnob(6, "xOffsetFromCenterOfHips", scs, -0.5, 0.5);
       sliderBoardConfigurationManager.setKnob(7, "yOffsetFromCenterOfHips", scs, -0.5, 0.5);
-      sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
+//      sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
       
       sliderBoardConfigurationManager.setSlider(1, "minimumVelocityForFullSkew", scs, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(2, "strideLength", scs, 0.0, 1.5);
@@ -60,7 +60,7 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       sliderBoardConfigurationManager.setKnob(1, "userProvidedDesiredVelocityX", scs, -0.4, 0.4);
       sliderBoardConfigurationManager.setKnob(2, "userProvidedDesiredVelocityY", scs, -0.5, 0.5);
       sliderBoardConfigurationManager.setKnob(4, "desiredCoMHeight", scs, 0.0, 1.0);
-      sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
+//      sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
       
       sliderBoardConfigurationManager.setSlider(1, "userProvidedDesiredYawRate", scs, -0.3, 0.3);
       sliderBoardConfigurationManager.setSlider(2, "desiredCoMOrientationPitch", scs, -0.5, 0.5);

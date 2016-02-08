@@ -1,6 +1,0 @@
-geometry_msgs/Point point
----
-int8 occupancy
-int8 FREE=0
-int8 OCCUPIED=1
-int8 UNKNOWN=-1

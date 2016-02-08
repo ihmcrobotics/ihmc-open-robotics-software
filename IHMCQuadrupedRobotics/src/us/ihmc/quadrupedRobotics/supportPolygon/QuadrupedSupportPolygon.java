@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -26,7 +25,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    private final QuadrantDependentFootstepList footsteps = new QuadrantDependentFootstepList();
    
-   private final FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
    private final FramePoint temporaryFramePoint = new FramePoint();
    private final FramePoint temporaryFramePoint2 = new FramePoint();
@@ -90,15 +89,15 @@ public class QuadrupedSupportPolygon implements Serializable
          // remove
          if (element == null && containsQuadrant(robotQuadrant))
          {
-            framePointsForStorageWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
             super.set(robotQuadrant, element);
             return;
          }
          // add
          else if (element != null && !containsQuadrant(robotQuadrant))
          {
-            framePointsForStorageWhenNull[robotQuadrant.ordinal()].setIncludingFrame(element);
-            super.set(robotQuadrant, element);
+            FramePoint storageWhenNull = framePointsForStorageWhenNull[robotQuadrant.ordinal()];
+            storageWhenNull.setIncludingFrame(element);
+            super.set(robotQuadrant, storageWhenNull);
             return;
          }
          // replace
@@ -451,31 +450,18 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       footsteps.clear();
    }
-   
-   private void computeFramePolygonConvex2d()
-   {
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
-      for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
-      {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
-      }
-      frameConvexPolygon2d.update();
-   }
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
-   {
-      FrameConvexPolygon2d frameConvexPolygon2d = yoFrameConvexPolygon2d.getFrameConvexPolygon2d();
-      
-      frameConvexPolygon2d.clear();
-      frameConvexPolygon2d.changeFrame(getReferenceFrame());
+   {      
+      tempFrameConvexPolygon2d.clear();
+      tempFrameConvexPolygon2d.changeFrame(getReferenceFrame());
       for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
       {
-         frameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
+         tempFrameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
       }
-      frameConvexPolygon2d.update();
-      
-      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
+      tempFrameConvexPolygon2d.update();
+
+      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
    }
 
    /**
@@ -536,21 +522,6 @@ public class QuadrupedSupportPolygon implements Serializable
          }
       }
       return closestQuadrant;
-   }
-
-   /**
-    * This will return the vector normal for each edge. The normal of an
-    * edge points outward of the support polygon. The ordering is of the edges
-    * starts with the FL and goes clockwise. E.g., if the swing leg is the FR,
-    * the edges will be: FL-HR, HR-HL, HL-FL
-    *
-    * @return Vector2d[]
-    */
-   public void getEdgeNormals2d(FrameVector2d[] normalsToPack)
-   {
-      computeFramePolygonConvex2d();
-      
-      frameConvexPolygon2d.getOutwardEdgeNormals(normalsToPack);
    }
 
    public void getCentroid2d(FramePoint centroidToPack)
@@ -882,26 +853,6 @@ public class QuadrupedSupportPolygon implements Serializable
 
       // find intersection point of the two bisecting vectors
       GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, tempPointListForInCirclePoint[1], v2p, tempPointListForInCirclePoint[2], v3p);
-   }
-
-   public int getNumberOfFootstepsOnTopOfEachOther()
-   {
-      int total = 0;
-      RobotQuadrant[] quadrants = RobotQuadrant.values;
-      for (int i = 0; i < quadrants.length; i++)
-      {
-         if(containsFootstep(quadrants[i]))
-         {
-            for (int j = i + 1; j < quadrants.length; j++)
-            {
-               if(getFootstep(quadrants[i]).epsilonEquals(getFootstep(quadrants[j]), 0.001))
-               {
-                  total++;
-               }
-            }
-         }
-      }
-      return total;
    }
 
    /**
@@ -1249,17 +1200,25 @@ public class QuadrupedSupportPolygon implements Serializable
       return distances;
    }
 
-   public boolean hasSameFootsteps(QuadrupedSupportPolygon polyTwo)
+   /**
+    * Check if the polygons are same size and contain the same quadrants.
+    * 
+    * @param polygonToCompare
+    * @return contain same quadrants
+    */
+   public boolean containsSameQuadrants(QuadrupedSupportPolygon polygonToCompare)
    {
-      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      if (size() != polygonToCompare.size())
+         return false;
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         FramePoint thisFootstep = getFootstep(robotQuadrant);
-         FramePoint otherFootstep = polyTwo.getFootstep(robotQuadrant);
-         if(!thisFootstep.epsilonEquals(otherFootstep, 0.005))
+         if (!polygonToCompare.containsFootstep(robotQuadrant))
          {
             return false;
          }
       }
+      
       return true;
    }
 
@@ -1488,8 +1447,8 @@ public class QuadrupedSupportPolygon implements Serializable
          throw new UndefinedOperationException("Swing legs should be on same side.");
 
       // verify exactly two legs epsilon match
-      if (getNumberOfMatchinfFootsteps(polygonToCompare) != 2)
-         throw new UndefinedOperationException("There must be exactly two similar foosteps not " + getNumberOfMatchinfFootsteps(polygonToCompare));
+      if (getNumberOfEqualFootsteps(polygonToCompare) != 2)
+         throw new UndefinedOperationException("There must be exactly two similar foosteps not " + getNumberOfEqualFootsteps(polygonToCompare));
 
       // verify specified swing leg name is one of the swinging (same side) leg names
       if ((quadrantForIntersection != thisSwingLeg) && (quadrantForIntersection != compareSwingLeg))
@@ -1514,22 +1473,18 @@ public class QuadrupedSupportPolygon implements Serializable
     *
     * @return int the number of footsteps that epsilon match
     */
-   public int getNumberOfMatchinfFootsteps(QuadrupedSupportPolygon polygon)
+   public int getNumberOfEqualFootsteps(QuadrupedSupportPolygon polygonToCompare)
    {
-      // check the number of null legs
-      int numberOfMatching = 0;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      int numberOfEqual = 0;
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         FramePoint thisFootStep = getFootstep(robotQuadrant);
-         FramePoint otherFootStep = polygon.getFootstep(robotQuadrant);
-         
-         if (thisFootStep != null && thisFootStep.epsilonEquals(otherFootStep, 0.0005))
+         if (getFootstep(robotQuadrant).epsilonEquals(polygonToCompare.getFootstep(robotQuadrant), 0.0005))
          {
-            numberOfMatching++;
+            ++numberOfEqual;
          }
       }
    
-      return numberOfMatching;
+      return numberOfEqual;
    }
 
    /**
@@ -1635,48 +1590,40 @@ public class QuadrupedSupportPolygon implements Serializable
    }
    
    /**
-    * If this and the given supportPolygon differ only by one footstep, this returns the leg that differs.
-    * Else it returns null
-    * @param supportPolygonEnd SupportPolygon
-    * @return LegName
+    *  If the two polygons differ only in that one footstep has moved, return that quadrant.
+    *  
+    * @param next polygon
+    * @return quadrant that has moved
     */
-   public RobotQuadrant getSwingLegFromHereToNextPolygon(QuadrupedSupportPolygon nextSupportPolygon)
+   public RobotQuadrant getWhichFootstepHasMoved(QuadrupedSupportPolygon nextPolygon)
    {
+      if (!containsSameQuadrants(nextPolygon))
+      {
+         throw new IllegalArgumentException("Polygons contain different quadrants");
+      }
+      
       RobotQuadrant swingLeg = null;
-
-      // First Check using ==
-      for (RobotQuadrant legName : RobotQuadrant.values())
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         if (getFootstep(legName) != nextSupportPolygon.getFootstep(legName))
+         if (!getFootstep(robotQuadrant).epsilonEquals(nextPolygon.getFootstep(robotQuadrant), 1e-5))
          {
-            if (swingLeg != null)
+            if (swingLeg == null)
             {
-               swingLeg = null;
-
-               break;
+               swingLeg = robotQuadrant;
             }
-
-            swingLeg = legName;
+            else // make sure only one foot differs
+            {
+               throw new IllegalArgumentException("More than one foot differs");
+            }
          }
       }
-
-      if (swingLeg != null)
-         return swingLeg;
-
-      // If that doesn't give an answer, then check using isEpsilonEqualTo
-      for (RobotQuadrant legName : RobotQuadrant.values())
+      
+      if (swingLeg == null)
       {
-         if (!getFootstep(legName).epsilonEquals(nextSupportPolygon.getFootstep(legName), 1e-5))
-         {
-            if (swingLeg != null)
-            {
-               return null;
-            }
-
-            swingLeg = legName;
-         }
+         throw new IllegalArgumentException("No feet were different");
       }
-
+      
       return swingLeg;
    }
 
