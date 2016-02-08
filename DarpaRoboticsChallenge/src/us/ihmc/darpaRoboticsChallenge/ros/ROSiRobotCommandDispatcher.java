@@ -7,14 +7,14 @@ import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationSubscriber;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommandDispatcher implements Runnable
 {
-   private final FingerStateProvider fingerStateProvider = new FingerStateProvider(null);
+   private final HandDesiredConfigurationSubscriber fingerStateProvider = new HandDesiredConfigurationSubscriber(null);
 
    private final ROSiRobotCommunicator rosHandCommunicator;
 
@@ -43,9 +43,9 @@ public class ROSiRobotCommandDispatcher implements Runnable
    {
       while (true)
       {
-         if (fingerStateProvider.isNewFingerStateAvailable())
+         if (fingerStateProvider.isNewDesiredConfigurationAvailable())
          {
-            HandDesiredConfigurationMessage packet = fingerStateProvider.pullPacket();
+            HandDesiredConfigurationMessage packet = fingerStateProvider.pullMessage();
             rosHandCommunicator.sendHandCommand(packet);
          }
       }

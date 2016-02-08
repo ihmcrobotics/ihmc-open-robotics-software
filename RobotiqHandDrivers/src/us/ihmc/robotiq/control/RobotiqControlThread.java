@@ -7,7 +7,7 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationSubscriber;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
@@ -28,7 +28,7 @@ class RobotiqControlThread extends HandControlThread
    
    private final RobotSide robotSide;
    private final RobotiqHandInterface robotiqHand;
-   private final FingerStateProvider fingerStateProvider;
+   private final HandDesiredConfigurationSubscriber fingerStateProvider;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private int errorCount = 0;
@@ -39,7 +39,7 @@ class RobotiqControlThread extends HandControlThread
       super(robotSide);
       this.robotSide = robotSide;
       robotiqHand = new RobotiqHandInterface(robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand));
-      fingerStateProvider = new FingerStateProvider(robotSide);
+      fingerStateProvider = new HandDesiredConfigurationSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
@@ -139,9 +139,9 @@ class RobotiqControlThread extends HandControlThread
             if (handStatus.hasError())
                handStatus.printError();
 
-            if (fingerStateProvider.isNewFingerStateAvailable())
+            if (fingerStateProvider.isNewDesiredConfigurationAvailable())
             {
-               HandDesiredConfigurationMessage packet = fingerStateProvider.pullPacket();
+               HandDesiredConfigurationMessage packet = fingerStateProvider.pullMessage();
                HandConfiguration state = packet.getHandDesiredConfiguration();
                
                switch (state)

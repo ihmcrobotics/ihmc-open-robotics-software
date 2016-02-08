@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationSubscriber;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
@@ -48,7 +48,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
 
-   private final SideDependentList<FingerStateProvider> fingerStateProviders = new SideDependentList<>();
+   private final SideDependentList<HandDesiredConfigurationSubscriber> fingerStateProviders = new SideDependentList<>();
    private final SideDependentList<ValkyrieFingerSetController> fingerSetControllers = new SideDependentList<>();
 
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
@@ -123,7 +123,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
             }
          }
          
-         fingerStateProviders.put(robotSide, new FingerStateProvider(robotSide));
+         fingerStateProviders.put(robotSide, new HandDesiredConfigurationSubscriber(robotSide));
          if (globalDataProducer != null)
             globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, fingerStateProviders.get(robotSide));
          fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry, controllerRegistry));
@@ -215,9 +215,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (fingerStateProviders.get(robotSide).isNewFingerStateAvailable())
+         if (fingerStateProviders.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration fingerState = fingerStateProviders.get(robotSide).pullPacket().getHandDesiredConfiguration();
+            HandConfiguration fingerState = fingerStateProviders.get(robotSide).pullMessage().getHandDesiredConfiguration();
             
             PrintTools.debug(DEBUG, this, "Recieved new FingerState Packet: " + fingerState);
             
