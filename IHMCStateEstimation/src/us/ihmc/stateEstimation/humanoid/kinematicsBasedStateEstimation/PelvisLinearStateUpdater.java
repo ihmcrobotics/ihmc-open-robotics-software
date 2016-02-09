@@ -1,9 +1,10 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+
 import static us.ihmc.robotics.math.filters.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +43,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
+
 
 /**
  * PelvisLinearUpdater estimates the pelvis position and linear velocity using leg kinematics and IMU acceleration data.
@@ -85,7 +87,8 @@ public class PelvisLinearStateUpdater
    private final Map<RigidBody, GlitchFilteredBooleanYoVariable> haveFeetHitGroundFiltered = new LinkedHashMap<>();
 //   private final SideDependentList<BooleanYoVariable> areFeetTrusted = new SideDependentList<BooleanYoVariable>();
    private final Map<RigidBody, BooleanYoVariable> areFeetTrusted = new LinkedHashMap<>();
-   private final Set<RigidBody> tempFeetTrustedSet = new LinkedHashSet<>();
+   private final List<RigidBody> listOfTrustedFeet = new ArrayList<RigidBody>();
+   private final List<RigidBody> listOfUnTrustedFeet = new ArrayList<RigidBody>();
    
    private final ReferenceFrame rootJointFrame;
    private final Map<RigidBody, ReferenceFrame> footFrames;
@@ -101,12 +104,12 @@ public class PelvisLinearStateUpdater
    private enum SlippageCompensatorMode {LOAD_THRESHOLD, MIN_PELVIS_ACCEL};
    private final EnumYoVariable<SlippageCompensatorMode> slippageCompensatorMode = new EnumYoVariable<SlippageCompensatorMode>("slippageCompensatorMode", registry, SlippageCompensatorMode.class);
    
-//   private enum EstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT, IMU_ONLY};
+   private enum EstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT, IMU_ONLY};
 
 //   private final SideDependentList<EstimationState> robotSideToEstimationState = new SideDependentList<EstimationState>(
 //         EstimationState.TRUST_LEFT_FOOT, EstimationState.TRUST_RIGHT_FOOT);
    
-//   private final EnumYoVariable<EstimationState> requestedState = new EnumYoVariable<EstimationState>("requestedEstimationState", "", registry, EstimationState.class, true);
+   private final EnumYoVariable<EstimationState> requestedState = new EnumYoVariable<EstimationState>("requestedEstimationState", "", registry, EstimationState.class, true);
    private final BooleanYoVariable requestStopEstimationOfPelvisLinearState = new BooleanYoVariable("userRequestStopEstimationOfPelvisLinearState", registry);
    
 //   private final StateMachine<EstimationState> stateMachine;
@@ -261,7 +264,7 @@ public class PelvisLinearStateUpdater
 //               hasFootHitTheGroundFiltered.setWindowSize(windowSize);
 //            }
 //         });
-         
+          
          ReferenceFrame footFrame = feetContactablePlaneBodies.get(foot).getSoleFrame();
          footFrames.put(foot, footFrame);
          
@@ -408,7 +411,20 @@ public class PelvisLinearStateUpdater
 	      }
 	   }
 	   
-	   // TODO previously set requested state, now set trusted feet	   
+	   if (numberOfEndEffectorsTrusted == 0)
+	   {
+//	       use imu only
+	   }
+	   else if (numberOfEndEffectorsTrusted > 0)
+	   {
+//	      kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet);
+	   }
+	   else
+	   {
+	      throw new RuntimeException("Computation of the number of end effectors to be trusted for state estimation is broken, computed: " + numberOfEndEffectorsTrusted);
+	   }
+	   
+	   // adapted stateMachine.doAction();
       
 	   updateRootJoint();
       
@@ -532,46 +548,38 @@ public class PelvisLinearStateUpdater
             areFeetTrusted.get(foot).set(haveFeetHitGroundFiltered.get(foot).getBooleanValue());
       }
       
+      // Else if there is a foot with a force past the threshold trust the force and not the CoP      
       else
       {
-         // Else if there is a foot with a force past the threshold trust the force and not the CoP      
-         tempFeetTrustedSet.clear();
-         
          for(RigidBody foot : feet)
          {
             if(footSwitches.get(foot).getForceMagnitudePastThreshhold())
             {
-               tempFeetTrustedSet.add(foot);
+               areFeetTrusted.get(foot).set(true);
                numberOfEndEffectorsTrusted++;
+               // TODO set all others to false
             }
          }
-         
-         if(numberOfEndEffectorsTrusted > 0)
-         {
-            for(RigidBody foot : feet)
-               areFeetTrusted.get(foot).set(tempFeetTrustedSet.contains(foot));
-         }
-         
-         else if(ALLOW_USING_IMU_ONLY)
+      }     
+      
+      if(numberOfEndEffectorsTrusted == 0)
+      {
+         if(ALLOW_USING_IMU_ONLY)
          {
             for(RigidBody foot : feet)
                areFeetTrusted.get(foot).set(false);
          }
-         
-         // Else keep the old states
          else
          {
             for (RigidBody foot : feet)
             {
                if (areFeetTrusted.get(foot).getBooleanValue()) 
                   numberOfEndEffectorsTrusted++;
-            }            
+            }
          }
       }
       
-      return numberOfEndEffectorsTrusted;
-   }
-  
+
 //      for (RobotSide robotSide : RobotSide.values)
 //      {
 //         if (footSwitches.get(robotSide).hasFootHitGround())
@@ -618,6 +626,9 @@ public class PelvisLinearStateUpdater
 //               numberOfEndEffectorsTrusted++;
 //         }
 //      }
+
+      return numberOfEndEffectorsTrusted;
+   }
    
    private int filterTrustedFeetBasedOnContactForces(int numberOfEndEffectorsTrusted)
    {
@@ -787,6 +798,20 @@ public class PelvisLinearStateUpdater
       centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       yoCenterOfMassVelocity.set(centerOfMassVelocity);
    }
+   
+   private void updateTrustedFeetLists()
+   {
+      listOfTrustedFeet.clear();
+      listOfUnTrustedFeet.clear();
+      
+      for(RigidBody foot : feet)
+      {
+         if(areFeetTrusted.get(foot).getBooleanValue())
+            listOfTrustedFeet.add(foot);
+         else
+            listOfUnTrustedFeet.add(foot);
+      }
+   }
 
    public void initializeCoMPositionToActual(Point3d initialCoMPosition)
    {
@@ -820,5 +845,5 @@ public class PelvisLinearStateUpdater
    public void getEstimatedCoMVelocity(FrameVector comVelocityToPack)
    {
       yoCenterOfMassVelocity.getFrameTupleIncludingFrame(comVelocityToPack);
-   }
+   }   
 }
