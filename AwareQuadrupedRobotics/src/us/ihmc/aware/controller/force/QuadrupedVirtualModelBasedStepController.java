@@ -570,23 +570,23 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       bodyOrientationController.compute(bodyTorqueSetpoint, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, bodyTorqueFeedforwardSetpoint);
 
       // compute horizontal forces to track desired instantaneous capture point
-      icpPositionSetpoint.setIncludingFrame(supportCentroidEstimate);
-      icpVelocitySetpoint.setToZero(supportFrame);
-      dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
-      dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
-      dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      if (checkInQuadSupport())
       {
-         if (footStateMachine.get(robotQuadrant).getState() != FootState.SUPPORT)
-         {
-            // compute dynamic dcm trajectory if robot taking a step
-            dcmTrajectory.computeTrajectory(currentTime);
-            dcmTrajectory.getPosition(dcmPositionSetpoint);
-            dcmTrajectory.getVelocity(dcmVelocitySetpoint);
-            icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
-            icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
-            icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
-         }
+         icpPositionSetpoint.setIncludingFrame(supportCentroidEstimate);
+         icpVelocitySetpoint.setToZero(supportFrame);
+         dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
+         dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
+         dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
+      }
+      else
+      {
+         // compute dynamic dcm trajectory if robot taking a step
+         dcmTrajectory.computeTrajectory(currentTime);
+         dcmTrajectory.getPosition(dcmPositionSetpoint);
+         dcmTrajectory.getVelocity(dcmVelocitySetpoint);
+         icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
+         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
+         icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
       }
       dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
@@ -655,6 +655,17 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoComHeightEstimate.set(comHeightEstimate);
    }
 
+   private boolean checkInQuadSupport()
+   {
+      boolean inQuadSupport = true;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (footStateMachine.get(robotQuadrant).getState() != FootState.SUPPORT)
+            inQuadSupport = false;
+      }
+      return inQuadSupport;
+   }
+
    @Override public QuadrupedForceControllerEvent process()
    {
       readYoVariables();
@@ -690,6 +701,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          }
       }
 
+      // initialize setpoints
+      updateEstimates();
+      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
+      dcmVelocitySetpoint.setToZero();
+
       // initialize controllers and state machines
       virtualModelController.reset();
       contactForceOptimization.reset();
@@ -719,13 +735,12 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       }
 
       // FIXME: provide an external interface to test steps
-      double stanceWidth = 0.35;
+      double stanceWidth = 0.25;
       double stanceLength = 1.2;
-      double stepDuration = 0.75;
-      double stepTimeShift = 1.5;
-      double strideLength = 0.3;
+      double stepDuration = 0.50;
+      double stepTimeShift = 1.00;
+      double strideLength = 0.35;
 
-      updateEstimates();
       double currentTime = robotTimestamp.getDoubleValue();
       TimeInterval timeInterval = new TimeInterval(0, stepDuration).shiftInterval(currentTime);
       FramePoint hindRightGoalPosition = new FramePoint(supportCentroidEstimate);
@@ -739,21 +754,24 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       hindRightGoalPosition.add(-stanceLength/2, -stanceWidth/2, 0);
       frontRightGoalPosition.add(stanceLength/2, -stanceWidth/2, 0);
-      hindLeftGoalPosition.add(-stanceLength/2, stanceWidth/2, 0);
-      frontLeftGoalPosition.add(stanceLength/2, stanceWidth/2, 0);
+      hindLeftGoalPosition.add(-stanceLength/2 + strideLength/2, stanceWidth/2, 0);
+      frontLeftGoalPosition.add(stanceLength/2 + strideLength/2, stanceWidth/2, 0);
       addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_RIGHT, hindRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
       addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_RIGHT, frontRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
       addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_LEFT, hindLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
       addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_LEFT, frontLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
 
-      hindRightGoalPosition.add(strideLength, 0, 0);
-      frontRightGoalPosition.add(strideLength, 0, 0);
-      hindLeftGoalPosition.add(strideLength,  0, 0);
-      frontLeftGoalPosition.add(strideLength, 0, 0);
-      addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_RIGHT, hindRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-      addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_RIGHT, frontRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-      addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_LEFT, hindLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-      addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_LEFT, frontLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+      for (int i = 0; i < 3; i++)
+      {
+         hindRightGoalPosition.add(strideLength, 0, 0);
+         frontRightGoalPosition.add(strideLength, 0, 0);
+         hindLeftGoalPosition.add(strideLength, 0, 0);
+         frontLeftGoalPosition.add(strideLength, 0, 0);
+         addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_RIGHT, hindRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+         addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_RIGHT, frontRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+         addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_LEFT, hindLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+         addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_LEFT, frontLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
+      }
    }
 
    @Override public void onExit()
@@ -890,6 +908,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       @Override public void onExit()
       {
+         // change setpoints to world frame when not in use
+         soleForceSetpoint.get(robotQuadrant).changeFrame(worldFrame);
+         solePositionSetpoint.get(robotQuadrant).changeFrame(worldFrame);
+         soleLinearVelocitySetpoint.get(robotQuadrant).changeFrame(worldFrame);
+         soleForceFeedforwardSetpoint.get(robotQuadrant).changeFrame(worldFrame);
       }
    }
 
