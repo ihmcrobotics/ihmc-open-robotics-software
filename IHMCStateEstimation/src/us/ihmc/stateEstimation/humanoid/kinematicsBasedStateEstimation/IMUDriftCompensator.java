@@ -328,10 +328,6 @@ public class IMUDriftCompensator
       twistCalculator.compute();
    }
    
-//   private final SideDependentList<FrameOrientation> footOrientations = new SideDependentList<FrameOrientation>(new FrameOrientation(), new FrameOrientation());
-//   private final SideDependentList<FrameOrientation> footOrientationsPrevValue = new SideDependentList<FrameOrientation>(new FrameOrientation(), new FrameOrientation());
-//   private final SideDependentList<FrameVector> footAxisAnglesPrevValue = new SideDependentList<FrameVector>(new FrameVector(), new FrameVector());
-   
    private final Map<RigidBody, FrameOrientation> footOrientations = new LinkedHashMap<RigidBody, FrameOrientation>();
    private final Map<RigidBody, FrameOrientation> footOrientationsPrevValue = new LinkedHashMap<RigidBody, FrameOrientation>();
    private final Map<RigidBody, FrameVector> footAxisAnglesPrevValue = new LinkedHashMap<RigidBody, FrameVector>();
@@ -371,6 +367,7 @@ public class IMUDriftCompensator
       footAngularVelocityAverage.setToZero();
       footAngularVelocityDifference.setToZero();
       
+      // FIXME generalize this for any foot length
       if(feet.size() == 2)
       {
          for(int i = 0; i < 2; i++)
@@ -397,16 +394,6 @@ public class IMUDriftCompensator
          yoFootAngularVelocityAverage.set(footAngularVelocityAverage);
          footAngularVelocityAverageFiltered.update();
       }
-      
-//      yoFootAngularVelocityDifference.setX(Math.abs(footAngularVelocitiesInWorldFilteredX.get(RobotSide.LEFT).getDoubleValue() - footAngularVelocitiesInWorldFilteredX.get(RobotSide.RIGHT).getDoubleValue()));
-//      yoFootAngularVelocityDifference.setY(Math.abs(footAngularVelocitiesInWorldFilteredY.get(RobotSide.LEFT).getDoubleValue() - footAngularVelocitiesInWorldFilteredY.get(RobotSide.RIGHT).getDoubleValue()));
-//      yoFootAngularVelocityDifference.setZ(Math.abs(footAngularVelocitiesInWorldFilteredZ.get(RobotSide.LEFT).getDoubleValue() - footAngularVelocitiesInWorldFilteredZ.get(RobotSide.RIGHT).getDoubleValue()));
-//         
-//      yoFootAngularVelocityAverage.setX(footAngularVelocitiesInWorldFilteredX.get(RobotSide.LEFT).getDoubleValue() + footAngularVelocitiesInWorldFilteredX.get(RobotSide.RIGHT).getDoubleValue());
-//      yoFootAngularVelocityAverage.setY(footAngularVelocitiesInWorldFilteredY.get(RobotSide.LEFT).getDoubleValue() + footAngularVelocitiesInWorldFilteredY.get(RobotSide.RIGHT).getDoubleValue());
-//      yoFootAngularVelocityAverage.setZ(footAngularVelocitiesInWorldFilteredZ.get(RobotSide.LEFT).getDoubleValue() + footAngularVelocitiesInWorldFilteredZ.get(RobotSide.RIGHT).getDoubleValue());
-//      yoFootAngularVelocityAverage.scale(0.5);
-//      footAngularVelocityAverageFiltered.update();
    }
    
    public void resetFootAngularVelocitiesFiltered()
