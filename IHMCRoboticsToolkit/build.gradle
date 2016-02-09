@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.9'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.10'
 }
 
 
@@ -26,7 +26,9 @@ dependencies {
 
 	compile group: 'org.ejml', name: 'denseC64', version: '0.28'
 	compile group: 'net.jafama', name: 'jafama', version: '2.1.0'
-	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
+	compile group: 'kryonet', name: 'kryonet', version: '2.21'
+    compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
+    compile group: 'com.esotericsoftware', name: 'jsonbeans', version: '0.7'
 	compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
 	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
