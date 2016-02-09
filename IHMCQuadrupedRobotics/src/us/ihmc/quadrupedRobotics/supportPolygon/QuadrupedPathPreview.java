@@ -103,7 +103,8 @@ public class QuadrupedPathPreview
 
          //get next step in future support
          RobotQuadrant nextRegularGaitSwingQuadrant = swingLeg.getNextRegularGaitSwingQuadrant();
-         QuadrupedSupportPolygon nextSwingLegSupportPolygon = updatedSupportPolygon.replaceFootstepCopy(swingLeg, desiredPosition);
+         QuadrupedSupportPolygon nextSwingLegSupportPolygon = new QuadrupedSupportPolygon();
+         updatedSupportPolygon.getAndReplaceFootstep(nextSwingLegSupportPolygon, swingLeg, desiredPosition);
          nextSwingLegSupportPolygon.removeFootstep(nextRegularGaitSwingQuadrant);
          drawSupportPolygon(nextSwingLegSupportPolygon, tripleSupportPolygons[i * 2 + 1]);
 
