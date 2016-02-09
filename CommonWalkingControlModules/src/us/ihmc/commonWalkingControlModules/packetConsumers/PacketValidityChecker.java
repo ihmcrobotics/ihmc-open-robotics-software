@@ -3,12 +3,14 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
+import us.ihmc.humanoidRobotics.communication.packets.SE3Waypoint;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
@@ -549,5 +551,85 @@ public abstract class PacketValidityChecker
       }
 
       return packetIsValid;
+   }
+
+   public static boolean validateHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      if (handTrajectoryMessage == null)
+         return false;
+
+      ObjectErrorType errorType;
+      SE3Waypoint previousWaypoint = null;
+
+      for (int i = 0; i < handTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SE3Waypoint waypoint = handTrajectoryMessage.getTaskspaceWaypoint(i);
+         String errorMessage = validateSE3Waypoint(waypoint, previousWaypoint);
+         if (errorMessage != null)
+         {
+            errorMessage += "The " + i + "th";
+            globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      errorType = ObjectValidityChecker.validateEnum(handTrajectoryMessage.getRobotSide());
+      if (errorType != null)
+      {
+         String errorMessage = "robotSide field " + errorType.getMessage();
+         globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
+         return false;
+      }
+
+      return true;
+   }
+
+   private static String validateSE3Waypoint(SE3Waypoint se3Waypoint, SE3Waypoint previousSE3Waypoint)
+   {
+      if (se3Waypoint == null)
+         return " is null.";
+
+      ObjectErrorType errorType;
+
+      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.getPosition());
+      if (errorType != null)
+      {
+         String errorMessage = "SE3 waypoint position field " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      errorType = ObjectValidityChecker.validateTuple4d(se3Waypoint.getOrientation());
+      if (errorType != null)
+      {
+         String errorMessage = "SE3 waypoint orientation field " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.getLinearVelocity());
+      if (errorType != null)
+      {
+         String errorMessage = "SE3 waypoint linear velocity field " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.getAngularVelocity());
+      if (errorType != null)
+      {
+         String errorMessage = "SE3 waypoint angular velocity field " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      double subTrajectoryTime = se3Waypoint.getTime();
+      if (previousSE3Waypoint != null)
+         subTrajectoryTime -= previousSE3Waypoint.getTime();
+         
+      errorType = ObjectValidityChecker.validateTrajectoryTime(subTrajectoryTime);
+      if (errorType != null)
+      {
+         String errorMessage = "SE3 waypoint time (relative to previous waypoint) " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      return null;
    }
 }
