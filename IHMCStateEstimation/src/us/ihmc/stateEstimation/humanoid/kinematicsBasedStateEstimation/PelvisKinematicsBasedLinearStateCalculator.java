@@ -27,7 +27,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -66,8 +65,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("estimatedRootJointVelocityWithKinematics", worldFrame, registry);
    private final BooleanYoVariable useTwistToComputeRootJointLinearVelocity = new BooleanYoVariable("useTwistToComputeRootJointLinearVelocity", registry);
 
-   private final YoFrameVector leftFootVelocityInWorld = new YoFrameVector("leftFootVelocityInWorld", worldFrame, registry);
-   private final YoFrameVector rightFootVelocityInWorld = new YoFrameVector("rightFootVelocityInWorld", worldFrame, registry);
+//   private final YoFrameVector leftFootVelocityInWorld = new YoFrameVector("leftFootVelocityInWorld", worldFrame, registry);
+//   private final YoFrameVector rightFootVelocityInWorld = new YoFrameVector("rightFootVelocityInWorld", worldFrame, registry);
 //   private final SideDependentList<YoFrameVector> footVelocitiesInWorld = new SideDependentList<YoFrameVector>(leftFootVelocityInWorld, rightFootVelocityInWorld);
 //   private final SideDependentList<Twist> footTwistsInWorld = new SideDependentList<Twist>(new Twist(), new Twist());
    private final Map<RigidBody, YoFrameVector> footVelocitiesInWorld = new LinkedHashMap<RigidBody, YoFrameVector>();
@@ -167,7 +166,12 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          YoFramePoint copPositionInWorld = new YoFramePoint(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
          copPositionsInWorld.put(foot, copPositionInWorld);
-
+         
+         YoFrameVector footVelocityInWorld = new YoFrameVector(namePrefix + "VelocityInWorld", worldFrame, registry);
+         footVelocitiesInWorld.put(foot, footVelocityInWorld);
+         
+         footTwistsInWorld.put(foot, new Twist());
+         
          ReferenceFrame copFrame = new ReferenceFrame("copFrame", soleFrame)
          {
             private static final long serialVersionUID = -1926704435608610401L;
@@ -428,7 +432,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          Twist footTwistInWorld = footTwistsInWorld.get(foot);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(foot);
 
-         twistCalculator.packTwistOfBody(footTwistInWorld, feetContactablePlaneBodies.get(foot).getRigidBody());
+         twistCalculator.packTwistOfBody(footTwistInWorld, foot);
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));
          footTwistInWorld.changeFrame(soleFrames.get(foot));
 

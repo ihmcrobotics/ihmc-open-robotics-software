@@ -125,7 +125,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
          footSwitchMap.put(foot, footSwitches.get(robotSide));
-         bipedFeetMap.put(foot, bipedFeet.get(foot));
+         bipedFeetMap.put(foot, bipedFeet.get(robotSide));
       }
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitchMap, centerOfPressureDataHolderFromController, bipedFeetMap, gravitationalAcceleration, yoTime,

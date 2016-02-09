@@ -104,12 +104,12 @@ public class PelvisLinearStateUpdater
    private enum SlippageCompensatorMode {LOAD_THRESHOLD, MIN_PELVIS_ACCEL};
    private final EnumYoVariable<SlippageCompensatorMode> slippageCompensatorMode = new EnumYoVariable<SlippageCompensatorMode>("slippageCompensatorMode", registry, SlippageCompensatorMode.class);
    
-   private enum EstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT, IMU_ONLY};
+//   private enum EstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT, IMU_ONLY};
 
 //   private final SideDependentList<EstimationState> robotSideToEstimationState = new SideDependentList<EstimationState>(
 //         EstimationState.TRUST_LEFT_FOOT, EstimationState.TRUST_RIGHT_FOOT);
    
-   private final EnumYoVariable<EstimationState> requestedState = new EnumYoVariable<EstimationState>("requestedEstimationState", "", registry, EstimationState.class, true);
+//   private final EnumYoVariable<EstimationState> requestedState = new EnumYoVariable<EstimationState>("requestedEstimationState", "", registry, EstimationState.class, true);
    private final BooleanYoVariable requestStopEstimationOfPelvisLinearState = new BooleanYoVariable("userRequestStopEstimationOfPelvisLinearState", registry);
    
 //   private final StateMachine<EstimationState> stateMachine;
@@ -215,7 +215,6 @@ public class PelvisLinearStateUpdater
       
 //      requestStopEstimationOfPelvisLinearState.set(true);
 
-      // TODO fix this guy
       imuDriftCompensator = new IMUDriftCompensator(footFrames, inverseDynamicsStructure, footSwitches, estimatorDT, registry);
       imuDriftCompensator.activateEstimation(stateEstimatorParameters.estimateIMUDrift());
       imuDriftCompensator.activateCompensation(stateEstimatorParameters.compensateIMUDrift());
@@ -280,6 +279,8 @@ public class PelvisLinearStateUpdater
          
          DoubleYoVariable footForceZInPercentOfTotalForce = new DoubleYoVariable(footPrefix + "FootForceZInPercentOfTotalForce", registry);
          footForcesZInPercentOfTotalForce.put(foot, footForceZInPercentOfTotalForce);
+         
+         footWrenches.put(foot, new Wrench());
          
          delayTimeBeforeTrustingFoot.addVariableChangedListener(new VariableChangedListener()
          {            
@@ -411,21 +412,53 @@ public class PelvisLinearStateUpdater
 	      }
 	   }
 	   
+      // adapted stateMachine.doAction() and .defaultActionOutOfStates()
+
 	   if (numberOfEndEffectorsTrusted == 0)
 	   {
-//	       use imu only
+	      if (ALLOW_USING_IMU_ONLY)
+	      {
+            yoRootJointPosition.getFrameTuple(rootJointPosition);
+            kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(rootJointPosition);	     
+            
+            imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(rootJointVelocity);
+            yoRootJointVelocity.set(rootJointVelocity);
+            imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
+
+            yoRootJointPosition.getFrameTuple(rootJointPosition);
+            imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
+            rootJointPosition.set(pelvisPositionIMUPart);
+            yoRootJointPosition.set(rootJointPosition);
+	      }
+	      else
+	         throw new RuntimeException("No foot trusted!");
 	   }
 	   else if (numberOfEndEffectorsTrusted > 0)
 	   {
-//	      kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet);
+	      updateTrustedFeetLists();
+         yoRootJointPosition.getFrameTuple(rootJointPosition);
+	      kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
+	      
+	      if(numberOfEndEffectorsTrusted == 1)
+	         imuDriftCompensator.esimtateDriftIfPossible(listOfTrustedFeet.get(0));
+	      
+	      if (imuBasedLinearStateCalculator.isEstimationEnabled())
+	      {
+	         computeLinearStateFromMergingMeasurements();
+	      }
+	      else 
+	      {
+	         yoRootJointPosition.getFrameTuple(rootJointPosition);
+	         kinematicsBasedLinearStateCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
+	         yoRootJointPosition.set(rootJointPosition);
+	         yoRootJointVelocity.set(rootJointVelocity);
+	      }
 	   }
 	   else
 	   {
 	      throw new RuntimeException("Computation of the number of end effectors to be trusted for state estimation is broken, computed: " + numberOfEndEffectorsTrusted);
 	   }
 	   
-	   // adapted stateMachine.doAction();
-      
 	   updateRootJoint();
       
 	   updateCoMState();
@@ -633,22 +666,22 @@ public class PelvisLinearStateUpdater
    private int filterTrustedFeetBasedOnContactForces(int numberOfEndEffectorsTrusted)
    {
       double totalForceZ = 0.0;
-      for (RobotSide robotSide : RobotSide.values)
+      for (RigidBody foot : feet)
       {
-         Wrench footWrench = footWrenches.get(robotSide);
-         footSwitches.get(robotSide).computeAndPackFootWrench(footWrench);
+         Wrench footWrench = footWrenches.get(foot);
+         footSwitches.get(foot).computeAndPackFootWrench(footWrench);
          totalForceZ += footWrench.getLinearPartZ();
       }
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (RigidBody foot : feet)
       {
-         Wrench footWrench = footWrenches.get(robotSide);
-         footForcesZInPercentOfTotalForce.get(robotSide).set(footWrench.getLinearPartZ() / totalForceZ);
+         Wrench footWrench = footWrenches.get(foot);
+         footForcesZInPercentOfTotalForce.get(foot).set(footWrench.getLinearPartZ() / totalForceZ);
 
-         if (footForcesZInPercentOfTotalForce.get(robotSide).getDoubleValue() < forceZInPercentThresholdToFilterFoot.getDoubleValue())
+         if (footForcesZInPercentOfTotalForce.get(foot).getDoubleValue() < forceZInPercentThresholdToFilterFoot.getDoubleValue())
          {
             numberOfEndEffectorsTrusted--;
-            areFeetTrusted.get(robotSide).set(false);
+            areFeetTrusted.get(foot).set(false);
 
             return numberOfEndEffectorsTrusted;
          }
