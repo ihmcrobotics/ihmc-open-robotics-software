@@ -171,7 +171,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
    @Override
    public void onEntry()
    {
-      referenceFrames.updateFrames();
+      updateEstimates();
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
