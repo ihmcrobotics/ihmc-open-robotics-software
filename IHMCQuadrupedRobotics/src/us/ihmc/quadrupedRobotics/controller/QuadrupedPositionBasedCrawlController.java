@@ -84,7 +84,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    public enum CrawlGateWalkingState
    {
-      QUADRUPLE_SUPPORT, TRIPLE_SUPPORT
+      QUADRUPLE_SUPPORT, TRIPLE_SUPPORT, ALPHA_FILTERING_DESIREDS
    }
    
    private enum SafeStartingShiftMode
@@ -102,11 +102,12 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
    private final QuadrupleSupportState quadrupleSupportState;
+   private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
    private final NextSwingLegChooser nextSwingLegChooser;
    private final SwingTargetGenerator swingTargetGenerator;
    private final QuadrupedStateEstimator stateEstimator;
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullRobotModel actualFullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CenterOfMassJacobian feedForwardCenterOfMassJacobian;
@@ -299,7 +300,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       this.robotTimestamp = yoTime;
       this.dt = dt;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
-      this.fullRobotModel = fullRobotModel;
+      this.actualFullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>(name, "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
@@ -468,13 +469,18 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT, 0.2);
       TripleSupportState tripleSupportState = new TripleSupportState(CrawlGateWalkingState.TRIPLE_SUPPORT);
       
+      filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS, robotParameters); 
+      
+      walkingStateMachine.addState(filterDesiredsToMatchCrawlControllerOnTransitionIn);
       walkingStateMachine.addState(quadrupleSupportState);
       walkingStateMachine.addState(tripleSupportState);
-      walkingStateMachine.setCurrentState(CrawlGateWalkingState.QUADRUPLE_SUPPORT);
+      walkingStateMachine.setCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS);
 
       StateTransitionCondition quadrupleToTripleCondition = new QuadrupleToTripleCondition(quadrupleSupportState);
       StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition(tripleSupportState);
+      StateTransitionCondition filterToQuadrupleCondition = new FilterToQuadrupleCondition(filterDesiredsToMatchCrawlControllerOnTransitionIn);
       
+      filterDesiredsToMatchCrawlControllerOnTransitionIn.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, filterToQuadrupleCondition));
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
       parentRegistry.addChild(registry);
@@ -611,7 +617,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       alphaFilterDesiredBodyOrientation();
       updateDesiredCoMPose();
       updateLegsBasedOnDesiredCoM();
-      computeDesiredPositionsAndStoreInFullRobotModel();
+      computeDesiredPositionsAndStoreInFullRobotModel(actualFullRobotModel);
+
+      if(walkingStateMachine.isCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS))
+      {
+         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds(oneDoFJointsActual);
+      }
+      
       updateFeedForwardModelAndFrames();
    }
 
@@ -648,9 +660,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       }
       
       feedForwardReferenceFrames.updateFrames();
+      actualFullRobotModel.updateFrames();
       
       SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      SixDoFJoint rootJoint = actualFullRobotModel.getRootJoint();
       
       rootJoint.getJointTransform3D(rootJointPose);
       feedForwardRootJoint.setPositionAndRotation(rootJointPose);
@@ -711,7 +724,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 	   }
 
 	   SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
-	   SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+	   SixDoFJoint rootJoint = actualFullRobotModel.getRootJoint();
 	   
 	   feedForwardRootJoint.setRotation(desiredCoMOrientation.getYaw().getDoubleValue(), desiredCoMOrientation.getPitch().getDoubleValue(), desiredCoMOrientation.getRoll().getDoubleValue());
 	   feedForwardFullRobotModel.updateFrames();
@@ -920,18 +933,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       }
    }
    
-   private void computeDesiredPositionsAndStoreInFullRobotModel()
+   private void computeDesiredPositionsAndStoreInFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {         
          desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).get(desiredFootPositionForInverseKinematics);
-         computeDesiredPositionsAndStoreInFullRobotModel(robotQuadrant, desiredFootPositionForInverseKinematics);
+         inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, desiredFootPositionForInverseKinematics, fullRobotModel);
       }
-   }
-   
-   private void computeDesiredPositionsAndStoreInFullRobotModel(RobotQuadrant robotQuadrant, Vector3d footPositionInLegAttachmentFrame)
-   {
-      inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, footPositionInLegAttachmentFrame, fullRobotModel);
    }
    
    /**
@@ -1084,6 +1092,86 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     	  }
     	  
     	  return ((swingTrajectoryIsDone || swingFootHitGround) && inSwingStateLongEnough);
+      }
+   }
+   
+   private class FilterToQuadrupleCondition implements StateTransitionCondition
+   {
+      private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerState;
+      
+      public FilterToQuadrupleCondition(FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerState)
+      {
+         this.filterDesiredsToMatchCrawlControllerState = filterDesiredsToMatchCrawlControllerState;
+      }
+      
+      @Override
+      public boolean checkCondition()
+      {
+         return filterDesiredsToMatchCrawlControllerState.isInterpolationFinished();
+      }
+   }
+   
+   private class FilterDesiredsToMatchCrawlControllerState extends State<CrawlGateWalkingState>
+   {
+      private final AlphaFilteredYoVariable filterStandPrepDesiredsToWalkingDesireds;
+      private final SDFFullRobotModel initialDesiredsUponEnteringFullRobotModel;
+      
+      public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedRobotParameters robotParameters)
+      {
+         super(stateEnum);
+         
+         initialDesiredsUponEnteringFullRobotModel = robotParameters.createFullRobotModel();
+         
+         double filterStandPrepDesiredsToWalkingDesiredsAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt);
+         filterStandPrepDesiredsToWalkingDesireds = new AlphaFilteredYoVariable("filterStandPrepDesiredsToWalkingDesireds", registry, filterStandPrepDesiredsToWalkingDesiredsAlpha);
+      }
+
+      public void filterDesireds(OneDoFJoint[] oneDoFJointsActual)
+      {
+         for(int i = 0; i < oneDoFJointsActual.length; i++)
+         {
+            OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
+            String jointName = actualOneDoFJoint.getName();
+            
+            OneDoFJoint intialOneDoFJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(jointName);
+//            OneDoFJoint desiredOneDofJoint = finalDesiredsFullRobotModel.getOneDoFJointByName(jointName);
+            
+            double alpha = filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
+            
+            double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
+            actualOneDoFJoint.setqDesired(alphaFilteredQ);
+         }         
+      }
+      
+      public boolean isInterpolationFinished()
+      {
+         return filterStandPrepDesiredsToWalkingDesireds.getDoubleValue() >= 0.9999;
+      }
+
+      @Override
+      public void doAction()
+      {
+         filterStandPrepDesiredsToWalkingDesireds.update(1.0);
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         filterStandPrepDesiredsToWalkingDesireds.reset();
+         filterStandPrepDesiredsToWalkingDesireds.update(0.0);
+         
+         for(int i = 0; i < oneDoFJointsActual.length; i++)
+         {
+            OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
+            OneDoFJoint initialOneDofJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(actualOneDoFJoint.getName());
+            initialOneDofJoint.setqDesired(actualOneDoFJoint.getqDesired());
+         }
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+         
       }
    }
    
@@ -1718,12 +1806,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          oneDofJoint.setUnderPositionControl(true);
       }
 
-      fullRobotModel.updateFrames();
+      actualFullRobotModel.updateFrames();
       referenceFrames.updateFrames();
 
       setFeedForwardToActuals();
       updateEstimates();
       updateFeedForwardModelAndFrames();
+      walkingStateMachine.setCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS);
    }
 
    @Override
