@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.9'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.10'
 }
 
 
@@ -36,7 +36,6 @@ dependencies {
     compile group: 'org.boofcv', name: 'visualize', version: '0.19'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
     compile group: 'org.apache.poi', name: 'poi', version: '3.9'
-    compile group: 'us.ihmc.thirdparty.org.opensphere', name: 'concavehull', version: '1.0'
     compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.1'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
