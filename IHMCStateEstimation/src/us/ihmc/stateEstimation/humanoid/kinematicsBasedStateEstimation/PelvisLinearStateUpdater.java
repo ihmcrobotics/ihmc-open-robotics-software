@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -28,7 +27,6 @@ import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -63,7 +61,7 @@ public class PelvisLinearStateUpdater
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianWorld;
    
-   private final Set<RigidBody> feet;
+   private final List<RigidBody> feet = new ArrayList<RigidBody>();
 
    private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
@@ -127,7 +125,7 @@ public class PelvisLinearStateUpdater
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
       this.feetContactablePlaneBodies = feetContactablePlaneBodies;
-      this.feet = footSwitches.keySet();
+      this.feet.addAll(footSwitches.keySet());
       
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       rootJoint = inverseDynamicsStructure.getRootJoint();
@@ -260,7 +258,8 @@ public class PelvisLinearStateUpdater
       centerOfMassCalculator.packCenterOfMass(tempPosition);
       if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
       {
-         tempPosition.changeFrame(footFrames.get(RobotSide.LEFT));
+         RigidBody foot = feet.get(0);
+         tempPosition.changeFrame(footFrames.get(foot));
          double footToCoMZ = tempPosition.getZ();
          tempPosition.changeFrame(worldFrame);
          tempPosition.setZ(tempPosition.getZ() - footToCoMZ);
