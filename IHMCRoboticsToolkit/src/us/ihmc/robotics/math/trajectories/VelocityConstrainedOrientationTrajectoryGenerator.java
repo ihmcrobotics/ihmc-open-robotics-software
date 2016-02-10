@@ -19,15 +19,22 @@ import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * Currently under development. Trying to fix this trajectory properly but it is not usable yet.
- * Two useful references from the web:
- * <p> a) <a href="http://www.geometrictools.com/Documentation/Quaternions.pdf">(SLERP & SQUAD methods)</a> </p>
- * <p> b) <a href="http://www.cim.mcgill.ca/~mpersson/docs/quat_calc_notes.pdf">(Proper quaternion calculus)</a> </p>
+ * This trajectory generator aims at interpolating between two orientations q0 and qf for given angular velocities at the limits w0 and wf.
+ * It does a nice job for "long distance" type trajectories but totally fails when used for interpolating between, it generates extra accelerations instead of being "lazy".
+ * Look at {@link HermiteCurveBasedOrientationTrajectoryGenerator} for interpolating between waypoints.
  * 
- * I got inspired by the first reference with the SQUAD method, but watch out there the math is totally WRONG.
+ * To build this trajectory generator, I got inspired by the two following refs.
+ * <p> a) <a href="http://www.geometrictools.com/Documentation/Quaternions.pdf">(SLERP & SQUAD methods)</a> </p>
+ * <p> b) <a href="http://www.cim.mcgill.ca/~mpersson/docs/quat_calc_notes.pdf">(Proper quaternion calculus, this link seems to be dead, but I can't find a new one. Ask me for the PDF file.)</a> </p>
+ * 
+ * I got inspired by the first reference with the SQUAD method, but watch out there the math seems to be totally wrong.
  * The second reference provides a proper approach to general quaternion calculus. I used it a lot to derive time derivatives with quaternion & angular velocity. Really useful ref.
  * 
- * Alright, so I ended up giving up on computing the angular velocity analytically. It seems that computing the derivative of a quaternion q to the power alpha where both q and alpha depend on time is still an open problem.
+ * The method I'm using here is as follows:
+ * - I interpolated from the initial orientation to the final orientation using the classic SLERP method using a fifth-order polynomial function to avoid generating angular velocity at the limits.
+ * - To induce the initial and final desired angular velocities I make the initial and final orientations drift at a constant velocity (the initial and final angular velocities respectively).
+ * 
+ * I ended up giving up on computing the angular velocity analytically. It seems that computing the derivative of a quaternion q raised to the power alpha where both q and alpha depend on time is still an open problem.
  * So I'm just computing the angular velocity and angular acceleration using finite difference.
  * Also, I had some issues when the initial and/or final angular velocity are large.
  * As soon as the integrated (initial or final) velocity over the trajectory goes beyond 2 Pi, there is some flip going.
