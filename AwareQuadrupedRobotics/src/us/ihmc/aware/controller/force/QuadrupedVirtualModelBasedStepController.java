@@ -215,12 +215,12 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 4000, 4000, 4000);
-      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 200, 200, 200);
+      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 1000, 1000, 1000);
+      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 100, 100, 100);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 10);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.15);
       params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
       params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
@@ -735,11 +735,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       }
 
       // FIXME: provide an external interface to test steps
-      double stanceWidth = 0.25;
+      double stanceWidth = 0.35;
       double stanceLength = 1.2;
-      double stepDuration = 0.50;
-      double stepTimeShift = 1.00;
-      double strideLength = 0.35;
+      double stepDuration = 1.00;
+      double stepTimeShift = 2.00;
+      double strideLength = 0.3;
 
       double currentTime = robotTimestamp.getDoubleValue();
       TimeInterval timeInterval = new TimeInterval(0, stepDuration).shiftInterval(currentTime);
@@ -780,6 +780,9 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoGraphicsList.setVisible(false);
       artifactList.setVisible(false);
       virtualModelController.setVisible(false);
+
+      // remove remaining steps from the queue
+      removeSteps();
    }
 
    private class SupportState implements StateMachineState<FootEvent>

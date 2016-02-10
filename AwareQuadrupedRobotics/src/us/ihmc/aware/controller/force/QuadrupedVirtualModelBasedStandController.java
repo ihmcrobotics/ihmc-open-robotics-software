@@ -563,6 +563,11 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
          }
       }
 
+      // initialize setpoints
+      updateEstimates();
+      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
+      dcmVelocitySetpoint.setToZero();
+
       // initialize controllers and state machines
       virtualModelController.reset();
       contactForceOptimization.reset();
