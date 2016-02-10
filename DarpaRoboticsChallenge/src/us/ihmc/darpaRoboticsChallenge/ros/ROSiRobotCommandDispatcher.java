@@ -45,7 +45,7 @@ public class ROSiRobotCommandDispatcher implements Runnable
       {
          if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
          {
-            HandDesiredConfigurationMessage ihmcMessage = handDesiredConfigurationSubscriber.pullMessage();
+            HandDesiredConfigurationMessage ihmcMessage = handDesiredConfigurationSubscriber.pollMessage();
             rosHandCommunicator.sendHandCommand(ihmcMessage);
          }
       }
