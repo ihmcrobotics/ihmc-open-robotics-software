@@ -204,6 +204,19 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
+   public void appendWaypoint(SO3WaypointInterface so3Waypoint)
+   {
+      appendWaypoint(so3Waypoint.getTime(), so3Waypoint.getOrientation(), so3Waypoint.getAngularVelocity());
+   }
+
+   public void appendWaypoints(SO3WaypointInterface[] so3Waypoints)
+   {
+      for (int i = 0; i < so3Waypoints.length; i++)
+      {
+         appendWaypoint(so3Waypoints[i]);
+      }
+   }
+
    public void appendWaypoints(WaypointOrientationTrajectoryData trajectoryData)
    {
       trajectoryData.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
