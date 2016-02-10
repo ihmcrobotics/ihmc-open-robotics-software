@@ -23,7 +23,7 @@ public class QuadrupedContactForceOptimization
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final ReferenceFrame worldFrame;
-   private final ConstrainedQPSolver qpSolver;
+   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver(null);
 
    private final FrameVector comTorqueCommand;
    private final FrameVector comTorqueSolution;
@@ -66,7 +66,6 @@ public class QuadrupedContactForceOptimization
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       soleFrame = referenceFrames.getFootReferenceFrames();
       worldFrame = ReferenceFrame.getWorldFrame();
-      qpSolver = new QuadProgSolver(null);
 
       comTorqueCommand = new FrameVector(comFrame);
       comTorqueSolution = new FrameVector(comFrame);
