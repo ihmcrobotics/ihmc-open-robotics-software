@@ -454,6 +454,63 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not equal", footstepFL.epsilonEquals(pack.getFootstep(RobotQuadrant.HIND_LEFT), 1e-7));
       assertTrue("not equal", footstepHL.epsilonEquals(pack.getFootstep(RobotQuadrant.FRONT_LEFT), 1e-7));
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testTranslatePolygon()
+   {
+      QuadrupedSupportPolygon poly = createZeroedPolygon();
+      Vector3d translateBy = new Vector3d(1.0, 2.0, -3.0);
+      poly.translate(translateBy);
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         assertTrue("not equal", poly.getFootstep(robotQuadrant).epsilonEquals(translateBy, 1e-7));
+      }
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testYawAboutCentroid()
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      Point3d origin = new Point3d(0.0, 0.0, 0.0);
+      Point3d bottomRight = new Point3d(1.0, 0.0, 0.0);
+      Point3d topLeft = new Point3d(0.0, 1.0, 0.0);
+      Point3d topRight = new Point3d(1.0, 1.0, 0.0);
+      footPoints.set(RobotQuadrant.HIND_LEFT, origin);
+      footPoints.set(RobotQuadrant.HIND_RIGHT, bottomRight);
+      footPoints.set(RobotQuadrant.FRONT_LEFT, topLeft);
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, topRight);
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      QuadrupedSupportPolygon polygon = new QuadrupedSupportPolygon(framePoints);
+      
+      polygon.yawAboutCentroid(Math.PI);
+      
+      assertTrue("not equal", polygon.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(topRight, 1e-7));
+      assertTrue("not equal", polygon.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(topLeft, 1e-7));
+      assertTrue("not equal", polygon.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(bottomRight, 1e-7));
+      assertTrue("not equal", polygon.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(origin, 1e-7));
+      
+      polygon.yawAboutCentroid(-Math.PI / 2);
+      
+      String message = "not equal expected: " + bottomRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_LEFT).getPoint();
+      assertTrue(message, polygon.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(bottomRight, 1e-7));
+      String message2 = "not equal expected: " + topRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_RIGHT).getPoint();
+      assertTrue(message2, polygon.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(topRight, 1e-7));
+      String message3 = "not equal expected: " + origin + " actual " + polygon.getFootstep(RobotQuadrant.FRONT_LEFT).getPoint();
+      assertTrue(message3, polygon.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(origin, 1e-7));
+      
+      polygon.removeFootstep(RobotQuadrant.FRONT_RIGHT);
+      polygon.yawAboutCentroid(Math.PI / 4);
+   }
 
    private Random random = new Random(9123090L);
 
@@ -564,6 +621,24 @@ public class QuadrupedSupportPolygonTest
       footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 1.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(1.0, 1.0, 0.0));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createZeroedPolygon()
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(0.0, 0.0, 0.0));
       
       QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
