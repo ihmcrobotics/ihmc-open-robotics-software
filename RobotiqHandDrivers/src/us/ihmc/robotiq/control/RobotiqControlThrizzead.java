@@ -7,7 +7,7 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
@@ -26,7 +26,7 @@ public class RobotiqControlThrizzead extends HandControlThread
    
    private final RobotSide robotSide;
    private final RobotiqHandCommunicator robotiqHand;
-   private final HandDesiredConfigurationSubscriber handDesiredConfigurationSubscriber;
+   private final HandDesiredConfigurationMessageSubscriber handDesiredConfigurationMessageSubscriber;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private RobotiqHandSensorDizzata handStatus;
@@ -36,11 +36,11 @@ public class RobotiqControlThrizzead extends HandControlThread
       super(robotSide);
       this.robotSide = robotSide;
       robotiqHand = new RobotiqHandCommunicator(robotSide);
-      handDesiredConfigurationSubscriber = new HandDesiredConfigurationSubscriber(robotSide);
+      handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
-      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
+      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationMessageSubscriber);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
 
@@ -71,7 +71,7 @@ public class RobotiqControlThrizzead extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         handDesiredConfigurationSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
+         handDesiredConfigurationMessageSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -84,9 +84,9 @@ public class RobotiqControlThrizzead extends HandControlThread
 //            System.out.println(handStatus.getFaultStatus().name());
          }
          
-         if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
+         if (handDesiredConfigurationMessageSubscriber.isNewDesiredConfigurationAvailable())
          {
-            HandDesiredConfigurationMessage packet = handDesiredConfigurationSubscriber.pollMessage();
+            HandDesiredConfigurationMessage packet = handDesiredConfigurationMessageSubscriber.pollMessage();
             HandConfiguration state = packet.getHandDesiredConfiguration();
             
             switch (state)
