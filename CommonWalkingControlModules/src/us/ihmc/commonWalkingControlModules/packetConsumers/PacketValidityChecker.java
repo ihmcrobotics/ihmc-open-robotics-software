@@ -561,6 +561,12 @@ public abstract class PacketValidityChecker
       ObjectErrorType errorType;
       SE3WaypointMessage previousWaypoint = null;
 
+      if (handTrajectoryMessage.getNumberOfWaypoints() == 0)
+      {
+         String errorMessage = "Received trajectory message with no waypoint.";
+         globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
+      }
+
       for (int i = 0; i < handTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
          SE3WaypointMessage waypoint = handTrajectoryMessage.getTaskspaceWaypoint(i);
