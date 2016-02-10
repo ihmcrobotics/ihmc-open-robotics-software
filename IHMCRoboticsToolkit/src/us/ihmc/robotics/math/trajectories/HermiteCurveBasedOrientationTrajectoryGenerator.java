@@ -62,7 +62,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    /**
     * Does not need to match the dt at which the trajectory will be updated.
     */
-   private final double dtForFiniteDifference = 1.0e-3;
+   private final double dtForFiniteDifference = 1.0e-3; // Weird jerkiness at 1.0e-4
 
    public HermiteCurveBasedOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
