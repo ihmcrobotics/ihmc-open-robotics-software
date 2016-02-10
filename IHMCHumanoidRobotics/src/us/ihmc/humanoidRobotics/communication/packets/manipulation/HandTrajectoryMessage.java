@@ -13,8 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
 @ClassDocumentation("This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified waypoints."
-      + " A fifth order polynomial function is used to interpolate from one waypoint to the next one."
-      + " If the velocities are close to zero at the waypoints, the trajectory will look like a straight line path between each pair of waypoints.")
+      + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations.")
 public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessage> implements VisualizablePacket
 {
    public enum BaseForControl implements DocumentedEnum<BaseForControl>
@@ -45,8 +44,7 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
 
    @FieldDocumentation("Specifies the which hand will execute the trajectory.")
    public RobotSide robotSide;
-   @FieldDocumentation("Specify whether the pose should be held with respect to the world or the chest. "
-         + "Note that in any case the desired hand pose must be expressed in world frame.")
+   @FieldDocumentation("Specify whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
    public BaseForControl base;
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory.")
    public SE3WaypointMessage[] taskspaceWaypoints;
