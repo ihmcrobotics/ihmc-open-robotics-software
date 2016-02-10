@@ -38,6 +38,26 @@ public class QuaternionCalculus
       resultToPack.scale(axisAngleForLog.getAngle());
    }
 
+   private final Vector3d vectorForExp = new Vector3d();
+
+   public void exp(Vector3d rotationVector, Quat4d quaternionToPack)
+   {
+      double length = rotationVector.length();
+      if (length < 1.0e-7)
+      {
+         quaternionToPack.set(0.0, 0.0, 0.0, 1.0);
+         return;
+      }
+      
+      quaternionToPack.w = Math.cos(0.5 * length);
+      double s = Math.sin(0.5 * length);
+      vectorForExp.set(rotationVector);
+      vectorForExp.scale(1.0 / length);
+      quaternionToPack.x = s * vectorForExp.x;
+      quaternionToPack.y = s * vectorForExp.y;
+      quaternionToPack.z = s * vectorForExp.z;
+   }
+
    /**
     * Interpolation from q0 to q1 for a given alpha = [0, 1] using SLERP.
     * Computes: resultToPack = q0 (q0^-1 q1)^alpha.
@@ -250,6 +270,12 @@ public class QuaternionCalculus
    {
       pureQuatForMultiply.mul(q1, q2);
       setVectorFromPureQuaternion(pureQuatForMultiply, resultToPack);
+   }
+
+   public void inverseMultiply(Quat4d q1, Quat4d q2, Quat4d resultToPack)
+   {
+      qInv.conjugate(q1);
+      resultToPack.mul(qInv, q2);
    }
 
    public void setAsPureQuaternion(Vector3d vector, Quat4d pureQuaternionToSet)
