@@ -75,7 +75,6 @@ public class ChestOrientationManager
          simpleOrientationTrajectoryGenerator.initialize();
          activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
 
-         boolean doVelocityAtWaypoints = false;
          waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chestWaypoint", 15, allowMultipleFrames,
                chestOrientationExpressedInFrame, registry);
          waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(pelvisZUpFrame);
