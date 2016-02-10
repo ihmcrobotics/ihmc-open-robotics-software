@@ -24,6 +24,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -436,7 +437,7 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon poly = createSimplePolygon();
       QuadrupedSupportPolygon removeFootstep = new QuadrupedSupportPolygon();
-      poly.getAndRemoveFootstep(RobotQuadrant.FRONT_LEFT, removeFootstep);
+      poly.getAndRemoveFootstep(removeFootstep, RobotQuadrant.FRONT_LEFT);
       removeFootstep.getFootstep(RobotQuadrant.FRONT_LEFT);
       assertNull("not null", removeFootstep.getFootstep(RobotQuadrant.FRONT_LEFT));
    }
@@ -449,7 +450,7 @@ public class QuadrupedSupportPolygonTest
       FramePoint footstepFL = poly.getFootstep(RobotQuadrant.FRONT_LEFT);
       FramePoint footstepHL = poly.getFootstep(RobotQuadrant.HIND_LEFT);
       QuadrupedSupportPolygon pack = new QuadrupedSupportPolygon();
-      poly.getAndSwapSameSideFootsteps(RobotQuadrant.FRONT_LEFT, pack);
+      poly.getAndSwapSameSideFootsteps(pack, RobotSide.LEFT);
       assertTrue("not equal", footstepFL.epsilonEquals(pack.getFootstep(RobotQuadrant.HIND_LEFT), 1e-7));
       assertTrue("not equal", footstepHL.epsilonEquals(pack.getFootstep(RobotQuadrant.FRONT_LEFT), 1e-7));
    }
