@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
+import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrant;
+
 import java.io.Serializable;
 
 import javax.vecmath.Point2d;
@@ -361,6 +363,16 @@ public class QuadrupedSupportPolygon implements Serializable
       footsteps.set(robotQuadrant, footstep);
    }
 
+   public void removeFootstep(RobotQuadrant robotQuadrant)
+   {
+      footsteps.remove(robotQuadrant);
+   }
+
+   public void clear()
+   {
+      footsteps.clear();
+   }
+
    /**
     * Replaces the stored footstep with the passed in one.
     * 
@@ -374,34 +386,16 @@ public class QuadrupedSupportPolygon implements Serializable
       supportPolygonToPack.setFootstep(quadrant, footstep);
    }
 
-   public void getAndRemoveFootstep(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   public void getAndRemoveFootstep(QuadrupedSupportPolygon supportPolygonToPack, RobotQuadrant quadrantToRemove)
    {
-      quadrupedSupportPolygonToPack.clear();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (robotQuadrant != legToDelete)
-         {
-            quadrupedSupportPolygonToPack.setFootstep(robotQuadrant, getFootstep(robotQuadrant));
-         }
-      }
+      supportPolygonToPack.set(this);
+      supportPolygonToPack.removeFootstep(quadrantToRemove);
    }
 
-   public void getAndSwapSameSideFootsteps(RobotQuadrant quadrant, QuadrupedSupportPolygon newQuadrupedSupportPolygon)
+   public void getAndSwapSameSideFootsteps(QuadrupedSupportPolygon supportPolygonToPack, RobotSide sideToSwap)
    {
-      newQuadrupedSupportPolygon.setFootstep(quadrant, getFootstep(quadrant.getSameSideQuadrant()));
-      newQuadrupedSupportPolygon.setFootstep(quadrant.getSameSideQuadrant(), getFootstep(quadrant));
-   }
-
-   public QuadrupedSupportPolygon deleteLegCopy(RobotQuadrant legName)
-   {
-      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
-      newPolygon.removeFootstep(legName);
-      return newPolygon;
-   }
-
-   public void removeFootstep(RobotQuadrant robotQuadrant)
-   {
-      footsteps.remove(robotQuadrant);
+      supportPolygonToPack.setFootstep(getQuadrant(RobotEnd.HIND, sideToSwap), getFootstep(getQuadrant(RobotEnd.FRONT, sideToSwap)));
+      supportPolygonToPack.setFootstep(getQuadrant(RobotEnd.FRONT, sideToSwap), getFootstep(getQuadrant(RobotEnd.HIND, sideToSwap)));
    }
 
    /**
@@ -447,11 +441,6 @@ public class QuadrupedSupportPolygon implements Serializable
    public boolean containsFootstep(RobotQuadrant robotQuadrant)
    {
       return footsteps.containsQuadrant(robotQuadrant);
-   }
-
-   public void clear()
-   {
-      footsteps.clear();
    }
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
@@ -513,15 +502,17 @@ public class QuadrupedSupportPolygon implements Serializable
       return highest;
    }
 
-   public RobotQuadrant getClosestFootstep(FramePoint midPoint)
+   public RobotQuadrant getClosestFootstep(FramePoint pointToCompare)
    {
-      double minDistance = Double.MAX_VALUE;
+      double minDistance = Double.POSITIVE_INFINITY;
       RobotQuadrant closestQuadrant = null;
       for(RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         if(getFootstep(robotQuadrant).distance(midPoint) < minDistance)
+         double distance = getFootstep(robotQuadrant).distance(pointToCompare);
+         if(distance < minDistance)
          {
             closestQuadrant = robotQuadrant;
+            minDistance = distance;
          }
       }
       return closestQuadrant;
@@ -818,7 +809,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       if (size() < 3)
       {
-         throw new UndefinedOperationException("InCirclePoint only defined for 3 and 4 legs.");
+         throw new UndefinedOperationException("InCirclePoint only defined for 3 and 4 legs. size() = " + size());
       }
       
       int i = 0;
