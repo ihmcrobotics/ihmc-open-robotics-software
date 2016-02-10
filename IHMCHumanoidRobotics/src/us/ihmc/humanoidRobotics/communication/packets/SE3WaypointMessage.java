@@ -106,6 +106,7 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
       this.angularVelocity = angularVelocity;
    }
 
+   @Override
    public boolean epsilonEquals(SE3WaypointMessage other, double epsilon)
    {
       if (position == null && other.position != null)

@@ -73,6 +73,7 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
       this.linearVelocity = linearVelocity;
    }
 
+   @Override
    public boolean epsilonEquals(EuclideanWaypointMessage other, double epsilon)
    {
       if (position == null && other.position != null)
