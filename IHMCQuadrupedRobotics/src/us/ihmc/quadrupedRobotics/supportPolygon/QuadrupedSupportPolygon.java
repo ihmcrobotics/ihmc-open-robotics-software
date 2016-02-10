@@ -502,15 +502,17 @@ public class QuadrupedSupportPolygon implements Serializable
       return highest;
    }
 
-   public RobotQuadrant getClosestFootstep(FramePoint midPoint)
+   public RobotQuadrant getClosestFootstep(FramePoint pointToCompare)
    {
-      double minDistance = Double.MAX_VALUE;
+      double minDistance = Double.POSITIVE_INFINITY;
       RobotQuadrant closestQuadrant = null;
       for(RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
-         if(getFootstep(robotQuadrant).distance(midPoint) < minDistance)
+         double distance = getFootstep(robotQuadrant).distance(pointToCompare);
+         if(distance < minDistance)
          {
             closestQuadrant = robotQuadrant;
+            minDistance = distance;
          }
       }
       return closestQuadrant;

@@ -513,6 +513,35 @@ public class QuadrupedSupportPolygonTest
       polygon.removeFootstep(RobotQuadrant.FRONT_RIGHT);
       polygon.yawAboutCentroid(Math.PI / 4);
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetLowestAndHighestFootstep()
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         QuadrupedSupportPolygon poly = createExtremeFootPolygon(robotQuadrant, new Point3d(1.0, 1.0, 20.0));
+         assertEquals("not highest", robotQuadrant, poly.getHighestFootstep());
+      }
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         QuadrupedSupportPolygon poly = createExtremeFootPolygon(robotQuadrant, new Point3d(1.0, 1.0, -20.0));
+         assertEquals("not lowest", robotQuadrant, poly.getLowestFootstep());
+      }
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetClosestFootstep()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         assertEquals("not closest", robotQuadrant, poly.getClosestFootstep(poly.getFootstep(robotQuadrant)));
+      }
+      
+      assertEquals("not closest", RobotQuadrant.FRONT_RIGHT, poly.getClosestFootstep(new FramePoint(ReferenceFrame.getWorldFrame(), 2.0, 2.0, 0.0)));
+   }
 
    private Random random = new Random(9123090L);
 
@@ -767,6 +796,26 @@ public class QuadrupedSupportPolygonTest
       footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(0.0, 2.0, 2.0));
       footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(-2.0, 0.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(-2.0, 2.0, 0.0));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createExtremeFootPolygon(RobotQuadrant quadrant, Point3d location)
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.0, 0.0, 2.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(0.0, 2.0, 2.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(-2.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(-2.0, 2.0, 0.0));
+      
+      footPoints.set(quadrant, location);
       
       QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
