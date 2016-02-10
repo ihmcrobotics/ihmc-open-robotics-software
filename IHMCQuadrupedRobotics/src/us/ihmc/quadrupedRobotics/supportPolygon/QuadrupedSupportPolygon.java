@@ -502,6 +502,11 @@ public class QuadrupedSupportPolygon implements Serializable
       return highest;
    }
 
+   public double getLowestFootstepZHeight()
+   {
+      return getFootstep(getLowestFootstep()).getZ();
+   }
+
    public RobotQuadrant getClosestFootstep(FramePoint pointToCompare)
    {
       double minDistance = Double.POSITIVE_INFINITY;
@@ -607,13 +612,6 @@ public class QuadrupedSupportPolygon implements Serializable
       return new QuadrupedSupportPolygon(newFeet);
    }
    
-   public double getLowestFootStepZHeight()
-   {
-      RobotQuadrant lowestFootstepQuadrant = getLowestFootstep();
-      FramePoint lowestFootstep = getFootstep(lowestFootstepQuadrant);
-      return lowestFootstep.getZ();
-   }
-
    /**
     * getBounds modifies the min and max points passed in to the min and max
     * xy values contained in the set of Footsteps that make up the polygon
