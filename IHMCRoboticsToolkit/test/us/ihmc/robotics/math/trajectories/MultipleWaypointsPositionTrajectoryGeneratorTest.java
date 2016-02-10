@@ -47,7 +47,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       simpleTrajectory.initialize();
 
       int numberOfWaypoints = 11;
-      multipleWaypointTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("testedTraj", worldFrame, initialPositionProvider, registry);
+      multipleWaypointTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("testedTraj", 50, worldFrame, registry);
       multipleWaypointTrajectory.clear();
       
       
@@ -55,7 +55,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       FramePoint waypointPosition = new FramePoint();
       FrameVector waypointVelocity = new FrameVector();
 
-      for (int i = 1; i < numberOfWaypoints; i++)
+      for (int i = 0; i < numberOfWaypoints; i++)
       {
          double timeAtWaypoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
          simpleTrajectory.compute(timeAtWaypoint);

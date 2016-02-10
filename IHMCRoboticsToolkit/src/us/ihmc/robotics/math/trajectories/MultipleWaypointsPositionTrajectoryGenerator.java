@@ -1,175 +1,293 @@
 package us.ihmc.robotics.math.trajectories;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
 /*
  * Note: this class can be used to interpolate N variables simultaneously.
  * You don't have a provider for the waypoint, therefore you should use method initialize(
  */
-public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
-   private final MultipleWaypointsTrajectoryGenerator[] trajectories = new MultipleWaypointsTrajectoryGenerator[3];
-   private final ReferenceFrame referenceFrame;
-   private final PositionProvider currentPositionProvider;
+   private final int maximumNumberOfWaypoints;
 
-   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, PositionProvider currentPositionProvider, YoVariableRegistry parentRegistry)
+   private final YoVariableRegistry registry;
+
+   private final DoubleYoVariable currentTrajectoryTime;
+
+   private final IntegerYoVariable numberOfWaypoints;
+   private final IntegerYoVariable currentWaypointIndex;
+   private final ArrayList<DoubleYoVariable> timeAtWaypoints;
+   private final ArrayList<YoFramePoint> positionAtWaypoints;
+   private final ArrayList<YoFrameVector> linearVelocityAtWaypoints;
+
+   private final VelocityConstrainedPositionTrajectoryGenerator subTrajectory;
+
+   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this.referenceFrame = trajectoryFrame;
-      this.currentPositionProvider = currentPositionProvider;
-
-      trajectories[0] = new MultipleWaypointsTrajectoryGenerator(namePrefix + "_X_", parentRegistry);
-      trajectories[1] = new MultipleWaypointsTrajectoryGenerator(namePrefix + "_Y_", parentRegistry);
-      trajectories[2] = new MultipleWaypointsTrajectoryGenerator(namePrefix + "_Z_", parentRegistry);
+      this(namePrefix, maximumNumberOfWaypoints, false, referenceFrame, parentRegistry);
    }
 
-   @Override
-   public void get(FramePoint positionToPack)
+   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      positionToPack.setIncludingFrame(referenceFrame, trajectories[0].getValue(), trajectories[1].getValue(), trajectories[2].getValue());
-   }
+      super(allowMultipleFrames, referenceFrame);
 
-   @Override
-   public void packVelocity(FrameVector velocityToPack)
-   {
-      velocityToPack.setIncludingFrame(referenceFrame, trajectories[0].getVelocity(), trajectories[1].getVelocity(), trajectories[2].getVelocity());
-   }
+      this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
-   @Override
-   public void packAcceleration(FrameVector accelerationToPack)
-   {
-      accelerationToPack.setIncludingFrame(referenceFrame, trajectories[0].getAcceleration(), trajectories[1].getAcceleration(), trajectories[2].getAcceleration());
-   }
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-   @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
-   {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      numberOfWaypoints = new IntegerYoVariable(namePrefix + "NumberOfWaypoints", registry);
+      numberOfWaypoints.set(0);
+
+      timeAtWaypoints = new ArrayList<>(maximumNumberOfWaypoints);
+      positionAtWaypoints = new ArrayList<>(maximumNumberOfWaypoints);
+      linearVelocityAtWaypoints = new ArrayList<>(maximumNumberOfWaypoints);
+
+      currentTrajectoryTime = new DoubleYoVariable(namePrefix + "CurrentTrajectoryTime", registry);
+      currentWaypointIndex = new IntegerYoVariable(namePrefix + "CurrentWaypointIndex", registry);
+
+      subTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix + "SubTajectory", allowMultipleFrames, referenceFrame, registry);
+      registerTrajectoryGeneratorsInMultipleFrames(subTrajectory);
+
+      String positionAtWayPointName = namePrefix + "PositionAtWaypoint";
+      String linearVelocityAtWaypointName = namePrefix + "LinearVelocityAtWaypoint";
+
+      for (int i = 0; i < maximumNumberOfWaypoints; i++)
+      {
+         DoubleYoVariable timeAtWaypoint = new DoubleYoVariable(namePrefix + "TimeAtWaypoint" + i, registry);
+         timeAtWaypoints.add(timeAtWaypoint);
+
+         if (allowMultipleFrames)
+         {
+            YoFramePointInMultipleFrames positionAtWaypoint = new YoFramePointInMultipleFrames(positionAtWayPointName + i, registry, referenceFrame);
+            positionAtWaypoints.add(positionAtWaypoint);
+
+            YoFrameVectorInMultipleFrames linearVelocityAtWaypoint = new YoFrameVectorInMultipleFrames(linearVelocityAtWaypointName + i, registry, referenceFrame);
+            linearVelocityAtWaypoints.add(linearVelocityAtWaypoint);
+
+            registerMultipleFramesHolders(positionAtWaypoint, linearVelocityAtWaypoint);
+         }
+         else
+         {
+            YoFramePoint positionAtWaypoint = new YoFramePoint(positionAtWayPointName + i, referenceFrame, registry);
+            positionAtWaypoints.add(positionAtWaypoint);
+
+            YoFrameVector linearVelocityAtWaypoint = new YoFrameVector(linearVelocityAtWaypointName + i, referenceFrame, registry);
+            linearVelocityAtWaypoints.add(linearVelocityAtWaypoint);
+         }
+      }
+
+      clear();
+
+      parentRegistry.addChild(registry);
    }
 
    public void clear()
    {
-      for (int i = 0; i < trajectories.length; i++)
+      numberOfWaypoints.set(0);
+      currentWaypointIndex.set(0);
+
+      for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         trajectories[i].clear();
+         timeAtWaypoints.get(i).set(Double.NaN);
+         positionAtWaypoints.get(i).setToNaN();
+         linearVelocityAtWaypoints.get(i).setToNaN();
       }
    }
 
-   public boolean appendWaypoint(double timeAtWaypoint, Point3d position, Vector3d velocity)
+   public void appendWaypoint(double timeAtWaypoint, Point3d position, Vector3d linearVelocity)
    {
-      boolean success = trajectories[0].appendWaypoint(timeAtWaypoint, position.getX(), velocity.getX());
-      success &= trajectories[1].appendWaypoint(timeAtWaypoint, position.getY(), velocity.getY());
-      success &= trajectories[2].appendWaypoint(timeAtWaypoint, position.getZ(), velocity.getZ());
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
 
-      if (!success)
-      {
-         clear();
-      }
-      return success;
+      timeAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint);
+      positionAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(position);
+      if (linearVelocity != null)
+         linearVelocityAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(linearVelocity);
+      else
+         linearVelocityAtWaypoints.get(numberOfWaypoints.getIntegerValue()).setToZero();
+
+      numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(double timeAtWaypoint, FramePoint position, FrameVector velocity)
+   public void appendWaypoint(double timeAtWaypoint, FramePoint position, FrameVector linearVelocity)
    {
-      position.checkReferenceFrameMatch(referenceFrame);
-      velocity.checkReferenceFrameMatch(referenceFrame);
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
 
-      Point3d pos = new Point3d();
-      Vector3d vel = new Vector3d();
-      position.get(pos);
-      velocity.get(vel);
+      timeAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint);
+      positionAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(position);
+      linearVelocityAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(linearVelocity);
 
-      appendWaypoint(timeAtWaypoint, pos, vel);
+      numberOfWaypoints.increment();
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, FramePoint[] positions, FrameVector[] velocities)
+   public void appendWaypoints(double[] timeAtWaypoints, FramePoint[] positions, FrameVector[] linearVelocities)
    {
-      if (timeAtWaypoints.length != positions.length || positions.length != velocities.length)
-         throw new RuntimeException("Arguments are inconsistent");
+      if (timeAtWaypoints.length != positions.length || (linearVelocities != null && positions.length != linearVelocities.length))
+         throw new RuntimeException("Arguments are inconsistent.");
+
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + timeAtWaypoints.length);
+
+      for (int i = 0; i < timeAtWaypoints.length; i++)
+         appendWaypoint(timeAtWaypoints[i], positions[i], linearVelocities[i]);
+   }
+
+   public void appendWaypoints(double[] timeAtWaypoints, Point3d[] positions, Vector3d[] linearVelocities)
+   {
+      if (timeAtWaypoints.length != positions.length || positions.length != linearVelocities.length)
+         throw new RuntimeException("Arguments are inconsistent.");
+
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + timeAtWaypoints.length);
 
       for (int i = 0; i < timeAtWaypoints.length; i++)
       {
-         referenceFrame.checkReferenceFrameMatch(positions[i]);
-         referenceFrame.checkReferenceFrameMatch(velocities[i]);
-         appendWaypoint(timeAtWaypoints[i], positions[i], velocities[i]);
+         appendWaypoint(timeAtWaypoints[i], positions[i], linearVelocities[i]);
       }
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, Point3d[] positions, Vector3d[] velocities)
+   public void appendWaypoint(EuclideanWaypointInterface euclideanWaypoint)
    {
-      if (timeAtWaypoints.length != positions.length || positions.length != velocities.length)
-         throw new RuntimeException("Arguments are inconsistent");
+      appendWaypoint(euclideanWaypoint.getTime(), euclideanWaypoint.getPosition(), euclideanWaypoint.getLinearVelocity());
+   }
 
-      for (int i = 0; i < timeAtWaypoints.length; i++)
+   public void appendWaypoints(EuclideanWaypointInterface[] euclideanWaypoint)
+   {
+      for (int i = 0; i < euclideanWaypoint.length; i++)
       {
-         appendWaypoint(timeAtWaypoints[i], positions[i], velocities[i]);
+         appendWaypoint(euclideanWaypoint[i]);
       }
    }
 
    public void appendWaypoints(WaypointPositionTrajectoryData trajectoryData)
    {
-      trajectoryData.checkReferenceFrameMatch(referenceFrame);
+      trajectoryData.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
       appendWaypoints(trajectoryData.getTimeAtWaypoints(), trajectoryData.getPositions(), trajectoryData.getVelocities());
    }
 
-   public void setWaypoints(WaypointPositionTrajectoryData trajectoryData)
+   private void checkNumberOfWaypoints(int length)
    {
-      clear();
-      appendWaypoints(trajectoryData);
+      if (length > maximumNumberOfWaypoints)
+         throw new RuntimeException("Cannot exceed the maximum number of waypoints. Number of waypoints provided: " + length);
    }
 
    @Override
    public void initialize()
    {
-      FramePoint positionToPack = new FramePoint(ReferenceFrame.getWorldFrame());
-      currentPositionProvider.get(positionToPack);
-      positionToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      if (numberOfWaypoints.getIntegerValue() == 0)
+      {
+         throw new RuntimeException("Trajectory has no waypoints.");
+      }
 
-      trajectories[0].setInitialCondition(positionToPack.getX(), 0.0);
-      trajectories[1].setInitialCondition(positionToPack.getY(), 0.0);
-      trajectories[2].setInitialCondition(positionToPack.getZ(), 0.0);
+      currentWaypointIndex.set(0);
+
+      double timeAtFirstWaypoint = timeAtWaypoints.get(0).getDoubleValue();
+      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
+      {
+         timeAtWaypoints.get(i).sub(timeAtFirstWaypoint);
+      }
+
+      if (numberOfWaypoints.getIntegerValue() == 1)
+      {
+         subTrajectory.setFinalConditions(positionAtWaypoints.get(0), linearVelocityAtWaypoints.get(0));
+         subTrajectory.setTrajectoryTime(0.0);
+         subTrajectory.initialize();
+      }
+      else
+         initializeSubTrajectory(0);
    }
 
-   public void initialize(FramePoint position, FrameVector velocity)
+   private void initializeSubTrajectory(int waypointIndex)
    {
-      position.changeFrame(ReferenceFrame.getWorldFrame());
-      velocity.changeFrame(ReferenceFrame.getWorldFrame());
+      YoFramePoint initialPosition = positionAtWaypoints.get(waypointIndex);
+      YoFrameVector initialLinearVelocity = linearVelocityAtWaypoints.get(waypointIndex);
+      subTrajectory.setInitialConditions(initialPosition, initialLinearVelocity);
 
-      trajectories[0].setInitialCondition(position.getX(), velocity.getX());
-      trajectories[1].setInitialCondition(position.getY(), velocity.getY());
-      trajectories[2].setInitialCondition(position.getZ(), velocity.getZ());
+      YoFramePoint finalPosition = positionAtWaypoints.get(waypointIndex + 1);
+      YoFrameVector finalLinearVelocity = linearVelocityAtWaypoints.get(waypointIndex + 1);
+      subTrajectory.setFinalConditions(finalPosition, finalLinearVelocity);
+
+      double subTrajectoryTime = timeAtWaypoints.get(waypointIndex + 1).getDoubleValue() - timeAtWaypoints.get(waypointIndex).getDoubleValue();
+      subTrajectory.setTrajectoryTime(subTrajectoryTime);
+
+      subTrajectory.initialize();
    }
 
    @Override
    public void compute(double time)
    {
-      trajectories[0].compute(time);
-      trajectories[1].compute(time);
-      trajectories[2].compute(time);
+      currentTrajectoryTime.set(time);
+
+      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= timeAtWaypoints.get(currentWaypointIndex.getIntegerValue() + 1).getDoubleValue())
+      {
+         currentWaypointIndex.increment();
+         initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
+      }
+
+      double subTrajectoryTime = time - timeAtWaypoints.get(currentWaypointIndex.getIntegerValue()).getDoubleValue();
+      subTrajectory.compute(subTrajectoryTime);
    }
 
    @Override
    public boolean isDone()
    {
-      return trajectories[0].isDone() && trajectories[1].isDone() && trajectories[2].isDone();
+      if (numberOfWaypoints.getIntegerValue() == 0)
+         return true;
+
+      boolean isLastWaypoint = currentWaypointIndex.getIntegerValue() >= numberOfWaypoints.getIntegerValue() - 2;
+      if (!isLastWaypoint)
+         return false;
+      boolean subTrajectoryIsDone = subTrajectory.isDone();
+      return subTrajectoryIsDone;
+   }
+
+   public int getCurrentWaypointIndex()
+   {
+      return currentWaypointIndex.getIntegerValue();
    }
 
    @Override
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
+   }
+
+   @Override
+   public void get(FramePoint positionToPack)
+   {
+      subTrajectory.get(positionToPack);
+   }
+
+   @Override
+   public void packVelocity(FrameVector linearVelocityToPack)
+   {
+      subTrajectory.packVelocity(linearVelocityToPack);
+   }
+
+   @Override
+   public void packAcceleration(FrameVector linearAccelerationToPack)
+   {
+      subTrajectory.packAcceleration(linearAccelerationToPack);
+   }
+
+   @Override
+   public void packLinearData(FramePoint positionToPack, FrameVector linearVelocityToPack, FrameVector linearAccelerationToPack)
+   {
+      subTrajectory.packLinearData(positionToPack, linearVelocityToPack, linearAccelerationToPack);
    }
 }

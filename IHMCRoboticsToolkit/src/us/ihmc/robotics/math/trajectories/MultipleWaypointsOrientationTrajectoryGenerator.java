@@ -32,6 +32,11 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
 
    private final HermiteCurveBasedOrientationTrajectoryGenerator subTrajectory;
 
+   public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, maximumNumberOfWaypoints, false, referenceFrame, parentRegistry);
+   }
+
    public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       super(allowMultipleFrames, referenceFrame);
@@ -99,54 +104,6 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
-   public void appendWaypoint(double timeAtWaypoint, Quat4d orientation)
-   {
-      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
-
-      timeAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint);
-      orientationAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(orientation);
-      angularVelocityAtWaypoints.get(numberOfWaypoints.getIntegerValue()).setToZero();
-
-      numberOfWaypoints.increment();
-   }
-
-   public void appendWaypoint(double timeAtWaypoint, FrameOrientation orientation)
-   {
-      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
-
-      timeAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint);
-      orientationAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(orientation);
-      angularVelocityAtWaypoints.get(numberOfWaypoints.getIntegerValue()).setToZero();
-
-      numberOfWaypoints.increment();
-   }
-
-   public void appendWaypoints(double[] timeAtWaypoints, Quat4d[] orientations)
-   {
-      if (timeAtWaypoints.length != orientations.length)
-         throw new RuntimeException("Arguments are inconsistent.");
-
-      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + timeAtWaypoints.length);
-
-      for (int i = 0; i < timeAtWaypoints.length; i++)
-      {
-         appendWaypoint(timeAtWaypoints[i], orientations[i]);
-      }
-   }
-
-   public void appendWaypoints(double[] timeAtWaypoints, FrameOrientation[] orientations)
-   {
-      if (timeAtWaypoints.length != orientations.length)
-         throw new RuntimeException("Arguments are inconsistent.");
-
-      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + timeAtWaypoints.length);
-
-      for (int i = 0; i < timeAtWaypoints.length; i++)
-      {
-         appendWaypoint(timeAtWaypoints[i], orientations[i]);
-      }
-   }
-
    public void appendWaypoint(double timeAtWaypoint, Quat4d orientation, Vector3d angularVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
@@ -179,16 +136,8 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
 
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + timeAtWaypoints.length);
 
-      if (angularVelocities == null)
-      {
-         for (int i = 0; i < timeAtWaypoints.length; i++)
-            appendWaypoint(timeAtWaypoints[i], orientations[i]);
-      }
-      else
-      {
-         for (int i = 0; i < timeAtWaypoints.length; i++)
-            appendWaypoint(timeAtWaypoints[i], orientations[i], angularVelocities[i]);
-      }
+      for (int i = 0; i < timeAtWaypoints.length; i++)
+         appendWaypoint(timeAtWaypoints[i], orientations[i], angularVelocities[i]);
    }
 
    public void appendWaypoints(double[] timeAtWaypoints, FrameOrientation[] orientations, FrameVector[] angularVelocities)
