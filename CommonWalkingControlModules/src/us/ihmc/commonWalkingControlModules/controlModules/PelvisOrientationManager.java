@@ -138,7 +138,7 @@ public class PelvisOrientationManager
 
       boolean doVelocityAtWaypoints = false;
       boolean allowMultipleFrames = false;
-      pelvisWaypointsOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisWaypointsOffset", 15, doVelocityAtWaypoints, allowMultipleFrames, desiredPelvisFrame, registry);
+      pelvisWaypointsOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisWaypointsOffset", 15, allowMultipleFrames, desiredPelvisFrame, registry);
 
       parentRegistry.addChild(registry);
    }

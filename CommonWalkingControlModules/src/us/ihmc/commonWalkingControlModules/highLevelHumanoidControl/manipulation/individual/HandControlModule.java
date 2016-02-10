@@ -288,7 +288,7 @@ public class HandControlModule
 
       boolean doVelocityAtWaypoints = false;
       waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", worldFrame, currentHandPosition, registry);
-      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, doVelocityAtWaypoints, true, worldFrame, registry);
+      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, true, worldFrame, registry);
       wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator,
               waypointOrientationTrajectoryGenerator);
 
