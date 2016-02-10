@@ -569,7 +569,7 @@ public abstract class PacketValidityChecker
 
       for (int i = 0; i < handTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
-         SE3WaypointMessage waypoint = handTrajectoryMessage.getTaskspaceWaypoint(i);
+         SE3WaypointMessage waypoint = handTrajectoryMessage.getWaypoint(i);
          String errorMessage = validateSE3Waypoint(waypoint, previousWaypoint);
          if (errorMessage != null)
          {

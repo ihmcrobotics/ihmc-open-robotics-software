@@ -132,13 +132,13 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
       return base;
    }
 
-   public SE3WaypointMessage getTaskspaceWaypoint(int waypointIndex)
+   public SE3WaypointMessage getWaypoint(int waypointIndex)
    {
       rangeCheck(waypointIndex);
       return taskspaceWaypoints[waypointIndex];
    }
 
-   public SE3WaypointMessage[] getTaskspaceWaypoints()
+   public SE3WaypointMessage[] getWaypoints()
    {
       return taskspaceWaypoints;
    }

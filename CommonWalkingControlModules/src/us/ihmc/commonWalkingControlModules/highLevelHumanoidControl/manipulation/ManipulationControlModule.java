@@ -201,7 +201,7 @@ public class ManipulationControlModule
 
       HandTrajectoryMessage message = handTrajectoryMessageSubscriber.pollMessage(robotSide);
       BaseForControl base = message.getBase();
-      SE3WaypointInterface[] taskspaceWaypoints = message.getTaskspaceWaypoints();
+      SE3WaypointInterface[] taskspaceWaypoints = message.getWaypoints();
       handControlModules.get(robotSide).moveInTaskspaceViaWaypoints(base, taskspaceWaypoints);
    }
 
