@@ -78,7 +78,7 @@ public class AtlasMultiContact
          break;
       default:
          footContactSides = RobotSide.values;
-         handContactSides = new RobotSide[] { RobotSide.LEFT };
+         handContactSides = new RobotSide[] {RobotSide.LEFT};
          robotInitialSetup = new MultiContactDRCRobotInitialSetup();
          break;
 
@@ -128,13 +128,13 @@ public class AtlasMultiContact
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, controllerParameters, armControllerParameters, capturePointPlannerParameters,
             HighLevelState.DO_NOTHING_BEHAVIOR);
-      
-      controllerFactory.addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));
+
+      controllerFactory
+            .addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));
       VariousWalkingProviderFactory variousWalkingProviderFactory = createVariousWalkingProviderFactory();
       controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
 
-      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup,
-            guiInitialSetup, null);
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
@@ -161,12 +161,14 @@ public class AtlasMultiContact
       {
          @Override
          public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullHumanoidRobotModel fullRobotModel,
-               WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
-               ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
-               YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+               WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
+               SideDependentList<ContactablePlaneBody> feet, ConstantTransferTimeCalculator transferTimeCalculator,
+               ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
+               YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
          {
             PelvisPoseProvider desiredPelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
-            HandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(referenceFrames,fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
+            HandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(referenceFrames, fullRobotModel,
+                  walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
             HandLoadBearingProvider desiredHandLoadBearingProvider = new DesiredHandLoadBearingProvider();
             return new VariousWalkingProviders(null, null, null, null, null, null, null, desiredPelvisPoseProvider, desiredHandPoseProvider, null, null,
                   desiredHandLoadBearingProvider, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
