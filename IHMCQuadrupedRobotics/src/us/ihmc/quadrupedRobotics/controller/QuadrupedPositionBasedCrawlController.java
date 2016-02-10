@@ -1343,7 +1343,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          FramePoint2d comProjectionOnOutsideLegs2d = new FramePoint2d(ReferenceFrame.getWorldFrame());
          FramePoint comProjectionOnOutsideLegs = new FramePoint(ReferenceFrame.getWorldFrame());
          
-         QuadrupedSupportPolygon trippleStateWithoutCurrentSwing = fourFootSupportPolygon.deleteLegCopy(currentSwingLeg);
+         QuadrupedSupportPolygon trippleStateWithoutCurrentSwing = new QuadrupedSupportPolygon();
+         fourFootSupportPolygon.getAndRemoveFootstep(trippleStateWithoutCurrentSwing, currentSwingLeg);
          
          switch(safeToShiftMode.getEnumValue())
          {
@@ -1551,8 +1552,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          
          RobotQuadrant fourthSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, thirdSwingLeg, desiredVelocityVector, yawRate);
          
-         upcommingTrippleSupportPolygons.set(firstSwingLeg, fourFootSupportPolygon.deleteLegCopy(firstSwingLeg));
-         upcommingTrippleSupportPolygons.set(secondSwingLeg, fourFootSupportPolygon.deleteLegCopy(firstSwingLeg));
+         upcommingTrippleSupportPolygons.set(firstSwingLeg, new QuadrupedSupportPolygon());
+         fourFootSupportPolygon.getAndRemoveFootstep(upcommingTrippleSupportPolygons.get(firstSwingLeg), firstSwingLeg);
+         upcommingTrippleSupportPolygons.set(secondSwingLeg, new QuadrupedSupportPolygon());
+         fourFootSupportPolygon.getAndRemoveFootstep(upcommingTrippleSupportPolygons.get(secondSwingLeg), firstSwingLeg);
          
          fourFootSupportPolygon.deleteLegCopy(secondSwingLeg, trippleStateWithFirstStepSwinging);
          quadStateAfterFirstStep.deleteLegCopy(secondSwingLeg, trippleStateAfterFirstStepWithSecondSwinging);

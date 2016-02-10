@@ -388,13 +388,6 @@ public class QuadrupedSupportPolygon implements Serializable
       supportPolygonToPack.setFootstep(getQuadrant(RobotEnd.FRONT, sideToSwap), getFootstep(getQuadrant(RobotEnd.HIND, sideToSwap)));
    }
 
-   public QuadrupedSupportPolygon deleteLegCopy(RobotQuadrant legName)
-   {
-      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
-      newPolygon.removeFootstep(legName);
-      return newPolygon;
-   }
-
    public void removeFootstep(RobotQuadrant robotQuadrant)
    {
       footsteps.remove(robotQuadrant);
@@ -814,7 +807,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       if (size() < 3)
       {
-         throw new UndefinedOperationException("InCirclePoint only defined for 3 and 4 legs.");
+         throw new UndefinedOperationException("InCirclePoint only defined for 3 and 4 legs. size() = " + size());
       }
       
       int i = 0;
