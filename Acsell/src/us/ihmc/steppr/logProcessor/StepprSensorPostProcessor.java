@@ -40,6 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -49,7 +50,6 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -195,13 +195,22 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, referenceFrames);
       SideDependentList<FootSwitchInterface> footSwitches = createStateEstimatorFootSwitches(logDataProcessorHelper, bipedFeet);
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // no viz for now
+      
+      final Map<RigidBody, RobotSide> feetMap = new LinkedHashMap<>();
+      Map<RigidBody, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
+         feetMap.put(foot, robotSide);
+         soleFrames.put(foot, referenceFrames.getSoleFrame(robotSide));
+      }
 
-      CenterOfPressureDataHolder centerOfPressureDataHolder = new CenterOfPressureDataHolder(referenceFrames.getSoleFrames())
+      CenterOfPressureDataHolder centerOfPressureDataHolder = new CenterOfPressureDataHolder(soleFrames)
       {
          @Override
-         public void getCenterOfPressure(FramePoint2d centerOfPressureToPack, RobotSide robotSide)
+         public void getCenterOfPressure(FramePoint2d centerOfPressureToPack, RigidBody foot)
          {
-            logDataProcessorHelper.getDesiredCoP(robotSide, centerOfPressureToPack);
+            logDataProcessorHelper.getDesiredCoP(feetMap.get(foot), centerOfPressureToPack);
          }
       };
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,

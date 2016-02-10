@@ -1,11 +1,15 @@
 package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
@@ -53,10 +57,16 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
-      estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(estimatorFullRobotModel.getSoleFrames());
       estimatorContactSensorHolder = new ContactSensorHolder(Arrays.asList(estimatorFullRobotModel.getContactSensorDefinitions()));
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new DesiredJointDataHolder(estimatorFullRobotModel.getOneDoFJoints());
+      
+      LinkedHashMap<RigidBody, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
+      for(RobotSide robotSide : RobotSide.values)  
+      {
+         soleFrames.put(estimatorFullRobotModel.getFoot(robotSide), estimatorFullRobotModel.getSoleFrame(robotSide));         
+      }
+      estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(soleFrames);
 
       controllerFullRobotModel = estimatorFullRobotModel;
       controllerForceSensorDataHolder = estimatorForceSensorDataHolder;
