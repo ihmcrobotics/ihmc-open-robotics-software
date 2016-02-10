@@ -41,7 +41,7 @@ public class HandTrajectoryMessageSubscriber implements PacketConsumer<HandTraje
       if (!PacketValidityChecker.validateHandTrajectoryMessage(handTrajectoryMessage, globalDataProducer))
          return;
 
-      AtomicReference<HandTrajectoryMessage> latestMessageReference = latestMessageReferences.get(handTrajectoryMessage.getRobotSide());
-      latestMessageReference.set(handTrajectoryMessage);
+      RobotSide robotSide = handTrajectoryMessage.getRobotSide();
+      latestMessageReferences.get(robotSide).set(handTrajectoryMessage);
    }
 }
