@@ -55,27 +55,32 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class YoVariableVariousWalkingProviderFactory implements VariousWalkingProviderFactory
 {
-   public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
-         SideDependentList<ContactablePlaneBody> feet, ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
+   public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullHumanoidRobotModel fullRobotModel,
+         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
+         ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
+         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
       HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber = null;
       ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = null;
 
       HandstepProvider handstepProvider = new UserDesiredHandstepProvider(fullRobotModel, registry, yoGraphicsListRegistry);
 
-      HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
+      HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel,
+            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
-      FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters, registry);
+      FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters,
+            registry);
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
       double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
-      HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), trajectoryTimeHeadOrientation, registry);
+      HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(),
+            trajectoryTimeHeadOrientation, registry);
       DesiredComHeightProvider desiredComHeightProvider = null;
       PelvisPoseProvider pelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
-      ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(), trajectoryTimeHeadOrientation, registry);
+      ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(),
+            trajectoryTimeHeadOrientation, registry);
 
       FootPoseProvider footPoseProvider = new UserDesiredFootPoseProvider(fullRobotModel, walkingControllerParameters.getDefaultSwingTime(), registry);
 
@@ -102,9 +107,11 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, footstepPovider, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider,
-            handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, footstepPovider,
+            handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider,
+            handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, automaticManipulationAbortCommunicator,
+            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
+            controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
             singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
 
       return variousProviders;
