@@ -111,7 +111,7 @@ public class PelvisICPBasedTranslationManager
       pelvisPositionTrajectoryGenerator.initialize();
       activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
 
-      pelvisWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisWaypoints", worldFrame, initialPositionProvider, registry);
+      pelvisWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisWaypoints", 15, worldFrame, registry);
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -207,10 +207,9 @@ public class PelvisICPBasedTranslationManager
             
             WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = desiredPelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
             desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
+            pelvisWaypointsPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
             pelvisWaypointsPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);
-           
-            pelvisWaypointsPositionTrajectoryGenerator.initialize( tempPosition, tempVelocity );
-           
+
             isUsingWaypointTrajectory.set(true);
             activeTrajectoryGenerator = pelvisWaypointsPositionTrajectoryGenerator;
             isRunning.set(true);

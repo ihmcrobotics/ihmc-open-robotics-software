@@ -286,8 +286,7 @@ public class HandControlModule
       circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, registry,
             yoGraphicsListRegistry);
 
-      boolean doVelocityAtWaypoints = false;
-      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", worldFrame, currentHandPosition, registry);
+      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", 15, worldFrame, registry);
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, true, worldFrame, registry);
       wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator,
               waypointOrientationTrajectoryGenerator);
@@ -554,6 +553,10 @@ public class HandControlModule
       int numberOfPoses = desiredPoses.length;
       double trajectoryTimeOfEachPose = totalTrajectoryTime / numberOfPoses;
       double elapsedTimeSinceTrajectoryStart = 0.0;
+
+      currentHandPosition.get(tempPosition);
+      tempVelocity.setToZero();
+      waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
 
       for (int i = 0; i < numberOfPoses; i++)
       {

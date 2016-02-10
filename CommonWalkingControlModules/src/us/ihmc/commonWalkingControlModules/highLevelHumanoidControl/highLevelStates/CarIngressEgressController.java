@@ -149,7 +149,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       PositionProvider pelvisPositionprovider = new YoPositionProvider(new YoFramePoint("pelvisPositionProvider", pelvisPositionControlFrame, registry));
 
-      pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", worldFrame, pelvisPositionprovider, registry);
+      pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 50, worldFrame, registry);
 
       // Set up the chest trajectory generator
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
