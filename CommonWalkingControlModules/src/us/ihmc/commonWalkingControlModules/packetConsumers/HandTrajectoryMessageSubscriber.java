@@ -8,13 +8,13 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class HandTrajectorySubscriber implements PacketConsumer<HandTrajectoryMessage>
+public class HandTrajectoryMessageSubscriber implements PacketConsumer<HandTrajectoryMessage>
 {
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    private final SideDependentList<AtomicReference<HandTrajectoryMessage>> latestMessageReferences = new SideDependentList<>(new AtomicReference<HandTrajectoryMessage>(null), new AtomicReference<HandTrajectoryMessage>(null));
    
-   public HandTrajectorySubscriber(HumanoidGlobalDataProducer globalDataProducer)
+   public HandTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
    }
