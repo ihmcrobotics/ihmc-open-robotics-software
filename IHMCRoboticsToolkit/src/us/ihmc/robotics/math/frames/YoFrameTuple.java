@@ -205,15 +205,27 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
       checkReferenceFrameMatch(referenceFrame);
       set(x, y, z);
    }
-   
+
    public final void setAndMatchFrame(FrameTuple<?> frameTuple)
    {
       setAndMatchFrame(frameTuple, true);
    }
-   
+
    public final void setAndMatchFrame(FrameTuple<?> frameTuple, boolean notifyListeners)
    {
       this.frameTuple.setIncludingFrame(frameTuple);
+      this.frameTuple.changeFrame(getReferenceFrame());
+      getYoValuesFromFrameTuple(notifyListeners);
+   }
+
+   public final void setAndMatchFrame(YoFrameTuple<?> yoFrameTuple)
+   {
+      setAndMatchFrame(yoFrameTuple, true);
+   }
+
+   public final void setAndMatchFrame(YoFrameTuple<?> yoFrameTuple, boolean notifyListeners)
+   {
+      yoFrameTuple.getFrameTupleIncludingFrame(frameTuple);
       this.frameTuple.changeFrame(getReferenceFrame());
       getYoValuesFromFrameTuple(notifyListeners);
    }
@@ -445,6 +457,14 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
       putYoValuesIntoFrameTuple();
       frameTuple.subAndScale(scaleFactor, yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
       getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Negates the value of this YoFrameTuple in place.
+    */
+   public final void negate()
+   {
+      set(-getX(), -getY(), -getZ());
    }
 
    /**
