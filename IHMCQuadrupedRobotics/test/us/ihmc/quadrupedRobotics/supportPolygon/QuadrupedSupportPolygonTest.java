@@ -55,7 +55,16 @@ public class QuadrupedSupportPolygonTest
       }
       
       quadrupedSupportPolygon = new QuadrupedSupportPolygon(framePoints);
+      
+      quadrupedSupportPolygon.setFootstep(RobotQuadrant.FRONT_LEFT, framePoints.get(RobotQuadrant.FRONT_LEFT));
+      quadrupedSupportPolygon.setFootstep(RobotQuadrant.FRONT_LEFT, quadrupedSupportPolygon.getFootstep(RobotQuadrant.FRONT_LEFT));
+      
       quadrupedSupportPolygon = new QuadrupedSupportPolygon(quadrupedSupportPolygon);
+      quadrupedSupportPolygon.set(quadrupedSupportPolygon);
+      for (RobotQuadrant robotQuadrant : quadrupedSupportPolygon.getSupportingQuadrantsInOrder())
+      {
+         assertTrue("not equals", framePoints.get(robotQuadrant).epsilonEquals(quadrupedSupportPolygon.getFootstep(robotQuadrant), 1e-7));
+      }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -80,6 +89,53 @@ public class QuadrupedSupportPolygonTest
    
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
+   public void testVariousMethodsForCodeCoverage()
+   {
+      final QuadrupedSupportPolygon emptyPolygon = createEmptyPolygon();
+      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            emptyPolygon.getFirstSupportingQuadrant();
+         }
+      });
+      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            emptyPolygon.getLastSupportingQuadrant();
+         }
+      });
+      
+      final QuadrupedSupportPolygon fullPolygon = createSimplePolygon();
+      JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            fullPolygon.getLastNonSupportingQuadrant();
+         }
+      });
+      JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            fullPolygon.getFirstNonSupportingQuadrant();
+         }
+      });
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         assertEquals("not right", robotQuadrant, createPolygonWithoutLeg(robotQuadrant).getFirstNonSupportingQuadrant());
+         assertEquals("not right", robotQuadrant, createPolygonWithoutLeg(robotQuadrant).getLastNonSupportingQuadrant());
+      }
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetLegPairs()
    {
       final QuadrupedSupportPolygon quadrupedSupportPolygon = createSimplePolygon();
@@ -98,6 +154,12 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not 1", 1, legPairs.length);
       
       quadrupedSupportPolygon.removeFootstep(RobotQuadrant.HIND_LEFT);
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         QuadrupedSupportPolygon createPolygonWithoutLeg = createPolygonWithoutLeg(robotQuadrant);
+         assertEquals("not 3", 3, createPolygonWithoutLeg.getLegPairs().length);
+      }
       
       JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
@@ -141,6 +203,24 @@ public class QuadrupedSupportPolygonTest
       variableSizedPolygon.removeFootstep(variableSizedPolygon.getFirstSupportingQuadrant());
       assertEquals("not size 1", 1, variableSizedPolygon.size());
       variableSizedPolygon.removeFootstep(variableSizedPolygon.getFirstSupportingQuadrant());
+      assertEquals("not size 0", 0, variableSizedPolygon.size());
+      variableSizedPolygon.removeFootstep(RobotQuadrant.FRONT_LEFT);
+      variableSizedPolygon.setFootstep(RobotQuadrant.FRONT_LEFT, null);
+      assertEquals("not size 0", 0, variableSizedPolygon.size());
+      
+      variableSizedPolygon = createSimplePolygon();
+      assertEquals("not size 4", 4, variableSizedPolygon.size());
+      variableSizedPolygon.setFootstep(variableSizedPolygon.getLastSupportingQuadrant(), null);
+      assertEquals("not size 3", 3, variableSizedPolygon.size());
+      variableSizedPolygon.setFootstep(variableSizedPolygon.getLastSupportingQuadrant(), null);
+      assertEquals("not size 2", 2, variableSizedPolygon.size());
+      variableSizedPolygon.setFootstep(variableSizedPolygon.getLastSupportingQuadrant(), null);
+      assertEquals("not size 1", 1, variableSizedPolygon.size());
+      variableSizedPolygon.setFootstep(variableSizedPolygon.getLastSupportingQuadrant(), null);
+      assertEquals("not size 0", 0, variableSizedPolygon.size());
+      
+      variableSizedPolygon = createSimplePolygon();
+      variableSizedPolygon.clear();
       assertEquals("not size 0", 0, variableSizedPolygon.size());
    }
    
@@ -212,6 +292,55 @@ public class QuadrupedSupportPolygonTest
       assertEquals("1 legs don't match", 1, match1.getNumberOfEqualFootsteps(match2));
       match1.getFootstep(RobotQuadrant.HIND_RIGHT).add(2.0, -3.0, 1.0);
       assertEquals("0 legs don't match", 0, match1.getNumberOfEqualFootsteps(match2));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetNextCounterClockwiseSupportingQuadrant()
+   {
+      QuadrupedSupportPolygon fourFootPoly = createSimplePolygon();
+      assertEquals("not correct", RobotQuadrant.FRONT_LEFT, fourFootPoly.getNextCounterClockwiseSupportingQuadrant(RobotQuadrant.FRONT_RIGHT));
+      assertEquals("not correct", RobotQuadrant.HIND_LEFT, fourFootPoly.getNextCounterClockwiseSupportingQuadrant(RobotQuadrant.FRONT_LEFT));
+      assertEquals("not correct", RobotQuadrant.HIND_RIGHT, fourFootPoly.getNextCounterClockwiseSupportingQuadrant(RobotQuadrant.HIND_LEFT));
+      assertEquals("not correct", RobotQuadrant.FRONT_RIGHT, fourFootPoly.getNextCounterClockwiseSupportingQuadrant(RobotQuadrant.HIND_RIGHT));
+
+      assertEquals("not correct", RobotQuadrant.FRONT_RIGHT, fourFootPoly.getNextClockwiseSupportingQuadrant(RobotQuadrant.FRONT_LEFT));
+      assertEquals("not correct", RobotQuadrant.HIND_RIGHT, fourFootPoly.getNextClockwiseSupportingQuadrant(RobotQuadrant.FRONT_RIGHT));
+      assertEquals("not correct", RobotQuadrant.HIND_LEFT, fourFootPoly.getNextClockwiseSupportingQuadrant(RobotQuadrant.HIND_RIGHT));
+      assertEquals("not correct", RobotQuadrant.FRONT_LEFT, fourFootPoly.getNextClockwiseSupportingQuadrant(RobotQuadrant.HIND_LEFT));
+      
+      QuadrupedSupportPolygon polyNoFL = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      assertEquals("not correct", RobotQuadrant.HIND_LEFT, polyNoFL.getNextCounterClockwiseSupportingQuadrant(RobotQuadrant.FRONT_RIGHT));
+      assertEquals("not correct", RobotQuadrant.FRONT_RIGHT, polyNoFL.getNextClockwiseSupportingQuadrant(RobotQuadrant.HIND_LEFT));
+      
+      final QuadrupedSupportPolygon emptyPolygon = createEmptyPolygon();
+      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            emptyPolygon.getNextCounterClockwiseSupportingQuadrant(RobotQuadrant.FRONT_LEFT);
+         }
+      });
+      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            emptyPolygon.getNextClockwiseSupportingQuadrant(RobotQuadrant.FRONT_LEFT);
+         }
+      });
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetOrCreateFootstep()
+   {
+      QuadrupedSupportPolygon noFL = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstep1 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      assertNotNull("null", footstep1);
+      FramePoint footstep2 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      assertTrue("not same ref", footstep1 == footstep2);
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
@@ -288,6 +417,41 @@ public class QuadrupedSupportPolygonTest
       poly2.removeFootstep(RobotQuadrant.FRONT_RIGHT);
       poly1.removeFootstep(RobotQuadrant.FRONT_LEFT);
       assertTrue("not same feet", poly1.containsSameQuadrants(poly2));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetAndReplaceFootstep()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      FramePoint footstep = poly.getFootstep(RobotQuadrant.FRONT_LEFT);
+      QuadrupedSupportPolygon replaceFootstep = new QuadrupedSupportPolygon();
+      poly.getAndReplaceFootstep(replaceFootstep, RobotQuadrant.FRONT_LEFT, new FramePoint(ReferenceFrame.getWorldFrame(), 2.0, 1.0, 1.0));
+      assertFalse("equal", footstep.epsilonEquals(replaceFootstep.getFootstep(RobotQuadrant.FRONT_LEFT), 0.1));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetAndRemoveFootstep()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      QuadrupedSupportPolygon removeFootstep = new QuadrupedSupportPolygon();
+      poly.getAndRemoveFootstep(RobotQuadrant.FRONT_LEFT, removeFootstep);
+      removeFootstep.getFootstep(RobotQuadrant.FRONT_LEFT);
+      assertNull("not null", removeFootstep.getFootstep(RobotQuadrant.FRONT_LEFT));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetAndSwapSameSideFootsteps()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      FramePoint footstepFL = poly.getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstepHL = poly.getFootstep(RobotQuadrant.HIND_LEFT);
+      QuadrupedSupportPolygon pack = new QuadrupedSupportPolygon();
+      poly.getAndSwapSameSideFootsteps(RobotQuadrant.FRONT_LEFT, pack);
+      assertTrue("not equal", footstepFL.epsilonEquals(pack.getFootstep(RobotQuadrant.HIND_LEFT), 1e-7));
+      assertTrue("not equal", footstepHL.epsilonEquals(pack.getFootstep(RobotQuadrant.FRONT_LEFT), 1e-7));
    }
 
    private Random random = new Random(9123090L);
@@ -407,6 +571,32 @@ public class QuadrupedSupportPolygonTest
       }
       
       return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createPolygonWithoutLeg(RobotQuadrant quadrantToSkip)
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 1.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(1.0, 1.0, 0.0));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant != quadrantToSkip)
+         {
+            framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+         }
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createEmptyPolygon()
+   {
+      return new QuadrupedSupportPolygon();
    }
    
    private QuadrupedSupportPolygon createOutOfOrderPolygon()
