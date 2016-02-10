@@ -7,20 +7,20 @@ import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommandDispatcher implements Runnable
 {
-   private final HandDesiredConfigurationSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationSubscriber(null);
+   private final HandDesiredConfigurationMessageSubscriber handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(null);
 
    private final ROSiRobotCommunicator rosHandCommunicator;
 
    public ROSiRobotCommandDispatcher(PacketCommunicator ihmcMessageCommunicator, String rosHostIP)
    {
-      ihmcMessageCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
+      ihmcMessageCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationMessageSubscriber);
       
       String rosURI = "http://" + rosHostIP + ":11311";
       
@@ -43,9 +43,9 @@ public class ROSiRobotCommandDispatcher implements Runnable
    {
       while (true)
       {
-         if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
+         if (handDesiredConfigurationMessageSubscriber.isNewDesiredConfigurationAvailable())
          {
-            HandDesiredConfigurationMessage ihmcMessage = handDesiredConfigurationSubscriber.pollMessage();
+            HandDesiredConfigurationMessage ihmcMessage = handDesiredConfigurationMessageSubscriber.pollMessage();
             rosHandCommunicator.sendHandCommand(ihmcMessage);
          }
       }

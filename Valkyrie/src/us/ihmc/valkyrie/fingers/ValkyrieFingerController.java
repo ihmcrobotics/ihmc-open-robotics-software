@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
@@ -48,7 +48,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
 
-   private final SideDependentList<HandDesiredConfigurationSubscriber> handDesiredConfigurationSubscribers = new SideDependentList<>();
+   private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
    private final SideDependentList<ValkyrieFingerSetController> fingerSetControllers = new SideDependentList<>();
 
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
@@ -123,9 +123,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
             }
          }
          
-         handDesiredConfigurationSubscribers.put(robotSide, new HandDesiredConfigurationSubscriber(robotSide));
+         handDesiredConfigurationMessageSubscribers.put(robotSide, new HandDesiredConfigurationMessageSubscriber(robotSide));
          if (globalDataProducer != null)
-            globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscribers.get(robotSide));
+            globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationMessageSubscribers.get(robotSide));
          fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry, controllerRegistry));
          
          jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, globalDataProducer, closeableAndDisposableRegistry));
@@ -215,9 +215,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (handDesiredConfigurationSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
+         if (handDesiredConfigurationMessageSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration handDesiredConfiguration = handDesiredConfigurationSubscribers.get(robotSide).pollMessage().getHandDesiredConfiguration();
+            HandConfiguration handDesiredConfiguration = handDesiredConfigurationMessageSubscribers.get(robotSide).pollMessage().getHandDesiredConfiguration();
             
             PrintTools.debug(DEBUG, this, "Recieved new HandDesiredConfigurationMessage: " + handDesiredConfiguration);
             

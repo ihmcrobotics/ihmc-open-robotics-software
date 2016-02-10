@@ -6,12 +6,12 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandDesiredConfigurationSubscriber implements PacketConsumer<HandDesiredConfigurationMessage>
+public class HandDesiredConfigurationMessageSubscriber implements PacketConsumer<HandDesiredConfigurationMessage>
 {
    private final ConcurrentLinkedQueue<HandDesiredConfigurationMessage> messageQueue = new ConcurrentLinkedQueue<HandDesiredConfigurationMessage>();
    private RobotSide robotSide;
 
-   public HandDesiredConfigurationSubscriber(RobotSide robotSide)
+   public HandDesiredConfigurationMessageSubscriber(RobotSide robotSide)
    {
       this.robotSide = robotSide;
    }

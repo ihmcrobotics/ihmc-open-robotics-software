@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
@@ -49,7 +49,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
 
-   private final SideDependentList<HandDesiredConfigurationSubscriber> handDesiredConfigurationSubscribers = new SideDependentList<>();
+   private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
 
    private final SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints = new SideDependentList<>();
 
@@ -101,8 +101,8 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
          if (hasRobotiqHand.get(robotSide))
          {
-            HandDesiredConfigurationSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationSubscriber(robotSide);
-            handDesiredConfigurationSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
+            HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
+            handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
             if (globalDataProducer != null)
                globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
 
@@ -209,7 +209,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          if (!hasRobotiqHand.get(robotSide))
             continue;
 
-         HandDesiredConfigurationSubscriber handDesiredConfigurationSubscriber = handDesiredConfigurationSubscribers.get(robotSide);
+         HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = handDesiredConfigurationMessageSubscribers.get(robotSide);
          if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
          {
             IndividualRobotiqHandController individualRobotiqHandController = individualHandControllers.get(robotSide);
