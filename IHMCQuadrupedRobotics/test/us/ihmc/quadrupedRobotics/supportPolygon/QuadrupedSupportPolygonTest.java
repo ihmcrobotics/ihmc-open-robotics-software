@@ -17,8 +17,10 @@ import com.google.caliper.runner.CaliperMain;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -557,6 +559,35 @@ public class QuadrupedSupportPolygonTest
             assertTrue("orig not equal list", framePoint.epsilonEquals(quadrantDependentList.get(robotQuadrant).getFrameTuple(), 1e-7));
             assertTrue("poly not equal list", quadrupedSupportPolygon.getFootstep(robotQuadrant).epsilonEquals(quadrupedSupportPolygon.getFootstep(robotQuadrant), 1e-7));
          }
+      }
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testPackYoFrameConvexPolygon2d()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("boo", "yaw", ReferenceFrame.getWorldFrame(), 4, new YoVariableRegistry("bah"));
+      poly.packYoFrameConvexPolygon2d(yoFrameConvexPolygon2d);
+      
+      for (int i = 0; i < 4; i++)
+      {
+         FramePoint polyPoint = poly.getFootstep(RobotQuadrant.getQuadrantNameFromOrdinal(i));
+         FramePoint2d convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, polyPoint.epsilonEquals(convexPoint, 1e-7));
+      }
+      
+      poly = create3LegPolygon();
+      poly.packYoFrameConvexPolygon2d(yoFrameConvexPolygon2d);
+      
+      RobotQuadrant quadrant = poly.getFirstSupportingQuadrant();
+      for (int i = 0; i < 3; i++)
+      {
+         FramePoint polyPoint = poly.getFootstep(quadrant);
+         FramePoint2d convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, polyPoint.epsilonEquals(convexPoint, 1e-7));
+         
+         quadrant = poly.getNextClockwiseSupportingQuadrant(quadrant);
       }
    }
    
