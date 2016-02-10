@@ -221,7 +221,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 10);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.15);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.075);
       params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
       params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
@@ -819,7 +819,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       @Override public void onEntry()
       {
-         System.out.println(robotQuadrant.getCamelCaseNameForMiddleOfExpression());
       }
 
       @Override public FootEvent process()
