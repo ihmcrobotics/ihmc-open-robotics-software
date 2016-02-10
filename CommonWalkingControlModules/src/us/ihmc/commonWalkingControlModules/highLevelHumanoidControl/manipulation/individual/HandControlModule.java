@@ -534,15 +534,18 @@ public class HandControlModule
       waypointPositionTrajectoryGenerator.clear();
       waypointOrientationTrajectoryGenerator.clear();
 
-      tempPosition.setToZero(handControlFrame);
-      tempPosition.changeFrame(worldFrame);
-      tempLinearVelocity.setToZero(worldFrame);
-      tempOrientation.setToZero(handControlFrame);
-      tempOrientation.changeFrame(worldFrame);
-      tempAngularVelocity.setToZero(worldFrame);
+      if (taskspaceWaypoints[0].getTime() > 1.0e-5)
+      {
+         tempPosition.setToZero(handControlFrame);
+         tempPosition.changeFrame(worldFrame);
+         tempLinearVelocity.setToZero(worldFrame);
+         tempOrientation.setToZero(handControlFrame);
+         tempOrientation.changeFrame(worldFrame);
+         tempAngularVelocity.setToZero(worldFrame);
 
-      waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
-      waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+         waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
+         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+      }
 
       waypointPositionTrajectoryGenerator.appendWaypoints(taskspaceWaypoints);
       waypointOrientationTrajectoryGenerator.appendWaypoints(taskspaceWaypoints);
@@ -561,6 +564,8 @@ public class HandControlModule
 
       waypointOrientationTrajectoryGenerator.initialize();
       waypointPositionTrajectoryGenerator.initialize();
+
+      executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
 
    private final FramePoint tempPosition = new FramePoint();
