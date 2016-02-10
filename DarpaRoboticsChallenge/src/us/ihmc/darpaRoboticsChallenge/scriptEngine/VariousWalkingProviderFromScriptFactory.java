@@ -24,7 +24,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelP
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectorySubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
@@ -87,7 +87,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       updatables.add(footstepProvider);
 
-      HandTrajectorySubscriber handTrajectorySubscriber = null;
+      HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber = null;
 
       DesiredHandPoseProvider handPoseProvider = footstepProvider.getDesiredHandPoseProvider();
       DesiredHandstepProvider handstepProvider = footstepProvider.getDesiredHandstepProvider();
@@ -124,7 +124,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(handTrajectorySubscriber, footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider,
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider,
             handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
             highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
             singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
