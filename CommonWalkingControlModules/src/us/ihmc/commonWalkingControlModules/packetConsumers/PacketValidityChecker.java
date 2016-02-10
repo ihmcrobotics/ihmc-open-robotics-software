@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
-import us.ihmc.humanoidRobotics.communication.packets.SE3Waypoint;
+import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
@@ -559,11 +559,11 @@ public abstract class PacketValidityChecker
          return false;
 
       ObjectErrorType errorType;
-      SE3Waypoint previousWaypoint = null;
+      SE3WaypointMessage previousWaypoint = null;
 
       for (int i = 0; i < handTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
-         SE3Waypoint waypoint = handTrajectoryMessage.getTaskspaceWaypoint(i);
+         SE3WaypointMessage waypoint = handTrajectoryMessage.getTaskspaceWaypoint(i);
          String errorMessage = validateSE3Waypoint(waypoint, previousWaypoint);
          if (errorMessage != null)
          {
@@ -584,7 +584,7 @@ public abstract class PacketValidityChecker
       return true;
    }
 
-   private static String validateSE3Waypoint(SE3Waypoint se3Waypoint, SE3Waypoint previousSE3Waypoint)
+   private static String validateSE3Waypoint(SE3WaypointMessage se3Waypoint, SE3WaypointMessage previousSE3Waypoint)
    {
       if (se3Waypoint == null)
          return " is null.";

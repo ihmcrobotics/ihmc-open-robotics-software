@@ -6,12 +6,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
+import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.SE3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one waypoint. "
       + "Feel free to look at EuclideanWaypoint (translational) and SO3Waypoint (rotational)")
-public class SE3Waypoint implements SE3WaypointInterface
+public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> implements SE3WaypointInterface
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -24,24 +25,24 @@ public class SE3Waypoint implements SE3WaypointInterface
    @FieldDocumentation("Define the desired 3D angular velocity to be reached at this waypoint. It is expressed in world frame.")
    public Vector3d angularVelocity;
 
-   public SE3Waypoint()
+   public SE3WaypointMessage()
    {
    }
 
-   public SE3Waypoint(SE3Waypoint se3Waypoint)
+   public SE3WaypointMessage(SE3WaypointMessage se3WaypointMessage)
    {
-      if (se3Waypoint.position != null)
-         position = new Point3d(se3Waypoint.position);
-      if (se3Waypoint.orientation != null)
-         orientation = new Quat4d(se3Waypoint.orientation);
-      if (se3Waypoint.linearVelocity != null)
-         linearVelocity = new Vector3d(se3Waypoint.linearVelocity);
-      if (se3Waypoint.angularVelocity != null)
-         angularVelocity = new Vector3d(se3Waypoint.angularVelocity);
-      time = se3Waypoint.time;
+      if (se3WaypointMessage.position != null)
+         position = new Point3d(se3WaypointMessage.position);
+      if (se3WaypointMessage.orientation != null)
+         orientation = new Quat4d(se3WaypointMessage.orientation);
+      if (se3WaypointMessage.linearVelocity != null)
+         linearVelocity = new Vector3d(se3WaypointMessage.linearVelocity);
+      if (se3WaypointMessage.angularVelocity != null)
+         angularVelocity = new Vector3d(se3WaypointMessage.angularVelocity);
+      time = se3WaypointMessage.time;
    }
 
-   public SE3Waypoint(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public SE3WaypointMessage(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
    {
       this.time = time;
       this.position = position;
@@ -105,7 +106,7 @@ public class SE3Waypoint implements SE3WaypointInterface
       this.angularVelocity = angularVelocity;
    }
 
-   public boolean epsilonEquals(SE3Waypoint other, double epsilon)
+   public boolean epsilonEquals(SE3WaypointMessage other, double epsilon)
    {
       if (position == null && other.position != null)
          return false;

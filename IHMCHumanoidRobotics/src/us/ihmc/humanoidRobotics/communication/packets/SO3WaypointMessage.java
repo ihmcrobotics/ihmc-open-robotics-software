@@ -5,12 +5,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
+import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.SO3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one waypoint (orientation & angular velocity). "
       + "Feel free to look at EuclideanWaypoint (translational) and SE3Waypoint (rotational AND translational)")
-public class SO3Waypoint implements SO3WaypointInterface
+public class SO3WaypointMessage extends IHMCRosApiPacket<SO3WaypointMessage> implements SO3WaypointInterface
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -19,11 +20,11 @@ public class SO3Waypoint implements SO3WaypointInterface
    @FieldDocumentation("Define the desired 3D angular velocity to be reached at this waypoint. It is expressed in world frame.")
    public Vector3d angularVelocity;
 
-   public SO3Waypoint()
+   public SO3WaypointMessage()
    {
    }
 
-   public SO3Waypoint(SO3Waypoint so3Waypoint)
+   public SO3WaypointMessage(SO3WaypointMessage so3Waypoint)
    {
       time = so3Waypoint.time;
       if (so3Waypoint.orientation != null)
@@ -32,7 +33,7 @@ public class SO3Waypoint implements SO3WaypointInterface
          angularVelocity = new Vector3d(so3Waypoint.angularVelocity);
    }
 
-   public SO3Waypoint(double time, Quat4d orientation, Vector3d angularVelocity)
+   public SO3WaypointMessage(double time, Quat4d orientation, Vector3d angularVelocity)
    {
       this.orientation = orientation;
       this.angularVelocity = angularVelocity;
@@ -72,7 +73,7 @@ public class SO3Waypoint implements SO3WaypointInterface
       this.angularVelocity = angularVelocity;
    }
 
-   public boolean epsilonEquals(SO3Waypoint other, double epsilon)
+   public boolean epsilonEquals(SO3WaypointMessage other, double epsilon)
    {
       if (orientation == null && other.orientation != null)
          return false;

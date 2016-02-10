@@ -8,7 +8,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.humanoidRobotics.communication.packets.SE3Waypoint;
+import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
@@ -49,7 +49,7 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
          + "Note that in any case the desired hand pose must be expressed in world frame.")
    public BaseForControl base;
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory.")
-   public SE3Waypoint[] taskspaceWaypoints;
+   public SE3WaypointMessage[] taskspaceWaypoints;
 
    public HandTrajectoryMessage()
    {
@@ -58,9 +58,9 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
    public HandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
       robotSide = handTrajectoryMessage.robotSide;
-      taskspaceWaypoints = new SE3Waypoint[handTrajectoryMessage.getNumberOfWaypoints()];
+      taskspaceWaypoints = new SE3WaypointMessage[handTrajectoryMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
-         taskspaceWaypoints[i] = new SE3Waypoint(handTrajectoryMessage.taskspaceWaypoints[i]);
+         taskspaceWaypoints[i] = new SE3WaypointMessage(handTrajectoryMessage.taskspaceWaypoints[i]);
    }
 
    /**
@@ -89,7 +89,7 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
       this.base = base;
       Vector3d zeroLinearVelocity = new Vector3d();
       Vector3d zeroAngularVelocity = new Vector3d();
-      taskspaceWaypoints = new SE3Waypoint[] {new SE3Waypoint(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
+      taskspaceWaypoints = new SE3WaypointMessage[] {new SE3WaypointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
    }
 
    /**
@@ -103,19 +103,19 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
    {
       this.robotSide = robotSide;
       this.base = base;
-      taskspaceWaypoints = new SE3Waypoint[numberOfWaypoints];
+      taskspaceWaypoints = new SE3WaypointMessage[numberOfWaypoints];
    }
 
    public void setWaypoint(int waypointIndex, double time, Point3d position, Quat4d orientation)
    {
       rangeCheck(waypointIndex);
-      taskspaceWaypoints[waypointIndex] = new SE3Waypoint(time, position, orientation, null, null);
+      taskspaceWaypoints[waypointIndex] = new SE3WaypointMessage(time, position, orientation, null, null);
    }
 
    public void setWaypoint(int waypointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
    {
       rangeCheck(waypointIndex);
-      taskspaceWaypoints[waypointIndex] = new SE3Waypoint(time, position, orientation, linearVelocity, angularVelocity);
+      taskspaceWaypoints[waypointIndex] = new SE3WaypointMessage(time, position, orientation, linearVelocity, angularVelocity);
    }
 
    public int getNumberOfWaypoints()
@@ -133,13 +133,13 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
       return base;
    }
 
-   public SE3Waypoint getTaskspaceWaypoint(int waypointIndex)
+   public SE3WaypointMessage getTaskspaceWaypoint(int waypointIndex)
    {
       rangeCheck(waypointIndex);
       return taskspaceWaypoints[waypointIndex];
    }
 
-   public SE3Waypoint[] getTaskspaceWaypoints()
+   public SE3WaypointMessage[] getTaskspaceWaypoints()
    {
       return taskspaceWaypoints;
    }
