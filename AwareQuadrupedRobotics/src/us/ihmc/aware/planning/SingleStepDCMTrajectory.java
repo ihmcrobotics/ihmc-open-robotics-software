@@ -11,6 +11,12 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class SingleStepDCMTrajectory
 {
+   /* the time it takes for the DCM to converge to the center of the final support polygon following the swing phase */
+   private final static double LOAD_DURATION = 0.5;
+
+   /* the normalized distance the DCM diverges from the center of the initial support polygon during the swing phase (0, 1) */
+   private final static double SWING_PHASE_DIVERGENCE = 0.33;
+
    private double gravity;
    private double comHeight;
    private boolean stepInitialized;
@@ -18,18 +24,24 @@ public class SingleStepDCMTrajectory
 
    private double initialTime;
    private double liftOffTime;
+   private double touchDownTime;
    private double finalTime;
+   private final FramePoint swingVRPPosition;
    private final FramePoint initialDCMPosition;
    private final FrameVector initialDCMVelocity;
-   private final FramePoint liftOffVRPPosition;
    private final FramePoint liftOffDCMPosition;
+   private final FramePoint touchDownDCMPosition;
+   private final FrameVector touchDownDCMVelocity;
    private final FramePoint finalDCMPosition;
    private final FramePoint currentDCMPosition;
    private final FrameVector currentDCMVelocity;
 
-   private final YoPolynomial xTrajectory;
-   private final YoPolynomial yTrajectory;
-   private final YoPolynomial zTrajectory;
+   private final YoPolynomial xUnloadTrajectory;
+   private final YoPolynomial yUnloadTrajectory;
+   private final YoPolynomial zUnloadTrajectory;
+   private final YoPolynomial xLoadTrajectory;
+   private final YoPolynomial yLoadTrajectory;
+   private final YoPolynomial zLoadTrajectory;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public SingleStepDCMTrajectory(double gravity, double comHeight, YoVariableRegistry parentRegistry)
@@ -41,18 +53,24 @@ public class SingleStepDCMTrajectory
 
       initialTime = 0.0;
       liftOffTime = 0.0;
+      touchDownTime = 0.0;
       finalTime = 0.0;
+      swingVRPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       initialDCMPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       initialDCMVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-      liftOffVRPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       liftOffDCMPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+      touchDownDCMPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+      touchDownDCMVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       finalDCMPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       currentDCMPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       currentDCMVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-      xTrajectory = new YoPolynomial("xTrajectory", 4, registry);
-      yTrajectory = new YoPolynomial("yTrajectory", 4, registry);
-      zTrajectory = new YoPolynomial("zTrajectory", 4, registry);
+      xUnloadTrajectory = new YoPolynomial("xUnloadTrajectory", 4, registry);
+      yUnloadTrajectory = new YoPolynomial("yUnloadTrajectory", 4, registry);
+      zUnloadTrajectory = new YoPolynomial("zUnloadTrajectory", 4, registry);
+      xLoadTrajectory = new YoPolynomial("xLoadTrajectory", 4, registry);
+      yLoadTrajectory = new YoPolynomial("yLoadTrajectory", 4, registry);
+      zLoadTrajectory = new YoPolynomial("zLoadTrajectory", 4, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -65,6 +83,7 @@ public class SingleStepDCMTrajectory
    public void setStepPameters(double initialTime, FramePoint initialDCMPosition, FrameVector initialDCMVelocity, QuadrupedSupportPolygon supportPolygon, QuadrupedTimedStep quadrupedStep)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      double naturalFrequency = Math.sqrt(gravity / comHeight);
 
       this.stepInitialized = true;
       this.supportPolygon.set(supportPolygon);
@@ -72,35 +91,51 @@ public class SingleStepDCMTrajectory
 
       this.initialTime = initialTime;
       this.liftOffTime = quadrupedStep.getTimeInterval().getStartTime();
-      this.finalTime = quadrupedStep.getTimeInterval().getEndTime();
+      this.touchDownTime = quadrupedStep.getTimeInterval().getEndTime();
+      this.finalTime = this.touchDownTime + LOAD_DURATION;
 
-      this.initialDCMPosition.setIncludingFrame(initialDCMPosition);
-      this.initialDCMVelocity.setIncludingFrame(initialDCMVelocity);
-      this.initialDCMPosition.changeFrame(worldFrame);
-      this.initialDCMVelocity.changeFrame(worldFrame);
-
-      // compute CMP position during swing phase
+      // compute VRP position in swing phase
       FramePoint acrossBodyFootPosition = supportPolygon.getFootstep(quadrupedStep.getRobotQuadrant().getAcrossBodyQuadrant());
       this.supportPolygon.setFootstep(quadrupedStep.getRobotQuadrant(), acrossBodyFootPosition);
-      this.supportPolygon.getCentroid2d(liftOffVRPPosition);
-      this.liftOffVRPPosition.add(0, 0, comHeight);
+      this.supportPolygon.getCentroid2d(swingVRPPosition);
+      this.swingVRPPosition.add(0, 0, comHeight);
 
-      // compute DCM position at time of touch down
+      // compute DCM position in final support phase
       quadrupedStep.getGoalPosition().changeFrame(worldFrame);
       this.supportPolygon.setFootstep(quadrupedStep.getRobotQuadrant(), quadrupedStep.getGoalPosition());
       this.supportPolygon.getCentroid2d(finalDCMPosition);
       this.finalDCMPosition.add(0, 0, comHeight);
 
-      // compute DCM position at time of heel strike
-      this.liftOffDCMPosition.set(finalDCMPosition);
-      this.liftOffDCMPosition.sub(liftOffVRPPosition);
-      this.liftOffDCMPosition.scale(Math.exp(-Math.sqrt(gravity / comHeight) * (finalTime - liftOffTime)));
-      this.liftOffDCMPosition.add(liftOffVRPPosition);
+      // compute DCM position and velocity at touch down
+      this.touchDownDCMPosition.set(this.finalDCMPosition);
+      this.touchDownDCMPosition.sub(this.swingVRPPosition);
+      this.touchDownDCMPosition.scale(SWING_PHASE_DIVERGENCE);
+      this.touchDownDCMPosition.add(this.swingVRPPosition);
+      this.touchDownDCMVelocity.set(this.touchDownDCMPosition);
+      this.touchDownDCMVelocity.sub(this.swingVRPPosition);
+      this.touchDownDCMVelocity.scale(naturalFrequency);
+
+      // compute DCM position at lift off
+      this.liftOffDCMPosition.set(touchDownDCMPosition);
+      this.liftOffDCMPosition.sub(swingVRPPosition);
+      this.liftOffDCMPosition.scale(Math.exp(-naturalFrequency * (touchDownTime - liftOffTime)));
+      this.liftOffDCMPosition.add(swingVRPPosition);
+
+      // compute DCM position in initial support phase
+      this.initialDCMPosition.setIncludingFrame(initialDCMPosition);
+      this.initialDCMVelocity.setIncludingFrame(initialDCMVelocity);
+      this.initialDCMPosition.changeFrame(worldFrame);
+      this.initialDCMVelocity.changeFrame(worldFrame);
 
       // compute polynomial trajectory to interpolate between initial and liftOff DCM state
-      this.xTrajectory.setCubic(initialTime, liftOffTime, initialDCMPosition.getX(), initialDCMVelocity.getX(), liftOffDCMPosition.getX(), 0.0);
-      this.yTrajectory.setCubic(initialTime, liftOffTime, initialDCMPosition.getY(), initialDCMVelocity.getY(), liftOffDCMPosition.getY(), 0.0);
-      this.zTrajectory.setCubic(initialTime, liftOffTime, initialDCMPosition.getZ(), initialDCMVelocity.getZ(), liftOffDCMPosition.getZ(), 0.0);
+      this.xUnloadTrajectory.setCubic(initialTime, liftOffTime, initialDCMPosition.getX(), initialDCMVelocity.getX(), liftOffDCMPosition.getX(), 0.0);
+      this.yUnloadTrajectory.setCubic(initialTime, liftOffTime, initialDCMPosition.getY(), initialDCMVelocity.getY(), liftOffDCMPosition.getY(), 0.0);
+      this.zUnloadTrajectory.setCubic(initialTime, liftOffTime, initialDCMPosition.getZ(), initialDCMVelocity.getZ(), liftOffDCMPosition.getZ(), 0.0);
+
+      // compute polynomial trajectory to interpolate between touchdown and final DCM state
+      this.xLoadTrajectory.setCubic(touchDownTime, finalTime, touchDownDCMPosition.getX(), touchDownDCMVelocity.getX(), finalDCMPosition.getX(), 0.0);
+      this.yLoadTrajectory.setCubic(touchDownTime, finalTime, touchDownDCMPosition.getY(), touchDownDCMVelocity.getY(), finalDCMPosition.getY(), 0.0);
+      this.zLoadTrajectory.setCubic(touchDownTime, finalTime, touchDownDCMPosition.getZ(), touchDownDCMVelocity.getZ(), finalDCMPosition.getZ(), 0.0);
    }
 
    public void computeTrajectory(double currentTime)
@@ -112,24 +147,33 @@ public class SingleStepDCMTrajectory
       currentTime = Math.min(Math.max(currentTime, initialTime), finalTime);
       if (currentTime < liftOffTime)
       {
-         // cubic spline trajectory during support phase
-         xTrajectory.compute(currentTime);
-         yTrajectory.compute(currentTime);
-         zTrajectory.compute(currentTime);
-         currentDCMPosition.set(xTrajectory.getPosition(), yTrajectory.getPosition(), zTrajectory.getPosition());
-         currentDCMVelocity.set(xTrajectory.getVelocity(), yTrajectory.getVelocity(), zTrajectory.getVelocity());
+         // cubic spline trajectory prior to lift off
+         xUnloadTrajectory.compute(currentTime);
+         yUnloadTrajectory.compute(currentTime);
+         zUnloadTrajectory.compute(currentTime);
+         currentDCMPosition.set(xUnloadTrajectory.getPosition(), yUnloadTrajectory.getPosition(), zUnloadTrajectory.getPosition());
+         currentDCMVelocity.set(xUnloadTrajectory.getVelocity(), yUnloadTrajectory.getVelocity(), zUnloadTrajectory.getVelocity());
       }
-      else
+      else if (currentTime < touchDownTime)
       {
          // constant virtual repellent point trajectory during swing phase
          double naturalFrequency = Math.sqrt(gravity / comHeight);
          currentDCMPosition.set(liftOffDCMPosition);
-         currentDCMPosition.sub(liftOffVRPPosition);
+         currentDCMPosition.sub(swingVRPPosition);
          currentDCMPosition.scale(Math.exp(naturalFrequency * (currentTime - liftOffTime)));
-         currentDCMPosition.add(liftOffVRPPosition);
+         currentDCMPosition.add(swingVRPPosition);
          currentDCMVelocity.set(currentDCMPosition);
-         currentDCMVelocity.sub(liftOffVRPPosition);
+         currentDCMVelocity.sub(swingVRPPosition);
          currentDCMVelocity.scale(naturalFrequency);
+      }
+      else
+      {
+         // cubic spline trajectory following touch down
+         xLoadTrajectory.compute(currentTime);
+         yLoadTrajectory.compute(currentTime);
+         zLoadTrajectory.compute(currentTime);
+         currentDCMPosition.set(xLoadTrajectory.getPosition(), yLoadTrajectory.getPosition(), zLoadTrajectory.getPosition());
+         currentDCMVelocity.set(xLoadTrajectory.getVelocity(), yLoadTrajectory.getVelocity(), zLoadTrajectory.getVelocity());
       }
    }
 
