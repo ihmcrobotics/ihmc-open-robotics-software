@@ -17,13 +17,12 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
 {
    private final MultipleWaypointsTrajectoryGenerator[] trajectories = new MultipleWaypointsTrajectoryGenerator[3];
    private final ReferenceFrame referenceFrame;
-   private final PositionProvider currentPelvisPosition;
+   private final PositionProvider currentPositionProvider;
 
-   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame,
-         PositionProvider currentPelvisPosition,  YoVariableRegistry parentRegistry)
+   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, PositionProvider currentPositionProvider, YoVariableRegistry parentRegistry)
    {
       this.referenceFrame = trajectoryFrame;
-      this.currentPelvisPosition = currentPelvisPosition;
+      this.currentPositionProvider = currentPositionProvider;
 
       trajectories[0] = new MultipleWaypointsTrajectoryGenerator(namePrefix + "_X_", parentRegistry);
       trajectories[1] = new MultipleWaypointsTrajectoryGenerator(namePrefix + "_Y_", parentRegistry);
@@ -45,8 +44,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    @Override
    public void packAcceleration(FrameVector accelerationToPack)
    {
-      accelerationToPack.setIncludingFrame(referenceFrame, trajectories[0].getAcceleration(), trajectories[1].getAcceleration(),
-            trajectories[2].getAcceleration());
+      accelerationToPack.setIncludingFrame(referenceFrame, trajectories[0].getAcceleration(), trajectories[1].getAcceleration(), trajectories[2].getAcceleration());
    }
 
    @Override
@@ -70,7 +68,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
       boolean success = trajectories[0].appendWaypoint(timeAtWaypoint, position.getX(), velocity.getX());
       success &= trajectories[1].appendWaypoint(timeAtWaypoint, position.getY(), velocity.getY());
       success &= trajectories[2].appendWaypoint(timeAtWaypoint, position.getZ(), velocity.getZ());
-      
+
       if (!success)
       {
          clear();
@@ -82,12 +80,12 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    {
       position.checkReferenceFrameMatch(referenceFrame);
       velocity.checkReferenceFrameMatch(referenceFrame);
-      
+
       Point3d pos = new Point3d();
       Vector3d vel = new Vector3d();
       position.get(pos);
       velocity.get(vel);
-      
+
       appendWaypoint(timeAtWaypoint, pos, vel);
    }
 
@@ -131,19 +129,19 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    public void initialize()
    {
       FramePoint positionToPack = new FramePoint(ReferenceFrame.getWorldFrame());
-      currentPelvisPosition.get(positionToPack);
-      positionToPack.changeFrame( ReferenceFrame.getWorldFrame() );
-      
+      currentPositionProvider.get(positionToPack);
+      positionToPack.changeFrame(ReferenceFrame.getWorldFrame());
+
       trajectories[0].setInitialCondition(positionToPack.getX(), 0.0);
       trajectories[1].setInitialCondition(positionToPack.getY(), 0.0);
       trajectories[2].setInitialCondition(positionToPack.getZ(), 0.0);
    }
-   
+
    public void initialize(FramePoint position, FrameVector velocity)
    {
-      position.changeFrame( ReferenceFrame.getWorldFrame() );
-      velocity.changeFrame( ReferenceFrame.getWorldFrame() );
-      
+      position.changeFrame(ReferenceFrame.getWorldFrame());
+      velocity.changeFrame(ReferenceFrame.getWorldFrame());
+
       trajectories[0].setInitialCondition(position.getX(), velocity.getX());
       trajectories[1].setInitialCondition(position.getY(), velocity.getY());
       trajectories[2].setInitialCondition(position.getZ(), velocity.getZ());

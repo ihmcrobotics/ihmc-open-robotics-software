@@ -11,6 +11,7 @@ public abstract class TrajectoryGeneratorInMultipleFrames
 
    private final ReferenceFrame initialTrajectoryFrame;
    private final ArrayList<YoMultipleFramesHolder> multipleFramesHolders;
+   private final ArrayList<TrajectoryGeneratorInMultipleFrames> trajectoryGeneratorsInMultipleFrames;
 
    public TrajectoryGeneratorInMultipleFrames(boolean allowMultipleFrames, ReferenceFrame initialTrajectoryFrame)
    {
@@ -18,12 +19,19 @@ public abstract class TrajectoryGeneratorInMultipleFrames
       this.initialTrajectoryFrame = initialTrajectoryFrame;
 
       multipleFramesHolders = new ArrayList<>();
+      trajectoryGeneratorsInMultipleFrames = new ArrayList<>();
    }
 
    protected void registerMultipleFramesHolders(YoMultipleFramesHolder... multipleFramesHolders)
    {
       for (YoMultipleFramesHolder multipleFramesHolder : multipleFramesHolders)
          this.multipleFramesHolders.add(multipleFramesHolder);
+   }
+
+   protected void registerTrajectoryGeneratorsInMultipleFrames(TrajectoryGeneratorInMultipleFrames... trajectoryGeneratorsInMultipleFrames)
+   {
+      for (TrajectoryGeneratorInMultipleFrames trajectoryGeneratorInMultipleFrames : trajectoryGeneratorsInMultipleFrames)
+         this.trajectoryGeneratorsInMultipleFrames.add(trajectoryGeneratorInMultipleFrames);
    }
 
    public void registerAndSwitchFrame(ReferenceFrame desiredFrame)
@@ -38,6 +46,8 @@ public abstract class TrajectoryGeneratorInMultipleFrames
 
       for (int i = 0; i < multipleFramesHolders.size(); i++)
          multipleFramesHolders.get(i).registerReferenceFrame(newReferenceFrame);
+      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
+         trajectoryGeneratorsInMultipleFrames.get(i).registerNewTrajectoryFrame(newReferenceFrame);
    }
 
    public void changeFrame(ReferenceFrame referenceFrame)
@@ -52,6 +62,8 @@ public abstract class TrajectoryGeneratorInMultipleFrames
          else
             multipleFramesHolder.changeFrame(referenceFrame);
       }
+      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
+         trajectoryGeneratorsInMultipleFrames.get(i).changeFrame(referenceFrame, false);
    }
 
    protected void changeFrame(ReferenceFrame referenceFrame, boolean checkIfAllowed)
@@ -61,6 +73,8 @@ public abstract class TrajectoryGeneratorInMultipleFrames
 
       for (int i = 0; i < multipleFramesHolders.size(); i++)
          multipleFramesHolders.get(i).changeFrame(referenceFrame);
+      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
+         trajectoryGeneratorsInMultipleFrames.get(i).changeFrame(referenceFrame, false);
    }
 
    public void switchTrajectoryFrame(ReferenceFrame referenceFrame)
@@ -69,6 +83,8 @@ public abstract class TrajectoryGeneratorInMultipleFrames
 
       for (int i = 0; i < multipleFramesHolders.size(); i++)
          multipleFramesHolders.get(i).switchCurrentReferenceFrame(referenceFrame);
+      for (int i = 0; i < trajectoryGeneratorsInMultipleFrames.size(); i++)
+         trajectoryGeneratorsInMultipleFrames.get(i).switchTrajectoryFrame(referenceFrame);
    }
 
    private void checkIfMultipleFramesAllowed()

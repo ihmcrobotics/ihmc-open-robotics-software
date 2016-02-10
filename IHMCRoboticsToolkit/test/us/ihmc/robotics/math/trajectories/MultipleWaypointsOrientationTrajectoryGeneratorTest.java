@@ -39,7 +39,7 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       simpleTraj.initialize();
 
       int numberOfWaypoints = 100;
-      MultipleWaypointsOrientationTrajectoryGenerator multipleWaypointTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("testedTraj", numberOfWaypoints+1, true, true, worldFrame, registry);
+      MultipleWaypointsOrientationTrajectoryGenerator multipleWaypointTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("testedTraj", numberOfWaypoints+1, true, worldFrame, registry);
       multipleWaypointTrajectory.clear();
       
       
