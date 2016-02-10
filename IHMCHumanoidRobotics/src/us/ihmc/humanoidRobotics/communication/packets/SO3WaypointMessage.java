@@ -73,6 +73,7 @@ public class SO3WaypointMessage extends IHMCRosApiPacket<SO3WaypointMessage> imp
       this.angularVelocity = angularVelocity;
    }
 
+   @Override
    public boolean epsilonEquals(SO3WaypointMessage other, double epsilon)
    {
       if (orientation == null && other.orientation != null)
