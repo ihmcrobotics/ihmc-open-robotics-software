@@ -1,7 +1,11 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
-import static org.junit.Assert.*;
-import static us.ihmc.tools.testing.TestPlanTarget.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.tools.testing.TestPlanTarget.Fast;
 
 import java.util.Random;
 
@@ -562,6 +566,58 @@ public class QuadrupedSupportPolygonTest
       poly.getCentroid2d(centroid2dToPack2d);
       assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3d(2.5, -1.5, 0.0), 1e-7));
       assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(2.5, -1.5), 1e-7));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetShrunkenPolygon()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      
+      poly.getShrunkenPolygon2d(poly, RobotQuadrant.FRONT_LEFT, 0.25);
+      poly.getShrunkenPolygon2d(poly, RobotQuadrant.FRONT_RIGHT, 0.25);
+      poly.getShrunkenPolygon2d(poly, RobotQuadrant.HIND_LEFT, 0.25);
+      poly.getShrunkenPolygon2d(poly, RobotQuadrant.HIND_RIGHT, 0.25);
+      
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.25, 0.25, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(0.75, 0.25, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.25, 0.75, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.75, 0.75, 0.0), 1e-7));
+      
+      poly.shrinkPolygon2d(0.05);
+      
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.30, 0.30, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(0.70, 0.30, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.30, 0.70, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.70, 0.70, 0.0), 1e-7));
+      
+      poly.shrinkPolygon2d(RobotQuadrant.FRONT_LEFT, -0.05);
+      poly.shrinkPolygon2d(RobotQuadrant.FRONT_RIGHT, -0.05);
+      poly.shrinkPolygon2d(RobotQuadrant.HIND_RIGHT, -0.05);
+      poly.shrinkPolygon2d(RobotQuadrant.HIND_LEFT, -0.05);
+      
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.25, 0.25, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(0.75, 0.25, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.25, 0.75, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.75, 0.75, 0.0), 1e-7));
+      
+      final QuadrupedSupportPolygon createEmptyPolygon = createEmptyPolygon();
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            createEmptyPolygon.getShrunkenPolygon2d(createEmptyPolygon, RobotQuadrant.FRONT_LEFT, 1.0);
+         }
+      });
+      
+      QuadrupedSupportPolygon poly3 = create3LegPolygon();
+      
+      poly3.shrinkPolygon2d(0.1);
+      
+      assertTrue("not shrunk correctly", poly3.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.97071, 0.92928, 0.0), 1e-5));
+      assertTrue("not shrunk correctly", poly3.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(0.9, 0.1, 0.0), 1e-5));
+      assertTrue("not shrunk correctly", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.070710, 0.029289, 0.0), 1e-5));
    }
 
    private Random random = new Random(9123090L);
