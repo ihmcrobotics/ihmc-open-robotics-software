@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -18,6 +17,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
+import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
@@ -1115,6 +1115,37 @@ public class RotationToolsTest
 
          boolean quaternionsAreEpsilonEquals = unitQuaternion.epsilonEquals(quaternionToPack, 1e-7);
          assertTrue(quaternionsAreEpsilonEquals);
+      }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testIntegrateToQuaternion() throws Exception
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d expectedAngularVelocity = RandomTools.generateRandomVector(random);
+         Vector3d actualAngularVelocity = new Vector3d();
+
+         Quat4d integrationResultPrevious = new Quat4d();
+         Quat4d integrationResultCurrent = new Quat4d();
+         Quat4d integrationResultNext = new Quat4d();
+         Quat4d qDot = new Quat4d();
+
+         QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+
+         double dt = 1.0e-4;
+
+         for (double t = dt; t <= 1.0; t += dt)
+         {
+            RotationTools.integrateAngularVelocity(expectedAngularVelocity, t - dt, integrationResultPrevious);
+            RotationTools.integrateAngularVelocity(expectedAngularVelocity, t, integrationResultCurrent);
+            RotationTools.integrateAngularVelocity(expectedAngularVelocity, t + dt, integrationResultNext);
+            quaternionCalculus.computeQDotByFiniteDifferenceCentral(integrationResultPrevious, integrationResultNext, dt, qDot);
+            quaternionCalculus.computeAngularVelocity(integrationResultCurrent, qDot, actualAngularVelocity);
+
+            assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-7));
+         }
       }
    }
 
