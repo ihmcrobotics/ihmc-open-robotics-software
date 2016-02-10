@@ -392,12 +392,6 @@ public class QuadrupedSupportPolygon implements Serializable
       supportPolygonToPack.removeFootstep(quadrantToRemove);
    }
 
-   public void deleteLegCopy(RobotQuadrant legName, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
-   {
-      quadrupedSupportPolygonToPack.set(this);
-      quadrupedSupportPolygonToPack.removeFootstep(legName);
-   }
-
    public void getAndSwapSameSideFootsteps(QuadrupedSupportPolygon supportPolygonToPack, RobotSide sideToSwap)
    {
       supportPolygonToPack.setFootstep(getQuadrant(RobotEnd.HIND, sideToSwap), getFootstep(getQuadrant(RobotEnd.FRONT, sideToSwap)));
