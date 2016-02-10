@@ -16,12 +16,15 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -29,6 +32,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.trajectories.SE3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -55,6 +59,7 @@ public class ManipulationControlModule
    private final ArmControllerParameters armControlParameters;
    private final FullHumanoidRobotModel fullRobotModel;
 
+   private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
@@ -84,6 +89,7 @@ public class ManipulationControlModule
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
+      handTrajectoryMessageSubscriber = variousWalkingProviders.getHandTrajectoryMessageSubscriber();
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
@@ -166,6 +172,7 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         handleHandTrajectoryMessages(robotSide);
          handleCompliantControlRequests(robotSide);
 
          handleDefaultState(robotSide);
@@ -185,6 +192,17 @@ public class ManipulationControlModule
       {
          toolRigidBodies.get(objectWeightProvider.getRobotSide()).setMass(objectWeightProvider.getWeight());
       }
+   }
+
+   private void handleHandTrajectoryMessages(RobotSide robotSide)
+   {
+      if (handTrajectoryMessageSubscriber == null || !handTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide))
+         return;
+
+      HandTrajectoryMessage message = handTrajectoryMessageSubscriber.pollMessage(robotSide);
+      BaseForControl base = message.getBase();
+      SE3WaypointInterface[] taskspaceWaypoints = message.getTaskspaceWaypoints();
+      handControlModules.get(robotSide).moveInTaskspaceViaWaypoints(base, taskspaceWaypoints);
    }
 
    private void handleDefaultState(RobotSide robotSide)
