@@ -689,7 +689,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       double desiredZInWorld = desiredCoMPosition.getZ();
       double lowestZ = fourFootSupportPolygon.getLowestFootStepZHeight();
-      double comHeight = desiredZInWorld - lowestZ;
+//      double comHeight = desiredZInWorld - lowestZ;
+      double comHeight = desiredZInWorld;
+      
       
       desiredCoMHeight.set(comHeight);
       filteredDesiredCoMHeight.reset();
@@ -724,7 +726,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 	   }
 
 	   SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
-	   SixDoFJoint rootJoint = actualFullRobotModel.getRootJoint();
 	   
 	   feedForwardRootJoint.setRotation(desiredCoMOrientation.getYaw().getDoubleValue(), desiredCoMOrientation.getPitch().getDoubleValue(), desiredCoMOrientation.getRoll().getDoubleValue());
 	   feedForwardFullRobotModel.updateFrames();
@@ -733,8 +734,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 //	   rootJoint.packTranslation(rootJointPosition);
 //	   feedForwardRootJoint.setPosition(rootJointPosition);
 	   
-	   centerOfMassInBody.setIncludingFrame(comFrame, 0.0, 0.0, 0.0);
-	   centerOfMassInBody.changeFrame(rootJoint.getFrameAfterJoint());
+	   centerOfMassInBody.setIncludingFrame(feedForwardReferenceFrames.getCenterOfMassFrame(), 0.0, 0.0, 0.0);
+	   centerOfMassInBody.changeFrame(feedForwardRootJoint.getFrameAfterJoint());
 	   
 	   vectorToSubtractHolder.setIncludingFrame(feedForwardFullRobotModel.getRootJoint().getFrameAfterJoint(), centerOfMassInBody.getPoint());
 	   vectorToSubtractHolder.changeFrame(ReferenceFrame.getWorldFrame());
@@ -901,7 +902,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private void updateDesiredHeight()
    {
       filteredDesiredCoMHeight.update();
-      double zHeight = fourFootSupportPolygon.getLowestFootStepZHeight() + filteredDesiredCoMHeight.getDoubleValue();
+      double zHeight = filteredDesiredCoMHeight.getDoubleValue();
+//      double zHeight = fourFootSupportPolygon.getLowestFootStepZHeight() + filteredDesiredCoMHeight.getDoubleValue();
       desiredCoMPosition.setZ(zHeight);
    }
    
@@ -1809,7 +1811,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       actualFullRobotModel.updateFrames();
       referenceFrames.updateFrames();
 
-      setFeedForwardToActuals();
+//      setFeedForwardToActuals();
       updateEstimates();
       updateFeedForwardModelAndFrames();
       walkingStateMachine.setCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS);
