@@ -392,6 +392,12 @@ public class QuadrupedSupportPolygon implements Serializable
       supportPolygonToPack.removeFootstep(quadrantToRemove);
    }
 
+   public void deleteLegCopy(RobotQuadrant legName, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   {
+      quadrupedSupportPolygonToPack.set(this);
+      quadrupedSupportPolygonToPack.removeFootstep(legName);
+   }
+
    public void getAndSwapSameSideFootsteps(QuadrupedSupportPolygon supportPolygonToPack, RobotSide sideToSwap)
    {
       supportPolygonToPack.setFootstep(getQuadrant(RobotEnd.HIND, sideToSwap), getFootstep(getQuadrant(RobotEnd.FRONT, sideToSwap)));
@@ -1286,131 +1292,6 @@ public class QuadrupedSupportPolygon implements Serializable
       return getFootstep(RobotQuadrant.HIND_LEFT).distance(getFootstep(RobotQuadrant.HIND_RIGHT));
    }
 
-//   /**
-//    * Returns the intersection points of the polygon and the given line segment.
-//    * The first returned FramePoint will be the point nearest the segmentStartFramePoint and the second returned FramePoint
-//    * will be the point nearest the segmentEndFramePoint. If both segment FramePoints are inside the polygon, both returned
-//    * FramePoints will be non-null. If both segment FramePoints are outside the Polygon, the one corresponding to the nearest will be non-null.
-//    * If one is inside and one is outside, such that the segment fully intersect the polygon, then
-//    * the one corresponding to the one inside will be non-null.
-//    * The z value of the returned points will be set so that the points are along the line between the feet points. That will make these points be
-//    * the tipping points on the polygon.
-//    *
-//    * @param segmentStartFramePoint FramePoint
-//    * @param segmentEndFramePoint FramePoint
-//    *
-//    * @return FramePoint[]
-//    */
-//   public FramePoint[] getIntersectingPointsOfSegment(FramePoint segmentStartFramePoint, FramePoint segmentEndFramePoint)
-//   {
-//      getReferenceFrame().checkReferenceFrameMatch(segmentStartFramePoint.getReferenceFrame());
-//      segmentStartFramePoint.getReferenceFrame().checkReferenceFrameMatch(segmentEndFramePoint.getReferenceFrame());
-//
-//      FramePoint feetPointStart = getFootstep(getFirstSupportingQuadrant());
-//      FramePoint feetPointEnd = getFootstep(getLastSupportingQuadrant());
-//
-//      double[] percentages = new double[2];
-//      GeometryTools.getLineSegmentPercentagesIfIntersecting(segmentStartFramePoint, segmentEndFramePoint, feetPointStart, feetPointEnd, percentages);
-//
-//      FramePoint intersectionNearStart = null;
-//      FramePoint intersectionNearEnd = null;
-//
-//      if (-EPSILON < percentages[1] && percentages[1] < 1.0 + EPSILON)
-//      {
-//         if (percentages[0] <= 0.0)
-//         {
-//            intersectionNearStart = new FramePoint(getReferenceFrame());
-//            intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//         }
-//         else if (percentages[0] >= 1.0)
-//         {
-//            intersectionNearEnd = new FramePoint(getReferenceFrame());
-//            intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//         }
-//         else if (isInside(segmentStartFramePoint))
-//         {
-//            intersectionNearStart = new FramePoint(getReferenceFrame());
-//            intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//
-//            return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-//         }
-//         else
-//         {
-//            intersectionNearEnd = new FramePoint(getReferenceFrame());
-//            intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//
-//            return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-//         }
-//      }
-//
-//      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
-//      {
-//         GeometryTools.getLineSegmentPercentagesIfIntersecting(segmentStartFramePoint, segmentEndFramePoint, feetPointStart, feetPointEnd, percentages);
-//
-//         if ((percentages != null) && ((-EPSILON < percentages[1]) && (percentages[1] < 1.0 + EPSILON)))
-//         {
-//            if (percentages[0] <= 0.0)
-//            {
-//               FramePoint newIntersectionNearStart = new FramePoint(getReferenceFrame());
-//               newIntersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//               if (intersectionNearStart != null)
-//               {
-//                  double distanceOne = segmentStartFramePoint.getXYPlaneDistance(intersectionNearStart);
-//                  double distanceTwo = segmentStartFramePoint.getXYPlaneDistance(newIntersectionNearStart);
-//                  if (distanceTwo < distanceOne)
-//                     intersectionNearStart = newIntersectionNearStart;
-//               }
-//               else
-//               {
-//                  intersectionNearStart = newIntersectionNearStart;
-//               }
-//            }
-//            else if (percentages[0] >= 1.0)
-//            {
-//               FramePoint newIntersectionNearEnd = new FramePoint(getReferenceFrame());
-//               newIntersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//
-//               if (intersectionNearEnd != null)
-//               {
-//                  double distanceOne = segmentEndFramePoint.getXYPlaneDistance(intersectionNearEnd);
-//                  double distanceTwo = segmentEndFramePoint.getXYPlaneDistance(newIntersectionNearEnd);
-//
-//                  if (distanceTwo < distanceOne)
-//                     intersectionNearEnd = newIntersectionNearEnd;
-//               }
-//               else
-//               {
-//                  intersectionNearEnd = newIntersectionNearEnd;
-//               }
-//            }
-//            else if (isInside(segmentStartFramePoint))
-//            {
-//               intersectionNearStart = new FramePoint(getReferenceFrame());
-//               intersectionNearStart.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//               intersectionNearEnd = null;
-//
-//               return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-//            }
-//            else
-//            {
-//               intersectionNearEnd = new FramePoint(getReferenceFrame());
-//               intersectionNearEnd.interpolate(feetPointStart, feetPointEnd, percentages[1]);
-//               intersectionNearStart = null;
-//
-//               return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-//            }
-//         }
-//      }
-//
-//      return new FramePoint[] {intersectionNearStart, intersectionNearEnd};
-//   }
-   
-   public void deleteLegCopy(RobotQuadrant legName, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
-   {
-      quadrupedSupportPolygonToPack.set(this);
-      quadrupedSupportPolygonToPack.removeFootstep(legName);
-   }
-   
    /**
     *  This method returns the common support polygon bewteen this and the supplied supportPolygon
     *
