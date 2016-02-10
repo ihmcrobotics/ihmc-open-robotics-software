@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryG
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -54,6 +55,7 @@ import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OneDoFJointTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OneDoFJointWayPointTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.SE3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -147,6 +149,7 @@ public class HandControlModule
 
    private final boolean doPositionControl;
 
+   private final ReferenceFrame chestFrame;
    private final ReferenceFrame handControlFrame;
    private final PoseReferenceFrame optionalHandControlFrame;
 
@@ -202,6 +205,7 @@ public class HandControlModule
       ReferenceFrame handFrame = hand.getBodyFixedFrame();
       int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chest, hand, handFrame);
 
+      chestFrame = chest.getBodyFixedFrame();
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       optionalHandControlFrame = new PoseReferenceFrame("optionalHandControlFrame", handControlFrame);
 
@@ -280,6 +284,8 @@ public class HandControlModule
       waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", 15, worldFrame, registry);
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, true, worldFrame, registry);
       wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator, waypointOrientationTrajectoryGenerator);
+      waypointPositionTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
+      waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
 
       doPositionControl = armControlParameters.doLowLevelPositionControl();
       String stateNamePrefix = namePrefix + "Hand";
@@ -520,9 +526,46 @@ public class HandControlModule
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
    }
 
+   public void moveInTaskspaceViaWaypoints(BaseForControl base, SE3WaypointInterface[] taskspaceWaypoints)
+   {
+      waypointPositionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+      waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+
+      waypointPositionTrajectoryGenerator.clear();
+      waypointOrientationTrajectoryGenerator.clear();
+
+      tempPosition.setToZero(handControlFrame);
+      tempPosition.changeFrame(worldFrame);
+      tempLinearVelocity.setToZero(worldFrame);
+      tempOrientation.setToZero(handControlFrame);
+      tempOrientation.changeFrame(worldFrame);
+      tempAngularVelocity.setToZero(worldFrame);
+
+      waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
+      waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+
+      waypointPositionTrajectoryGenerator.appendWaypoints(taskspaceWaypoints);
+      waypointOrientationTrajectoryGenerator.appendWaypoints(taskspaceWaypoints);
+
+      switch (base)
+      {
+      case CHEST:
+         waypointPositionTrajectoryGenerator.changeFrame(chestFrame);
+         waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
+         break;
+      case WORLD:
+         break;
+      default:
+         throw new RuntimeException("The base: " + base + " is not handled.");
+      }
+
+      waypointOrientationTrajectoryGenerator.initialize();
+      waypointPositionTrajectoryGenerator.initialize();
+   }
+
    private final FramePoint tempPosition = new FramePoint();
    private final FramePoint tempPositionOld = new FramePoint();
-   private final FrameVector tempVelocity = new FrameVector();
+   private final FrameVector tempLinearVelocity = new FrameVector();
    private final FrameVector tempAngularVelocity = new FrameVector();
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameOrientation tempOrientationOld = new FrameOrientation();
@@ -534,7 +577,7 @@ public class HandControlModule
       waypointPositionTrajectoryGenerator.clear();
       waypointOrientationTrajectoryGenerator.clear();
 
-      tempVelocity.setToZero(worldFrame);
+      tempLinearVelocity.setToZero(worldFrame);
       tempAngularVelocity.setToZero(worldFrame);
 
       int numberOfPoses = desiredPoses.length;
@@ -542,8 +585,8 @@ public class HandControlModule
       double elapsedTimeSinceTrajectoryStart = 0.0;
 
       currentHandPosition.get(tempPosition);
-      tempVelocity.setToZero();
-      waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
+      tempLinearVelocity.setToZero();
+      waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
 
       for (int i = 0; i < numberOfPoses; i++)
       {
@@ -552,14 +595,14 @@ public class HandControlModule
 
          if ((i > 0) && (i < desiredPoses.length - 1))
          {
-            tempVelocity.sub(tempPosition, tempPositionOld);
-            tempVelocity.scale(1.0 / trajectoryTimeOfEachPose);
+            tempLinearVelocity.sub(tempPosition, tempPositionOld);
+            tempLinearVelocity.scale(1.0 / trajectoryTimeOfEachPose);
 
             orientationInterpolationCalculator.computeAngularVelocity(tempAngularVelocity, tempOrientationOld, tempOrientation, 1.0 / trajectoryTimeOfEachPose);
          }
          else
          {
-            tempVelocity.scale(0.0);
+            tempLinearVelocity.scale(0.0);
             tempAngularVelocity.scale(0.0);
          }
 
@@ -568,7 +611,7 @@ public class HandControlModule
 
          elapsedTimeSinceTrajectoryStart += trajectoryTimeOfEachPose;
 
-         waypointPositionTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempPosition, tempVelocity);
+         waypointPositionTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempPosition, tempLinearVelocity);
          waypointOrientationTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempOrientation, tempAngularVelocity);
       }
 
