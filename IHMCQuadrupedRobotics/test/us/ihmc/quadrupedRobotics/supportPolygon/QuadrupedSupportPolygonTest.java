@@ -5,6 +5,7 @@ import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 import java.util.Random;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -527,6 +528,7 @@ public class QuadrupedSupportPolygonTest
       {
          QuadrupedSupportPolygon poly = createExtremeFootPolygon(robotQuadrant, new Point3d(1.0, 1.0, -20.0));
          assertEquals("not lowest", robotQuadrant, poly.getLowestFootstep());
+         assertEquals("not correct", -20.0, poly.getLowestFootstepZHeight(), 1e-7);
       }
    }
    
@@ -541,6 +543,25 @@ public class QuadrupedSupportPolygonTest
       }
       
       assertEquals("not closest", RobotQuadrant.FRONT_RIGHT, poly.getClosestFootstep(new FramePoint(ReferenceFrame.getWorldFrame(), 2.0, 2.0, 0.0)));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetCentroid()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      FramePoint centroidToPack2d = new FramePoint();
+      FramePoint2d centroid2dToPack2d = new FramePoint2d();
+      poly.getCentroid2d(centroidToPack2d);
+      poly.getCentroid2d(centroid2dToPack2d);
+      assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3d(0.5, 0.5, 0.0), 1e-7));
+      assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(0.5, 0.5), 1e-7));
+      
+      poly.translate(new Vector3d(2.0, -2.0, 0.0));
+      poly.getCentroid2d(centroidToPack2d);
+      poly.getCentroid2d(centroid2dToPack2d);
+      assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3d(2.5, -1.5, 0.0), 1e-7));
+      assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(2.5, -1.5), 1e-7));
    }
 
    private Random random = new Random(9123090L);
