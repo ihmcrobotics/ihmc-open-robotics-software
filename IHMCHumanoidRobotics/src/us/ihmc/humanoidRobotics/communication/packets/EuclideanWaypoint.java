@@ -6,10 +6,11 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.math.trajectories.EuclideanWaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the translational information for one waypoint (position & linear velocity). "
       + "Feel free to look at SO3Waypoint (rotational) and SE3Waypoint (rotational AND translational)")
-public class EuclideanWaypoint
+public class EuclideanWaypoint implements EuclideanWaypointInterface
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -38,6 +39,7 @@ public class EuclideanWaypoint
       this.time = time;
    }
 
+   @Override
    public double getTime()
    {
       return time;
@@ -48,6 +50,7 @@ public class EuclideanWaypoint
       this.time = time;
    }
 
+   @Override
    public Point3d getPosition()
    {
       return position;
@@ -58,6 +61,7 @@ public class EuclideanWaypoint
       this.position = position;
    }
 
+   @Override
    public Vector3d getLinearVelocity()
    {
       return linearVelocity;

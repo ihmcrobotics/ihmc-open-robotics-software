@@ -6,10 +6,11 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.math.trajectories.SO3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one waypoint (orientation & angular velocity). "
       + "Feel free to look at EuclideanWaypoint (translational) and SE3Waypoint (rotational AND translational)")
-public class SO3Waypoint
+public class SO3Waypoint implements SO3WaypointInterface
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -38,6 +39,7 @@ public class SO3Waypoint
       this.time = time;
    }
 
+   @Override
    public double getTime()
    {
       return time;
@@ -48,6 +50,7 @@ public class SO3Waypoint
       this.time = time;
    }
 
+   @Override
    public Quat4d getOrientation()
    {
       return orientation;
@@ -58,6 +61,7 @@ public class SO3Waypoint
       this.orientation = orientation;
    }
 
+   @Override
    public Vector3d getAngularVelocity()
    {
       return angularVelocity;
