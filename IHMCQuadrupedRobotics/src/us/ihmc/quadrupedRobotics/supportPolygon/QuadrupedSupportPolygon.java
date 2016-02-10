@@ -124,6 +124,12 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       
       @Override
+      public FramePoint get(RobotQuadrant key)
+      {
+         return super.get(key);
+      }
+
+      @Override
       public void clear()
       {
          for (RobotQuadrant robotQuadrant : quadrants())
@@ -233,7 +239,7 @@ public class QuadrupedSupportPolygon implements Serializable
             {RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT}
          };
       default:
-         throw new UndefinedOperationException("Size unknown");
+         throw new RuntimeException();
       }
    }
    
@@ -272,7 +278,7 @@ public class QuadrupedSupportPolygon implements Serializable
       else if (!containsFootstep(RobotQuadrant.HIND_LEFT))
          return RobotQuadrant.HIND_LEFT;
       else
-         throw new EmptySupportPolygonException();
+         throw new RuntimeException("Polygon is full");
    }
    
    public RobotQuadrant getLastSupportingQuadrant()
@@ -300,7 +306,7 @@ public class QuadrupedSupportPolygon implements Serializable
       else if (!containsFootstep(RobotQuadrant.FRONT_LEFT))
          return RobotQuadrant.FRONT_LEFT;
       else
-         throw new EmptySupportPolygonException();
+         throw new RuntimeException("Polygon is full");
    }
    
    public RobotQuadrant getNextClockwiseSupportingQuadrant(RobotQuadrant robotQuadrant)
@@ -313,7 +319,7 @@ public class QuadrupedSupportPolygon implements Serializable
             return prospectiveQuadrant;
       }
       
-      throw new EmptySupportPolygonException("Legs: " + size());
+      throw new EmptySupportPolygonException();
    }
    
    public RobotQuadrant getNextCounterClockwiseSupportingQuadrant(RobotQuadrant robotQuadrant)
@@ -356,20 +362,19 @@ public class QuadrupedSupportPolygon implements Serializable
    }
 
    /**
-    * replaceFootstepCopy: this replaces the stored footsep with the passed in one.
-    * If the stored footstep is null, it will throw an exception.
-    *
-    * @param footstep Footstep
-    * @return Polygon
+    * Replaces the stored footstep with the passed in one.
+    * 
+    * @param support polygon to pack
+    * @param quadrant to replace
+    * @param resulting footstep
     */
-   public QuadrupedSupportPolygon replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep)
+   public void getAndReplaceFootstep(QuadrupedSupportPolygon supportPolygonToPack, RobotQuadrant quadrant, FramePoint footstep)
    {
-      QuadrupedSupportPolygon newPolygon = new QuadrupedSupportPolygon(this);
-      newPolygon.setFootstep(quadrant, footstep);
-      return newPolygon;
+      supportPolygonToPack.set(this);
+      supportPolygonToPack.setFootstep(quadrant, footstep);
    }
 
-   public void packPolygonWithoutLeg(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
+   public void getAndRemoveFootstep(RobotQuadrant legToDelete, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
    {
       quadrupedSupportPolygonToPack.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -381,12 +386,10 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
 
-   public QuadrupedSupportPolygon swapSameSideFeetCopy(RobotQuadrant quadrant)
+   public void getAndSwapSameSideFootsteps(RobotQuadrant quadrant, QuadrupedSupportPolygon newQuadrupedSupportPolygon)
    {
-      QuadrupedSupportPolygon newQuadrupedSupportPolygon = new QuadrupedSupportPolygon(this);
       newQuadrupedSupportPolygon.setFootstep(quadrant, getFootstep(quadrant.getSameSideQuadrant()));
       newQuadrupedSupportPolygon.setFootstep(quadrant.getSameSideQuadrant(), getFootstep(quadrant));
-      return newQuadrupedSupportPolygon;
    }
 
    public QuadrupedSupportPolygon deleteLegCopy(RobotQuadrant legName)
@@ -1767,19 +1770,6 @@ public class QuadrupedSupportPolygon implements Serializable
 
    }
    
-   /**
-    * replaceFootstepCopy: this replaces the stored footsep with the passed in one.
-    * If the stored footstep is null, it will throw an exception.
-    *
-    * @param footstep Footstep
-    * @return Polygon
-    */
-   public void replaceFootstepCopy(RobotQuadrant quadrant, FramePoint footstep, QuadrupedSupportPolygon supportPolygonToPack)
-   {
-      supportPolygonToPack.set(this);
-      supportPolygonToPack.setFootstep(quadrant, footstep);
-   }
-
    /**
     *  getDiagonalIntersection returns a point that has a value of the intersection
     *  of the diagonals in a quad stance.

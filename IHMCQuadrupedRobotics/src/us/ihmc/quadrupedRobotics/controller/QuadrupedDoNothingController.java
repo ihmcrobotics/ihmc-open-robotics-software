@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -50,6 +49,7 @@ public class QuadrupedDoNothingController extends QuadrupedController implements
          if(!joint.isEnabled())
          {
             joint.setqDesired(joint.getQ());
+            initialized[i].set(false);
          }
          else if(!initialized[i].getBooleanValue())
          {
