@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3WaypointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
@@ -12,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
@@ -590,6 +592,34 @@ public abstract class PacketValidityChecker
       return true;
    }
 
+   public static boolean validateChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      if (chestTrajectoryMessage == null)
+         return false;
+
+      SO3WaypointMessage previousWaypoint = null;
+
+      if (chestTrajectoryMessage.getNumberOfWaypoints() == 0)
+      {
+         String errorMessage = "Received trajectory message with no waypoint.";
+         globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
+      }
+
+      for (int i = 0; i < chestTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SO3WaypointMessage waypoint = chestTrajectoryMessage.getWaypoint(i);
+         String errorMessage = validateSO3Waypoint(waypoint, previousWaypoint);
+         if (errorMessage != null)
+         {
+            errorMessage += "The " + i + "th";
+            globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      return true;
+   }
+
    private static String validateSE3Waypoint(SE3WaypointMessage se3Waypoint, SE3WaypointMessage previousSE3Waypoint)
    {
       if (se3Waypoint == null)
@@ -633,6 +663,41 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          String errorMessage = "SE3 waypoint time (relative to previous waypoint) " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      return null;
+   }
+
+   private static String validateSO3Waypoint(SO3WaypointMessage so3Waypoint, SO3WaypointMessage previousSO3Waypoint)
+   {
+      if (so3Waypoint == null)
+         return " is null.";
+
+      ObjectErrorType errorType;
+
+      errorType = ObjectValidityChecker.validateTuple4d(so3Waypoint.getOrientation());
+      if (errorType != null)
+      {
+         String errorMessage = "SO3 waypoint orientation field " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      errorType = ObjectValidityChecker.validateTuple3d(so3Waypoint.getAngularVelocity());
+      if (errorType != null)
+      {
+         String errorMessage = "SO3 waypoint angular velocity field " + errorType.getMessage();
+         return errorMessage;
+      }
+
+      double subTrajectoryTime = so3Waypoint.getTime();
+      if (previousSO3Waypoint != null)
+         subTrajectoryTime -= previousSO3Waypoint.getTime();
+         
+      errorType = ObjectValidityChecker.validateTrajectoryTime(subTrajectoryTime);
+      if (errorType != null)
+      {
+         String errorMessage = "SO3 waypoint time (relative to previous waypoint) " + errorType.getMessage();
          return errorMessage;
       }
 
