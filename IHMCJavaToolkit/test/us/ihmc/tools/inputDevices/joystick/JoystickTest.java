@@ -22,7 +22,7 @@ public class JoystickTest
                System.out.println(event);
             }
          });
-         joystick.addJoystickGeneralListener(new JoystickGeneralListener()
+         joystick.addJoystickStatusListener(new JoystickStatusListener()
          {
             @Override
             public void updateConnectivity(boolean connected)
