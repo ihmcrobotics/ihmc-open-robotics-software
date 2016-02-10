@@ -528,6 +528,7 @@ public class QuadrupedSupportPolygonTest
       {
          QuadrupedSupportPolygon poly = createExtremeFootPolygon(robotQuadrant, new Point3d(1.0, 1.0, -20.0));
          assertEquals("not lowest", robotQuadrant, poly.getLowestFootstep());
+         assertEquals("not correct", -20.0, poly.getLowestFootstepZHeight(), 1e-7);
       }
    }
    

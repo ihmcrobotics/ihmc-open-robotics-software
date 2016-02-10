@@ -688,7 +688,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       }
       
       double desiredZInWorld = desiredCoMPosition.getZ();
-      double lowestZ = fourFootSupportPolygon.getLowestFootStepZHeight();
+      double lowestZ = fourFootSupportPolygon.getLowestFootstepZHeight();
 //      double comHeight = desiredZInWorld - lowestZ;
       double comHeight = desiredZInWorld;
       
