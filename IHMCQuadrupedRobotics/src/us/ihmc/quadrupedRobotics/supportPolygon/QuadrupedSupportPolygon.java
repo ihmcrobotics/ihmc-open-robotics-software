@@ -363,6 +363,16 @@ public class QuadrupedSupportPolygon implements Serializable
       footsteps.set(robotQuadrant, footstep);
    }
 
+   public void removeFootstep(RobotQuadrant robotQuadrant)
+   {
+      footsteps.remove(robotQuadrant);
+   }
+
+   public void clear()
+   {
+      footsteps.clear();
+   }
+
    /**
     * Replaces the stored footstep with the passed in one.
     * 
@@ -386,11 +396,6 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       supportPolygonToPack.setFootstep(getQuadrant(RobotEnd.HIND, sideToSwap), getFootstep(getQuadrant(RobotEnd.FRONT, sideToSwap)));
       supportPolygonToPack.setFootstep(getQuadrant(RobotEnd.FRONT, sideToSwap), getFootstep(getQuadrant(RobotEnd.HIND, sideToSwap)));
-   }
-
-   public void removeFootstep(RobotQuadrant robotQuadrant)
-   {
-      footsteps.remove(robotQuadrant);
    }
 
    /**
@@ -436,11 +441,6 @@ public class QuadrupedSupportPolygon implements Serializable
    public boolean containsFootstep(RobotQuadrant robotQuadrant)
    {
       return footsteps.containsQuadrant(robotQuadrant);
-   }
-
-   public void clear()
-   {
-      footsteps.clear();
    }
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
