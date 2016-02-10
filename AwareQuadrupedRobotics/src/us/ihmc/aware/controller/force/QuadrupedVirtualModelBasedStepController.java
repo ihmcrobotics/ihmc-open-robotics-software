@@ -94,6 +94,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final TwistCalculator twistCalculator;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
    private final SingleStepDCMTrajectory dcmTrajectory;
+   private boolean dcmTrajectoryInitialized;
 
    // controllers
    private final QuadrupedVirtualModelController virtualModelController;
@@ -487,6 +488,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
             footStateMachine.get(robotQuadrant).trigger(FootEvent.TRANSFER);
             dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
             dcmTrajectory.setStepPameters(currentTime, dcmPositionSetpoint, dcmVelocitySetpoint, supportPolygonEstimate, step);
+            dcmTrajectoryInitialized = true;
          }
       }
    }
@@ -570,15 +572,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       bodyOrientationController.compute(bodyTorqueSetpoint, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, bodyTorqueFeedforwardSetpoint);
 
       // compute horizontal forces to track desired instantaneous capture point
-      if (checkInQuadSupport())
-      {
-         icpPositionSetpoint.setIncludingFrame(supportCentroidEstimate);
-         icpVelocitySetpoint.setToZero(supportFrame);
-         dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
-         dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
-         dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
-      }
-      else
+      if (dcmTrajectoryInitialized)
       {
          // compute dynamic dcm trajectory if robot taking a step
          dcmTrajectory.computeTrajectory(currentTime);
@@ -587,6 +581,14 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
          icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
          icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
+      }
+      else
+      {
+         icpPositionSetpoint.setIncludingFrame(supportCentroidEstimate);
+         icpVelocitySetpoint.setToZero(supportFrame);
+         dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
+         dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
+         dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
       }
       dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
@@ -655,17 +657,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoComHeightEstimate.set(comHeightEstimate);
    }
 
-   private boolean checkInQuadSupport()
-   {
-      boolean inQuadSupport = true;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (footStateMachine.get(robotQuadrant).getState() != FootState.SUPPORT)
-            inQuadSupport = false;
-      }
-      return inQuadSupport;
-   }
-
    @Override public QuadrupedForceControllerEvent process()
    {
       readYoVariables();
@@ -705,6 +696,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       updateEstimates();
       dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
       dcmVelocitySetpoint.setToZero();
+      dcmTrajectoryInitialized = false;
 
       // initialize controllers and state machines
       virtualModelController.reset();
@@ -737,8 +729,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // FIXME: provide an external interface to test steps
       double stanceWidth = 0.35;
       double stanceLength = 1.2;
-      double stepDuration = 1.00;
-      double stepTimeShift = 2.00;
+      double stepDuration = 1.0;
+      double stepTimeShift = 2.0;
       double strideLength = 0.3;
 
       double currentTime = robotTimestamp.getDoubleValue();
@@ -807,6 +799,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          // compute sole force setpoint
          contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
          virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
+
          return null;
       }
 
@@ -826,6 +819,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       @Override public void onEntry()
       {
+         System.out.println(robotQuadrant.getCamelCaseNameForMiddleOfExpression());
       }
 
       @Override public FootEvent process()
