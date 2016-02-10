@@ -27,6 +27,67 @@ public class QuaternionCalculusTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testLogAndExpAlgebra() throws Exception
+   {
+      Random random = new Random(651651961L);
+
+      for (int i = 0; i < 10000; i++)
+      {
+         QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+         Quat4d q = RandomTools.generateRandomQuaternion(random);
+
+         Quat4d qLog = new Quat4d();
+         Quat4d vExp = new Quat4d();
+         
+         quaternionCalculus.log(q, qLog);
+         Vector3d v = new Vector3d(qLog.getX(),qLog.getY(),qLog.getZ()); 
+         
+         quaternionCalculus.exp(v, vExp);
+
+         assertTrue(Math.abs(q.getX() - vExp.getX()) < 10e-10);
+         assertTrue(Math.abs(q.getY() - vExp.getY()) < 10e-10);
+         assertTrue(Math.abs(q.getZ() - vExp.getZ()) < 10e-10);
+         assertTrue(Math.abs(q.getW() - vExp.getW()) < 10e-10);
+
+      }
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testMultiplyAndInverseMultiplyAlgebra() throws Exception
+   {
+      Random random = new Random(651651961L);
+
+      for (int i = 0; i < 10000; i++)
+      {
+         QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+         Quat4d q = RandomTools.generateRandomQuaternion(random);
+         Vector3d v = RandomTools.generateRandomVector(random);
+         
+         Quat4d qResult = new Quat4d();
+         Quat4d qResultInverse = new Quat4d();
+         Vector3d vResult = new Vector3d();
+                  
+         quaternionCalculus.multiply(q, v, qResult);
+         quaternionCalculus.multiply(q, v, vResult);
+         
+         assertTrue(qResult.getX()==vResult.getX());
+         assertTrue(qResult.getY()==vResult.getY());
+         assertTrue(qResult.getZ()==vResult.getZ());
+         
+         quaternionCalculus.inverseMultiply(q,qResult,qResultInverse); 
+         
+         assertTrue(Math.abs(v.getX() - qResultInverse.getX()) < 10e-10);
+         assertTrue(Math.abs(v.getY() - qResultInverse.getY()) < 10e-10);
+         assertTrue(Math.abs(v.getZ() - qResultInverse.getZ()) < 10e-10);
+         
+
+      }
+   }
+   
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testConversionQDotToAngularVelocityBackAndForth() throws Exception
    {
       Random random = new Random(651651961L);
@@ -154,7 +215,7 @@ public class QuaternionCalculusTest
       Quat4d qNext = new Quat4d();
       Quat4d qDot = new Quat4d();
       Quat4d qDDot = new Quat4d();
-      
+
       Vector3d actualAngularVelocity = new Vector3d();
       Vector3d actualAngularAcceleration = new Vector3d();
 
@@ -170,7 +231,7 @@ public class QuaternionCalculusTest
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dt, qDot);
          quaternionCalculus.computeAngularVelocity(qCurrent, qDot, actualAngularVelocity);
-         
+
          quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, qCurrent, qNext, dt, qDDot);
          quaternionCalculus.computeAngularAcceleration(qCurrent, qDot, qDDot, actualAngularAcceleration);
 
