@@ -18,6 +18,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -172,17 +173,21 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       private final PDController pdController;
       private final YoVariableRegistry pidRegistry;
       private final OneDoFJoint oneDofJoint;
-      private final DoubleYoVariable q_d, tau_d, tau_d_notCapped, maxTorque;
+      private final DoubleYoVariable q_d, q_d_notCapped, tau_d, tau_d_notCapped, maxTorque;
+      private final BooleanYoVariable hitJointLimit, hitTorqueLimit;
       
-      public PDPositionControllerForOneDoFJoint(OneDoFJoint oneDofJoint, double kp, double kd, double maxTorque)
+      public PDPositionControllerForOneDoFJoint(OneDoFJoint oneDofJoint, double kp, double kd, double torqueLimit)
       {
          String name = "pdController_" + oneDofJoint.getName();
          pidRegistry = new YoVariableRegistry(name);
          q_d = new DoubleYoVariable(name + "_q_d", pidRegistry);
+         q_d_notCapped = new DoubleYoVariable(name + "_q_d_notCapped", pidRegistry);
          tau_d = new DoubleYoVariable(name + "_tau_d", pidRegistry);
          tau_d_notCapped = new DoubleYoVariable(name + "_tau_d_notCapped", pidRegistry);
-         this.maxTorque = new DoubleYoVariable(name + "_tau_max", pidRegistry);
-         this.maxTorque.set(maxTorque);
+         maxTorque = new DoubleYoVariable(name + "_tau_max", pidRegistry);
+         maxTorque.set(torqueLimit);
+         hitJointLimit = new BooleanYoVariable(name + "_hitJointLimit", pidRegistry);
+         hitTorqueLimit = new BooleanYoVariable(name + "_hitTorqueLimit", pidRegistry);
          
          pdController = new PDController(oneDofJoint.getName(), pidRegistry);
          pdController.setProportionalGain(kp);
@@ -196,14 +201,20 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       {
          double currentPosition = oneDofJoint.getQ();
          double desiredPosition = oneDofJoint.getqDesired();
-         q_d.set(desiredPosition);
+         
+         q_d_notCapped.set(desiredPosition);
+         double desiredPositionClipped = MathTools.clipToMinMax(desiredPosition, oneDofJoint.getJointLimitLower(), oneDofJoint.getJointLimitUpper());
+         boolean insidePosiotionLimits = MathTools.isInsideBoundsInclusive(desiredPosition, oneDofJoint.getJointLimitLower(), oneDofJoint.getJointLimitUpper());
+         hitJointLimit.set(!insidePosiotionLimits);
+         q_d.set(desiredPositionClipped);
          
          double currentRate = oneDofJoint.getQd();
          double desiredRate = oneDofJoint.getQdDesired();
-         double desiredTau = pdController.compute(currentPosition, desiredPosition, currentRate, desiredRate);
+         double desiredTau = pdController.compute(currentPosition, desiredPositionClipped, currentRate, desiredRate);
          
          tau_d_notCapped.set(desiredTau);
-         // Clip the max torque to both better match the servos and also to prevent the simulation from blowing up when dt is fast.
+         boolean insideTauLimits = MathTools.isInsideBoundsInclusive(desiredTau, -maxTorque.getDoubleValue(), maxTorque.getDoubleValue());
+         hitTorqueLimit.set(!insideTauLimits);
          desiredTau = MathTools.clipToMinMax(desiredTau, maxTorque.getDoubleValue());
          
          tau_d.set(desiredTau);
