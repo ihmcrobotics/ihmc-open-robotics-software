@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
-   private static boolean DEBUG = false;
+   private static boolean DEBUG = true;
 
    @Test
    public void testDerivativesConsistency() throws Exception
@@ -112,7 +112,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
          traj.compute(0.0 + dt);
          traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-         double epsilon = 1.0e-4;
+         double epsilon = 5.0e-5;
+         double accelerationEpsilon = 5.0e-4;
          assertTrue(initialOrientation.epsilonEquals(currentOrientation, epsilon));
          boolean goodInitialVelocity = initialAngularVelocity.epsilonEquals(currentAngularVelocity, epsilon);
          if (DEBUG && !goodInitialVelocity)
@@ -123,7 +124,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
             printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
          }
          assertTrue(goodInitialVelocity);
-         boolean goodInitialAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, epsilon);
+         boolean goodInitialAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
          assertTrue(goodInitialAngularAcceleration);
 
          traj.compute(trajectoryTime - dt);
@@ -131,7 +132,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 
          assertTrue(finalOrientation.epsilonEquals(currentOrientation, epsilon));
          assertTrue(finalAngularVelocity.epsilonEquals(currentAngularVelocity, epsilon));
-         boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, epsilon);
+         boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
          if (DEBUG && !goodFinalAngularAcceleration)
          {
             System.out.println("Bad final acceleration: " + currentAngularAcceleration);
