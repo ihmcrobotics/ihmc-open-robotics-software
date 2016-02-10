@@ -24,7 +24,7 @@ public class HandDesiredConfigurationSubscriber implements PacketConsumer<HandDe
          messageQueue.add(ihmcMessage);
    }
 
-   public HandDesiredConfigurationMessage pullMessage()
+   public HandDesiredConfigurationMessage pollMessage()
    {
       return messageQueue.poll();
    }
