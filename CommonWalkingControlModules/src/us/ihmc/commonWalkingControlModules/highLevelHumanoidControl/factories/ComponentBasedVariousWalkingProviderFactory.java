@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelP
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectorySubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
@@ -48,7 +49,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 
-
 public class ComponentBasedVariousWalkingProviderFactory implements VariousWalkingProviderFactory
 {
    private final boolean useHeadingAndVelocityScript;
@@ -62,24 +62,23 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       this.controlDT = controlDT;
    }
 
-   public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullHumanoidRobotModel fullRobotModel,
-           WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
-           ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
-           YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
+   public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
+         SideDependentList<ContactablePlaneBody> feet, ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
+         YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
       HandstepProvider handstepProvider = null;
 
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator =
-         HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, feet, controlDT, registry,
-            updatables, useHeadingAndVelocityScript);
+      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, feet, controlDT, registry, updatables,
+            useHeadingAndVelocityScript);
       if (heightMapForCheatingOnStepHeight != null)
       {
          desiredFootstepCalculator.setGroundProfile(heightMapForCheatingOnStepHeight);
       }
 
-      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
-                                                                             registry);
+      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator, registry);
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
+
+      HandTrajectorySubscriber handTrajectorySubscriber = null;
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
       HeadOrientationProvider headOrientationProvider = null;
@@ -88,9 +87,8 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       ChestOrientationProvider chestOrientationProvider = null;
       DesiredHandPoseProvider handPoseProvider = null;
       if ((fullRobotModel.getHand(RobotSide.LEFT) != null) && (fullRobotModel.getHand(RobotSide.RIGHT) != null))
-         handPoseProvider = new DesiredHandPoseProvider(referenceFrames,fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
+         handPoseProvider = new DesiredHandPoseProvider(referenceFrames, fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), null);
-     
 
       HandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
       DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
@@ -100,10 +98,10 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
-      
+
       HandPoseStatusProducer handPoseStatusProducer = null;
       ObjectWeightProvider objectWeightProvider = null;
-      
+
       DesiredJointsPositionProvider desiredJointsPositionProvider = null;
       SingleJointPositionProvider singleJointPositionProvider = null;
       MultiJointPositionProvider multiJointPositionProvider = null;
@@ -116,12 +114,10 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
-                                                           headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
-                                                           handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider,
-                                                           footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-                                                           controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider,
-                                                           desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectorySubscriber, footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, comHeightProvider, pelvisPoseProvider,
+            handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
+            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
+            singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
 
       return variousWalkingProviders;
    }
