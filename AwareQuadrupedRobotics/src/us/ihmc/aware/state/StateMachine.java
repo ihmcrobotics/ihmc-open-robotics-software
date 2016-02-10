@@ -26,6 +26,8 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    private EnumYoVariable<S> state;
 
+   private boolean needToCallDoEnter = false;
+
    /**
     * Whether or not the initial state's {@link StateMachineState#onEntry()} method has been called.
     */
@@ -76,6 +78,12 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
 
       StateMachineState<E> instance = states.get(getState());
 
+      if (needToCallDoEnter)
+      {
+         instance.onEntry();
+         needToCallDoEnter = false;
+      }
+
       // Run the current state and see if it generates an event.
       E event = instance.process();
       if (event != null)
@@ -118,11 +126,11 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    private void transition(S from, S to)
    {
       StateMachineState<E> fromInstance = getInstanceForEnum(from);
-      StateMachineState<E> toInstance = getInstanceForEnum(to);
 
       // It does, so transition to the next state.
       fromInstance.onExit();
       setState(to);
-      toInstance.onEntry();
+
+      needToCallDoEnter = true;
    }
 }
