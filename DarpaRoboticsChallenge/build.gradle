@@ -2,8 +2,6 @@ plugins {
    id 'us.ihmc.gradle.ihmc-build' version '0.0.10'
 }
 
-
-
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
@@ -35,8 +33,6 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
-
-	compile group: 'us.ihmc.thirdparty.com.centralnexus', name: 'joystick', version: '0.7'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-jbullet', version: '3.1.0-internal2'
 	compile group: 'io.netty', name: 'netty', version: '3.9.0.Final' //'3.5.8.Final'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
