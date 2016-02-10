@@ -1742,7 +1742,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       public TripleSupportState(CrawlGateWalkingState stateEnum)
       {
          super(stateEnum);
-         speedMatchScalar.set(-1.0);
+         speedMatchScalar.set(0.0);
       }
 
       @Override
