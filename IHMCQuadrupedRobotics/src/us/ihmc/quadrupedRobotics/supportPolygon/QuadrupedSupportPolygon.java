@@ -548,71 +548,6 @@ public class QuadrupedSupportPolygon implements Serializable
    }
 
    /**
-    * Moves each footstep a given distance toward the opposite edge.
-    * To guarantee shrinkage, we cap the shrink amount by half the polygon's
-    * incircle radius.
-    *
-    * This method works only for triangle polygons where the footsteps
-    * are Cartesian.
-    *
-    * NOTE: The Z values for the feet will remain unchanged;
-    * we are shrinking the polygon in terms of (X,Y) positions only.
-    *
-    * @param shrinkDistance double
-    * @return Polygon
-    */
-   public QuadrupedSupportPolygon getShrunkenPolygon2d(double shrinkDistance)
-   {
-      if (size() != 3)
-      {
-         throw new RuntimeException("This method works only for triangle polygons.");
-      }
-
-      // Cap the shrink amount by half the radius of the largest inscribed circle.
-      shrinkDistance = Math.min(shrinkDistance, 0.5 * getInCircleRadius2d());
-
-      QuadrantDependentList<FramePoint> newFeet = new QuadrantDependentList<FramePoint>();
-
-      // Foot 0
-      FramePoint footPoint = getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint point1 = getFootstep(RobotQuadrant.FRONT_RIGHT);
-      FramePoint point2 = getFootstep(RobotQuadrant.HIND_RIGHT);
-      Vector2d edgeVector = new Vector2d(point2.getX(), point2.getY());
-      edgeVector.sub(new Point2d(point1.getX(), point1.getY()));
-      Vector3d edgeNormal = new Vector3d(-edgeVector.y, edgeVector.x, 0.0);
-      edgeNormal.normalize();
-      edgeNormal.scale(shrinkDistance);
-      footPoint.add(new FrameVector(footPoint.getReferenceFrame(), edgeNormal));
-      newFeet.set(RobotQuadrant.FRONT_LEFT, footPoint);
-
-      // Foot 1
-      footPoint = getFootstep(RobotQuadrant.FRONT_RIGHT);
-      point1 = getFootstep(RobotQuadrant.HIND_RIGHT);
-      point2 = getFootstep(RobotQuadrant.FRONT_LEFT);
-      edgeVector = new Vector2d(point2.getX(), point2.getY());
-      edgeVector.sub(new Point2d(point1.getX(), point1.getY()));
-      edgeNormal = new Vector3d(-edgeVector.y, edgeVector.x, 0.0);
-      edgeNormal.normalize();
-      edgeNormal.scale(shrinkDistance);
-      footPoint.add(new FrameVector(footPoint.getReferenceFrame(), edgeNormal));
-      newFeet.set(RobotQuadrant.FRONT_RIGHT, footPoint);
-
-      // Foot 2
-      footPoint = getFootstep(RobotQuadrant.HIND_RIGHT);
-      point1 = getFootstep(RobotQuadrant.FRONT_LEFT);
-      point2 = point1 = getFootstep(RobotQuadrant.FRONT_RIGHT);
-      edgeVector = new Vector2d(point2.getX(), point2.getY());
-      edgeVector.sub(new Point2d(point1.getX(), point1.getY()));
-      edgeNormal = new Vector3d(-edgeVector.y, edgeVector.x, 0.0);
-      edgeNormal.normalize();
-      edgeNormal.scale(shrinkDistance);
-      footPoint.add(new FrameVector(footPoint.getReferenceFrame(), edgeNormal));
-      newFeet.set(RobotQuadrant.HIND_RIGHT, footPoint);
-
-      return new QuadrupedSupportPolygon(newFeet);
-   }
-   
-   /**
     * getBounds modifies the min and max points passed in to the min and max
     * xy values contained in the set of Footsteps that make up the polygon
     *
@@ -1375,7 +1310,7 @@ public class QuadrupedSupportPolygon implements Serializable
     *        Each side is shrunken by the specified distance.
     *        If the remaining distance is insufficent to shrink, then return null
     */
-   public void getShrunkenCommonSupportPolygon(QuadrupedSupportPolygon nextSupportPolygon, QuadrupedSupportPolygon shrunkenCommonPolygonToPack,
+   public void getShrunkenCommonPolygon2d(QuadrupedSupportPolygon nextSupportPolygon, QuadrupedSupportPolygon shrunkenCommonPolygonToPack,
          RobotQuadrant quadrantForIntersection, double frontDistance, double sideDistance, double hindDistance)
    {
       QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
@@ -1412,6 +1347,29 @@ public class QuadrupedSupportPolygon implements Serializable
    }
    
    /**
+    * Shrinks all sides of the polygon.
+    * 
+    * @param distance to shrink
+    */
+   public void shrinkPolygon2d(double distance)
+   {
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         getShrunkenPolygon2d(this, robotQuadrant, distance);
+      }
+   }
+   
+   /**
+    * Shrinks one side of the polygon.
+    * 
+    * @param distance to shrink
+    */
+   public void shrinkPolygon2d(RobotQuadrant robotQuadrant, double distance)
+   {
+      getShrunkenPolygon2d(this, robotQuadrant, distance);
+   }
+   
+   /**
     * Shrinks one side of the polygon.
     * 
     * @param shrunkenPolygonToPack
@@ -1422,7 +1380,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       shrunkenPolygonToPack.set(this);
       
-      if (size() == 3)
+      if (size() >= 3)
       {
          RobotQuadrant nextEdgeQuadrant = getNextClockwiseSupportingQuadrant(sideToShrink);
          RobotQuadrant previousEdgeQuadrant = getNextCounterClockwiseSupportingQuadrant(sideToShrink);
@@ -1434,7 +1392,7 @@ public class QuadrupedSupportPolygon implements Serializable
          FramePoint shrunkenShrinkEdgeFoot = shrunkenPolygonToPack.getFootstep(sideToShrink);
          FramePoint shrunkenNextEdgeFoot = shrunkenPolygonToPack.getFootstep(nextEdgeQuadrant);
          
-         FrameVector shrinkDirection = new FrameVector();
+         FrameVector shrinkDirection = tempPlaneNormalInWorld;
          shrinkDirection.sub(originalShrinkEdgeFoot, originalNextEdgeFoot);
          GeometryTools.getPerpendicularVector2d(shrinkDirection, shrinkDirection);
          shrinkDirection.normalize();
@@ -1445,10 +1403,6 @@ public class QuadrupedSupportPolygon implements Serializable
          
          GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot);
          GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot);
-      }
-      else if (size() == 4)
-      {
-         
       }
       else
       {
