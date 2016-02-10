@@ -20,7 +20,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
-
 public class ChestOrientationManager
 {
    private final YoVariableRegistry registry;
@@ -44,7 +43,7 @@ public class ChestOrientationManager
    private final ReferenceFrame chestFrame;
 
    private final BooleanYoVariable initializeToCurrent;
-   
+
    public ChestOrientationManager(MomentumBasedController momentumBasedController, ChestOrientationControlModule chestOrientationControlModule,
          ChestOrientationProvider chestOrientationProvider, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
@@ -57,7 +56,7 @@ public class ChestOrientationManager
       registry = new YoVariableRegistry(getClass().getSimpleName());
       chestFrame = chestOrientationControlModule.getChest().getBodyFixedFrame();
       yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestFrame, registry);
-      
+
       if (chestOrientationProvider != null)
       {
          chestOrientationExpressedInFrame = chestOrientationProvider.getChestOrientationExpressedInFrame();
@@ -69,14 +68,16 @@ public class ChestOrientationManager
          isUsingWaypointTrajectory.set(false);
 
          boolean allowMultipleFrames = true;
-         simpleOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("chest", allowMultipleFrames, chestOrientationExpressedInFrame, parentRegistry);
+         simpleOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("chest", allowMultipleFrames, chestOrientationExpressedInFrame,
+               parentRegistry);
          simpleOrientationTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
          simpleOrientationTrajectoryGenerator.registerAndSwitchFrame(pelvisZUpFrame);
          simpleOrientationTrajectoryGenerator.initialize();
          activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
 
          boolean doVelocityAtWaypoints = false;
-         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chestWaypoint", 15, allowMultipleFrames, chestOrientationExpressedInFrame, registry);
+         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chestWaypoint", 15, allowMultipleFrames,
+               chestOrientationExpressedInFrame, registry);
          waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(pelvisZUpFrame);
 
          initializeToCurrent = new BooleanYoVariable("initializeChestOrientationToCurrent", registry);
@@ -92,7 +93,7 @@ public class ChestOrientationManager
 
          initializeToCurrent = null;
       }
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -101,7 +102,7 @@ public class ChestOrientationManager
    private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
 
    private final FrameVector controlledAngularAcceleration = new FrameVector();
-   
+
    public void compute()
    {
       if (isUsingWaypointTrajectory != null)
@@ -119,10 +120,10 @@ public class ChestOrientationManager
          double deltaTime = yoTime.getDoubleValue() - receivedNewChestOrientationTime.getDoubleValue();
          activeTrajectoryGenerator.compute(deltaTime);
          boolean isTrajectoryDone = activeTrajectoryGenerator.isDone();
-         
+
          if (isTrajectoryDone)
             activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         
+
          activeTrajectoryGenerator.get(desiredOrientation);
          chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
@@ -132,7 +133,7 @@ public class ChestOrientationManager
       {
          chestOrientationControlModule.compute();
          TaskspaceConstraintData taskspaceConstraintData = chestOrientationControlModule.getTaskspaceConstraintData();
-         
+
          if (yoControlledAngularAcceleration != null)
          {
             SpatialAccelerationVector spatialAcceleration = taskspaceConstraintData.getSpatialAcceleration();
@@ -214,36 +215,43 @@ public class ChestOrientationManager
          activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
          activeTrajectoryGenerator.get(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
-         
+
          WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
 
-         int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;      
+         int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;
 
-         double totalTime = trajectoryData.getTimeAtWaypoints()[ lastIndex ];     
+         double totalTime = trajectoryData.getTimeAtWaypoints()[lastIndex];
 
-         FrameOrientation lastChestOrientation = new FrameOrientation( ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex] );
-         
-         simpleOrientationTrajectoryGenerator.setFinalOrientation( lastChestOrientation );  
-         simpleOrientationTrajectoryGenerator.setTrajectoryTime( totalTime );
-         
+         FrameOrientation lastChestOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex]);
+
+         simpleOrientationTrajectoryGenerator.setFinalOrientation(lastChestOrientation);
+         simpleOrientationTrajectoryGenerator.setTrajectoryTime(totalTime);
+
          simpleOrientationTrajectoryGenerator.initialize();
          isUsingWaypointTrajectory.set(false);
          activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-         
-         /*waypointOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
-         waypointOrientationTrajectoryGenerator.clear();
-         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation);
-         WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
-         trajectoryData.changeFrame(chestOrientationExpressedInFrame);
-         waypointOrientationTrajectoryGenerator.appendWaypoints(trajectoryData);
-         waypointOrientationTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(true);
-         activeTrajectoryGenerator = waypointOrientationTrajectoryGenerator;*/
+
+         /*
+          * waypointOrientationTrajectoryGenerator.changeFrame(
+          * chestOrientationExpressedInFrame);
+          * activeTrajectoryGenerator.changeFrame(
+          * chestOrientationExpressedInFrame);
+          * activeTrajectoryGenerator.get(desiredOrientation);
+          * waypointOrientationTrajectoryGenerator.clear();
+          * waypointOrientationTrajectoryGenerator.appendWaypoint(0.0,
+          * desiredOrientation); WaypointOrientationTrajectoryData
+          * trajectoryData =
+          * chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
+          * trajectoryData.changeFrame(chestOrientationExpressedInFrame);
+          * waypointOrientationTrajectoryGenerator.appendWaypoints(
+          * trajectoryData);
+          * waypointOrientationTrajectoryGenerator.initialize();
+          * isUsingWaypointTrajectory.set(true); activeTrajectoryGenerator =
+          * waypointOrientationTrajectoryGenerator;
+          */
          isTrackingOrientation.set(true);
       }
-   }  
+   }
 
    public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector desiredAngularAcceleration)
    {
