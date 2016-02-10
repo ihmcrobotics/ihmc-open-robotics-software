@@ -98,7 +98,8 @@ public class QuadrupedPathPreview
          swingTargetGenerator.getSwingTarget(updatedSupportPolygon, swingLeg, desiredBodyVelocity, desiredPosition, yawRate);
 
          //get swing leg support
-         QuadrupedSupportPolygon swingLegSupportPolygon = updatedSupportPolygon.deleteLegCopy(swingLeg);
+         QuadrupedSupportPolygon swingLegSupportPolygon = new QuadrupedSupportPolygon();
+         updatedSupportPolygon.getAndRemoveFootstep(swingLegSupportPolygon, swingLeg);
          drawSupportPolygon(swingLegSupportPolygon, tripleSupportPolygons[i * 2]);
 
          //get next step in future support
