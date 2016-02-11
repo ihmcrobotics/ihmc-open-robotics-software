@@ -160,8 +160,10 @@ public class VariousWalkingProviders
          }
       }
 
-      handTrajectoryMessageSubscriber.clearMessagesInQueue();
-      chestTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (handTrajectoryMessageSubscriber != null)
+         handTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (chestTrajectoryMessageSubscriber != null)
+         chestTrajectoryMessageSubscriber.clearMessagesInQueue();
    }
 
    public HandTrajectoryMessageSubscriber getHandTrajectoryMessageSubscriber()
