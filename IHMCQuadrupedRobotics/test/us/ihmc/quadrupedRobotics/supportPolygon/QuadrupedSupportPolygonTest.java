@@ -1,11 +1,7 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.testing.TestPlanTarget.Fast;
+import static org.junit.Assert.*;
+import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 import java.util.Random;
 
@@ -618,6 +614,96 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not shrunk correctly", poly3.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.97071, 0.92928, 0.0), 1e-5));
       assertTrue("not shrunk correctly", poly3.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(0.9, 0.1, 0.0), 1e-5));
       assertTrue("not shrunk correctly", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.070710, 0.029289, 0.0), 1e-5));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetShrunkenCommonPolygon2d()
+   {
+      QuadrupedSupportPolygon poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      QuadrupedSupportPolygon poly2 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      QuadrupedSupportPolygon poly3 = new QuadrupedSupportPolygon();
+      
+      poly1.getCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT);
+      
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.5, 0.5, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.0, 0.0, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 1e-7));
+      
+      poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      poly2 = createPolygonWithoutLeg(RobotQuadrant.HIND_LEFT);
+      poly3 = new QuadrupedSupportPolygon();
+      
+      poly1.getCommonTriangle2d(poly2, poly3, RobotQuadrant.HIND_LEFT);
+      
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(1.0, 1.0, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.5, 0.5, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 1e-7));
+      
+      poly1 = createPolygonWithoutLeg(RobotQuadrant.HIND_RIGHT);
+      poly2 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      poly3 = new QuadrupedSupportPolygon();
+      
+      poly1.getCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT);
+      
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.0, 1.0, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.5, 0.5, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.0, 0.0, 0.0), 1e-7));
+      
+      poly1 = createPolygonWithoutLeg(RobotQuadrant.HIND_RIGHT);
+      poly2 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      poly3 = new QuadrupedSupportPolygon();
+      
+      poly1.getCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT);
+      
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.0, 1.0, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.5, 0.5, 0.0), 1e-7));
+      assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.0, 0.0, 0.0), 1e-7));
+      
+      final QuadrupedSupportPolygon poly4 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      final QuadrupedSupportPolygon poly5 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      poly5.translate(0.5, 0.0, 0.0);
+      final QuadrupedSupportPolygon poly6 = new QuadrupedSupportPolygon();
+      
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly4.getCommonTriangle2d(poly5, poly6, RobotQuadrant.FRONT_RIGHT);
+         }
+      });
+      
+      final QuadrupedSupportPolygon poly7 = createEmptyPolygon();
+      final QuadrupedSupportPolygon poly8 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      poly8.translate(0.5, 0.0, 0.0);
+      final QuadrupedSupportPolygon poly9 = new QuadrupedSupportPolygon();
+      
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly7.getCommonTriangle2d(poly8, poly9, RobotQuadrant.FRONT_RIGHT);
+         }
+      });
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly8.getCommonTriangle2d(poly7, poly9, RobotQuadrant.FRONT_RIGHT);
+         }
+      });
+      poly8.translate(-0.5, 0.0, 0.0);
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly8.getCommonTriangle2d(poly4, poly9, RobotQuadrant.HIND_LEFT);
+         }
+      });
    }
 
    private Random random = new Random(9123090L);
