@@ -408,6 +408,17 @@ public class QuadrupedSupportPolygon implements Serializable
          getFootstep(robotQuadrant).add(translateBy);
       }
    }
+   
+   /**
+    * Translates this polygon in X and Y.
+    */
+   public void translate(double x, double y, double z)
+   {
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         getFootstep(robotQuadrant).add(x, y, z);
+      }
+   }
 
    /**
     * Rotates the feet about the Centroid, keeping the z heights.
@@ -1229,31 +1240,28 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param polygonToCompare SupportPolygon
     *        1) must contain only three kegs
     *        2) exactly two footsteps must be the same
-    * @param quadrantForIntersection LegName is the legname to assign to the intersection footstep
+    * @param quadrantToAssignToIntersection LegName is the legname to assign to the intersection footstep
     *        3) must be one of the swinging (same side) leg names
     * @return SupportPolygon That is common to both (can be null for opposite side swing legs)
     *        This should be the two matching feet and the intersection of the two tror lines
     */
-   public void getCommonSupportPolygon(QuadrupedSupportPolygon polygonToCompare, QuadrupedSupportPolygon commonPolygonToPack, RobotQuadrant quadrantForIntersection)
+   public void getCommonTriangle2d(QuadrupedSupportPolygon polygonToCompare, QuadrupedSupportPolygon commonPolygonToPack, RobotQuadrant quadrantToAssignToIntersection)
    {
       // verify both have exactly three legs
       if (size() != 3)
          throw new UndefinedOperationException("This supportPolygon must contain exactly three legs, not " + size());
       if (polygonToCompare.size() != 3)
          throw new UndefinedOperationException("Supplied supportPolygon must contain exactly three legs, not " + polygonToCompare.size());
-
-      // return null if swing legs are not same side *** Assumes regular gait ***
-      RobotQuadrant thisSwingLeg = getFirstNonSupportingQuadrant();
-      RobotQuadrant compareSwingLeg = polygonToCompare.getFirstNonSupportingQuadrant();
-      if (compareSwingLeg != thisSwingLeg.getSameSideQuadrant())
-         throw new UndefinedOperationException("Swing legs should be on same side.");
-
       // verify exactly two legs epsilon match
       if (getNumberOfEqualFootsteps(polygonToCompare) != 2)
          throw new UndefinedOperationException("There must be exactly two similar foosteps not " + getNumberOfEqualFootsteps(polygonToCompare));
 
+      // return null if swing legs are not same side *** Assumes regular gait ***
+      RobotQuadrant thisSwingLeg = getFirstNonSupportingQuadrant();
+      RobotQuadrant compareSwingLeg = polygonToCompare.getFirstNonSupportingQuadrant();
+
       // verify specified swing leg name is one of the swinging (same side) leg names
-      if ((quadrantForIntersection != thisSwingLeg) && (quadrantForIntersection != compareSwingLeg))
+      if (quadrantToAssignToIntersection != thisSwingLeg && quadrantToAssignToIntersection != compareSwingLeg)
          throw new UndefinedOperationException("The specified intersection quadrant must be one of the swinging (same side) leg names");
       
       FrameVector direction1 = tempVectorsForCommonSupportPolygon[0];
@@ -1262,12 +1270,12 @@ public class QuadrupedSupportPolygon implements Serializable
       FrameVector direction2 = tempVectorsForCommonSupportPolygon[1];
       direction2.sub(polygonToCompare.getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()), polygonToCompare.getFootstep(thisSwingLeg));
       
-      FramePoint intersection = commonPolygonToPack.getFootstepOrCreateIfNonSupporting(quadrantForIntersection);
+      commonPolygonToPack.clear();
+      FramePoint intersection = commonPolygonToPack.getFootstepOrCreateIfNonSupporting(quadrantToAssignToIntersection);
       GeometryTools.getIntersectionBetweenTwoLines2d(intersection, getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2);
       
-      commonPolygonToPack.setFootstep(thisSwingLeg.getAcrossBodyQuadrant(), getFootstep(thisSwingLeg.getAcrossBodyQuadrant()));
       commonPolygonToPack.setFootstep(thisSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()));
-      commonPolygonToPack.removeFootstep(quadrantForIntersection.getSameSideQuadrant());
+      commonPolygonToPack.setFootstep(compareSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(compareSwingLeg.getDiagonalOppositeQuadrant()));
    }
 
    /**
@@ -1310,11 +1318,11 @@ public class QuadrupedSupportPolygon implements Serializable
     *        Each side is shrunken by the specified distance.
     *        If the remaining distance is insufficent to shrink, then return null
     */
-   public void getShrunkenCommonPolygon2d(QuadrupedSupportPolygon nextSupportPolygon, QuadrupedSupportPolygon shrunkenCommonPolygonToPack,
+   public void getShrunkenCommonTriangle2d(QuadrupedSupportPolygon nextSupportPolygon, QuadrupedSupportPolygon shrunkenCommonPolygonToPack,
          RobotQuadrant quadrantForIntersection, double frontDistance, double sideDistance, double hindDistance)
    {
       QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
-      getCommonSupportPolygon(nextSupportPolygon, commonSupportPolygon, quadrantForIntersection);
+      getCommonTriangle2d(nextSupportPolygon, commonSupportPolygon, quadrantForIntersection);
       
       shrunkenCommonPolygonToPack.set(commonSupportPolygon);
       

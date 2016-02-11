@@ -111,7 +111,7 @@ public class QuadrupedPathPreview
 
          //if there's a common draw it
          QuadrupedSupportPolygon shrunkenCommonSupportPolygon = new QuadrupedSupportPolygon();
-         swingLegSupportPolygon.getShrunkenCommonPolygon2d(nextSwingLegSupportPolygon, shrunkenCommonSupportPolygon, swingLeg, 0.02, 0.02, 0.02);
+         swingLegSupportPolygon.getShrunkenCommonTriangle2d(nextSwingLegSupportPolygon, shrunkenCommonSupportPolygon, swingLeg, 0.02, 0.02, 0.02);
          drawSupportPolygon(shrunkenCommonSupportPolygon, commonSupportPolygons[i]);
 
          shrunkenCommonSupportPolygon.getTangentTangentRadiusCircleCenter(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
