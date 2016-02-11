@@ -7,12 +7,15 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.trajectories.SE3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one waypoint. "
       + "Feel free to look at EuclideanWaypoint (translational) and SO3Waypoint (rotational)")
-public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> implements SE3WaypointInterface
+public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> implements SE3WaypointInterface, TransformableDataObject<SE3WaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -141,5 +144,35 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
          return false;
 
       return true;
+   }
+
+   @Override
+   public SE3WaypointMessage transform(RigidBodyTransform transform)
+   {
+      SE3WaypointMessage transformedWaypointMessage = new SE3WaypointMessage();
+
+      transformedWaypointMessage.time = time;
+
+      if (position != null)
+         transformedWaypointMessage.position = TransformTools.getTransformedPoint(position, transform);
+      else
+         transformedWaypointMessage.position = null;
+
+      if (orientation != null)
+         transformedWaypointMessage.orientation = TransformTools.getTransformedQuat(orientation, transform);
+      else
+         transformedWaypointMessage.orientation = null;
+
+      if (linearVelocity != null)
+         transformedWaypointMessage.linearVelocity = TransformTools.getTransformedVector(linearVelocity, transform);
+      else
+         transformedWaypointMessage.linearVelocity = null;
+
+      if (angularVelocity != null)
+         transformedWaypointMessage.angularVelocity = TransformTools.getTransformedVector(angularVelocity, transform);
+      else
+         transformedWaypointMessage.angularVelocity = null;
+
+      return transformedWaypointMessage;
    }
 }
