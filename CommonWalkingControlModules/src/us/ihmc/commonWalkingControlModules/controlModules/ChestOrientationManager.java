@@ -163,7 +163,6 @@ public class ChestOrientationManager
          initializeToCurrent.set(true);
    }
 
-   private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
 
    private void handleChestTrajectoryMessages()
@@ -173,16 +172,18 @@ public class ChestOrientationManager
 
       ChestTrajectoryMessage message = chestTrajectoryMessageSubscriber.pollMessage();
 
+      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       waypointOrientationTrajectoryGenerator.clear();
 
       if (message.getWaypoint(0).getTime() > 1.0e-5)
       {
-         tempOrientation.setToZero(chestFrame);
-         tempOrientation.changeFrame(worldFrame);
+         activeTrajectoryGenerator.changeFrame(worldFrame);
+         activeTrajectoryGenerator.get(desiredOrientation);
          tempAngularVelocity.setToZero(worldFrame);
 
-         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, tempAngularVelocity);
       }
 
       waypointOrientationTrajectoryGenerator.appendWaypoints(message.getWaypoints());
