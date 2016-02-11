@@ -178,17 +178,6 @@ public class QuadrupedSupportPolygonTest
    
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testPitch()
-   {
-      QuadrupedSupportPolygon pitchedUpPolygon = createPitchedUpPolygon();
-      assertEquals("not 45 degrees", -Math.PI / 4, pitchedUpPolygon.getPitchInRadians(), 1e-7);
-      
-      QuadrupedSupportPolygon pitchedDownPolygon = createPitchedDownPolygon();
-      assertEquals("not -45 degrees", Math.PI / 4, pitchedDownPolygon.getPitchInRadians(), 1e-7);
-   }
-   
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testDistanceInside()
    {
       QuadrupedSupportPolygon simplePolygon = createSimplePolygon();
@@ -905,6 +894,52 @@ public class QuadrupedSupportPolygonTest
          public void run() throws Throwable
          {
             zeroedPolygon.getNominalPitch();
+         }
+      });
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testFootstepMidpoints()
+   {
+      QuadrupedSupportPolygon simplePolygon = createSimplePolygon();
+      FramePoint framePointToPack = new FramePoint();
+      simplePolygon.getFrontMidpoint(framePointToPack);
+      assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(0.5, 1.0, 0.0), 1e-7));
+      simplePolygon.getHindMidpoint(framePointToPack);
+      assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(0.5, 0.0, 0.0), 1e-7));
+      
+      QuadrupedSupportPolygon poly1;
+      poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      poly1.getFrontMidpoint(framePointToPack);
+      assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(1.0, 1.0, 0.0), 1e-7));
+      poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      poly1.getFrontMidpoint(framePointToPack);
+      assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(0.0, 1.0, 0.0), 1e-7));
+      poly1.removeFootstep(RobotQuadrant.FRONT_LEFT);
+      final QuadrupedSupportPolygon poly2 = poly1;
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly2.getFrontMidpoint(null);
+         }
+      });
+      poly1 = createPolygonWithoutLeg(RobotQuadrant.HIND_LEFT);
+      poly1.getHindMidpoint(framePointToPack);
+      assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(1.0, 0.0, 0.0), 1e-7));
+      poly1 = createPolygonWithoutLeg(RobotQuadrant.HIND_RIGHT);
+      poly1.getHindMidpoint(framePointToPack);
+      assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(0.0, 0.0, 0.0), 1e-7));
+      poly1.removeFootstep(RobotQuadrant.HIND_LEFT);
+      final QuadrupedSupportPolygon poly3 = poly1;
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly3.getHindMidpoint(null);
          }
       });
    }
