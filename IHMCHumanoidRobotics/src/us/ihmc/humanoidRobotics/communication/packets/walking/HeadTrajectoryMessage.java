@@ -31,7 +31,7 @@ public class HeadTrajectoryMessage extends IHMCRosApiPacket<HeadTrajectoryMessag
    /**
     * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
     * @param trajectoryTime how long it takes to reach the desired orientation.
-    * @param desiredOrientation desired chest orientation expressed in world frame.
+    * @param desiredOrientation desired head orientation expressed in world frame.
     */
    public HeadTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
    {
