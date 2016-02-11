@@ -630,6 +630,20 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.0, 0.0, 0.0), 1e-7));
       assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 1e-7));
       
+      poly1.getShrunkenCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
+      
+      Vector3d expected;
+      FramePoint actual;
+      actual = poly3.getFootstep(RobotQuadrant.HIND_LEFT);
+      expected = new Vector3d(0.24142, 0.1, 0.0);
+      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      actual = poly3.getFootstep(RobotQuadrant.HIND_RIGHT);
+      expected = new Vector3d(0.75858, 0.1, 0.0);
+      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      actual = poly3.getFootstep(RobotQuadrant.FRONT_RIGHT);
+      expected = new Vector3d(0.5, 0.35858, 0.0);
+      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      
       poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
       poly2 = createPolygonWithoutLeg(RobotQuadrant.HIND_LEFT);
       poly3 = new QuadrupedSupportPolygon();
@@ -704,6 +718,29 @@ public class QuadrupedSupportPolygonTest
             poly8.getCommonTriangle2d(poly4, poly9, RobotQuadrant.HIND_LEFT);
          }
       });
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetBounds()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      Point2d minToPack = new Point2d();
+      Point2d maxToPack = new Point2d();
+      poly.getBounds(minToPack , maxToPack);
+      
+      assertEquals("not correct", minToPack.x, 0.0, 1e-7);
+      assertEquals("not correct", minToPack.y, 0.0, 1e-7);
+      assertEquals("not correct", maxToPack.x, 1.0, 1e-7);
+      assertEquals("not correct", maxToPack.y, 1.0, 1e-7);
+      
+      poly = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      poly.getBounds(minToPack , maxToPack);
+      
+      assertEquals("not correct", minToPack.x, 0.0, 1e-7);
+      assertEquals("not correct", minToPack.y, 0.0, 1e-7);
+      assertEquals("not correct", maxToPack.x, 1.0, 1e-7);
+      assertEquals("not correct", maxToPack.y, 1.0, 1e-7);
    }
 
    private Random random = new Random(9123090L);

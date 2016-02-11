@@ -562,37 +562,37 @@ public class QuadrupedSupportPolygon implements Serializable
     * getBounds modifies the min and max points passed in to the min and max
     * xy values contained in the set of Footsteps that make up the polygon
     *
-    * @param min Point2d  Minimum x and y value contained in footsteps list
-    * @param max Point2d  Maximum x and y value contained in footsteps list
+    * @param minToPack Point2d  Minimum x and y value contained in footsteps list
+    * @param maxToPack Point2d  Maximum x and y value contained in footsteps list
     */
-   public void getBounds(Point2d min, Point2d max)
+   public void getBounds(Point2d minToPack, Point2d maxToPack)
    {
-      min.x = min.y = Double.POSITIVE_INFINITY;
-      max.x = max.y = Double.NEGATIVE_INFINITY;
+      minToPack.x = minToPack.y = Double.POSITIVE_INFINITY;
+      maxToPack.x = maxToPack.y = Double.NEGATIVE_INFINITY;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint footstep = getFootstep(robotQuadrant);
          if (containsFootstep(footstep))
          {
-            if (footstep.getX() < min.x)
+            if (footstep.getX() < minToPack.x)
             {
-               min.x = footstep.getX();
+               minToPack.x = footstep.getX();
             }
 
-            if (footstep.getY() < min.y)
+            if (footstep.getY() < minToPack.y)
             {
-               min.y = footstep.getY();
+               minToPack.y = footstep.getY();
             }
 
-            if (footstep.getX() > max.x)
+            if (footstep.getX() > maxToPack.x)
             {
-               max.x = footstep.getX();
+               maxToPack.x = footstep.getX();
             }
 
-            if (footstep.getY() > max.y)
+            if (footstep.getY() > maxToPack.y)
             {
-               max.y = footstep.getY();
+               maxToPack.y = footstep.getY();
             }
          }
       }
