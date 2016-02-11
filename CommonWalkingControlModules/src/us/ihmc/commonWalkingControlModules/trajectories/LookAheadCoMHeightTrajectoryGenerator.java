@@ -61,12 +61,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoVariableDoubleProvider offsetHeightAboveGroundInitialPositionProvider = new YoVariableDoubleProvider(offsetHeightAboveGroundPrevValue);
    private final YoVariableDoubleProvider offsetHeightAboveGroundFinalPositionProvider = new YoVariableDoubleProvider(offsetHeightAboveGround);
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryOutput = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryOutput",
-                                                                                       registry);
-   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider =
-      new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryTimeProvider", registry);
-   private final CubicPolynomialTrajectoryGenerator offsetHeightAboveGroundTrajectory =
-      new CubicPolynomialTrajectoryGenerator("offsetHeightAboveGroundTrajectory", offsetHeightAboveGroundInitialPositionProvider,
-         offsetHeightAboveGroundFinalPositionProvider, offsetHeightAboveGroundTrajectoryTimeProvider, registry);
+         registry);
+   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider(
+         "offsetHeightAboveGroundTrajectoryTimeProvider", registry);
+   private final CubicPolynomialTrajectoryGenerator offsetHeightAboveGroundTrajectory = new CubicPolynomialTrajectoryGenerator(
+         "offsetHeightAboveGroundTrajectory", offsetHeightAboveGroundInitialPositionProvider, offsetHeightAboveGroundFinalPositionProvider,
+         offsetHeightAboveGroundTrajectoryTimeProvider, registry);
 
    private final DoubleYoVariable minimumHeightAboveGround = new DoubleYoVariable("minimumHeightAboveGround", registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
@@ -139,7 +139,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
 
-      this.maximumHeightDeltaBetweenWaypoints.set(0.2);    // 0.04);
+      this.maximumHeightDeltaBetweenWaypoints.set(0.2); // 0.04);
 
       parentRegistry.addChild(registry);
 
@@ -254,7 +254,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final Point2d[] points = new Point2d[4];
    private final double[] endpointSlopes = new double[] {0.0, 0.0};
    private final double[] waypointSlopes = new double[2];
-   
+
    @Override
    public void setSupportLeg(RobotSide supportLeg)
    {
@@ -275,12 +275,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, sF.getY());
       tempFramePoint.changeFrame(newFrame);
       sF.setY(tempFramePoint.getZ());
-      
+
       points[0] = s0;
       points[1] = d0;
       points[2] = dF;
       points[3] = sF;
-      
+
       endpointSlopes[0] = 0.0;
       endpointSlopes[1] = 0.0;
 
@@ -296,13 +296,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          tempFramePoint.changeFrame(newFrame);
          previousZFinal.set(tempFramePoint.getZ());
       }
-      
+
       frameOfLastFoostep = newFrame;
    }
 
    @Override
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
-                          List<PlaneContactState> contactStates)
+         List<PlaneContactState> contactStates)
    {
       initialize(transferToAndNextFootstepsData);
    }
@@ -373,9 +373,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       {
          if (transferFromDesiredFootstep.getRobotSide() != transferFromFootstep.getRobotSide())
          {
-            if(DEBUG)
+            if (DEBUG)
             {
-               System.err.println("transferFromDesiredFootstep.getRobotSide() != transferFromFootstep.getRobotSide() in LookAheadCoMHeightTrajectoryGenerator.initialize()");
+               System.err.println(
+                     "transferFromDesiredFootstep.getRobotSide() != transferFromFootstep.getRobotSide() in LookAheadCoMHeightTrajectoryGenerator.initialize()");
             }
          }
 
@@ -453,8 +454,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       dFMin.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
       dFNom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
 
-      if ((walkOnTheEdgesManager != null)
-              && walkOnTheEdgesManager.willDoToeOff(transferToAndNextFootstepsData))
+      if ((walkOnTheEdgesManager != null) && walkOnTheEdgesManager.willDoToeOff(transferToAndNextFootstepsData))
       {
          dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0 + extraCoMMaxHeightWithToes, footHeight1));
       }
@@ -747,7 +747,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final FramePoint desiredPosition = new FramePoint();
    private final double[] splineOutput = new double[3];
    private final double[] partialDerivativesWithRespectToS = new double[2];
-   
+
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint, boolean isInDoubleSupport)
    {
       projectionSegment.orthogonalProjection(queryPoint);
@@ -917,7 +917,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       footstep.getOrientationInWorldFrame(orientation);
 
       System.out.println("footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide." + robotSide + ", new Point3d(" + position.getX() + ", "
-                         + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getW() + ", " + orientation.getX() + ", "
-                         + orientation.getY() + ", " + orientation.getZ() + ")));");
+            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getW() + ", " + orientation.getX() + ", " + orientation.getY() + ", "
+            + orientation.getZ() + ")));");
    }
 }
