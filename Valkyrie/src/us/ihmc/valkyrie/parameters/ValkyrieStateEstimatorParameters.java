@@ -97,7 +97,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       maximumDeflection = 0.25;
       defaultJointStiffness = 10000;
       for (RobotSide robotSide : RobotSide.values)
-         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 6500.0);
+         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
       kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0;
