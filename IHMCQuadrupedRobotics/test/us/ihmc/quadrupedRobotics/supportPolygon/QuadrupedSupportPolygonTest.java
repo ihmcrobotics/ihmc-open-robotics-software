@@ -943,6 +943,42 @@ public class QuadrupedSupportPolygonTest
          }
       });
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testStanceLength()
+   {
+      QuadrupedSupportPolygon create3LegPolygon;
+      create3LegPolygon = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      assertEquals("not 1.0", 1.0, create3LegPolygon.getStanceLength(RobotSide.RIGHT), 1e-7);
+      create3LegPolygon = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      assertEquals("not 1.0", 1.0, create3LegPolygon.getStanceLength(RobotSide.LEFT), 1e-7);
+      create3LegPolygon = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      assertEquals("not 1.0", 1.0, create3LegPolygon.getStanceLength(RobotSide.RIGHT), 1e-7);
+      create3LegPolygon = createPolygonWithoutLeg(RobotQuadrant.HIND_RIGHT);
+      assertEquals("not 1.0", 1.0, create3LegPolygon.getStanceLength(RobotSide.LEFT), 1e-7);
+      
+      final QuadrupedSupportPolygon createEmptyPolygon = createEmptyPolygon();
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            createEmptyPolygon.getStanceLength(RobotSide.LEFT);
+         }
+      });
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testEpsilonEquals()
+   {
+      QuadrupedSupportPolygon createSimplePolygon = createSimplePolygon();
+      assertTrue("not correct", createSimplePolygon.epsilonEquals(createSimplePolygon));
+      QuadrupedSupportPolygon create3LegPolygon = create3LegPolygon();
+      assertFalse("not correct", createSimplePolygon.epsilonEquals(create3LegPolygon));
+      assertFalse("not correct", createSimplePolygon.epsilonEquals(null));
+   }
 
    private Random random = new Random(9123090L);
 
