@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -179,14 +179,14 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
-      sendPacketToController(new PauseCommand(true));
+      sendPacketToController(new PauseWalkingMessage(true));
       isStopped.set(true);
    }
 
    @Override
    public void pause()
    {
-      sendPacketToController(new PauseCommand(true));
+      sendPacketToController(new PauseWalkingMessage(true));
       isPaused.set(true);
       if (DEBUG)
          PrintTools.debug(this, "Pausing Behavior");
@@ -195,7 +195,7 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void resume()
    {
-      sendPacketToController(new PauseCommand(false));
+      sendPacketToController(new PauseWalkingMessage(false));
       isPaused.set(false);
       isStopped.set(false);
       if (DEBUG)

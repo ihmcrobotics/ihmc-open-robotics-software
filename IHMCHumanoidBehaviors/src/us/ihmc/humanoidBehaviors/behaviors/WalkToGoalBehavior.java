@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -326,14 +326,14 @@ public class WalkToGoalBehavior extends BehaviorInterface {
             debugPrintln("Requesting path");
          }else	if (newestPacket.action == WalkToGoalBehaviorPacket.WalkToGoalAction.EXECUTE){
 				debugPrintln("Executing path");
-            sendPacketToController(new PauseCommand(false));
+            sendPacketToController(new PauseWalkingMessage(false));
 				executePlan.set(true);
 			}else if (newestPacket.action == WalkToGoalBehaviorPacket.WalkToGoalAction.EXECUTE_UNKNOWN){
             executeUnknownFirstStep.set(true);
             debugPrintln("First step now allowed to be unknown");
          }else if (newestPacket.action == WalkToGoalBehaviorPacket.WalkToGoalAction.STOP){
             executePlan.set(false);
-            sendPacketToController(new PauseCommand(true));
+            sendPacketToController(new PauseWalkingMessage(true));
             debugPrintln("Stopping execution");
          }
 		}
@@ -405,7 +405,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	public void stop()
 	{
 		requestSearchStop();
-      sendPacketToController(new PauseCommand(true));
+      sendPacketToController(new PauseWalkingMessage(true));
 		waitingForValidPlan.set(false);
 		isStopped.set(true);
 	}
@@ -422,14 +422,14 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	{
 
       isPaused.set(true);
-      sendPacketToController(new PauseCommand(true));
+      sendPacketToController(new PauseWalkingMessage(true));
 	}
 
 	@Override
 	public void resume()
 	{
 		isPaused.set(false);
-      sendPacketToController(new PauseCommand(false));
+      sendPacketToController(new PauseWalkingMessage(false));
 	}
 
 	@Override

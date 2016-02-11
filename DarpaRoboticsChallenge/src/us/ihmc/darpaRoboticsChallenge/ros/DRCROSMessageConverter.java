@@ -72,7 +72,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
@@ -102,8 +102,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((ChestOrientationPacket) packet);
       else if (packet instanceof HeadOrientationPacket)
          return convertToRosMessage((HeadOrientationPacket) packet);
-      else if (packet instanceof PauseCommand)
-         return convertToRosMessage((PauseCommand) packet);
+      else if (packet instanceof PauseWalkingMessage)
+         return convertToRosMessage((PauseWalkingMessage) packet);
       else if (packet instanceof HighLevelStatePacket)
          return convertToRosMessage((HighLevelStatePacket) packet);
       else if (packet instanceof ArmJointTrajectoryPacket)
@@ -604,7 +604,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static PauseCommandMessage convertToRosMessage(PauseCommand packet)
+   public static PauseCommandMessage convertToRosMessage(PauseWalkingMessage packet)
    {
       PauseCommandMessage ret = messageFactory.newFromType("ihmc_msgs/PauseCommandMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -613,9 +613,9 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static PauseCommand convertToPacket(PauseCommandMessage message)
+   public static PauseWalkingMessage convertToPacket(PauseCommandMessage message)
    {
-      PauseCommand ret = new PauseCommand(message.getPause());
+      PauseWalkingMessage ret = new PauseWalkingMessage(message.getPause());
       ret.setUniqueId(message.getUniqueId());
       return ret;
    }
