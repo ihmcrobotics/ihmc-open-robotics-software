@@ -5,7 +5,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
-import us.ihmc.aware.planning.SingleStepDcmTrajectory;
+import us.ihmc.aware.planning.SingleStepDCMTrajectory;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
 import us.ihmc.aware.state.StateMachine;
@@ -96,7 +96,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final CenterOfMassJacobian comJacobian;
    private final TwistCalculator twistCalculator;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
-   private final SingleStepDcmTrajectory dcmTrajectory;
+   private final SingleStepDCMTrajectory dcmTrajectory;
    private boolean dcmTrajectoryInitialized;
 
    // controllers
@@ -260,7 +260,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       {
          swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
       }
-      dcmTrajectory = new SingleStepDcmTrajectory(gravity, params.get(COM_HEIGHT_NOMINAL), registry);
+      dcmTrajectory = new SingleStepDCMTrajectory(gravity, params.get(COM_HEIGHT_NOMINAL), registry);
 
       // controllers
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);

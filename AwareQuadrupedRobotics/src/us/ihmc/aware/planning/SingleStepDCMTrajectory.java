@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class SingleStepDcmTrajectory
+public class SingleStepDCMTrajectory
 {
    /* the time it takes for the DCM to converge to the center of the final support polygon following the swing phase */
    private final static double LOAD_DURATION = 0.5;
@@ -44,7 +44,7 @@ public class SingleStepDcmTrajectory
    private final YoPolynomial zLoadTrajectory;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public SingleStepDcmTrajectory(double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public SingleStepDCMTrajectory(double gravity, double comHeight, YoVariableRegistry parentRegistry)
    {
       this.gravity = gravity;
       this.comHeight = comHeight;
