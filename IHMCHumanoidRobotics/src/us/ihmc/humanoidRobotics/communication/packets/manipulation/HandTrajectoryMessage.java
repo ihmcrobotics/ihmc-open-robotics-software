@@ -8,14 +8,16 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
 @ClassDocumentation("This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified waypoints."
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
       + " To excute a single straight line trajectory to reach a desired hand pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
-public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessage> implements VisualizablePacket
+public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessage> implements TransformableDataObject<HandTrajectoryMessage>, VisualizablePacket
 {
    public enum BaseForControl implements DocumentedEnum<BaseForControl>
    {
@@ -105,12 +107,6 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
       taskspaceWaypoints = new SE3WaypointMessage[numberOfWaypoints];
    }
 
-   public void setWaypoint(int waypointIndex, double time, Point3d position, Quat4d orientation)
-   {
-      rangeCheck(waypointIndex);
-      taskspaceWaypoints[waypointIndex] = new SE3WaypointMessage(time, position, orientation, null, null);
-   }
-
    public void setWaypoint(int waypointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
    {
       rangeCheck(waypointIndex);
@@ -154,6 +150,8 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
    {
       if (robotSide != other.robotSide)
          return false;
+      if (base != other.base)
+         return false;
       if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
          return false;
 
@@ -164,5 +162,16 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
       }
 
       return true;
+   }
+
+   @Override
+   public HandTrajectoryMessage transform(RigidBodyTransform transform)
+   {
+      HandTrajectoryMessage transformedHandTrajectoryMessage = new HandTrajectoryMessage(robotSide, base, getNumberOfWaypoints());
+
+      for (int i = 0; i < getNumberOfWaypoints(); i++)
+         transformedHandTrajectoryMessage.taskspaceWaypoints[i] = taskspaceWaypoints[i].transform(transform);
+
+      return transformedHandTrajectoryMessage;
    }
 }

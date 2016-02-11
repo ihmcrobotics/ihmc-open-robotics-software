@@ -11,29 +11,29 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.SO3WaypointMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-@ClassDocumentation("This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified waypoints."
+@ClassDocumentation("This message commands the controller to move in taskspace the head to the desired orientation while going through the specified waypoints."
       + " A hermite based curve (third order) is used to interpolate the orientations."
-      + " To excute a simple trajectory to reach a desired chest orientation, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
-public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMessage> implements TransformableDataObject<ChestTrajectoryMessage>, VisualizablePacket
+      + " To excute a simple trajectory to reach a desired head orientation, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
+public class HeadTrajectoryMessage extends IHMCRosApiPacket<HeadTrajectoryMessage> implements TransformableDataObject<HeadTrajectoryMessage>, VisualizablePacket
 {
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
    public SO3WaypointMessage[] taskspaceWaypoints;
 
-   public ChestTrajectoryMessage()
+   public HeadTrajectoryMessage()
    {
    }
 
-   public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
+   public HeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
-      taskspaceWaypoints = new SO3WaypointMessage[chestTrajectoryMessage.getNumberOfWaypoints()];
+      taskspaceWaypoints = new SO3WaypointMessage[headTrajectoryMessage.getNumberOfWaypoints()];
    }
 
    /**
     * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
     * @param trajectoryTime how long it takes to reach the desired orientation.
-    * @param desiredOrientation desired chest orientation expressed in world frame.
+    * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public ChestTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
+   public HeadTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
    {
       Vector3d zeroAngularVelocity = new Vector3d();
       taskspaceWaypoints = new SO3WaypointMessage[]{new SO3WaypointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
@@ -44,7 +44,7 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
     * This constructor only allocates memory for the waypoints, you need to call {@link #setWaypoint(int, double, Quat4d, Vector3d)} for each waypoint afterwards.
     * @param numberOfWaypoints number of waypoints that will be sent to the controller.
     */
-   public ChestTrajectoryMessage(int numberOfWaypoints)
+   public HeadTrajectoryMessage(int numberOfWaypoints)
    {
       taskspaceWaypoints = new SO3WaypointMessage[numberOfWaypoints];
    }
@@ -85,7 +85,7 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
    }
 
    @Override
-   public boolean epsilonEquals(ChestTrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(HeadTrajectoryMessage other, double epsilon)
    {
       if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
          return false;
@@ -100,13 +100,13 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
    }
 
    @Override
-   public ChestTrajectoryMessage transform(RigidBodyTransform transform)
+   public HeadTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      ChestTrajectoryMessage transformedChestTrajectoryMessage = new ChestTrajectoryMessage(getNumberOfWaypoints());
+      HeadTrajectoryMessage transformedHeadTrajectoryMessage = new HeadTrajectoryMessage(getNumberOfWaypoints());
 
       for (int i = 0; i < getNumberOfWaypoints(); i++)
-         transformedChestTrajectoryMessage.taskspaceWaypoints[i] = taskspaceWaypoints[i].transform(transform);
+         transformedHeadTrajectoryMessage.taskspaceWaypoints[i] = taskspaceWaypoints[i].transform(transform);
 
-      return transformedChestTrajectoryMessage;
+      return transformedHeadTrajectoryMessage;
    }
 }

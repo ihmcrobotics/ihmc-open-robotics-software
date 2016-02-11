@@ -21,11 +21,8 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
 
    private final FrameOrientation frameOrientation = new FrameOrientation();
 
-   private final ReferenceFrame chestOrientationFrame;
-
    public UserDesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      this.chestOrientationFrame = chestOrientationFrame;
       userChest = new YoFrameOrientation("userDesiredChest", chestOrientationFrame, registry);
 
       VariableChangedListener variableChangedListener = new VariableChangedListener()
@@ -80,12 +77,6 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
       isNewChestOrientationInformationAvailable.set(false);
 
       return frameOrientation;
-   }
-
-   @Override
-   public ReferenceFrame getChestOrientationExpressedInFrame()
-   {
-      return chestOrientationFrame;
    }
 
    @Override
