@@ -83,7 +83,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandCon
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SpigotPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
@@ -185,7 +185,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       // Hand pose
       registerPacketClass(HandPosePacket.class);
-      registerPacketClass(StopMotionPacket.class);
+      registerPacketClass(StopAllTrajectoryMessage.class);
       registerPacketClass(AutomaticManipulationAbortPacket.class);
       registerPacketClass(ManipulationAbortedStatus.class);
       registerPacketClass(HandStatePacket.class);

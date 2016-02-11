@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTraje
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.geometry.FramePose;
@@ -34,7 +34,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final SideDependentList<AtomicReference<HandPoseListPacket>> handPoseListPackets = new SideDependentList<AtomicReference<HandPoseListPacket>>();
    private final SideDependentList<AtomicReference<HandRotateAboutAxisPacket>> handRotateAboutAxisPackets = new SideDependentList<AtomicReference<HandRotateAboutAxisPacket>>();
    private final AtomicReference<WholeBodyTrajectoryPacket> wholeBodyTrajectoryHandPoseListPackets = new AtomicReference<WholeBodyTrajectoryPacket>();
-   private final SideDependentList<AtomicReference<StopMotionPacket>> pausePackets = new SideDependentList<AtomicReference<StopMotionPacket>>();
+   private final SideDependentList<AtomicReference<StopAllTrajectoryMessage>> pausePackets = new SideDependentList<AtomicReference<StopAllTrajectoryMessage>>();
    private final SideDependentList<AtomicReference<ArmJointTrajectoryPacket>> armJointTrajectoryPackets = new SideDependentList<AtomicReference<ArmJointTrajectoryPacket>>();
 
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
@@ -64,7 +64,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final PacketConsumer<StopMotionPacket> handPauseCommandConsumer;
+   private final PacketConsumer<StopAllTrajectoryMessage> handPauseCommandConsumer;
    private final PacketConsumer<HandPoseListPacket> handPoseListConsumer;
    private final PacketConsumer<HandRotateAboutAxisPacket> handRotateAboutAxisConsumer;
    private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryHandPoseListConsumer;
@@ -83,7 +83,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
       for (RobotSide robotSide : RobotSide.values)
       {
          handPosePackets.put(robotSide, new AtomicReference<HandPosePacket>());
-         pausePackets.put(robotSide, new AtomicReference<StopMotionPacket>());
+         pausePackets.put(robotSide, new AtomicReference<StopAllTrajectoryMessage>());
          handPoseListPackets.put(robotSide, new AtomicReference<HandPoseListPacket>());
          handRotateAboutAxisPackets.put(robotSide, new AtomicReference<HandRotateAboutAxisPacket>());
          armJointTrajectoryPackets.put(robotSide, new AtomicReference<ArmJointTrajectoryPacket>());
@@ -100,10 +100,10 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          controlledAxes.put(robotSide, new AtomicReference<boolean[]>(null));
       }
 
-      handPauseCommandConsumer = new PacketConsumer<StopMotionPacket>()
+      handPauseCommandConsumer = new PacketConsumer<StopAllTrajectoryMessage>()
       {
          @Override
-         public void receivedPacket(StopMotionPacket object)
+         public void receivedPacket(StopAllTrajectoryMessage object)
          {
             pausePackets.get(RobotSide.LEFT).set(object);
             pausePackets.get(RobotSide.RIGHT).set(object);
@@ -484,7 +484,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
       return ret;
    }
 
-   public PacketConsumer<StopMotionPacket> getHandPauseCommandConsumer()
+   public PacketConsumer<StopAllTrajectoryMessage> getHandPauseCommandConsumer()
    {
       return handPauseCommandConsumer;
    }

@@ -8,7 +8,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -26,7 +26,7 @@ public class DesiredPelvisPoseProvider implements PelvisPoseProvider
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryConsumer;
-   private final PacketConsumer<StopMotionPacket>    stopMotionConsumer;
+   private final PacketConsumer<StopAllTrajectoryMessage>    stopMotionConsumer;
    private final PacketConsumer<PelvisPosePacket>    pelvisPoseConsumer;
 
    private final AtomicBoolean goToHomePosition = new AtomicBoolean(false);
@@ -35,7 +35,7 @@ public class DesiredPelvisPoseProvider implements PelvisPoseProvider
    private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(null);
    private final AtomicReference<WaypointPositionTrajectoryData> desiredPelvisPositionWithWaypoints = new AtomicReference<>(null);
    private final AtomicReference<WaypointOrientationTrajectoryData> desiredPelvisOrientationWithWaypoints = new AtomicReference<>(null);
-   private final AtomicReference<StopMotionPacket> stopMotion = new  AtomicReference<>(null);
+   private final AtomicReference<StopAllTrajectoryMessage> stopMotion = new  AtomicReference<>(null);
    private double trajectoryTime = Double.NaN;
 
    public DesiredPelvisPoseProvider()
@@ -49,10 +49,10 @@ public class DesiredPelvisPoseProvider implements PelvisPoseProvider
          }
       };
       
-      stopMotionConsumer = new PacketConsumer<StopMotionPacket>()
+      stopMotionConsumer = new PacketConsumer<StopAllTrajectoryMessage>()
       {
          @Override
-         public void receivedPacket(StopMotionPacket packet)
+         public void receivedPacket(StopAllTrajectoryMessage packet)
          {
             receivedPacketImpl(packet);
          }
@@ -101,7 +101,7 @@ public class DesiredPelvisPoseProvider implements PelvisPoseProvider
       return wholeBodyTrajectoryConsumer;
    }
    
-   public PacketConsumer<StopMotionPacket> getStopMotionPacketConsumer()
+   public PacketConsumer<StopAllTrajectoryMessage> getStopMotionPacketConsumer()
    {
       return stopMotionConsumer;
    }
@@ -225,7 +225,7 @@ public class DesiredPelvisPoseProvider implements PelvisPoseProvider
          desiredPelvisOrientation.set(null);
    }
    
-   private void receivedPacketImpl(StopMotionPacket object)
+   private void receivedPacketImpl(StopAllTrajectoryMessage object)
    {
       if (object == null)
          return;

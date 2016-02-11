@@ -63,7 +63,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredCo
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
@@ -126,8 +126,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((LegCompliancePacket) packet);
       else if (packet instanceof WholeBodyTrajectoryPacket)
          return convertToRosMessage((WholeBodyTrajectoryPacket) packet);
-      else if (packet instanceof StopMotionPacket)
-         return convertToRosMessage((StopMotionPacket) packet);
+      else if (packet instanceof StopAllTrajectoryMessage)
+         return convertToRosMessage((StopAllTrajectoryMessage) packet);
       else if (packet instanceof HandDesiredConfigurationMessage)
          return convertToRosMessage((HandDesiredConfigurationMessage) packet);
       else
@@ -186,12 +186,12 @@ public class DRCROSMessageConverter
 
    private static Packet<?> convertToPacket(StopMotionPacketMessage message)
    {
-      StopMotionPacket ret = new StopMotionPacket();
+      StopAllTrajectoryMessage ret = new StopAllTrajectoryMessage();
       ret.setUniqueId(message.getUniqueId());
       return ret;
    }
 
-   public static StopMotionPacketMessage convertToRosMessage(StopMotionPacket packet)
+   public static StopMotionPacketMessage convertToRosMessage(StopAllTrajectoryMessage packet)
    {
       StopMotionPacketMessage ret = messageFactory.newFromType("ihmc_msgs/StopMotionPacketMessage");
       ret.setUniqueId(packet.getUniqueId());
