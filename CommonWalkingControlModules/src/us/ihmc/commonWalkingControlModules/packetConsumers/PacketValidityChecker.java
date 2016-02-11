@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -673,6 +674,43 @@ public abstract class PacketValidityChecker
             globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
+      }
+
+      return true;
+   }
+
+   public static boolean validateFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      if (footTrajectoryMessage == null)
+         return false;
+
+      ObjectErrorType errorType;
+      SE3WaypointMessage previousWaypoint = null;
+
+      if (footTrajectoryMessage.getNumberOfWaypoints() == 0)
+      {
+         String errorMessage = "Received trajectory message with no waypoint.";
+         globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
+      }
+
+      for (int i = 0; i < footTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SE3WaypointMessage waypoint = footTrajectoryMessage.getWaypoint(i);
+         String errorMessage = validateSE3Waypoint(waypoint, previousWaypoint);
+         if (errorMessage != null)
+         {
+            errorMessage += "The " + i + "th";
+            globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      errorType = ObjectValidityChecker.validateEnum(footTrajectoryMessage.getRobotSide());
+      if (errorType != null)
+      {
+         String errorMessage = "robotSide field " + errorType.getMessage();
+         globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
+         return false;
       }
 
       return true;
