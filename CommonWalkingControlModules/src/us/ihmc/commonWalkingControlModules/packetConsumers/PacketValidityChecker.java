@@ -724,15 +724,6 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRobotSide());
-      if (errorType != null)
-      {
-         String errorMessage = "robotSide field " + errorType.getMessage();
-         globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
-         return false;
-      }
-
-      
       errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getEndEffector());
       if (errorType != null)
       {
@@ -740,7 +731,18 @@ public abstract class PacketValidityChecker
          globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
          return false;
       }
-      
+
+      if (endEffectorLoadBearingMessage.getEndEffector().isRobotSideNeeded())
+      {
+         errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRobotSide());
+         if (endEffectorLoadBearingMessage.getRobotSide() == null)
+         {
+            String errorMessage = "robotSide field is null. It is required for the endEffector " + endEffectorLoadBearingMessage.getEndEffector();
+            globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
       return true;
    }
 

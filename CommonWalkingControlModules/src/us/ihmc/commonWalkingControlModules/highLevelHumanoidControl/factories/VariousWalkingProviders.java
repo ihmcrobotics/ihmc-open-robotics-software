@@ -32,7 +32,6 @@ import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedSta
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -183,6 +182,10 @@ public class VariousWalkingProviders
          chestTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (pelvisTrajectoryMessageSubscriber != null)
          pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (footTrajectoryMessageSubscriber != null)
+         footTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (endEffectorLoadBearingMessageSubscriber != null)
+         endEffectorLoadBearingMessageSubscriber.clearMessagesInQueue();
    }
 
    public HandTrajectoryMessageSubscriber getHandTrajectoryMessageSubscriber()
@@ -208,6 +211,11 @@ public class VariousWalkingProviders
    public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()
    {
       return footTrajectoryMessageSubscriber;
+   }
+
+   public EndEffectorLoadBearingMessageSubscriber getEndEffectorLoadBearingMessageSubscriber()
+   {
+      return endEffectorLoadBearingMessageSubscriber;
    }
 
    public DesiredHighLevelStateProvider getDesiredHighLevelStateProvider()
