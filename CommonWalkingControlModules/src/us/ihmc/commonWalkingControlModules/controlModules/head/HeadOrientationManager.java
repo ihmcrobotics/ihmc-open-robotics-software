@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
+import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -11,6 +13,7 @@ import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class HeadOrientationManager
 {
@@ -25,26 +28,30 @@ public class HeadOrientationManager
 
    private final BooleanYoVariable isTrackingOrientation;
 
-   private final ReferenceFrame headOrientationExpressedInFrame;
+   private final ReferenceFrame chestFrame;
    private final YoQuaternionProvider initialOrientationProvider;
    private final YoQuaternionProvider finalOrientationProvider;
 
    private final BooleanYoVariable hasBeenInitialized;
 
-   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
-         HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, double[] initialDesiredHeadYawPitchRoll,
+   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
+         YoOrientationPIDGains gains, HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, double[] initialDesiredHeadYawPitchRoll,
          YoVariableRegistry parentRegistry)
    {
+      registry = new YoVariableRegistry(getClass().getSimpleName());
+
       this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();
-      this.headOrientationControlModule = headOrientationControlModule;
+      chestFrame = momentumBasedController.getFullRobotModel().getChest().getBodyFixedFrame();
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      this.headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, chestFrame, headOrientationControllerParameters, gains,
+            registry, yoGraphicsListRegistry);
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
-      registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       if (desiredHeadOrientationProvider != null)
       {
-         headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
 
          receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
          isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
@@ -55,18 +62,16 @@ public class HeadOrientationManager
 
          headOrientationTrajectoryTime.set(trajectoryTime);
          DoubleProvider trajectoryTimeProvider = new YoVariableDoubleProvider(headOrientationTrajectoryTime);
-         //         initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
-         initialOrientationProvider = new YoQuaternionProvider("headInitialOrientation", headOrientationExpressedInFrame, registry);
-         finalOrientationProvider = new YoQuaternionProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
-         desiredOrientation.setIncludingFrame(headOrientationExpressedInFrame, initialDesiredHeadYawPitchRoll);
+         initialOrientationProvider = new YoQuaternionProvider("headInitialOrientation", chestFrame, registry);
+         finalOrientationProvider = new YoQuaternionProvider("headFinalOrientation", chestFrame, registry);
+         desiredOrientation.setIncludingFrame(chestFrame, initialDesiredHeadYawPitchRoll);
          finalOrientationProvider.setOrientation(desiredOrientation);
-         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", headOrientationExpressedInFrame,
-               trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
+         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", chestFrame, trajectoryTimeProvider,
+               initialOrientationProvider, finalOrientationProvider, registry);
          orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
       }
       else
       {
-         headOrientationExpressedInFrame = null;
          receivedNewHeadOrientationTime = null;
          headOrientationTrajectoryTime = null;
          isTrackingOrientation = null;
@@ -86,7 +91,7 @@ public class HeadOrientationManager
 
       ReferenceFrame headFrame = momentumBasedController.getFullRobotModel().getHead().getBodyFixedFrame();
       desiredOrientation.setToZero(headFrame);
-      desiredOrientation.changeFrame(headOrientationExpressedInFrame);
+      desiredOrientation.changeFrame(chestFrame);
       initialOrientationProvider.setOrientation(desiredOrientation);
       receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
       orientationTrajectoryGenerator.initialize();
@@ -125,7 +130,9 @@ public class HeadOrientationManager
       {
          orientationTrajectoryGenerator.get(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
-         finalOrientationProvider.setOrientation(desiredHeadOrientationProvider.getDesiredHeadOrientation());
+         FrameOrientation desiredHeadOrientation = desiredHeadOrientationProvider.getDesiredHeadOrientation();
+         desiredHeadOrientation.changeFrame(chestFrame);
+         finalOrientationProvider.setOrientation(desiredHeadOrientation);
          headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
          receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
          orientationTrajectoryGenerator.initialize();
@@ -137,7 +144,7 @@ public class HeadOrientationManager
          initialOrientationProvider.setOrientation(desiredOrientation);
          headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
          headOrientationControlModule.packDesiredFrameOrientation(desiredOrientation);
-         desiredOrientation.changeFrame(headOrientationExpressedInFrame);
+         desiredOrientation.changeFrame(chestFrame);
          finalOrientationProvider.setOrientation(desiredOrientation);
          headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
          receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
