@@ -1,7 +1,11 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
-import static org.junit.Assert.*;
-import static us.ihmc.tools.testing.TestPlanTarget.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.tools.testing.TestPlanTarget.Fast;
 
 import java.util.Random;
 
@@ -27,6 +31,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.testing.JUnitTools;
@@ -979,6 +984,61 @@ public class QuadrupedSupportPolygonTest
       assertFalse("not correct", createSimplePolygon.epsilonEquals(create3LegPolygon));
       assertFalse("not correct", createSimplePolygon.epsilonEquals(null));
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testAreLegsCrossing()
+   {
+      QuadrupedSupportPolygon simple = createSimplePolygon();
+      assertFalse("cross", simple.areLegsCrossing());
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      {
+         double negateIfLeftSide = robotQuadrant.getSide().negateIfLeftSide(-20.0);
+         QuadrupedSupportPolygon extreme = createExtremeFootPolygon(robotQuadrant, new Point3d(negateIfLeftSide, negateIfLeftSide, 0.0));
+         assertTrue("not cross", extreme.areLegsCrossing());
+         
+         extreme.removeFootstep(robotQuadrant.getSameSideQuadrant());
+         assertTrue("not cross", extreme.areLegsCrossing());
+      }
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testValidTrotPolygon()
+   {
+      final QuadrupedSupportPolygon createPitchedDownPolygon = createPitchedDownPolygon();
+      assertFalse("trot", createPitchedDownPolygon.isValidTrotPolygon());
+      
+      JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            createPitchedDownPolygon.getRightTrotLeg();
+         }
+      });JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            createPitchedDownPolygon.getLeftTrotLeg();
+         }
+      });
+      
+      QuadrupedSupportPolygon trot = createTrotPolygon(RobotSide.LEFT);
+      assertTrue("not trot", trot.isValidTrotPolygon());
+      assertEquals("not trot", RobotQuadrant.HIND_RIGHT, trot.getRightTrotLeg());
+      assertEquals("not trot", RobotQuadrant.FRONT_LEFT, trot.getLeftTrotLeg());
+      trot = createTrotPolygon(RobotSide.RIGHT);
+      assertTrue("not trot", trot.isValidTrotPolygon());
+      assertEquals("not trot", RobotQuadrant.FRONT_RIGHT, trot.getRightTrotLeg());
+      assertEquals("not trot", RobotQuadrant.HIND_LEFT, trot.getLeftTrotLeg());
+      QuadrupedSupportPolygon side = createSidePolygon(RobotSide.LEFT);
+      assertFalse("trot", side.isValidTrotPolygon());
+      side = createSidePolygon(RobotSide.RIGHT);
+      assertFalse("trot", side.isValidTrotPolygon());
+   }
 
    private Random random = new Random(9123090L);
 
@@ -1121,6 +1181,48 @@ public class QuadrupedSupportPolygonTest
       
       QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createTrotPolygon(RobotSide leadingSide)
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 1.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(1.0, 1.0, 0.0));
+      
+      footPoints.remove(RobotQuadrant.getQuadrant(RobotEnd.FRONT, leadingSide.getOppositeSide()));
+      footPoints.remove(RobotQuadrant.getQuadrant(RobotEnd.HIND, leadingSide));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : footPoints.quadrants())
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createSidePolygon(RobotSide leadingSide)
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 1.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(1.0, 1.0, 0.0));
+      
+      footPoints.remove(RobotQuadrant.getQuadrant(RobotEnd.FRONT, leadingSide.getOppositeSide()));
+      footPoints.remove(RobotQuadrant.getQuadrant(RobotEnd.HIND, leadingSide.getOppositeSide()));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : footPoints.quadrants())
       {
          framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
       }
