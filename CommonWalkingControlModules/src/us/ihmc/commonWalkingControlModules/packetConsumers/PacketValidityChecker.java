@@ -594,6 +594,34 @@ public abstract class PacketValidityChecker
       return true;
    }
 
+   public static boolean validateHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      if (headTrajectoryMessage == null)
+         return false;
+
+      SO3WaypointMessage previousWaypoint = null;
+
+      if (headTrajectoryMessage.getNumberOfWaypoints() == 0)
+      {
+         String errorMessage = "Received trajectory message with no waypoint.";
+         globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
+      }
+
+      for (int i = 0; i < headTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SO3WaypointMessage waypoint = headTrajectoryMessage.getWaypoint(i);
+         String errorMessage = validateSO3Waypoint(waypoint, previousWaypoint);
+         if (errorMessage != null)
+         {
+            errorMessage += "The " + i + "th";
+            globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      return true;
+   }
+
    public static boolean validateChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
       if (chestTrajectoryMessage == null)
@@ -643,34 +671,6 @@ public abstract class PacketValidityChecker
          {
             errorMessage += "The " + i + "th";
             globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
-            return false;
-         }
-      }
-
-      return true;
-   }
-
-   public static boolean validateHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
-   {
-      if (headTrajectoryMessage == null)
-         return false;
-
-      SO3WaypointMessage previousWaypoint = null;
-
-      if (headTrajectoryMessage.getNumberOfWaypoints() == 0)
-      {
-         String errorMessage = "Received trajectory message with no waypoint.";
-         globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
-      }
-
-      for (int i = 0; i < headTrajectoryMessage.getNumberOfWaypoints(); i++)
-      {
-         SO3WaypointMessage waypoint = headTrajectoryMessage.getWaypoint(i);
-         String errorMessage = validateSO3Waypoint(waypoint, previousWaypoint);
-         if (errorMessage != null)
-         {
-            errorMessage += "The " + i + "th";
-            globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
