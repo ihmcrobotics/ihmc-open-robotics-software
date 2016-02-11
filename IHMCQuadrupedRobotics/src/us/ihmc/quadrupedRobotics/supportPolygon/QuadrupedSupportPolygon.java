@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
+import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_LEFT;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_RIGHT;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_LEFT;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_RIGHT;
 import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrant;
 
 import java.io.Serializable;
@@ -802,59 +806,52 @@ public class QuadrupedSupportPolygon implements Serializable
    }
    
    /**
-    * Computes a nominal yaw angle. If triangle support, then the angle from the front to back support foot on the same side.
+    * Computes a nominal yaw angle. If triangle support, then the angle from the back to front support foot on the same side.
     * If a quad, then the average of the two front to back angles.
     *
     * @return double
     */
    public double getNominalYaw()
    {
-      FramePoint flFootstep = getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frFootstep = getFootstep(RobotQuadrant.FRONT_RIGHT);
-      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
-
-      Vector2d vector1 = null, vector2 = null;
-
-      if ((flFootstep != null) && (hlFootstep != null))
+      if (size() >= 3)
       {
-         vector1 = new Vector2d(flFootstep.getX() - hlFootstep.getX(), flFootstep.getY() - hlFootstep.getY());
-      }
-
-      if ((frFootstep != null) && (hrFootstep != null))
-      {
-         vector2 = new Vector2d(frFootstep.getX() - hrFootstep.getX(), frFootstep.getY() - hrFootstep.getY());
-      }
-
-      if ((vector1 != null) && (vector2 != null))
-      {
-         vector1.add(vector2);
-
-         return Math.atan2(vector1.y, vector1.x);
-      }
-
-      else if (vector1 != null)
-      {
-         return Math.atan2(vector1.y, vector1.x);
-      }
-      else if (vector2 != null)
-      {
-         return Math.atan2(vector2.y, vector2.x);
+         double deltaX = 0.0;
+         double deltaY = 0.0;
+         
+         if (containsFootstep(FRONT_LEFT) && containsFootstep(HIND_LEFT))
+         {
+            deltaX += getFootstep(FRONT_LEFT).getX() - getFootstep(HIND_LEFT).getX();
+            deltaY += getFootstep(FRONT_LEFT).getY() - getFootstep(HIND_LEFT).getY();
+         }
+         if (containsFootstep(FRONT_RIGHT) && containsFootstep(HIND_RIGHT))
+         {
+            deltaX += getFootstep(FRONT_RIGHT).getX() - getFootstep(HIND_RIGHT).getX();
+            deltaY += getFootstep(FRONT_RIGHT).getY() - getFootstep(HIND_RIGHT).getY();
+         }
+         
+         return Math.atan2(deltaY, deltaX);
       }
       else
       {
-         return 0.0;
+         throw new UndefinedOperationException("Undefined for less than 3 size. size = " + size());
       }
    }
 
+   /**
+    * Angle from hind left to hind right footstep.
+    */
    public double getNominalYawHindLegs()
    {
-      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
-
-      double ret = Math.atan2(hrFootstep.getX() - hlFootstep.getX(), -(hrFootstep.getY() - hlFootstep.getY()));
-
-      return ret;
+      if (containsFootstep(RobotQuadrant.HIND_RIGHT) && containsFootstep(RobotQuadrant.HIND_LEFT))
+      {
+         double deltaX = getFootstep(HIND_RIGHT).getX() - getFootstep(HIND_LEFT).getX();
+         double deltaY = getFootstep(HIND_RIGHT).getY() - getFootstep(HIND_LEFT).getY();
+         return Math.atan2(deltaY, deltaX);
+      }
+      else
+      {
+         throw new UndefinedOperationException("Polygon must contain both hind legs.");
+      }
    }
 
    /**
@@ -864,52 +861,35 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getNominalPitch()
    {
-      FramePoint flFootstep = getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frFootstep = getFootstep(RobotQuadrant.FRONT_RIGHT);
-      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
-
-      Vector3d vector1 = null, vector2 = null;
-
-      if ((containsFootstep(flFootstep) && containsFootstep(hlFootstep)))
+      if (size() >= 3)
       {
-         vector1 = new Vector3d(flFootstep.getX() - hlFootstep.getX(), flFootstep.getY() - hlFootstep.getY(), flFootstep.getZ() - hlFootstep.getZ());
-      }
-
-      if (containsFootstep(frFootstep) && containsFootstep(hrFootstep))
-      {
-         vector2 = new Vector3d(frFootstep.getX() - hrFootstep.getX(), frFootstep.getY() - hrFootstep.getY(), frFootstep.getZ() - hrFootstep.getZ());
-      }
-
-      if ((vector1 != null) && (vector2 != null))
-      {
-         vector1.add(vector2);
-         double length = vector1.length();
+         double deltaX = 0.0;
+         double deltaY = 0.0;
+         double deltaZ = 0.0;
+   
+         if ((containsFootstep(RobotQuadrant.FRONT_LEFT) && containsFootstep(RobotQuadrant.HIND_LEFT)))
+         {
+            deltaX += getFootstep(RobotQuadrant.FRONT_LEFT).getX() - getFootstep(RobotQuadrant.HIND_LEFT).getX();
+            deltaY += getFootstep(RobotQuadrant.FRONT_LEFT).getY() - getFootstep(RobotQuadrant.HIND_LEFT).getY();
+            deltaZ += getFootstep(RobotQuadrant.FRONT_LEFT).getZ() - getFootstep(RobotQuadrant.HIND_LEFT).getZ();
+         }
+   
+         if (containsFootstep(RobotQuadrant.FRONT_RIGHT) && containsFootstep(RobotQuadrant.HIND_RIGHT))
+         {
+            deltaX += getFootstep(RobotQuadrant.FRONT_RIGHT).getX() - getFootstep(RobotQuadrant.HIND_RIGHT).getX();
+            deltaY += getFootstep(RobotQuadrant.FRONT_RIGHT).getY() - getFootstep(RobotQuadrant.HIND_RIGHT).getY();
+            deltaZ += getFootstep(RobotQuadrant.FRONT_RIGHT).getZ() - getFootstep(RobotQuadrant.HIND_RIGHT).getZ();
+         }
+         
+         double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
          if (length < 1e-3)
-            return 0.0;    // Avoid division by zero and NaN...
-
-         return -Math.asin(vector1.z / length);
-      }
-
-      else if (vector1 != null)
-      {
-         double length = vector1.length();
-         if (length < 1e-3)
-            return 0.0;
-
-         return -Math.asin(vector1.z / length);
-      }
-      else if (vector2 != null)
-      {
-         double length = vector2.length();
-         if (length < 1e-3)
-            return 0.0;
-
-         return -Math.asin(vector2.z / length);
+            throw new UndefinedOperationException("Polygon is too small");
+         
+         return -Math.asin(deltaZ / length);
       }
       else
       {
-         return 0.0;
+         throw new UndefinedOperationException("Undefined for less than 3 size. size = " + size());
       }
    }
 
@@ -920,52 +900,35 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getNominalRoll()
    {
-      FramePoint flFootstep = getFootstep(RobotQuadrant.FRONT_LEFT);
-      FramePoint frFootstep = getFootstep(RobotQuadrant.FRONT_RIGHT);
-      FramePoint hrFootstep = getFootstep(RobotQuadrant.HIND_RIGHT);
-      FramePoint hlFootstep = getFootstep(RobotQuadrant.HIND_LEFT);
-
-      Vector3d vector1 = null, vector2 = null;
-
-      if ((containsFootstep(flFootstep) && containsFootstep(frFootstep)))
+      if (size() >= 3)
       {
-         vector1 = new Vector3d(flFootstep.getX() - frFootstep.getX(), flFootstep.getY() - frFootstep.getY(), flFootstep.getZ() - frFootstep.getZ());
-      }
-
-      if (containsFootstep(hlFootstep) && containsFootstep(hrFootstep))
-      {
-         vector2 = new Vector3d(hlFootstep.getX() - hrFootstep.getX(), hlFootstep.getY() - hrFootstep.getY(), hlFootstep.getZ() - hrFootstep.getZ());
-      }
-
-      if ((vector1 != null) && (vector2 != null))
-      {
-         vector1.add(vector2);
-         double length = vector1.length();
+         double deltaX = 0.0;
+         double deltaY = 0.0;
+         double deltaZ = 0.0;
+         
+         if (containsFootstep(FRONT_LEFT) && containsFootstep(FRONT_RIGHT))
+         {
+            deltaX += getFootstep(FRONT_LEFT).getX() - getFootstep(FRONT_RIGHT).getX();
+            deltaY += getFootstep(FRONT_LEFT).getY() - getFootstep(FRONT_RIGHT).getY();
+            deltaZ += getFootstep(FRONT_LEFT).getZ() - getFootstep(FRONT_RIGHT).getZ();
+         }
+   
+         if (containsFootstep(HIND_LEFT) && containsFootstep(HIND_RIGHT))
+         {
+            deltaX = getFootstep(HIND_LEFT).getX() - getFootstep(HIND_RIGHT).getX();
+            deltaY = getFootstep(HIND_LEFT).getY() - getFootstep(HIND_RIGHT).getY();
+            deltaZ = getFootstep(HIND_LEFT).getZ() - getFootstep(HIND_RIGHT).getZ();
+         }
+         
+         double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
          if (length < 1e-3)
-            return 0.0;    // Avoid division by zero and NaN...
-
-         return Math.asin(vector1.z / length);
-      }
-
-      else if (vector1 != null)
-      {
-         double length = vector1.length();
-         if (length < 1e-3)
-            return 0.0;
-
-         return Math.asin(vector1.z / length);
-      }
-      else if (vector2 != null)
-      {
-         double length = vector2.length();
-         if (length < 1e-3)
-            return 0.0;
-
-         return Math.asin(vector2.z / length);
+            throw new UndefinedOperationException("Polygon is too small");
+         
+         return Math.asin(deltaZ / length);
       }
       else
       {
-         return 0.0;
+         throw new UndefinedOperationException("Undefined for less than 3 size. size = " + size());
       }
    }
 

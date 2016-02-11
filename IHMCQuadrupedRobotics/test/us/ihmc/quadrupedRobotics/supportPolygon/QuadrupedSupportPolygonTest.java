@@ -20,6 +20,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -211,7 +212,7 @@ public class QuadrupedSupportPolygonTest
       
       simplePolygon.removeFootstep(RobotQuadrant.HIND_RIGHT);
       assertEquals("not 0.0 inside", 0.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  0.0, 0.0)), 1e-7);
-      assertEquals("not 0.0 inside", -1.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  1.0, 0.0)), 1e-7);
+      assertEquals("not -1.0 inside", -1.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  1.0, 0.0)), 1e-7);
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
@@ -801,6 +802,112 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not correct", poly.isInside(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.5, 0.5)));
       assertFalse("not correct", poly.isInside(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.5, -0.5)));
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetNominalYawPitchRoll()
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 1.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(1.0, 1.0, 0.0));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      QuadrupedSupportPolygon poly = new QuadrupedSupportPolygon(framePoints);
+      assertEquals("not 90", 90.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalYaw()), 1e-7);
+      assertEquals("not 0", 0.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalPitch()), 1e-7);
+      assertEquals("not 0", 0.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalRoll()), 1e-7);
+      assertEquals("not 0", 0.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalYawHindLegs()), 1e-7);
+      poly.yawAboutCentroid(-Math.PI / 2);
+      assertEquals("not 0", 0.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalYaw()), 1e-7);
+      assertEquals("not 0", 0.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalPitch()), 1e-7);
+      assertEquals("not 0", 0.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalRoll()), 1e-7);
+      assertEquals("not -90", -90.0, BodeUnitsConverter.convertRadianToDegrees(poly.getNominalYawHindLegs()), 1e-7);
+      
+      QuadrupedSupportPolygon poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
+      QuadrupedSupportPolygon poly2 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      final QuadrupedSupportPolygon poly3 = new QuadrupedSupportPolygon();
+      
+      poly1.getCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT);
+      assertEquals("not 135", 135.0, BodeUnitsConverter.convertRadianToDegrees(poly3.getNominalYaw()), 1e-7);
+      poly3.yawAboutCentroid(Math.PI / 2);
+      assertEquals("not -135", -135.0, BodeUnitsConverter.convertRadianToDegrees(poly3.getNominalYaw()), 1e-7);
+      
+      poly3.removeFootstep(RobotQuadrant.FRONT_RIGHT);
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly3.getNominalYaw();
+         }
+      });
+      poly3.removeFootstep(RobotQuadrant.HIND_LEFT);
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly3.getNominalYawHindLegs();
+         }
+      });
+      poly3.removeFootstep(RobotQuadrant.HIND_RIGHT);
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly3.getNominalYawHindLegs();
+         }
+      });
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly3.getNominalRoll();
+         }
+      });JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly3.getNominalPitch();
+         }
+      });
+      
+      QuadrupedSupportPolygon pitchedUp = createPitchedUpPolygon();
+      assertEquals("not -45", -45.0, BodeUnitsConverter.convertRadianToDegrees(pitchedUp.getNominalPitch()), 1e-7);
+      QuadrupedSupportPolygon pitchedDown = createPitchedDownPolygon();
+      assertEquals("not 45", 45.0, BodeUnitsConverter.convertRadianToDegrees(pitchedDown.getNominalPitch()), 1e-7);
+      QuadrupedSupportPolygon rolled = createRolledPolygon();
+      assertEquals("not -45", -45.0, BodeUnitsConverter.convertRadianToDegrees(rolled.getNominalRoll()), 1e-7);
+      
+      final QuadrupedSupportPolygon zeroedPolygon = createZeroedPolygon();
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            zeroedPolygon.getNominalRoll();
+         }
+      });
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            zeroedPolygon.getNominalPitch();
+         }
+      });
+   }
 
    private Random random = new Random(9123090L);
 
@@ -1055,6 +1162,24 @@ public class QuadrupedSupportPolygonTest
       footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(0.0, 2.0, 2.0));
       footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(-2.0, 0.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(-2.0, 2.0, 0.0));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createRolledPolygon()
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(0.0, 1.0, 1.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(-1.0, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(-1.0, 1.0, 1.0));
       
       QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
