@@ -136,12 +136,12 @@ public class PelvisICPBasedTranslationManager
 
    public void compute(RobotSide supportLeg, FramePoint2d actualICP)
    {
-      if (isFrozen.getBooleanValue()) 
+      if (isFrozen.getBooleanValue())
       {
          icpOffsetForFreezing.scale(frozenOffsetDecayAlpha.getDoubleValue());
          return;
       }
-      
+
       if (isUsingWaypointTrajectory != null)
       {
          if (isUsingWaypointTrajectory.getBooleanValue())
@@ -199,12 +199,12 @@ public class PelvisICPBasedTranslationManager
          else if (desiredPelvisPoseProvider.checkForNewPositionWithWaypoints())
          {
             initialPelvisPositionTime.set(yoTime.getDoubleValue());
-            pelvisWaypointsPositionTrajectoryGenerator.clear();     
-            
+            pelvisWaypointsPositionTrajectoryGenerator.clear();
+
             tempPosition.setToZero(pelvisZUpFrame);
             tempPosition.changeFrame(worldFrame);
-            tempVelocity.setToZero(worldFrame);     
-            
+            tempVelocity.setToZero(worldFrame);
+
             WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = desiredPelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
             desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
             pelvisWaypointsPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
@@ -253,19 +253,18 @@ public class PelvisICPBasedTranslationManager
       desiredICPOffset.add(integralTerm);
    }
 
-   
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
 
    private final FramePoint2d originalICPToModify = new FramePoint2d();
-   
+
    public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify, FrameConvexPolygon2d supportPolygon)
    {
       desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
       desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());
-      
+
       originalICPToModify.setIncludingFrame(desiredICPToModify);
-      
+
       if (!isEnabled.getBooleanValue() || (!isRunning.getBooleanValue() && !manualMode.getBooleanValue()))
       {
          desiredICPOffset.setToZero();
@@ -280,19 +279,19 @@ public class PelvisICPBasedTranslationManager
          // Ignore the desiredICPOffset frame assuming the user wants to control the ICP in the supportFrame
          tempICPOffset.setIncludingFrame(supportFrame, desiredICPOffset.getX(), desiredICPOffset.getY());
       }
-      
+
       else
       {
          desiredICPOffset.getFrameTuple2dIncludingFrame(tempICPOffset);
          tempICPOffset.changeFrame(supportFrame);
       }
-      
+
       if (isFrozen.getBooleanValue())
       {
          desiredICPOffset.setAndMatchFrame(icpOffsetForFreezing);
          desiredICPToModify.add(icpOffsetForFreezing);
       }
-      
+
       else
       {
          desiredICPToModify.add(tempICPOffset);
@@ -331,7 +330,7 @@ public class PelvisICPBasedTranslationManager
       isFrozen.set(false);
       initialize();
    }
-   
+
    public void freeze()
    {
       isFrozen.set(true);
