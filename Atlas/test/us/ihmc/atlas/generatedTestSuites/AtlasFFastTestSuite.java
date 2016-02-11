@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
-   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
    us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
    us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class
 })

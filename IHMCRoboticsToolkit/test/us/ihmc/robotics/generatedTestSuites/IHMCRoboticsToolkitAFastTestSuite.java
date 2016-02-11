@@ -225,7 +225,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.trajectories.MinimumJerkTrajectoryTest.class,
    us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolverTest.class,
    us.ihmc.robotics.trajectories.PolynomialSplineTest.class,
-   us.ihmc.robotics.trajectories.PolynomialTrajectoryTest.class,
    us.ihmc.robotics.trajectories.providers.ConstantDoubleProviderTest.class,
    us.ihmc.robotics.trajectories.providers.ConstantPositionProviderTest.class,
    us.ihmc.robotics.trajectories.providers.CurrentPositionProviderTest.class,

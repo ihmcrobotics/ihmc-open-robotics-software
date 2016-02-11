@@ -6,7 +6,6 @@ import java.util.Arrays;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidBehaviors.behaviors.DrillPickUpBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizeDrillBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
@@ -20,8 +19,8 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
@@ -212,13 +211,6 @@ public class IHMCHumanoidBehaviorManager
 
       ForceControlledWallTaskBehavior forcecontrolledWallTaskBehavior = new ForceControlledWallTaskBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel, yoTime, yoGraphicsListRegistry);
       dispatcher.addBehavior(HumanoidBehaviorType.FORCECONTROL_WALL_TASK, forcecontrolledWallTaskBehavior);
-
-      if (wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
-      {
-         DrillPickUpBehavior drillPickUpBehavior = new DrillPickUpBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
-               wholeBodyControllerParameters);
-         dispatcher.addBehavior(HumanoidBehaviorType.DRILL_PICK_UP, drillPickUpBehavior);
-      }
    }
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
