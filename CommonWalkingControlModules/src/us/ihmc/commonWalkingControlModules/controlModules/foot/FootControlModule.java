@@ -44,7 +44,7 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, HOLD_POSITION, HEEL_TOUCHDOWN, TOES_TOUCHDOWN, TOES, SWING, MOVE_STRAIGHT
+      FULL, HOLD_POSITION, HEEL_TOUCHDOWN, TOES_TOUCHDOWN, TOES, SWING, MOVE_STRAIGHT, MOVE_VIA_WAYPOINTS
    }
 
    private static final double coefficientOfFriction = 0.8;
