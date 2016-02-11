@@ -184,7 +184,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
          FramePoint finalPosition = computeFinalSolePosition(quadrant);
 
-         trajectory.setMoveParameters(solePosition, finalPosition, params.get(PARAM_TRAJECTORY_TIME));
+         trajectory.initializeTrajectory(solePosition, finalPosition, params.get(PARAM_TRAJECTORY_TIME));
       }
 
       // Show the VMC visualizations.

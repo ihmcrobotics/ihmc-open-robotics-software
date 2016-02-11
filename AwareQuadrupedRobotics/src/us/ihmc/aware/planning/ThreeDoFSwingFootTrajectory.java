@@ -48,7 +48,7 @@ public class ThreeDoFSwingFootTrajectory
       return referenceFrame;
    }
 
-   public void setMoveParameters(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double swingDuration)
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double swingDuration)
    {
       initialPosition.checkReferenceFrameMatch(finalPosition);
       referenceFrame = initialPosition.getReferenceFrame();

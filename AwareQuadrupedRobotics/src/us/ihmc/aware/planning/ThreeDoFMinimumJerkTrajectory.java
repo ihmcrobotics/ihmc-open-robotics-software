@@ -48,7 +48,7 @@ public class ThreeDoFMinimumJerkTrajectory
       return referenceFrame;
    }
 
-   public void setMoveParameters(FramePoint initialPosition, FramePoint finalPosition, double duration)
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double duration)
    {
       initialPosition.checkReferenceFrameMatch(finalPosition);
       referenceFrame = initialPosition.getReferenceFrame();
