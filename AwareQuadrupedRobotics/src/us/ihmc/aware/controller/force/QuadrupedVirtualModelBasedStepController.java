@@ -216,8 +216,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 1000, 1000, 1000);
-      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 100, 100, 100);
+      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 10000, 10000, 10000);
+      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 1000, 1000, 1000);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 10);
@@ -551,7 +551,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // compute center of mass height
       comPositionEstimate.changeFrame(worldFrame);
       supportCentroidEstimate.changeFrame(worldFrame);
-      comHeightEstimate = comPositionEstimate.getZ() - supportPolygonEstimate.getLowestFootStepZHeight();
+      comHeightEstimate = comPositionEstimate.getZ() - supportPolygonEstimate.getLowestFootstepZHeight();
    }
 
    private void updateSetpoints()
@@ -692,12 +692,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          }
       }
 
-      // initialize setpoints
-      updateEstimates();
-      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
-      dcmVelocitySetpoint.setToZero();
-      dcmTrajectoryInitialized = false;
-
       // initialize controllers and state machines
       virtualModelController.reset();
       contactForceOptimization.reset();
@@ -726,11 +720,17 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          footStateMachine.get(robotQuadrant).reset();
       }
 
+      // initialize setpoints
+      updateEstimates();
+      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
+      dcmVelocitySetpoint.setToZero();
+      dcmTrajectoryInitialized = false;
+
       // FIXME: provide an external interface to test steps
       double stanceWidth = 0.35;
       double stanceLength = 1.2;
-      double stepDuration = 1.0;
-      double stepTimeShift = 2.0;
+      double stepDuration = 0.4;
+      double stepTimeShift = 0.6;
       double strideLength = 0.3;
 
       double currentTime = robotTimestamp.getDoubleValue();

@@ -432,7 +432,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // compute center of mass height
       comPositionEstimate.changeFrame(worldFrame);
       supportCentroidEstimate.changeFrame(worldFrame);
-      comHeightEstimate = comPositionEstimate.getZ() - supportPolygonEstimate.getLowestFootStepZHeight();
+      comHeightEstimate = comPositionEstimate.getZ() - supportPolygonEstimate.getLowestFootstepZHeight();
    }
 
    private void updateSetpoints()
@@ -563,11 +563,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
          }
       }
 
-      // initialize setpoints
-      updateEstimates();
-      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
-      dcmVelocitySetpoint.setToZero();
-
       // initialize controllers and state machines
       virtualModelController.reset();
       contactForceOptimization.reset();
@@ -591,6 +586,12 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionController.reset();
       dcmPositionController.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
       dcmPositionController.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
+
+      // initialize setpoints
+      updateEstimates();
+      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
+      dcmVelocitySetpoint.setToZero();
+
    }
 
    @Override public void onExit()
