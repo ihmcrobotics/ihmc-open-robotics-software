@@ -10,7 +10,8 @@ public abstract class Packet<T> implements ComparableDataObject<T>
 {
    @FieldDocumentation("A unique id for the current message. This can be a timestamp or sequence number.\n"
          + "Only the unique id in the top level message is used, the unique id in nested messages is ignored.\n"
-         + "Use /output/last_received_message for feedback about when the last message was received.")
+         + "Use /output/last_received_message for feedback about when the last message was received.\n"
+         + "A unique id equals to 0 will be interpreted as invalid message and will not be processed by the controller.")
    public long uniqueId = 0; 
    
    @IgnoreField
