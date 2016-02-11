@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSen
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
@@ -53,7 +53,7 @@ public class IHMCRosApiMessageMap
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
       WholeBodyTrajectoryPacket.class,
-      StopMotionPacket.class,
+      StopAllTrajectoryMessage.class,
       HandDesiredConfigurationMessage.class
    };
 
@@ -76,7 +76,7 @@ public class IHMCRosApiMessageMap
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
       WholeBodyTrajectoryPacket.class,
-      StopMotionPacket.class
+      StopAllTrajectoryMessage.class
    };
 
    public static final Class[] OUTPUT_PACKET_LIST =
@@ -118,7 +118,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(HandComplianceControlParametersPacket.class, "/control/hand_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(LegCompliancePacket.class, "/control/leg_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryPacket.class, "/control/whole_body_trajectory");
-      PACKET_TO_TOPIC_MAP.put(StopMotionPacket.class, "/control/stop_motion");
+      PACKET_TO_TOPIC_MAP.put(StopAllTrajectoryMessage.class, "/control/stop_motion");
 
       //outputs
       PACKET_TO_TOPIC_MAP.put(FootstepStatus.class, "/output/footstep_status");

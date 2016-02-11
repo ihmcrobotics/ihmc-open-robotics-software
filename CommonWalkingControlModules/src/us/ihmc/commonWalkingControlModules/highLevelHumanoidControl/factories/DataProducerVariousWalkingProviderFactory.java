@@ -60,7 +60,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAbo
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LookAtPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortPacket;
@@ -126,7 +126,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       DesiredSteeringWheelProvider desiredSteeringWheelProvider = new DesiredSteeringWheelProvider(objectCommunicator);
 
-      PacketConsumer<StopMotionPacket> handPauseCommandConsumer = handPoseProvider.getHandPauseCommandConsumer();
+      PacketConsumer<StopAllTrajectoryMessage> handPauseCommandConsumer = handPoseProvider.getHandPauseCommandConsumer();
       HandPoseStatusProducer handPoseStatusProducer = new HandPoseStatusProducer(objectCommunicator);
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
@@ -179,7 +179,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, desiredComHeightProvider.getWholeBodyPacketConsumer());
 
       objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
-      objectCommunicator.attachListener(StopMotionPacket.class, handPauseCommandConsumer);
+      objectCommunicator.attachListener(StopAllTrajectoryMessage.class, handPauseCommandConsumer);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
       objectCommunicator.attachListener(AutomaticManipulationAbortPacket.class, automaticManipulationAbortCommunicator);
 
@@ -188,7 +188,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider.getPelvisPosePacketConsumer());
       objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, pelvisPoseProvider.getWholeBodyTrajectoryPacketConsumer());
-      objectCommunicator.attachListener(StopMotionPacket.class, pelvisPoseProvider.getStopMotionPacketConsumer());
+      objectCommunicator.attachListener(StopAllTrajectoryMessage.class, pelvisPoseProvider.getStopMotionPacketConsumer());
 
       objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
       objectCommunicator.attachListener(HandPoseListPacket.class, handPoseProvider.getHandPoseListConsumer());
