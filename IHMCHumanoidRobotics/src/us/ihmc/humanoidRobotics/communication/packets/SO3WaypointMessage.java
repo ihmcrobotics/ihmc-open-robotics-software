@@ -6,12 +6,15 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.trajectories.SO3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one waypoint (orientation & angular velocity). "
       + "Feel free to look at EuclideanWaypoint (translational) and SE3Waypoint (rotational AND translational)")
-public class SO3WaypointMessage extends IHMCRosApiPacket<SO3WaypointMessage> implements SO3WaypointInterface
+public class SO3WaypointMessage extends IHMCRosApiPacket<SO3WaypointMessage> implements SO3WaypointInterface, TransformableDataObject<SO3WaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -94,5 +97,25 @@ public class SO3WaypointMessage extends IHMCRosApiPacket<SO3WaypointMessage> imp
          return false;
 
       return true;
+   }
+
+   @Override
+   public SO3WaypointMessage transform(RigidBodyTransform transform)
+   {
+      SO3WaypointMessage transformedWaypointMessage = new SO3WaypointMessage();
+
+      transformedWaypointMessage.time = time;
+
+      if (orientation != null)
+         transformedWaypointMessage.orientation = TransformTools.getTransformedQuat(orientation, transform);
+      else
+         transformedWaypointMessage.orientation = null;
+
+      if (angularVelocity != null)
+         transformedWaypointMessage.angularVelocity = TransformTools.getTransformedVector(angularVelocity, transform);
+      else
+         transformedWaypointMessage.angularVelocity = null;
+
+      return transformedWaypointMessage;
    }
 }

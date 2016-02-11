@@ -98,7 +98,8 @@ public class QuadrupedPathPreview
          swingTargetGenerator.getSwingTarget(updatedSupportPolygon, swingLeg, desiredBodyVelocity, desiredPosition, yawRate);
 
          //get swing leg support
-         QuadrupedSupportPolygon swingLegSupportPolygon = updatedSupportPolygon.deleteLegCopy(swingLeg);
+         QuadrupedSupportPolygon swingLegSupportPolygon = new QuadrupedSupportPolygon();
+         updatedSupportPolygon.getAndRemoveFootstep(swingLegSupportPolygon, swingLeg);
          drawSupportPolygon(swingLegSupportPolygon, tripleSupportPolygons[i * 2]);
 
          //get next step in future support
@@ -110,7 +111,7 @@ public class QuadrupedPathPreview
 
          //if there's a common draw it
          QuadrupedSupportPolygon shrunkenCommonSupportPolygon = new QuadrupedSupportPolygon();
-         swingLegSupportPolygon.getShrunkenCommonSupportPolygon(nextSwingLegSupportPolygon, shrunkenCommonSupportPolygon, swingLeg, 0.02, 0.02, 0.02);
+         swingLegSupportPolygon.getShrunkenCommonPolygon2d(nextSwingLegSupportPolygon, shrunkenCommonSupportPolygon, swingLeg, 0.02, 0.02, 0.02);
          drawSupportPolygon(shrunkenCommonSupportPolygon, commonSupportPolygons[i]);
 
          shrunkenCommonSupportPolygon.getTangentTangentRadiusCircleCenter(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);

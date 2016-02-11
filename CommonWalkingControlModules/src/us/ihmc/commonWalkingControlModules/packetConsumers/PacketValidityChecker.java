@@ -20,6 +20,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -613,6 +615,62 @@ public abstract class PacketValidityChecker
          {
             errorMessage += "The " + i + "th";
             globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   public static boolean validatePelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      if (pelvisTrajectoryMessage == null)
+         return false;
+
+      SE3WaypointMessage previousWaypoint = null;
+
+      if (pelvisTrajectoryMessage.getNumberOfWaypoints() == 0)
+      {
+         String errorMessage = "Received trajectory message with no waypoint.";
+         globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
+      }
+
+      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SE3WaypointMessage waypoint = pelvisTrajectoryMessage.getWaypoint(i);
+         String errorMessage = validateSE3Waypoint(waypoint, previousWaypoint);
+         if (errorMessage != null)
+         {
+            errorMessage += "The " + i + "th";
+            globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   public static boolean validateHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      if (headTrajectoryMessage == null)
+         return false;
+
+      SO3WaypointMessage previousWaypoint = null;
+
+      if (headTrajectoryMessage.getNumberOfWaypoints() == 0)
+      {
+         String errorMessage = "Received trajectory message with no waypoint.";
+         globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
+      }
+
+      for (int i = 0; i < headTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SO3WaypointMessage waypoint = headTrajectoryMessage.getWaypoint(i);
+         String errorMessage = validateSO3Waypoint(waypoint, previousWaypoint);
+         if (errorMessage != null)
+         {
+            errorMessage += "The " + i + "th";
+            globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
