@@ -38,6 +38,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionPro
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
@@ -115,6 +116,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = new PelvisTrajectoryMessageSubscriber(objectCommunicator);
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(objectCommunicator);
       EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber = new EndEffectorLoadBearingMessageSubscriber(objectCommunicator);
+      StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = new StopAllTrajectoryMessageSubscriber();
 
       DesiredHandstepProvider handstepProvider = new DesiredHandstepProvider(fullRobotModel);
 
@@ -219,11 +221,12 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, headTrajectoryMessageSubscriber,
             chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber,
-            footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider,
-            pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider,
-            automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider,
-            thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer,
-            objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
+            stopAllTrajectoryMessageSubscriber, footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider,
+            desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider,
+            handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
+            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer,
+            handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider,
+            multiJointPositionProvider);
 
       return variousWalkingProviders;
    }
