@@ -3,11 +3,15 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.SO3WaypointMessage;
 
+@ClassDocumentation("This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified waypoints."
+      + " A hermite based curve (third order) is used to interpolate the orientations."
+      + " To excute a simple trajectory to reach a desired chest orientation, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
 public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMessage> implements VisualizablePacket
 {
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
