@@ -1021,13 +1021,46 @@ public class GeometryTools
     *    --  = --
     *    BC    CX
     *
-    *
+    * not garbage free!
     * @param A Point2d
     * @param B Point2d
     * @param C Point2d
     * @return Point2d the intersection point of the bisector with the opposite side
     */
    public static Point2d getTriangleBisector(Point2d A, Point2d B, Point2d C)
+   {
+      Point2d bisectorToPack = new Point2d();
+      getTriangleBisector(A, B, C, bisectorToPack);
+      return bisectorToPack;
+   }
+   
+   private static final ThreadLocal<Vector2d> tempAToC = new ThreadLocal<Vector2d>()
+   {
+      @Override
+      public Vector2d initialValue()
+      {
+         return new Vector2d();
+      }
+   };
+   
+   /**
+    *  This method returns the point representing where the bisector of an
+    *  angle of a triangle intersects the opposite side.
+    *  Given a triangle defined by three points (A,B,C),
+    *  To find the Bisector that divides the angle at B in half
+    *  and intersects AC at X.
+    *
+    *    BA    AX
+    *    --  = --
+    *    BC    CX
+    *
+    *
+    * @param A Point2d
+    * @param B Point2d
+    * @param C Point2d
+    * @return Point2d the intersection point of the bisector with the opposite side
+    */
+   public static void getTriangleBisector(Point2d A, Point2d B, Point2d C, Point2d bisectorToPack)
    {
       // find all proportional values
       double BA = B.distance(A);
@@ -1036,14 +1069,14 @@ public class GeometryTools
       double AX = AC / ((BC / BA) + 1.0);
 
       // use AX distance to find X along AC
-      Vector2d AtoC = new Vector2d(C);
+      Vector2d AtoC = tempAToC.get();
+      AtoC.set(C);
       AtoC.sub(A);
       AtoC.normalize();
       AtoC.scale(AX);
-      Point2d X = new Point2d(A);
-      X.add(AtoC);
 
-      return X;
+      bisectorToPack.set(A);
+      bisectorToPack.add(AtoC);
    }
 
    public static double getAngleFromFirstToSecondVector(Vector2d firstVector, Vector2d secondVector)

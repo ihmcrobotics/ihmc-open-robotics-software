@@ -34,7 +34,6 @@ public class QuadrupedSupportPolygon implements Serializable
    private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
    private final FramePoint temporaryFramePoint = new FramePoint();
-   private final FramePoint temporaryFramePoint2 = new FramePoint();
    private final FrameVector tempPlaneNormalInWorld = new FrameVector();
    
    private final FrameVector[] tempVectorsForInCirclePoint = new FrameVector[] {new FrameVector(), new FrameVector(), new FrameVector(), new FrameVector()};
@@ -42,6 +41,8 @@ public class QuadrupedSupportPolygon implements Serializable
    private final FramePoint tempInCircleCenter = new FramePoint();
    
    private final FrameVector[] tempVectorsForCommonSupportPolygon = new FrameVector[] {new FrameVector(), new FrameVector()};
+   private final Point2d[] tempPointsForCornerCircle = new Point2d[] {new Point2d(), new Point2d(), new Point2d(), new Point2d()};
+   private final Vector2d tempVectorForCornerCircle = new Vector2d();
 
    public QuadrupedSupportPolygon()
    {
@@ -1388,64 +1389,64 @@ public class QuadrupedSupportPolygon implements Serializable
       return firstLeg.getDiagonalOppositeQuadrant();
    }
 
-   public boolean getTangentTangentRadiusCircleCenter(RobotQuadrant robotQuadrantToAnchorTo, double radius, FramePoint2d centerToPack)
+   /**
+    * Gets the center point of a circle of radius in the corner of a triangle.
+    * 
+    * @param cornerToPutCircle
+    * @param radius
+    * @param centerToPack
+    * @return
+    */
+   public boolean getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
    {
-      if(containsFootstep(robotQuadrantToAnchorTo) && size() == 3)
+      if (containsFootstep(cornerToPutCircle))
       {
          double maximumInCircleRadius = getInCircleRadius2d();
-         if(maximumInCircleRadius < radius)
+         if (cornerCircleRadius > maximumInCircleRadius)
          {
-            return false;
+            throw new UndefinedOperationException("Desired radius (" + cornerCircleRadius + ") larger than max (" + maximumInCircleRadius + ").");
          }
+
+         // Corner and A and B form a V with corner as the vertex
+         FramePoint cornerPoint = getFootstep(cornerToPutCircle);
+         FramePoint pointA = getFootstep(getNextClockwiseSupportingQuadrant(cornerToPutCircle));
+         FramePoint pointB = getFootstep(getNextCounterClockwiseSupportingQuadrant(cornerToPutCircle));
+
+         double cornerToA = cornerPoint.distance(pointA);
+         double cornerToB = cornerPoint.distance(pointB);
+         double aToB = pointA.distance(pointB);
+
+         double theta = GeometryTools.getUnknownTriangleAngleByLawOfCosine(cornerToA, cornerToB, aToB);
          
-         FramePoint vertex = getFootstep(robotQuadrantToAnchorTo);
-         FramePoint pointA = null;
-         FramePoint pointB = null;
+         Point2d tempCorner = tempPointsForCornerCircle[0];
+         Point2d tempA = tempPointsForCornerCircle[1];
+         Point2d tempB = tempPointsForCornerCircle[2];
          
-         for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            FramePoint footstep = getFootstep(robotQuadrant);
-            if(footstep == null || robotQuadrant == robotQuadrantToAnchorTo)
-            {
-               continue;
-            }
-            if(pointA == null)
-            {
-               pointA = footstep;
-            }
-            else if(pointB == null)
-            {
-               pointB = footstep;
-            }
-         }
-         
-         Point2d vertex2d = new Point2d(vertex.getX(), vertex.getY());
-         Point2d A2d = new Point2d(pointA.getX(), pointA.getY());
-         Point2d B2d = new Point2d(pointB.getX(), pointB.getY());
-         
-         double VA = vertex.distance(pointA);
-         double VB = vertex.distance(pointB);
-         double AB = pointA.distance(pointB);
-         
-         double theta = GeometryTools.getUnknownTriangleAngleByLawOfCosine(VA, VB, AB);
-         
+         cornerPoint.getPoint2d(tempCorner);
+         pointA.getPoint2d(tempA);
+         pointB.getPoint2d(tempB);
+
          double bisectTheta = 0.5 * theta;
-         
-         double radiusOffsetAlongBisector = radius * (Math.sin(Math.PI / 2.0) / Math.sin(bisectTheta));
-         Point2d adjacentBisector = GeometryTools.getTriangleBisector(A2d, vertex2d, B2d);
-         
-         Vector2d bisectorVector = new Vector2d(adjacentBisector.getX() - vertex.getX(), adjacentBisector.getY() - vertex.getY());
+
+         double radiusOffsetAlongBisector = cornerCircleRadius * (Math.sin(Math.PI / 2.0) / Math.sin(bisectTheta));
+         Point2d adjacentBisector = tempPointsForCornerCircle[3];
+         GeometryTools.getTriangleBisector(tempA, tempCorner, tempB, adjacentBisector);
+
+         Vector2d bisectorVector = tempVectorForCornerCircle;
+         bisectorVector.set(adjacentBisector.getX() - cornerPoint.getX(), adjacentBisector.getY() - cornerPoint.getY());
          double scalar = radiusOffsetAlongBisector / bisectorVector.length();
-         
+
          bisectorVector.scale(scalar);
-         
-         vertex2d.add(bisectorVector);
-         centerToPack.set(vertex2d);
-         
+
+         tempCorner.add(bisectorVector);
+         centerToPack.set(tempCorner);
+
          return true;
       }
-      
-      return false;
+      else
+      {
+         throw new UndefinedOperationException("Polygon must contain " + cornerToPutCircle);
+      }
    }
 
    public boolean epsilonEquals(QuadrupedSupportPolygon polyTwo)
