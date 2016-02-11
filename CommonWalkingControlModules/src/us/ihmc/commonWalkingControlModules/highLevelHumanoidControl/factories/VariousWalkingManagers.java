@@ -20,7 +20,6 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -51,20 +50,16 @@ public class VariousWalkingManagers
          DoubleProvider swingTimeProvider)
    {
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      double controlDT = momentumBasedController.getControlDT();
 
-      HeadOrientationProvider desiredHeadOrientationProvider = null;
-      HeadOrientationControlModule headOrientationControlModule = null;
       HeadOrientationManager headOrientationManager = null;
 
       double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
       if (fullRobotModel.getHead() != null)
       {
-         desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
+         HeadOrientationProvider desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
 
-         headOrientationControlModule = setupHeadOrientationControlModule(momentumBasedController, desiredHeadOrientationProvider, walkingControllerParameters,
+         HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(momentumBasedController, desiredHeadOrientationProvider, walkingControllerParameters,
                yoGraphicsListRegistry, registry);
 
          double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
@@ -72,12 +67,11 @@ public class VariousWalkingManagers
                trajectoryTimeHeadOrientation, initialHeadYawPitchRoll, registry);
       }
 
-      ChestOrientationProvider desiredChestOrientationProvider = null;
       ChestOrientationManager chestOrientationManager = null;
 
       if (fullRobotModel.getChest() != null)
       {
-         desiredChestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
+         ChestOrientationProvider desiredChestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
          YoOrientationPIDGains chestControlGains = walkingControllerParameters.createChestControlGains(registry);
 
          chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, desiredChestOrientationProvider, trajectoryTimeHeadOrientation, registry);
