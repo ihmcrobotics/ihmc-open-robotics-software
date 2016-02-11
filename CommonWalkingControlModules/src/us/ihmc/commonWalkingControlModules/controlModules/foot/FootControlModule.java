@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -61,6 +62,7 @@ public class FootControlModule
    private final HoldPositionState holdPositionState;
    private final SwingStateInterface swingState;
    private final MoveStraightState moveStraightState;
+   private final MoveViaWaypointsState moveViaWaypointsState;
    private final TouchdownState touchdownOnToesState;
    private final TouchdownState touchdownOnHeelState;
    private final OnToesState onToesState;
@@ -143,6 +145,9 @@ public class FootControlModule
       moveStraightState = new MoveStraightState(footControlHelper, swingFootControlGains, registry);
       states.add(moveStraightState);
 
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, swingFootControlGains, registry);
+      states.add(moveViaWaypointsState);
+
       setupStateMachine(states);
    }
 
@@ -155,6 +160,7 @@ public class FootControlModule
 
       contactStatesMap.put(ConstraintType.SWING, falses);
       contactStatesMap.put(ConstraintType.MOVE_STRAIGHT, falses);
+      contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
       contactStatesMap.put(ConstraintType.HOLD_POSITION, trues);
       contactStatesMap.put(ConstraintType.HEEL_TOUCHDOWN, getOnEdgeContactPointStates(contactableFoot, ConstraintType.HEEL_TOUCHDOWN));
@@ -212,11 +218,12 @@ public class FootControlModule
       swingState.replanTrajectory(footstep);
    }
 
-   public void requestMoveStraightTouchdownForDisturbanceRecovery()
+   public void requestTouchdownForDisturbanceRecovery()
    {
-      if (stateMachine.getCurrentState() != moveStraightState)
-         return;
-      moveStraightState.requestTouchdownForDisturbanceRecovery();
+      if (stateMachine.getCurrentState() == moveStraightState)
+         moveStraightState.requestTouchdownForDisturbanceRecovery();
+      else if (stateMachine.getCurrentState() == moveViaWaypointsState)
+         moveViaWaypointsState.requestTouchdownForDisturbanceRecovery();
    }
 
    public void doSingularityEscape(boolean doSingularityEscape)
@@ -395,6 +402,12 @@ public class FootControlModule
    public void setFootPose(FramePose footPose, double trajectoryTime)
    {
       moveStraightState.setFootPose(footPose, trajectoryTime);
+   }
+
+   public void setFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
+   {
+      boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
+      moveViaWaypointsState.handleFootTrajectoryMessage(footTrajectoryMessage, initializeToCurrent);
    }
 
    public double getHeelTouchdownInitialAngle()

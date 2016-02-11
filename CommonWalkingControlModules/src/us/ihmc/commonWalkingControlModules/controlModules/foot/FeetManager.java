@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -124,6 +125,17 @@ public class FeetManager
          setContactStateForMoveStraight(robotSide);
    }
 
+   public void handleFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
+   {
+      RobotSide robotSide = footTrajectoryMessage.getRobotSide();
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+
+      if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_VIA_WAYPOINTS)
+         footControlModule.resetCurrentState();
+      else
+         setContactStateForMoveViaWaypoints(robotSide);
+   }
+
    public boolean isInEdgeTouchdownState(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).isInEdgeTouchdownState();
@@ -141,7 +153,7 @@ public class FeetManager
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
    {
-      footControlModules.get(swingSide).requestMoveStraightTouchdownForDisturbanceRecovery();
+      footControlModules.get(swingSide).requestTouchdownForDisturbanceRecovery();
    }
 
    public boolean isInSingularityNeighborhood(RobotSide robotSide)
@@ -294,6 +306,13 @@ public class FeetManager
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.doSingularityEscapeBeforeTransitionToNextState();
       footControlModule.setContactState(ConstraintType.MOVE_STRAIGHT);
+   }
+
+   private void setContactStateForMoveViaWaypoints(RobotSide robotSide)
+   {
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      footControlModule.doSingularityEscapeBeforeTransitionToNextState();
+      footControlModule.setContactState(ConstraintType.MOVE_VIA_WAYPOINTS);
    }
 
    public WalkOnTheEdgesManager getWalkOnTheEdgesManager()

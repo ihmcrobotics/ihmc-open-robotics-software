@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.HeelSwitch;
@@ -37,7 +38,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivati
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
@@ -1107,8 +1107,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          capturePointPlannerAdapter.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d, yoTime.getDoubleValue());
 
-         if (isInFlamingoStance.getBooleanValue() && footPoseProvider.checkForNewPose(swingSide))
-            feetManager.requestMoveStraight(swingSide, footPoseProvider.getDesiredFootPose(swingSide), footPoseProvider.getTrajectoryTime());
+         if (isInFlamingoStance.getBooleanValue())
+         {
+            handleFootPose(swingSide);
+            handleFootTrajectoryMessage(swingSide);
+         }
 
          RobotSide supportSide = swingSide.getOppositeSide();
          transferToFootstep.packFramePoint2d(transferToFootstepLocation);
@@ -1291,10 +1294,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             feetManager.requestSwing(swingSide, nextFootstep);
          }
-         else if (footPoseProvider != null && footPoseProvider.checkForNewPose(swingSide))
+         else if (handleFootPose(swingSide) || handleFootTrajectoryMessage(swingSide))
          {
-            FramePose nextFootPose = footPoseProvider.getDesiredFootPose(swingSide);
-            feetManager.requestMoveStraight(swingSide, nextFootPose, footPoseProvider.getTrajectoryTime());
             isInFlamingoStance.set(true);
             pelvisICPBasedTranslationManager.enable();
          }
@@ -1514,7 +1515,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return false;
 
          boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getValue();
-         boolean transferringToThisRobotSide = footPoseProvider != null && footPoseProvider.checkForNewPose(transferToSide.getOppositeSide());
+         boolean hasNewFootPose = footPoseProvider != null && footPoseProvider.checkForNewPose(transferToSide.getOppositeSide());
+
+         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
+         boolean hasNewFootTrajectoryMessage;
+         if (hasNewFootPose && footTrajectoryMessageSubscriber != null)
+            hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+         else
+         {
+            hasNewFootTrajectoryMessage = false;
+            footTrajectoryMessageSubscriber.clearMessagesInQueue();
+         }
+         boolean transferringToThisRobotSide = hasNewFootPose || hasNewFootTrajectoryMessage;
 
          if (transferringToThisRobotSide && doubleSupportTimeHasPassed)
             upcomingSupportLeg.set(transferToSide);
