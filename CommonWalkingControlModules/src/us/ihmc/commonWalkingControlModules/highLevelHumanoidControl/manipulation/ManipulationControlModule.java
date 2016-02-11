@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
@@ -60,6 +61,7 @@ public class ManipulationControlModule
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
+   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
@@ -90,6 +92,7 @@ public class ManipulationControlModule
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handTrajectoryMessageSubscriber = variousWalkingProviders.getHandTrajectoryMessageSubscriber();
+      stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
@@ -173,6 +176,7 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handleHandTrajectoryMessages(robotSide);
+         handleStopAllTrajectoryMessages(robotSide);
          handleCompliantControlRequests(robotSide);
 
          handleDefaultState(robotSide);
@@ -203,6 +207,16 @@ public class ManipulationControlModule
       BaseForControl base = message.getBase();
       SE3WaypointInterface[] taskspaceWaypoints = message.getWaypoints();
       handControlModules.get(robotSide).moveInTaskspaceViaWaypoints(base, taskspaceWaypoints);
+   }
+
+   private void handleStopAllTrajectoryMessages(RobotSide robotSide)
+   {
+      if (stopAllTrajectoryMessageSubscriber == null)
+         return;
+
+      HandControlModule handControlModule = handControlModules.get(robotSide);
+      if (stopAllTrajectoryMessageSubscriber.pollMessage(handControlModule))
+         handControlModule.holdPositionInJointSpace();
    }
 
    private void handleDefaultState(RobotSide robotSide)

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
@@ -55,6 +56,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final FourPointSpline1D spline = new FourPointSpline1D(registry);
 
    private final DesiredComHeightProvider desiredComHeightProvider;
+   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
+   private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isOffsetHeightTrajectoryStopped", registry);
 
    private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
 
@@ -68,7 +71,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          registry);
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider(
          "offsetHeightAboveGroundTrajectoryTimeProvider", registry);
-   private final MultipleWaypointsTrajectoryGenerator waypointOffsetHeightAboveGroundTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator("wayointOffsetHeightAboveGroundTrajectory", 15, registry);
+   private final MultipleWaypointsTrajectoryGenerator waypointOffsetHeightAboveGroundTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(
+         "wayointOffsetHeightAboveGroundTrajectory", 15, registry);
    private final CubicPolynomialTrajectoryGenerator offsetHeightAboveGroundTrajectory = new CubicPolynomialTrajectoryGenerator(
          "offsetHeightAboveGroundTrajectory", offsetHeightAboveGroundInitialPositionProvider, offsetHeightAboveGroundFinalPositionProvider,
          offsetHeightAboveGroundTrajectoryTimeProvider, registry);
@@ -112,12 +116,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final ReferenceFrame pelvisFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
-   public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround,
-         double nominalHeightAboveGround, double maximumHeightAboveGround, double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn,
-         ReferenceFrame pelvisFrame, SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider,
+         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, double minimumHeightAboveGround, double nominalHeightAboveGround,
+         double maximumHeightAboveGround, double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame pelvisFrame,
+         SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
+      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
       this.pelvisFrame = pelvisFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
@@ -768,6 +774,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
 
+      handleStopAllTrajectoryMessage();
       updateOffsetDesireds();
 
       if (isUsingWaypointTrajectory.getBooleanValue())
@@ -775,7 +782,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       else
          activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
 
-      activeTrajectoryGenerator.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
+      if (!isTrajectoryOffsetStopped.getBooleanValue())
+         activeTrajectoryGenerator.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
       offsetHeightAboveGroundTrajectoryOutput.set(activeTrajectoryGenerator.getValue());
 
       offsetHeightAboveGroundPrevValue.set(activeTrajectoryGenerator.getValue());
@@ -826,6 +834,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          offsetHeightAboveGroundTrajectory.initialize();
          activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
          isUsingWaypointTrajectory.set(false);
+         isTrajectoryOffsetStopped.set(false);
       }
       else if (desiredComHeightProvider != null)
       {
@@ -837,6 +846,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
             offsetHeightAboveGroundTrajectory.initialize();
             activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
             isUsingWaypointTrajectory.set(false);
+            isTrajectoryOffsetStopped.set(false);
          }
          else if (desiredComHeightProvider.isNewComHeightMultipointAvailable())
          {
@@ -859,6 +869,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
             offsetHeightAboveGroundTrajectory.initialize();
             activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
             isUsingWaypointTrajectory.set(false);
+            isTrajectoryOffsetStopped.set(false);
          }
       }
    }
@@ -892,6 +903,15 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       waypointOffsetHeightAboveGroundTrajectoryGenerator.initialize();
       activeTrajectoryGenerator = waypointOffsetHeightAboveGroundTrajectoryGenerator;
       isUsingWaypointTrajectory.set(true);
+      isTrajectoryOffsetStopped.set(false);
+   }
+
+   private void handleStopAllTrajectoryMessage()
+   {
+      if (stopAllTrajectoryMessageSubscriber == null || !stopAllTrajectoryMessageSubscriber.pollMessage(this))
+         return;
+
+      isTrajectoryOffsetStopped.set(true);
    }
 
    public void initializeDesiredHeightToCurrent()

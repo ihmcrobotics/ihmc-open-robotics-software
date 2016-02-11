@@ -226,6 +226,14 @@ public class FootControlModule
          moveViaWaypointsState.requestTouchdownForDisturbanceRecovery();
    }
 
+   public void requestStopTrajectoryIfPossible()
+   {
+      if (stateMachine.getCurrentState() == moveStraightState)
+         moveStraightState.requestStopTrajectory();
+      else if (stateMachine.getCurrentState() == moveViaWaypointsState)
+         moveViaWaypointsState.requestStopTrajectory();
+   }
+
    public void doSingularityEscape(boolean doSingularityEscape)
    {
       footControlHelper.doSingularityEscape(doSingularityEscape);
