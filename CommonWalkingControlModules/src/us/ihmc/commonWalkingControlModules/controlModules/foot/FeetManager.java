@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -48,9 +49,11 @@ public class FeetManager
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable(
          "singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
 
+   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
+
    // TODO Needs to be cleaned up someday... (Sylvain)
-   public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         DoubleProvider swingTimeProvider, YoVariableRegistry parentRegistry)
+   public FeetManager(MomentumBasedController momentumBasedController, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
+         WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider, YoVariableRegistry parentRegistry)
    {
       double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
       singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
@@ -59,6 +62,8 @@ public class FeetManager
 
       feet = momentumBasedController.getContactableFeet();
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, footControlModules, registry);
+
+      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       this.footSwitches = momentumBasedController.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
@@ -84,6 +89,8 @@ public class FeetManager
 
    public void compute()
    {
+      handleStopAllTrajectoryMessage();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          footSwitches.get(robotSide).hasFootHitGround(); //debug
@@ -156,6 +163,19 @@ public class FeetManager
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
    {
       footControlModules.get(swingSide).requestTouchdownForDisturbanceRecovery();
+   }
+
+   private void handleStopAllTrajectoryMessage()
+   {
+      if (stopAllTrajectoryMessageSubscriber == null)
+         return;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         if (stopAllTrajectoryMessageSubscriber.pollMessage(footControlModule))
+            footControlModule.requestStopTrajectoryIfPossible();
+      }
    }
 
    public boolean isInSingularityNeighborhood(RobotSide robotSide)

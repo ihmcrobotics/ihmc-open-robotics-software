@@ -19,7 +19,7 @@ public class StopAllTrajectoryMessageSubscriber implements PacketConsumer<StopAl
 
    }
 
-   public void registerNewListener(Object newListener)
+   private void registerNewListener(Object newListener)
    {
       if (latestMessageReferences.containsKey(newListener))
          throw new RuntimeException("Subscriber already resgistered: " + newListener.getClass().getSimpleName());
@@ -29,7 +29,13 @@ public class StopAllTrajectoryMessageSubscriber implements PacketConsumer<StopAl
 
    public boolean pollMessage(Object listener)
    {
-      return latestMessageReferences.get(listener).getAndSet(false);
+      AtomicBoolean latestMessageReference = latestMessageReferences.get(listener);
+      if (latestMessageReference == null)
+      {
+         registerNewListener(listener);
+         latestMessageReference = latestMessageReferences.get(listener);
+      }
+      return latestMessageReference.getAndSet(false);
    }
 
    public void clearMessagesInQueue()
@@ -39,6 +45,17 @@ public class StopAllTrajectoryMessageSubscriber implements PacketConsumer<StopAl
          Object listener = listeners.get(i);
          latestMessageReferences.get(listener).set(false);
       }
+   }
+
+   public void clearMessageInQueue(Object listener)
+   {
+      AtomicBoolean latestMessageReference = latestMessageReferences.get(listener);
+      if (latestMessageReference == null)
+      {
+         registerNewListener(listener);
+         latestMessageReference = latestMessageReferences.get(listener);
+      }
+      latestMessageReference.set(false);
    }
 
    @Override

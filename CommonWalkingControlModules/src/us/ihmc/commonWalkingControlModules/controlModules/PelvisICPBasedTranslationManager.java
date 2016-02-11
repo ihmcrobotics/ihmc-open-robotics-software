@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -74,6 +75,8 @@ public class PelvisICPBasedTranslationManager
    private final double controlDT;
 
    private final PelvisPoseProvider desiredPelvisPoseProvider;
+   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
+   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isPelvisTranslationalTrajectoryStopped", registry);
 
    private ReferenceFrame supportFrame;
    private final ReferenceFrame pelvisZUpFrame;
@@ -87,7 +90,7 @@ public class PelvisICPBasedTranslationManager
    private final FrameVector2d tempICPOffset = new FrameVector2d();
    private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
 
-   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider,
+   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
          YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
@@ -100,6 +103,7 @@ public class PelvisICPBasedTranslationManager
       ankleZUpFrames = momentumBasedController.getReferenceFrames().getAnkleZUpReferenceFrames();
 
       this.desiredPelvisPoseProvider = desiredPelvisPoseProvider;
+      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
       isUsingWaypointTrajectory.set(false);
@@ -162,6 +166,7 @@ public class PelvisICPBasedTranslationManager
       if (manualMode.getBooleanValue())
          return;
 
+      handleStopAllTrajectoryMessage();
       updateDesireds();
 
       if (!isRunning.getBooleanValue())
@@ -194,6 +199,7 @@ public class PelvisICPBasedTranslationManager
             finalPelvisPosition.setAndMatchFrame(desiredPelvisPoseProvider.getDesiredPelvisPosition(supportFrame));
             pelvisPositionTrajectoryGenerator.initialize();
             isUsingWaypointTrajectory.set(false);
+            isTrajectoryStopped.set(false);
             activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
             isRunning.set(true);
          }
@@ -212,6 +218,7 @@ public class PelvisICPBasedTranslationManager
             waypointPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);
 
             isUsingWaypointTrajectory.set(true);
+            isTrajectoryStopped.set(false);
             activeTrajectoryGenerator = waypointPositionTrajectoryGenerator;
             isRunning.set(true);
          }
@@ -219,8 +226,11 @@ public class PelvisICPBasedTranslationManager
 
       if (isRunning.getBooleanValue())
       {
-         double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
-         activeTrajectoryGenerator.compute(deltaTime);
+         if (!isTrajectoryStopped.getBooleanValue())
+         {
+            double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
+            activeTrajectoryGenerator.compute(deltaTime);
+         }
          activeTrajectoryGenerator.get(tempPosition);
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
@@ -245,7 +255,16 @@ public class PelvisICPBasedTranslationManager
       waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       waypointPositionTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);
+      isTrajectoryStopped.set(false);
       activeTrajectoryGenerator = waypointPositionTrajectoryGenerator;
+   }
+
+   private void handleStopAllTrajectoryMessage()
+   {
+      if (stopAllTrajectoryMessageSubscriber == null || !stopAllTrajectoryMessageSubscriber.pollMessage(this))
+         return;
+
+      isTrajectoryStopped.set(true);
    }
 
    private void computeDesiredICPOffset()
@@ -334,6 +353,7 @@ public class PelvisICPBasedTranslationManager
       isEnabled.set(false);
       isRunning.set(false);
       isFrozen.set(false);
+      isTrajectoryStopped.set(false);
 
       pelvisPositionError.setToZero();
       pelvisPositionCumulatedError.setToZero();
@@ -350,6 +370,7 @@ public class PelvisICPBasedTranslationManager
          return;
       isEnabled.set(true);
       isFrozen.set(false);
+      isTrajectoryStopped.set(false);
       initialize();
    }
 
@@ -367,5 +388,6 @@ public class PelvisICPBasedTranslationManager
       finalPelvisPosition.setAndMatchFrame(tempPosition);
       pelvisPositionTrajectoryGenerator.initialize();
       activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
+      isTrajectoryStopped.set(false);
    }
 }

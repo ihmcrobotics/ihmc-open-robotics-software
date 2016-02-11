@@ -31,6 +31,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
    private final FramePose initialFootPose = new FramePose();
    private final ChangeableConfigurationProvider initialConfigurationProvider = new ChangeableConfigurationProvider();
 
+   private final BooleanYoVariable isTrajectoryStopped;
    private final BooleanYoVariable isPerformingTouchdown;
    private final SettableDoubleProvider touchdownInitialTimeProvider = new SettableDoubleProvider(0.0);
    private final SettablePositionProvider currentDesiredFootPosition = new SettablePositionProvider();
@@ -41,10 +42,10 @@ public class MoveStraightState extends AbstractUnconstrainedState
       super(ConstraintType.MOVE_STRAIGHT, footControlHelper, gains, registry);
 
       RigidBody rigidBody = contactableFoot.getRigidBody();
-      String namePrefix = rigidBody.getName();
+      String namePrefix = rigidBody.getName() + "MoveStraight";
 
-      finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "MoveStraightFootFinal", worldFrame, registry);
-      trajectoryTimeProvider = new YoVariableDoubleProvider(namePrefix + "MoveStraightTrajectoryTime", registry);
+      finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "FootFinal", worldFrame, registry);
+      trajectoryTimeProvider = new YoVariableDoubleProvider(namePrefix + "TrajectoryTime", registry);
 
       footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
 
@@ -54,11 +55,12 @@ public class MoveStraightState extends AbstractUnconstrainedState
       orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Orientation", worldFrame, trajectoryTimeProvider,
             initialConfigurationProvider, finalConfigurationProvider, registry);
 
+      isTrajectoryStopped = new BooleanYoVariable(namePrefix + "IsTrajectoryStopped", registry);
       isPerformingTouchdown = new BooleanYoVariable(namePrefix + "IsPerformingTouchdown", registry);
 
       VectorProvider touchdownVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, 0.0, 0.0, -0.3));
       VectorProvider touchdownAccelerationProvider = new ConstantVectorProvider(new FrameVector(worldFrame, 0.0, 0.0, -1.0));
-      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "MoveStraightTouchdown", worldFrame,
+      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             currentDesiredFootPosition, touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
    }
 
@@ -93,6 +95,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
       super.doTransitionIntoAction();
       if (getPreviousState() == this)
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
+      isTrajectoryStopped.set(false);
       isPerformingTouchdown.set(false);
    };
 
@@ -106,6 +109,15 @@ public class MoveStraightState extends AbstractUnconstrainedState
          positionTrajectoryForDisturbanceRecovery.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
          orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
          desiredAngularVelocity.setToZero();
+         desiredAngularAcceleration.setToZero();
+      }
+      else if (isTrajectoryStopped.getBooleanValue())
+      {
+         positionTrajectoryGenerator.get(desiredPosition);
+         orientationTrajectoryGenerator.get(desiredOrientation);
+         desiredLinearVelocity.setToZero();
+         desiredAngularVelocity.setToZero();
+         desiredLinearAcceleration.setToZero();
          desiredAngularAcceleration.setToZero();
       }
       else
@@ -131,10 +143,16 @@ public class MoveStraightState extends AbstractUnconstrainedState
       isPerformingTouchdown.set(true);
    }
 
+   public void requestStopTrajectory()
+   {
+      isTrajectoryStopped.set(true);
+   }
+
    @Override
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
+      isTrajectoryStopped.set(false);
       isPerformingTouchdown.set(false);
    }
 }
