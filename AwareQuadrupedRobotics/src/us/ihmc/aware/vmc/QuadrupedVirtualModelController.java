@@ -115,7 +115,7 @@ public class QuadrupedVirtualModelController
          String prefix = parentRegistry.getName();
          yoSoleVirtualForceViz.set(robotQuadrant,
                new YoGraphicVector(prefix + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + "SoleVirtualForce", yoSolePosition.get(robotQuadrant),
-                     yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.OrangeRed()));
+                     yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.Blue()));
          yoSoleContactForceViz.set(robotQuadrant,
                new YoGraphicVector(prefix + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + "SoleContactForce", yoSolePosition.get(robotQuadrant),
                      yoSoleContactForce.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));

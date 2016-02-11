@@ -16,6 +16,7 @@ import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
@@ -60,6 +61,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    // parameters
    private final ParameterMap params;
+   private final static String JOINT_DAMPING = "jointDamping";
    private final static String BODY_ORIENTATION_PROPORTIONAL_GAINS = "bodyOrientationProportionalGains";
    private final static String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
    private final static String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
@@ -90,6 +92,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final PoseReferenceFrame supportFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final QuadrantDependentList<RigidBody> footRigidBody;
+   private final OneDoFJoint[] oneDoFJoints;
    private final CenterOfMassJacobian comJacobian;
    private final TwistCalculator twistCalculator;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
@@ -212,15 +215,16 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStepController.class);
-      params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 2500);
-      params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
+      params.setDefault(JOINT_DAMPING, 0);
+      params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 5000);
+      params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 750);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 10000, 10000, 10000);
-      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 1000, 1000, 1000);
+      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 40000, 40000, 40000);
+      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 500, 500, 500);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 10);
+      params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 0);
       params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.075);
       params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
       params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
@@ -248,6 +252,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
          footRigidBody.set(robotQuadrant, jointBeforeFoot.getSuccessor());
       }
+      oneDoFJoints = fullRobotModel.getOneDoFJoints();
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
       swingFootTrajectory = new QuadrantDependentList<>();
@@ -449,9 +454,9 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    {
       String prefix = getClass().getSimpleName();
       YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "pcomPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Chartreuse());
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
       YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition(prefix + "icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
-      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Magenta());
+      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Chartreuse());
       yoGraphicsList.add(yoComPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionSetpointViz);
@@ -694,6 +699,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // initialize controllers and state machines
       virtualModelController.reset();
+      for (OneDoFJoint joint : oneDoFJoints)
+      {
+         QuadrupedJointName jointName = jointNameMap.getJointNameForSDFName(joint.getName());
+         virtualModelControllerSettings.setJointDamping(jointName, params.get(JOINT_DAMPING));
+      }
       contactForceOptimization.reset();
       contactForceOptimizationSettings.setDefaults();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
