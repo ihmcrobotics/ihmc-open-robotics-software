@@ -13,13 +13,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-
 
 public class VariousWalkingManagers
 {
@@ -31,7 +31,8 @@ public class VariousWalkingManagers
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
 
    public VariousWalkingManagers(HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager,
-         ManipulationControlModule manipulationControlModule, FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager, PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager)
+         ManipulationControlModule manipulationControlModule, FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager,
+         PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager)
    {
       this.headOrientationManager = headOrientationManager;
       this.chestOrientationManager = chestOrientationManager;
@@ -53,11 +54,12 @@ public class VariousWalkingManagers
       if (fullRobotModel.getHead() != null)
       {
          HeadOrientationProvider desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
+         HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = variousWalkingProviders.getHeadTrajectoryMessageSubscriber();
 
          YoOrientationPIDGains headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
          double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
-         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains, desiredHeadOrientationProvider,
-               trajectoryTimeHeadOrientation, initialHeadYawPitchRoll, registry);
+         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains,
+               desiredHeadOrientationProvider, headTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, initialHeadYawPitchRoll, registry);
       }
 
       ChestOrientationManager chestOrientationManager = null;
@@ -68,7 +70,8 @@ public class VariousWalkingManagers
          ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = variousWalkingProviders.getChestTrajectoryMessageSubscriber();
          YoOrientationPIDGains chestControlGains = walkingControllerParameters.createChestControlGains(registry);
 
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, desiredChestOrientationProvider, chestTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, registry);
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, desiredChestOrientationProvider,
+               chestTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, registry);
       }
 
       ManipulationControlModule manipulationControlModule = null;
@@ -82,10 +85,12 @@ public class VariousWalkingManagers
       FeetManager feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, swingTimeProvider, registry);
 
       PelvisPoseProvider desiredPelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
-      PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, desiredPelvisPoseProvider, registry);
-      
+      PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController,
+            desiredPelvisPoseProvider, registry);
+
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
-      PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, desiredPelvisPoseProvider, pelvisXYControlGains, registry);
+      PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController,
+            desiredPelvisPoseProvider, pelvisXYControlGains, registry);
 
       VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(headOrientationManager, chestOrientationManager, manipulationControlModule,
             feetManager, pelvisOrientationManager, pelvisICPBasedTranslationManager);
