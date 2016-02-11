@@ -173,6 +173,8 @@ public class VariousWalkingProviders
          headTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (chestTrajectoryMessageSubscriber != null)
          chestTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (pelvisTrajectoryMessageSubscriber != null)
+         pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
    }
 
    public HandTrajectoryMessageSubscriber getHandTrajectoryMessageSubscriber()
