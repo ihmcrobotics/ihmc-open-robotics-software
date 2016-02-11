@@ -40,12 +40,12 @@ import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
+import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -412,14 +412,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    protected void doFootControl()
    {
       for (RobotSide robotSide : RobotSide.values)
-      {
-         if (footPoseProvider != null && footPoseProvider.checkForNewPose(robotSide))
-         {
-            FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
-            double trajectoryTime = footPoseProvider.getTrajectoryTime();
-            feetManager.requestMoveStraight(robotSide, newFootPose, trajectoryTime);
-         }
-      }
+         handleFootPose(robotSide);
 
       super.doFootControl();
    }
