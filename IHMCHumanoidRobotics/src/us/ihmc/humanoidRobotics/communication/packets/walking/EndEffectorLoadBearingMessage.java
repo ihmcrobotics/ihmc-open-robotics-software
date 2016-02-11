@@ -15,6 +15,19 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiPacket<EndEffectorL
    {
       FOOT;
 
+      public static final EndEffector[] values = values();
+
+      public boolean isRobotSideNeeded()
+      {
+         switch (this)
+         {
+         case FOOT:
+            return true;
+         default:
+            throw new RuntimeException("Should not get there.");
+         }
+      }
+
       @Override
       public String getDocumentation(EndEffector var)
       {

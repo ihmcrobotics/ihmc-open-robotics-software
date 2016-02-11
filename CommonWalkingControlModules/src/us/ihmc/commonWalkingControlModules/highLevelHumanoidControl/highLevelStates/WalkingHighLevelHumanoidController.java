@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
@@ -46,6 +47,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationP
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
@@ -163,6 +165,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final UpcomingFootstepList upcomingFootstepList;
    private final FootPoseProvider footPoseProvider;
+   private final EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber;
    private final DesiredFootStateProvider desiredFootStateProvider;
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
 
@@ -347,6 +350,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
       desiredFootStateProvider = variousWalkingProviders.getDesiredFootStateProvider();
+      endEffectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       pelvisTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisTrajectoryMessageSubscriber();
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
@@ -1337,8 +1341,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (desiredFootStateProvider != null)
          {
             desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide);
-            loadFoot.set(false);
          }
+
+         if (endEffectorLoadBearingMessageSubscriber != null)
+            endEffectorLoadBearingMessageSubscriber.clearMessageInQueue(EndEffector.FOOT, swingSide);
+
+         loadFoot.set(false);
       }
 
       private void updateFootstepParameters()
@@ -1677,9 +1685,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
          
-         if (desiredFootStateProvider != null)
+         boolean hasNewFootLoadBearingRequest = desiredFootStateProvider != null && desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide);
+         
+         if (!hasNewFootLoadBearingRequest)
          {
-            if (isInFlamingoStance.getBooleanValue() && desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide))
+            hasNewFootLoadBearingRequest = endEffectorLoadBearingMessageSubscriber != null && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide);
+         }
+         
+         if (hasNewFootLoadBearingRequest)
+         {
+            if (isInFlamingoStance.getBooleanValue())
             {
                initiateFootLoadingProcedure(swingSide);
             }
