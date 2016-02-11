@@ -647,11 +647,6 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double distanceInside2d(FramePoint point)
    {
-//      computeFramePolygonConvex2d();
-//      
-//      temporaryFramePoint2d.set(point.getX(), point.getY());
-//      return frameConvexPolygon2d.getDistanceInside(temporaryFramePoint2d);
-      
       if (size() == 1)
       {
          return -point.distance(getFootstep(getFirstSupportingQuadrant()));
@@ -799,10 +794,10 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point
     * @return distance
     */
-   public double distanceInsideInCircle(FramePoint point)
+   public double distanceInsideInCircle2d(FramePoint point)
    {
       double inCircleRadius = getInCircle2d(tempInCircleCenter);
-      double distanceToInCircleCenter = point.distance(tempInCircleCenter);
+      double distanceToInCircleCenter = point.getXYPlaneDistance(tempInCircleCenter);
       return (inCircleRadius - distanceToInCircleCenter);
    }
    

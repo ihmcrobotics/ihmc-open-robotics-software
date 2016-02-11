@@ -194,6 +194,52 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not 0.0 inside", 0.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  0.0, 0.0)), 1e-7);
       assertEquals("not 0.25 inside", 0.25, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.25,  0.5, 0.0)), 1e-7);
       assertTrue("should be inside", simplePolygon.isInside(new FramePoint(WORLD, 0.25,  0.5, 0.0)));
+      
+      FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.5, 0.0);
+      double distance = simplePolygon.distanceInsideInCircle2d(point);
+      assertEquals("not 0.5 inside", 0.5, distance, 1e-7);
+      point.set(0.4, 0.5, 1.0);
+      distance = simplePolygon.distanceInsideInCircle2d(point);
+      assertEquals("not 0.4 inside", 0.4, distance, 1e-7);
+      
+      simplePolygon.removeFootstep(RobotQuadrant.FRONT_RIGHT);
+      assertEquals("not 0.05 inside", 0.05, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.06,  0.05, 0.0)), 1e-7);
+      
+      simplePolygon.removeFootstep(RobotQuadrant.FRONT_LEFT);
+      assertEquals("not 0.0 inside", 0.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.06,  0.0, 0.0)), 1e-7);
+      assertEquals("not -0.1 inside", -0.1, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.06,  0.1, 0.0)), 1e-7);
+      
+      simplePolygon.removeFootstep(RobotQuadrant.HIND_RIGHT);
+      assertEquals("not 0.0 inside", 0.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  0.0, 0.0)), 1e-7);
+      assertEquals("not 0.0 inside", -1.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  1.0, 0.0)), 1e-7);
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetInCircleRadius()
+   {
+      final QuadrupedSupportPolygon poly = createSimplePolygon();
+      assertEquals("not 0.5 radius", 0.5, poly.getInCircleRadius2d(), 1e-7);
+      
+      poly.removeFootstep(RobotQuadrant.FRONT_LEFT);
+      
+      FramePoint inCircleCenterToPack = new FramePoint();
+      double radius = poly.getInCircle2d(inCircleCenterToPack);
+      
+      assertEquals("not 0.292893 radius", 0.292893, radius, 1e-5);
+      assertTrue("not equal", inCircleCenterToPack.epsilonEquals(new Vector3d(0.7071067, 0.292893, 0.0), 1e-5));
+
+      poly.removeFootstep(RobotQuadrant.FRONT_RIGHT);
+      
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            FramePoint intersectionToPack = new FramePoint();
+            poly.getInCirclePoint2d(intersectionToPack);
+         }
+      });
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
@@ -741,6 +787,19 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not correct", minToPack.y, 0.0, 1e-7);
       assertEquals("not correct", maxToPack.x, 1.0, 1e-7);
       assertEquals("not correct", maxToPack.y, 1.0, 1e-7);
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testIsInside()
+   {
+      QuadrupedSupportPolygon poly = createSimplePolygon();
+      assertTrue("not correct", poly.isInside(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.5, 0.0)));
+      assertFalse("not correct", poly.isInside(new FramePoint(ReferenceFrame.getWorldFrame(), 1.5, 0.5, 0.0)));
+      assertTrue("not correct", poly.isInside(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.5, 1.0)));
+      assertTrue("not correct", poly.isInside(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.5, -1.0)));
+      assertTrue("not correct", poly.isInside(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.5, 0.5)));
+      assertFalse("not correct", poly.isInside(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.5, -0.5)));
    }
 
    private Random random = new Random(9123090L);
