@@ -2,13 +2,11 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -19,11 +17,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 
 public class VariousWalkingManagers
@@ -51,7 +46,6 @@ public class VariousWalkingManagers
          DoubleProvider swingTimeProvider)
    {
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
       HeadOrientationManager headOrientationManager = null;
 
@@ -60,11 +54,9 @@ public class VariousWalkingManagers
       {
          HeadOrientationProvider desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
 
-         HeadOrientationControlModule headOrientationControlModule = setupHeadOrientationControlModule(momentumBasedController, desiredHeadOrientationProvider, walkingControllerParameters,
-               yoGraphicsListRegistry, registry);
-
+         YoOrientationPIDGains headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
          double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
-         headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule, desiredHeadOrientationProvider,
+         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains, desiredHeadOrientationProvider,
                trajectoryTimeHeadOrientation, initialHeadYawPitchRoll, registry);
       }
 
@@ -99,25 +91,6 @@ public class VariousWalkingManagers
             feetManager, pelvisOrientationManager, pelvisICPBasedTranslationManager);
 
       return variousWalkingManagers;
-   }
-
-   private static HeadOrientationControlModule setupHeadOrientationControlModule(MomentumBasedController momentumBasedController,
-         HeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
-   {
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-
-      ReferenceFrame headOrientationExpressedInFrame;
-      if (desiredHeadOrientationProvider != null)
-         headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
-      else
-         headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame(); // ReferenceFrame.getWorldFrame(); //
-
-      YoOrientationPIDGains gains = headOrientationControllerParameters.createHeadOrientationControlGains(registry);
-      HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, headOrientationExpressedInFrame,
-            headOrientationControllerParameters, gains, registry, yoGraphicsListRegistry);
-
-      return headOrientationControlModule;
    }
 
    public void initializeManagers()
