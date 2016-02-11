@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelP
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
@@ -106,6 +107,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
    {
 
       HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber = new HandTrajectoryMessageSubscriber(objectCommunicator);
+      HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = new HeadTrajectoryMessageSubscriber(objectCommunicator);
       ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = new ChestTrajectoryMessageSubscriber(objectCommunicator);
 
       DesiredHandstepProvider handstepProvider = new DesiredHandstepProvider(fullRobotModel);
@@ -142,8 +144,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
             trajectoryTimeHeadOrientation, objectCommunicator);
       DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider(objectCommunicator);
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
-      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(trajectoryTimeHeadOrientation,
-            objectCommunicator);
+      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(trajectoryTimeHeadOrientation, objectCommunicator);
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), objectCommunicator);
 
       DesiredJointsPositionProvider desiredJointsPositionProvider = new DesiredJointsPositionProvider();
@@ -210,12 +211,13 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber,
-            footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider,
-            pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider,
-            automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider,
-            thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer,
-            objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, headTrajectoryMessageSubscriber,
+            chestTrajectoryMessageSubscriber, footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider,
+            desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider,
+            handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
+            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer,
+            handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider,
+            multiJointPositionProvider);
 
       return variousWalkingProviders;
    }
