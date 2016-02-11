@@ -114,7 +114,7 @@ public class QuadrupedPathPreview
          swingLegSupportPolygon.getShrunkenCommonTriangle2d(nextSwingLegSupportPolygon, shrunkenCommonSupportPolygon, swingLeg, 0.02, 0.02, 0.02);
          drawSupportPolygon(shrunkenCommonSupportPolygon, commonSupportPolygons[i]);
 
-         shrunkenCommonSupportPolygon.getTangentTangentRadiusCircleCenter(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
+         shrunkenCommonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangle(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
          YoFramePoint circleCenter = circleCenters[i];
          circleCenter.setXY(circleCenter2d);
 
