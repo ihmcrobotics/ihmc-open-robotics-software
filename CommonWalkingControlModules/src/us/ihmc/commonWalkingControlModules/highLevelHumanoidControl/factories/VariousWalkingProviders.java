@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPosition
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
@@ -31,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedSta
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,6 +45,7 @@ public class VariousWalkingProviders
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
+   private final EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber;
 
    // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
    private final FootstepProvider footstepProvider;
@@ -82,7 +85,8 @@ public class VariousWalkingProviders
    private final MultiJointPositionProvider multiJointPositionProvider;
 
    public VariousWalkingProviders(HandTrajectoryMessageSubscriber handTrajectorySubscriber, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
-         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber, PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber, FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber,
+         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber, PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
+         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
          FootstepProvider footstepProvider, HandstepProvider handstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
@@ -101,6 +105,7 @@ public class VariousWalkingProviders
       this.chestTrajectoryMessageSubscriber = chestTrajectoryMessageSubscriber;
       this.pelvisTrajectoryMessageSubscriber = pelvisTrajectoryMessageSubscriber;
       this.footTrajectoryMessageSubscriber = footTrajectoryMessageSubscriber;
+      this.endEffectorLoadBearingMessageSubscriber = endEffectorLoadBearingMessageSubscriber;
 
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
