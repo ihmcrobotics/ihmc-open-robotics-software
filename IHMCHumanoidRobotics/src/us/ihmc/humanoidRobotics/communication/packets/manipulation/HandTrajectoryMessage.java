@@ -150,6 +150,8 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
    {
       if (robotSide != other.robotSide)
          return false;
+      if (base != other.base)
+         return false;
       if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
          return false;
 
