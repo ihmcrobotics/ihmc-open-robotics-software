@@ -103,8 +103,7 @@ public class FrameOrientation extends ReferenceFrameHolder
       return randomOrientation;
    }
 
-   public static FrameOrientation generateRandomFrameOrientation(Random random, ReferenceFrame referenceFrame, double yawMin, double yawMax, double pitchMin,
-         double pitchMax, double rollMin, double rollMax)
+   public static FrameOrientation generateRandomFrameOrientation(Random random, ReferenceFrame referenceFrame, double yawMin, double yawMax, double pitchMin, double pitchMax, double rollMin, double rollMax)
    {
       double yaw = RandomTools.generateRandomDouble(random, yawMin, yawMax);
       double pitch = RandomTools.generateRandomDouble(random, pitchMin, pitchMax);
@@ -359,18 +358,16 @@ public class FrameOrientation extends ReferenceFrameHolder
       transform3D.normalize();
    }
 
-   
    public void setOrientationFromOneToTwo(FrameOrientation orientationOne, FrameOrientation orientationTwo)
    {
       orientationOne.checkReferenceFrameMatch(orientationTwo);
       this.checkReferenceFrameMatch(orientationOne);
-      
+
       this.transform3D.set(orientationTwo.transform3D);
       this.transform3D.invert();
       this.transform3D.multiply(orientationOne.transform3D);
    }
-   
-   
+
    public boolean epsilonEquals(FrameOrientation frameOrientation, double epsilon)
    {
       boolean referenceFramesMatch = referenceFrame == frameOrientation.referenceFrame;

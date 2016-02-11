@@ -19,8 +19,9 @@ public class QuadrupedTrotWalkSliderBoardConfiguration
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            System.out.println("loading configuration " + selectedMode.getEnumValue());
-            sliderBoardConfigurationManager.loadConfiguration(selectedMode.getEnumValue().toString());
+            SliderBoardModes sliderBoardMode = SliderBoardModes.values()[selectedMode.getOrdinal()];
+            System.out.println("loading configuration " + sliderBoardMode);
+            sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.toString());
          }
       });
       
@@ -30,7 +31,6 @@ public class QuadrupedTrotWalkSliderBoardConfiguration
       sliderBoardConfigurationManager.setSlider(4, "q_d_roll", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(5, "q_d_pitch", scs, -0.1, 0.1);
       sliderBoardConfigurationManager.setSlider(6, "q_d_yaw", scs, -0.03, 0.03);
-      sliderBoardConfigurationManager.setSliderEnum(8, selectedMode);
       sliderBoardConfigurationManager.saveConfiguration(trotWalk);
    }
    

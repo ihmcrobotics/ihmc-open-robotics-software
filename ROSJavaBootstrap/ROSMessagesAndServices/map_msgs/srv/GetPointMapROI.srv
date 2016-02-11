@@ -1,9 +1,0 @@
-float64 x
-float64 y
-float64 z
-float64 r    # if != 0, circular ROI of radius r
-float64 l_x  # if r == 0, length of AABB on x
-float64 l_y  # if r == 0, length of AABB on y
-float64 l_z  # if r == 0, length of AABB on z
----
-sensor_msgs/PointCloud2 sub_map

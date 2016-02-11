@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.9'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.11'
 }
 
 
@@ -28,7 +28,7 @@ dependencies {
 
 
 
-    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
@@ -36,7 +36,6 @@ dependencies {
     compile group: 'org.boofcv', name: 'visualize', version: '0.19'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
     compile group: 'org.apache.poi', name: 'poi', version: '3.9'
-    compile group: 'us.ihmc.thirdparty.org.opensphere', name: 'concavehull', version: '1.0'
     compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.1'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
@@ -46,7 +45,7 @@ dependencies {
     compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.0'
 	compile group: 'org.jgrapht', name: 'jgrapht-ext', version: '0.9.0'
 
-    compile group: 'us.ihmc.thirdparty', name: 'JTransforms', version: '3.0'
+    compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
 
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":Graphics3DAdapter")

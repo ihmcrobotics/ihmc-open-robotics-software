@@ -12,7 +12,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class Joystick
 {
-   private final ArrayList<JoystickGeneralListener> generalListeners = new ArrayList<JoystickGeneralListener>();
+   private final ArrayList<JoystickStatusListener> statusListeners = new ArrayList<JoystickStatusListener>();
    private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
    private final Controller joystickController;
    private final JoystickUpdater joystickUpdater;
@@ -34,24 +34,21 @@ public class Joystick
          identifiers.add(component.getIdentifier());
       }
       
-      joystickUpdater = new JoystickUpdater(joystickController, generalListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, statusListeners);
 
       Thread thread = new Thread(joystickUpdater);
       thread.setPriority(Thread.NORM_PRIORITY);
       thread.start();
    }
 
-
-
    public void addJoystickEventListener(JoystickEventListener joystickEventListener)
    {
       joystickUpdater.addListener(joystickEventListener);
    }
    
-   public void addJoystickGeneralListener(JoystickGeneralListener joystickGeneralListener)
+   public void addJoystickStatusListener(JoystickStatusListener joystickStatusListener)
    {
-      
-      generalListeners.add(joystickGeneralListener);
+      statusListeners.add(joystickStatusListener);
    }
    
    public void clearEventListeners()
@@ -61,7 +58,6 @@ public class Joystick
 
    public Component findComponent(Identifier identifier) throws JoystickComponentNotFoundException
    {
-      
       if (hasComponent(identifier))
          return joystickController.getComponent(identifier);
       else
@@ -70,13 +66,11 @@ public class Joystick
 
    public boolean hasComponent(Identifier identifier)
    {
-      
       return identifiers.contains(identifier);
    }
    
    public void setPollInterval(int pollIntervalMillis)
    {
-      
       joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
    }
    

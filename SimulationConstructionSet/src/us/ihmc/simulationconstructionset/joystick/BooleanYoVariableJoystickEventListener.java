@@ -5,7 +5,6 @@ import net.java.games.input.Event;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 
-
 public class BooleanYoVariableJoystickEventListener implements JoystickEventListener
 {
    private final BooleanYoVariable variable;
@@ -17,8 +16,6 @@ public class BooleanYoVariableJoystickEventListener implements JoystickEventList
    {
       this(variable, component, toggle, false);
    }
-        
-
 
    public BooleanYoVariableJoystickEventListener(BooleanYoVariable variable, Component component, boolean toggle,  boolean flip)
    {
@@ -30,6 +27,7 @@ public class BooleanYoVariableJoystickEventListener implements JoystickEventList
       this.toggle=toggle;
    }
 
+   @Override
    public void processEvent(Event event)
    {
       if (event.getComponent() == component)

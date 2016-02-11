@@ -1,8 +1,6 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.9'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.11'
 }
-
-
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
@@ -14,6 +12,11 @@ project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
+repositories {
+	maven {
+	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+	}
+}
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
@@ -29,7 +32,7 @@ evaluationDependsOn(ihmc.getProjectDependencyGradlePath("SensorProcessing"))
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
-    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
 	compile group: 'org.ejml', name: 'all', version: '0.28'
     compile group: 'org.georegression' , name: 'georegression', version: '0.8'
@@ -43,6 +46,7 @@ dependencies {
     compile group: 'colt', name: 'colt', version: '1.2.0'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
    	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
+	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
 
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")
     compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
@@ -59,7 +63,6 @@ dependencies {
     compile ihmc.getProjectDependency(":ImageProcessing")
     compile ihmc.getProjectDependency(":RobotDataCommunication")
     compile ihmc.getProjectDependency(":RobotiqHandDrivers")
-    compile ihmc.getProjectDependency(":ROSJava")
     compile ihmc.getProjectDependency(":SDFLoader")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")

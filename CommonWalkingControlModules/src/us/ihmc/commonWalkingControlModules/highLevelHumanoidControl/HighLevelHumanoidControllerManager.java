@@ -3,16 +3,15 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -26,6 +25,8 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateMachineTools;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 
 public class HighLevelHumanoidControllerManager implements RobotController
 {
@@ -168,10 +169,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private void reportDesiredCenterOfPressureForEstimator()
    {
       SideDependentList<ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
+      FullHumanoidRobotModel fullHumanoidRobotModel = momentumBasedController.getFullRobotModel();
       for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFeet.get(robotSide));
-         centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredCoP, robotSide);
+         centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredCoP, fullHumanoidRobotModel.getFoot(robotSide));
       }
    }
 

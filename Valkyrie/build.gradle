@@ -1,6 +1,6 @@
 plugins {
 	id 'org.hidetake.ssh' version '0.3.12'
-    id 'us.ihmc.gradle.ihmc-build' version '0.0.9'
+    id 'us.ihmc.gradle.ihmc-build' version '0.0.11'
 }
 
 
@@ -15,6 +15,11 @@ project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
+repositories {
+	maven {
+	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+	}
+}
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
@@ -26,7 +31,7 @@ evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
 
 	compile group: 'org.ejml', name: 'all', version: '0.28'
@@ -35,9 +40,11 @@ dependencies {
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.51'
 	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
 	compile group: 'commons-io', name: 'commons-io', version: '2.4'
-	compile group: 'us.ihmc.thirdparty.com.esotericsoftware', name: 'kryonet', version: '2.21'
-	compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
+	compile group: 'kryonet', name: 'kryonet', version: '2.21'
+    compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
+    compile group: 'com.esotericsoftware', name: 'jsonbeans', version: '0.7'
 	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.+'
+//	compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
 	compile group: 'org.apache.sshd', name: 'sshd-core', version: '0.12.+'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 
@@ -50,7 +57,6 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCROSTools")
 
 	compile ihmc.getProjectDependency(":RobotDataCommunication")
-	compile ihmc.getProjectDependency(":ROSJavaMessages")
 	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
