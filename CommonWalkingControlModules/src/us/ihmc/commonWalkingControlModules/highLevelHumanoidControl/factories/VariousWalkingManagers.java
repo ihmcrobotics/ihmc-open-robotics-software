@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationMa
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
@@ -72,9 +73,10 @@ public class VariousWalkingManagers
       if (fullRobotModel.getChest() != null)
       {
          ChestOrientationProvider desiredChestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
+         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = variousWalkingProviders.getChestTrajectoryMessageSubscriber();
          YoOrientationPIDGains chestControlGains = walkingControllerParameters.createChestControlGains(registry);
 
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, desiredChestOrientationProvider, trajectoryTimeHeadOrientation, registry);
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, desiredChestOrientationProvider, chestTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, registry);
       }
 
       ManipulationControlModule manipulationControlModule = null;
