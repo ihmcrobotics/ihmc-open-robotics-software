@@ -9,6 +9,7 @@ import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.vmc.*;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
@@ -52,19 +53,20 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    // parameters
    private final ParameterMap params;
-   private final String BODY_ORIENTATION_PROPORTIONAL_GAINS = "bodyOrientationProportionalGains";
-   private final String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
-   private final String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
-   private final String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
-   private final String DCM_PROPORTIONAL_GAINS = "dcmProportionalGains";
-   private final String DCM_INTEGRAL_GAINS = "dcmIntegralGains";
-   private final String DCM_MAX_INTEGRAL_ERROR = "dcmMaxIntegralError";
-   private final String COM_HEIGHT_PROPORTIONAL_GAIN = "comHeightProportionalGain";
-   private final String COM_HEIGHT_DERIVATIVE_GAIN = "comHeightDerivativeGain";
-   private final String COM_HEIGHT_INTEGRAL_GAIN = "comHeightIntegralGain";
-   private final String COM_HEIGHT_MAX_INTEGRAL_ERROR = "comHeightMaxIntegralError";
-   private final String COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT = "comHeightGravityFeedforwardConstant";
-   private final String COM_HEIGHT_NOMINAL = "comHeightNominal";
+   private final static String JOINT_DAMPING = "jointDamping";
+   private final static String BODY_ORIENTATION_PROPORTIONAL_GAINS = "bodyOrientationProportionalGains";
+   private final static String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
+   private final static String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
+   private final static String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
+   private final static String DCM_PROPORTIONAL_GAINS = "dcmProportionalGains";
+   private final static String DCM_INTEGRAL_GAINS = "dcmIntegralGains";
+   private final static String DCM_MAX_INTEGRAL_ERROR = "dcmMaxIntegralError";
+   private final static String COM_HEIGHT_PROPORTIONAL_GAIN = "comHeightProportionalGain";
+   private final static String COM_HEIGHT_DERIVATIVE_GAIN = "comHeightDerivativeGain";
+   private final static String COM_HEIGHT_INTEGRAL_GAIN = "comHeightIntegralGain";
+   private final static String COM_HEIGHT_MAX_INTEGRAL_ERROR = "comHeightMaxIntegralError";
+   private final static String COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT = "comHeightGravityFeedforwardConstant";
+   private final static String COM_HEIGHT_NOMINAL = "comHeightNominal";
 
    // utilities
    private final QuadrupedJointLimits jointLimits;
@@ -76,6 +78,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final PoseReferenceFrame supportFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final QuadrantDependentList<RigidBody> footRigidBody;
+   private final OneDoFJoint[] oneDoFJoints;
    private final CenterOfMassJacobian comJacobian;
    private final TwistCalculator twistCalculator;
 
@@ -181,6 +184,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStandController.class);
+      params.setDefault(JOINT_DAMPING, 0);
       params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 2500);
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
@@ -211,6 +215,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
          OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
          footRigidBody.set(robotQuadrant, jointBeforeFoot.getSuccessor());
       }
+      oneDoFJoints = fullRobotModel.getOneDoFJoints();
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
 
@@ -356,9 +361,9 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    {
       String prefix = getClass().getSimpleName();
       YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "comPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Chartreuse());
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
       YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition(prefix + "icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
-      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Magenta());
+      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Chartreuse());
       yoGraphicsList.add(yoComPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionSetpointViz);
@@ -565,6 +570,11 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // initialize controllers and state machines
       virtualModelController.reset();
+      for (OneDoFJoint joint : oneDoFJoints)
+      {
+         QuadrupedJointName jointName = jointNameMap.getJointNameForSDFName(joint.getName());
+         virtualModelControllerSettings.setJointDamping(jointName, params.get(JOINT_DAMPING));
+      }
       contactForceOptimization.reset();
       contactForceOptimizationSettings.setDefaults();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
