@@ -18,10 +18,10 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class FeetManager
 {
@@ -43,8 +43,10 @@ public class FeetManager
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSwingLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSwingLeg", registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg", registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg",
+         registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable(
+         "singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
 
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
@@ -180,7 +182,7 @@ public class FeetManager
    {
       RobotSide[] leadingLegFirst;
       if (trailingLeg != null)
-         leadingLegFirst = new RobotSide[] { trailingLeg.getOppositeSide(), trailingLeg };
+         leadingLegFirst = new RobotSide[] {trailingLeg.getOppositeSide(), trailingLeg};
       else
          leadingLegFirst = RobotSide.values;
 
