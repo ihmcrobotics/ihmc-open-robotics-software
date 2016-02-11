@@ -15,6 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheel
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
@@ -713,6 +714,33 @@ public abstract class PacketValidityChecker
          return false;
       }
 
+      return true;
+   }
+
+   public static boolean validateEndEffectorLoadBearingMessage(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      if (endEffectorLoadBearingMessage == null)
+         return false;
+
+      ObjectErrorType errorType;
+
+      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRobotSide());
+      if (errorType != null)
+      {
+         String errorMessage = "robotSide field " + errorType.getMessage();
+         globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
+         return false;
+      }
+
+      
+      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getEndEffector());
+      if (errorType != null)
+      {
+         String errorMessage = "endEffector field " + errorType.getMessage();
+         globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
+         return false;
+      }
+      
       return true;
    }
 
