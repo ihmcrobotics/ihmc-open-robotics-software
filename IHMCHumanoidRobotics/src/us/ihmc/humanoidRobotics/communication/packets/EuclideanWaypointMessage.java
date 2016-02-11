@@ -6,12 +6,15 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.trajectories.EuclideanWaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the translational information for one waypoint (position & linear velocity). "
       + "Feel free to look at SO3Waypoint (rotational) and SE3Waypoint (rotational AND translational)")
-public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypointMessage> implements EuclideanWaypointInterface
+public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypointMessage> implements EuclideanWaypointInterface, TransformableDataObject<EuclideanWaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -94,5 +97,25 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
          return false;
 
       return true;
+   }
+
+   @Override
+   public EuclideanWaypointMessage transform(RigidBodyTransform transform)
+   {
+      EuclideanWaypointMessage transformedWaypointMessage = new EuclideanWaypointMessage();
+
+      transformedWaypointMessage.time = time;
+
+      if (position != null)
+         transformedWaypointMessage.position = TransformTools.getTransformedPoint(position, transform);
+      else
+         transformedWaypointMessage.position = null;
+
+      if (linearVelocity != null)
+         transformedWaypointMessage.linearVelocity = TransformTools.getTransformedVector(linearVelocity, transform);
+      else
+         transformedWaypointMessage.linearVelocity = null;
+
+      return transformedWaypointMessage;
    }
 }
