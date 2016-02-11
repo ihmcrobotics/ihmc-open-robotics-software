@@ -12,7 +12,6 @@ import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
-
 public class HeadOrientationManager
 {
    private final YoVariableRegistry registry;
@@ -33,7 +32,8 @@ public class HeadOrientationManager
    private final BooleanYoVariable hasBeenInitialized;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
-         HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
+         HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, double[] initialDesiredHeadYawPitchRoll,
+         YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();
@@ -76,7 +76,7 @@ public class HeadOrientationManager
          orientationTrajectoryGenerator = null;
       }
    }
-   
+
    private void initialize()
    {
       if (hasBeenInitialized == null || hasBeenInitialized.getBooleanValue())
@@ -100,7 +100,7 @@ public class HeadOrientationManager
       initialize();
 
       checkForNewDesiredOrientationInformation();
-      
+
       if (desiredHeadOrientationProvider != null)
       {
          if (isTrackingOrientation.getBooleanValue())
