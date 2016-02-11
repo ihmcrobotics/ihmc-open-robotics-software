@@ -10,15 +10,22 @@ public class AbortWalkingProvider implements PacketConsumer<AbortWalkingPacket>
 {
    private boolean abortWalking;
 
-   public boolean shouldAbortWalking(){
+   public AbortWalkingProvider()
+   {
+   }
+
+   public boolean shouldAbortWalking()
+   {
       return abortWalking;
    }
 
-   public void walkingAborted(){
+   public void walkingAborted()
+   {
       abortWalking = false;
    }
 
-   public void triggerAbort(){
+   public void triggerAbort()
+   {
       abortWalking = true;
    }
 
