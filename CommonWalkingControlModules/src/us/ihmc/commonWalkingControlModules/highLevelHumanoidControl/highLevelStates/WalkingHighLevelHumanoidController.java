@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -27,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.ToeSwitch;
@@ -37,13 +40,13 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
+import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
@@ -63,10 +66,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -78,6 +77,10 @@ import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -96,7 +99,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final StateMachine<WalkingState> stateMachine;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
-   private final CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
+   private final LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
    private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
    private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother;
    private final DoubleYoVariable desiredCoMHeightFromTrajectory = new DoubleYoVariable("desiredCoMHeightFromTrajectory", registry);
@@ -161,6 +164,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final UpcomingFootstepList upcomingFootstepList;
    private final FootPoseProvider footPoseProvider;
    private final DesiredFootStateProvider desiredFootStateProvider;
+   private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
 
@@ -252,7 +256,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-         CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
+         LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerAdapter capturePointPlannerAdapter, ICPAndMomentumBasedController icpAndMomentumBasedController,
          MomentumBasedController momentumBasedController)
@@ -343,6 +347,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
       desiredFootStateProvider = variousWalkingProviders.getDesiredFootStateProvider();
+      pelvisTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisTrajectoryMessageSubscriber();
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
       DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
@@ -717,6 +722,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // Do it only when standing
          if (transferToSide == null)
             handleAutomaticManipulationAbortOnICPError();
+
+         if (transferToSide == null && pelvisTrajectoryMessageSubscriber != null && pelvisTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
+         {
+            PelvisTrajectoryMessage pelvisTrajectoryMessage = pelvisTrajectoryMessageSubscriber.pollMessage();
+            pelvisOrientationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+            pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+            centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+         }
       }
 
       private void handleAutomaticManipulationAbortOnICPError()
@@ -931,6 +944,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          timeICPPlannerFinishedAt.set(Double.NaN);
          desiredICPVelocityRedutionFactor.set(Double.NaN);
 
+         if (pelvisTrajectoryMessageSubscriber != null)
+            pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
+
          boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
          if (isInDoubleSupport && !upcomingFootstepList.hasNextFootsteps() && !upcomingFootstepList.isPaused())
          {
@@ -1029,6 +1045,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredECMPinSupportPolygon.set(false);
          feetManager.reset();
          ecmpBasedToeOffHasBeenInitialized.set(false);
+
+         if (pelvisTrajectoryMessageSubscriber != null)
+            pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
 
          if (transferToSide == null)
          {
