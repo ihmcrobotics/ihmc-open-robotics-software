@@ -11,6 +11,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -22,12 +24,14 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
@@ -64,9 +68,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          registry);
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider(
          "offsetHeightAboveGroundTrajectoryTimeProvider", registry);
+   private final MultipleWaypointsTrajectoryGenerator waypointOffsetHeightAboveGroundTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator("wayointOffsetHeightAboveGroundTrajectory", 15, registry);
    private final CubicPolynomialTrajectoryGenerator offsetHeightAboveGroundTrajectory = new CubicPolynomialTrajectoryGenerator(
          "offsetHeightAboveGroundTrajectory", offsetHeightAboveGroundInitialPositionProvider, offsetHeightAboveGroundFinalPositionProvider,
          offsetHeightAboveGroundTrajectoryTimeProvider, registry);
+   private final BooleanYoVariable isUsingWaypointTrajectory = new BooleanYoVariable("IsUsingWaypointTrajectoryForOffsetHeight", registry);
+   private DoubleTrajectoryGenerator activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
 
    private final DoubleYoVariable minimumHeightAboveGround = new DoubleYoVariable("minimumHeightAboveGround", registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
@@ -126,6 +133,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          {
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
             offsetHeightAboveGroundTrajectory.initialize();
+            activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
+            isUsingWaypointTrajectory.set(false);
          }
       });
 
@@ -759,55 +768,17 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
 
-      if (initializeToCurrent.getBooleanValue())
-      {
-         initializeToCurrent.set(false);
+      updateOffsetDesireds();
 
-         desiredPosition.setToZero(pelvisFrame);
-         desiredPosition.changeFrame(frameOfLastFoostep);
+      if (isUsingWaypointTrajectory.getBooleanValue())
+         activeTrajectoryGenerator = waypointOffsetHeightAboveGroundTrajectoryGenerator;
+      else
+         activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
 
-         double heightOffset = desiredPosition.getZ() - splineOutput[0];
+      activeTrajectoryGenerator.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
+      offsetHeightAboveGroundTrajectoryOutput.set(activeTrajectoryGenerator.getValue());
 
-         offsetHeightAboveGround.set(heightOffset);
-         offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
-         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-         offsetHeightAboveGroundTrajectory.initialize();
-      }
-      else if (desiredComHeightProvider != null)
-      {
-         if (desiredComHeightProvider.isNewComHeightInformationAvailable())
-         {
-            offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
-            offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());
-            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-            offsetHeightAboveGroundTrajectory.initialize();
-         }
-         else if (desiredComHeightProvider.isNewComHeightMultipointAvailable())
-         {
-            WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
-
-            int lastIndex = pelvisTrajectory.getTimeAtWaypoints().length - 1;
-
-            // TODO (Sylvain) Check if that's the right way to do it
-            desiredPosition.setIncludingFrame(worldFrame, pelvisTrajectory.getPositions()[lastIndex]);
-            desiredPosition.changeFrame(frameOfLastFoostep);
-
-            double heightOffset = desiredPosition.getZ() - splineOutput[0];
-
-            // it is not really the last time, since we have the "settling"
-            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[lastIndex];
-
-            offsetHeightAboveGround.set(heightOffset);
-            offsetHeightAboveGroundTrajectoryTimeProvider.set(totalTime);
-            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-            offsetHeightAboveGroundTrajectory.initialize();
-         }
-      }
-
-      offsetHeightAboveGroundTrajectory.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
-      offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightAboveGroundTrajectory.getValue());
-
-      offsetHeightAboveGroundPrevValue.set(offsetHeightAboveGroundTrajectory.getValue());
+      offsetHeightAboveGroundPrevValue.set(activeTrajectoryGenerator.getValue());
 
       double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getValue();
       double dzds = splineOutput[1];
@@ -836,6 +807,91 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
 
       desiredCoMHeight.set(z);
+   }
+
+   private void updateOffsetDesireds()
+   {
+      if (initializeToCurrent.getBooleanValue())
+      {
+         initializeToCurrent.set(false);
+
+         desiredPosition.setToZero(pelvisFrame);
+         desiredPosition.changeFrame(frameOfLastFoostep);
+
+         double heightOffset = desiredPosition.getZ() - splineOutput[0];
+
+         offsetHeightAboveGround.set(heightOffset);
+         offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
+         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+         offsetHeightAboveGroundTrajectory.initialize();
+         activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
+         isUsingWaypointTrajectory.set(false);
+      }
+      else if (desiredComHeightProvider != null)
+      {
+         if (desiredComHeightProvider.isNewComHeightInformationAvailable())
+         {
+            offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+            offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());
+            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+            offsetHeightAboveGroundTrajectory.initialize();
+            activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
+            isUsingWaypointTrajectory.set(false);
+         }
+         else if (desiredComHeightProvider.isNewComHeightMultipointAvailable())
+         {
+            WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
+
+            int lastIndex = pelvisTrajectory.getTimeAtWaypoints().length - 1;
+
+            // TODO (Sylvain) Check if that's the right way to do it
+            desiredPosition.setIncludingFrame(worldFrame, pelvisTrajectory.getPositions()[lastIndex]);
+            desiredPosition.changeFrame(frameOfLastFoostep);
+
+            double heightOffset = desiredPosition.getZ() - splineOutput[0];
+
+            // it is not really the last time, since we have the "settling"
+            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[lastIndex];
+
+            offsetHeightAboveGround.set(heightOffset);
+            offsetHeightAboveGroundTrajectoryTimeProvider.set(totalTime);
+            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+            offsetHeightAboveGroundTrajectory.initialize();
+            activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
+            isUsingWaypointTrajectory.set(false);
+         }
+      }
+   }
+
+   public void handlePelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
+   {
+      offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+      waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
+
+      if (pelvisTrajectoryMessage.getWaypoint(0).getTime() > 1.0e-5)
+      {
+         waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
+      }
+
+      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SE3WaypointMessage waypoint = pelvisTrajectoryMessage.getWaypoint(i);
+         double time = waypoint.getTime();
+         double z = waypoint.getPosition().getZ();
+         double zDot = waypoint.getLinearVelocity().getZ();
+
+         // TODO (Sylvain) Check if that's the right way to do it
+         desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, z);
+         desiredPosition.changeFrame(frameOfLastFoostep);
+
+         double zOffset = desiredPosition.getZ() - splineOutput[0];
+
+         waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(time, zOffset, zDot);
+      }
+
+      waypointOffsetHeightAboveGroundTrajectoryGenerator.initialize();
+      activeTrajectoryGenerator = waypointOffsetHeightAboveGroundTrajectoryGenerator;
+      isUsingWaypointTrajectory.set(true);
    }
 
    public void initializeDesiredHeightToCurrent()
