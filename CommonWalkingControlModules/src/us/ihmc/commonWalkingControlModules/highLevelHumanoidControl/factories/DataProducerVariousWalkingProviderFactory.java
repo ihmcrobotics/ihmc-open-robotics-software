@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
@@ -111,6 +112,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = new HeadTrajectoryMessageSubscriber(objectCommunicator);
       ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = new ChestTrajectoryMessageSubscriber(objectCommunicator);
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = new PelvisTrajectoryMessageSubscriber(objectCommunicator);
+      FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(objectCommunicator);
 
       DesiredHandstepProvider handstepProvider = new DesiredHandstepProvider(fullRobotModel);
 
@@ -214,7 +216,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, headTrajectoryMessageSubscriber,
-            chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, footstepPathCoordinator, handstepProvider,
+            chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, footstepPathCoordinator, handstepProvider,
             mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider,
             handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, automaticManipulationAbortCommunicator,
             chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
