@@ -130,7 +130,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanReques
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ThighStatePacket;
@@ -252,7 +252,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BlindWalkingPacket.class);
       registerPacketFields(Point2d.class, BlindWalkingDirection.class, BlindWalkingSpeed.class);
 
-      registerPacketClass(PauseCommand.class);
+      registerPacketClass(PauseWalkingMessage.class);
       registerPacketClass(FootstepStatus.class);
       registerPacketClass(TrajectoryType.class);
 

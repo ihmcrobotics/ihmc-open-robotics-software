@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -144,7 +144,7 @@ public class DesiredFootstepTest
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       PauseConsumer pauseConsumer = new PauseConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(PauseCommand.class, pauseConsumer, port);
+      PacketCommunicator tcpClient = createStreamingDataConsumer(PauseWalkingMessage.class, pauseConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
       //      queueBasedStreamingDataProducer.startProducingData();
 
@@ -155,7 +155,7 @@ public class DesiredFootstepTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         tcpServer.send(new PauseCommand(isPaused));
+         tcpServer.send(new PauseWalkingMessage(isPaused));
       }
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -194,7 +194,7 @@ public class DesiredFootstepTest
       PauseConsumer pauseConsumer = new PauseConsumer();
 
       PacketCommunicator streamingDataTCPClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, pathPort);
-      streamingDataTCPClient.attachListener(PauseCommand.class, pauseConsumer);
+      streamingDataTCPClient.attachListener(PauseWalkingMessage.class, pauseConsumer);
 
       ThreadTools.sleep(SLEEP_TIME);
       //      pathQueueBasedStreamingDataProducer.startProducingData();
@@ -214,7 +214,7 @@ public class DesiredFootstepTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         streamingDataTCPServer.send(new PauseCommand(isPaused));
+         streamingDataTCPServer.send(new PauseWalkingMessage(isPaused));
       }
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -289,7 +289,7 @@ public class DesiredFootstepTest
       NetClassList netClassList = new NetClassList();
       netClassList.registerPacketClass(FootstepData.class);
       netClassList.registerPacketClass(FootstepDataList.class);
-      netClassList.registerPacketClass(PauseCommand.class);
+      netClassList.registerPacketClass(PauseWalkingMessage.class);
       netClassList.registerPacketClass(FootstepStatus.class);
 
       netClassList.registerPacketField(ArrayList.class);
@@ -438,12 +438,12 @@ public class DesiredFootstepTest
       return ScrewTools.addRigidBody(name, joint, new Matrix3d(), 0.0, new Vector3d());
    }
 
-   private class PauseConsumer implements PacketConsumer<PauseCommand>
+   private class PauseConsumer implements PacketConsumer<PauseWalkingMessage>
    {
       ArrayList<Boolean> reconstructedCommands = new ArrayList<Boolean>();
 
       @Override
-      public void receivedPacket(PauseCommand packet)
+      public void receivedPacket(PauseWalkingMessage packet)
       {
          reconstructedCommands.add(packet.isPaused());
       }

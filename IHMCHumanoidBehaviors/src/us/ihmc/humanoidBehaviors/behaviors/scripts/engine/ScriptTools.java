@@ -10,7 +10,7 @@ import com.thoughtworks.xstream.io.StreamException;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.tools.io.printing.PrintTools;
 
 /**
@@ -66,7 +66,7 @@ public class ScriptTools
    {
       for (int i = listToEdit.size() - 1; i >= 0; i--)
       {
-         if (listToEdit.get(i).getScriptObject() instanceof PauseCommand)
+         if (listToEdit.get(i).getScriptObject() instanceof PauseWalkingMessage)
             listToEdit.remove(i);
       }
    }
@@ -92,9 +92,9 @@ public class ScriptTools
       {
          ScriptObject scriptObject = listToEdit.get(i);
 
-         if (scriptObject.getScriptObject() instanceof PauseCommand)
+         if (scriptObject.getScriptObject() instanceof PauseWalkingMessage)
          {
-            if (((PauseCommand) scriptObject.getScriptObject()).isPaused())
+            if (((PauseWalkingMessage) scriptObject.getScriptObject()).isPaused())
             {
                if (previousWasPause)
                {

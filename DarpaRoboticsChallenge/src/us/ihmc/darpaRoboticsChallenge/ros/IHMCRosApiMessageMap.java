@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
@@ -42,7 +42,7 @@ public class IHMCRosApiMessageMap
 	   FootstepStatus.class,
 	   ChestOrientationPacket.class,
 	   HeadOrientationPacket.class,
-	   PauseCommand.class,
+	   PauseWalkingMessage.class,
 	   HighLevelStatePacket.class,
 	   ArmJointTrajectoryPacket.class,
 	   JointAnglesPacket.class,
@@ -65,7 +65,7 @@ public class IHMCRosApiMessageMap
       FootstepDataList.class,
       ChestOrientationPacket.class,
       HeadOrientationPacket.class,
-      PauseCommand.class,
+      PauseWalkingMessage.class,
       HighLevelStatePacket.class,
       ArmJointTrajectoryPacket.class,
       JointAnglesPacket.class,
@@ -107,7 +107,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(FootstepDataList.class, "/control/footstep_list");
       PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
       PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
-      PACKET_TO_TOPIC_MAP.put(PauseCommand.class, "/control/pause_footstep_exec");
+      PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");
       PACKET_TO_TOPIC_MAP.put(HighLevelStatePacket.class, "/control/high_level_state");
       PACKET_TO_TOPIC_MAP.put(ArmJointTrajectoryPacket.class, "/control/arm_joint_trajectory");
       PACKET_TO_TOPIC_MAP.put(JointAnglesPacket.class, "/control/joint_angles");

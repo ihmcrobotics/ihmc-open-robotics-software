@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -137,9 +137,9 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
          setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }
-      else if (scriptObject instanceof PauseCommand)
+      else if (scriptObject instanceof PauseWalkingMessage)
       {
-         PauseCommand pauseCommand = (PauseCommand) scriptObject;
+         PauseWalkingMessage pauseCommand = (PauseWalkingMessage) scriptObject;
          setupTimesForNewScriptEvent(0.5);
       }
 
