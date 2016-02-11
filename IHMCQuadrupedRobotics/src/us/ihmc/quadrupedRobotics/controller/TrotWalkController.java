@@ -327,10 +327,6 @@ public class TrotWalkController extends QuadrupedController
          footLocation.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, footLocation);
          feetLocations.get(robotQuadrant).set(footLocation);
-         // TODO Figure why polygon foot has different value than feetLocations foot
-         // System.out.println("orig" + footLocation);
-         // System.out.println("polygon" + fourFootSupportPolygon.getFootstep(RobotQuadrant.FRONT_LEFT));
-         // System.out.println("quadList" + feetLocations.get(RobotQuadrant.FRONT_LEFT));
       }
 
       //update centroid
@@ -355,7 +351,7 @@ public class TrotWalkController extends QuadrupedController
       centerOfMassVelocity.set(comVelocity);
 
       // compute instantaneous capture point
-      double lowestFootZ = fourFootSupportPolygon.getLowestFootStepZHeight();
+      double lowestFootZ = fourFootSupportPolygon.getLowestFootstepZHeight();
       double zDelta = coMPosition.getZ() - lowestFootZ;
       double omega = Math.sqrt(GRAVITY / zDelta);
       icp.setX(coMPosition.getX() + centerOfMassVelocity.getX() / omega);
@@ -514,7 +510,7 @@ public class TrotWalkController extends QuadrupedController
 
    private void computeBodyRelativePositionsVelocities()
    {
-      double footZ = fourFootSupportPolygon.getLowestFootStepZHeight();
+      double footZ = fourFootSupportPolygon.getLowestFootstepZHeight();
       body_rel_z.set(bodyPose.getZ() - footZ);
    }
 
