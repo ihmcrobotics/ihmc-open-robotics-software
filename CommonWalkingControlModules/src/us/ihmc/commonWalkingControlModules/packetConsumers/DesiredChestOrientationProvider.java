@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
@@ -13,8 +15,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import com.google.common.util.concurrent.AtomicDouble;
 
 public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrientationPacket>, ChestOrientationProvider
 {
@@ -25,15 +25,13 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
    private final AtomicReference<Quat4d> desiredOrientation = new AtomicReference<>();
    private final AtomicDouble trajectoryTime = new AtomicDouble();
    private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
-   private final ReferenceFrame chestOrientationFrame;
 
    private final AtomicReference<WaypointOrientationTrajectoryData> desiredChestOrientationWithWaypoints = new AtomicReference<>(null);
 
    private final HumanoidGlobalDataProducer globalDataProducer;
 
-   public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime, HumanoidGlobalDataProducer globalDataProducer)
+   public DesiredChestOrientationProvider(double defaultTrajectoryTime, HumanoidGlobalDataProducer globalDataProducer)
    {
-      this.chestOrientationFrame = chestOrientationFrame;
       this.globalDataProducer = globalDataProducer;
       trajectoryTime.set(defaultTrajectoryTime);
 
@@ -89,7 +87,6 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
          return null;
 
       FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation);
-      frameOrientation.changeFrame(chestOrientationFrame);
       return frameOrientation;
    }
 
@@ -126,12 +123,6 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
       }
 
       desiredOrientation.set(object.getOrientation());
-   }
-
-   @Override
-   public ReferenceFrame getChestOrientationExpressedInFrame()
-   {
-      return chestOrientationFrame;
    }
 
    @Override

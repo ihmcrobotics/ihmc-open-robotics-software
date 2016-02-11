@@ -201,7 +201,9 @@ public class ChestOrientationManager
          activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          activeTrajectoryGenerator.get(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setFinalOrientation(chestOrientationProvider.getDesiredChestOrientation());
+         FrameOrientation desiredChestOrientation = chestOrientationProvider.getDesiredChestOrientation();
+         desiredChestOrientation.changeFrame(pelvisZUpFrame);
+         simpleOrientationTrajectoryGenerator.setFinalOrientation(desiredChestOrientation);
          simpleOrientationTrajectoryGenerator.setTrajectoryTime(chestOrientationProvider.getTrajectoryTime());
          simpleOrientationTrajectoryGenerator.initialize();
          isUsingWaypointTrajectory.set(false);
@@ -232,24 +234,6 @@ public class ChestOrientationManager
          isUsingWaypointTrajectory.set(false);
          activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
 
-         /*
-          * waypointOrientationTrajectoryGenerator.changeFrame(
-          * chestOrientationExpressedInFrame);
-          * activeTrajectoryGenerator.changeFrame(
-          * chestOrientationExpressedInFrame);
-          * activeTrajectoryGenerator.get(desiredOrientation);
-          * waypointOrientationTrajectoryGenerator.clear();
-          * waypointOrientationTrajectoryGenerator.appendWaypoint(0.0,
-          * desiredOrientation); WaypointOrientationTrajectoryData
-          * trajectoryData =
-          * chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
-          * trajectoryData.changeFrame(chestOrientationExpressedInFrame);
-          * waypointOrientationTrajectoryGenerator.appendWaypoints(
-          * trajectoryData);
-          * waypointOrientationTrajectoryGenerator.initialize();
-          * isUsingWaypointTrajectory.set(true); activeTrajectoryGenerator =
-          * waypointOrientationTrajectoryGenerator;
-          */
          isTrackingOrientation.set(true);
       }
    }

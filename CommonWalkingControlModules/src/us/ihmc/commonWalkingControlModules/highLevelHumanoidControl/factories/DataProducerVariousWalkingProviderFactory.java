@@ -78,7 +78,6 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -143,8 +142,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
             trajectoryTimeHeadOrientation, objectCommunicator);
       DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider(objectCommunicator);
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
-      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(ReferenceFrame.getWorldFrame(),
-            trajectoryTimeHeadOrientation, objectCommunicator);
+      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(trajectoryTimeHeadOrientation,
+            objectCommunicator);
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), objectCommunicator);
 
       DesiredJointsPositionProvider desiredJointsPositionProvider = new DesiredJointsPositionProvider();
