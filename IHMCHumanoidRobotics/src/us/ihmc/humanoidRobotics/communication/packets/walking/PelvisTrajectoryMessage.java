@@ -14,7 +14,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 @ClassDocumentation("This message commands the controller to move in taskspace the pelvis to the desired pose (position & orientation) while going through the specified waypoints."
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
-      + " To excute a single straight line trajectory to reach a desired pelvis pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
+      + " To excute a single straight line trajectory to reach a desired pelvis pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time."
+      + " Note that the pelvis position is limited keep the robot's balance (center of mass has to remain inside the support polygon).")
 public class PelvisTrajectoryMessage extends IHMCRosApiPacket<PelvisTrajectoryMessage> implements TransformableDataObject<PelvisTrajectoryMessage>, VisualizablePacket
 {
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
