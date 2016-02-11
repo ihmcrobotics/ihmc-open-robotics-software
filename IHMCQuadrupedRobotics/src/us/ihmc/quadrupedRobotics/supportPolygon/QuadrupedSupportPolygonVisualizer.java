@@ -102,7 +102,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       
       QuadrupedSupportPolygon commonPolygonToPack = new QuadrupedSupportPolygon();
 //      firstQuadrupedPolygon.getCommonSupportPolygon(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT);
-      firstQuadrupedPolygon.getShrunkenCommonPolygon2d(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
+      firstQuadrupedPolygon.getShrunkenCommonTriangle2d(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
       
       vertices.get(RobotQuadrant.FRONT_LEFT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_LEFT));
       vertices.get(RobotQuadrant.FRONT_RIGHT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_RIGHT));
