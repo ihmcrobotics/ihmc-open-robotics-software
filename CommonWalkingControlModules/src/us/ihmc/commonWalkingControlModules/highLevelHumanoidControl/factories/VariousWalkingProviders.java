@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessage
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
@@ -39,6 +40,7 @@ public class VariousWalkingProviders
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
    private final HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber;
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
+   private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
 
    // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
    private final FootstepProvider footstepProvider;
@@ -78,7 +80,7 @@ public class VariousWalkingProviders
    private final MultiJointPositionProvider multiJointPositionProvider;
 
    public VariousWalkingProviders(HandTrajectoryMessageSubscriber handTrajectorySubscriber, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
-         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber,
+         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber, PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
          FootstepProvider footstepProvider, HandstepProvider handstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
@@ -95,6 +97,7 @@ public class VariousWalkingProviders
       this.handTrajectoryMessageSubscriber = handTrajectorySubscriber;
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       this.chestTrajectoryMessageSubscriber = chestTrajectoryMessageSubscriber;
+      this.pelvisTrajectoryMessageSubscriber = pelvisTrajectoryMessageSubscriber;
 
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
@@ -185,6 +188,11 @@ public class VariousWalkingProviders
    public ChestTrajectoryMessageSubscriber getChestTrajectoryMessageSubscriber()
    {
       return chestTrajectoryMessageSubscriber;
+   }
+
+   public PelvisTrajectoryMessageSubscriber getPelvisTrajectoryMessageSubscriber()
+   {
+      return pelvisTrajectoryMessageSubscriber;
    }
 
    public DesiredHighLevelStateProvider getDesiredHighLevelStateProvider()
