@@ -933,38 +933,13 @@ public class QuadrupedSupportPolygon implements Serializable
    }
 
    /**
-    * Returns pitch of the polygon in radians.  Negative values indicate the
-    * polygon's "front" is higher than the "back": average front foot positions
-    * are higher than then average back foot positions
-    *
-    * @return double
-    */
-   public double getPitchInRadians()
-   {
-      FramePoint averageFrontPosition = new FramePoint(getReferenceFrame());
-      getAverageFrontFootPosition(averageFrontPosition);
-
-      FramePoint averageHindPosition = new FramePoint(getReferenceFrame());
-      getAverageHindFootPosition(averageHindPosition);
-      
-      if (!averageFrontPosition.containsNaN() && !averageHindPosition.containsNaN())
-      {
-         return -Math.atan2(averageFrontPosition.getZ() - averageHindPosition.getZ(), averageFrontPosition.getXYPlaneDistance(averageHindPosition));
-      }
-      else
-      {
-         return Double.NaN;
-      }
-   }
-
-   /**
     * Returns the average position of the vertices in the polygon
     * corresponding to front foot locations. NaN is front feet aren't
     * supporting.
     *
     * @params framePointToPack
     */
-   public void getAverageFrontFootPosition(FramePoint framePointToPack)
+   public void getFrontMidpoint(FramePoint framePointToPack)
    {
       if (containsFootstep(RobotQuadrant.FRONT_LEFT) && containsFootstep(RobotQuadrant.FRONT_RIGHT))
       {
@@ -983,7 +958,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       else
       {
-         framePointToPack.setToNaN();
+         throw new UndefinedOperationException("Polygon must contain a front footstep");
       }
    }
 
@@ -994,7 +969,7 @@ public class QuadrupedSupportPolygon implements Serializable
     *
     * @params framePointToPack
     */
-   public void getAverageHindFootPosition(FramePoint framePointToPack)
+   public void getHindMidpoint(FramePoint framePointToPack)
    {
       if (containsFootstep(RobotQuadrant.HIND_LEFT) && containsFootstep(RobotQuadrant.HIND_RIGHT))
       {
@@ -1013,7 +988,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       else
       {
-         framePointToPack.setToNaN();
+         throw new UndefinedOperationException("Polygon must contain a hind footstep");
       }
    }
 
