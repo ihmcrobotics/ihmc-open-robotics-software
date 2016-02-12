@@ -140,7 +140,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacke
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationData;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -398,7 +398,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       //Whole Body IK 
       registerPacketClass(WholeBodyTrajectoryDevelopmentPacket.class);
-      registerPacketClass(WholeBodyTrajectoryPacket.class);
+      registerPacketClass(WholeBodyTrajectoryMessage.class);
       
       registerPacketClass(JointAnglesPacket.class);
       registerPacketClass(SingleJointAnglePacket.class);

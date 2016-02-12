@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPac
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 
 /**
  * Created by agrabertilton on 10/10/14.
@@ -52,7 +52,7 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-      WholeBodyTrajectoryPacket.class,
+      WholeBodyTrajectoryMessage.class,
       StopAllTrajectoryMessage.class,
       HandDesiredConfigurationMessage.class
    };
@@ -75,7 +75,7 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-      WholeBodyTrajectoryPacket.class,
+      WholeBodyTrajectoryMessage.class,
       StopAllTrajectoryMessage.class
    };
 
@@ -117,7 +117,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(MultiJointAnglePacket.class, "/control/multi_joint_angles");
       PACKET_TO_TOPIC_MAP.put(HandComplianceControlParametersPacket.class, "/control/hand_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(LegCompliancePacket.class, "/control/leg_compliance_control_parameters");
-      PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryPacket.class, "/control/whole_body_trajectory");
+      PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryMessage.class, "/control/whole_body_trajectory");
       PACKET_TO_TOPIC_MAP.put(StopAllTrajectoryMessage.class, "/control/stop_motion");
 
       //outputs

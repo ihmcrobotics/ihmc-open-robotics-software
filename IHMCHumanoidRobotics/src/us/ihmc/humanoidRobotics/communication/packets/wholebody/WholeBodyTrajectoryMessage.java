@@ -32,8 +32,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
                + "position, do not provide a waypoint at time 0.0.\n"
                + "Positions and orientations are set to null if no motion is desired\n"
                + "velocities are set to null if they are zero")
-public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTrajectoryPacket>
-        implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryPacket>
+public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajectoryMessage>
+        implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>
 {
 
    @FieldDocumentation("Sequence of desired time at the waypoints of the trajecotry. \n"
@@ -119,11 +119,11 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
    @Optional(value = "scripting")
    public PelvisPosePacket pelvisPosePacket;
 
-   public WholeBodyTrajectoryPacket()
+   public WholeBodyTrajectoryMessage()
    {
    }
 
-   public WholeBodyTrajectoryPacket(WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket)
+   public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage wholeBodyTrajectoryPacket)
    {
 //    public double[] timeAtWaypoint;
       if (wholeBodyTrajectoryPacket.timeAtWaypoint != null)
@@ -254,7 +254,7 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
 
    }
 
-   public WholeBodyTrajectoryPacket(int numWaypoints, int numJointsPerArm)
+   public WholeBodyTrajectoryMessage(int numWaypoints, int numJointsPerArm)
    {
       this.numJointsPerArm = numJointsPerArm;
       this.numWaypoints = numWaypoints;
@@ -265,7 +265,7 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
       allocatePelvisTrajectory();
    }
 
-   public WholeBodyTrajectoryPacket(Random random)
+   public WholeBodyTrajectoryMessage(Random random)
    {
       this(random.nextInt(128) + 1, random.nextInt(16) + 1);
       
@@ -342,7 +342,7 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
    }
 
    @Override
-   public boolean epsilonEquals(WholeBodyTrajectoryPacket otherTrajectory, double epsilon)
+   public boolean epsilonEquals(WholeBodyTrajectoryMessage otherTrajectory, double epsilon)
    {
       if ((numWaypoints != otherTrajectory.numWaypoints) || (numJointsPerArm != otherTrajectory.numJointsPerArm))
       {
@@ -503,9 +503,9 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
 
 
    @Override
-   public WholeBodyTrajectoryPacket transform(RigidBodyTransform transform)
+   public WholeBodyTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      WholeBodyTrajectoryPacket ret = new WholeBodyTrajectoryPacket(this);
+      WholeBodyTrajectoryMessage ret = new WholeBodyTrajectoryMessage(this);
 
       ret.leftFootPosePacket = ret.leftFootPosePacket.transform(transform);
       ret.rightFootPosePacket = ret.rightFootPosePacket.transform(transform);
