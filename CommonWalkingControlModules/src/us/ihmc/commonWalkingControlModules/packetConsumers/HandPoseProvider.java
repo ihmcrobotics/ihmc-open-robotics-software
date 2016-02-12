@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.robotics.geometry.FramePose;
@@ -43,8 +42,6 @@ public interface HandPoseProvider
    
    public abstract double getGraspOffsetFromControlFrame(RobotSide robotSide);
    
-   public abstract boolean checkAndResetStopCommand(RobotSide robotSide);
-
    public abstract boolean checkForHomePosition(RobotSide robotSide);
 
    public abstract HandPosePacket.DataType checkHandPosePacketDataType(RobotSide robotSide);
@@ -55,10 +52,6 @@ public interface HandPoseProvider
 
    public abstract Map<OneDoFJoint, double[]> getDesiredJointAngleForWaypointTrajectory(RobotSide robotSide);
 
-   public abstract boolean checkForNewArmJointTrajectory(RobotSide robotSide);
-
-   public abstract ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide);
-   
    public abstract Vector3d getForceConstraint(RobotSide robotSide);
    
    public abstract double getTangentialForce(RobotSide robotSide);

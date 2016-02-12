@@ -8,18 +8,17 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -176,12 +175,6 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    }
 
    @Override
-   public boolean checkAndResetStopCommand(RobotSide robotSide)
-   {
-      return false;
-   }
-
-   @Override
    public boolean[] getControlledOrientationAxes(RobotSide robotSide)
    {
       for (int i = 0; i < userHandControlledOrientationAxes.length; i++)
@@ -241,18 +234,6 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    public double getRotationAngleRightHandRule(RobotSide robotSide)
    {
       return 0;
-   }
-
-   @Override
-   public boolean checkForNewArmJointTrajectory(RobotSide robotSide)
-   {
-      return false;
-   }
-
-   @Override
-   public ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide)
-   {
-      return null;
    }
 
    @Override

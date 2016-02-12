@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -182,7 +181,6 @@ public class ManipulationControlModule
          handleDefaultState(robotSide);
 
          handleHandPoses(robotSide);
-         handleHandPauses(robotSide);
          handleHandsteps(robotSide);
          handleLoadBearing(robotSide);
       }
@@ -293,25 +291,6 @@ public class ManipulationControlModule
             handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, graspOffsetFromControlFrame, trajectoryTime);
          }
 
-      }
-      else if (handPoseProvider.checkForNewArmJointTrajectory(robotSide))
-      {
-         ArmJointTrajectoryPacket armJointTrajectoryPacket = handPoseProvider.getArmJointTrajectoryPacket(robotSide);
-         if (armJointTrajectoryPacket != null)
-         {
-            handControlModules.get(robotSide).moveUsingCubicTrajectory(armJointTrajectoryPacket);
-         }
-      }
-   }
-
-   private void handleHandPauses(RobotSide robotSide)
-   {
-      if (handPoseProvider != null)
-      {
-         if (handPoseProvider.checkAndResetStopCommand(robotSide))
-         {
-            handControlModules.get(robotSide).holdPositionInJointSpace();
-         }
       }
    }
 

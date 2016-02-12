@@ -18,7 +18,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -268,33 +267,6 @@ public class ChestOrientationManager
          simpleOrientationTrajectoryGenerator.initialize();
          isUsingWaypointTrajectory.set(false);
          activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-         isTrackingOrientation.set(true);
-         isTrajectoryStopped.set(false);
-      }
-      else if (chestOrientationProvider.checkForNewChestOrientationWithWaypoints())
-      {
-         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-
-         simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
-
-         WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
-
-         int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;
-
-         double totalTime = trajectoryData.getTimeAtWaypoints()[lastIndex];
-
-         FrameOrientation lastChestOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex]);
-
-         simpleOrientationTrajectoryGenerator.setFinalOrientation(lastChestOrientation);
-         simpleOrientationTrajectoryGenerator.setTrajectoryTime(totalTime);
-
-         simpleOrientationTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(false);
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-
          isTrackingOrientation.set(true);
          isTrajectoryStopped.set(false);
       }

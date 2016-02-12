@@ -7,7 +7,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class UserDesiredChestOrientationProvider implements ChestOrientationProvider
@@ -83,17 +82,5 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
    public double getTrajectoryTime()
    {
       return chestTrajectoryTime.getDoubleValue();
-   }
-
-   @Override
-   public boolean checkForNewChestOrientationWithWaypoints()
-   {
-      return false;
-   }
-
-   @Override
-   public WaypointOrientationTrajectoryData getDesiredChestOrientationWithWaypoints()
-   {
-      return null;
    }
 }

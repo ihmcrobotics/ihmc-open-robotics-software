@@ -25,7 +25,6 @@ import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectory
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -239,31 +238,6 @@ public class PelvisOrientationManager
             activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
             initialPelvisOrientationOffset.set(tempOrientation);
             FrameOrientation pelvisOrientationProvided = pelvisPoseProvider.getDesiredPelvisOrientation(desiredPelvisFrame);
-
-            pelvisOrientationProvided.changeFrame(desiredPelvisFrame);
-            tempOrientation.setIncludingFrame(pelvisOrientationProvided);
-            finalPelvisOrientationOffset.set(tempOrientation);
-
-            pelvisOrientationOffsetTrajectoryGenerator.initialize();
-            isUsingWaypointTrajectory.set(false);
-            isTrajectoryStopped.set(false);
-            activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
-         }
-         else if (pelvisPoseProvider.checkForNewOrientationWithWaypoints())
-         {
-            initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-
-            WaypointOrientationTrajectoryData trajectoryData = pelvisPoseProvider.getDesiredPelvisOrientationWithWaypoints();
-
-            int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;
-            // it is not really the last time, since we have the "settling"
-            double totalTime = trajectoryData.getTimeAtWaypoints()[lastIndex];
-
-            offsetTrajectoryTime.set(totalTime);
-            activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
-            initialPelvisOrientationOffset.set(tempOrientation);
-
-            FrameOrientation pelvisOrientationProvided = new FrameOrientation(ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex]);
 
             pelvisOrientationProvided.changeFrame(desiredPelvisFrame);
             tempOrientation.setIncludingFrame(pelvisOrientationProvided);

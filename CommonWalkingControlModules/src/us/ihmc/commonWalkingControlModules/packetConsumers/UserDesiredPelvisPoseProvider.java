@@ -12,8 +12,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
-import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
@@ -159,37 +157,6 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
          goToHomeOrientation.set(false);
          return true;
       }
-      return false;
-   }
-
-   @Override
-   public boolean checkForNewPositionWithWaypoints()
-   {
-      return false;
-   }
-
-   @Override
-   public WaypointPositionTrajectoryData getDesiredPelvisPositionWithWaypoints()
-   {
-      return null;
-   }
-
-   @Override
-   public boolean checkForNewOrientationWithWaypoints()
-   {
-      return false;
-   }
-
-   @Override
-   public WaypointOrientationTrajectoryData getDesiredPelvisOrientationWithWaypoints()
-   {
-      return null;
-   }
-
-   @Override
-   public boolean checkAndResetStopCommand()
-   {
-      // TODO Auto-generated method stub
       return false;
    }
 }

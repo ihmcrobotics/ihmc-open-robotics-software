@@ -170,12 +170,6 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       }
    }
 
-   public void appendWaypoints(WaypointPositionTrajectoryData trajectoryData)
-   {
-      trajectoryData.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
-      appendWaypoints(trajectoryData.getTimeAtWaypoints(), trajectoryData.getPositions(), trajectoryData.getVelocities());
-   }
-
    private void checkNumberOfWaypoints(int length)
    {
       if (length > maximumNumberOfWaypoints)
