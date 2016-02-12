@@ -498,7 +498,7 @@ public abstract class PacketValidityChecker
       return true;
    }
 
-   public static boolean validateArmJointTrajectoryPacket(ArmTrajectoryMessage armTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static boolean validateArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(armTrajectoryMessage.robotSide);
       if (packetFieldErrorType != null)

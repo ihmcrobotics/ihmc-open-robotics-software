@@ -111,6 +111,11 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
       return jointTrajectory1DMessages[jointIndex].getNumberOfWaypoints();
    }
 
+   public RobotSide getRobotSide()
+   {
+      return robotSide;
+   }
+
    public Trajectory1DMessage getJointTrajectory(int jointIndex)
    {
       rangeCheck(jointIndex);
