@@ -118,4 +118,10 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
 
       return transformedWaypointMessage;
    }
+
+   @Override
+   public String toString()
+   {
+      return "Euclidean waypoint: time = " + time + ", position = " + position + ", linear velocity = " + linearVelocity;
+   }
 }

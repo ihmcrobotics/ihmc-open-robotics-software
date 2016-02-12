@@ -118,4 +118,10 @@ public class SO3WaypointMessage extends IHMCRosApiPacket<SO3WaypointMessage> imp
 
       return transformedWaypointMessage;
    }
+
+   @Override
+   public String toString()
+   {
+      return "SO3 waypoint: time = " + time + ", orientation = " + orientation + ", angular velocity = " + angularVelocity;
+   }
 }

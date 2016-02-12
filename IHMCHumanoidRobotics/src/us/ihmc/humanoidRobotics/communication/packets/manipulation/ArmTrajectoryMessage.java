@@ -1,6 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
@@ -26,6 +25,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
 
    public ArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
+      setUniqueId(1L);
       robotSide = armTrajectoryMessage.robotSide;
       jointTrajectory1DMessages = new Trajectory1DMessage[armTrajectoryMessage.getNumberOfJoints()];
 
@@ -41,6 +41,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
     */
    public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
    {
+      setUniqueId(1L);
       this.robotSide = robotSide;
       jointTrajectory1DMessages = new Trajectory1DMessage[desiredJointPositions.length];
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
@@ -49,6 +50,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
 
    public ArmTrajectoryMessage(RobotSide robotSide, Trajectory1DMessage[] jointTrajectory1DMessages)
    {
+      setUniqueId(1L);
       this.robotSide = robotSide;
       this.jointTrajectory1DMessages = jointTrajectory1DMessages;
    }
@@ -61,6 +63,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
     */
    public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints)
    {
+      setUniqueId(1L);
       this.robotSide = robotSide;
       jointTrajectory1DMessages = new Trajectory1DMessage[numberOfJoints];
    }
@@ -74,6 +77,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
     */
    public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints, int numberOfWaypoints)
    {
+      setUniqueId(1L);
       this.robotSide = robotSide;
       jointTrajectory1DMessages = new Trajectory1DMessage[numberOfJoints];
       for (int i = 0; i < numberOfWaypoints; i++)
@@ -169,6 +173,9 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
    @Override
    public String toString()
    {
-      return "ArmJointTrajectoryPacket [robotSide=" + robotSide + ", trajectoryPoints=" + Arrays.toString(jointTrajectory1DMessages) + "]";
+      if (jointTrajectory1DMessages != null)
+         return "Arm 1D trajectories: number of joints = " + getNumberOfJoints() + ", robotSide = " + robotSide;
+      else
+         return "Arm 1D trajectories: no joint trajectory, robotSide = " + robotSide;
    }
 }

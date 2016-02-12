@@ -111,4 +111,13 @@ public class HeadTrajectoryMessage extends IHMCRosApiPacket<HeadTrajectoryMessag
 
       return transformedHeadTrajectoryMessage;
    }
+
+   @Override
+   public String toString()
+   {
+      if (taskspaceWaypoints != null)
+         return "Head SO3 trajectory: number of SO3 waypoints = " + getNumberOfWaypoints();
+      else
+         return "Head SO3 trajectory: no SO3 waypoints";
+   }
 }

@@ -108,4 +108,13 @@ public class Trajectory1DMessage extends IHMCRosApiPacket<Trajectory1DMessage> i
          setWaypoint(i, time, position, velocity);
       }
    }
+
+   @Override
+   public String toString()
+   {
+      if (waypoints != null)
+         return "Trajectory 1D: number of 1D waypoints = " + getNumberOfWaypoints();
+      else
+         return "Trajectory 1D: no 1D waypoints";
+   }
 }
