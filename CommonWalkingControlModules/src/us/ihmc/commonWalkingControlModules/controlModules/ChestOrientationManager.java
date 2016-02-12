@@ -92,6 +92,7 @@ public class ChestOrientationManager
 
          waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chestWaypoint", 15, allowMultipleFrames, pelvisZUpFrame,
                registry);
+         waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
          initializeToCurrent = new BooleanYoVariable("initializeChestOrientationToCurrent", registry);
       }

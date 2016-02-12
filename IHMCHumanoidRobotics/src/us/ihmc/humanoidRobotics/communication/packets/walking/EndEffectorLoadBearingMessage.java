@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
@@ -11,7 +11,7 @@ import us.ihmc.tools.DocumentedEnum;
       + "The only application at the moment is making a foot loadbearing."
       + "When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class EndEffectorLoadBearingMessage extends IHMCRosApiPacket<EndEffectorLoadBearingMessage>
+public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffectorLoadBearingMessage>
 {
    public enum EndEffector implements DocumentedEnum<EndEffector>
    {

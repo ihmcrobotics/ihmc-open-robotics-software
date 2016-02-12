@@ -11,7 +11,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -25,7 +25,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n"
                                   + "world frame")
-public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
+public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
    @FieldDocumentation("Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;

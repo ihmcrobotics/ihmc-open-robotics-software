@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
       + " To excute a single straight line trajectory to reach a desired pelvis pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time."
       + " Note that the pelvis position is limited keep the robot's balance (center of mass has to remain inside the support polygon)."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class PelvisTrajectoryMessage extends IHMCRosApiPacket<PelvisTrajectoryMessage> implements TransformableDataObject<PelvisTrajectoryMessage>, VisualizablePacket
+public class PelvisTrajectoryMessage extends IHMCRosApiMessage<PelvisTrajectoryMessage> implements TransformableDataObject<PelvisTrajectoryMessage>, VisualizablePacket
 {
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
    public SE3WaypointMessage[] taskspaceWaypoints;

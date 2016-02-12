@@ -3,13 +3,13 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 
 @ClassDocumentation("This message pauses the execution of a list of footsteps. If this message is\n"
       + "sent in the middle of executing a footstep, the robot will finish the step and\n" + "pause when back in double support."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class PauseWalkingMessage extends IHMCRosApiPacket<PauseWalkingMessage>
+public class PauseWalkingMessage extends IHMCRosApiMessage<PauseWalkingMessage>
 {
    public boolean pause;
 

@@ -9,7 +9,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This message commands the controller to execute a list of footsteps. See FootstepDataMessage for information about defining a footstep."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
+public class FootstepDataListMessage extends IHMCRosApiMessage<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
    @FieldDocumentation("Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();

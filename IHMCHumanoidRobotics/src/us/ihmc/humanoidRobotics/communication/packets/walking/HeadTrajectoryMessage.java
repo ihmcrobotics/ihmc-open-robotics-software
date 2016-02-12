@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
       + " A hermite based curve (third order) is used to interpolate the orientations."
       + " To excute a simple trajectory to reach a desired head orientation, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class HeadTrajectoryMessage extends IHMCRosApiPacket<HeadTrajectoryMessage> implements TransformableDataObject<HeadTrajectoryMessage>, VisualizablePacket
+public class HeadTrajectoryMessage extends IHMCRosApiMessage<HeadTrajectoryMessage> implements TransformableDataObject<HeadTrajectoryMessage>, VisualizablePacket
 {
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
    public SO3WaypointMessage[] taskspaceWaypoints;

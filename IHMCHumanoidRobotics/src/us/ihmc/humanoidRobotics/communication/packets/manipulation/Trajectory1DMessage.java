@@ -4,14 +4,14 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
 import us.ihmc.robotics.math.trajectories.TrajectoryWaypoint1DDataInterface;
 import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the waypoints to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between waypoints.")
-public class Trajectory1DMessage extends IHMCRosApiPacket<Trajectory1DMessage> implements TrajectoryWaypoint1DDataInterface
+public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> implements TrajectoryWaypoint1DDataInterface
 {
    @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
    public Waypoint1DMessage[] waypoints;

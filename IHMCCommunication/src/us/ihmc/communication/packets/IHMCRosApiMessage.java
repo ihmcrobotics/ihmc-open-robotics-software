@@ -2,9 +2,9 @@ package us.ihmc.communication.packets;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 
-public abstract class IHMCRosApiPacket<T> extends Packet<T>
+public abstract class IHMCRosApiMessage<T> extends Packet<T>
 {
-   public IHMCRosApiPacket()
+   public IHMCRosApiMessage()
    {
       if(!this.getClass().isAnnotationPresent(ClassDocumentation.class))
          throw new RuntimeException("Documentation annotation could not be found for " + this.getClass().getName());
