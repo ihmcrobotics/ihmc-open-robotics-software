@@ -10,9 +10,12 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
@@ -56,6 +59,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final FourPointSpline1D spline = new FourPointSpline1D(registry);
 
    private final DesiredComHeightProvider desiredComHeightProvider;
+   private final PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isOffsetHeightTrajectoryStopped", registry);
 
@@ -117,13 +121,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider,
-         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, double minimumHeightAboveGround, double nominalHeightAboveGround,
-         double maximumHeightAboveGround, double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame pelvisFrame,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
+         double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround, double defaultOffsetHeightAboveGround,
+         double doubleSupportPercentageIn, ReferenceFrame pelvisFrame, SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
+      this.pelvisHeightTrajectoryMessageSubscriber = pelvisHeightTrajectoryMessageSubscriber;
       this.pelvisFrame = pelvisFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
@@ -776,6 +781,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       handleStopAllTrajectoryMessage();
       updateOffsetDesireds();
+      handlePelvisHeightTrajectoryMessage();
 
       if (isUsingWaypointTrajectory.getBooleanValue())
          activeTrajectoryGenerator = waypointOffsetHeightAboveGroundTrajectoryGenerator;
@@ -890,6 +896,43 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          double time = waypoint.getTime();
          double z = waypoint.getPosition().getZ();
          double zDot = waypoint.getLinearVelocity().getZ();
+
+         // TODO (Sylvain) Check if that's the right way to do it
+         desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, z);
+         desiredPosition.changeFrame(frameOfLastFoostep);
+
+         double zOffset = desiredPosition.getZ() - splineOutput[0];
+
+         waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(time, zOffset, zDot);
+      }
+
+      waypointOffsetHeightAboveGroundTrajectoryGenerator.initialize();
+      activeTrajectoryGenerator = waypointOffsetHeightAboveGroundTrajectoryGenerator;
+      isUsingWaypointTrajectory.set(true);
+      isTrajectoryOffsetStopped.set(false);
+   }
+
+   private void handlePelvisHeightTrajectoryMessage()
+   {
+      if (pelvisHeightTrajectoryMessageSubscriber == null || !pelvisHeightTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
+         return;
+
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = pelvisHeightTrajectoryMessageSubscriber.pollMessage();
+
+      offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+      waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
+
+      if (pelvisHeightTrajectoryMessage.getWaypoint(0).getTime() > 1.0e-5)
+      {
+         waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
+      }
+
+      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         Waypoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getWaypoint(i);
+         double time = waypoint.getTime();
+         double z = waypoint.getPosition();
+         double zDot = waypoint.getVelocity();
 
          // TODO (Sylvain) Check if that's the right way to do it
          desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, z);
