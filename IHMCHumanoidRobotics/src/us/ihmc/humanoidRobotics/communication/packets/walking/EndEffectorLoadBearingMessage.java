@@ -89,4 +89,9 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiPacket<EndEffectorL
       return true;
    }
 
+   @Override
+   public String toString()
+   {
+      return "End effector load bearing: end-effector = " + endEffector + ", robotSide = " + robotSide;
+   }
 }

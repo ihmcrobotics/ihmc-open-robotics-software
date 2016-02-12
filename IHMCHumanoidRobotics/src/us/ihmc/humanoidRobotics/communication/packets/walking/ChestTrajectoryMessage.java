@@ -14,17 +14,22 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 @ClassDocumentation("This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified waypoints."
       + " A hermite based curve (third order) is used to interpolate the orientations."
       + " To excute a simple trajectory to reach a desired chest orientation, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
-public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMessage> implements TransformableDataObject<ChestTrajectoryMessage>, VisualizablePacket
+public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMessage>
+      implements TransformableDataObject<ChestTrajectoryMessage>, VisualizablePacket
 {
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
    public SO3WaypointMessage[] taskspaceWaypoints;
 
+   /**
+    * Empty constructor deserialization.
+    */
    public ChestTrajectoryMessage()
    {
    }
 
    public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
+      setUniqueId(1L);
       taskspaceWaypoints = new SO3WaypointMessage[chestTrajectoryMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
          taskspaceWaypoints[i] = new SO3WaypointMessage(chestTrajectoryMessage.taskspaceWaypoints[i]);
@@ -37,8 +42,9 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
     */
    public ChestTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
    {
+      setUniqueId(1L);
       Vector3d zeroAngularVelocity = new Vector3d();
-      taskspaceWaypoints = new SO3WaypointMessage[]{new SO3WaypointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
+      taskspaceWaypoints = new SO3WaypointMessage[] {new SO3WaypointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
    }
 
    /**
@@ -48,6 +54,7 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
     */
    public ChestTrajectoryMessage(int numberOfWaypoints)
    {
+      setUniqueId(1L);
       taskspaceWaypoints = new SO3WaypointMessage[numberOfWaypoints];
    }
 
@@ -110,5 +117,14 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
          transformedChestTrajectoryMessage.taskspaceWaypoints[i] = taskspaceWaypoints[i].transform(transform);
 
       return transformedChestTrajectoryMessage;
+   }
+
+   @Override
+   public String toString()
+   {
+      if (taskspaceWaypoints != null)
+         return "Chest SO3 trajectory: number of SO3 waypoints = " + getNumberOfWaypoints();
+      else
+         return "Chest SO3 trajectory: no SO3 waypoints";
    }
 }

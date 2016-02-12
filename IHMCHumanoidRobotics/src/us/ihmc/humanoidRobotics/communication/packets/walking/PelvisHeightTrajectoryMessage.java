@@ -93,4 +93,13 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeight
 
       return true;
    }
+
+   @Override
+   public String toString()
+   {
+      if (waypoints != null)
+         return "Pelvis height 1D trajectory: number of 1D waypoints = " + getNumberOfWaypoints();
+      else
+         return "Pelvis height 1D trajectory: no 1D waypoints";
+   }
 }

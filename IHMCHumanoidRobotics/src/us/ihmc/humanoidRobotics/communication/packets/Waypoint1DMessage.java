@@ -80,4 +80,10 @@ public class Waypoint1DMessage extends IHMCRosApiPacket<Waypoint1DMessage> imple
 
       return true;
    }
+
+   @Override
+   public String toString()
+   {
+      return "SE3 waypoint: time = " + time + ", position = " + position + ", velocity = " + velocity;
+   }
 }

@@ -175,4 +175,10 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
 
       return transformedWaypointMessage;
    }
+
+   @Override
+   public String toString()
+   {
+      return "SE3 waypoint: time = " + time + ", position = " + position + ", orientation = " + orientation + ", linear velocity = " + linearVelocity + ", angular velocity = " + angularVelocity;
+   }
 }
