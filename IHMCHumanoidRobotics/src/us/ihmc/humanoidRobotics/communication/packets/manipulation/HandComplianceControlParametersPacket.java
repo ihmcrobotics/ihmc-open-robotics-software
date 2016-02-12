@@ -7,7 +7,7 @@ import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
                                   + "Once activated, an integrator is used on the error in force/torque measured to keep adjusting the desired hand pose until the desired\n"
                                   + "force/torque are achieved or until the maximum correction is reached (set to 5cm for translation and 0.2rad for the orientation).\n"
                                   + "As it uses the measurements from wrist force sensors, a calibration of these is preferred prior to activation of compliance.")
-public class HandComplianceControlParametersPacket extends IHMCRosApiPacket<HandComplianceControlParametersPacket>
+public class HandComplianceControlParametersPacket extends Packet<HandComplianceControlParametersPacket>
 {
    
    public RobotSide robotSide;

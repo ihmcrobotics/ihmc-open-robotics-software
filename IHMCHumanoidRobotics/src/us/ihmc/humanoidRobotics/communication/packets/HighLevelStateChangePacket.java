@@ -4,13 +4,13 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 
 @ClassDocumentation("This message notifies the user of a change in the high level state. This message's primary\n"
                                   + "use is to signal a requested state change is completed.")
-public class HighLevelStateChangePacket extends IHMCRosApiPacket<HighLevelStateChangePacket>
+public class HighLevelStateChangePacket extends Packet<HighLevelStateChangePacket>
 {
    @FieldDocumentation("initialState gives the controller's state prior to transition")
    public HighLevelState initialState;

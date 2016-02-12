@@ -6,7 +6,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -15,7 +15,7 @@ import us.ihmc.robotics.random.RandomTools;
                                   + "the FOV of the camera using a combination of the neck and pelvis joints. If the\n"
                                   + "point is outside the combined range of the available joints, the robot will\n"
                                   + "turn as close as it can to the point without taking any steps.")
-public class LookAtPacket extends IHMCRosApiPacket<LookAtPacket>
+public class LookAtPacket extends Packet<LookAtPacket>
 {
    public Point3d lookAtPoint;
    @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")
