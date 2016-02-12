@@ -52,39 +52,6 @@ public class QuaternionCalculusTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testMultiplyAndInverseMultiplyAlgebra() throws Exception
-   {
-      Random random = new Random(651651961L);
-
-      for (int i = 0; i < 10000; i++)
-      {
-         QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quat4d q = RandomTools.generateRandomQuaternion(random);
-         Vector3d v = RandomTools.generateRandomVector(random);
-         
-         Quat4d qResult = new Quat4d();
-         Quat4d qResultInverse = new Quat4d();
-         Vector3d vResult = new Vector3d();
-                  
-         quaternionCalculus.multiply(q, v, qResult);
-         quaternionCalculus.multiply(q, v, vResult);
-         
-         assertTrue(qResult.getX()==vResult.getX());
-         assertTrue(qResult.getY()==vResult.getY());
-         assertTrue(qResult.getZ()==vResult.getZ());
-         
-         quaternionCalculus.inverseMultiply(q,qResult,qResultInverse); 
-         
-         assertTrue(Math.abs(v.getX() - qResultInverse.getX()) < 10e-10);
-         assertTrue(Math.abs(v.getY() - qResultInverse.getY()) < 10e-10);
-         assertTrue(Math.abs(v.getZ() - qResultInverse.getZ()) < 10e-10);
-         
-
-      }
-   }
-   
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
