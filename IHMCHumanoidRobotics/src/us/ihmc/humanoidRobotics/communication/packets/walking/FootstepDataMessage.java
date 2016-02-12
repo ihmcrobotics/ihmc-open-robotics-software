@@ -27,9 +27,11 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
                                   + "world frame")
 public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
-   // Must be public for efficient serialization.
+   @FieldDocumentation("Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
+   @FieldDocumentation("Specifies the position of the footstep. It is expressed in world frame.")
    public Point3d location;
+   @FieldDocumentation("Specifies the orientation of the footstep. It is expressed in world frame.")
    public Quat4d orientation;
    
    @FieldDocumentation("predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
@@ -43,7 +45,7 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
                                      + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2d> predictedContactPoints;
 
-   @FieldDocumentation("This contains information on what the swing trajectory should be for each step. Recomended is to default to basic.\n")
+   @FieldDocumentation("This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
 
    @FieldDocumentation("Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."

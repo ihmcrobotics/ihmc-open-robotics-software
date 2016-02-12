@@ -45,9 +45,9 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
       }
    }
 
-   @FieldDocumentation("Specifies the which hand will execute the trajectory.")
+   @FieldDocumentation("Specifies which hand will execute the trajectory.")
    public RobotSide robotSide;
-   @FieldDocumentation("Specify whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
+   @FieldDocumentation("Specifies whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
    public BaseForControl base;
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
    public SE3WaypointMessage[] taskspaceWaypoints;
