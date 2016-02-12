@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 /**
@@ -21,7 +21,7 @@ public class SimpleFootstepValueFunction implements FootstepValueFunction
    }
 
    @Override
-   public double getFootstepValue(FootstepData footstepData)
+   public double getFootstepValue(FootstepDataMessage footstepData)
    {
       Matrix3d rotationMatrix = new Matrix3d();
       rotationMatrix.set(footstepData.getOrientation());

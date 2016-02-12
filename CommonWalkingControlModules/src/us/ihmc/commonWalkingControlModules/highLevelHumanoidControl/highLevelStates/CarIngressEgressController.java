@@ -32,20 +32,16 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
-import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -146,8 +142,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel
             .getPelvis().getBodyFixedFrame());
-
-      PositionProvider pelvisPositionprovider = new YoPositionProvider(new YoFramePoint("pelvisPositionProvider", pelvisPositionControlFrame, registry));
 
       pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 50, worldFrame, registry);
 
@@ -324,23 +318,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
             pelvisPositionTrajectoryGenerator.initialize();
          }
-         else if (pelvisPoseProvider.checkForNewPositionWithWaypoints())
-         {
-            double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime.getDoubleValue();
-            pelvisPositionTrajectoryGenerator.compute(time);
-
-            pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
-            desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
-            
-            WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = pelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
-            desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
-            pelvisPositionTrajectoryGenerator.clear();
-
-            pelvisPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);
-            pelvisTrajectoryStartTime.set(yoTime.getDoubleValue());
-
-            pelvisPositionTrajectoryGenerator.initialize();
-         }
       }
 
       double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime.getDoubleValue();
@@ -412,14 +389,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    protected void doFootControl()
    {
       for (RobotSide robotSide : RobotSide.values)
-      {
-         if (footPoseProvider != null && footPoseProvider.checkForNewPose(robotSide))
-         {
-            FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
-            double trajectoryTime = footPoseProvider.getTrajectoryTime();
-            feetManager.requestMoveStraight(robotSide, newFootPose, trajectoryTime);
-         }
-      }
+         handleFootPose(robotSide);
 
       super.doFootControl();
    }

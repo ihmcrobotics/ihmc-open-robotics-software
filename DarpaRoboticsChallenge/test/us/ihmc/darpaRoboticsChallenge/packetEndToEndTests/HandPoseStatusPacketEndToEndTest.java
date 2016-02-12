@@ -21,7 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -200,7 +200,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       testHelper.send(outgoingHandPosePacket);
       double timeToSimulateHandMotion = 1.0;
       testHelper.simulateAndBlockAndCatchExceptions(timeToSimulateHandMotion);
-      testHelper.send(new StopMotionPacket());
+      testHelper.send(new StopAllTrajectoryMessage());
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       FramePoint endLocation = new FramePoint(handControlFrame);

@@ -9,7 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepVisualizer;
@@ -92,7 +92,7 @@ public class FootstepSnapperTest
       InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resourceName);
 
       FootstepPointsDataReader dataReader = new FootstepPointsDataReader(resourceAsStream);
-      FootstepData footstepData = new FootstepData();
+      FootstepDataMessage footstepData = new FootstepDataMessage();
       FootSpoof spoof = new FootSpoof("basicSpoof");
       FramePose2d desiredPose = new FramePose2d(ReferenceFrame.getWorldFrame());
 
@@ -535,7 +535,7 @@ public class FootstepSnapperTest
          return false;
       }
 
-      public List<Point3d> getNextSetPointsAndFootstep(FootstepData footstepData) throws IOException
+      public List<Point3d> getNextSetPointsAndFootstep(FootstepDataMessage footstepData) throws IOException
       {
          if (hasAnotherFootstepAndPoints())
          {

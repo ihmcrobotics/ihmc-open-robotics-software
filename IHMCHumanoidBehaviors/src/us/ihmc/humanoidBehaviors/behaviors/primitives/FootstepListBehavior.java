@@ -12,10 +12,10 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -27,7 +27,7 @@ public class FootstepListBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = false;
 
-   private FootstepDataList outgoingFootstepDataList;
+   private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
    private FootstepStatus lastFootstepStatus;
 
@@ -52,7 +52,7 @@ public class FootstepListBehavior extends BehaviorInterface
       defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();
    }
 
-   public void set(FootstepDataList footStepList)
+   public void set(FootstepDataListMessage footStepList)
    {
       outgoingFootstepDataList = footStepList;
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
@@ -61,7 +61,7 @@ public class FootstepListBehavior extends BehaviorInterface
    
    public void set(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
-      FootstepDataList footstepDataList = new FootstepDataList(swingTime,transferTime);
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime,transferTime);
       
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -71,7 +71,7 @@ public class FootstepListBehavior extends BehaviorInterface
          footstep.getOrientation(orientation);
          
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
          footstepDataList.add(footstepData);
       }
       set(footstepDataList);
@@ -179,14 +179,14 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
-      sendPacketToController(new PauseCommand(true));
+      sendPacketToController(new PauseWalkingMessage(true));
       isStopped.set(true);
    }
 
    @Override
    public void pause()
    {
-      sendPacketToController(new PauseCommand(true));
+      sendPacketToController(new PauseWalkingMessage(true));
       isPaused.set(true);
       if (DEBUG)
          PrintTools.debug(this, "Pausing Behavior");
@@ -195,7 +195,7 @@ public class FootstepListBehavior extends BehaviorInterface
    @Override
    public void resume()
    {
-      sendPacketToController(new PauseCommand(false));
+      sendPacketToController(new PauseWalkingMessage(false));
       isPaused.set(false);
       isStopped.set(false);
       if (DEBUG)
@@ -245,18 +245,18 @@ public class FootstepListBehavior extends BehaviorInterface
       return hasInputBeenSet() && !isDone();
    }
 
-   private final ArrayList<FootstepData> footstepDataList = new ArrayList<FootstepData>();
+   private final ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
    private final Vector3d firstSingleSupportFootTranslationFromWorld = new Vector3d();
    private final Point3d previousFootStepLocation = new Point3d();
    private final Point3d nextFootStepLocation = new Point3d();
 
-   public ArrayList<Double> getFootstepLengths(FootstepDataList footStepList, FullHumanoidRobotModel fullRobotModel,
+   public ArrayList<Double> getFootstepLengths(FootstepDataListMessage footStepList, FullHumanoidRobotModel fullRobotModel,
          WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
       footstepDataList.addAll(footStepList.getDataList());
 
-      FootstepData firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
+      FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 
       RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(firstStepData.getRobotSide().getOppositeSide()).getBodyFixedFrame()
             .getTransformToWorldFrame();
@@ -278,7 +278,7 @@ public class FootstepListBehavior extends BehaviorInterface
       return footStepLengths;
    }
 
-   public boolean areFootstepsTooFarApart(FootstepDataList footStepList, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
+   public boolean areFootstepsTooFarApart(FootstepDataListMessage footStepList, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
       for (double stepLength : getFootstepLengths(footStepList, fullRobotModel, walkingControllerParameters))
       {

@@ -20,9 +20,9 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -111,9 +111,9 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       ScriptObject nextObject = scriptObjects.poll();
       Object scriptObject = nextObject.getScriptObject();
 
-      if (scriptObject instanceof FootstepDataList)
+      if (scriptObject instanceof FootstepDataListMessage)
       {
-         FootstepDataList footstepDataList = (FootstepDataList) scriptObject;
+         FootstepDataListMessage footstepDataList = (FootstepDataListMessage) scriptObject;
          this.addFootstepDataList(footstepDataList);
          setupTimesForNewScriptEvent(0.5); // Arbitrary half second duration. With footsteps, it waits till they are done before looking for a new command.
       }
@@ -133,20 +133,20 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       else if (scriptObject instanceof PelvisPosePacket)
       {
          PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
-         desiredPelvisPoseProvider.getPelvisPosePacketConsumer().receivedPacket(pelvisPosePacket);
+         desiredPelvisPoseProvider.receivedPacket(pelvisPosePacket);
 
          setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }
-      else if (scriptObject instanceof PauseCommand)
+      else if (scriptObject instanceof PauseWalkingMessage)
       {
-         PauseCommand pauseCommand = (PauseCommand) scriptObject;
+         PauseWalkingMessage pauseCommand = (PauseWalkingMessage) scriptObject;
          setupTimesForNewScriptEvent(0.5);
       }
 
       else if (scriptObject instanceof ComHeightPacket)
       {
          ComHeightPacket comHeightPacket = (ComHeightPacket) scriptObject;
-         desiredComHeightProvider.getComHeightPacketConsumer().receivedPacket(comHeightPacket);
+         desiredComHeightProvider.receivedPacket(comHeightPacket);
          setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
       }
    }
@@ -157,12 +157,12 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       this.scriptEventDuration.set(scriptEventDuration);
    }
 
-   private void addFootstepDataList(FootstepDataList footstepDataList)
+   private void addFootstepDataList(FootstepDataListMessage footstepDataList)
    {
-      ArrayList<FootstepData> footstepList = footstepDataList.getDataList();
+      ArrayList<FootstepDataMessage> footstepList = footstepDataList.getDataList();
 
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      for (FootstepData footstepData : footstepList)
+      for (FootstepDataMessage footstepData : footstepList)
       {
          RobotSide robotSide = footstepData.getRobotSide();
          ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);

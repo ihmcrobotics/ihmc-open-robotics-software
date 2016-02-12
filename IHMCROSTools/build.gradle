@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.11'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.12'
 }
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
@@ -34,11 +34,7 @@ project.sourceSets {
     }
 }
 
-repositories {
-	maven {
-	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
-	}
-}
+
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']

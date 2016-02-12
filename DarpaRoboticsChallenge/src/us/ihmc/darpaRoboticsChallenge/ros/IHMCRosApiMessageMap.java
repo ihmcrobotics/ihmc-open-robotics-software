@@ -7,25 +7,25 @@ import java.util.Map.Entry;
 
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 
 /**
  * Created by agrabertilton on 10/10/14.
@@ -37,14 +37,14 @@ public class IHMCRosApiMessageMap
 	   HandPosePacket.class,
 	   ComHeightPacket.class,
 	   FootPosePacket.class,
-	   FootstepData.class,
-	   FootstepDataList.class,
+	   FootstepDataMessage.class,
+	   FootstepDataListMessage.class,
 	   FootstepStatus.class,
 	   ChestOrientationPacket.class,
 	   HeadOrientationPacket.class,
-	   PauseCommand.class,
+	   PauseWalkingMessage.class,
 	   HighLevelStatePacket.class,
-	   ArmJointTrajectoryPacket.class,
+	   ArmTrajectoryMessage.class,
 	   JointAnglesPacket.class,
 	   AtlasElectricMotorEnablePacket.class,
       AtlasWristSensorCalibrationRequestPacket.class,
@@ -52,8 +52,8 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-      WholeBodyTrajectoryPacket.class,
-      StopMotionPacket.class,
+      WholeBodyTrajectoryMessage.class,
+      StopAllTrajectoryMessage.class,
       HandDesiredConfigurationMessage.class
    };
 
@@ -62,12 +62,12 @@ public class IHMCRosApiMessageMap
       HandPosePacket.class,
       ComHeightPacket.class,
       FootPosePacket.class,
-      FootstepDataList.class,
+      FootstepDataListMessage.class,
       ChestOrientationPacket.class,
       HeadOrientationPacket.class,
-      PauseCommand.class,
+      PauseWalkingMessage.class,
       HighLevelStatePacket.class,
-      ArmJointTrajectoryPacket.class,
+      ArmTrajectoryMessage.class,
       JointAnglesPacket.class,
       AtlasElectricMotorEnablePacket.class,
       AtlasWristSensorCalibrationRequestPacket.class,
@@ -75,8 +75,8 @@ public class IHMCRosApiMessageMap
       MultiJointAnglePacket.class,
       HandComplianceControlParametersPacket.class,
       LegCompliancePacket.class,
-      WholeBodyTrajectoryPacket.class,
-      StopMotionPacket.class
+      WholeBodyTrajectoryMessage.class,
+      StopAllTrajectoryMessage.class
    };
 
    public static final Class[] OUTPUT_PACKET_LIST =
@@ -104,12 +104,12 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(HandPosePacket.class, "/control/hand_pose");
       PACKET_TO_TOPIC_MAP.put(ComHeightPacket.class, "/control/com_height");
       PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
-      PACKET_TO_TOPIC_MAP.put(FootstepDataList.class, "/control/footstep_list");
+      PACKET_TO_TOPIC_MAP.put(FootstepDataListMessage.class, "/control/footstep_list");
       PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
       PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
-      PACKET_TO_TOPIC_MAP.put(PauseCommand.class, "/control/pause_footstep_exec");
+      PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");
       PACKET_TO_TOPIC_MAP.put(HighLevelStatePacket.class, "/control/high_level_state");
-      PACKET_TO_TOPIC_MAP.put(ArmJointTrajectoryPacket.class, "/control/arm_joint_trajectory");
+      PACKET_TO_TOPIC_MAP.put(ArmTrajectoryMessage.class, "/control/arm_joint_trajectory");
       PACKET_TO_TOPIC_MAP.put(JointAnglesPacket.class, "/control/joint_angles");
       PACKET_TO_TOPIC_MAP.put(AtlasElectricMotorEnablePacket.class, "/control/enable_electric_motor");
       PACKET_TO_TOPIC_MAP.put(AtlasWristSensorCalibrationRequestPacket.class, "/control/wrist_sensor_calibration");
@@ -117,8 +117,8 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(MultiJointAnglePacket.class, "/control/multi_joint_angles");
       PACKET_TO_TOPIC_MAP.put(HandComplianceControlParametersPacket.class, "/control/hand_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(LegCompliancePacket.class, "/control/leg_compliance_control_parameters");
-      PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryPacket.class, "/control/whole_body_trajectory");
-      PACKET_TO_TOPIC_MAP.put(StopMotionPacket.class, "/control/stop_motion");
+      PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryMessage.class, "/control/whole_body_trajectory");
+      PACKET_TO_TOPIC_MAP.put(StopAllTrajectoryMessage.class, "/control/stop_motion");
 
       //outputs
       PACKET_TO_TOPIC_MAP.put(FootstepStatus.class, "/output/footstep_status");

@@ -23,8 +23,8 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
@@ -118,13 +118,13 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getDRCSimulationFactory().getThreadDataSynchronizer().getControllerFullRobotModel();
 
-      FootstepDataList corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
+      FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
       
       // Corrupt the footsteps by adding a big z offset and coorupting the pitch and roll
       FrameOrientation tempFrameOrientation = new FrameOrientation();
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
       {
-         FootstepData footstepData = corruptedFootstepDataList.getDataList().get(i);
+         FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          footstepData.location.z += 1.0;
          tempFrameOrientation.set(footstepData.getOrientation());
          double[] yawPitchRoll = tempFrameOrientation.getYawPitchRoll();
@@ -139,7 +139,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       ArrayList<Footstep> corruptedFootstepList = new ArrayList<>();
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
       {
-         FootstepData footstepData = corruptedFootstepDataList.getDataList().get(i);
+         FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          RobotSide robotSide = footstepData.getRobotSide();
          RigidBody endEffector = fullRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
@@ -153,7 +153,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       Point2d boundingBoxMin = new Point2d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       Point2d boundingBoxMax = new Point2d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-      for (FootstepData footstepData : corruptedFootstepDataList.getDataList())
+      for (FootstepDataMessage footstepData : corruptedFootstepDataList.getDataList())
       {
          double footstepX = footstepData.getLocation().x;
          double footstepY = footstepData.getLocation().y;
@@ -185,7 +185,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
  
-      FootstepDataList snappedFootstepDataList = new FootstepDataList();
+      FootstepDataListMessage snappedFootstepDataList = new FootstepDataListMessage();
       for (int i = 0; i < corruptedFootstepList.size(); i++)
       {
          Footstep footstep = corruptedFootstepList.get(i);
@@ -196,7 +196,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          Quat4d orientation = new Quat4d();
          footstep.getPosition(location);
          footstep.getOrientation(orientation);
-         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
          snappedFootstepDataList.add(footstepData);
       }
 
@@ -212,12 +212,12 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       assertTrue(success);
    }
 
-   private void vidualizeCorruptedFootsteps(FootstepDataList corruptedFootstepDataList, SimulationConstructionSet scs)
+   private void vidualizeCorruptedFootsteps(FootstepDataListMessage corruptedFootstepDataList, SimulationConstructionSet scs)
    {
       if (!VISUALIZE)
          return;
 
-      for (FootstepData footstepData : corruptedFootstepDataList.getDataList())
+      for (FootstepDataMessage footstepData : corruptedFootstepDataList.getDataList())
       {
             Graphics3DObject staticLinkGraphics = new Graphics3DObject();
             staticLinkGraphics.translate(new Vector3d(footstepData.location));
@@ -306,7 +306,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       return heightMap;
    }
 
-   private FootstepDataList createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][] {
             { { 3.00, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },

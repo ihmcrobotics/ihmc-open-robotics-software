@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -22,13 +22,13 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    static double thetaResolution = Math.PI / 16;
 
    //position information
-   public FootstepData footstepData = new FootstepData();
+   public FootstepDataMessage footstepData = new FootstepDataMessage();
    public double theta;
    public TerrainType terrainType = TerrainType.UNKNOWN;
    public double supportPolygonArea = 0;
 
 
-   public FootstepPlanState(FootstepData startState, double theta)
+   public FootstepPlanState(FootstepDataMessage startState, double theta)
    {
       footstepData = startState;
       this.theta = theta;

@@ -20,6 +20,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
@@ -88,7 +90,7 @@ public class MomentumBasedControllerFactory
    private final SideDependentList<String> footContactSensorNames;
    private final SideDependentList<String> wristSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
-   
+
    private WalkingHighLevelHumanoidController walkingBehavior;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -97,8 +99,8 @@ public class MomentumBasedControllerFactory
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-         SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
-         CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
+         SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
+         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -131,17 +133,17 @@ public class MomentumBasedControllerFactory
    {
       return highLevelHumanoidControllerManager;
    }
-   
+
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       momentumBasedController.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
-         DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry, 
-         TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
-         ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, HumanoidGlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry,
+         TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolderReadOnly forceSensorDataHolder,
+         ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, HumanoidGlobalDataProducer dataProducer,
+         InverseDynamicsJoint... jointsToIgnore)
    {
       SideDependentList<ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
@@ -149,7 +151,8 @@ public class MomentumBasedControllerFactory
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
-      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, contactSensorHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, contactSensorHolder, totalRobotWeight,
+            yoGraphicsListRegistry, registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,21 +193,24 @@ public class MomentumBasedControllerFactory
       double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
 
       DesiredComHeightProvider desiredComHeightProvider = variousWalkingProviders.getDesiredComHeightProvider();
+      StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
+      PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisHeightTrajectoryMessageSubscriber();
 
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(desiredComHeightProvider,
-            minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn,
-            pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
+            stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, minimumHeightAboveGround, nominalHeightAboveGround,
+            maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry,
+            registry);
       centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
 
-      CapturePointPlannerAdapter instantaneousCapturePointPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, walkingControllerParameters, registry,
-            yoGraphicsListRegistry, controlDT, feet, bipedSupportPolygons);
+      CapturePointPlannerAdapter instantaneousCapturePointPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, walkingControllerParameters,
+            registry, yoGraphicsListRegistry, controlDT, feet, bipedSupportPolygons);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
-      momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ,
-            twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT,
+      momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors, yoTime,
+            gravityZ, twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT,
             oldMomentumControlModule, updatables, armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
@@ -234,9 +240,9 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
-      walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
-            centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters,
-            instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
+      walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers, centerOfMassHeightTrajectoryGenerator,
+            transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters, instantaneousCapturePointPlanner,
+            icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -273,7 +279,7 @@ public class MomentumBasedControllerFactory
          ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
          double contactThresholdForce = walkingControllerParameters.getContactThresholdForce();
          double footSwitchCoPThresholdFraction = walkingControllerParameters.getCoPThresholdFraction();
-         
+
          switch (walkingControllerParameters.getFootSwitchType())
          {
          case KinematicBased:
@@ -282,15 +288,16 @@ public class MomentumBasedControllerFactory
             break;
 
          case WrenchBased:
-            WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(footName, footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide),
-                     yoGraphicsListRegistry, contactThresholdForce, registry);
+            WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(footName, footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight,
+                  bipedFeet.get(robotSide), yoGraphicsListRegistry, contactThresholdForce, registry);
             wrenchBasedFootSwitch.setSecondContactThresholdForce(walkingControllerParameters.getSecondContactThresholdForceIgnoringCoP());
             footSwitch = wrenchBasedFootSwitch;
             break;
-            
+
          case WrenchAndContactSensorFused:
-            footSwitch = new WrenchAndContactSensorFusedFootSwitch(footName, footForceSensor, contactSensorHolder.getByName(footContactSensorNames.get(robotSide)), 
-                  footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), yoGraphicsListRegistry, contactThresholdForce, registry);
+            footSwitch = new WrenchAndContactSensorFusedFootSwitch(footName, footForceSensor,
+                  contactSensorHolder.getByName(footContactSensorNames.get(robotSide)), footSwitchCoPThresholdFraction, totalRobotWeight,
+                  bipedFeet.get(robotSide), yoGraphicsListRegistry, contactThresholdForce, registry);
             break;
          }
 
@@ -303,12 +310,13 @@ public class MomentumBasedControllerFactory
 
    private SideDependentList<ForceSensorDataReadOnly> createWristForceSensors(ForceSensorDataHolderReadOnly forceSensorDataHolder)
    {
-      if (wristSensorNames == null) return null;
+      if (wristSensorNames == null)
+         return null;
 
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         if(wristSensorNames.get(robotSide) == null)
+         if (wristSensorNames.get(robotSide) == null)
          {
             return null;
          }
@@ -333,22 +341,23 @@ public class MomentumBasedControllerFactory
    public void reinitializeWalking(boolean keepPosition)
    {
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.WALKING);
-      if( keepPosition )
+      if (keepPosition)
       {
-         if ( walkingBehavior!= null )
+         if (walkingBehavior != null)
          {
             walkingBehavior.initializeDesiredHeightToCurrent();
             walkingBehavior.requestICPPlannerToHoldCurrentCoM();
             walkingBehavior.reinitializePelvisOrientation(false);
          }
-         
-         if( variousWalkingManagers != null){
-            variousWalkingManagers.getManipulationControlModule().initializeDesiredToCurrent(); 
+
+         if (variousWalkingManagers != null)
+         {
+            variousWalkingManagers.getManipulationControlModule().initializeDesiredToCurrent();
             variousWalkingManagers.getPelvisOrientationManager().setToHoldCurrentInWorldFrame();
-         }          
+         }
       }
    }
-   
+
    public void reinitializePositionControl()
    {
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.JOINT_POSITION_CONTROL);
