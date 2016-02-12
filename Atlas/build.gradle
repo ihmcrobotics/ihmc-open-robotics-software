@@ -41,7 +41,7 @@ dependencies {
     compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
     compile group: 'colt', name: 'colt', version: '1.2.0'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
-   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
+   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
 	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
 
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")
