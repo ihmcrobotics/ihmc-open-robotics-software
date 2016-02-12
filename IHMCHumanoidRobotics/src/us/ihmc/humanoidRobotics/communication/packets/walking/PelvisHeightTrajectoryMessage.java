@@ -25,16 +25,33 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeight
          waypoints[i] = new Waypoint1DMessage(pelvisHeightTrajectoryMessage.waypoints[i]);
    }
 
+   /**
+    * Use this constructor to go straight to the given end point.
+    * @param trajectoryTime how long it takes to reach the desired height.
+    * @param desiredHeight desired pelvis height expressed in world frame.
+    */
    public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight)
    {
       waypoints = new Waypoint1DMessage[] {new Waypoint1DMessage(trajectoryTime, desiredHeight, 0.0)};
    }
 
+   /**
+    * Use this constructor to build a message with more than one waypoint.
+    * This constructor only allocates memory for the waypoints, you need to call {@link #setWaypoint(int, double, double, double)} for each waypoint afterwards.
+    * @param numberOfWaypoints number of waypoints that will be sent to the controller.
+    */
    public PelvisHeightTrajectoryMessage(int numberOfWaypoints)
    {
       waypoints = new Waypoint1DMessage[numberOfWaypoints];
    }
 
+   /**
+    * Create a waypoint.
+    * @param waypointIndex index of the waypoint to create.
+    * @param time time at which the waypoint has to be reached. The time is relative to when the trajectory starts.
+    * @param position define the desired 1D position to be reached at this waypoint. It is expressed in world frame.
+    * @param velocity define the desired 1D velocity to be reached at this waypoint. It is expressed in world frame.
+    */
    public void setWaypoint(int waypointIndex, double time, double position, double velocity)
    {
       rangeCheck(waypointIndex);

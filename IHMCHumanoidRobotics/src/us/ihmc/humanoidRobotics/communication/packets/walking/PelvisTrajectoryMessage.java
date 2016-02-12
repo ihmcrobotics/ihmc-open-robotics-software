@@ -55,6 +55,15 @@ public class PelvisTrajectoryMessage extends IHMCRosApiPacket<PelvisTrajectoryMe
       taskspaceWaypoints = new SE3WaypointMessage[numberOfWaypoints];
    }
 
+   /**
+    * Create a waypoint.
+    * @param waypointIndex index of the waypoint to create.
+    * @param time time at which the waypoint has to be reached. The time is relative to when the trajectory starts.
+    * @param position define the desired 3D position to be reached at this waypoint. It is expressed in world frame.
+    * @param orientation define the desired 3D orientation to be reached at this waypoint. It is expressed in world frame.
+    * @param linearVelocity define the desired 3D linear velocity to be reached at this waypoint. It is expressed in world frame.
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this waypoint. It is expressed in world frame.
+    */
    public void setWaypoint(int waypointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
    {
       rangeCheck(waypointIndex);
