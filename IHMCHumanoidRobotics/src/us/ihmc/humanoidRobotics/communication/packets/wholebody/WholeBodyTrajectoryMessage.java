@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -13,7 +14,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
-      + "When going through our ROS API: set the id to 0 (zero) any message that should not be processed by the controller, set the field to null when going through our Java API.")
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
+      + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.")
 public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajectoryMessage>
       implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>
 {
@@ -25,9 +27,11 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
    /**
     * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public WholeBodyTrajectoryMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide)
@@ -81,6 +85,9 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
    public void setHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
+      if (handTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
+         handTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
       switch (handTrajectoryMessage.getRobotSide())
       {
       case LEFT:
@@ -94,6 +101,9 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
    public void setArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
+      if (armTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
+         armTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
       switch (armTrajectoryMessage.getRobotSide())
       {
       case LEFT:
@@ -107,16 +117,25 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
    public void setChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
+      if (chestTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
+         chestTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
       this.chestTrajectoryMessage = chestTrajectoryMessage;
    }
 
    public void setPelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
+      if (pelvisTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
+         pelvisTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
       this.pelvisTrajectoryMessage = pelvisTrajectoryMessage;
    }
 
    public void setFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
+      if (footTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
+         footTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
       switch (footTrajectoryMessage.getRobotSide())
       {
       case LEFT:
@@ -144,26 +163,6 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          return false;
 
       return true;
-   }
-
-   public void propagatePropertiesToChildMessages()
-   {
-      if (leftHandTrajectoryMessage != null)
-         leftHandTrajectoryMessage.setUniqueId(getUniqueId());
-      if (rightHandTrajectoryMessage != null)
-         rightHandTrajectoryMessage.setUniqueId(getUniqueId());
-      if (leftArmTrajectoryMessage != null)
-         leftArmTrajectoryMessage.setUniqueId(getUniqueId());
-      if (rightArmTrajectoryMessage != null)
-         rightArmTrajectoryMessage.setUniqueId(getUniqueId());
-      if (chestTrajectoryMessage != null)
-         chestTrajectoryMessage.setUniqueId(getUniqueId());
-      if (pelvisTrajectoryMessage != null)
-         pelvisTrajectoryMessage.setUniqueId(getUniqueId());
-      if (leftFootTrajectoryMessage != null)
-         leftFootTrajectoryMessage.setUniqueId(getUniqueId());
-      if (rightFootTrajectoryMessage != null)
-         rightFootTrajectoryMessage.setUniqueId(getUniqueId());
    }
 
    @Override
