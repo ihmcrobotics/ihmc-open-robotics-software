@@ -30,7 +30,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePoseTraj
 import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -925,46 +925,47 @@ public class HandControlModule
       executeJointspaceTrajectory(quinticPolynomialTrajectoryGenerators);
    }
 
-   public void moveUsingCubicTrajectory(ArmJointTrajectoryPacket trajectoryPacket)
+   public void moveUsingCubicTrajectory(ArmTrajectoryMessage armTrajectoryMessage)
    {
-      int armJoints = trajectoryPacket.trajectoryPoints[0].positions.length;
-      if (armJoints != oneDoFJoints.length)
-      {
-         System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket packet contains " + armJoints + " joints - expected was " + oneDoFJoints.length);
+      if (!checkArmTrajectoryMessage(armTrajectoryMessage))
          return;
-      }
 
-      int waypoints = trajectoryPacket.trajectoryPoints.length;
-      for (int jointIdx = 0; jointIdx < oneDoFJoints.length; jointIdx++)
+      for (int jointIndex = 0; jointIndex < armTrajectoryMessage.getNumberOfJoints(); jointIndex++)
       {
-         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[jointIdx]);
+         OneDoFJoint joint = oneDoFJoints[jointIndex];
+         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(joint);
          trajectoryGenerator.clear();
 
-         if (trajectoryPacket.trajectoryPoints[0].time > 1.0e-5)
+         if (armTrajectoryMessage.getJointTrajectoryWaypoint(jointIndex, 0).getTime() > 1.0e-5)
          {
             appendFirstWaypointToWaypointJointspaceTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators, false);
          }
 
-         for (int i = 0; i < waypoints; i++)
-         {
-            double position = trajectoryPacket.trajectoryPoints[i].positions[jointIdx];
-            double velocity = trajectoryPacket.trajectoryPoints[i].velocities[jointIdx];
-            double time = trajectoryPacket.trajectoryPoints[i].time;
-
-            if (!MathTools.isInsideBoundsInclusive(position, oneDoFJoints[jointIdx].getJointLimitLower(), oneDoFJoints[jointIdx].getJointLimitUpper()))
-            {
-               PrintTools.warn(this, "Waypoint " + i + " is out of the joint position limits, cancelling action.");
-               trajectoryGenerator.clear();
-               return;
-            }
-
-            trajectoryGenerator.appendWaypoint(time, position, velocity);
-         }
-
+         trajectoryGenerator.appendWaypoints(armTrajectoryMessage.getJointTrajectory(jointIndex));
          trajectoryGenerator.initialize();
       }
 
       executeJointspaceTrajectory(wholeBodyWaypointsPolynomialTrajectoryGenerators);
+   }
+
+   private boolean checkArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
+   {
+      if (armTrajectoryMessage.getNumberOfJoints() != oneDoFJoints.length)
+         return false;
+
+      for (int jointIndex = 0; jointIndex < armTrajectoryMessage.getNumberOfJoints(); jointIndex++)
+      {
+         for (int waypointIndex = 0; waypointIndex < armTrajectoryMessage.getNumberOfWaypointsForJointTrajectory(jointIndex); waypointIndex++)
+         {
+            double waypointPosition = armTrajectoryMessage.getJointTrajectoryWaypoint(jointIndex, waypointIndex).getPosition();
+            double jointLimitLower = oneDoFJoints[jointIndex].getJointLimitLower();
+            double jointLimitUpper = oneDoFJoints[jointIndex].getJointLimitUpper();
+            if (!MathTools.isInsideBoundsInclusive(waypointPosition, jointLimitLower, jointLimitUpper))
+               return false;
+         }
+      }
+
+      return true;
    }
 
    private void appendFirstWaypointToWaypointJointspaceTrajectories(Map<OneDoFJoint, ? extends MultipleWaypointsTrajectoryGenerator> trajectoryGenrators, boolean appendCurrent)

@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
@@ -44,7 +44,7 @@ public class IHMCRosApiMessageMap
 	   HeadOrientationPacket.class,
 	   PauseWalkingMessage.class,
 	   HighLevelStatePacket.class,
-	   ArmJointTrajectoryPacket.class,
+	   ArmTrajectoryMessage.class,
 	   JointAnglesPacket.class,
 	   AtlasElectricMotorEnablePacket.class,
       AtlasWristSensorCalibrationRequestPacket.class,
@@ -67,7 +67,7 @@ public class IHMCRosApiMessageMap
       HeadOrientationPacket.class,
       PauseWalkingMessage.class,
       HighLevelStatePacket.class,
-      ArmJointTrajectoryPacket.class,
+      ArmTrajectoryMessage.class,
       JointAnglesPacket.class,
       AtlasElectricMotorEnablePacket.class,
       AtlasWristSensorCalibrationRequestPacket.class,
@@ -109,7 +109,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
       PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");
       PACKET_TO_TOPIC_MAP.put(HighLevelStatePacket.class, "/control/high_level_state");
-      PACKET_TO_TOPIC_MAP.put(ArmJointTrajectoryPacket.class, "/control/arm_joint_trajectory");
+      PACKET_TO_TOPIC_MAP.put(ArmTrajectoryMessage.class, "/control/arm_joint_trajectory");
       PACKET_TO_TOPIC_MAP.put(JointAnglesPacket.class, "/control/joint_angles");
       PACKET_TO_TOPIC_MAP.put(AtlasElectricMotorEnablePacket.class, "/control/enable_electric_motor");
       PACKET_TO_TOPIC_MAP.put(AtlasWristSensorCalibrationRequestPacket.class, "/control/wrist_sensor_calibration");
