@@ -166,12 +166,6 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
-   public void appendWaypoints(WaypointOrientationTrajectoryData trajectoryData)
-   {
-      trajectoryData.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
-      appendWaypoints(trajectoryData.getTimeAtWaypoints(), trajectoryData.getOrientations(), trajectoryData.getAngularVelocities());
-   }
-
    private void checkNumberOfWaypoints(int length)
    {
       if (length > maximumNumberOfWaypoints)

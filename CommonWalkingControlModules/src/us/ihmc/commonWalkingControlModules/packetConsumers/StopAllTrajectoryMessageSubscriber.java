@@ -8,15 +8,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 
 public class StopAllTrajectoryMessageSubscriber implements PacketConsumer<StopAllTrajectoryMessage>
 {
    private final List<Object> listeners = new ArrayList<>();
    private final Map<Object, AtomicBoolean> latestMessageReferences = new HashMap<>(10);
 
-   public StopAllTrajectoryMessageSubscriber()
+   public StopAllTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
-
+      globalDataProducer.attachListener(StopAllTrajectoryMessage.class, this);
    }
 
    private void registerNewListener(Object newListener)

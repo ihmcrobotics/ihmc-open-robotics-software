@@ -22,7 +22,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -201,25 +200,6 @@ public class PelvisICPBasedTranslationManager
             isUsingWaypointTrajectory.set(false);
             isTrajectoryStopped.set(false);
             activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
-            isRunning.set(true);
-         }
-         else if (desiredPelvisPoseProvider.checkForNewPositionWithWaypoints())
-         {
-            initialPelvisPositionTime.set(yoTime.getDoubleValue());
-            waypointPositionTrajectoryGenerator.clear();
-
-            tempPosition.setToZero(pelvisZUpFrame);
-            tempPosition.changeFrame(worldFrame);
-            tempVelocity.setToZero(worldFrame);
-
-            WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = desiredPelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
-            desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
-            waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
-            waypointPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);
-
-            isUsingWaypointTrajectory.set(true);
-            isTrajectoryStopped.set(false);
-            activeTrajectoryGenerator = waypointPositionTrajectoryGenerator;
             isRunning.set(true);
          }
       }

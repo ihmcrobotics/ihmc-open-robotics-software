@@ -32,12 +32,9 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
-import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -45,7 +42,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -146,8 +142,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel
             .getPelvis().getBodyFixedFrame());
-
-      PositionProvider pelvisPositionprovider = new YoPositionProvider(new YoFramePoint("pelvisPositionProvider", pelvisPositionControlFrame, registry));
 
       pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 50, worldFrame, registry);
 
@@ -320,23 +314,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             desiredPelvisWaypointPosition.changeFrame(worldFrame);
             double dt = pelvisPoseProvider.getTrajectoryTime();
             pelvisPositionTrajectoryGenerator.appendWaypoint(dt, desiredPelvisWaypointPosition, desiredPelvisWaypointLinearVelocity);
-            pelvisTrajectoryStartTime.set(yoTime.getDoubleValue());
-
-            pelvisPositionTrajectoryGenerator.initialize();
-         }
-         else if (pelvisPoseProvider.checkForNewPositionWithWaypoints())
-         {
-            double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime.getDoubleValue();
-            pelvisPositionTrajectoryGenerator.compute(time);
-
-            pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
-            desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
-            
-            WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = pelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
-            desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
-            pelvisPositionTrajectoryGenerator.clear();
-
-            pelvisPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);
             pelvisTrajectoryStartTime.set(yoTime.getDoubleValue());
 
             pelvisPositionTrajectoryGenerator.initialize();

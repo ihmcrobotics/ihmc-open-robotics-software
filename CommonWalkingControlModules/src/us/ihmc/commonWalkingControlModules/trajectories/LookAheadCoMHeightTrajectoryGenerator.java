@@ -33,7 +33,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -848,29 +847,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          {
             offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
             offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());
-            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-            offsetHeightAboveGroundTrajectory.initialize();
-            activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
-            isUsingWaypointTrajectory.set(false);
-            isTrajectoryOffsetStopped.set(false);
-         }
-         else if (desiredComHeightProvider.isNewComHeightMultipointAvailable())
-         {
-            WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
-
-            int lastIndex = pelvisTrajectory.getTimeAtWaypoints().length - 1;
-
-            // TODO (Sylvain) Check if that's the right way to do it
-            desiredPosition.setIncludingFrame(worldFrame, pelvisTrajectory.getPositions()[lastIndex]);
-            desiredPosition.changeFrame(frameOfLastFoostep);
-
-            double heightOffset = desiredPosition.getZ() - splineOutput[0];
-
-            // it is not really the last time, since we have the "settling"
-            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[lastIndex];
-
-            offsetHeightAboveGround.set(heightOffset);
-            offsetHeightAboveGroundTrajectoryTimeProvider.set(totalTime);
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
             offsetHeightAboveGroundTrajectory.initialize();
             activeTrajectoryGenerator = offsetHeightAboveGroundTrajectory;
