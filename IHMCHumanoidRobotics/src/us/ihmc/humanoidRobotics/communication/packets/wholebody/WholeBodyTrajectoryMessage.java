@@ -127,25 +127,79 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
    public boolean checkRobotSideConsistency()
    {
-      if (leftHandTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
+      if (leftHandTrajectoryMessage != null && leftHandTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
          return false;
-      if (rightHandTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
+      if (rightHandTrajectoryMessage != null && rightHandTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
          return false;
-      if (leftArmTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
+      if (leftArmTrajectoryMessage != null && leftArmTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
          return false;
-      if (rightArmTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
+      if (rightArmTrajectoryMessage != null && rightArmTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
          return false;
-      if (leftFootTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
+      if (leftFootTrajectoryMessage != null && leftFootTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
          return false;
-      if (rightFootTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
+      if (rightFootTrajectoryMessage != null && rightFootTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
          return false;
 
       return true;
    }
 
+   public void propagatePropertiesToChildMessages()
+   {
+      if (leftHandTrajectoryMessage != null)
+         leftHandTrajectoryMessage.setUniqueId(getUniqueId());
+      if (rightHandTrajectoryMessage != null)
+         rightHandTrajectoryMessage.setUniqueId(getUniqueId());
+      if (leftArmTrajectoryMessage != null)
+         leftArmTrajectoryMessage.setUniqueId(getUniqueId());
+      if (rightArmTrajectoryMessage != null)
+         rightArmTrajectoryMessage.setUniqueId(getUniqueId());
+      if (chestTrajectoryMessage != null)
+         chestTrajectoryMessage.setUniqueId(getUniqueId());
+      if (pelvisTrajectoryMessage != null)
+         pelvisTrajectoryMessage.setUniqueId(getUniqueId());
+      if (leftFootTrajectoryMessage != null)
+         leftFootTrajectoryMessage.setUniqueId(getUniqueId());
+      if (rightFootTrajectoryMessage != null)
+         rightFootTrajectoryMessage.setUniqueId(getUniqueId());
+   }
+
    @Override
    public boolean epsilonEquals(WholeBodyTrajectoryMessage other, double epsilon)
    {
+      if (leftHandTrajectoryMessage == null && other.leftHandTrajectoryMessage != null)
+         return false;
+      if (rightHandTrajectoryMessage == null && other.rightHandTrajectoryMessage != null)
+         return false;
+      if (leftArmTrajectoryMessage == null && other.leftArmTrajectoryMessage != null)
+         return false;
+      if (rightArmTrajectoryMessage == null && other.rightArmTrajectoryMessage != null)
+         return false;
+      if (chestTrajectoryMessage == null && other.chestTrajectoryMessage != null)
+         return false;
+      if (pelvisTrajectoryMessage == null && other.pelvisTrajectoryMessage != null)
+         return false;
+      if (leftFootTrajectoryMessage == null && other.leftFootTrajectoryMessage != null)
+         return false;
+      if (rightFootTrajectoryMessage == null && other.rightFootTrajectoryMessage != null)
+         return false;
+
+      if (leftHandTrajectoryMessage != null && other.leftHandTrajectoryMessage == null)
+         return false;
+      if (rightHandTrajectoryMessage != null && other.rightHandTrajectoryMessage == null)
+         return false;
+      if (leftArmTrajectoryMessage != null && other.leftArmTrajectoryMessage == null)
+         return false;
+      if (rightArmTrajectoryMessage != null && other.rightArmTrajectoryMessage == null)
+         return false;
+      if (chestTrajectoryMessage != null && other.chestTrajectoryMessage == null)
+         return false;
+      if (pelvisTrajectoryMessage != null && other.pelvisTrajectoryMessage == null)
+         return false;
+      if (leftFootTrajectoryMessage != null && other.leftFootTrajectoryMessage == null)
+         return false;
+      if (rightFootTrajectoryMessage != null && other.rightFootTrajectoryMessage == null)
+         return false;
+
       if (!leftHandTrajectoryMessage.epsilonEquals(other.leftHandTrajectoryMessage, epsilon))
          return false;
       if (!rightHandTrajectoryMessage.epsilonEquals(other.rightHandTrajectoryMessage, epsilon))
@@ -171,16 +225,23 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
    {
       WholeBodyTrajectoryMessage transformedWholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
-      transformedWholeBodyTrajectoryMessage.leftHandTrajectoryMessage = leftHandTrajectoryMessage.transform(transform);
-      transformedWholeBodyTrajectoryMessage.rightHandTrajectoryMessage = rightHandTrajectoryMessage.transform(transform);
-      transformedWholeBodyTrajectoryMessage.leftArmTrajectoryMessage = new ArmTrajectoryMessage(leftArmTrajectoryMessage);
-      transformedWholeBodyTrajectoryMessage.rightArmTrajectoryMessage = new ArmTrajectoryMessage(rightArmTrajectoryMessage);
-      transformedWholeBodyTrajectoryMessage.chestTrajectoryMessage = chestTrajectoryMessage.transform(transform);
-      transformedWholeBodyTrajectoryMessage.pelvisTrajectoryMessage = pelvisTrajectoryMessage.transform(transform);
-      transformedWholeBodyTrajectoryMessage.leftFootTrajectoryMessage = leftFootTrajectoryMessage.transform(transform);
-      transformedWholeBodyTrajectoryMessage.rightFootTrajectoryMessage = rightFootTrajectoryMessage.transform(transform);
+      if (leftHandTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.leftHandTrajectoryMessage = leftHandTrajectoryMessage.transform(transform);
+      if (rightHandTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.rightHandTrajectoryMessage = rightHandTrajectoryMessage.transform(transform);
+      if (leftArmTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.leftArmTrajectoryMessage = new ArmTrajectoryMessage(leftArmTrajectoryMessage);
+      if (rightArmTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.rightArmTrajectoryMessage = new ArmTrajectoryMessage(rightArmTrajectoryMessage);
+      if (chestTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.chestTrajectoryMessage = chestTrajectoryMessage.transform(transform);
+      if (pelvisTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.pelvisTrajectoryMessage = pelvisTrajectoryMessage.transform(transform);
+      if (leftFootTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.leftFootTrajectoryMessage = leftFootTrajectoryMessage.transform(transform);
+      if (rightFootTrajectoryMessage != null)
+         transformedWholeBodyTrajectoryMessage.rightFootTrajectoryMessage = rightFootTrajectoryMessage.transform(transform);
 
       return transformedWholeBodyTrajectoryMessage;
    }
-
 }
