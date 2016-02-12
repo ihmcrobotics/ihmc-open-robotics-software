@@ -5,6 +5,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
+import us.ihmc.aware.planning.QuadrupedXGaitFootstepPlanner;
 import us.ihmc.aware.planning.SingleStepDCMTrajectory;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
@@ -117,7 +118,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrantDependentList<StateMachine<FootState, FootEvent>> footStateMachine;
 
    // provider inputs
-   private static int STEP_QUEUE_CAPACITY = 30;
+   private static int STEP_QUEUE_CAPACITY = 60;
    private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
    private final QuadrantDependentList<QuadrupedTimedStep> stepCache;
    private final FrameOrientation bodyOrientationDesired;
@@ -198,6 +199,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    // temporary
    private final Twist twistStorage = new Twist();
+
+   private final QuadrupedXGaitFootstepPlanner footstepPlanner;
 
    public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository)
    {
@@ -402,6 +405,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoGraphicsList = new YoGraphicsList(getClass().getSimpleName() + "Graphics");
       artifactList = new ArtifactList(getClass().getSimpleName() + "Artifacts");
       registerGraphics();
+
+      this.footstepPlanner = new QuadrupedXGaitFootstepPlanner(referenceFrames);
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -734,44 +739,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          footStateMachine.get(robotQuadrant).reset();
       }
 
-      // FIXME: provide an external interface to test steps
-      double stanceWidth = 0.25;
-      double stanceLength = 1.2;
-      double stepDuration = 0.50;
-      double stepTimeShift = 1.00;
-      double strideLength = 0.35;
-
-      double currentTime = robotTimestamp.getDoubleValue();
-      TimeInterval timeInterval = new TimeInterval(0, stepDuration).shiftInterval(currentTime);
-      FramePoint hindRightGoalPosition = new FramePoint(supportCentroidEstimate);
-      FramePoint frontRightGoalPosition = new FramePoint(supportCentroidEstimate);
-      FramePoint hindLeftGoalPosition = new FramePoint(supportCentroidEstimate);
-      FramePoint frontLeftGoalPosition = new FramePoint(supportCentroidEstimate);
-      hindRightGoalPosition.changeFrame(comFrame);
-      frontRightGoalPosition.changeFrame(comFrame);
-      hindLeftGoalPosition.changeFrame(comFrame);
-      frontLeftGoalPosition.changeFrame(comFrame);
-
-      hindRightGoalPosition.add(-stanceLength/2, -stanceWidth/2, 0);
-      frontRightGoalPosition.add(stanceLength/2, -stanceWidth/2, 0);
-      hindLeftGoalPosition.add(-stanceLength/2 + strideLength/2, stanceWidth/2, 0);
-      frontLeftGoalPosition.add(stanceLength/2 + strideLength/2, stanceWidth/2, 0);
-      addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_RIGHT, hindRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-      addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_RIGHT, frontRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-      addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_LEFT, hindLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-      addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_LEFT, frontLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-
-      for (int i = 0; i < 3; i++)
-      {
-         hindRightGoalPosition.add(strideLength, 0, 0);
-         frontRightGoalPosition.add(strideLength, 0, 0);
-         hindLeftGoalPosition.add(strideLength, 0, 0);
-         frontLeftGoalPosition.add(strideLength, 0, 0);
-         addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_RIGHT, hindRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-         addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_RIGHT, frontRightGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-         addStep(new QuadrupedTimedStep(RobotQuadrant.HIND_LEFT, hindLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-         addStep(new QuadrupedTimedStep(RobotQuadrant.FRONT_LEFT, frontLeftGoalPosition, timeInterval.shiftInterval(stepTimeShift)));
-      }
+      footstepPlanner.plan(stepQueue, robotTimestamp.getDoubleValue() + 2.0);
    }
 
    @Override public void onExit()
