@@ -58,6 +58,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final ForceSensorStateUpdater forceSensorStateUpdater;
+   private final IMUOrientationBiasEstimator imuOrientationBiasEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -72,6 +73,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
+   private final RobotMotionStatusHolder robotMotionStatusFromController;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
@@ -81,6 +83,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      this.robotMotionStatusFromController = robotMotionStatusFromController;
 
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
@@ -130,6 +133,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitchMap, centerOfPressureDataHolderFromController, bipedFeetMap, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
+      imuOrientationBiasEstimator = new IMUOrientationBiasEstimator(inverseDynamicsStructure, pelvisRotationalStateUpdater.getIMUUsedForEstimation(), estimatorDT, registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -209,6 +213,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
             forceSensorStateUpdater.updateForceSensorState();
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
+            imuOrientationBiasEstimator.compute(robotMotionStatusFromController.getCurrentRobotMotionStatus());
             break;
       }
 

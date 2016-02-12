@@ -42,8 +42,8 @@ import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
@@ -557,12 +557,12 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, HumanoidReferenceFrames referenceFrames)
+   private FootstepDataListMessage createFootStepDataList(Vector2d walkDeltaXY, HumanoidReferenceFrames referenceFrames)
    {
       drcBehaviorTestHelper.updateRobotModel();
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
-      FootstepDataList footsepDataList = new FootstepDataList();
+      FootstepDataListMessage footsepDataList = new FootstepDataListMessage();
 
       SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
@@ -611,7 +611,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          footstep.getOrientation(orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
          footsepDataList.add(footstepData);
       }
 

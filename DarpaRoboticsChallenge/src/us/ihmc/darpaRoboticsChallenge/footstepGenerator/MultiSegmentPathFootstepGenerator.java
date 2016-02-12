@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTrajectoryHeightCalculator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class MultiSegmentPathFootstepGenerator extends PathToFootstepGenerator
 {
    private ArrayList<FootstepOverheadPath> overheadPathList = new ArrayList<>();
-   private SideDependentList<FootstepData> initialFeet = new SideDependentList<>();
+   private SideDependentList<FootstepDataMessage> initialFeet = new SideDependentList<>();
 
    public MultiSegmentPathFootstepGenerator(SwingTrajectoryHeightCalculator heightCalculator, FootstepSnapper footstepSnapper, FootstepValidityMetric validityMetric, HeightMapWithPoints heightMap)
    {
@@ -28,7 +28,7 @@ public class MultiSegmentPathFootstepGenerator extends PathToFootstepGenerator
    }
 
    @Override
-   public void initialize(SideDependentList<FootstepData> originalFeet, FootstepOverheadPath overheadPath)
+   public void initialize(SideDependentList<FootstepDataMessage> originalFeet, FootstepOverheadPath overheadPath)
    {
       overheadPathList.clear();
       overheadPathList.add(overheadPath);
@@ -44,7 +44,7 @@ public class MultiSegmentPathFootstepGenerator extends PathToFootstepGenerator
    }
 
    @Override
-   public ArrayList<FootstepData> getStepsAlongPath(RobotSide firstStepSide)
+   public ArrayList<FootstepDataMessage> getStepsAlongPath(RobotSide firstStepSide)
    {
 
       if (overheadPathList.isEmpty())
@@ -57,16 +57,16 @@ public class MultiSegmentPathFootstepGenerator extends PathToFootstepGenerator
 //         throw new RuntimeException(this.getClass().getSimpleName() + ": No HeightMap");
 //      }
 
-      ArrayList<FootstepData> generatedSteps = new ArrayList<>();
+      ArrayList<FootstepDataMessage> generatedSteps = new ArrayList<>();
 
       RobotSide lastStepSide = firstStepSide.getOppositeSide();
-      SideDependentList<FootstepData> lastFootsteps = initialFeet;
+      SideDependentList<FootstepDataMessage> lastFootsteps = initialFeet;
 
       for (FootstepOverheadPath overheadPath : overheadPathList){
          //for each segment, generate a path to the end, then use that as the initial for the next
          super.initialize(lastFootsteps, overheadPath);
-         List<FootstepData> segmentFootsteps = super.getStepsAlongPath(lastStepSide.getOppositeSide());
-         for (FootstepData footstep : segmentFootsteps){
+         List<FootstepDataMessage> segmentFootsteps = super.getStepsAlongPath(lastStepSide.getOppositeSide());
+         for (FootstepDataMessage footstep : segmentFootsteps){
             generatedSteps.add(footstep);
             lastStepSide = footstep.getRobotSide();
             lastFootsteps.put(lastStepSide, footstep);

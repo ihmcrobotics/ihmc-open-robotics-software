@@ -10,10 +10,10 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 
-public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer, PacketConsumer<FootstepData>
+public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer, PacketConsumer<FootstepDataMessage>
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
@@ -29,7 +29,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    @Override
    public boolean canHandle(Object object)
    {
-      return object instanceof FootstepData;
+      return object instanceof FootstepDataMessage;
    }
 
    @Override
@@ -40,7 +40,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
          throw new RuntimeException("Wrong data identifier: " + dataIdentifier + ". Expected: " + this.dataIdentifier);
       }
 
-      FootstepData footstepData = (FootstepData) object;
+      FootstepDataMessage footstepData = (FootstepDataMessage) object;
       ContactablePlaneBody contactableBody = rigidBodyList.get(footstepData.getRobotSide());
 
       boolean trustHeight = true;
@@ -128,7 +128,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    }
 
    @Override
-   public void receivedPacket(FootstepData object)
+   public void receivedPacket(FootstepDataMessage object)
    {
       // TODO Auto-generated method stub
    }

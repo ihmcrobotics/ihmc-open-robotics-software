@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacke
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus.Status;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -279,7 +279,7 @@ public class HandPoseBehavior extends BehaviorInterface
 	{
 		if (outgoingPacket != null ) 
 		{
-			StopMotionPacket pausePacket = new StopMotionPacket();
+			StopAllTrajectoryMessage pausePacket = new StopAllTrajectoryMessage();
 			pausePacket.setDestination(PacketDestination.CONTROLLER);
 			sendPacketToController(pausePacket);
 		}

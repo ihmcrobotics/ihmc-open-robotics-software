@@ -16,6 +16,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -254,6 +256,26 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected void doUnconstrainedJointControl()
    {
       momentumBasedController.doPDControl(unconstrainedJoints, unconstrainedJointsControlGains);
+   }
+
+   protected boolean handleFootPose(RobotSide robotSide)
+   {
+      FootPoseProvider footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
+      if (footPoseProvider == null || !footPoseProvider.checkForNewPose(robotSide))
+         return false;
+
+      feetManager.requestMoveStraight(robotSide, footPoseProvider.getDesiredFootPose(robotSide), footPoseProvider.getTrajectoryTime());
+      return true;
+   }
+
+   protected boolean handleFootTrajectoryMessage(RobotSide robotSide)
+   {
+      FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
+      if (footTrajectoryMessageSubscriber == null || !footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide))
+         return false;
+
+      feetManager.handleFootTrajectoryMessage(footTrajectoryMessageSubscriber.pollMessage(robotSide));
+      return true;
    }
 
    // TODO: New methods coming from extending State class

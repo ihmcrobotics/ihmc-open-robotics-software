@@ -26,6 +26,8 @@ public class HeadTrajectoryMessage extends IHMCRosApiPacket<HeadTrajectoryMessag
    public HeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
       taskspaceWaypoints = new SO3WaypointMessage[headTrajectoryMessage.getNumberOfWaypoints()];
+      for (int i = 0; i < getNumberOfWaypoints(); i++)
+         taskspaceWaypoints[i] = new SO3WaypointMessage(headTrajectoryMessage.taskspaceWaypoints[i]);
    }
 
    /**

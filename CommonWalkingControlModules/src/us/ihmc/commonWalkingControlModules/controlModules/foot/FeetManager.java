@@ -4,9 +4,11 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -17,10 +19,10 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class FeetManager
 {
@@ -42,12 +44,16 @@ public class FeetManager
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSwingLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSwingLeg", registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg", registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg",
+         registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable(
+         "singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
+
+   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
 
    // TODO Needs to be cleaned up someday... (Sylvain)
-   public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         DoubleProvider swingTimeProvider, YoVariableRegistry parentRegistry)
+   public FeetManager(MomentumBasedController momentumBasedController, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
+         WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider, YoVariableRegistry parentRegistry)
    {
       double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
       singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
@@ -56,6 +62,8 @@ public class FeetManager
 
       feet = momentumBasedController.getContactableFeet();
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, footControlModules, registry);
+
+      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       this.footSwitches = momentumBasedController.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
@@ -81,6 +89,8 @@ public class FeetManager
 
    public void compute()
    {
+      handleStopAllTrajectoryMessage();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          footSwitches.get(robotSide).hasFootHitGround(); //debug
@@ -124,6 +134,17 @@ public class FeetManager
          setContactStateForMoveStraight(robotSide);
    }
 
+   public void handleFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
+   {
+      RobotSide robotSide = footTrajectoryMessage.getRobotSide();
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+
+      if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_VIA_WAYPOINTS)
+         footControlModule.resetCurrentState();
+      else
+         setContactStateForMoveViaWaypoints(robotSide);
+   }
+
    public boolean isInEdgeTouchdownState(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).isInEdgeTouchdownState();
@@ -141,7 +162,20 @@ public class FeetManager
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
    {
-      footControlModules.get(swingSide).requestMoveStraightTouchdownForDisturbanceRecovery();
+      footControlModules.get(swingSide).requestTouchdownForDisturbanceRecovery();
+   }
+
+   private void handleStopAllTrajectoryMessage()
+   {
+      if (stopAllTrajectoryMessageSubscriber == null)
+         return;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         if (stopAllTrajectoryMessageSubscriber.pollMessage(footControlModule))
+            footControlModule.requestStopTrajectoryIfPossible();
+      }
    }
 
    public boolean isInSingularityNeighborhood(RobotSide robotSide)
@@ -168,7 +202,7 @@ public class FeetManager
    {
       RobotSide[] leadingLegFirst;
       if (trailingLeg != null)
-         leadingLegFirst = new RobotSide[] { trailingLeg.getOppositeSide(), trailingLeg };
+         leadingLegFirst = new RobotSide[] {trailingLeg.getOppositeSide(), trailingLeg};
       else
          leadingLegFirst = RobotSide.values;
 
@@ -294,6 +328,13 @@ public class FeetManager
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.doSingularityEscapeBeforeTransitionToNextState();
       footControlModule.setContactState(ConstraintType.MOVE_STRAIGHT);
+   }
+
+   private void setContactStateForMoveViaWaypoints(RobotSide robotSide)
+   {
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      footControlModule.doSingularityEscapeBeforeTransitionToNextState();
+      footControlModule.setContactState(ConstraintType.MOVE_VIA_WAYPOINTS);
    }
 
    public WalkOnTheEdgesManager getWalkOnTheEdgesManager()

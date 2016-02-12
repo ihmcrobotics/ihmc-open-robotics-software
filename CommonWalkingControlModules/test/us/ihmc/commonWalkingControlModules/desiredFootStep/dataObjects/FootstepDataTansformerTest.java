@@ -15,7 +15,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -39,8 +39,8 @@ public class FootstepDataTansformerTest
    public void test()
    {
       RigidBodyTransform transform3D;
-      FootstepData originalFootstepData;
-      FootstepData transformedFootstepData;
+      FootstepDataMessage originalFootstepData;
+      FootstepDataMessage transformedFootstepData;
 
       int numberOfTests = 1;
 
@@ -56,9 +56,9 @@ public class FootstepDataTansformerTest
       }
    }
 
-   private static FootstepData getTestFootstepData()
+   private static FootstepDataMessage getTestFootstepData()
    {
-      FootstepData ret = new FootstepData();
+      FootstepDataMessage ret = new FootstepDataMessage();
       ret.robotSide = RobotSide.LEFT;
       ret.location = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
       AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
@@ -76,7 +76,7 @@ public class FootstepDataTansformerTest
       return ret;
    }
 
-   private static void performEqualsTestsWithTransform(FootstepData footstepData, RigidBodyTransform transform3D, FootstepData transformedFootstepData)
+   private static void performEqualsTestsWithTransform(FootstepDataMessage footstepData, RigidBodyTransform transform3D, FootstepDataMessage transformedFootstepData)
    {
       double distance;
 

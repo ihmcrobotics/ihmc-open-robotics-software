@@ -18,7 +18,7 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
    //   public static final byte VALID_UNCHANGED_STEP = 1;
    //   public static final byte VALID_SNAPPED_STEP = 2;
    //   public static final byte BAD_STEP = 3;
-   public ArrayList<FootstepData> footstepData;
+   public ArrayList<FootstepDataMessage> footstepData;
    public int[] footstepOrder;
    public byte[] flag;
 
@@ -27,14 +27,14 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
       // Empty constructor for deserialization
    }
 
-   public SnapFootstepPacket(ArrayList<FootstepData> data, int[] footstepOrder, byte[] flag)
+   public SnapFootstepPacket(ArrayList<FootstepDataMessage> data, int[] footstepOrder, byte[] flag)
    {
       this.footstepData = data;
       this.footstepOrder = footstepOrder;
       this.flag = flag;
    }
 
-   public ArrayList<FootstepData> getFootstepData()
+   public ArrayList<FootstepDataMessage> getFootstepData()
    {
       return this.footstepData;
    }
@@ -81,7 +81,7 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
       // create random footsteps
       int[] footstepOrder = new int[numberOfFootsteps];
       byte[] flag = new byte[numberOfFootsteps];
-      ArrayList<FootstepData> footsteps = new ArrayList<FootstepData>();
+      ArrayList<FootstepDataMessage> footsteps = new ArrayList<FootstepDataMessage>();
       RigidBodyTransform previousFootstep = new RigidBodyTransform();
 
       double[] XYZ_MAX = {2.0, 2.0, 2.0};
@@ -107,7 +107,7 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
          previousFootstep.setTranslation(new Vector3f(position));
          previousFootstep.setRotation(orientation);
 
-         FootstepData footstepData = new FootstepData(robotSide, new Point3d(position), orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, new Point3d(position), orientation);
 
          footsteps.add(footstepData);
       }

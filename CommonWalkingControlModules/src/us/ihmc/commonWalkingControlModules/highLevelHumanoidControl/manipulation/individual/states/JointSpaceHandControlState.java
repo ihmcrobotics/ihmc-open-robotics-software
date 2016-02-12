@@ -15,7 +15,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.OneDoFJointTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -25,7 +24,7 @@ import us.ihmc.robotics.stateMachines.State;
 public class JointSpaceHandControlState extends State<HandControlState>
 {
    private final OneDoFJoint[] oneDoFJoints;
-   private Map<OneDoFJoint, ? extends OneDoFJointTrajectoryGenerator> trajectories;
+   private Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
 
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
@@ -206,7 +205,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
       return true;
    }
 
-   public void setTrajectories(Map<OneDoFJoint, ? extends OneDoFJointTrajectoryGenerator> trajectories)
+   public void setTrajectories(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
    {
       this.trajectories = trajectories;
    }

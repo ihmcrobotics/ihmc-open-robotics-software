@@ -13,18 +13,19 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.SE3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -60,6 +60,8 @@ public class ManipulationControlModule
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
+   private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
+   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
@@ -90,6 +92,8 @@ public class ManipulationControlModule
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handTrajectoryMessageSubscriber = variousWalkingProviders.getHandTrajectoryMessageSubscriber();
+      armTrajectoryMessageSubscriber = variousWalkingProviders.geArmTrajectoryMessageSubscriber();
+      stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
@@ -173,12 +177,13 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handleHandTrajectoryMessages(robotSide);
+         handleArmTrajectoryMessages(robotSide);
+         handleStopAllTrajectoryMessages(robotSide);
          handleCompliantControlRequests(robotSide);
 
          handleDefaultState(robotSide);
 
          handleHandPoses(robotSide);
-         handleHandPauses(robotSide);
          handleHandsteps(robotSide);
          handleLoadBearing(robotSide);
       }
@@ -200,9 +205,26 @@ public class ManipulationControlModule
          return;
 
       HandTrajectoryMessage message = handTrajectoryMessageSubscriber.pollMessage(robotSide);
-      BaseForControl base = message.getBase();
-      SE3WaypointInterface[] taskspaceWaypoints = message.getWaypoints();
-      handControlModules.get(robotSide).moveInTaskspaceViaWaypoints(base, taskspaceWaypoints);
+      handControlModules.get(robotSide).handleHandTrajectoryMessage(message);
+   }
+
+   private void handleArmTrajectoryMessages(RobotSide robotSide)
+   {
+      if (armTrajectoryMessageSubscriber == null || !armTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide))
+         return;
+
+      ArmTrajectoryMessage message = armTrajectoryMessageSubscriber.pollMessage(robotSide);
+      handControlModules.get(robotSide).handleArmTrajectoryMessage(message);
+   }
+
+   private void handleStopAllTrajectoryMessages(RobotSide robotSide)
+   {
+      if (stopAllTrajectoryMessageSubscriber == null)
+         return;
+
+      HandControlModule handControlModule = handControlModules.get(robotSide);
+      if (stopAllTrajectoryMessageSubscriber.pollMessage(handControlModule))
+         handControlModule.holdPositionInJointSpace();
    }
 
    private void handleDefaultState(RobotSide robotSide)
@@ -279,25 +301,6 @@ public class ManipulationControlModule
             handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, graspOffsetFromControlFrame, trajectoryTime);
          }
 
-      }
-      else if (handPoseProvider.checkForNewArmJointTrajectory(robotSide))
-      {
-         ArmJointTrajectoryPacket armJointTrajectoryPacket = handPoseProvider.getArmJointTrajectoryPacket(robotSide);
-         if (armJointTrajectoryPacket != null)
-         {
-            handControlModules.get(robotSide).moveUsingCubicTrajectory(armJointTrajectoryPacket);
-         }
-      }
-   }
-
-   private void handleHandPauses(RobotSide robotSide)
-   {
-      if (handPoseProvider != null)
-      {
-         if (handPoseProvider.checkAndResetStopCommand(robotSide))
-         {
-            handControlModules.get(robotSide).holdPositionInJointSpace();
-         }
       }
    }
 

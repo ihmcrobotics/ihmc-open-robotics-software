@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesir
 import us.ihmc.commonWalkingControlModules.referenceFrames.VisualizeFramesController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurningThenStraightFootstepGenerator;
@@ -322,7 +322,7 @@ public class DesiredFootstepVisualizer
     	  Point3d location = new Point3d();
     	  Quat4d orientation = new Quat4d();
     	  footstep.getPose(location, orientation);
-         FootstepData footStepData = new FootstepData(footstep.getRobotSide(), location, orientation);
+         FootstepDataMessage footStepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
          footstepConsumer.consume(dataIdentifier, footStepData);
       }
 

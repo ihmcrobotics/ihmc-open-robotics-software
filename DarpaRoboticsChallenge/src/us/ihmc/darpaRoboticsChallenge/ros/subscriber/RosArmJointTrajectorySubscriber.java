@@ -7,8 +7,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -35,14 +34,14 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
    }
 
    @Override
-   public void onNewMessage(JointTrajectory message)
+   public void onNewMessage(JointTrajectory rosMessage)
    {
       RobotSide robotSide;
-      if (leftArmNames.equals(message.getJointNames()))
+      if (leftArmNames.equals(rosMessage.getJointNames()))
       {
          robotSide = RobotSide.LEFT;
       }
-      else if (rightArmNames.equals(message.getJointNames()))
+      else if (rightArmNames.equals(rosMessage.getJointNames()))
       {
          robotSide = RobotSide.RIGHT;
       }
@@ -53,31 +52,33 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
          return;
       }
       
-      int numberJoints = message.getJointNames().size();
-      int numberPoints = message.getPoints().size();
+      int numberOfJoints = rosMessage.getJointNames().size();
+      int numberOfWaypoints = rosMessage.getPoints().size();
       
-      ArmJointTrajectoryPacket packet = new ArmJointTrajectoryPacket(robotSide, numberPoints, numberJoints);
-      for (int i = 0; i < numberPoints; i++)
+      ArmTrajectoryMessage ihmcMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfWaypoints);
+      for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
       {
-         double[] positions = message.getPoints().get(i).getPositions();
-         double[] velocities = message.getPoints().get(i).getVelocities();
+         double[] positions = rosMessage.getPoints().get(waypointIndex).getPositions();
+         double[] velocities = rosMessage.getPoints().get(waypointIndex).getVelocities();
          
-         if (positions.length != numberJoints || positions.length != velocities.length)
+         if (positions.length != numberOfJoints || positions.length != velocities.length)
          {
-            String msg = "Number of joints positions or velocities in JointTrajectoryPoint inconsistent with expected number of joints " + numberJoints;
+            String msg = "Number of joints positions or velocities in JointTrajectoryPoint inconsistent with expected number of joints " + numberOfJoints;
             System.out.println(msg);
             System.err.println(msg);
          }
          
-         long nsecs = message.getPoints().get(i).getTimeFromStart().totalNsecs();
+         long nsecs = rosMessage.getPoints().get(waypointIndex).getTimeFromStart().totalNsecs();
          double time = TimeTools.nanoSecondstoSeconds(nsecs);
          
-         JointTrajectoryPoint point = new JointTrajectoryPoint(positions, velocities, time);
-         packet.trajectoryPoints[i] = point;
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         {
+            ihmcMessage.setWaypoint(jointIndex, waypointIndex, time, positions[jointIndex], velocities[jointIndex]);
+         }
       }
       
-      packet.setDestination(PacketDestination.CONTROLLER);
-      packetCommunicator.send(packet);
+      ihmcMessage.setDestination(PacketDestination.CONTROLLER);
+      packetCommunicator.send(ihmcMessage);
    }
    
    private String getHelp()

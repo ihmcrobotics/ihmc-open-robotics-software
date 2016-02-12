@@ -7,8 +7,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.commonWalkingControlModules.packetConsumers.PacketValidityChecker;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
@@ -18,7 +18,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * User: Matt
  * Date: 1/18/13
  */
-public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
+public class FootstepPathConsumer implements PacketConsumer<FootstepDataListMessage>
 {
    private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
@@ -33,14 +33,14 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
       this.bipedFeet = bipedFeet;
    }
 
-   public void receivedPacket(FootstepDataList footstepList)
+   public void receivedPacket(FootstepDataListMessage footstepList)
    {
       if (globalDataProducer != null)
       {
          String errorMessage = PacketValidityChecker.validateFootstepDataList(footstepList);
          if (errorMessage != null)
          {
-            globalDataProducer.notifyInvalidPacketReceived(FootstepDataList.class, errorMessage);
+            globalDataProducer.notifyInvalidPacketReceived(FootstepDataListMessage.class, errorMessage);
             return;
          }
       }
@@ -48,7 +48,7 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
 
       for (int i = 0; i < footstepList.size(); i++)
       {
-         FootstepData footstepData = footstepList.get(i);
+         FootstepDataMessage footstepData = footstepList.get(i);
          ContactablePlaneBody contactableBody = bipedFeet.get(footstepData.getRobotSide());
          Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, contactableBody, i);
          footsteps.add(footstep);
