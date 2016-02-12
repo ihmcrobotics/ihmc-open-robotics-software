@@ -15,6 +15,8 @@ public class ChestTrajectoryMessageSubscriber implements PacketConsumer<ChestTra
    public ChestTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
+
+      globalDataProducer.attachListener(ChestTrajectoryMessage.class, this);
    }
 
    public boolean isNewTrajectoryMessageAvailable()

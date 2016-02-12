@@ -15,6 +15,8 @@ public class PelvisHeightTrajectoryMessageSubscriber implements PacketConsumer<P
    public PelvisHeightTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
+
+      globalDataProducer.attachListener(PelvisHeightTrajectoryMessage.class, this);
    }
 
    public boolean isNewTrajectoryMessageAvailable()
