@@ -530,6 +530,12 @@ public class HandControlModule
 
    public void handleHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
+      if (handTrajectoryMessage.getRobotSide() != robotSide)
+      {
+         PrintTools.warn(this, "Received a " + HandTrajectoryMessage.class.getSimpleName() + " for the wrong side.");
+         return;
+      }
+
       BaseForControl base = handTrajectoryMessage.getBase();
       SE3WaypointInterface[] taskspaceWaypoints = handTrajectoryMessage.getWaypoints();
       
@@ -598,6 +604,12 @@ public class HandControlModule
 
    private boolean checkArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
+      if (armTrajectoryMessage.getRobotSide() != robotSide)
+      {
+         PrintTools.warn(this, "Received a " + ArmTrajectoryMessage.class.getSimpleName() + " for the wrong side.");
+         return false;
+      }
+
       if (armTrajectoryMessage.getNumberOfJoints() != oneDoFJoints.length)
          return false;
 

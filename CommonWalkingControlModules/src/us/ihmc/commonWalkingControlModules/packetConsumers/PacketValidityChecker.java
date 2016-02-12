@@ -850,7 +850,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   private static String validatePacket(Packet<?> packet)
+   public static String validatePacket(Packet<?> packet)
    {
       if (packet == null)
          return "is null.";
