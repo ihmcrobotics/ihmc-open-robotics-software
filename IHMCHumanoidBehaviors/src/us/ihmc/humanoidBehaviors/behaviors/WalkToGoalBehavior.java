@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -279,7 +279,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private void sendStepsToController(){
 		int size = currentPlan.footstepUnknown.size();
-		FootstepDataList outgoingFootsteps = new FootstepDataList();
+		FootstepDataListMessage outgoingFootsteps = new FootstepDataListMessage();
 		for (int i = 0; i < size; i ++){
          if (executeUnknownFirstStep.getBooleanValue() && i ==0){
             outgoingFootsteps.footstepDataList.add(adjustFootstepForAnkleHeight(currentPlan.pathPlan.get(i)));

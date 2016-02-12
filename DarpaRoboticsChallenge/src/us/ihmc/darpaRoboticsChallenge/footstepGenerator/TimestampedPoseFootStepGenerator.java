@@ -6,7 +6,7 @@ import geometry_msgs.PoseStamped;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.AbstractSimpleParametersFootstepGenerator;
@@ -73,7 +73,7 @@ public class TimestampedPoseFootStepGenerator extends AbstractRosTopicSubscriber
 
    public void sendFootStepsToController(ArrayList<Footstep> footsteps)
    {
-      FootstepDataList footsepDataList = new FootstepDataList();
+      FootstepDataListMessage footsepDataList = new FootstepDataListMessage();
 
       for (int i = 0; i < footsteps.size(); i++)
       {

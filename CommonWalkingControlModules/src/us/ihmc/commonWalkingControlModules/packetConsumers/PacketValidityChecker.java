@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBea
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
@@ -230,11 +230,11 @@ public abstract class PacketValidityChecker
    }
 
    /**
-    * Checks the validity of a {@link FootstepDataList}.
+    * Checks the validity of a {@link FootstepDataListMessage}.
     * @param packetToCheck
     * @return null if the packet is valid, or the error message.
     */
-   public static String validateFootstepDataList(FootstepDataList packetToCheck)
+   public static String validateFootstepDataList(FootstepDataListMessage packetToCheck)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.swingTime);
       if (packetFieldErrorType != null)

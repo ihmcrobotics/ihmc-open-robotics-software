@@ -24,7 +24,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -100,7 +100,7 @@ public class AtlasFinalsWorldStairsTest
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
-      FootstepDataList footstepDataList = createFootstepsWithHighSwing(robotModel.getWalkingControllerParameters());
+      FootstepDataListMessage footstepDataList = createFootstepsWithHighSwing(robotModel.getWalkingControllerParameters());
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(24.0);
@@ -148,7 +148,7 @@ public class AtlasFinalsWorldStairsTest
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
-      FootstepDataList footstepDataList = createFastFootstepsForStairs(robotModel.getWalkingControllerParameters());
+      FootstepDataListMessage footstepDataList = createFastFootstepsForStairs(robotModel.getWalkingControllerParameters());
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(22.0);
@@ -186,12 +186,12 @@ public class AtlasFinalsWorldStairsTest
       return footSupportPolygon;
    }
 
-   private FootstepDataList createFootstepsWithHighSwing(WalkingControllerParameters walkingControllerParameters)
+   private FootstepDataListMessage createFootstepsWithHighSwing(WalkingControllerParameters walkingControllerParameters)
    {
       double swingHeight = 0.10;
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
-      FootstepDataList footstepDataList = new FootstepDataList();
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
 
       Point3d startingLocation = new Point3d(1.0, -13.5, 0);
       double directionYaw = -90.0;
@@ -263,7 +263,7 @@ public class AtlasFinalsWorldStairsTest
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-   private FootstepDataList createFastFootstepsForStairs(WalkingControllerParameters walkingControllerParameters)
+   private FootstepDataListMessage createFastFootstepsForStairs(WalkingControllerParameters walkingControllerParameters)
    {
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
@@ -272,7 +272,7 @@ public class AtlasFinalsWorldStairsTest
 
 //      swingTime = 0.6; //default sim time
 //      transferTime = 0.25; //default sim time
-      FootstepDataList footstepDataList = new FootstepDataList(swingTime, transferTime);
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
 
       Point3d startingLocation = new Point3d(1.0, -13.5, 0);
       double directionYaw = -90.0;

@@ -67,7 +67,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
@@ -93,8 +92,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((FootPosePacket) packet);
       else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage)
          return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage) packet);
-      else if (packet instanceof FootstepDataList)
-         return convertToRosMessage((FootstepDataList) packet);
+      else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage)
+         return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage) packet);
       else if (packet instanceof FootstepStatus)
          return convertToRosMessage((FootstepStatus) packet);
       else if (packet instanceof ChestOrientationPacket)
@@ -507,7 +506,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootstepDataListMessage convertToRosMessage(FootstepDataList packet)
+   public static FootstepDataListMessage convertToRosMessage(us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage packet)
    {
       List<FootstepDataMessage> footstepDataMessageList = new ArrayList<>();
       for (int i = 0; i < packet.size(); i++)
@@ -524,14 +523,14 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootstepDataList convertToPacket(FootstepDataListMessage message)
+   public static us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage convertToPacket(FootstepDataListMessage message)
    {
       ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage> footstepDataList = new ArrayList<>();
       for (int i = 0; i < message.getFootstepDataList().size(); i++)
       {
          footstepDataList.add(convertToPacket(message.getFootstepDataList().get(i)));
       }
-      FootstepDataList ret = new FootstepDataList(footstepDataList, message.getSwingTime(), message.getTransferTime());
+      us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage ret = new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage(footstepDataList, message.getSwingTime(), message.getTransferTime());
       ret.setUniqueId(message.getUniqueId());
       return ret;
    }

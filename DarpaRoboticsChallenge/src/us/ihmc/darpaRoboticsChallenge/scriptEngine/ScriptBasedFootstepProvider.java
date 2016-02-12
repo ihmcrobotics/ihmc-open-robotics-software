@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacke
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -111,9 +111,9 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       ScriptObject nextObject = scriptObjects.poll();
       Object scriptObject = nextObject.getScriptObject();
 
-      if (scriptObject instanceof FootstepDataList)
+      if (scriptObject instanceof FootstepDataListMessage)
       {
-         FootstepDataList footstepDataList = (FootstepDataList) scriptObject;
+         FootstepDataListMessage footstepDataList = (FootstepDataListMessage) scriptObject;
          this.addFootstepDataList(footstepDataList);
          setupTimesForNewScriptEvent(0.5); // Arbitrary half second duration. With footsteps, it waits till they are done before looking for a new command.
       }
@@ -157,7 +157,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       this.scriptEventDuration.set(scriptEventDuration);
    }
 
-   private void addFootstepDataList(FootstepDataList footstepDataList)
+   private void addFootstepDataList(FootstepDataListMessage footstepDataList)
    {
       ArrayList<FootstepDataMessage> footstepList = footstepDataList.getDataList();
 

@@ -21,7 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -169,7 +169,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForSteppingPastSmallPlatform(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForSteppingPastSmallPlatform(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -205,7 +205,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
+      FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
@@ -240,7 +240,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForSideSteppingOverSmallWall();
+      FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallWall();
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
@@ -276,7 +276,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForSteppingOntoSmallPlatform(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoSmallPlatform(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -323,7 +323,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForSteppingOntoMediumPlatform(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoMediumPlatform(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -360,7 +360,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       
-      FootstepDataList footstepDataList = createFootstepsForSteppingOffOfMediumPlatform(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -418,7 +418,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 	   double swingTime = 1.0;
       double transferTime = 0.6;
-      FootstepDataList footstepDataList = createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(scriptedFootstepGenerator, swingTime, transferTime);
+      FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(scriptedFootstepGenerator, swingTime, transferTime);
 	   drcSimulationTestHelper.send(footstepDataList);
 
 	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
@@ -461,7 +461,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-   private FootstepDataList createFootstepsForSteppingOntoSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForSteppingOntoSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-3.3303508964136372, -5.093152916934431, 0.2361869051765919}, {-0.003380023644676521, 0.01519186055257256, 0.9239435001894032, -0.3822122332825927}},
@@ -472,11 +472,11 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 
-   private FootstepDataList createFootstepsForSideSteppingOverSmallPlatform()
+   private FootstepDataListMessage createFootstepsForSideSteppingOverSmallPlatform()
    {
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
-      FootstepDataList footstepDataList = new FootstepDataList();
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
       footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-3.40, -5.03, .24), new Quat4d(orientation)));
       footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-3.22, -4.85, 0.0), new Quat4d(orientation)));
@@ -489,11 +489,11 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return footstepDataList;
    }
 
-   private FootstepDataList createFootstepsForSideSteppingOverSmallWall()
+   private FootstepDataListMessage createFootstepsForSideSteppingOverSmallWall()
    {
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
-      FootstepDataList footstepDataList = new FootstepDataList();
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
       footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-4.30, -3.93, 0.0), new Quat4d(orientation)));
       footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-4.18, -3.81, 0.0), new Quat4d(orientation)));
@@ -506,7 +506,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return footstepDataList;
    }
 
-   private FootstepDataList createFootstepsForSteppingOffOfSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForSteppingOffOfSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-3.850667406347062, -5.249955436839419, 0.08402883817600326}, {-0.0036296745847858064, 0.003867481752280881, 0.9236352342329301, -0.38323598752046323}},
@@ -517,7 +517,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 
-   private FootstepDataList createFootstepsForSteppingPastSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForSteppingPastSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-3.3303508964136372, -5.093152916934431, 0.2361869051765919}, {-0.003380023644676521, 0.01519186055257256, 0.9239435001894032, -0.3822122332825927}},
@@ -526,7 +526,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
             };
 
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
-      FootstepDataList desiredFootsteps = scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+      FootstepDataListMessage desiredFootsteps = scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
       double zClearHeight = desiredFootsteps.get(0).getLocation().getZ() + 0.07;
       double swingHeightForClear = zClearHeight - desiredFootsteps.get(2).getLocation().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
       desiredFootsteps.get(1).setSwingHeight(swingHeightForClear);
@@ -534,7 +534,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return desiredFootsteps;
    }
 
-   private FootstepDataList createFootstepsForSteppingOntoMediumPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForSteppingOntoMediumPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-4.144889177599215, -5.68009276450442, 0.2841471307289875}, {-0.012979910123161926, 0.017759854548746876, 0.9232071519598507, -0.3836726001029824}},
@@ -545,7 +545,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
    
-   private FootstepDataList createFootstepsForSteppingOffOfMediumPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForSteppingOffOfMediumPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-4.304392715667327, -6.084498586699763, 0.08716704456087025}, {-0.0042976203878775715, -0.010722204803598987, 0.9248070170408506, -0.38026115501738456}},
@@ -556,7 +556,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
    
-   private FootstepDataList createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(ScriptedFootstepGenerator scriptedFootstepGenerator, double swingTime, double transferTime)
+   private FootstepDataListMessage createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(ScriptedFootstepGenerator scriptedFootstepGenerator, double swingTime, double transferTime)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-4.27, -5.67, 0.28}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},

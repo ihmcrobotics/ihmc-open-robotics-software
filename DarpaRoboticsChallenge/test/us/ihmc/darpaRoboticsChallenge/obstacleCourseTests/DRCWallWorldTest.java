@@ -22,7 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -99,7 +99,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          }
 
          bodyY = bodyY + 0.15;
-         FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
+         FootstepDataListMessage footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
          drcSimulationTestHelper.send(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       }
@@ -114,7 +114,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       for (int i = 0; i < 3; i++)
       {
          bodyY = bodyY + 0.3;
-         FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
+         FootstepDataListMessage footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
          drcSimulationTestHelper.send(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
@@ -156,7 +156,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private FootstepDataList createFootstepsForTwoSideSteps(double bodyY, ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForTwoSideSteps(double bodyY, ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double stepWidth = 0.20;
       double[][][] footstepLocationsAndOrientations = new double[][][]

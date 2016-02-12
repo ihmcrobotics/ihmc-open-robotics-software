@@ -49,7 +49,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacke
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
@@ -1763,7 +1763,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceStepsInPlace()
    {
-      FootstepDataList footstepDataList = new FootstepDataList(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       FramePose footstepPose = new FramePose();
 
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
@@ -1789,7 +1789,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceSquareUp()
    {
-      FootstepDataList footstepDataList = new FootstepDataList(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       FramePose footstepPose = new FramePose();
 
       RobotSide robotSide = activeSideForFootControl.getEnumValue();

@@ -25,7 +25,7 @@ import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
@@ -254,9 +254,9 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       assertTrue(areFootstepsTooFarApart(footstepListBehavior, desiredFootsteps));
    }
 
-   private FootstepDataList createFootstepDataList(ArrayList<Footstep> desiredFootsteps)
+   private FootstepDataListMessage createFootstepDataList(ArrayList<Footstep> desiredFootsteps)
    {
-      FootstepDataList ret = new FootstepDataList();
+      FootstepDataListMessage ret = new FootstepDataListMessage();
 
       for (int i = 0; i < desiredFootsteps.size(); i++)
       {
