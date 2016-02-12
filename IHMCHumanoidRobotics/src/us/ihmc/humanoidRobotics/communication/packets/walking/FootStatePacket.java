@@ -3,11 +3,11 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This message tells the controller whether a foot is load bearing.")
-public class FootStatePacket extends IHMCRosApiPacket<FootStatePacket>
+public class FootStatePacket extends Packet<FootStatePacket>
 {
    public RobotSide robotSide;
 

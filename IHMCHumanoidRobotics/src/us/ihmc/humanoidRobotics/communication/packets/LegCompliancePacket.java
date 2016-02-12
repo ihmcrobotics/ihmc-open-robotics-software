@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + "However, low stiffness (high compliance) can lead to poor joint tracking in the presence of natural joint stiction. Finding a "
       + "good balance is application specific. In our hybrid velocity+force controller, most force comes from velocity control, therefore, "
       + "only parameter related to velocity control is exposed.")
-public class LegCompliancePacket extends IHMCRosApiPacket<LegCompliancePacket>
+public class LegCompliancePacket extends Packet<LegCompliancePacket>
 {
    @FieldDocumentation("maximum allowed force (ratio) from velocity control in the range of [0.0, 1.0]. "
          + "1.0 is the maximum stiffness (default) value tuned for fast walking, 0.0 refers to zero velocity control making the joint"

@@ -4,13 +4,13 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This message sets the robot's center of mass height.")
-public class ComHeightPacket extends IHMCRosApiPacket<ComHeightPacket> implements VisualizablePacket
+public class ComHeightPacket extends Packet<ComHeightPacket> implements VisualizablePacket
 {
    public static final double MIN_COM_HEIGHT = -0.33; //-0.40
    public static final double MAX_COM_HEIGHT = 0.14;

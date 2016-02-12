@@ -6,14 +6,14 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This message gives the desired head orientation of the robot in world coordinates.")
-public class HeadOrientationPacket extends IHMCRosApiPacket<HeadOrientationPacket> implements VisualizablePacket
+public class HeadOrientationPacket extends Packet<HeadOrientationPacket> implements VisualizablePacket
 {
    public Quat4d orientation;
    @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")

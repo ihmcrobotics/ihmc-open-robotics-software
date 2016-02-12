@@ -11,7 +11,7 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
@@ -32,7 +32,7 @@ import us.ihmc.tools.DocumentedEnum;
                                   + "as the end of the hand attachment plate, which is about 10 cm from the end\n"
                                   + "of the wrist. The position/orientation may be specified in world frame, chest\n"
                                   + "frame, or desired joint angles.")
-public class HandPosePacket extends IHMCRosApiPacket<HandPosePacket> implements TransformableDataObject<HandPosePacket>, VisualizablePacket
+public class HandPosePacket extends Packet<HandPosePacket> implements TransformableDataObject<HandPosePacket>, VisualizablePacket
 {
    public enum Frame implements DocumentedEnum<Frame>
    {
@@ -450,7 +450,6 @@ public class HandPosePacket extends IHMCRosApiPacket<HandPosePacket> implements 
       this.jointAngles = randomJointAngles;
    }
    
-   @Override
    public boolean rosConversionEpsilonEquals(HandPosePacket other, double epsilon)
    {
       boolean ret = this.getRobotSide().equals(other.getRobotSide());
