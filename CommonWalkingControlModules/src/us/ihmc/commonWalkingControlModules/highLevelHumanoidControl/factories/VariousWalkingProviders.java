@@ -195,6 +195,8 @@ public class VariousWalkingProviders
          endEffectorLoadBearingMessageSubscriber.clearMessagesInQueue();
       if (stopAllTrajectoryMessageSubscriber != null)
          stopAllTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (pelvisHeightTrajectoryMessageSubscriber != null)
+         pelvisHeightTrajectoryMessageSubscriber.clearMessagesInQueue();
    }
 
    public HandTrajectoryMessageSubscriber getHandTrajectoryMessageSubscriber()
@@ -230,6 +232,11 @@ public class VariousWalkingProviders
    public StopAllTrajectoryMessageSubscriber getStopAllTrajectoryMessageSubscriber()
    {
       return stopAllTrajectoryMessageSubscriber;
+   }
+
+   public PelvisHeightTrajectoryMessageSubscriber getPelvisHeightTrajectoryMessageSubscriber()
+   {
+      return pelvisHeightTrajectoryMessageSubscriber;
    }
 
    public DesiredHighLevelStateProvider getDesiredHighLevelStateProvider()
