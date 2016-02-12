@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAborte
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class PacketsForwardedToTheUi
@@ -62,7 +62,7 @@ public class PacketsForwardedToTheUi
       DepthDataClearCommand.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
-      WholeBodyTrajectoryPacket.class,
+      WholeBodyTrajectoryMessage.class,
       JointAnglesPacket.class,
       ControllerCrashNotificationPacket.class,
       InvalidPacketNotificationPacket.class,

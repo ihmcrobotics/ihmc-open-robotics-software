@@ -74,7 +74,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessag
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -122,8 +122,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((HandComplianceControlParametersPacket) packet);
       else if (packet instanceof LegCompliancePacket)
          return convertToRosMessage((LegCompliancePacket) packet);
-      else if (packet instanceof WholeBodyTrajectoryPacket)
-         return convertToRosMessage((WholeBodyTrajectoryPacket) packet);
+      else if (packet instanceof WholeBodyTrajectoryMessage)
+         return convertToRosMessage((WholeBodyTrajectoryMessage) packet);
       else if (packet instanceof StopAllTrajectoryMessage)
          return convertToRosMessage((StopAllTrajectoryMessage) packet);
       else if (packet instanceof HandDesiredConfigurationMessage)
@@ -198,7 +198,7 @@ public class DRCROSMessageConverter
 
    private static Packet<?> convertToPacket(WholeBodyTrajectoryPacketMessage message)
    {
-      WholeBodyTrajectoryPacket ret = new WholeBodyTrajectoryPacket(message.getNumWaypoints(), message.getNumJointsPerArm());ret.setUniqueId(message.getUniqueId());
+      WholeBodyTrajectoryMessage ret = new WholeBodyTrajectoryMessage(message.getNumWaypoints(), message.getNumJointsPerArm());ret.setUniqueId(message.getUniqueId());
       
 
       if (message.getPelvisWorldPosition().size() == 0)
@@ -237,7 +237,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static WholeBodyTrajectoryPacketMessage convertToRosMessage(WholeBodyTrajectoryPacket packet)
+   public static WholeBodyTrajectoryPacketMessage convertToRosMessage(WholeBodyTrajectoryMessage packet)
    {
       WholeBodyTrajectoryPacketMessage ret = messageFactory.newFromType("ihmc_msgs/WholeBodyTrajectoryPacketMessage");
       ret.setUniqueId(packet.getUniqueId());
