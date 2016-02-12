@@ -22,6 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
                                   + "for information about defining a footstep.")
 public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
+   @FieldDocumentation("Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
 
    @FieldDocumentation("swingTime is the time spent in single-support when stepping")
