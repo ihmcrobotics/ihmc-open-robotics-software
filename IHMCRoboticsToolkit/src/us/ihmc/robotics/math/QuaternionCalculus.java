@@ -254,13 +254,6 @@ public class QuaternionCalculus
 
    private final Quat4d pureQuatForMultiply = new Quat4d();
 
-   public void multiply(Quat4d q, Vector3d v, Vector3d resultToPack)
-   {
-      setAsPureQuaternion(v, pureQuatForMultiply);
-      pureQuatForMultiply.mul(q, pureQuatForMultiply);
-      resultToPack.set(pureQuatForMultiply.x, pureQuatForMultiply.y, pureQuatForMultiply.z);
-   }
-
    public void multiply(Quat4d q, Vector3d v, Quat4d resultToPack)
    {
       setAsPureQuaternion(v, resultToPack);
