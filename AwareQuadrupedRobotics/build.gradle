@@ -8,11 +8,7 @@ plugins {
 sourceCompatibility = 1.7
 version = '1.0'
 
-repositories {
-	maven {
-	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
-	}
-}
+
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 
