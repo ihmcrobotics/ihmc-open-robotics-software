@@ -77,6 +77,11 @@ public class PelvisRotationalStateUpdater
       
       angularVelocityRootJointFrameRelativeToWorld = new FrameVector(rootJointFrame);
    }
+   
+   public IMUSensorReadOnly getIMUUsedForEstimation()
+   {
+      return imuProcessedOutput;
+   }
 
    private void checkNumberOfSensors(List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
