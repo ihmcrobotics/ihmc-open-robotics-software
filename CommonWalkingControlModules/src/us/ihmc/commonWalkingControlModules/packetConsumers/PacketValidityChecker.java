@@ -462,7 +462,7 @@ public abstract class PacketValidityChecker
 
    public static boolean validateHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
-      String errorMessage = validatePacket(handTrajectoryMessage);
+      String errorMessage = validatePacket(handTrajectoryMessage, true);
       if (errorMessage != null)
          return false;
 
@@ -478,7 +478,7 @@ public abstract class PacketValidityChecker
       for (int i = 0; i < handTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
          SE3WaypointMessage waypoint = handTrajectoryMessage.getWaypoint(i);
-         errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint);
+         errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
@@ -500,17 +500,21 @@ public abstract class PacketValidityChecker
 
    public static boolean validateArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
+      String errorMessage = validatePacket(armTrajectoryMessage, true);
+      if (errorMessage != null)
+         return false;
+
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(armTrajectoryMessage.robotSide);
       if (packetFieldErrorType != null)
       {
-         String errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
+         errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
          globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
          return false;
       }
       
       if (armTrajectoryMessage.jointTrajectory1DMessages == null)
       {
-         String errorMessage = "Trajectory pointes are empty.";
+         errorMessage = "Trajectory pointes are empty.";
          globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
          return false;
       }
@@ -518,7 +522,7 @@ public abstract class PacketValidityChecker
       int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
       if (numberOfJoints == 0)
       {
-         String errorMessage = "ArmJointTrajectoryPacket does not contain any points";
+         errorMessage = "ArmJointTrajectoryPacket does not contain any points";
          globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
          return false;
       }
@@ -526,7 +530,7 @@ public abstract class PacketValidityChecker
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          Trajectory1DMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectory(jointIndex);
-         String errorMessage = validateJointTrajectory1DMessage(jointTrajectory1DMessage);
+         errorMessage = validateJointTrajectory1DMessage(jointTrajectory1DMessage, false);
          if (errorMessage != null)
          {
             errorMessage = "Error with the " + jointIndex + " jointTrajectory1DMessage: " + errorMessage;
@@ -541,7 +545,7 @@ public abstract class PacketValidityChecker
 
    public static boolean validateHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
-      String errorMessage = validatePacket(headTrajectoryMessage);
+      String errorMessage = validatePacket(headTrajectoryMessage, true);
       if (errorMessage != null)
          return false;
 
@@ -556,7 +560,7 @@ public abstract class PacketValidityChecker
       for (int i = 0; i < headTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
          SO3WaypointMessage waypoint = headTrajectoryMessage.getWaypoint(i);
-         errorMessage = validateSO3WaypointMessage(waypoint, previousWaypoint);
+         errorMessage = validateSO3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
@@ -570,7 +574,7 @@ public abstract class PacketValidityChecker
 
    public static boolean validateChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
-      String errorMessage = validatePacket(chestTrajectoryMessage);
+      String errorMessage = validatePacket(chestTrajectoryMessage, true);
       if (errorMessage != null)
          return false;
 
@@ -585,7 +589,7 @@ public abstract class PacketValidityChecker
       for (int i = 0; i < chestTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
          SO3WaypointMessage waypoint = chestTrajectoryMessage.getWaypoint(i);
-         errorMessage = validateSO3WaypointMessage(waypoint, previousWaypoint);
+         errorMessage = validateSO3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
@@ -599,7 +603,7 @@ public abstract class PacketValidityChecker
 
    public static boolean validatePelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
-      String errorMessage = validatePacket(pelvisTrajectoryMessage);
+      String errorMessage = validatePacket(pelvisTrajectoryMessage, true);
       if (errorMessage != null)
          return false;
 
@@ -614,7 +618,7 @@ public abstract class PacketValidityChecker
       for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
          SE3WaypointMessage waypoint = pelvisTrajectoryMessage.getWaypoint(i);
-         errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint);
+         errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
@@ -628,7 +632,7 @@ public abstract class PacketValidityChecker
 
    public static boolean validateFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
-      String errorMessage = validatePacket(footTrajectoryMessage);
+      String errorMessage = validatePacket(footTrajectoryMessage, true);
       if (errorMessage != null)
          return false;
 
@@ -644,7 +648,7 @@ public abstract class PacketValidityChecker
       for (int i = 0; i < footTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
          SE3WaypointMessage waypoint = footTrajectoryMessage.getWaypoint(i);
-         errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint);
+         errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
@@ -666,7 +670,7 @@ public abstract class PacketValidityChecker
 
    public static boolean validateEndEffectorLoadBearingMessage(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
-      String errorMessage = validatePacket(endEffectorLoadBearingMessage);
+      String errorMessage = validatePacket(endEffectorLoadBearingMessage, true);
       if (errorMessage != null)
          return false;
 
@@ -696,7 +700,7 @@ public abstract class PacketValidityChecker
 
    public static boolean validatePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
    {
-      String errorMessage = validatePacket(pelvisHeightTrajectoryMessage);
+      String errorMessage = validatePacket(pelvisHeightTrajectoryMessage, true);
       if (errorMessage != null)
          return false;
 
@@ -711,7 +715,7 @@ public abstract class PacketValidityChecker
       for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfWaypoints(); i++)
       {
          Waypoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getWaypoint(i);
-         errorMessage = validateWaypoint1DMessage(waypoint, previousWaypoint);
+         errorMessage = validateWaypoint1DMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
@@ -723,9 +727,9 @@ public abstract class PacketValidityChecker
       return true;
    }
 
-   private static String validateSE3WaypointMessage(SE3WaypointMessage se3Waypoint, SE3WaypointMessage previousSE3Waypoint)
+   private static String validateSE3WaypointMessage(SE3WaypointMessage se3Waypoint, SE3WaypointMessage previousSE3Waypoint, boolean checkId)
    {
-      String errorMessage = validatePacket(se3Waypoint);
+      String errorMessage = validatePacket(se3Waypoint, checkId);
       if (errorMessage != null)
          return errorMessage;
 
@@ -758,9 +762,9 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   private static String validateSO3WaypointMessage(SO3WaypointMessage so3Waypoint, SO3WaypointMessage previousSO3Waypoint)
+   private static String validateSO3WaypointMessage(SO3WaypointMessage so3Waypoint, SO3WaypointMessage previousSO3Waypoint, boolean checkId)
    {
-      String errorMessage = validatePacket(so3Waypoint);
+      String errorMessage = validatePacket(so3Waypoint, checkId);
       if (errorMessage != null)
          return errorMessage;
 
@@ -785,9 +789,9 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   private static String validateWaypoint1DMessage(Waypoint1DMessage waypoint1D, Waypoint1DMessage previousWaypoint1D)
+   private static String validateWaypoint1DMessage(Waypoint1DMessage waypoint1D, Waypoint1DMessage previousWaypoint1D, boolean checkId)
    {
-      String errorMessage = validatePacket(waypoint1D);
+      String errorMessage = validatePacket(waypoint1D, checkId);
       if (errorMessage != null)
          return errorMessage;
 
@@ -814,9 +818,9 @@ public abstract class PacketValidityChecker
 
    private final static double MAX_ACCEPTED_JOINT_VELOCITY = 100.0;
 
-   public static String validateJointTrajectory1DMessage(Trajectory1DMessage jointTrajectory1DMessage)
+   public static String validateJointTrajectory1DMessage(Trajectory1DMessage jointTrajectory1DMessage, boolean checkId)
    {
-      String errorMessage = validatePacket(jointTrajectory1DMessage);
+      String errorMessage = validatePacket(jointTrajectory1DMessage, checkId);
       if (errorMessage != null)
          return errorMessage;
 
@@ -828,7 +832,7 @@ public abstract class PacketValidityChecker
       for (int i = 0; i < jointTrajectory1DMessage.getNumberOfWaypoints(); i++)
       {
          Waypoint1DMessage waypoint = jointTrajectory1DMessage.getWaypoint(i);
-         errorMessage = validateWaypoint1DMessage(waypoint, previousWaypoint);
+         errorMessage = validateWaypoint1DMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
             return "The " + i + "th " + errorMessage;
       }
@@ -850,11 +854,11 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validatePacket(Packet<?> packet)
+   public static String validatePacket(Packet<?> packet, boolean checkId)
    {
       if (packet == null)
          return "is null.";
-      if (packet.getUniqueId() <= 0)
+      if (checkId && packet.getUniqueId() <= 0)
          return "invalid id.";
       return null;
    }
