@@ -26,46 +26,36 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("Send whole body trajectories to the robot. A best effort is \n" +
-               "made to execute the trajectory while balance is kept.\n"
-               + "Internally the first waypoint at time 0.0 is set to the current\n"
-               + "position, do not provide a waypoint at time 0.0.\n"
-               + "Positions and orientations are set to null if no motion is desired\n"
-               + "velocities are set to null if they are zero")
+@ClassDocumentation("Send whole body trajectories to the robot. A best effort is \n" + "made to execute the trajectory while balance is kept.\n"
+      + "Internally the first waypoint at time 0.0 is set to the current\n" + "position, do not provide a waypoint at time 0.0.\n"
+      + "Positions and orientations are set to null if no motion is desired\n" + "velocities are set to null if they are zero")
 public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajectoryMessage>
-        implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>
+      implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>
 {
 
-   @FieldDocumentation("Sequence of desired time at the waypoints of the trajecotry. \n"
-         + "The execution starts at 0. Do not proivde time 0.0\n"
+   @FieldDocumentation("Sequence of desired time at the waypoints of the trajecotry. \n" + "The execution starts at 0. Do not proivde time 0.0\n"
          + "Should be numWaypoint elements long")
    public double[] timeAtWaypoint;
-   
-   @FieldDocumentation("Sequence of desired positions of the pelvis in world coordinates. \n"
-           + "Provide an empty list if no motion is desired\n"
-           + "Should be numWaypoints elements long")
+
+   @FieldDocumentation("Sequence of desired positions of the pelvis in world coordinates. \n" + "Provide an empty list if no motion is desired\n"
+         + "Should be numWaypoints elements long")
    public Point3d[] pelvisWorldPosition;
-   
-   @FieldDocumentation("Sequence of desired velocities of the pelvis. \n"
-         + "Provide an empty list if zero velocity is required\n"
+
+   @FieldDocumentation("Sequence of desired velocities of the pelvis. \n" + "Provide an empty list if zero velocity is required\n"
          + "Should be numWaypoints elements long")
    public Vector3d[] pelvisLinearVelocity;
-   @FieldDocumentation("Sequence of desired angular velocities of the pelvis. \n"
-         + "Provide an empty list if zero angular velocity is desired\n"
+   @FieldDocumentation("Sequence of desired angular velocities of the pelvis. \n" + "Provide an empty list if zero angular velocity is desired\n"
          + "Should be numWaypoints elements long")
    public Vector3d[] pelvisAngularVelocity;
 
    @FieldDocumentation("Sequence of desired quaternion (x,y,z,w) orientations of the pelvis in world coordinates. \n"
-         + "Provide an empty list if no motion is desired\n"
-         + "Should be numWaypoints elements long")
+         + "Provide an empty list if no motion is desired\n" + "Should be numWaypoints elements long")
    public Quat4d[] pelvisWorldOrientation;
    @FieldDocumentation("Sequence of desired quaternion (x,y,z,w) orientations of the chest in world coordinates. \n"
-         + "Provide an empty list if no motion is desired\n"
-         + "Should be numWaypoints elements long")
+         + "Provide an empty list if no motion is desired\n" + "Should be numWaypoints elements long")
    public Quat4d[] chestWorldOrientation;
-   
-   @FieldDocumentation("Sequence of desired angular velocities of the chest. \n"
-         + "Provide an empty list if zero velocity is desired\n"
+
+   @FieldDocumentation("Sequence of desired angular velocities of the chest. \n" + "Provide an empty list if zero velocity is desired\n"
          + "Should be numWaypoints elements long")
    public Vector3d[] chestAngularVelocity;
 
@@ -79,7 +69,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
    @FieldDocumentation("Number of waypoints in the trajectory. Should be at least 1")
    public int numWaypoints = 0;
-   
+
    @FieldDocumentation("Number of joints in a single arm")
    public int numJointsPerArm = 0;
 
@@ -125,11 +115,11 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
    public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage wholeBodyTrajectoryPacket)
    {
-//    public double[] timeAtWaypoint;
+      //    public double[] timeAtWaypoint;
       if (wholeBodyTrajectoryPacket.timeAtWaypoint != null)
          this.timeAtWaypoint = Arrays.copyOf(wholeBodyTrajectoryPacket.timeAtWaypoint, wholeBodyTrajectoryPacket.timeAtWaypoint.length);
 
-//    public Point3d[] pelvisWorldPosition;
+      //    public Point3d[] pelvisWorldPosition;
       if (wholeBodyTrajectoryPacket.pelvisWorldPosition != null)
       {
          this.pelvisWorldPosition = new Point3d[wholeBodyTrajectoryPacket.pelvisWorldPosition.length];
@@ -140,7 +130,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          }
       }
 
-//    public Vector3d[] pelvisLinearVelocity;
+      //    public Vector3d[] pelvisLinearVelocity;
       if (wholeBodyTrajectoryPacket.pelvisLinearVelocity != null)
       {
          this.pelvisLinearVelocity = new Vector3d[wholeBodyTrajectoryPacket.pelvisLinearVelocity.length];
@@ -151,7 +141,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          }
       }
 
-//    public Vector3d[] pelvisAngularVelocity;
+      //    public Vector3d[] pelvisAngularVelocity;
       if (wholeBodyTrajectoryPacket.pelvisAngularVelocity != null)
       {
          this.pelvisAngularVelocity = new Vector3d[wholeBodyTrajectoryPacket.pelvisAngularVelocity.length];
@@ -162,7 +152,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          }
       }
 
-//    public Quat4d[] pelvisWorldOrientation;
+      //    public Quat4d[] pelvisWorldOrientation;
       if (wholeBodyTrajectoryPacket.pelvisWorldOrientation != null)
       {
          this.pelvisWorldOrientation = new Quat4d[wholeBodyTrajectoryPacket.pelvisWorldOrientation.length];
@@ -173,8 +163,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          }
       }
 
-
-//    public Quat4d[] chestWorldOrientation;
+      //    public Quat4d[] chestWorldOrientation;
       if (wholeBodyTrajectoryPacket.chestWorldOrientation != null)
       {
          this.chestWorldOrientation = new Quat4d[wholeBodyTrajectoryPacket.chestWorldOrientation.length];
@@ -185,7 +174,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          }
       }
 
-//    public Vector3d[] chestAngularVelocity;
+      //    public Vector3d[] chestAngularVelocity;
       if (wholeBodyTrajectoryPacket.chestAngularVelocity != null)
       {
          this.chestAngularVelocity = new Vector3d[wholeBodyTrajectoryPacket.chestAngularVelocity.length];
@@ -196,18 +185,18 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          }
       }
 
-//    public ArmJointTrajectoryPacket rightArmTrajectory;
+      //    public ArmJointTrajectoryPacket rightArmTrajectory;
       if (wholeBodyTrajectoryPacket.rightArmTrajectory != null)
          this.rightArmTrajectory = new ArmTrajectoryMessage(wholeBodyTrajectoryPacket.rightArmTrajectory);
 
-//    public ArmJointTrajectoryPacket leftArmTrajectory;
+      //    public ArmJointTrajectoryPacket leftArmTrajectory;
       if (wholeBodyTrajectoryPacket.leftArmTrajectory != null)
          this.leftArmTrajectory = new ArmTrajectoryMessage(wholeBodyTrajectoryPacket.leftArmTrajectory);
 
-//    public int numWaypoints = 0;
+      //    public int numWaypoints = 0;
       this.numWaypoints = wholeBodyTrajectoryPacket.numWaypoints;
 
-//    public int numJointsPerArm = 0;  
+      //    public int numJointsPerArm = 0;  
       this.numJointsPerArm = wholeBodyTrajectoryPacket.numJointsPerArm;
 
       // public FootPosePacket leftFootPosePacket;
@@ -268,38 +257,37 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
    public WholeBodyTrajectoryMessage(Random random)
    {
       this(random.nextInt(128) + 1, random.nextInt(16) + 1);
-      
-      for(int i = 0; i < numWaypoints; i++)
+
+      for (int i = 0; i < numWaypoints; i++)
       {
-         if(i == 0)
+         if (i == 0)
          {
-            timeAtWaypoint[i] = random.nextDouble();            
+            timeAtWaypoint[i] = random.nextDouble();
          }
          else
          {
             timeAtWaypoint[i] = random.nextDouble() + timeAtWaypoint[i - 1];
          }
-         
-         
+
          pelvisWorldPosition[i] = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
          pelvisLinearVelocity[i] = RandomTools.generateRandomVector(random);
          pelvisAngularVelocity[i] = RandomTools.generateRandomVector(random);
          pelvisWorldOrientation[i] = RandomTools.generateRandomQuaternion(random);
-         
+
          chestWorldOrientation[i] = RandomTools.generateRandomQuaternion(random);
          chestAngularVelocity[i] = RandomTools.generateRandomVector(random);
       }
-      
+
       pelvisWorldPosition = random.nextBoolean() ? null : pelvisWorldPosition;
       pelvisLinearVelocity = random.nextBoolean() ? null : pelvisLinearVelocity;
       pelvisAngularVelocity = random.nextBoolean() ? null : pelvisAngularVelocity;
       pelvisWorldOrientation = random.nextBoolean() ? null : pelvisWorldOrientation;
-      
+
       chestWorldOrientation = random.nextBoolean() ? null : chestWorldOrientation;
       chestAngularVelocity = random.nextBoolean() ? null : chestAngularVelocity;
-      
-//      rightArmTrajectory = new ArmTrajectoryMessage(random, RobotSide.RIGHT, this.numWaypoints);
-//      leftArmTrajectory = new ArmTrajectoryMessage(random, RobotSide.LEFT, this.numWaypoints);
+
+      //      rightArmTrajectory = new ArmTrajectoryMessage(random, RobotSide.RIGHT, this.numWaypoints);
+      //      leftArmTrajectory = new ArmTrajectoryMessage(random, RobotSide.LEFT, this.numWaypoints);
    }
 
    public void allocateArmTrajectories()
@@ -366,7 +354,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
             return false;
          }
 
-         if(this.pelvisWorldPosition == null)
+         if (this.pelvisWorldPosition == null)
          {
             return otherTrajectory.pelvisWorldPosition == null;
          }
@@ -375,7 +363,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
             return false;
          }
 
-         if(this.pelvisWorldOrientation == null)
+         if (this.pelvisWorldOrientation == null)
          {
             return otherTrajectory.pelvisWorldOrientation == null;
          }
@@ -384,7 +372,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
             return false;
          }
 
-         if(this.chestWorldOrientation == null)
+         if (this.chestWorldOrientation == null)
          {
             return otherTrajectory.chestWorldOrientation == null;
          }
@@ -392,8 +380,8 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          {
             return false;
          }
-         
-         if(this.chestAngularVelocity == null)
+
+         if (this.chestAngularVelocity == null)
          {
             return otherTrajectory.chestAngularVelocity == null;
          }
@@ -402,7 +390,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
             return false;
          }
 
-         if(this.pelvisLinearVelocity == null)
+         if (this.pelvisLinearVelocity == null)
          {
             return otherTrajectory.pelvisLinearVelocity == null;
          }
@@ -410,7 +398,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          {
             return false;
          }
-         if(this.pelvisAngularVelocity == null)
+         if (this.pelvisAngularVelocity == null)
          {
             return otherTrajectory.pelvisAngularVelocity == null;
          }
@@ -418,8 +406,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          {
             return false;
          }
-         
-         
+
       }
 
       return true;
@@ -434,7 +421,6 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
       else
          throw new RuntimeException("Side must be either LEFT or RIGHT, robotSide=" + robotSide);
    }
-
 
    @Override
    public String toString()
@@ -451,7 +437,6 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
       String F = " %." + decimals + "f ";
 
       out.format("WBTraj Packet, # pts=" + numWaypoints);
-
 
       for (int w = 0; w < numWaypoints; w++)
       {
@@ -476,8 +461,8 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
             for (int j = 0; j < numJointsPerArm; j++)
             {
 
-//               System.out.println(Arrays.toString(rightArmTrajectory.jointTrajectory1DMessages[w].positions));
-//               out.format(F + "\t", leftArmTrajectory.jointTrajectory1DMessages[w].positions[j]);
+               //               System.out.println(Arrays.toString(rightArmTrajectory.jointTrajectory1DMessages[w].positions));
+               //               out.format(F + "\t", leftArmTrajectory.jointTrajectory1DMessages[w].positions[j]);
             }
          }
 
@@ -489,8 +474,8 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
          {
             for (int j = 0; j < numJointsPerArm; j++)
             {
-//               System.out.println(Arrays.toString(rightArmTrajectory.jointTrajectory1DMessages[w].positions));
-//               out.format(F + "\t", rightArmTrajectory.jointTrajectory1DMessages[w].positions[j]);
+               //               System.out.println(Arrays.toString(rightArmTrajectory.jointTrajectory1DMessages[w].positions));
+               //               out.format(F + "\t", rightArmTrajectory.jointTrajectory1DMessages[w].positions[j]);
             }
          }
 
@@ -499,8 +484,6 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
 
       return stream.toString();
    }
-
-
 
    @Override
    public WholeBodyTrajectoryMessage transform(RigidBodyTransform transform)
@@ -535,7 +518,7 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
       else
          throw new RuntimeException("Side must be either LEFT or RIGHT, robotSide=" + footPosePacket.getRobotSide());
    }
-   
+
    public HandPosePacket getHandPosePacket(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT)
@@ -620,7 +603,6 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
       return pelvisWorldOrientation;
    }
 
-
    public PelvisPosePacket getPelvisPosePacket()
    {
       return pelvisPosePacket;
@@ -630,6 +612,5 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
    {
       this.pelvisPosePacket = pelvisPosePacket;
    }
-
 
 }
