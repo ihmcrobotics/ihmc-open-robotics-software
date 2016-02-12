@@ -16,6 +16,9 @@ public class Trajectory1DMessage extends IHMCRosApiPacket<Trajectory1DMessage> i
    @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
    public Waypoint1DMessage[] waypoints;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public Trajectory1DMessage()
    {
    }

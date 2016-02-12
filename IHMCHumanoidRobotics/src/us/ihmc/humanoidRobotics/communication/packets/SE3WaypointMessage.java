@@ -28,6 +28,9 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
    @FieldDocumentation("Define the desired 3D angular velocity to be reached at this waypoint. It is expressed in world frame.")
    public Vector3d angularVelocity;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public SE3WaypointMessage()
    {
    }

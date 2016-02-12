@@ -16,9 +16,11 @@ public class HandDesiredConfigurationMessage extends IHMCRosApiPacket<HandDesire
    @FieldDocumentation(value = "Specifies the grasp to perform")
    public HandConfiguration handDesiredConfiguration;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public HandDesiredConfigurationMessage()
    {
-      // Empty constructor for deserialization
    }
 
    public HandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration handDesiredConfiguration)

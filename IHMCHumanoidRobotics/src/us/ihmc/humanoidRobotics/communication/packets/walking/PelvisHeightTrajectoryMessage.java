@@ -14,6 +14,9 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeight
    @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
    public Waypoint1DMessage[] waypoints;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public PelvisHeightTrajectoryMessage()
    {
    }

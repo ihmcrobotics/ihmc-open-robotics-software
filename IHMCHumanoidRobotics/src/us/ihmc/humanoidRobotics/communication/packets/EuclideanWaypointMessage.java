@@ -23,6 +23,9 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
    @FieldDocumentation("Define the desired 3D linear velocity to be reached at this waypoint. It is expressed in world frame.")
    public Vector3d linearVelocity;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public EuclideanWaypointMessage()
    {
    }

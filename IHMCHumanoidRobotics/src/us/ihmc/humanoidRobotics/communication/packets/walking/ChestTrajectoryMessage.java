@@ -21,7 +21,7 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
    public SO3WaypointMessage[] taskspaceWaypoints;
 
    /**
-    * Empty constructor deserialization.
+    * Empty constructor for serialization.
     */
    public ChestTrajectoryMessage()
    {

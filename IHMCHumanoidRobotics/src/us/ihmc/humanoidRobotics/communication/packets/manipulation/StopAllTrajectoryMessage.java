@@ -9,13 +9,15 @@ import us.ihmc.communication.packets.IHMCRosApiPacket;
 public class StopAllTrajectoryMessage extends IHMCRosApiPacket<StopAllTrajectoryMessage>
 {
 
+   /**
+    * Empty constructor for serialization.
+    */
    public StopAllTrajectoryMessage()
    {
    }
    
    public StopAllTrajectoryMessage(Random random)
    {
-      
    }
 
    @Override
