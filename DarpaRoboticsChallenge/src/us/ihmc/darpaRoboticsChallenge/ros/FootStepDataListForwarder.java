@@ -6,7 +6,6 @@ import java.util.List;
 import ihmc_msgs.FootstepDataListMessage;
 import ihmc_msgs.FootstepDataMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -23,7 +22,7 @@ public class FootStepDataListForwarder extends AbstractRosTopicSubscriber<ihmc_m
    @Override
    public void onNewMessage(FootstepDataListMessage message)
    {
-      ArrayList<FootstepData> footStepDataArrayList = new ArrayList<FootstepData>();
+      ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage> footStepDataArrayList = new ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>();
       List<FootstepDataMessage> footStepDataList = message.getFootstepDataList();
       FootStepDataMessageConverter.convertFootStepDataList(footStepDataList, footStepDataArrayList);;
       

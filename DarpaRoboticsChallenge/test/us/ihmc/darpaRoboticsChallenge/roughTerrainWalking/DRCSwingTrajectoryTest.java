@@ -16,7 +16,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -247,7 +247,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    private FootstepDataList createBasicFootstepFromDefaultForSwingHeightTest(double swingHeight)
    {
       FootstepDataList desiredFootsteps = new FootstepDataList(0.0, 0.0);
-      FootstepData footstep = new FootstepData(RobotSide.RIGHT, new Point3d(0.4, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3d(0.4, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
@@ -258,17 +258,17 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    private FootstepDataList createFootstepsForSwingHeightTest(double swingHeight)
    {
       FootstepDataList desiredFootsteps = new FootstepDataList(0.0, 0.0);
-      FootstepData footstep = new FootstepData(RobotSide.RIGHT, new Point3d(0.6, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3d(0.6, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
-      footstep = new FootstepData(RobotSide.LEFT, new Point3d(1.2, 0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      footstep = new FootstepDataMessage(RobotSide.LEFT, new Point3d(1.2, 0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
-      footstep = new FootstepData(RobotSide.RIGHT, new Point3d(1.2, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3d(1.2, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);

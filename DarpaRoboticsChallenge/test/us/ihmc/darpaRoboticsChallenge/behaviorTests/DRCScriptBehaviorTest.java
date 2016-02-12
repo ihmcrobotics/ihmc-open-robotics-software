@@ -42,7 +42,7 @@ import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -611,7 +611,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          footstep.getOrientation(orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
          footsepDataList.add(footstepData);
       }
 

@@ -5,7 +5,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.InclusionFunction;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 
@@ -86,7 +86,7 @@ public class SwingTrajectoryHeightCalculator
       return getSwingHeight(startPoint, endPoint, stanceHeight, groundProfile);
    }
 
-   public double getSwingHeight(FootstepData initialFootstep, FootstepData stanceFootstep, FootstepData endFootstep, HeightMapWithPoints heightMap)
+   public double getSwingHeight(FootstepDataMessage initialFootstep, FootstepDataMessage stanceFootstep, FootstepDataMessage endFootstep, HeightMapWithPoints heightMap)
    {
       return getSwingHeight(initialFootstep.getLocation(), endFootstep.getLocation(), stanceFootstep.getLocation().getZ(), heightMap);
    }

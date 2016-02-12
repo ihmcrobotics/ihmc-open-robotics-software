@@ -12,7 +12,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -71,7 +71,7 @@ public class FootstepListBehavior extends BehaviorInterface
          footstep.getOrientation(orientation);
          
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
          footstepDataList.add(footstepData);
       }
       set(footstepDataList);
@@ -245,7 +245,7 @@ public class FootstepListBehavior extends BehaviorInterface
       return hasInputBeenSet() && !isDone();
    }
 
-   private final ArrayList<FootstepData> footstepDataList = new ArrayList<FootstepData>();
+   private final ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
    private final Vector3d firstSingleSupportFootTranslationFromWorld = new Vector3d();
    private final Point3d previousFootStepLocation = new Point3d();
    private final Point3d nextFootStepLocation = new Point3d();
@@ -256,7 +256,7 @@ public class FootstepListBehavior extends BehaviorInterface
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
       footstepDataList.addAll(footStepList.getDataList());
 
-      FootstepData firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
+      FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 
       RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(firstStepData.getRobotSide().getOppositeSide()).getBodyFixedFrame()
             .getTransformToWorldFrame();

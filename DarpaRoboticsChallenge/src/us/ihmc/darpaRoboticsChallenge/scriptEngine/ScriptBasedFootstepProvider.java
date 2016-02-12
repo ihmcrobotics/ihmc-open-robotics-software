@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
@@ -159,10 +159,10 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
    private void addFootstepDataList(FootstepDataList footstepDataList)
    {
-      ArrayList<FootstepData> footstepList = footstepDataList.getDataList();
+      ArrayList<FootstepDataMessage> footstepList = footstepDataList.getDataList();
 
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      for (FootstepData footstepData : footstepList)
+      for (FootstepDataMessage footstepData : footstepList)
       {
          RobotSide robotSide = footstepData.getRobotSide();
          ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);

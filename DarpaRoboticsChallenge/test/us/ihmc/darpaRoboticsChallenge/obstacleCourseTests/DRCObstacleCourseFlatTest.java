@@ -26,7 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -270,7 +270,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          Quat4d orientation = new Quat4d();
          desiredFootstep.getPose(location, orientation);
          location.setZ(0.0);
-         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
          footstepDataList.add(footstepData);
       }
       

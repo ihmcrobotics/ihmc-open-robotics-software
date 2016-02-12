@@ -13,7 +13,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
@@ -46,8 +46,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	private final BooleanYoVariable hasInputBeenSet;
 	private final FullHumanoidRobotModel fullRobotModel;
 
-	private FootstepData startFootstep;
-	private ArrayList<FootstepData> goalFootsteps = new ArrayList<FootstepData>();
+	private FootstepDataMessage startFootstep;
+	private ArrayList<FootstepDataMessage> goalFootsteps = new ArrayList<FootstepDataMessage>();
 	private double startYaw;
 
 	private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -62,10 +62,10 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 
 //	private ArrayList<FootstepData> footsteps = new ArrayList<FootstepData>();
 	
-	private FootstepData currentLocation;
-	private FootstepData predictedLocation;
+	private FootstepDataMessage currentLocation;
+	private FootstepDataMessage predictedLocation;
 	private FootstepPathPlanPacket currentPlan;
-	private List<FootstepData> stepsRequested;
+	private List<FootstepDataMessage> stepsRequested;
 	private double ankleHeight = 0;
 	private int expectedIndex = 0;
    private RobotSide lastSide = null;
@@ -150,7 +150,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		if (plan.pathPlan == null || plan.pathPlan.size() == 0) return;
 		int size = plan.pathPlan.size();
 		SnapFootstepPacket planVisualizationPacket = new SnapFootstepPacket();
-		planVisualizationPacket.footstepData = new ArrayList<FootstepData>();
+		planVisualizationPacket.footstepData = new ArrayList<FootstepDataMessage>();
 		planVisualizationPacket.footstepOrder = new int[size];
 		planVisualizationPacket.flag = new byte[size];
 		
@@ -196,7 +196,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 			}else if (newestPacket.status == Status.COMPLETED){
 				stepCompleted.set(true);
 				currentLocation = predictedLocation;
-            FootstepData actualFootstep = new FootstepData(newestPacket.getRobotSide(), newestPacket.getActualFootPositionInWorld(), newestPacket.getActualFootOrientationInWorld());
+            FootstepDataMessage actualFootstep = new FootstepDataMessage(newestPacket.getRobotSide(), newestPacket.getActualFootPositionInWorld(), newestPacket.getActualFootOrientationInWorld());
             lastSide = newestPacket.getRobotSide();
 
             debugPrintln("Step Completed, expected location is: "+ currentLocation.toString());
@@ -239,7 +239,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private boolean atGoal(){
 		if (currentLocation == null) return false;
-		for (FootstepData goal : goalFootsteps){
+		for (FootstepDataMessage goal : goalFootsteps){
 			if (approximatelyEqual(currentLocation, goal)){
 				hasInputBeenSet.set(false);
 				return true;
@@ -248,7 +248,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		return false;
 	}
 
-	private boolean approximatelyEqual(FootstepData currentLocation, FootstepData checkAgainst){
+	private boolean approximatelyEqual(FootstepDataMessage currentLocation, FootstepDataMessage checkAgainst){
 		if (currentLocation == null) return false;
 		double xDiff = currentLocation.location.x - checkAgainst.location.x;
 		double yDiff = currentLocation.location.y - checkAgainst.location.y;
@@ -266,12 +266,12 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	}
 
 	private void requestSearchStop(){
-		FootstepPlanRequestPacket stopSearchRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.STOP_SEARCH,new FootstepData(), 0.0, null);
+		FootstepPlanRequestPacket stopSearchRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.STOP_SEARCH,new FootstepDataMessage(), 0.0, null);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(stopSearchRequestPacket);
 		waitingForValidPlan.set(false);
 	}
 	
-	private void sendUpdateStart(FootstepData updatedLocation){
+	private void sendUpdateStart(FootstepDataMessage updatedLocation){
 		if (updatedLocation.orientation.epsilonEquals(new Quat4d(), .003)) return;
 		FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation, RotationTools.computeYaw(updatedLocation.orientation), null, 10);
 		outgoingCommunicationBridge.sendPacketToNetworkProcessor(updateStartPacket);
@@ -304,8 +304,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
       expectedIndex = 0;
     }
 	
-	private FootstepData adjustFootstepForAnkleHeight(FootstepData footstep){
-		FootstepData copy = new FootstepData(footstep);
+	private FootstepDataMessage adjustFootstepForAnkleHeight(FootstepDataMessage footstep){
+		FootstepDataMessage copy = new FootstepDataMessage(footstep);
 		Point3d ankleOffset = new Point3d(0, 0, ankleHeight);
 		RigidBodyTransform footTransform = new RigidBodyTransform();
 		footTransform.setRotationAndZeroTranslation(copy.getOrientation());
@@ -354,8 +354,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 		startYaw = RotationTools.computeYaw(startRotation);
 		Quat4d startOrientation = new Quat4d();
 		RotationTools.convertMatrixToQuaternion(startRotation, startOrientation);
-		startFootstep = new FootstepData(startSide, new Point3d(startTranslation), startOrientation);
-		currentLocation = new FootstepData(startFootstep);
+		startFootstep = new FootstepDataMessage(startSide, new Point3d(startTranslation), startOrientation);
+		currentLocation = new FootstepDataMessage(startFootstep);
 		predictedLocation = currentLocation;
 		stepCompleted.set(true);
 
@@ -373,7 +373,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 
 		Quat4d rightGoalOrientation = new Quat4d();
 		RotationTools.convertYawPitchRollToQuaternion(thetaGoal, 0, 0,rightGoalOrientation);
-		goalFootsteps.add(new FootstepData(RobotSide.RIGHT, new Point3d(xGoal - xOffset, yGoal - yOffset, 0), rightGoalOrientation));
+		goalFootsteps.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(xGoal - xOffset, yGoal - yOffset, 0), rightGoalOrientation));
 
 		hasInputBeenSet.set(true);
 	}

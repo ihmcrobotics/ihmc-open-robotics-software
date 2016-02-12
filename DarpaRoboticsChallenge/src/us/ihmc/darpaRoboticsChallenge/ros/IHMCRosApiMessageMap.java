@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
@@ -37,7 +37,7 @@ public class IHMCRosApiMessageMap
 	   HandPosePacket.class,
 	   ComHeightPacket.class,
 	   FootPosePacket.class,
-	   FootstepData.class,
+	   FootstepDataMessage.class,
 	   FootstepDataList.class,
 	   FootstepStatus.class,
 	   ChestOrientationPacket.class,

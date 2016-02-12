@@ -27,7 +27,7 @@ public class FootstepDataListCorruptor
    {
       FootstepDataList ret = new FootstepDataList(footstepDataList.swingTime, footstepDataList.transferTime);
       
-      for (FootstepData footstepData : footstepDataList)
+      for (FootstepDataMessage footstepData : footstepDataList)
       {
          ret.add(corruptFootstepData(footstepData));
       }
@@ -35,9 +35,9 @@ public class FootstepDataListCorruptor
       return ret;
    }
    
-   public FootstepData corruptFootstepData(FootstepData footstepData)
+   public FootstepDataMessage corruptFootstepData(FootstepDataMessage footstepData)
    {
-      FootstepData ret = footstepData.clone();
+      FootstepDataMessage ret = footstepData.clone();
       
       Point3d location = new Point3d();
       Quat4d orientation = new Quat4d();

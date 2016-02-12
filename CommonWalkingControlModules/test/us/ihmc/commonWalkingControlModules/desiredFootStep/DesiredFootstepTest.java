@@ -24,7 +24,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -78,7 +78,7 @@ public class DesiredFootstepTest
       //      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepData.class, footstepDataConsumer, port);
+      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepDataMessage.class, footstepDataConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
       //      queueBasedStreamingDataProducer.startProducingData();
 
@@ -86,7 +86,7 @@ public class DesiredFootstepTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       for (Footstep footstep : sentFootsteps)
       {
-         FootstepData footstepData = new FootstepData(footstep);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstep);
          tcpServer.send(footstepData);
          //         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
@@ -287,7 +287,7 @@ public class DesiredFootstepTest
    private NetClassList getNetClassList()
    {
       NetClassList netClassList = new NetClassList();
-      netClassList.registerPacketClass(FootstepData.class);
+      netClassList.registerPacketClass(FootstepDataMessage.class);
       netClassList.registerPacketClass(FootstepDataList.class);
       netClassList.registerPacketClass(PauseWalkingMessage.class);
       netClassList.registerPacketClass(FootstepStatus.class);
@@ -373,18 +373,18 @@ public class DesiredFootstepTest
 
       for (Footstep footstep : footsteps)
       {
-         footstepsData.add(new FootstepData(footstep));
+         footstepsData.add(new FootstepDataMessage(footstep));
       }
 
       return footstepsData;
    }
 
-   private class FootstepDataConsumer implements PacketConsumer<FootstepData>
+   private class FootstepDataConsumer implements PacketConsumer<FootstepDataMessage>
    {
       ArrayList<Footstep> reconstructedFootsteps = new ArrayList<Footstep>();
 
       @Override
-      public void receivedPacket(FootstepData packet)
+      public void receivedPacket(FootstepDataMessage packet)
       {
          RigidBody endEffector = createRigidBody(packet.getRobotSide());
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
@@ -410,7 +410,7 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(FootstepDataList packet)
       {
-         for (FootstepData footstepData : packet)
+         for (FootstepDataMessage footstepData : packet)
          {
             RigidBody endEffector = createRigidBody(footstepData.getRobotSide());
             ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());

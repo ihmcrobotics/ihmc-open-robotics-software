@@ -9,7 +9,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -53,7 +53,7 @@ public class ScriptedFootstepGenerator
          Point3d location = new Point3d();
          Quat4d orientation = new Quat4d();
          footstep.getPose(location, orientation);
-         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
          footstepDataList.add(footstepData);
       }
 

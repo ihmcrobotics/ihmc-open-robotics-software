@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class FootstepTools
 {
-   public static Footstep generateFootstepFromFootstepData(FootstepData footstepData, ContactablePlaneBody contactableBody, int index)
+   public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody, int index)
    {
       String id = "footstep_" + index;
       FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
@@ -33,7 +33,7 @@ public class FootstepTools
       return footstep;
    }
 
-   public static Footstep generateFootstepFromFootstepData(FootstepData footstepData, ContactablePlaneBody contactableBody)
+   public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody)
    {
       FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
@@ -51,7 +51,7 @@ public class FootstepTools
       return footstep;
    }
 
-   public static Footstep generateFootstepFromFootstepDataSole(FootstepData footstepData, ContactablePlaneBody contactableBody)
+   public static Footstep generateFootstepFromFootstepDataSole(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody)
    {
       FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
