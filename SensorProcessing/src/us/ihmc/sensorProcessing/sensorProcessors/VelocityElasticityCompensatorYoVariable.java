@@ -11,13 +11,11 @@ public class VelocityElasticityCompensatorYoVariable extends DoubleYoVariable im
 {
    private final DoubleYoVariable stiffness;
    private final DoubleYoVariable rawJointVelocity;
-   private final DoubleYoVariable jointDeflectionAlpha;
    private final DoubleYoVariable jointTau;
    private final DoubleYoVariable jointDeflection;
    private final DoubleYoVariable jointDeflectionPrevious;
    private final DoubleYoVariable jointDeflectionDot;
    private final DoubleYoVariable maximumDeflection;
-   private final BooleanYoVariable hasBeenCalled;
 
    private final double updateDT;
 
@@ -46,12 +44,6 @@ public class VelocityElasticityCompensatorYoVariable extends DoubleYoVariable im
    public VelocityElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, DoubleYoVariable maximumDeflection,
          DoubleYoVariable rawJointVelocity, DoubleYoVariable jointTau, double updateDT, YoVariableRegistry registry)
    {
-      this(name, stiffness, maximumDeflection, rawJointVelocity, jointTau, null, updateDT, registry);
-   }
-
-   public VelocityElasticityCompensatorYoVariable(String name, DoubleYoVariable stiffness, DoubleYoVariable maximumDeflection,
-         DoubleYoVariable rawJointVelocity, DoubleYoVariable jointTau, DoubleYoVariable jointDeflectionAlphaFilter, double updateDT, YoVariableRegistry registry)
-   {
       super(name, registry);
 
       this.updateDT = updateDT;
@@ -72,12 +64,6 @@ public class VelocityElasticityCompensatorYoVariable extends DoubleYoVariable im
       jointDeflection = new DoubleYoVariable(name + "Deflection", registry);
       jointDeflectionPrevious = new DoubleYoVariable(name + "DeflectionPrevious", registry);
       jointDeflectionDot = new DoubleYoVariable(name + "DeflectionDot", registry);
-      if (jointDeflectionAlphaFilter == null)
-         jointDeflectionAlphaFilter = new DoubleYoVariable(name + "DeflectionAlpha", registry);
-      jointDeflectionAlpha = jointDeflectionAlphaFilter;
-
-      hasBeenCalled = new BooleanYoVariable(name + "ElasticityHasBeenCalled", registry);
-      hasBeenCalled.set(false);
    }
 
    public void setStiffness(double newStiffness)
@@ -110,24 +96,10 @@ public class VelocityElasticityCompensatorYoVariable extends DoubleYoVariable im
       deflection = MathTools.clipToMinMax(deflection, maximumDeflection.getDoubleValue());
       jointDeflection.set(deflection);
 
-      if (!hasBeenCalled.getBooleanValue())
-      {
-         jointDeflectionDot.set(0.0);
-         hasBeenCalled.set(true);
-      }
-      else
-      {
-         double newDeflectionDot = (jointDeflection.getDoubleValue() - jointDeflectionPrevious.getDoubleValue()) / updateDT;
-         double alpha = jointDeflectionAlpha.getDoubleValue();
-         jointDeflectionDot.set(alpha * jointDeflectionDot.getDoubleValue() + (1.0 - alpha) * newDeflectionDot);
-      }
+      double newDeflectionDot = (jointDeflection.getDoubleValue() - jointDeflectionPrevious.getDoubleValue()) / updateDT;
+      jointDeflectionDot.set(newDeflectionDot);
 
       jointDeflectionPrevious.set(jointDeflection.getDoubleValue());
       set(rawJointVelocity - jointDeflectionDot.getDoubleValue());
-   }
-
-   public void reset()
-   {
-      hasBeenCalled.set(false);
    }
 }
