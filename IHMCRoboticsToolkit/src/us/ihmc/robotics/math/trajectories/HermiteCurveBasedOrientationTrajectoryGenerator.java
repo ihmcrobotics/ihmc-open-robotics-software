@@ -65,7 +65,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    /**
     * Does not need to match the dt at which the trajectory will be updated.
     */
-   private final double dtForFiniteDifference = 1.0e-4; // Weird jerkiness at 1.0e-4
+   private final double dtForFiniteDifference = 1.0e-3; // Weird jerkiness at 1.0e-4
 
    public HermiteCurveBasedOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -357,7 +357,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       quaternionCalculus.computeAngularVelocity(qInterpolated, qDot, tempAngularVelocity);
       quaternionCalculus.computeAngularAcceleration(qInterpolated, qDot, qDDot, tempAngularAcceleration);
 
-      tempAngularVelocity.scale(trajectoryTime.getValueAsDouble());
+      //      tempAngularVelocity.scale(trajectoryTime.getValueAsDouble());
 
       currentOrientation.set(qInterpolated);
       currentAngularVelocity.set(tempAngularVelocity);
