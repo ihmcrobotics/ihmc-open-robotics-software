@@ -2,7 +2,7 @@
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderPitch.leftShoulderPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftShoulderPitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,7 +14,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipYaw.leftHipYawTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftHipYaw_Status</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -26,7 +26,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw.rightHipYawTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightHipYaw_Status</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderPitch.rightShoulderPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightShoulderPitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,7 +50,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderRoll.leftShoulderRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftShoulderRoll_Status</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipRoll.leftHipRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftHipRoll_Status</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipRoll.rightHipRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightHipRoll_Status</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderRoll.rightShoulderRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightShoulderRoll_Status</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderYaw.leftShoulderYawTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftShoulderYaw_Status</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,7 +110,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipPitch.leftHipPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftHipPitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,7 +122,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipPitch.rightHipPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightHipPitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -134,7 +134,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderYaw.rightShoulderYawTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightShoulderYaw_Status</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -146,7 +146,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftElbowPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftElbowPitch.leftElbowPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftElbowPitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -158,7 +158,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftKneePitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -170,7 +170,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightKneePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightKneePitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -182,7 +182,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightElbowPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightElbowPitch.rightElbowPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightElbowPitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -194,7 +194,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoYaw,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoYaw.torsoYawTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limittorsoYaw_Status</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -206,7 +206,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnklePitch.leftAnklePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftAnklePitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -218,7 +218,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnklePitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnklePitch.rightAnklePitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightAnklePitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -230,7 +230,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoPitch,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoPitch.torsoPitchTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limittorsoPitch_Status</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -254,7 +254,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnkleRoll.leftAnkleRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitleftAnkleRoll_Status</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -266,7 +266,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnkleRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnkleRoll.rightAnkleRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitrightAnkleRoll_Status</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -278,7 +278,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoRoll,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoRoll.torsoRollTauDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limittorsoRoll_Status</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>

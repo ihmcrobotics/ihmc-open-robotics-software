@@ -102,7 +102,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       
       QuadrupedSupportPolygon commonPolygonToPack = new QuadrupedSupportPolygon();
 //      firstQuadrupedPolygon.getCommonSupportPolygon(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT);
-      firstQuadrupedPolygon.getShrunkenCommonPolygon2d(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
+      firstQuadrupedPolygon.getShrunkenCommonTriangle2d(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
       
       vertices.get(RobotQuadrant.FRONT_LEFT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_LEFT));
       vertices.get(RobotQuadrant.FRONT_RIGHT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_RIGHT));
@@ -209,7 +209,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       FramePoint2d centerOfMiniCircle = new FramePoint2d();
       if (supportPolygon.size() == 3)
       {
-         boolean successful = supportPolygon.getTangentTangentRadiusCircleCenter(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
+         boolean successful = supportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
 
          miniCircleRadiusSuccess.set(successful);
          if (successful)

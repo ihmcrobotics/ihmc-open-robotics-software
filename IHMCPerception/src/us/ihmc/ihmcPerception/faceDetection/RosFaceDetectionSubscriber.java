@@ -42,7 +42,7 @@ public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<Posit
 
          framePoint.setIncludingFrame(cameraFrame, person.getPos().getX(), person.getPos().getY(), person.getPos().getZ());
          framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         positions[i] = framePoint.getPoint();
+         positions[i] = framePoint.getPointCopy();
       }
 
       DetectedFacesPacket detectedFaces = new DetectedFacesPacket(ids, positions);
