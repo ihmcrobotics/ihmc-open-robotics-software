@@ -4,22 +4,32 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 
 @ClassDocumentation("This message pauses the execution of a list of footsteps. If this message is\n"
-      + "sent in the middle of executing a footstep, the robot will finish the step and\n" + "pause when back in double support.")
+      + "sent in the middle of executing a footstep, the robot will finish the step and\n" + "pause when back in double support."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
 public class PauseWalkingMessage extends IHMCRosApiPacket<PauseWalkingMessage>
 {
    public boolean pause;
 
    /**
     * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public PauseWalkingMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * 
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param pause
+    */
    public PauseWalkingMessage(boolean pause)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.pause = pause;
    }
 

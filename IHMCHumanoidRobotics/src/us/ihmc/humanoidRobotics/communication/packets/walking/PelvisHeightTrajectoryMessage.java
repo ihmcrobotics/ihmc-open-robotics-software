@@ -3,12 +3,14 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
 
 @ClassDocumentation("This mesage commands the controller to move the pelvis to a new height in world while going through the specified waypoints."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
-      + " A third order polynomial is used to interpolate between waypoints.")
+      + " A third order polynomial is used to interpolate between waypoints."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
 public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeightTrajectoryMessage> implements VisualizablePacket
 {
    @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
@@ -16,13 +18,21 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeight
 
    /**
     * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public PelvisHeightTrajectoryMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * Clone contructor.
+    * @param pelvisHeightTrajectoryMessage message to clone.
+    */
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
+      setUniqueId(pelvisHeightTrajectoryMessage.getUniqueId());
+      setDestination(pelvisHeightTrajectoryMessage.getDestination());
       waypoints = new Waypoint1DMessage[pelvisHeightTrajectoryMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
          waypoints[i] = new Waypoint1DMessage(pelvisHeightTrajectoryMessage.waypoints[i]);
@@ -30,21 +40,25 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeight
 
    /**
     * Use this constructor to go straight to the given end point.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param trajectoryTime how long it takes to reach the desired height.
     * @param desiredHeight desired pelvis height expressed in world frame.
     */
    public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       waypoints = new Waypoint1DMessage[] {new Waypoint1DMessage(trajectoryTime, desiredHeight, 0.0)};
    }
 
    /**
     * Use this constructor to build a message with more than one waypoint.
     * This constructor only allocates memory for the waypoints, you need to call {@link #setWaypoint(int, double, double, double)} for each waypoint afterwards.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param numberOfWaypoints number of waypoints that will be sent to the controller.
     */
    public PelvisHeightTrajectoryMessage(int numberOfWaypoints)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       waypoints = new Waypoint1DMessage[numberOfWaypoints];
    }
 

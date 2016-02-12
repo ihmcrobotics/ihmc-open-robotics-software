@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
@@ -16,7 +17,8 @@ import us.ihmc.tools.DocumentedEnum;
 
 @ClassDocumentation("This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified waypoints."
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
-      + " To excute a single straight line trajectory to reach a desired hand pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
+      + " To excute a single straight line trajectory to reach a desired hand pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
 public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessage> implements TransformableDataObject<HandTrajectoryMessage>, VisualizablePacket
 {
    public enum BaseForControl implements DocumentedEnum<BaseForControl>
@@ -54,13 +56,21 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
 
    /**
     * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public HandTrajectoryMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * Clone constructor.
+    * @param handTrajectoryMessage message to clone.
+    */
    public HandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
+      setUniqueId(handTrajectoryMessage.getUniqueId());
+      setDestination(handTrajectoryMessage.getDestination());
       robotSide = handTrajectoryMessage.robotSide;
       taskspaceWaypoints = new SE3WaypointMessage[handTrajectoryMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
@@ -69,6 +79,7 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
 
    /**
     * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the base for the control.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
     * @param trajectoryTime how long it takes to reach the desired pose.
     * @param desiredPosition desired hand position expressed in world frame.
@@ -81,6 +92,7 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
 
    /**
     * Use this constructor to execute a straight line trajectory in taskspace.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
     * @param base define with respect to what base the hand is controlled.
     * @param trajectoryTime how long it takes to reach the desired pose.
@@ -89,6 +101,7 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
     */
    public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.base = base;
       Vector3d zeroLinearVelocity = new Vector3d();
@@ -99,12 +112,14 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
    /**
     * Use this constructor to build a message with more than one waypoint.
     * This constructor only allocates memory for the waypoints, you need to call {@link #setWaypoint(int, double, Point3d, Quat4d, Vector3d, Vector3d)} for each waypoint afterwards.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
     * @param base define with respect to what base the hand is controlled.
     * @param numberOfWaypoints number of waypoints that will be sent to the controller.
     */
    public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, int numberOfWaypoints)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.base = base;
       taskspaceWaypoints = new SE3WaypointMessage[numberOfWaypoints];

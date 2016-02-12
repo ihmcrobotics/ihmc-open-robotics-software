@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
@@ -15,7 +16,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified waypoints."
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
-      + " To excute a single straight line trajectory to reach a desired foot pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time.")
+      + " To excute a single straight line trajectory to reach a desired foot pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
 public class FootTrajectoryMessage extends IHMCRosApiPacket<FootTrajectoryMessage> implements TransformableDataObject<FootTrajectoryMessage>, VisualizablePacket
 {
    @FieldDocumentation("Specifies the which foot will execute the trajectory.")
@@ -25,13 +27,21 @@ public class FootTrajectoryMessage extends IHMCRosApiPacket<FootTrajectoryMessag
 
    /**
     * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public FootTrajectoryMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * Clone constructor.
+    * @param footTrajectoryMessage message to clone.
+    */
    public FootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
+      setUniqueId(footTrajectoryMessage.getUniqueId());
+      setDestination(footTrajectoryMessage.getDestination());
       robotSide = footTrajectoryMessage.robotSide;
       taskspaceWaypoints = new SE3WaypointMessage[footTrajectoryMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
@@ -40,6 +50,7 @@ public class FootTrajectoryMessage extends IHMCRosApiPacket<FootTrajectoryMessag
 
    /**
     * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the base for the control.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which foot is performing the trajectory.
     * @param trajectoryTime how long it takes to reach the desired pose.
     * @param desiredPosition desired foot position expressed in world frame.
@@ -47,6 +58,7 @@ public class FootTrajectoryMessage extends IHMCRosApiPacket<FootTrajectoryMessag
     */
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       Vector3d zeroLinearVelocity = new Vector3d();
       Vector3d zeroAngularVelocity = new Vector3d();
@@ -56,11 +68,13 @@ public class FootTrajectoryMessage extends IHMCRosApiPacket<FootTrajectoryMessag
    /**
     * Use this constructor to build a message with more than one waypoint.
     * This constructor only allocates memory for the waypoints, you need to call either {@link #setWaypoint(int, double, Point3d, Quat4d)} or {@link #setWaypoint(int, double, Point3d, Quat4d, Vector3d, Vector3d)} for each waypoint afterwards.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which foot is performing the trajectory.
     * @param numberOfWaypoints number of waypoints that will be sent to the controller.
     */
    public FootTrajectoryMessage(RobotSide robotSide, int numberOfWaypoints)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       taskspaceWaypoints = new SE3WaypointMessage[numberOfWaypoints];
    }

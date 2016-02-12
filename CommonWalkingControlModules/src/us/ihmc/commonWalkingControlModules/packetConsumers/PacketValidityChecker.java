@@ -858,7 +858,7 @@ public abstract class PacketValidityChecker
    {
       if (packet == null)
          return "is null.";
-      if (checkId && packet.getUniqueId() <= 0)
+      if (checkId && packet.getUniqueId() == Packet.INVALID_MESSAGE_ID)
          return "invalid id.";
       return null;
    }
