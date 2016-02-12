@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
@@ -42,6 +43,7 @@ import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 public class VariousWalkingProviders
 {
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
+   private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
    private final HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber;
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
@@ -87,10 +89,11 @@ public class VariousWalkingProviders
    private final SingleJointPositionProvider singleJointPositionProvider;
    private final MultiJointPositionProvider multiJointPositionProvider;
 
-   public VariousWalkingProviders(HandTrajectoryMessageSubscriber handTrajectorySubscriber, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
-         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber, PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
-         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
-         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
+   public VariousWalkingProviders(HandTrajectoryMessageSubscriber handTrajectorySubscriber, ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber,
+         HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber, ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber,
+         PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber, FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber,
+         EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
+         PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
          FootstepProvider footstepProvider, HandstepProvider handstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
@@ -105,6 +108,7 @@ public class VariousWalkingProviders
          SingleJointPositionProvider singleJointPositionProvider, AbortWalkingProvider abortProvider, MultiJointPositionProvider multiJointPositionProvider)
    {
       this.handTrajectoryMessageSubscriber = handTrajectorySubscriber;
+      this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       this.chestTrajectoryMessageSubscriber = chestTrajectoryMessageSubscriber;
       this.pelvisTrajectoryMessageSubscriber = pelvisTrajectoryMessageSubscriber;
@@ -183,6 +187,8 @@ public class VariousWalkingProviders
 
       if (handTrajectoryMessageSubscriber != null)
          handTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (armTrajectoryMessageSubscriber != null)
+         armTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (headTrajectoryMessageSubscriber != null)
          headTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (chestTrajectoryMessageSubscriber != null)
@@ -202,6 +208,11 @@ public class VariousWalkingProviders
    public HandTrajectoryMessageSubscriber getHandTrajectoryMessageSubscriber()
    {
       return handTrajectoryMessageSubscriber;
+   }
+
+   public ArmTrajectoryMessageSubscriber geArmTrajectoryMessageSubscriber()
+   {
+      return armTrajectoryMessageSubscriber;
    }
 
    public HeadTrajectoryMessageSubscriber getHeadTrajectoryMessageSubscriber()

@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
@@ -62,6 +63,7 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
       HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber = null;
+      ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber = null;
       HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = null;
       ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = null;
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
@@ -105,10 +107,10 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, headTrajectoryMessageSubscriber,
-            chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber,
-            stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, footstepProvider, handstepProvider,
-            mapFromFootstepsToTrajectoryParameters, headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, armTrajectoryMessageSubscriber,
+            headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber,
+            endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, footstepProvider,
+            handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
             handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, automaticManipulationAbortCommunicator,
             chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
             controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
