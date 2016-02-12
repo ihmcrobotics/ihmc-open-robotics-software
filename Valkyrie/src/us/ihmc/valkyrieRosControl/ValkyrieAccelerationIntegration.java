@@ -32,9 +32,9 @@ public class ValkyrieAccelerationIntegration
    /**
     * Need to be extracted to a config file
     */
-   private final String[] jointShortNamesToProcess = new String[]{"Hip", "Ankle", "Shoulder", "Elbow", "Torso"};
-   private final String[] hipAnkle = new String[]{"Hip", "Ankle"};
-   private final String[] shoulderElbow = new String[]{"Shoulder", "Elbow"};
+   private final String[] jointShortNamesToProcess = new String[]{"Hip", "Knee", "Ankle", "Shoulder", "Elbow", "Torso"};
+   private final String[] legs = new String[]{"Hip", "Knee", "Ankle"};
+   private final String[] arms = new String[]{"Shoulder", "Elbow"};
 
    public ValkyrieAccelerationIntegration(List<YoJointHandleHolder> yoJointHandleHolders, double updateDT, YoVariableRegistry parentRegistry)
    {
@@ -76,11 +76,11 @@ public class ValkyrieAccelerationIntegration
          OneDoFJoint joint = jointHandle.getOneDoFJoint();
          String jointName = joint.getName();
 
-         if (arrayContainsIgnoreCase(hipAnkle, jointName))
+         if (arrayContainsIgnoreCase(legs, jointName))
          {
             kVelocityList.get(i).set(4.75);
          }
-         else if (arrayContainsIgnoreCase(shoulderElbow, jointName))
+         else if (arrayContainsIgnoreCase(arms, jointName))
          {
             kVelocityList.get(i).set(6.0);
          }
