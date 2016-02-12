@@ -18,7 +18,7 @@ import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiPacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
@@ -71,11 +71,11 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
 
    @FieldDocumentation("Arm trajectory for the right arm. Should have numWaypoints waypoints.\n"
          + "Time in trajectory_points should match the corresponding element of timeAtWaypoint")
-   public ArmJointTrajectoryPacket rightArmTrajectory;
+   public ArmTrajectoryMessage rightArmTrajectory;
 
    @FieldDocumentation("Arm trajectory for the left arm. Should have numWaypoints waypoints.\n"
          + "Time in trajectory_points should match the corresponding element of timeAtWaypoint")
-   public ArmJointTrajectoryPacket leftArmTrajectory;
+   public ArmTrajectoryMessage leftArmTrajectory;
 
    @FieldDocumentation("Number of waypoints in the trajectory. Should be at least 1")
    public int numWaypoints = 0;
@@ -198,11 +198,11 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
 
 //    public ArmJointTrajectoryPacket rightArmTrajectory;
       if (wholeBodyTrajectoryPacket.rightArmTrajectory != null)
-         this.rightArmTrajectory = new ArmJointTrajectoryPacket(wholeBodyTrajectoryPacket.rightArmTrajectory);
+         this.rightArmTrajectory = new ArmTrajectoryMessage(wholeBodyTrajectoryPacket.rightArmTrajectory);
 
 //    public ArmJointTrajectoryPacket leftArmTrajectory;
       if (wholeBodyTrajectoryPacket.leftArmTrajectory != null)
-         this.leftArmTrajectory = new ArmJointTrajectoryPacket(wholeBodyTrajectoryPacket.leftArmTrajectory);
+         this.leftArmTrajectory = new ArmTrajectoryMessage(wholeBodyTrajectoryPacket.leftArmTrajectory);
 
 //    public int numWaypoints = 0;
       this.numWaypoints = wholeBodyTrajectoryPacket.numWaypoints;
@@ -298,14 +298,14 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
       chestWorldOrientation = random.nextBoolean() ? null : chestWorldOrientation;
       chestAngularVelocity = random.nextBoolean() ? null : chestAngularVelocity;
       
-      rightArmTrajectory = new ArmJointTrajectoryPacket(random, RobotSide.RIGHT, this.numWaypoints);
-      leftArmTrajectory = new ArmJointTrajectoryPacket(random, RobotSide.LEFT, this.numWaypoints);
+//      rightArmTrajectory = new ArmTrajectoryMessage(random, RobotSide.RIGHT, this.numWaypoints);
+//      leftArmTrajectory = new ArmTrajectoryMessage(random, RobotSide.LEFT, this.numWaypoints);
    }
 
    public void allocateArmTrajectories()
    {
-      rightArmTrajectory = new ArmJointTrajectoryPacket(RobotSide.RIGHT, numWaypoints, numJointsPerArm);
-      leftArmTrajectory = new ArmJointTrajectoryPacket(RobotSide.LEFT, numWaypoints, numJointsPerArm);
+      rightArmTrajectory = new ArmTrajectoryMessage(RobotSide.RIGHT, numJointsPerArm, numWaypoints);
+      leftArmTrajectory = new ArmTrajectoryMessage(RobotSide.LEFT, numJointsPerArm, numWaypoints);
    }
 
    public void allocatePelvisTrajectory()
@@ -425,7 +425,7 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
       return true;
    }
 
-   public ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide)
+   public ArmTrajectoryMessage getArmJointTrajectoryPacket(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT)
          return leftArmTrajectory;
@@ -476,8 +476,8 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
             for (int j = 0; j < numJointsPerArm; j++)
             {
 
-               System.out.println(Arrays.toString(rightArmTrajectory.trajectoryPoints[w].positions));
-               out.format(F + "\t", leftArmTrajectory.trajectoryPoints[w].positions[j]);
+//               System.out.println(Arrays.toString(rightArmTrajectory.jointTrajectory1DMessages[w].positions));
+//               out.format(F + "\t", leftArmTrajectory.jointTrajectory1DMessages[w].positions[j]);
             }
          }
 
@@ -489,8 +489,8 @@ public class WholeBodyTrajectoryPacket extends IHMCRosApiPacket<WholeBodyTraject
          {
             for (int j = 0; j < numJointsPerArm; j++)
             {
-               System.out.println(Arrays.toString(rightArmTrajectory.trajectoryPoints[w].positions));
-               out.format(F + "\t", rightArmTrajectory.trajectoryPoints[w].positions[j]);
+//               System.out.println(Arrays.toString(rightArmTrajectory.jointTrajectory1DMessages[w].positions));
+//               out.format(F + "\t", rightArmTrajectory.jointTrajectory1DMessages[w].positions[j]);
             }
          }
 

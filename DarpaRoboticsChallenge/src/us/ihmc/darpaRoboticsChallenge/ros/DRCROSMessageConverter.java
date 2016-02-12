@@ -17,7 +17,6 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import ihmc_msgs.FingerStatePacketMessage;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
@@ -30,6 +29,7 @@ import ihmc_msgs.AtlasElectricMotorEnablePacketMessage;
 import ihmc_msgs.AtlasWristSensorCalibrationRequestPacketMessage;
 import ihmc_msgs.ChestOrientationPacketMessage;
 import ihmc_msgs.ComHeightPacketMessage;
+import ihmc_msgs.FingerStatePacketMessage;
 import ihmc_msgs.FootPosePacketMessage;
 import ihmc_msgs.FootstepDataListMessage;
 import ihmc_msgs.FootstepDataMessage;
@@ -52,17 +52,17 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
+import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
@@ -104,8 +104,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((PauseWalkingMessage) packet);
       else if (packet instanceof HighLevelStatePacket)
          return convertToRosMessage((HighLevelStatePacket) packet);
-      else if (packet instanceof ArmJointTrajectoryPacket)
-         return convertToRosMessage((ArmJointTrajectoryPacket) packet);
+      else if (packet instanceof ArmTrajectoryMessage)
+         return convertToRosMessage((ArmTrajectoryMessage) packet);
       else if (packet instanceof JointAnglesPacket)
          return convertToRosMessage((JointAnglesPacket) packet);
       else if (packet instanceof AtlasElectricMotorEnablePacket)
@@ -635,44 +635,61 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static ArmJointTrajectoryPacketMessage convertToRosMessage(ArmJointTrajectoryPacket packet)
+   public static ArmJointTrajectoryPacketMessage convertToRosMessage(ArmTrajectoryMessage ihmcMessage)
    {
-      int waypoints = packet.trajectoryPoints.length;
+      int numberOfJoints = ihmcMessage.getNumberOfJoints();
+      int numberOfWaypoints = ihmcMessage.getNumberOfWaypointsForJointTrajectory(0);
       List<JointTrajectoryPointMessage> trajectoryPoints = new ArrayList<JointTrajectoryPointMessage>();
 
-      for (int i = 0; i < waypoints; i++)
+      for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
       {
-         JointTrajectoryPoint point = packet.trajectoryPoints[i];
-         JointTrajectoryPointMessage pointMessage = messageFactory.newFromType("ihmc_msgs/JointTrajectoryPointMessage");
-         pointMessage.setPositions(point.positions);
-         pointMessage.setVelocities(point.velocities);
-         pointMessage.setTime(point.time);
-         trajectoryPoints.add(pointMessage);
+         double[] positions = new double[numberOfJoints];
+         double[] velocities = new double[numberOfJoints];
+
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         {
+            Waypoint1DMessage waypoint = ihmcMessage.getJointTrajectoryWaypoint(jointIndex, waypointIndex);
+            positions[jointIndex] = waypoint.getPosition();
+            velocities[jointIndex] = waypoint.getVelocity();
+         }
+
+         JointTrajectoryPointMessage waypointMessage = messageFactory.newFromType("ihmc_msgs/JointTrajectoryPointMessage");
+         waypointMessage.setTime(ihmcMessage.getJointTrajectoryWaypoint(0, waypointIndex).getTime());
+         waypointMessage.setPositions(positions);
+         waypointMessage.setVelocities(velocities);
+         trajectoryPoints.add(waypointMessage);
       }
 
-      ArmJointTrajectoryPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ArmJointTrajectoryPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setRobotSide(convertEnumToByte(packet.robotSide));
-      ret.setTrajectoryPoints(trajectoryPoints);
+      ArmJointTrajectoryPacketMessage rosMessage = messageFactory.newFromType("ihmc_msgs/ArmJointTrajectoryPacketMessage");
+      rosMessage.setUniqueId(ihmcMessage.getUniqueId());
+      rosMessage.setRobotSide(convertEnumToByte(ihmcMessage.robotSide));
+      rosMessage.setTrajectoryPoints(trajectoryPoints);
 
-      return ret;
+      return rosMessage;
    }
 
-   public static ArmJointTrajectoryPacket convertToPacket(ArmJointTrajectoryPacketMessage message)
+   public static ArmTrajectoryMessage convertToPacket(ArmJointTrajectoryPacketMessage rosMessage)
    {
-      int waypoints = message.getTrajectoryPoints().size();
+      int numberOfWaypoints = rosMessage.getTrajectoryPoints().size();
+      int numberOfJoints = rosMessage.getTrajectoryPoints().get(0).getPositions().length;
 
-      JointTrajectoryPoint[] trajectoryPoints = new JointTrajectoryPoint[waypoints];
-      RobotSide robotSide = convertByteToEnum(RobotSide.class, message.getRobotSide());
-      ArmJointTrajectoryPacket ret = new ArmJointTrajectoryPacket(robotSide, trajectoryPoints);ret.setUniqueId(message.getUniqueId());
+      RobotSide robotSide = convertByteToEnum(RobotSide.class, rosMessage.getRobotSide());
+      ArmTrajectoryMessage ihmcMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfWaypoints);
+      ihmcMessage.setUniqueId(rosMessage.getUniqueId());
 
-      for (int i = 0; i < waypoints; i++)
+      for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
       {
-         JointTrajectoryPointMessage pointMessage = message.getTrajectoryPoints().get(i);
-         ret.trajectoryPoints[i] = new JointTrajectoryPoint(pointMessage.getPositions(), pointMessage.getVelocities(), pointMessage.getTime());
+         JointTrajectoryPointMessage waypointMessage = rosMessage.getTrajectoryPoints().get(waypointIndex);
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         {
+            double time = waypointMessage.getTime();
+            double position = waypointMessage.getPositions()[jointIndex];
+            double velocity = waypointMessage.getVelocities()[jointIndex];
+            ihmcMessage.setWaypoint(jointIndex, waypointIndex, time, position, velocity);
+         }
       }
 
-      return ret;
+      return ihmcMessage;
    }
 
    public static JointAnglesPacketMessage convertToRosMessage(JointAnglesPacket packet)

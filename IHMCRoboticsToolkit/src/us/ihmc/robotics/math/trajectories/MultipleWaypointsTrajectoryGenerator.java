@@ -110,6 +110,24 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], velocities[i]);
    }
 
+   public void appendWaypoint(Waypoint1DInterface waypoint1D)
+   {
+      appendWaypoint(waypoint1D.getTime(), waypoint1D.getPosition(), waypoint1D.getVelocity());
+   }
+
+   public void appendWaypoints(Waypoint1DInterface[] waypoints1D)
+   {
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.length);
+
+      for (int i = 0; i < waypoints1D.length; i++)
+         appendWaypointUnsafe(waypoints1D[i].getTime(), waypoints1D[i].getPosition(), waypoints1D[i].getVelocity());
+   }
+
+   public void appendWaypoints(TrajectoryWaypoint1DDataInterface trajectoryWaypoint1DData)
+   {
+      appendWaypoints(trajectoryWaypoint1DData.getWaypoints());
+   }
+
    private void checkNumberOfWaypoints(int length)
    {
       if (length > maximumNumberOfWaypoints)

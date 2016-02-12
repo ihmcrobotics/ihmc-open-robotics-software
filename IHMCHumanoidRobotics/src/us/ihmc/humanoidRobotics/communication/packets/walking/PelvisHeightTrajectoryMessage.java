@@ -49,13 +49,13 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeight
     * Create a waypoint.
     * @param waypointIndex index of the waypoint to create.
     * @param time time at which the waypoint has to be reached. The time is relative to when the trajectory starts.
-    * @param position define the desired 1D position to be reached at this waypoint. It is expressed in world frame.
-    * @param velocity define the desired 1D velocity to be reached at this waypoint. It is expressed in world frame.
+    * @param height define the desired height position to be reached at this waypoint. It is expressed in world frame.
+    * @param heightVelocity define the desired height velocity to be reached at this waypoint. It is expressed in world frame.
     */
-   public void setWaypoint(int waypointIndex, double time, double position, double velocity)
+   public void setWaypoint(int waypointIndex, double time, double height, double heightVelocity)
    {
       rangeCheck(waypointIndex);
-      waypoints[waypointIndex] = new Waypoint1DMessage(time, position, velocity);
+      waypoints[waypointIndex] = new Waypoint1DMessage(time, height, heightVelocity);
    }
 
    public int getNumberOfWaypoints()
