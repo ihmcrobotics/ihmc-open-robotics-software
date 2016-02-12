@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.11'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.12'
 }
 
 
@@ -8,11 +8,7 @@ plugins {
 sourceCompatibility = 1.7
 version = '1.0'
 
-repositories {
-	maven {
-	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
-	}
-}
+
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 
