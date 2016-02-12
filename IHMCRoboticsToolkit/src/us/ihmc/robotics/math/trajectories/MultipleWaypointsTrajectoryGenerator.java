@@ -22,6 +22,8 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 {
    private final int maximumNumberOfWaypoints;
 
+   private final String namePrefix;
+
    private final YoVariableRegistry registry;
 
    private final DoubleYoVariable currentTrajectoryTime;
@@ -29,9 +31,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    private final IntegerYoVariable numberOfWaypoints;
    private final IntegerYoVariable currentWaypointIndex;
 
-   private final ArrayList<DoubleYoVariable> timeAtWaypoints;
-   private final ArrayList<DoubleYoVariable> positionAtWaypoints;
-   private final ArrayList<DoubleYoVariable> velocityAtWaypoints;
+   private final ArrayList<YoWaypoint1D> waypoints;
 
    private final SettableDoubleProvider initialPositionProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider initialVelocityProvider = new SettableDoubleProvider();
@@ -42,6 +42,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
    public MultipleWaypointsTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, YoVariableRegistry parentRegistry)
    {
+      this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -56,15 +57,12 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       subTrajectory = new CubicPolynomialTrajectoryGenerator(namePrefix + "SubTrajectory", initialPositionProvider, initialVelocityProvider,
             finalPositionProvider, finalVelocityProvider, trajectoryTimeProvider, registry);
 
-      timeAtWaypoints = new ArrayList<>(maximumNumberOfWaypoints);
-      positionAtWaypoints = new ArrayList<>(maximumNumberOfWaypoints);
-      velocityAtWaypoints = new ArrayList<>(maximumNumberOfWaypoints);
+      waypoints = new ArrayList<>(maximumNumberOfWaypoints);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         timeAtWaypoints.add(new DoubleYoVariable(namePrefix + "TimeAtWaypoint" + i, registry));
-         positionAtWaypoints.add(new DoubleYoVariable(namePrefix + "PositionAtWaypoint" + i, registry));
-         velocityAtWaypoints.add(new DoubleYoVariable(namePrefix + "VelocityAtWaypoint" + i, registry));
+         YoWaypoint1D waypoint = new YoWaypoint1D(namePrefix, "AtWaypoint" + i, registry);
+         waypoints.add(waypoint);
       }
 
       clear();
@@ -77,9 +75,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         timeAtWaypoints.get(i).set(Double.NaN);
-         positionAtWaypoints.get(i).set(Double.NaN);
-         velocityAtWaypoints.get(i).set(Double.NaN);
+         waypoints.get(i).setToNaN();
       }
    }
 
@@ -92,9 +88,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
    private void appendWaypointUnsafe(double timeAtWaypoint, double position, double velocity)
    {
-      timeAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint);
-      positionAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(position);
-      velocityAtWaypoints.get(numberOfWaypoints.getIntegerValue()).set(velocity);
+      waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, position, velocity);
 
       numberOfWaypoints.increment();
    }
@@ -144,16 +138,16 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
       currentWaypointIndex.set(0);
 
-      double timeAtFirstWaypoint = timeAtWaypoints.get(0).getDoubleValue();
+      double timeAtFirstWaypoint = waypoints.get(0).getTime();
       for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
       {
-         timeAtWaypoints.get(i).sub(timeAtFirstWaypoint);
+         waypoints.get(i).subtractTimeOffset(timeAtFirstWaypoint);
       }
 
       if (numberOfWaypoints.getIntegerValue() == 1)
       {
-         finalPositionProvider.setValue(positionAtWaypoints.get(0).getDoubleValue());
-         finalVelocityProvider.setValue(velocityAtWaypoints.get(0).getDoubleValue());
+         finalPositionProvider.setValue(waypoints.get(0).getPosition());
+         finalVelocityProvider.setValue(waypoints.get(0).getVelocity());
          trajectoryTimeProvider.setValue(0.0);
          subTrajectory.initialize();
       }
@@ -163,13 +157,13 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
    private void initializeSubTrajectory(int waypointIndex)
    {
-      initialPositionProvider.setValue(positionAtWaypoints.get(waypointIndex).getDoubleValue());
-      initialVelocityProvider.setValue(velocityAtWaypoints.get(waypointIndex).getDoubleValue());
+      initialPositionProvider.setValue(waypoints.get(waypointIndex).getPosition());
+      initialVelocityProvider.setValue(waypoints.get(waypointIndex).getVelocity());
 
-      finalPositionProvider.setValue(positionAtWaypoints.get(waypointIndex + 1).getDoubleValue());
-      finalVelocityProvider.setValue(velocityAtWaypoints.get(waypointIndex + 1).getDoubleValue());
+      finalPositionProvider.setValue(waypoints.get(waypointIndex + 1).getPosition());
+      finalVelocityProvider.setValue(waypoints.get(waypointIndex + 1).getVelocity());
 
-      double subTrajectoryTime = timeAtWaypoints.get(waypointIndex + 1).getDoubleValue() - timeAtWaypoints.get(waypointIndex).getDoubleValue();
+      double subTrajectoryTime = waypoints.get(waypointIndex + 1).getTime() - waypoints.get(waypointIndex).getTime();
       trajectoryTimeProvider.setValue(subTrajectoryTime);
 
       subTrajectory.initialize();
@@ -180,13 +174,13 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    {
       currentTrajectoryTime.set(time);
 
-      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= timeAtWaypoints.get(currentWaypointIndex.getIntegerValue() + 1).getDoubleValue())
+      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
       }
 
-      double subTrajectoryTime = time - timeAtWaypoints.get(currentWaypointIndex.getIntegerValue()).getDoubleValue();
+      double subTrajectoryTime = time - waypoints.get(currentWaypointIndex.getIntegerValue()).getTime();
       subTrajectory.compute(subTrajectoryTime);
    }
 
@@ -219,5 +213,15 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    public double getAcceleration()
    {
       return subTrajectory.getAcceleration();
+   }
+
+   @Override
+   public String toString()
+   {
+      if (numberOfWaypoints.getIntegerValue() == 0)
+         return namePrefix + ": Has no waypoints.";
+      else
+         return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = " + currentWaypointIndex.getIntegerValue()
+         + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: " + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
    }
 }
