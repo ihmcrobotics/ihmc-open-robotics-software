@@ -26,6 +26,8 @@ public class ChestTrajectoryMessage extends IHMCRosApiPacket<ChestTrajectoryMess
    public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
       taskspaceWaypoints = new SO3WaypointMessage[chestTrajectoryMessage.getNumberOfWaypoints()];
+      for (int i = 0; i < getNumberOfWaypoints(); i++)
+         taskspaceWaypoints[i] = new SO3WaypointMessage(chestTrajectoryMessage.taskspaceWaypoints[i]);
    }
 
    /**
