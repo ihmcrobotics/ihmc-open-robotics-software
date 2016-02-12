@@ -43,7 +43,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacke
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
@@ -557,12 +557,12 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private FootstepDataList createFootStepDataList(Vector2d walkDeltaXY, HumanoidReferenceFrames referenceFrames)
+   private FootstepDataListMessage createFootStepDataList(Vector2d walkDeltaXY, HumanoidReferenceFrames referenceFrames)
    {
       drcBehaviorTestHelper.updateRobotModel();
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
-      FootstepDataList footsepDataList = new FootstepDataList();
+      FootstepDataListMessage footsepDataList = new FootstepDataListMessage();
 
       SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();

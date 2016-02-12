@@ -13,7 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -73,7 +73,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForWalkingToTheRocks(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheRocks(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.5);
@@ -110,7 +110,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
    }
 
   
-   private FootstepDataList createFootstepsForWalkingToTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingToTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-0.1332474847934586, 2.17798187482979, 0.08940742138400676}, {-3.403089128803084E-18, -2.675953624308355E-18, 0.6245692503477591, 0.7809694305925413}},
@@ -124,7 +124,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
    
-   private FootstepDataList createFootstepsForSteppingOntoTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForSteppingOntoTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {

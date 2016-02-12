@@ -24,7 +24,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
@@ -118,7 +118,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getDRCSimulationFactory().getThreadDataSynchronizer().getControllerFullRobotModel();
 
-      FootstepDataList corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
+      FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
       
       // Corrupt the footsteps by adding a big z offset and coorupting the pitch and roll
       FrameOrientation tempFrameOrientation = new FrameOrientation();
@@ -185,7 +185,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
  
-      FootstepDataList snappedFootstepDataList = new FootstepDataList();
+      FootstepDataListMessage snappedFootstepDataList = new FootstepDataListMessage();
       for (int i = 0; i < corruptedFootstepList.size(); i++)
       {
          Footstep footstep = corruptedFootstepList.get(i);
@@ -212,7 +212,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       assertTrue(success);
    }
 
-   private void vidualizeCorruptedFootsteps(FootstepDataList corruptedFootstepDataList, SimulationConstructionSet scs)
+   private void vidualizeCorruptedFootsteps(FootstepDataListMessage corruptedFootstepDataList, SimulationConstructionSet scs)
    {
       if (!VISUALIZE)
          return;
@@ -306,7 +306,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       return heightMap;
    }
 
-   private FootstepDataList createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][] {
             { { 3.00, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },

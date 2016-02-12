@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -112,7 +112,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
 
       // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
@@ -147,7 +147,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
 
 
-   private FootstepDataList createFootstepsForWalkingOnFlatLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingOnFlatLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
       {

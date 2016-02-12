@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -38,7 +38,7 @@ public class IHMCRosApiMessageMap
 	   ComHeightPacket.class,
 	   FootPosePacket.class,
 	   FootstepDataMessage.class,
-	   FootstepDataList.class,
+	   FootstepDataListMessage.class,
 	   FootstepStatus.class,
 	   ChestOrientationPacket.class,
 	   HeadOrientationPacket.class,
@@ -62,7 +62,7 @@ public class IHMCRosApiMessageMap
       HandPosePacket.class,
       ComHeightPacket.class,
       FootPosePacket.class,
-      FootstepDataList.class,
+      FootstepDataListMessage.class,
       ChestOrientationPacket.class,
       HeadOrientationPacket.class,
       PauseWalkingMessage.class,
@@ -104,7 +104,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(HandPosePacket.class, "/control/hand_pose");
       PACKET_TO_TOPIC_MAP.put(ComHeightPacket.class, "/control/com_height");
       PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
-      PACKET_TO_TOPIC_MAP.put(FootstepDataList.class, "/control/footstep_list");
+      PACKET_TO_TOPIC_MAP.put(FootstepDataListMessage.class, "/control/footstep_list");
       PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
       PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
       PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");

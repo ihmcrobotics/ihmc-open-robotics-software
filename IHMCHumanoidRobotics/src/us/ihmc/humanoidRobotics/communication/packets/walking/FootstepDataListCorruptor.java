@@ -23,9 +23,9 @@ public class FootstepDataListCorruptor
       this.maxRotationCorruption = maxRotationCorruption;
    }
    
-   public FootstepDataList corruptDataList(FootstepDataList footstepDataList)
+   public FootstepDataListMessage corruptDataList(FootstepDataListMessage footstepDataList)
    {
-      FootstepDataList ret = new FootstepDataList(footstepDataList.swingTime, footstepDataList.transferTime);
+      FootstepDataListMessage ret = new FootstepDataListMessage(footstepDataList.swingTime, footstepDataList.transferTime);
       
       for (FootstepDataMessage footstepData : footstepDataList)
       {

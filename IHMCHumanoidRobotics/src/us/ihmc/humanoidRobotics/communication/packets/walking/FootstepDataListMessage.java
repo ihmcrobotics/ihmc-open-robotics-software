@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This message commands the controller to execute a list of footsteps. See FootstepDataMessage\n"
                                   + "for information about defining a footstep.")
-public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> implements TransformableDataObject<FootstepDataList>, Iterable<FootstepDataMessage>, VisualizablePacket
+public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
 
@@ -29,12 +29,12 @@ public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> impleme
    @FieldDocumentation("transferTime is the time spent in double-support between steps")
    public double transferTime = 0.0;
 
-   public FootstepDataList()
+   public FootstepDataListMessage()
    {
       // Must have null constructor for efficient serialization
    }
 
-   public FootstepDataList(ArrayList<FootstepDataMessage> footstepDataList, double swingTime, double transferTime)
+   public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double swingTime, double transferTime)
    {
       if(footstepDataList != null)
       {
@@ -45,7 +45,7 @@ public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> impleme
    }
 
 
-   public FootstepDataList(double swingTime, double transferTime)
+   public FootstepDataListMessage(double swingTime, double transferTime)
    {
       this.swingTime = swingTime;
       this.transferTime = transferTime;
@@ -77,7 +77,7 @@ public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> impleme
    }
 
 
-   public boolean epsilonEquals(FootstepDataList otherList, double epsilon)
+   public boolean epsilonEquals(FootstepDataListMessage otherList, double epsilon)
    {
       for (int i = 0; i < size(); i++)
       {
@@ -138,11 +138,11 @@ public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> impleme
       return footstepDataList.iterator();
    }
 
-   public FootstepDataList transform(RigidBodyTransform transform)
+   public FootstepDataListMessage transform(RigidBodyTransform transform)
    {
-      FootstepDataList ret = new FootstepDataList(swingTime, transferTime);
+      FootstepDataListMessage ret = new FootstepDataListMessage(swingTime, transferTime);
 
-      for (FootstepDataMessage footstepData : (FootstepDataList) this)
+      for (FootstepDataMessage footstepData : (FootstepDataListMessage) this)
       {
          FootstepDataMessage transformedFootstepData = footstepData.transform(transform);
          ret.add(transformedFootstepData);
@@ -151,7 +151,7 @@ public class FootstepDataList extends IHMCRosApiPacket<FootstepDataList> impleme
       return ret;
    }
 
-   public FootstepDataList(Random random)
+   public FootstepDataListMessage(Random random)
    {
 
       int footstepListSize = random.nextInt(20);

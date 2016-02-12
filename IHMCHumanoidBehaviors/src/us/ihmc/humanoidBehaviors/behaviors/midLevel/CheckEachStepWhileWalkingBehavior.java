@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.LookAtBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -38,7 +38,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    private final BooleanYoVariable haveInputsBeenSet;
 
    private final ConcurrentListeningQueue<SnapFootstepPacket> SnapFootstepQueue;
-   private final ConcurrentListeningQueue<FootstepDataList> footstepListQueue;
+   private final ConcurrentListeningQueue<FootstepDataListMessage> footstepListQueue;
    private final FootstepListBehavior footstepListBehavior;
    private final LookAtBehavior lookAtBehavior;
    private final LinkedList<FootstepDataMessage> footStepToTake;
@@ -50,8 +50,8 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    private final Vector3d footStepToLookAtTranslation = new Vector3d();
    private final ArrayList<FootstepDataMessage> outgoingFootStepsForSnapping = new ArrayList<FootstepDataMessage>();
 
-   private final FootstepDataList outgoingFootstepDataList;
-   private FootstepDataList currentFootStepList;
+   private final FootstepDataListMessage outgoingFootstepDataList;
+   private FootstepDataListMessage currentFootStepList;
    private FootstepDataMessage currentFootBeingLookedAt;
    
    public CheckEachStepWhileWalkingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime)
@@ -60,7 +60,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
       isDone = new BooleanYoVariable(behaviorName + "_isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable(behaviorName + "_haveInputsBeenSet", registry);
 
-      footstepListQueue = new ConcurrentListeningQueue<FootstepDataList>();
+      footstepListQueue = new ConcurrentListeningQueue<FootstepDataListMessage>();
       SnapFootstepQueue = new ConcurrentListeningQueue<SnapFootstepPacket>();
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
       lookAtBehavior = new LookAtBehavior(outgoingCommunicationBridge, walkingControllerParameters, yoTime);
@@ -69,7 +69,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
 
       footStepToTake = new LinkedList<FootstepDataMessage>();
       footStepsToLookAt = new LinkedList<FootstepDataMessage>();
-      outgoingFootstepDataList = new FootstepDataList();
+      outgoingFootstepDataList = new FootstepDataListMessage();
    }
 
    @Override
@@ -176,7 +176,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
       footStepToTake.addAll(footsteps);
    }
 
-   public void setNewFootSteps(FootstepDataList footStepDataList)
+   public void setNewFootSteps(FootstepDataListMessage footStepDataList)
    {
       currentFootStepList = footStepDataList;
       footstepListBehavior.pause();

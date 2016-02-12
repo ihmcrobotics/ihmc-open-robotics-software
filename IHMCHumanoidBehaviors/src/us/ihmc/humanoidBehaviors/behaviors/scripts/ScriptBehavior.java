@@ -42,7 +42,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ThighStatePacket;
@@ -395,7 +395,7 @@ public class ScriptBehavior extends BehaviorInterface
 
       Object scriptObject = inputPacket.getScriptObject();
 
-      if (scriptObject instanceof FootstepDataList)
+      if (scriptObject instanceof FootstepDataListMessage)
       {
          ret = PrimitiveBehaviorType.FOOTSTEP_LIST;
       }
@@ -465,7 +465,7 @@ public class ScriptBehavior extends BehaviorInterface
       if (behaviorType.equals(PrimitiveBehaviorType.FOOTSTEP_LIST))
       {
          footstepListBehavior.initialize();
-         footstepListBehavior.set((FootstepDataList) inputPacket.getScriptObject());
+         footstepListBehavior.set((FootstepDataListMessage) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.HAND_POSE))
       {

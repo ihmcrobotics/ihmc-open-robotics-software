@@ -71,7 +71,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
@@ -172,7 +172,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       BatchedDesiredSteeringAngleAndSingleJointAngleProvider batchedDesiredSteeringWheelAngleAndSingleJointAngleProvider = new BatchedDesiredSteeringAngleAndSingleJointAngleProvider(
             desiredSteeringWheelProvider.getDesiredSteeringAngleProvider(), singleJointPositionProvider);
 
-      objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
+      objectCommunicator.attachListener(FootstepDataListMessage.class, footstepPathConsumer);
       objectCommunicator.attachListener(HandstepPacket.class, handstepProvider);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
       objectCommunicator.attachListener(PauseWalkingMessage.class, pauseWalkingMessageSubscriber);

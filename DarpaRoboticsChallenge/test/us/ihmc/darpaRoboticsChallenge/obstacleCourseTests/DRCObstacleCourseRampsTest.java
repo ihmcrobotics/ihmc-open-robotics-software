@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListCorruptor;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -93,7 +93,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForWalkingDownRampMediumSteps(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingDownRampMediumSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(18.0);
@@ -189,7 +189,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator, stepLength);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator, stepLength);
 
       if (footstepDataListCorruptor != null)
       {
@@ -206,7 +206,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       assertTrue(success);
    }
 
-   private FootstepDataList createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator, StepLength stepLength)
+   private FootstepDataListMessage createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator, StepLength stepLength)
    {
       switch(stepLength)
       {
@@ -246,7 +246,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    }
 
    
-   private FootstepDataList createFootstepsForWalkingUpRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
       {
@@ -319,7 +319,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    }
 
    
-   private FootstepDataList createFootstepsForWalkingUpRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
    {{{2.96830428414849, -0.09766543994755546, 0.08399999999999998}, {-2.720672111457406E-20, 5.415915594351002E-20, 0.0018763016130482887, 0.9999982397445792}},
@@ -342,7 +342,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
    
-   private FootstepDataList createFootstepsForWalkingUpRampLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRampLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
    {{{}}
@@ -352,7 +352,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
    
-   private FootstepDataList createFootstepsForWalkingDownRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingDownRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{6.954747596485718, 0.11524925726571199, 0.7119679417361913}, {-0.004756259680920303, -1.677100279548098E-5, 0.9999824722629655, 0.003526028846796884}},

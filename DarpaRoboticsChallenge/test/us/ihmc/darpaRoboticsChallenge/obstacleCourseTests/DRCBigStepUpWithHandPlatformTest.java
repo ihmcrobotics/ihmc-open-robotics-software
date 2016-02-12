@@ -22,7 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -104,7 +104,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       }
 
-      FootstepDataList footstepDataList = createFootstepsForStepOntoPlatform(RobotSide.LEFT, 0.5, 0.1, stepHeight, scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForStepOntoPlatform(RobotSide.LEFT, 0.5, 0.1, stepHeight, scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
@@ -165,7 +165,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       return ret;
    }
    
-   private FootstepDataList createFootstepsForStepOntoPlatform(RobotSide robotSide, double stepX, double stepY, double stepZ, ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForStepOntoPlatform(RobotSide robotSide, double stepX, double stepY, double stepZ, ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
       {
