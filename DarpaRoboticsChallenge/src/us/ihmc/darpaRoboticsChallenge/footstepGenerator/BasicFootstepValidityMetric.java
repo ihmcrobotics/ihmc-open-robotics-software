@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.footstepGenerator;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -24,7 +24,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
    }
 
    @Override
-   public boolean footstepValid(FootstepData stanceFootstep, FootstepData prospectiveFootstep)
+   public boolean footstepValid(FootstepDataMessage stanceFootstep, FootstepDataMessage prospectiveFootstep)
    {
       if (stanceFootstep.getRobotSide() == prospectiveFootstep.getRobotSide()) return false;
       double stanceYaw = RotationTools.computeYaw(stanceFootstep.getOrientation());
@@ -93,7 +93,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
    }
 
    @Override
-   public boolean footstepValid(FootstepData previousFootstep, FootstepData stanceFootstep, FootstepData prospectiveFootstep)
+   public boolean footstepValid(FootstepDataMessage previousFootstep, FootstepDataMessage stanceFootstep, FootstepDataMessage prospectiveFootstep)
    {
       if (previousFootstep.getRobotSide() != prospectiveFootstep.getRobotSide()) return false;
       if (!footstepValid(stanceFootstep, prospectiveFootstep)){
@@ -140,7 +140,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
       return true;
    }
 
-   private boolean checkArea(FootstepData footstep, double percentageToCheckAgainst, SteppingParameters parameters){
+   private boolean checkArea(FootstepDataMessage footstep, double percentageToCheckAgainst, SteppingParameters parameters){
       if (footstep.predictedContactPoints == null) return true;
 
       ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d(footstep.getPredictedContactPoints());

@@ -24,7 +24,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -266,7 +266,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          footstep.getOrientation(orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
          ret.add(footstepData);
       }
 

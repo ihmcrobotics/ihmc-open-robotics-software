@@ -67,7 +67,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
@@ -92,8 +91,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((ComHeightPacket) packet);
       else if (packet instanceof FootPosePacket)
          return convertToRosMessage((FootPosePacket) packet);
-      else if (packet instanceof FootstepData)
-         return convertToRosMessage((FootstepData) packet);
+      else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage)
+         return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage) packet);
       else if (packet instanceof FootstepDataList)
          return convertToRosMessage((FootstepDataList) packet);
       else if (packet instanceof FootstepStatus)
@@ -452,7 +451,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootstepDataMessage convertToRosMessage(FootstepData packet)
+   public static FootstepDataMessage convertToRosMessage(us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage packet)
    {
       FootstepDataMessage ret = messageFactory.newFromType("ihmc_msgs/FootstepDataMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -475,7 +474,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootstepData convertToPacket(FootstepDataMessage message)
+   public static us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage convertToPacket(FootstepDataMessage message)
    {
       ArrayList<Point2d> predictedContactPoints = new ArrayList<>();
       for (int i = 0; i < message.getPredictedContactPoints().size(); i++)
@@ -483,7 +482,7 @@ public class DRCROSMessageConverter
          predictedContactPoints.add(convertToPacket(message.getPredictedContactPoints().get(i)));
       }
 
-      FootstepData ret = new FootstepData(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getLocation()),
+      us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage ret = new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getLocation()),
             convertQuaternionToQuat4d(message.getOrientation()), predictedContactPoints, convertByteToEnum(TrajectoryType.class, message.getTrajectoryType()),
             message.getSwingHeight());
 
@@ -527,7 +526,7 @@ public class DRCROSMessageConverter
 
    public static FootstepDataList convertToPacket(FootstepDataListMessage message)
    {
-      ArrayList<FootstepData> footstepDataList = new ArrayList<>();
+      ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage> footstepDataList = new ArrayList<>();
       for (int i = 0; i < message.getFootstepDataList().size(); i++)
       {
          footstepDataList.add(convertToPacket(message.getFootstepDataList().get(i)));

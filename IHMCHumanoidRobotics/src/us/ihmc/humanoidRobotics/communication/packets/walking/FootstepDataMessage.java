@@ -25,7 +25,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n"
                                   + "world frame")
-public class FootstepData extends IHMCRosApiPacket<FootstepData> implements TransformableDataObject<FootstepData>
+public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
    // Must be public for efficient serialization.
    public RobotSide robotSide;
@@ -50,26 +50,26 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
          + "Recommended values are between 0.1 (default) and 0.25.\n")
    public double swingHeight = 0;
 
-   public FootstepData()
+   public FootstepDataMessage()
    {
       // Must have null constructor for efficient serialization.
    }
 
-   public FootstepData(RobotSide robotSide, Point3d location, Quat4d orientation)
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation)
    {
       this(robotSide, location, orientation, null);
    }
 
-   public FootstepData(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints){
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints){
       this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
-   public FootstepData(RobotSide robotSide, Point3d location, Quat4d orientation, TrajectoryType trajectoryType, double swingHeight)
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, TrajectoryType trajectoryType, double swingHeight)
    {
       this(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
 
-   public FootstepData(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
    {
       this.robotSide = robotSide;
       this.location = location;
@@ -82,7 +82,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       this.swingHeight = swingHeight;
    }
 
-   public FootstepData(FootstepData footstepData)
+   public FootstepDataMessage(FootstepDataMessage footstepData)
    {
       this.robotSide = footstepData.robotSide;
       this.location = new Point3d(footstepData.location);
@@ -100,11 +100,11 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       this.swingHeight = footstepData.swingHeight;
    }
 
-   public FootstepData clone(){
-      return new FootstepData(this);
+   public FootstepDataMessage clone(){
+      return new FootstepDataMessage(this);
    }
 
-   public FootstepData(Footstep footstep){
+   public FootstepDataMessage(Footstep footstep){
       robotSide = footstep.getRobotSide();
       location = new Point3d();
       orientation = new Quat4d();
@@ -222,7 +222,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       return ret;
    }
 
-   public boolean epsilonEquals(FootstepData footstepData, double epsilon)
+   public boolean epsilonEquals(FootstepDataMessage footstepData, double epsilon)
    {
       boolean robotSideEquals = robotSide == footstepData.robotSide;
       boolean locationEquals = location.epsilonEquals(footstepData.location, epsilon);
@@ -258,9 +258,9 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
    }
 
-   public FootstepData transform(RigidBodyTransform transform)
+   public FootstepDataMessage transform(RigidBodyTransform transform)
    {
-      FootstepData ret = this.clone();
+      FootstepDataMessage ret = this.clone();
 
       // Point3d location;
       ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
@@ -270,7 +270,7 @@ public class FootstepData extends IHMCRosApiPacket<FootstepData> implements Tran
       return ret;
    }
 
-   public FootstepData(Random random)
+   public FootstepDataMessage(Random random)
    {
       TrajectoryType[] trajectoryTypes = TrajectoryType.values();
       int randomOrdinal = random.nextInt(trajectoryTypes.length);

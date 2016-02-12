@@ -48,7 +48,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
@@ -1779,7 +1779,7 @@ public class DiagnosticBehavior extends BehaviorInterface
             footstepPose.getPosition(footLocation);
             footstepPose.getOrientation(footOrientation);
 
-            FootstepData footstepData = new FootstepData(robotSide, footLocation, footOrientation);
+            FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 
             footstepDataList.add(footstepData);
          }
@@ -1808,7 +1808,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          footstepPose.getPosition(footLocation);
          footstepPose.getOrientation(footOrientation);
 
-         FootstepData footstepData = new FootstepData(robotSide, footLocation, footOrientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 
          footstepDataList.add(footstepData);
          pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
