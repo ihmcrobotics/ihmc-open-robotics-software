@@ -1527,12 +1527,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
          boolean hasNewFootTrajectoryMessage;
-         if (hasNewFootPose && footTrajectoryMessageSubscriber != null)
-            hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+         if (footTrajectoryMessageSubscriber != null)
+         {
+            if (hasNewFootPose && footTrajectoryMessageSubscriber != null)
+               hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+            else
+            {
+               hasNewFootTrajectoryMessage = false;
+               footTrajectoryMessageSubscriber.clearMessagesInQueue();
+            }
+         }
          else
          {
             hasNewFootTrajectoryMessage = false;
-            footTrajectoryMessageSubscriber.clearMessagesInQueue();
          }
          boolean transferringToThisRobotSide = hasNewFootPose || hasNewFootTrajectoryMessage;
 
