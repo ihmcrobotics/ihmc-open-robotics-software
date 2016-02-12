@@ -33,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseT
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -99,7 +100,7 @@ public class HandControlModule
 
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> quinticPolynomialTrajectoryGenerators;
    private final Map<OneDoFJoint, OneDoFJointWayPointTrajectoryGenerator> waypointsPolynomialTrajectoryGenerators;
-   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> wholeBodyWaypointsPolynomialTrajectoryGenerators;
+   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> waypointJointTrajectoryGenerators;
 
    private final EnumYoVariable<HandTrajectoryType> activeTrajectory;
 
@@ -246,12 +247,12 @@ public class HandControlModule
          waypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
       }
 
-      wholeBodyWaypointsPolynomialTrajectoryGenerators = new LinkedHashMap<>();
+      waypointJointTrajectoryGenerators = new LinkedHashMap<>();
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
          MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(oneDoFJoint.getName(), 15, registry);
-         wholeBodyWaypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
+         waypointJointTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
@@ -584,22 +585,25 @@ public class HandControlModule
       if (!checkArmTrajectoryMessage(armTrajectoryMessage))
          return;
 
-      for (int jointIndex = 0; jointIndex < armTrajectoryMessage.getNumberOfJoints(); jointIndex++)
+      int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJoint joint = oneDoFJoints[jointIndex];
-         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(joint);
+         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = waypointJointTrajectoryGenerators.get(joint);
          trajectoryGenerator.clear();
 
          if (armTrajectoryMessage.getJointTrajectoryWaypoint(jointIndex, 0).getTime() > 1.0e-5)
          {
-            appendFirstWaypointToWaypointJointspaceTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators, false);
+            appendFirstWaypointToWaypointJointspaceTrajectories(joint, trajectoryGenerator, false);
          }
 
-         trajectoryGenerator.appendWaypoints(armTrajectoryMessage.getJointTrajectory(jointIndex));
+         Trajectory1DMessage jointTrajectory = armTrajectoryMessage.getJointTrajectory(jointIndex);
+         trajectoryGenerator.appendWaypoints(jointTrajectory);
          trajectoryGenerator.initialize();
       }
 
-      executeJointspaceTrajectory(wholeBodyWaypointsPolynomialTrajectoryGenerators);
+      executeJointspaceTrajectory(waypointJointTrajectoryGenerators);
    }
 
    private boolean checkArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
@@ -628,28 +632,23 @@ public class HandControlModule
       return true;
    }
 
-   private void appendFirstWaypointToWaypointJointspaceTrajectories(Map<OneDoFJoint, ? extends MultipleWaypointsTrajectoryGenerator> trajectoryGenrators, boolean appendCurrent)
+   private void appendFirstWaypointToWaypointJointspaceTrajectories(OneDoFJoint joint, MultipleWaypointsTrajectoryGenerator trajectoryGenrator, boolean appendCurrent)
    {
+      double initialPosition;
+      double initialVelocity;
+
       if (!appendCurrent && stateMachine.getCurrentState() == jointSpaceHandControlState)
       {
-         for (int i = 0; i < oneDoFJoints.length; i++)
-         {
-            OneDoFJoint joint = oneDoFJoints[i];
-            double initialPosition = qDesireds.get(joint).getDoubleValue();
-            double initialVelocity = qdDesireds.get(joint).getDoubleValue();
-            trajectoryGenrators.get(joint).appendWaypoint(0.0, initialPosition, initialVelocity);
-         }
+         initialPosition = qDesireds.get(joint).getDoubleValue();
+         initialVelocity = qdDesireds.get(joint).getDoubleValue();
       }
       else
       {
-         for (int i = 0; i < oneDoFJoints.length; i++)
-         {
-            OneDoFJoint joint = oneDoFJoints[i];
-            double initialPosition = joint.getQ();
-            double initialVelocity = joint.getQd();
-            trajectoryGenrators.get(joint).appendWaypoint(0.0, initialPosition, initialVelocity);
-         }
+         initialPosition = joint.getQ();
+         initialVelocity = joint.getQd();
       }
+
+      trajectoryGenrator.appendWaypoint(0.0, initialPosition, initialVelocity);
    }
 
    private final FramePoint tempPosition = new FramePoint();
