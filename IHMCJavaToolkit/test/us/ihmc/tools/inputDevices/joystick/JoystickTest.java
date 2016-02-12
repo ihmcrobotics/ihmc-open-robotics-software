@@ -54,7 +54,7 @@ public class JoystickTest
    @Test(timeout = 10000)
    public void testCreateVirtualJoystick()
    {
-      Object monitor = new Object();
+      final Object monitor = new Object();
 
       try
       {
@@ -120,8 +120,8 @@ public class JoystickTest
    @Test(timeout = 300000)
    public void testCreateTwoJoysticks()
    {
-      Object monitor1 = new Object();
-      Object monitor2 = new Object();
+      final Object monitor1 = new Object();
+      final Object monitor2 = new Object();
 
       try
       {
