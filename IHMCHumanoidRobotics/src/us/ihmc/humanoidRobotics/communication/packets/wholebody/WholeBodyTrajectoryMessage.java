@@ -23,6 +23,9 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajec
    public PelvisTrajectoryMessage pelvisTrajectoryMessage;
    public FootTrajectoryMessage leftFootTrajectoryMessage, rightFootTrajectoryMessage;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public WholeBodyTrajectoryMessage()
    {
    }

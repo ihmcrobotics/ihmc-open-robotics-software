@@ -30,9 +30,11 @@ public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMe
    @FieldDocumentation("transferTime is the time spent in double-support between steps")
    public double transferTime = 0.0;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public FootstepDataListMessage()
    {
-      // Must have null constructor for efficient serialization
    }
 
    public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double swingTime, double transferTime)

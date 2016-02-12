@@ -11,14 +11,16 @@ public class PauseWalkingMessage extends IHMCRosApiPacket<PauseWalkingMessage>
 {
    public boolean pause;
 
+   /**
+    * Empty constructor for serialization.
+    */
+   public PauseWalkingMessage()
+   {
+   }
+
    public PauseWalkingMessage(boolean pause)
    {
       this.pause = pause;
-   }
-
-   public PauseWalkingMessage()
-   {
-
    }
 
    public boolean isPaused()

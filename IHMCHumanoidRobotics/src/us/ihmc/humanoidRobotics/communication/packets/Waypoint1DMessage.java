@@ -17,6 +17,9 @@ public class Waypoint1DMessage extends IHMCRosApiPacket<Waypoint1DMessage> imple
    @FieldDocumentation("Define the desired 1D velocity to be reached at this waypoint.")
    public double velocity;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public Waypoint1DMessage()
    {
    }

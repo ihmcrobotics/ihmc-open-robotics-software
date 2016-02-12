@@ -19,6 +19,9 @@ public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage>
          + " The expected joint ordering is from the closest joint to the chest to the closest joint to the hand.")
    public Trajectory1DMessage[] jointTrajectory1DMessages;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public ArmTrajectoryMessage()
    {
    }

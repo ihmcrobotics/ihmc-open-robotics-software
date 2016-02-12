@@ -52,6 +52,9 @@ public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessag
    @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
    public SE3WaypointMessage[] taskspaceWaypoints;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public HandTrajectoryMessage()
    {
    }

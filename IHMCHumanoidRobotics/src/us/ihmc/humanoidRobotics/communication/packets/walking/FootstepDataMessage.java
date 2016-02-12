@@ -52,9 +52,11 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
          + "Recommended values are between 0.1 (default) and 0.25.\n")
    public double swingHeight = 0;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public FootstepDataMessage()
    {
-      // Must have null constructor for efficient serialization.
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation)

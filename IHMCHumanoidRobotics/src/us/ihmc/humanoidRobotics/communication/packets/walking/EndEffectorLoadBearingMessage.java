@@ -58,6 +58,9 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiPacket<EndEffectorL
          + " When the option for another end-effector will be available, the corresponding enum value for that end-effector will be added.")
    public EndEffector endEffector;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public EndEffectorLoadBearingMessage()
    {
    }
