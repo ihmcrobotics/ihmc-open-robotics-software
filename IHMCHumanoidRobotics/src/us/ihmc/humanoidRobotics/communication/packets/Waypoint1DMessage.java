@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.Waypoint1DInterface;
 
 @ClassDocumentation("This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D waypoints look at EuclideanWaypointMessage (translational), SO3WaypointMessage (rotational), and SE3WaypointMessage (translational AND rotational).")
-public class Waypoint1DMessage extends IHMCRosApiPacket<Waypoint1DMessage> implements Waypoint1DInterface
+public class Waypoint1DMessage extends IHMCRosApiMessage<Waypoint1DMessage> implements Waypoint1DInterface
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;

@@ -4,14 +4,14 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation(value = "Packet for commanding the hands to perform various predefined grasps."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class HandDesiredConfigurationMessage extends IHMCRosApiPacket<HandDesiredConfigurationMessage>
+public class HandDesiredConfigurationMessage extends IHMCRosApiMessage<HandDesiredConfigurationMessage>
 {
    @FieldDocumentation(value = "Specifies the side of the robot that will execute the trajectory")
    public RobotSide robotSide;

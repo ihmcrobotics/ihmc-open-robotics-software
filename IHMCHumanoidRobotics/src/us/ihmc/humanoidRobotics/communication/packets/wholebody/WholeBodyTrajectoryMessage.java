@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 @ClassDocumentation("Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
       + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.")
-public class WholeBodyTrajectoryMessage extends IHMCRosApiPacket<WholeBodyTrajectoryMessage>
+public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTrajectoryMessage>
       implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>
 {
    public HandTrajectoryMessage leftHandTrajectoryMessage, rightHandTrajectoryMessage;

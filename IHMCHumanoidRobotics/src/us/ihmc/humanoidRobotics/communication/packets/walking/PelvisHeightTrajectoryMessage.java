@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
@@ -11,7 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
       + " A third order polynomial is used to interpolate between waypoints."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class PelvisHeightTrajectoryMessage extends IHMCRosApiPacket<PelvisHeightTrajectoryMessage> implements VisualizablePacket
+public class PelvisHeightTrajectoryMessage extends IHMCRosApiMessage<PelvisHeightTrajectoryMessage> implements VisualizablePacket
 {
    @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
    public Waypoint1DMessage[] waypoints;

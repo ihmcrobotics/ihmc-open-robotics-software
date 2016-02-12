@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 @ClassDocumentation("This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified waypoints."
       + " A third order polynomial function is used to interpolate between waypoints."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class ArmTrajectoryMessage extends IHMCRosApiPacket<ArmTrajectoryMessage> implements VisualizablePacket
+public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage> implements VisualizablePacket
 {
    @FieldDocumentation("Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;

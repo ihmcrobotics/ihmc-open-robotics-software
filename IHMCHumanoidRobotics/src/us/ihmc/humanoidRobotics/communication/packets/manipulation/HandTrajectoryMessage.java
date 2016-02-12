@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
@@ -19,7 +19,7 @@ import us.ihmc.tools.DocumentedEnum;
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
       + " To excute a single straight line trajectory to reach a desired hand pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class HandTrajectoryMessage extends IHMCRosApiPacket<HandTrajectoryMessage> implements TransformableDataObject<HandTrajectoryMessage>, VisualizablePacket
+public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessage> implements TransformableDataObject<HandTrajectoryMessage>, VisualizablePacket
 {
    public enum BaseForControl implements DocumentedEnum<BaseForControl>
    {
