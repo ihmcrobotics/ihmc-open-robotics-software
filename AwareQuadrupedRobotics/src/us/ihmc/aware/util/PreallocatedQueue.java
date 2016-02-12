@@ -34,7 +34,6 @@ public class PreallocatedQueue<T>
       this.elements = elements;
    }
 
-
    public int size()
    {
       return size;
@@ -63,6 +62,11 @@ public class PreallocatedQueue<T>
 
    public T get(int queueIndex)
    {
+      if (queueIndex >= size)
+      {
+         throw new IndexOutOfBoundsException();
+      }
+
       return elements.get((position + queueIndex) % elements.size());
    }
 
@@ -70,16 +74,14 @@ public class PreallocatedQueue<T>
    {
       if (size == 0)
       {
-         return getHead();
+         throw new IndexOutOfBoundsException();
       }
-      else
-      {
-         return elements.get((position + size - 1) % elements.size());
-      }
+
+      return get(size - 1);
    }
 
    public T getHead()
    {
-      return elements.get(position);
+      return get(0);
    }
 }
