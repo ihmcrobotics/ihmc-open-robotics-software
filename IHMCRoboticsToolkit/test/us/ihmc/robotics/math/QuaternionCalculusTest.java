@@ -104,7 +104,7 @@ public class QuaternionCalculusTest
          Quat4d qDot = new Quat4d();
 
          quaternionCalculus.computeQDot(q, expectedAngularVelocity, qDot);
-         quaternionCalculus.computeAngularVelocity(q, qDot, actualAngularVelocity);
+         quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
 
          assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, EPSILON));
       }
@@ -191,7 +191,7 @@ public class QuaternionCalculusTest
          orientation.getQuaternion(qNext);
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dtForFD, qDot);
-         quaternionCalculus.computeAngularVelocity(q, qDot, actualAngularVelocity);
+         quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
 
          assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-8));
       }
@@ -230,7 +230,7 @@ public class QuaternionCalculusTest
          qNext.set(axisAngleNext);
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dt, qDot);
-         quaternionCalculus.computeAngularVelocity(qCurrent, qDot, actualAngularVelocity);
+         quaternionCalculus.computeAngularVelocityInWorldFrame(qCurrent, qDot, actualAngularVelocity);
 
          quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, qCurrent, qNext, dt, qDDot);
          quaternionCalculus.computeAngularAcceleration(qCurrent, qDot, qDDot, actualAngularAcceleration);
