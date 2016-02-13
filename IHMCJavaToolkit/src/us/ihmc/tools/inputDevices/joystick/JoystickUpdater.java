@@ -20,6 +20,7 @@ public class JoystickUpdater implements Runnable
    private int pollIntervalMillis = 5;
    private float deadband = 0.0f;
    private boolean connected;
+   private boolean threadRunning = false;
 
    public JoystickUpdater(Controller joystickController, ArrayList<JoystickStatusListener> generalListenersList)
    {
@@ -48,7 +49,8 @@ public class JoystickUpdater implements Runnable
    @Override
    public void run()
    {
-      while (true)
+      threadRunning = true;
+      while (threadRunning)
       {
          joystickController.poll();
          EventQueue queue = joystickController.getEventQueue();
@@ -100,6 +102,11 @@ public class JoystickUpdater implements Runnable
             e.printStackTrace();
          }
       }
+   }
+   
+   public void stopThread()
+   {
+      threadRunning = false;
    }
 
    private boolean isNewValue(Event event)
