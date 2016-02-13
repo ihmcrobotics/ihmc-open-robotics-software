@@ -38,7 +38,7 @@ public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<Posit
       for(int i = 0; i < people.length; i++)
       {
          PositionMeasurement person = (PositionMeasurement) people[i];
-         ids[i] = person.getObjectId();
+         ids[i] = String.valueOf(i);
 
          framePoint.setIncludingFrame(cameraFrame, person.getPos().getX(), person.getPos().getY(), person.getPos().getZ());
          framePoint.changeFrame(ReferenceFrame.getWorldFrame());
