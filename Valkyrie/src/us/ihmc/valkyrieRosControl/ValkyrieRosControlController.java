@@ -79,7 +79,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
    public static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
    public static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };
    
-   public static final double gravity = -9.80665; //Tuned on Valkyrie 9.785; // Measured with IMUs on real robot
+   public static final double gravity = 9.80665;
    
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
