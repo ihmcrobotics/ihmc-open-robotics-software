@@ -99,14 +99,7 @@ public class QuaternionCalculus
 
    private final Quat4d qConj = new Quat4d();
 
-   public void computeAngularVelocityInBodyFixedFrame(Quat4d q, Quat4d qDot, Vector3d angularVelocityToPack)
-   {
-      qConj.conjugate(q);
-      multiply(qConj, qDot, angularVelocityToPack);
-      angularVelocityToPack.scale(2.0);
-   }
-
-   public void computeAngularVelocityInWorldFrame(Quat4d q, Quat4d qDot, Vector3d angularVelocityToPack)
+   public void computeAngularVelocity(Quat4d q, Quat4d qDot, Vector3d angularVelocityToPack)
    {
       qConj.conjugate(q);
       multiply(qDot, qConj, angularVelocityToPack);
@@ -127,7 +120,7 @@ public class QuaternionCalculus
 
    public void computeQDDot(Quat4d q, Quat4d qDot, Vector3d angularAcceleration, Quat4d qDDotToPack)
    {
-      computeAngularVelocityInWorldFrame(q, qDot, intermediateAngularVelocity);
+      computeAngularVelocity(q, qDot, intermediateAngularVelocity);
       computeQDDot(q, qDot, intermediateAngularVelocity, angularAcceleration, qDDotToPack);
    }
 
