@@ -16,6 +16,7 @@ public class FrameOrientation extends ReferenceFrameHolder
    private ReferenceFrame referenceFrame;
    private final Quat4d quaternion = new Quat4d();
    private final Quat4d tempQuaternionForTransform = new Quat4d();
+   private final Matrix3d tempMatrixForYawPitchRollConversion = new Matrix3d();
 
    public FrameOrientation(FrameOrientation orientation)
    {
@@ -25,13 +26,12 @@ public class FrameOrientation extends ReferenceFrameHolder
 
    public FrameOrientation(ReferenceFrame referenceFrame)
    {
-      this.referenceFrame = referenceFrame;
-      quaternion.set(0.0, 0.0, 0.0, 1.0);
+      setToZero(referenceFrame);
    }
 
    public FrameOrientation()
    {
-      referenceFrame = ReferenceFrame.getWorldFrame();
+      setToZero(ReferenceFrame.getWorldFrame());
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, RigidBodyTransform transform3D)
@@ -111,9 +111,15 @@ public class FrameOrientation extends ReferenceFrameHolder
       normalize();
    }
 
-   public void set(Quat4d quat4d)
+   public void set(Quat4d quaternion)
    {
-      quaternion.set(quat4d);
+      this.quaternion.set(quaternion);
+      normalize();
+   }
+
+   public void set(double qx, double qy, double qz, double qs)
+   {
+      quaternion.set(qx, qy, qz, qs);
       normalize();
    }
 
@@ -146,17 +152,22 @@ public class FrameOrientation extends ReferenceFrameHolder
       normalize();
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, Quat4d quat)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, Quat4d quaternion)
    {
       this.referenceFrame = referenceFrame;
-      quaternion.set(quat);
-      normalize();
+      set(quaternion);
+   }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, double qx, double qy, double qz, double qs)
+   {
+      this.referenceFrame = referenceFrame;
+      set(qx, qy, qz, qs);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, AxisAngle4d axisAngle)
    {
       this.referenceFrame = referenceFrame;
-      quaternion.set(axisAngle);
+      set(axisAngle);
       normalize();
    }
 
@@ -195,6 +206,12 @@ public class FrameOrientation extends ReferenceFrameHolder
    public void setToZero(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
+      setToZero();
+   }
+
+   // TODO Find a better. I chose setToZero() as in FrameTuple.
+   public void setToZero()
+   {
       quaternion.set(0.0, 0.0, 0.0, 1.0);
    }
 
@@ -224,9 +241,22 @@ public class FrameOrientation extends ReferenceFrameHolder
       transformToPack.setRotation(quaternion);
    }
 
-   public void getYawPitchRoll(double[] yawPitchRoll)
+   public void getYawPitchRoll(double[] yawPitchRollToPack)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(quaternion, yawPitchRoll);
+      tempMatrixForYawPitchRollConversion.set(quaternion);
+      yawPitchRollToPack[0] = Math.atan2(tempMatrixForYawPitchRollConversion.m10, tempMatrixForYawPitchRollConversion.m00);
+
+      if (Math.abs(tempMatrixForYawPitchRollConversion.m20) < 1.0 - 1e-10)
+         yawPitchRollToPack[1] = Math.asin(-tempMatrixForYawPitchRollConversion.m20);
+      else
+         yawPitchRollToPack[1] = -Math.signum(tempMatrixForYawPitchRollConversion.m20) * Math.PI / 2.0;
+
+      yawPitchRollToPack[2] = Math.atan2(tempMatrixForYawPitchRollConversion.m21, tempMatrixForYawPitchRollConversion.m22);
+
+      if (Double.isNaN(yawPitchRollToPack[0]) || Double.isNaN(yawPitchRollToPack[1]) || Double.isNaN(yawPitchRollToPack[2]))
+      {
+         throw new RuntimeException("yaw, pitch, or roll are NaN! rotationMatrix = " + tempMatrixForYawPitchRollConversion);
+      }
    }
 
    public double[] getYawPitchRoll()
@@ -238,17 +268,20 @@ public class FrameOrientation extends ReferenceFrameHolder
 
    public double getYaw()
    {
-      return RotationTools.computeYaw(quaternion);
+      tempMatrixForYawPitchRollConversion.set(quaternion);
+      return RotationTools.computeYaw(tempMatrixForYawPitchRollConversion);
    }
 
    public double getPitch()
    {
-      return RotationTools.computePitch(quaternion);
+      tempMatrixForYawPitchRollConversion.set(quaternion);
+      return RotationTools.computePitch(tempMatrixForYawPitchRollConversion);
    }
 
    public double getRoll()
    {
-      return RotationTools.computeRoll(quaternion);
+      tempMatrixForYawPitchRollConversion.set(quaternion);
+      return RotationTools.computeRoll(tempMatrixForYawPitchRollConversion);
    }
 
    public Quat4d getQuaternionCopy()
@@ -317,15 +350,25 @@ public class FrameOrientation extends ReferenceFrameHolder
       this.quaternion.mul(orientationOne.quaternion);
    }
 
+   public void negateQuaternion()
+   {
+      quaternion.negate();
+   }
+
    /**
-    * Normalize the quaternion and also limits the described angle magnitude in {-Pi, Pi].
+    * Normalize the quaternion and also limits the described angle magnitude in [-Pi, Pi].
     * The latter prevents some controllers to poop their pants.
     */
    public void normalize()
    {
-      quaternion.normalize();
-      if (quaternion.getW() < 0.0)
-         quaternion.negate();
+      if (normSquared() < 1.0e-7)
+         setToZero();
+      else
+      {
+         quaternion.normalize();
+         if (quaternion.getW() < 0.0)
+            negateQuaternion();
+      }
    }
 
    public boolean epsilonEquals(FrameOrientation frameOrientation, double epsilon)
@@ -334,6 +377,22 @@ public class FrameOrientation extends ReferenceFrameHolder
       boolean quaternionsAreEqual = RotationTools.quaternionEpsilonEquals(quaternion, frameOrientation.quaternion, epsilon);
 
       return referenceFramesMatch && quaternionsAreEqual;
+   }
+
+   public void checkQuaternionIsUnitMagnitude()
+   {
+      double normSquared = normSquared();
+      if (Math.abs(normSquared - 1.0) > 1e-12)
+      {
+         System.err.println("\nQuaternion " + quaternion + " is not unit magnitude! normSquared = " + normSquared);
+
+         throw new RuntimeException("Quaternion " + quaternion + " is not unit magnitude! normSquared = " + normSquared);
+      }
+   }
+
+   public double normSquared()
+   {
+      return quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w;
    }
 
    @Override
