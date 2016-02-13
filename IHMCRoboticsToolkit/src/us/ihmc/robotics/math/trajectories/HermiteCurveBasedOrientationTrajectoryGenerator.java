@@ -297,7 +297,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       initialAngularVelocity.get(tempAngularVelocity);
 
       quaternionCalculus.invertTransform(tempControlQuaternions[0], tempAngularVelocity);
-      tempAngularVelocity.scale(1.0 / 3.0);
+      tempAngularVelocity.scale(trajectoryTime.getDoubleValue() / 3.0);
       RotationTools.convertRotationVectorToQuaternion(tempAngularVelocity, tempQuatForControlQuats);
 
       tempControlQuaternions[1].mul(tempQuatForControlQuats);
@@ -306,7 +306,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       finalAngularVelocity.get(tempAngularVelocity);
 
       quaternionCalculus.invertTransform(tempControlQuaternions[3], tempAngularVelocity);
-      tempAngularVelocity.scale(1.0 / 3.0);
+      tempAngularVelocity.scale(trajectoryTime.getDoubleValue() / 3.0);
       tempAngularVelocity.negate();
       RotationTools.convertRotationVectorToQuaternion(tempAngularVelocity, tempQuatForControlQuats);
       tempControlQuaternions[2].mul(tempQuatForControlQuats);
@@ -317,15 +317,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
          quaternionCalculus.log(tempQuatForControlQuats, tempAngularVelocity);
          controlAngularVelocities[i].set(tempAngularVelocity);
       }
-
-      //      System.out.println(controlAngularVelocities[1]);
-      //
-      //      initialAngularVelocity.get(tempAngularVelocity);
-      //
-      //      quaternionCalculus.invertTransform(tempControlQuaternions[0], tempAngularVelocity);
-      //      tempAngularVelocity.scale(1.0 / 3.0);
-      //
-      //      System.out.println(tempAngularVelocity);
 
       for (int i = 0; i <= 3; i++)
          controlQuaternions[i].set(tempControlQuaternions[i]);
@@ -374,7 +365,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qInterpolatedPrevious, qInterpolated, qInterpolatedNext, dtForFiniteDifference, qDDot);
 
-
       quaternionCalculus.computeAngularVelocityInWorldFrame(qInterpolated, qDot, tempAngularVelocity);
       quaternionCalculus.computeAngularAcceleration(qInterpolated, qDot, qDDot, tempAngularAcceleration);
 
@@ -414,10 +404,10 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
             - (2 / MathTools.powWithInteger(trajectoryTime.getDoubleValue(), 3)) * timeCube);
       cumulativeBeziers[3].set(timeCube / MathTools.powWithInteger(trajectoryTime.getDoubleValue(), 3));
 
-      cumulativeBezierDerivatives[1].set(3.0 * MathTools.square(1 - (1 / trajectoryTime.getDoubleValue()) * time));
-      cumulativeBezierDerivatives[2]
-            .set((6.0 / trajectoryTime.getDoubleValue()) * time * MathTools.square(1.0 - (1.00 / trajectoryTime.getDoubleValue()) * time));
-      cumulativeBezierDerivatives[3].set((3.0 / MathTools.square(trajectoryTime.getDoubleValue())) * timeSquare);
+      cumulativeBezierDerivatives[1].set((1 / trajectoryTime.getDoubleValue()) * (3.0 * MathTools.square(1 - (1 / trajectoryTime.getDoubleValue()) * time)));
+      cumulativeBezierDerivatives[2].set((1 / trajectoryTime.getDoubleValue()) * ((6.0 / trajectoryTime.getDoubleValue()) * time * MathTools
+            .square(1.0 - (1.00 / trajectoryTime.getDoubleValue()) * time)));
+      cumulativeBezierDerivatives[3].set((1 / trajectoryTime.getDoubleValue()) * ((3.0 / MathTools.square(trajectoryTime.getDoubleValue())) * timeSquare));
 
    }
 
