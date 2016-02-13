@@ -18,10 +18,10 @@ package us.ihmc.robotics.alphaToAlpha;
 public class StretchedSlowAtStartAlphaToAlphaFunction implements AlphaToAlphaFunction
 {
    @SuppressWarnings("unused")
-   private final double derivativeAtEnd;
-   private final double ratio;
-   private final double alphaToStartAt;
-   private final double a2, a3, a4;
+   private double derivativeAtEnd;
+   private double ratio;
+   private double alphaToStartAt;
+   private double a2, a3, a4;
 
    /**
     * Create a StretchedSlowAtStartAlphaToAlphaFunction given nSwing points and nBody points.
@@ -30,7 +30,14 @@ public class StretchedSlowAtStartAlphaToAlphaFunction implements AlphaToAlphaFun
    public StretchedSlowAtStartAlphaToAlphaFunction(double derivativeAtEnd)
    {
       this.derivativeAtEnd = derivativeAtEnd;
+      calculateInternalParameters();
 
+
+      //    System.out.println("a2 = " + a2 + ", a3 = " + a3 + ", a4 = " + a4 + ", ratio = " + ratio + ", alphaToStartAt = " + alphaToStartAt + ", derivativeAtEnd = " + derivativeAtEnd);
+   }
+
+   private void calculateInternalParameters()
+   {
       if (derivativeAtEnd < 1.0)
          throw new RuntimeException("We are assuming derivativeAtEnd >= 1.0!!!");
 
@@ -48,8 +55,6 @@ public class StretchedSlowAtStartAlphaToAlphaFunction implements AlphaToAlphaFun
       a2 = 6.0 - 3.0 * ratio;
       a3 = -8.0 + 5.0 * ratio;
       a4 = 3.0 - 2.0 * ratio;
-
-//    System.out.println("a2 = " + a2 + ", a3 = " + a3 + ", a4 = " + a4 + ", ratio = " + ratio + ", alphaToStartAt = " + alphaToStartAt + ", derivativeAtEnd = " + derivativeAtEnd);
    }
 
    public double getAlphaPrime(double alpha)
@@ -71,6 +76,12 @@ public class StretchedSlowAtStartAlphaToAlphaFunction implements AlphaToAlphaFun
          return 1.0;
 
       return ret;
+   }
+
+   public void setDerivativeAtEnd(double derivativeAtEnd)
+   {
+      this.derivativeAtEnd = derivativeAtEnd;
+      calculateInternalParameters();
    }
 
    public double getMaxAlpha()
