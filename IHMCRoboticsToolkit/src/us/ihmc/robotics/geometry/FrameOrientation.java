@@ -4,6 +4,7 @@ import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Matrix3f;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 
@@ -215,6 +216,17 @@ public class FrameOrientation extends ReferenceFrameHolder
       quaternion.set(0.0, 0.0, 0.0, 1.0);
    }
 
+   public void setToNaN(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      setToNaN();
+   }
+
+   public void setToNaN()
+   {
+      quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+   }
+
    @Override
    public ReferenceFrame getReferenceFrame()
    {
@@ -227,6 +239,11 @@ public class FrameOrientation extends ReferenceFrameHolder
    }
 
    public void getMatrix3d(Matrix3d matrixToPack)
+   {
+      matrixToPack.set(quaternion);
+   }
+
+   public void getMatrix3f(Matrix3f matrixToPack)
    {
       matrixToPack.set(quaternion);
    }
@@ -282,6 +299,11 @@ public class FrameOrientation extends ReferenceFrameHolder
    {
       tempMatrixForYawPitchRollConversion.set(quaternion);
       return RotationTools.computeRoll(tempMatrixForYawPitchRollConversion);
+   }
+
+   public Quat4d getQuaternion()
+   {
+      return quaternion;
    }
 
    public Quat4d getQuaternionCopy()
@@ -341,6 +363,12 @@ public class FrameOrientation extends ReferenceFrameHolder
       referenceFrame = orientationOne.getReferenceFrame();
    }
 
+   public void interpolate(Quat4d quaternion1, Quat4d quaternion2, double alpha)
+   {
+      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      quaternion.interpolate(quaternion1, quaternion2, alpha);
+   }
+
    public void setOrientationFromOneToTwo(FrameOrientation orientationOne, FrameOrientation orientationTwo)
    {
       orientationOne.checkReferenceFrameMatch(orientationTwo);
@@ -348,6 +376,33 @@ public class FrameOrientation extends ReferenceFrameHolder
 
       this.quaternion.conjugate(orientationTwo.quaternion);
       this.quaternion.mul(orientationOne.quaternion);
+   }
+
+   public void mul(FrameOrientation frameOrientation)
+   {
+      checkReferenceFrameMatch(frameOrientation);
+      mul(frameOrientation.quaternion);
+   }
+
+   public void mul(Quat4d quaternion)
+   {
+      this.quaternion.mul(quaternion);
+   }
+
+   public double dot(FrameOrientation frameOrientation)
+   {
+      checkReferenceFrameMatch(frameOrientation);
+      return dot(frameOrientation.quaternion);
+   }
+
+   public double dot(Quat4d quaternion)
+   {
+      double dot = this.quaternion.x * quaternion.x;
+      dot += this.quaternion.y * quaternion.y;
+      dot += this.quaternion.z * quaternion.z;
+      dot += this.quaternion.w * quaternion.w;
+      
+      return dot;
    }
 
    public void negateQuaternion()
@@ -369,6 +424,26 @@ public class FrameOrientation extends ReferenceFrameHolder
          if (quaternion.getW() < 0.0)
             negateQuaternion();
       }
+   }
+
+   public double getQx()
+   {
+      return quaternion.x;
+   }
+
+   public double getQy()
+   {
+      return quaternion.y;
+   }
+
+   public double getQz()
+   {
+      return quaternion.z;
+   }
+
+   public double getQs()
+   {
+      return quaternion.w;
    }
 
    public boolean epsilonEquals(FrameOrientation frameOrientation, double epsilon)
