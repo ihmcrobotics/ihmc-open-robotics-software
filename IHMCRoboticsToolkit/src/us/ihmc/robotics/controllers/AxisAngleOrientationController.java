@@ -6,6 +6,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -151,7 +152,7 @@ public class AxisAngleOrientationController
       desiredOrientation.changeFrame(bodyFrame);
       desiredOrientation.getQuaternion(desiredQuaternion);
       desiredAngleAxis.set(desiredQuaternion);
-
+      desiredAngleAxis.setAngle(AngleTools.trimAngleMinusPiToPi(desiredAngleAxis.getAngle()));
       orientationErrorMagnitude.set(desiredAngleAxis.getAngle());
 
       proportionalTerm.set(desiredAngleAxis.getX(), desiredAngleAxis.getY(), desiredAngleAxis.getZ());
