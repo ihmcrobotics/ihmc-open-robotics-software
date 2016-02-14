@@ -92,8 +92,10 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
       {
       case LEFT:
          leftHandTrajectoryMessage = handTrajectoryMessage;
+         return;
       case RIGHT:
          rightHandTrajectoryMessage = handTrajectoryMessage;
+         return;
       default:
          throw new RuntimeException("Should not get there.");
       }
@@ -108,8 +110,10 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
       {
       case LEFT:
          leftArmTrajectoryMessage = armTrajectoryMessage;
+         return;
       case RIGHT:
          rightArmTrajectoryMessage = armTrajectoryMessage;
+         return;
       default:
          throw new RuntimeException("Should not get there.");
       }
@@ -140,8 +144,10 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
       {
       case LEFT:
          leftFootTrajectoryMessage = footTrajectoryMessage;
+         return;
       case RIGHT:
          rightFootTrajectoryMessage = footTrajectoryMessage;
+         return;
       default:
          throw new RuntimeException("Should not get there.");
       }

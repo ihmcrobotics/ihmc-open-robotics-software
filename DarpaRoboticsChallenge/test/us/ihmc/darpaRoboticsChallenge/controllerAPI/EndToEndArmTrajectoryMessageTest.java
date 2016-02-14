@@ -29,7 +29,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private boolean DEBUG = false;
+   private static boolean DEBUG = false;
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -86,39 +86,46 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
          assertTrue(success);
 
-         String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-         double[] controllerDesiredJointPositions = new double[numberOfJoints];
-         double[] controllerDesiredJointVelocities = new double[numberOfJoints];
+
+         assertSingleWaypointExecuted(robotSide, armJoints, numberOfJoints, desiredJointPositions, desiredJointVelcoties, epsilon, scs);
+      }
+   }
+
+   public static void assertSingleWaypointExecuted(RobotSide robotSide, OneDoFJoint[] armJoints, int numberOfJoints, double[] desiredJointPositions,
+         double[] desiredJointVelcoties, double epsilon, SimulationConstructionSet scs)
+   {
+      String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
+
+      double[] controllerDesiredJointPositions = new double[numberOfJoints];
+      double[] controllerDesiredJointVelocities = new double[numberOfJoints];
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         OneDoFJoint joint = armJoints[i];
+         DoubleYoVariable q_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "q_d_" + joint.getName() + "HandControlModule");
+         DoubleYoVariable qd_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "qd_d_" + joint.getName() + "HandControlModule");
+         controllerDesiredJointPositions[i] = q_d_HCM.getDoubleValue();
+         controllerDesiredJointVelocities[i] = qd_d_HCM.getDoubleValue();
+      }
+
+      assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
+      assertArrayEquals(desiredJointVelcoties, controllerDesiredJointVelocities, epsilon);
+
+      if (DEBUG)
+      {
+         for (int i = 0; i < numberOfJoints; i++)
+         {
+            OneDoFJoint joint = armJoints[i];
+            double q_err = desiredJointPositions[i] - joint.getQ();
+            System.out.println(joint.getName() + ": q_err = " + q_err + ", controller q_d = " + controllerDesiredJointPositions[i] + ", message q_d = "
+                  + desiredJointPositions[i] + ", q = " + joint.getQ());
+         }
 
          for (int i = 0; i < numberOfJoints; i++)
          {
             OneDoFJoint joint = armJoints[i];
-            DoubleYoVariable q_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "q_d_" + joint.getName() + "HandControlModule");
-            DoubleYoVariable qd_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "qd_d_" + joint.getName() + "HandControlModule");
-            controllerDesiredJointPositions[i] = q_d_HCM.getDoubleValue();
-            controllerDesiredJointVelocities[i] = qd_d_HCM.getDoubleValue();
-         }
-
-         assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
-         assertArrayEquals(desiredJointVelcoties, controllerDesiredJointVelocities, epsilon);
-
-         if (DEBUG)
-         {
-            for (int i = 0; i < numberOfJoints; i++)
-            {
-               OneDoFJoint joint = armJoints[i];
-               double q_err = desiredJointPositions[i] - joint.getQ();
-               System.out.println(joint.getName() + ": q_err = " + q_err + ", controller q_d = " + controllerDesiredJointPositions[i] + ", message q_d = "
-                     + desiredJointPositions[i] + ", q = " + joint.getQ());
-            }
-
-            for (int i = 0; i < numberOfJoints; i++)
-            {
-               OneDoFJoint joint = armJoints[i];
-               System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
-            }
+            System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
          }
       }
    }

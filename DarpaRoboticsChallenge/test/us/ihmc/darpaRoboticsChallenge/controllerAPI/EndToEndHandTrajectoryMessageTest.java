@@ -35,6 +35,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -45,7 +46,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       BambooTools.reportTestStartedMessage();
 
       Random random = new Random(564574L);
-      double epsilon = 1.0e-10;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -74,45 +74,51 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          Point3d desiredPosition = new Point3d();
          Quat4d desiredOrientation = new Quat4d();
          desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
-         HandTrajectoryMessage armTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.WORLD, trajectoryTime, desiredPosition, desiredOrientation);
+         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.WORLD, trajectoryTime, desiredPosition, desiredOrientation);
 
-         drcSimulationTestHelper.send(armTrajectoryMessage);
+         drcSimulationTestHelper.send(handTrajectoryMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
          assertTrue(success);
 
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          
-         String handPrefix = sidePrefix + "Hand";
-         String positionTrajectoryName = handPrefix + "MultipleWaypointsPositionTrajectoryGenerator";
-         String orientationTrajectoryName = handPrefix + "MultipleWaypointsOrientationTrajectoryGenerator";
-         String numberOfWaypointsVarName = handPrefix + "NumberOfWaypoints";
-         String subTrajectoryName = handPrefix + "SubTrajectory";
-         String currentPositionVarNamePrefix = subTrajectoryName + "CurrentPosition";
-         String currentOrientationVarNamePrefix = subTrajectoryName + "CurrentOrientation";
-
-         double numberOfWaypoints = scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName).getValueAsDouble();
-         assertEquals(2.0, numberOfWaypoints, 0.1);
-         numberOfWaypoints = scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName).getValueAsDouble();
-         assertEquals(2.0, numberOfWaypoints, 0.1);
-
-         double trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "X").getValueAsDouble();
-         assertEquals(desiredPosition.getX(), trajOutput, epsilon);
-         trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "Y").getValueAsDouble();
-         assertEquals(desiredPosition.getY(), trajOutput, epsilon);
-         trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "Z").getValueAsDouble();
-         assertEquals(desiredPosition.getZ(), trajOutput, epsilon);
-         trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
-         assertEquals(desiredOrientation.getX(), trajOutput, epsilon);
-         trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
-         assertEquals(desiredOrientation.getY(), trajOutput, epsilon);
-         trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
-         assertEquals(desiredOrientation.getZ(), trajOutput, epsilon);
-         trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
-         assertEquals(desiredOrientation.getW(), trajOutput, epsilon);
+         assertSingleWaypointExecuted(robotSide, desiredPosition, desiredOrientation, scs);
       }
+   }
+
+   public static void assertSingleWaypointExecuted(RobotSide robotSide, Point3d desiredPosition, Quat4d desiredOrientation,
+         SimulationConstructionSet scs)
+   {
+      String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+      String handPrefix = sidePrefix + "Hand";
+      String positionTrajectoryName = handPrefix + "MultipleWaypointsPositionTrajectoryGenerator";
+      String orientationTrajectoryName = handPrefix + "MultipleWaypointsOrientationTrajectoryGenerator";
+      String numberOfWaypointsVarName = handPrefix + "NumberOfWaypoints";
+      String subTrajectoryName = handPrefix + "SubTrajectory";
+      String currentPositionVarNamePrefix = subTrajectoryName + "CurrentPosition";
+      String currentOrientationVarNamePrefix = subTrajectoryName + "CurrentOrientation";
+
+      double numberOfWaypoints = scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName).getValueAsDouble();
+      assertEquals(2.0, numberOfWaypoints, 0.1);
+      numberOfWaypoints = scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName).getValueAsDouble();
+      assertEquals(2.0, numberOfWaypoints, 0.1);
+
+      double trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "X").getValueAsDouble();
+      assertEquals(desiredPosition.getX(), trajOutput, EPSILON_FOR_DESIREDS);
+      trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "Y").getValueAsDouble();
+      assertEquals(desiredPosition.getY(), trajOutput, EPSILON_FOR_DESIREDS);
+      trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "Z").getValueAsDouble();
+      assertEquals(desiredPosition.getZ(), trajOutput, EPSILON_FOR_DESIREDS);
+      trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
+      assertEquals(desiredOrientation.getX(), trajOutput, EPSILON_FOR_DESIREDS);
+      trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
+      assertEquals(desiredOrientation.getY(), trajOutput, EPSILON_FOR_DESIREDS);
+      trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
+      assertEquals(desiredOrientation.getZ(), trajOutput, EPSILON_FOR_DESIREDS);
+      trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
+      assertEquals(desiredOrientation.getW(), trajOutput, EPSILON_FOR_DESIREDS);
    }
 
    @Before

@@ -32,6 +32,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-4;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -42,7 +43,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       Random random = new Random(564574L);
-      double epsilon = 1.0e-5;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -81,6 +81,11 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
+      assertSingleWaypointExecuted(desiredRandomChestOrientation, scs);
+   }
+
+   public static void assertSingleWaypointExecuted(FrameOrientation desiredChestOrientation, SimulationConstructionSet scs)
+   {
       String chestPrefix = "chest";
       String orientationTrajectoryName = chestPrefix + "MultipleWaypointsOrientationTrajectoryGenerator";
       String numberOfWaypointsVarName = chestPrefix + "NumberOfWaypoints";
@@ -91,13 +96,13 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertEquals(2.0, numberOfWaypoints, 0.1);
 
       double trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQx(), trajOutput, epsilon);
+      assertEquals(desiredChestOrientation.getQx(), trajOutput, EPSILON_FOR_DESIREDS);
       trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQy(), trajOutput, epsilon);
+      assertEquals(desiredChestOrientation.getQy(), trajOutput, EPSILON_FOR_DESIREDS);
       trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQz(), trajOutput, epsilon);
+      assertEquals(desiredChestOrientation.getQz(), trajOutput, EPSILON_FOR_DESIREDS);
       trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQs(), trajOutput, epsilon);
+      assertEquals(desiredChestOrientation.getQs(), trajOutput, EPSILON_FOR_DESIREDS);
    }
 
    @Before
