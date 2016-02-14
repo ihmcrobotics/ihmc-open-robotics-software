@@ -1140,6 +1140,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
                }
             }
+            else if (pelvisTrajectoryMessageSubscriber != null && pelvisTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
+            {
+                  PelvisTrajectoryMessage pelvisTrajectoryMessage = pelvisTrajectoryMessageSubscriber.pollMessage();
+                  pelvisOrientationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+                  pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+                  centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+            }
          }
          else if (pushRecoveryModule.isEnabled())
          {
