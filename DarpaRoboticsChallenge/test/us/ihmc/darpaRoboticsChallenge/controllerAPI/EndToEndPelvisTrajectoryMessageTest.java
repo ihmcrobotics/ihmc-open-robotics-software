@@ -31,6 +31,8 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-4;
+   private static final double EPSILON_FOR_HEIGHT = 1.0e-2;
 
    private static final boolean DEBUG = false;
 
@@ -43,7 +45,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       BambooTools.reportTestStartedMessage();
 
       Random random = new Random(564574L);
-      double epsilon = 1.0e-4;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -90,6 +91,11 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
+      assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
+   }
+
+   public static void assertSingleWaypointExecuted(Point3d desiredPosition, Quat4d desiredOrientation, SimulationConstructionSet scs)
+   {
       String pelvisPrefix = "pelvisOffset";
       String positionTrajectoryName = pelvisPrefix + "MultipleWaypointsPositionTrajectoryGenerator";
       String orientationTrajectoryName = pelvisPrefix + "MultipleWaypointsOrientationTrajectoryGenerator";
@@ -105,25 +111,25 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       
       double trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "X").getValueAsDouble();
-      assertEquals(desiredPosition.getX(), trajOutput, epsilon);
+      assertEquals(desiredPosition.getX(), trajOutput, EPSILON_FOR_DESIREDS);
       trajOutput = scs.getVariable(subTrajectoryName, currentPositionVarNamePrefix + "Y").getValueAsDouble();
-      assertEquals(desiredPosition.getY(), trajOutput, epsilon);
+      assertEquals(desiredPosition.getY(), trajOutput, EPSILON_FOR_DESIREDS);
       
       trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
-      assertEquals(desiredOrientation.getX(), trajOutput, epsilon);
+      assertEquals(desiredOrientation.getX(), trajOutput, EPSILON_FOR_DESIREDS);
       trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
-      assertEquals(desiredOrientation.getY(), trajOutput, epsilon);
+      assertEquals(desiredOrientation.getY(), trajOutput, EPSILON_FOR_DESIREDS);
       trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
-      assertEquals(desiredOrientation.getZ(), trajOutput, epsilon);
+      assertEquals(desiredOrientation.getZ(), trajOutput, EPSILON_FOR_DESIREDS);
       trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
-      assertEquals(desiredOrientation.getW(), trajOutput, epsilon);
+      assertEquals(desiredOrientation.getW(), trajOutput, EPSILON_FOR_DESIREDS);
 
       // Hard to figure out how to verify the desired there
 //      trajOutput = scs.getVariable("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentValue").getValueAsDouble();
-//      assertEquals(desiredPosition.getZ(), trajOutput, epsilon);
+//      assertEquals(desiredPosition.getZ(), trajOutput, EPSILON_FOR_DESIREDS);
       // Ending up doing a rough check on the actual height
       double pelvisHeight = scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
-      assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
+      assertEquals(desiredPosition.getZ(), pelvisHeight, EPSILON_FOR_HEIGHT);
    }
 
    @Before
