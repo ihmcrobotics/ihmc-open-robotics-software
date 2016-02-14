@@ -7,6 +7,8 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.SO3WaypointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
@@ -514,7 +516,7 @@ public abstract class PacketValidityChecker
       
       if (armTrajectoryMessage.jointTrajectory1DMessages == null)
       {
-         errorMessage = "Trajectory pointes are empty.";
+         errorMessage = "Trajectory points are empty.";
          globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
          return false;
       }
@@ -722,6 +724,47 @@ public abstract class PacketValidityChecker
             globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
+      }
+
+      return true;
+   }
+
+   public static boolean validateArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      String errorMessage = validatePacket(armDesiredAccelerationsMessage, true);
+      if (errorMessage != null)
+         return false;
+
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.robotSide);
+      if (packetFieldErrorType != null)
+      {
+         errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
+         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         return false;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.armControlMode);
+      if (packetFieldErrorType != null)
+      {
+         errorMessage = "armControlMode field" + packetFieldErrorType.getMessage();
+         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         return false;
+      }
+      
+      boolean isInUserControlMode = armDesiredAccelerationsMessage.armControlMode == ArmControlMode.USER_CONTROL_MODE;
+      if (isInUserControlMode && armDesiredAccelerationsMessage.armJointDesiredAccelerations == null)
+      {
+         errorMessage = "The field with desired joint acceleration is empty.";
+         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         return false;
+      }
+      
+      int numberOfJoints = armDesiredAccelerationsMessage.getNumberOfJoints();
+      if (isInUserControlMode && numberOfJoints == 0)
+      {
+         errorMessage = "The field with desired joint acceleration is empty.";
+         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         return false;
       }
 
       return true;
