@@ -69,9 +69,9 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
    }
 
    @Override
-   public Point3d getPosition()
+   public void getPosition(Point3d positionToPack)
    {
-      return position;
+      positionToPack.set(position);
    }
 
    public void setPosition(Point3d position)
@@ -80,9 +80,9 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
    }
 
    @Override
-   public Quat4d getOrientation()
+   public void getOrientation(Quat4d orientationToPack)
    {
-      return orientation;
+      orientationToPack.set(orientation);
    }
 
    public void setOrientation(Quat4d orientation)
@@ -91,9 +91,9 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
    }
 
    @Override
-   public Vector3d getLinearVelocity()
+   public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      return linearVelocity;
+      linearVelocityToPack.set(linearVelocity);
    }
 
    public void setLinearVelocity(Vector3d linearVelocity)
@@ -102,9 +102,9 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
    }
 
    @Override
-   public Vector3d getAngularVelocity()
+   public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
-      return angularVelocity;
+      angularVelocityToPack.set(angularVelocity);
    }
 
    public void setAngularVelocity(Vector3d angularVelocity)

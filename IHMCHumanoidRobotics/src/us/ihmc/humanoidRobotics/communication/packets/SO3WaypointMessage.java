@@ -58,9 +58,9 @@ public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage> im
    }
 
    @Override
-   public Quat4d getOrientation()
+   public void getOrientation(Quat4d orientationToPack)
    {
-      return orientation;
+      orientationToPack.set(orientation);
    }
 
    public void setOrientation(Quat4d orientation)
@@ -69,9 +69,9 @@ public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage> im
    }
 
    @Override
-   public Vector3d getAngularVelocity()
+   public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
-      return angularVelocity;
+      angularVelocityToPack.set(angularVelocity);
    }
 
    public void setAngularVelocity(Vector3d angularVelocity)

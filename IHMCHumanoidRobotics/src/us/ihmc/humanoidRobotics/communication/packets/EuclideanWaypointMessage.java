@@ -58,9 +58,9 @@ public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypoin
    }
 
    @Override
-   public Point3d getPosition()
+   public void getPosition(Point3d positionToPack)
    {
-      return position;
+      positionToPack.set(position);
    }
 
    public void setPosition(Point3d position)
@@ -69,9 +69,9 @@ public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypoin
    }
 
    @Override
-   public Vector3d getLinearVelocity()
+   public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      return linearVelocity;
+      linearVelocityToPack.set(linearVelocity);
    }
 
    public void setLinearVelocity(Vector3d linearVelocity)

@@ -168,6 +168,28 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.finalVelocity.set(finalVelocity);
    }
 
+   public void setTrajectoryParameters(FrameEuclideanWaypoint initialFrameEuclideanWaypoint, FrameEuclideanWaypoint finalFrameEuclideanWaypoint)
+   {
+      setTrajectoryTime(finalFrameEuclideanWaypoint.getTime() - initialFrameEuclideanWaypoint.getTime());
+
+      initialPosition.set(initialFrameEuclideanWaypoint.getPosition());
+      initialVelocity.set(initialFrameEuclideanWaypoint.getLinearVelocity());
+
+      finalPosition.set(finalFrameEuclideanWaypoint.getPosition());
+      finalVelocity.set(finalFrameEuclideanWaypoint.getLinearVelocity());
+   }
+
+   public void setTrajectoryParameters(YoFrameEuclideanWaypoint initialYoFrameEuclideanWaypoint, YoFrameEuclideanWaypoint finalYoFrameEuclideanWaypoint)
+   {
+      setTrajectoryTime(finalYoFrameEuclideanWaypoint.getTime() - initialYoFrameEuclideanWaypoint.getTime());
+
+      initialPosition.set(initialYoFrameEuclideanWaypoint.getPosition());
+      initialVelocity.set(initialYoFrameEuclideanWaypoint.getLinearVelocity());
+
+      finalPosition.set(finalYoFrameEuclideanWaypoint.getPosition());
+      finalVelocity.set(finalYoFrameEuclideanWaypoint.getLinearVelocity());
+   }
+
    public void initialize()
    {
       currentTime.set(0.0);
