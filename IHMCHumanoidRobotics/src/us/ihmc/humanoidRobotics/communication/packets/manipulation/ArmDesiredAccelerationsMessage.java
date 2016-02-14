@@ -1,5 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
@@ -97,5 +100,28 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
       if (ArrayTools.deltaEquals(armDesiredJointAccelerations, other.armDesiredJointAccelerations, epsilon))
          return false;
       return true;
+   }
+
+   @Override
+   public String toString()
+   {
+      switch (armControlMode)
+      {
+      case IHMC_CONTROL_MODE:
+         return "ArmControlMode == " + armControlMode + ".";
+      case USER_CONTROL_MODE:
+         String ret = "ArmControlMode == " + armControlMode + ", desired qccelerations = [";
+         NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
+         for (int i = 0; i < getNumberOfJoints(); i++)
+         {
+            double jointDesiredAcceleration = armDesiredJointAccelerations[i];
+            ret += doubleFormat.format(jointDesiredAcceleration);
+            if (i < getNumberOfJoints() - 1)
+               ret += ", ";
+         }
+         return ret + "].";
+      default:
+         return "Invalid ArmControlMode: " + armControlMode;
+      }
    }
 }

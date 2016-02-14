@@ -759,8 +759,7 @@ public abstract class PacketValidityChecker
          return false;
       }
       
-      int numberOfJoints = armDesiredAccelerationsMessage.getNumberOfJoints();
-      if (isInUserControlMode && numberOfJoints == 0)
+      if (isInUserControlMode && armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
       {
          errorMessage = "The field with desired joint acceleration is empty.";
          globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
