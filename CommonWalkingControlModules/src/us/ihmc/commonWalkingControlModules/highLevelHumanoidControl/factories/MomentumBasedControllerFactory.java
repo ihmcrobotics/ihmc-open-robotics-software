@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePoin
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
@@ -164,10 +163,6 @@ public class MomentumBasedControllerFactory
       ContactablePlaneBody pelvisBackContactablePlaneBody = contactableBodiesFactory.createPelvisBackContactableBody(fullRobotModel.getPelvis());
       SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
 
-      // No longer need old one. Don't create it.
-      // TODO: Remove OldMomentumControlModule completely once QP stuff is solidified.
-      OldMomentumControlModule oldMomentumControlModule = null;
-
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup different things relative to GUI communication and WalkingProviders ////////////////
 
@@ -211,7 +206,7 @@ public class MomentumBasedControllerFactory
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors, yoTime,
             gravityZ, twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT,
-            oldMomentumControlModule, updatables, armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
+            updatables, armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
 

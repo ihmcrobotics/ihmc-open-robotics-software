@@ -9,9 +9,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -42,7 +41,6 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 public class HighLevelPositionController extends HighLevelBehavior
 {
    private final static HighLevelState controllerState = HighLevelState.TASKSPACE_POSITION_CONTROL;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
@@ -370,7 +368,6 @@ public class HighLevelPositionController extends HighLevelBehavior
    @Override
    public void doTransitionOutOfAction()
    {
-      momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
    }
 
    public YoVariableRegistry getYoVariableRegistry()

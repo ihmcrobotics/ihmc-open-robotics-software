@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -92,7 +91,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private static final boolean CHECK_FOR_OVEREXTENSION_ON_TOE_OFF_LEG = false;
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final PushRecoveryControlModule pushRecoveryModule;
 
@@ -519,8 +517,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          unconstrainedDesiredPositions[i].set(unconstrainedJoints[i].getQ());
       }
-
-      momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
 
       initializeContacts();
 

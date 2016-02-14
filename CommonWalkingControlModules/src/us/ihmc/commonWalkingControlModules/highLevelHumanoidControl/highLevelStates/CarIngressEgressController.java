@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyPositionContr
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
@@ -46,7 +45,6 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final FootPoseProvider footPoseProvider;
    private final DesiredFootStateProvider footLoadBearingProvider;
@@ -223,8 +221,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    public void initialize()
    {
       super.initialize();
-
-      momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
 
       chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControlId);
       carIngressChestOrientationKp.set(100.0);
