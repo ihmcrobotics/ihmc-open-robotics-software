@@ -36,18 +36,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout=300000)
-   public void testArmTrajectoryMessagesWithSingleWaypoint() throws Exception
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         showMemoryUsageBeforeTest();
-         testArmTrajectoryMessageWithSingleWaypoint(robotSide);
-         destroySimulationAndRecycleMemory();
-      }
-   }
-
-   public void testArmTrajectoryMessageWithSingleWaypoint(RobotSide robotSide) throws Exception
+   @Test(timeout = 300000)
+   public void testArmTrajectoryMessageWithSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 
@@ -64,65 +54,71 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      double trajectoryTime = 0.5;
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody hand = fullRobotModel.getHand(robotSide);
-      OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
-      int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
-      double[] desiredJointPositions = new double[numberOfJoints];
-      double[] desiredJointVelcoties = new double[numberOfJoints];
-
-      for (int i = 0; i < numberOfJoints; i++)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         OneDoFJoint joint = armJoints[i];
-         desiredJointPositions[i] = RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
-      }
+         double trajectoryTime = 0.5;
+         RigidBody chest = fullRobotModel.getChest();
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+         int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
+         double[] desiredJointPositions = new double[numberOfJoints];
+         double[] desiredJointVelcoties = new double[numberOfJoints];
 
-      ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
-
-      for (int i = 0; i < numberOfJoints; i++)
-      {
-         OneDoFJoint armJoint = armJoints[i];
-         System.out.println(armJoint.getName() + ": q = " + armJoint.getQ());
-      }
-
-      drcSimulationTestHelper.send(armTrajectoryMessage);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
-      assertTrue(success);
-
-      String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      double[] controllerDesiredJointPositions = new double[numberOfJoints];
-      double[] controllerDesiredJointVelocities = new double[numberOfJoints];
-
-      for (int i = 0; i < numberOfJoints; i++)
-      {
-         OneDoFJoint joint = armJoints[i];
-         DoubleYoVariable q_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "q_d_" + joint.getName() + "HandControlModule");
-         DoubleYoVariable qd_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "qd_d_" + joint.getName() + "HandControlModule");
-         controllerDesiredJointPositions[i] = q_d_HCM.getDoubleValue();
-         controllerDesiredJointVelocities[i] = qd_d_HCM.getDoubleValue();
-      }
-
-      assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
-      assertArrayEquals(desiredJointVelcoties, controllerDesiredJointVelocities, epsilon);
-
-      if (DEBUG)
-      {
          for (int i = 0; i < numberOfJoints; i++)
          {
             OneDoFJoint joint = armJoints[i];
-            double q_err = desiredJointPositions[i] - joint.getQ();
-            System.out.println(joint.getName() + ": q_err = " + q_err + ", controller q_d = " + controllerDesiredJointPositions[i] + ", message q_d = "
-                  + desiredJointPositions[i] + ", q = " + joint.getQ());
+            desiredJointPositions[i] = RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
          }
 
+         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
+
+         if (DEBUG)
+         {
+            for (int i = 0; i < numberOfJoints; i++)
+            {
+               OneDoFJoint armJoint = armJoints[i];
+               System.out.println(armJoint.getName() + ": q = " + armJoint.getQ());
+            }
+         }
+
+         drcSimulationTestHelper.send(armTrajectoryMessage);
+
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+         assertTrue(success);
+
+         String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
+
+         SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+         double[] controllerDesiredJointPositions = new double[numberOfJoints];
+         double[] controllerDesiredJointVelocities = new double[numberOfJoints];
+
          for (int i = 0; i < numberOfJoints; i++)
          {
             OneDoFJoint joint = armJoints[i];
-            System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
+            DoubleYoVariable q_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "q_d_" + joint.getName() + "HandControlModule");
+            DoubleYoVariable qd_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "qd_d_" + joint.getName() + "HandControlModule");
+            controllerDesiredJointPositions[i] = q_d_HCM.getDoubleValue();
+            controllerDesiredJointVelocities[i] = qd_d_HCM.getDoubleValue();
+         }
+
+         assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
+         assertArrayEquals(desiredJointVelcoties, controllerDesiredJointVelocities, epsilon);
+
+         if (DEBUG)
+         {
+            for (int i = 0; i < numberOfJoints; i++)
+            {
+               OneDoFJoint joint = armJoints[i];
+               double q_err = desiredJointPositions[i] - joint.getQ();
+               System.out.println(joint.getName() + ": q_err = " + q_err + ", controller q_d = " + controllerDesiredJointPositions[i] + ", message q_d = "
+                     + desiredJointPositions[i] + ", q = " + joint.getQ());
+            }
+
+            for (int i = 0; i < numberOfJoints; i++)
+            {
+               OneDoFJoint joint = armJoints[i];
+               System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
+            }
          }
       }
    }
