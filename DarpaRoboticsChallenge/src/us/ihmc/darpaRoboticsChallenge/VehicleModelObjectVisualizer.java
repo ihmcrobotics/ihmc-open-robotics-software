@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;

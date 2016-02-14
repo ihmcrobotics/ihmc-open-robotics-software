@@ -1,4 +1,4 @@
-package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
+package us.ihmc.darpaRoboticsChallenge;
 
 /**
 * @author twan
