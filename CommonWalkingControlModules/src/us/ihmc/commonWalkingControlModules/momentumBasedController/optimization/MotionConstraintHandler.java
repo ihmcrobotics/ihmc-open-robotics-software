@@ -75,6 +75,7 @@ public class MotionConstraintHandler
    {
       registry = new YoVariableRegistry(name + getClass().getSimpleName()); 
       removeNullspaceFromJ = new BooleanYoVariable(name + "RemoveNullspaceFromJ", registry);
+      removeNullspaceFromJ.set(true);
       
       this.geometricJacobianHolder = (geometricJacobianHolder != null) ? geometricJacobianHolder : new GeometricJacobianHolder();
       jacobiansHaveToBeUpdated = geometricJacobianHolder == null;
@@ -93,7 +94,6 @@ public class MotionConstraintHandler
 
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
       
-      removeNullspaceFromJ.set(true);
       
       parentRegistry.addChild(registry);
    }
@@ -239,18 +239,12 @@ public class MotionConstraintHandler
                CommonOps.extract(tempPVector, 0, tempPVector.getNumRows(), 0, tempPVector.getNumCols(), pBlock, 0, 0);
                CommonOps.extract(nullspaceMultipliers, 0, nullspaceMultipliers.getNumRows(), 0, nullspaceMultipliers.getNumCols(), pBlock, tempPVector.getNumRows(), 0);
             }
-            
-            //TODO: Figure out how to deal with selection matrix here.
-//            DenseMatrix64F selectionMatrixTimesCTransposeJ = new DenseMatrix64F(selectionMatrix.getNumRows(), matrixCTransposeJ.getNumCols());
-//            CommonOps.mult(selectionMatrix, matrixCTransposeJ, selectionMatrixTimesCTransposeJ);
          
             jBlockCompact.zero();
             
             tempNullSpaceMatrixNTranspose.reshape(nullity, tempMatrixVTranspose.getNumCols());
             CommonOps.extract(tempMatrixVTranspose, tempMatrixVTranspose.getNumRows() - nullity, tempMatrixVTranspose.getNumRows(), 0, tempMatrixVTranspose.getNumCols(), tempNullSpaceMatrixNTranspose, 0, 0);  
-//            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
             NullspaceCalculator.makeLargestComponentInEachColumnPositive(tempNullSpaceMatrixNTranspose);
-//            System.out.println("nullSpaceMatrixNTranspose = " + nullSpaceMatrixNTranspose);
 
             if (removeNullspaceFromJ.getBooleanValue())
             {
@@ -270,14 +264,6 @@ public class MotionConstraintHandler
                   System.out.println("blop");
                }
             }
-//            System.out.println("jBlockCompact = " + jBlockCompact);
-            
-//            jBlockCompact.set(5, 8, -0.5);
-//            jBlockCompact.set(5, 9, 1.0);
-//            jBlockCompact.set(5, 10, -0.5);
-            
-//            System.out.println("jBlockCompact = " + jBlockCompact);
-            
             
             DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
             compactBlockToFullBlock(baseToEndEffectorJacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
@@ -314,7 +300,6 @@ public class MotionConstraintHandler
 
       for (int index = 0; index < joints.length; index++){
          InverseDynamicsJoint joint = joints[index];
-//         int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
          indicesIntoCompactBlock.reset();
          ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
@@ -331,7 +316,6 @@ public class MotionConstraintHandler
       }
    }
 
-//   public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration, double weight)
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
       InverseDynamicsJoint joint = desiredJointAccelerationCommand.getJoint();

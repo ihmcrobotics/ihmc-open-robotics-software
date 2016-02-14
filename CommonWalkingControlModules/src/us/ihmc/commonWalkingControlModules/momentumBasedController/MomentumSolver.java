@@ -32,7 +32,7 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 
-public class MomentumSolver implements MomentumSolverInterface
+public class MomentumSolver
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
