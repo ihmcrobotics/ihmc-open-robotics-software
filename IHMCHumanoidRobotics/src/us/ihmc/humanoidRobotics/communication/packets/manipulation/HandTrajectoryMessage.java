@@ -209,7 +209,7 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
       if (taskspaceWaypoints != null)
          ret = "Hand SE3 trajectory: number of SE3 waypoints = " + getNumberOfWaypoints();
       else
-         ret = "Chest SE3 trajectory: no SE3 waypoints";
+         ret = "Hand SE3 trajectory: no SE3 waypoints";
 
       return ret + ", robotSide = " + robotSide + ", base for control = " + base;
    }
