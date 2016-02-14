@@ -80,7 +80,8 @@ public class HeadOrientationManager
          finalOrientationProvider.setOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", chestFrame, trajectoryTimeProvider,
                initialOrientationProvider, finalOrientationProvider, registry);
-         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("headWaypoint", 15, true, chestFrame, registry);
+         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", 15, true, chestFrame, registry);
+         waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
          simpleOrientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
 
          isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
@@ -161,13 +162,14 @@ public class HeadOrientationManager
          return;
 
       HeadTrajectoryMessage message = headTrajectoryMessageSubscriber.pollMessage();
+      receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
 
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       waypointOrientationTrajectoryGenerator.clear();
 
       if (message.getWaypoint(0).getTime() > 1.0e-5)
       {
-         tempOrientation.setToZero(chestFrame);
+         activeTrajectoryGenerator.get(tempOrientation);
          tempOrientation.changeFrame(worldFrame);
          tempAngularVelocity.setToZero(worldFrame);
 
