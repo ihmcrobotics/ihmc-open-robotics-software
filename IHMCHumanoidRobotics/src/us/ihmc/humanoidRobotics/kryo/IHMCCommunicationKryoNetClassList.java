@@ -61,6 +61,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorAutoEnableFlagPacket;
@@ -92,6 +93,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheel
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
@@ -223,6 +225,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(EndEffectorLoadBearingMessage.class);
       registerPacketClass(EndEffector.class);
 
+      // User arm control mode
+      registerPacketClass(ArmDesiredAccelerationsMessage.class);
+
       // Trajectory messages
       registerPacketClass(HandTrajectoryMessage.class);
       registerPacketClass(ArmTrajectoryMessage.class);
@@ -242,6 +247,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(SO3WaypointMessage.class);
       registerPacketClass(SE3WaypointMessage.class);
 
+      registerPacketField(ArmControlMode.class);
       registerPacketField(BaseForControl.class);
       registerPacketField(Trajectory1DMessage.class);
       registerPacketField(Trajectory1DMessage[].class);
