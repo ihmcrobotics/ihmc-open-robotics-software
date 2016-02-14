@@ -70,7 +70,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         waypoints.get(i).setToNaN();;
+         waypoints.get(i).setToNaN();
       }
    }
 
@@ -106,7 +106,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
 
    private void appendWaypointUnsafe(SO3WaypointInterface so3Waypoint)
    {
-      waypoints.get(currentWaypointIndex.getIntegerValue()).set(so3Waypoint);
+      waypoints.get(numberOfWaypoints.getIntegerValue()).set(so3Waypoint);
       numberOfWaypoints.increment();
    }
 
