@@ -75,7 +75,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider(
          "offsetHeightAboveGroundTrajectoryTimeProvider", registry);
    private final MultipleWaypointsTrajectoryGenerator waypointOffsetHeightAboveGroundTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(
-         "wayointOffsetHeightAboveGroundTrajectory", 15, registry);
+         "pelvisHeightOffset", 15, registry);
    private final CubicPolynomialTrajectoryGenerator offsetHeightAboveGroundTrajectory = new CubicPolynomialTrajectoryGenerator(
          "offsetHeightAboveGroundTrajectory", offsetHeightAboveGroundInitialPositionProvider, offsetHeightAboveGroundFinalPositionProvider,
          offsetHeightAboveGroundTrajectoryTimeProvider, registry);
