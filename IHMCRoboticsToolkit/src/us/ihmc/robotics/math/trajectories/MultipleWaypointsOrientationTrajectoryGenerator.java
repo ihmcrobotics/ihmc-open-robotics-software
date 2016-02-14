@@ -14,6 +14,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MultipleWaypointsOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
+   private final String namePrefix;
+
    private final int maximumNumberOfWaypoints;
 
    private final YoVariableRegistry registry;
@@ -35,6 +37,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    {
       super(allowMultipleFrames, referenceFrame);
 
+      this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -47,7 +50,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       currentTrajectoryTime = new DoubleYoVariable(namePrefix + "CurrentTrajectoryTime", registry);
       currentWaypointIndex = new IntegerYoVariable(namePrefix + "CurrentWaypointIndex", registry);
 
-      subTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "SubTajectory", allowMultipleFrames, referenceFrame, registry);
+      subTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "SubTrajectory", allowMultipleFrames, referenceFrame, registry);
       registerTrajectoryGeneratorsInMultipleFrames(subTrajectory);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
@@ -236,5 +239,15 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       subTrajectory.packAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
+   }
+
+   @Override
+   public String toString()
+   {
+      if (numberOfWaypoints.getIntegerValue() == 0)
+         return namePrefix + ": Has no waypoints.";
+      else
+         return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = " + currentWaypointIndex.getIntegerValue()
+         + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: " + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
    }
 }

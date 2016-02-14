@@ -18,6 +18,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
+   private final String namePrefix;
+
    private final int maximumNumberOfWaypoints;
 
    private final YoVariableRegistry registry;
@@ -39,6 +41,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    {
       super(allowMultipleFrames, referenceFrame);
 
+      this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -51,7 +54,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       currentTrajectoryTime = new DoubleYoVariable(namePrefix + "CurrentTrajectoryTime", registry);
       currentWaypointIndex = new IntegerYoVariable(namePrefix + "CurrentWaypointIndex", registry);
 
-      subTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix + "SubTajectory", allowMultipleFrames, referenceFrame, registry);
+      subTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix + "SubTrajectory", allowMultipleFrames, referenceFrame, registry);
       registerTrajectoryGeneratorsInMultipleFrames(subTrajectory);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
@@ -111,7 +114,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    private void appendWaypointUnsafe(EuclideanWaypointInterface euclideanWaypoint)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(euclideanWaypoint);
-      currentWaypointIndex.increment();
+      numberOfWaypoints.increment();
    }
 
    public void appendWaypoints(double[] timeAtWaypoints, FramePoint[] positions, FrameVector[] linearVelocities)
@@ -242,5 +245,15 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    public void packLinearData(FramePoint positionToPack, FrameVector linearVelocityToPack, FrameVector linearAccelerationToPack)
    {
       subTrajectory.packLinearData(positionToPack, linearVelocityToPack, linearAccelerationToPack);
+   }
+
+   @Override
+   public String toString()
+   {
+      if (numberOfWaypoints.getIntegerValue() == 0)
+         return namePrefix + ": Has no waypoints.";
+      else
+         return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = " + currentWaypointIndex.getIntegerValue()
+         + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: " + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
    }
 }
