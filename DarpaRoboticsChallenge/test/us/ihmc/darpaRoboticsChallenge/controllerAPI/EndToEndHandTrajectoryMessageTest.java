@@ -39,8 +39,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
-   public void testArmTrajectoryMessageWithSingleWaypoint() throws Exception
+   @Test//(timeout = 300000)
+   public void testHandTrajectoryMessageWithSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 
@@ -49,7 +49,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), "", selectedLocation, simulationTestingParameters, getRobotModel());
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
