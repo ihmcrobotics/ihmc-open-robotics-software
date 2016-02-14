@@ -245,7 +245,7 @@ public class SimpleStanceController implements RobotController
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModule.compute(contactStates, null);
+         momentumModuleSolution = momentumControlModule.compute(contactStates);
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {
