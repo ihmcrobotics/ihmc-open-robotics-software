@@ -1,11 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
 public class YoWaypoint1D implements Waypoint1DInterface
 {
@@ -21,9 +22,9 @@ public class YoWaypoint1D implements Waypoint1DInterface
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      time = new DoubleYoVariable(YoFrameVariableNameTools.createName(namePrefix, "time", nameSuffix), registry);
-      position = new DoubleYoVariable(YoFrameVariableNameTools.createName(namePrefix, "position", nameSuffix), registry);
-      velocity = new DoubleYoVariable(YoFrameVariableNameTools.createName(namePrefix, "velocity", nameSuffix), registry);
+      time = new DoubleYoVariable(createName(namePrefix, "time", nameSuffix), registry);
+      position = new DoubleYoVariable(createName(namePrefix, "position", nameSuffix), registry);
+      velocity = new DoubleYoVariable(createName(namePrefix, "velocity", nameSuffix), registry);
    }
 
    public void set(Waypoint1DInterface waypoint1d)

@@ -735,19 +735,19 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.getPosition());
+      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.position);
       if (errorType != null)
          return "SE3 waypoint position field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple4d(se3Waypoint.getOrientation());
+      errorType = ObjectValidityChecker.validateTuple4d(se3Waypoint.orientation);
       if (errorType != null)
          return "SE3 waypoint orientation field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.getLinearVelocity());
+      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.linearVelocity);
       if (errorType != null)
          return "SE3 waypoint linear velocity field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.getAngularVelocity());
+      errorType = ObjectValidityChecker.validateTuple3d(se3Waypoint.angularVelocity);
       if (errorType != null)
          return "SE3 waypoint angular velocity field " + errorType.getMessage();;
 
@@ -770,11 +770,11 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateTuple4d(so3Waypoint.getOrientation());
+      errorType = ObjectValidityChecker.validateTuple4d(so3Waypoint.orientation);
       if (errorType != null)
          return "SO3 waypoint orientation field " + errorType.getMessage();;
 
-      errorType = ObjectValidityChecker.validateTuple3d(so3Waypoint.getAngularVelocity());
+      errorType = ObjectValidityChecker.validateTuple3d(so3Waypoint.angularVelocity);
       if (errorType != null)
          return "SO3 waypoint angular velocity field " + errorType.getMessage();
 
