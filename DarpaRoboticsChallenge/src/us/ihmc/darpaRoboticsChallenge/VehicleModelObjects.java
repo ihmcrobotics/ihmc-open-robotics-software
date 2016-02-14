@@ -5,18 +5,17 @@ import java.util.EnumMap;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjects;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class DRCVehicleModelObjects implements VehicleModelObjects
+public class VehicleModelObjects
 {
    private EnumMap<VehicleObject, RigidBodyTransform> objectTransforms;
 
-   public DRCVehicleModelObjects()
+   public VehicleModelObjects()
    {
       objectTransforms = new EnumMap<VehicleObject, RigidBodyTransform>(VehicleObject.class);
 
