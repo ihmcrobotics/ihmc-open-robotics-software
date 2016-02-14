@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryG
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
@@ -646,7 +647,7 @@ public class HandControlModule
          return false;
       }
 
-      if (armDesiredAccelerationsMessage.getNumberOfJoints() != oneDoFJoints.length)
+      if (armDesiredAccelerationsMessage.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE && armDesiredAccelerationsMessage.getNumberOfJoints() != oneDoFJoints.length)
          return false;
 
       return true;

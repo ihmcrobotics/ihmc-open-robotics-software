@@ -12,7 +12,7 @@ import us.ihmc.robotics.stateMachines.State;
 
 public class UserControlModeState extends State<HandControlState>
 {
-   private static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
+   public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
    private final RobotSide robotSide;
    private final OneDoFJoint[] userControlledJoints;
@@ -20,6 +20,7 @@ public class UserControlModeState extends State<HandControlState>
    private final DoubleYoVariable timeOfLastUserMesage;
    private final DoubleYoVariable timeSinceLastUserMesage;
    private final BooleanYoVariable abortUserControlMode;
+   private final DoubleYoVariable yoTime;
    private final MomentumBasedController momentumBasedController;
 
    public UserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController,
@@ -42,6 +43,7 @@ public class UserControlModeState extends State<HandControlState>
       timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfsLastUserMesage", registry);
       timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
       abortUserControlMode = new BooleanYoVariable(namePrefix + "AbortUserControlMode", registry);
+      yoTime = momentumBasedController.getYoTime();
       this.momentumBasedController = momentumBasedController;
    }
 
@@ -62,7 +64,7 @@ public class UserControlModeState extends State<HandControlState>
       for (int i = 0; i < userControlledJoints.length; i++)
          userDesiredJointAccelerations[i].set(message.getArmDesiredJointAcceleration(i));
       timeSinceLastUserMesage.set(0.0);
-      timeOfLastUserMesage.set(getTimeInCurrentState());
+      timeOfLastUserMesage.set(yoTime.getDoubleValue());
    }
 
    @Override
@@ -74,7 +76,7 @@ public class UserControlModeState extends State<HandControlState>
    @Override
    public void doAction()
    {
-      timeSinceLastUserMesage.set(getTimeInCurrentState() - timeOfLastUserMesage.getDoubleValue());
+      timeSinceLastUserMesage.set(yoTime.getDoubleValue() - timeOfLastUserMesage.getDoubleValue());
 
       if (timeSinceLastUserMesage.getDoubleValue() > TIME_WITH_NO_MESSAGE_BEFORE_ABORT)
       {
