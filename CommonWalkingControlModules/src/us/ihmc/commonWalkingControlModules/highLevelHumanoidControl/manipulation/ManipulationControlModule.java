@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMess
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -288,19 +287,7 @@ public class ManipulationControlModule
          boolean controlHandAngleAboutAxis = handPoseProvider.controlHandAngleAboutAxis(robotSide);
          double graspOffsetFromControlFrame = handPoseProvider.getGraspOffsetFromControlFrame(robotSide);
          double trajectoryTime = handPoseProvider.getTrajectoryTime();
-
-         if (handPoseProvider.checkHandRotateAboutAxisDataType(robotSide) == HandRotateAboutAxisPacket.DataType.ROTATE_ABOUT_AXIS_FORCE_CONTROLLED)
-         {
-            Vector3d forceConstraintVector = handPoseProvider.getForceConstraint(robotSide);
-            double desiredTangentialForce = handPoseProvider.getTangentialForce(robotSide);
-            handControlModules.get(robotSide).moveInCircleForceControl(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, graspOffsetFromControlFrame, trajectoryTime, forceConstraintVector,
-                  desiredTangentialForce);
-         }
-         else
-         {
-            handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, graspOffsetFromControlFrame, trajectoryTime);
-         }
-
+         handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, graspOffsetFromControlFrame, trajectoryTime);
       }
    }
 
