@@ -29,7 +29,6 @@ import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
@@ -83,9 +82,9 @@ public class FootControlModule
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
       momentumBasedController.setPlaneContactStateFullyConstrained(contactableFoot);
 
-      RigidBody foot = contactableFoot.getRigidBody();
-      String namePrefix = foot.getName();
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+      String namePrefix = sidePrefix + "Foot";
+      registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
 
