@@ -194,15 +194,6 @@ public class OptimizationMomentumControlModule
       externalWrenchHandler.reset();
    }
 
-   private MomentumControlModuleSolverListener momentumControlModuleSolverListener;
-
-   public void setMomentumControlModuleSolverListener(MomentumControlModuleSolverListener momentumControlModuleSolverListener)
-   {
-      if (this.momentumControlModuleSolverListener != null)
-         throw new RuntimeException("MomentumControlModuleSolverListener is already set!");
-      this.momentumControlModuleSolverListener = momentumControlModuleSolverListener;
-   }
-
    public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
          throws MomentumControlModuleException
 
@@ -349,8 +340,6 @@ public class OptimizationMomentumControlModule
          secondaryResNorm.set(LinearConstraintResNorm(jSecondary, pSecondary, jointAccelerations));
       }
 
-      updateMomentumControlModuleSolverListener(jPrimary, pPrimary, a, b, jSecondary, pSecondary, weightMatrixSecondary, jointAccelerations);
-
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
@@ -401,37 +390,6 @@ public class OptimizationMomentumControlModule
 
          throw e;
       }
-   }
-
-   private void updateMomentumControlModuleSolverListener(DenseMatrix64F jPrimary, DenseMatrix64F pPrimary, DenseMatrix64F a, DenseMatrix64F b,
-         DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F jointAccelerations)
-   {
-      if (momentumControlModuleSolverListener != null)
-      {
-         momentumControlModuleSolverListener.setPrimaryMotionConstraintJMatrix(jPrimary);
-         momentumControlModuleSolverListener.setPrimaryMotionConstraintPVector(pPrimary);
-         momentumControlModuleSolverListener.setCentroidalMomentumMatrix(a, b, momentumRateOfChangeData.getMomentumSubspace());
-
-         DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = equalityConstraintEnforcer.checkJQEqualsZeroAfterSetConstraint();
-         momentumControlModuleSolverListener.setCheckJQEqualsZeroAfterSetConstraint(checkJQEqualsZeroAfterSetConstraint);
-
-         //       equalityConstraintEnforcer.computeCheck();
-         //       DenseMatrix64F checkCopy = equalityConstraintEnforcer.getCheckCopy();
-         //       momentumControlModuleSolverListener.setPrimaryMotionConstraintCheck(checkCopy);
-
-         momentumControlModuleSolverListener.setSecondaryMotionConstraintJMatrix(jSecondary);
-         momentumControlModuleSolverListener.setSecondaryMotionConstraintPVector(pSecondary);
-         momentumControlModuleSolverListener.setSecondaryMotionConstraintWeightMatrix(weightMatrixSecondary);
-
-         momentumControlModuleSolverListener.setJointAccelerationSolution(jointsToOptimizeFor, jointAccelerations);
-         momentumControlModuleSolverListener.setOptimizationValue(momentumOptimizer.getOutputOptVal());
-         momentumControlModuleSolverListener.reviewSolution();
-      }
-   }
-
-   public void resetGroundReactionWrenchFilter()
-   {
-      // empty for now
    }
 
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
