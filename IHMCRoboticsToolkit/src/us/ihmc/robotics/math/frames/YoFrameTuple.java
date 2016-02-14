@@ -497,6 +497,12 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
       interpolate(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple(), alpha);
    }
 
+   public final boolean epsilonEquals(YoFrameTuple<?> frameTuple, double threshold)
+   {
+      putYoValuesIntoFrameTuple();
+      return this.frameTuple.epsilonEquals(frameTuple.getFrameTuple(), threshold);
+   }
+
    public final boolean epsilonEquals(FrameTuple<?> frameTuple, double threshold)
    {
       putYoValuesIntoFrameTuple();
