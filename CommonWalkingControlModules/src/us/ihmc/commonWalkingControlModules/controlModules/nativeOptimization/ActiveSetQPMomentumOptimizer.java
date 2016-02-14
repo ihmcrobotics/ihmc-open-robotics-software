@@ -10,11 +10,11 @@ import java.util.Arrays;
 
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+
+import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 // javah -cp ../classes/:../../ThirdParty/ThirdPartyJars/EJML/EJML.jar -o ActiveSetQPMomentumOptimizer.h us.ihmc.commonWalkingControlModules.controlModules
 // .nativeOptimization.ActiveSetQPMomentumOptimizer

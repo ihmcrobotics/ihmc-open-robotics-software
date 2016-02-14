@@ -3,14 +3,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.linsol.LinearSolver;
 
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.tools.exceptions.NoConvergenceException;
-
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.PDQuadraticMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
+
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 
 public class JOptimizerConstrainedQPSolver extends ConstrainedQPSolver

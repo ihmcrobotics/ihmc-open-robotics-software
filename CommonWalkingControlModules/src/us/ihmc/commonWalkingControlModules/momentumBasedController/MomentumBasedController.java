@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -185,10 +184,6 @@ public class MomentumBasedController
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
-
-   private final BooleanYoVariable feetCoPControlIsActive;
-   private final DoubleYoVariable footCoPOffsetX, footCoPOffsetY;
-   private final EnumYoVariable<RobotSide> footUnderCoPControl;
 
    private final BooleanYoVariable userActivateFeetForce = new BooleanYoVariable("userActivateFeetForce", registry);
    private final DoubleYoVariable userLateralFeetForce = new DoubleYoVariable("userLateralFeetForce", registry);
@@ -420,11 +415,6 @@ public class MomentumBasedController
          }
       }
 
-      feetCoPControlIsActive = new BooleanYoVariable("feetCoPControlIsActive", registry);
-      footCoPOffsetX = new DoubleYoVariable("footCoPOffsetX", registry);
-      footCoPOffsetY = new DoubleYoVariable("footCoPOffsetY", registry);
-      footUnderCoPControl = new EnumYoVariable<RobotSide>("footUnderCoPControl", registry, RobotSide.class);
-
       yoRootJointDesiredAngularAcceleration = new YoFrameVector("rootJointDesiredAngularAcceleration", fullRobotModel.getRootJoint().getFrameAfterJoint(),
             registry);
       yoRootJointDesiredLinearAcceleration = new YoFrameVector("rootJointDesiredLinearAcceleration", fullRobotModel.getRootJoint().getFrameAfterJoint(),
@@ -543,29 +533,6 @@ public class MomentumBasedController
          contactPointVisualizer.update();
 
       MomentumModuleSolution momentumModuleSolution;
-
-      if (feetCoPControlIsActive.getBooleanValue())
-      {
-         if (footCoPOffsetX.isNaN() || footCoPOffsetY.isNaN())
-         {
-            footCoPOffsetX.set(0.0);
-            footCoPOffsetY.set(0.0);
-         }
-
-         ReferenceFrame selectedFootSoleFrame = feet.get(footUnderCoPControl.getEnumValue()).getSoleFrame();
-         Vector3d copOffset = new Vector3d(footCoPOffsetX.getDoubleValue(), footCoPOffsetY.getDoubleValue(), 0.0);
-         String sideName = footUnderCoPControl.getEnumValue().name();
-         ReferenceFrame desiredCoPFrame = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(sideName + "_desiredCoPFrame",
-               selectedFootSoleFrame, copOffset);
-
-         optimizationMomentumControlModule.setFootCoPControlData(footUnderCoPControl.getEnumValue(), desiredCoPFrame);
-      }
-      else
-      {
-         footCoPOffsetX.set(Double.NaN);
-         footCoPOffsetY.set(Double.NaN);
-         optimizationMomentumControlModule.setFootCoPControlData(footUnderCoPControl.getEnumValue(), null);
-      }
 
       try
       {
@@ -1335,26 +1302,6 @@ public class MomentumBasedController
       {
          yoPlaneContactStateList.get(i).clear();
       }
-   }
-
-   public void setSideOfFootUnderCoPControl(RobotSide side)
-   {
-      footUnderCoPControl.set(side);
-   }
-
-   public void setFeetCoPControlIsActive(boolean isActive)
-   {
-      feetCoPControlIsActive.set(isActive);
-   }
-
-   public void setFootCoPOffsetX(double offseX)
-   {
-      footCoPOffsetX.set(offseX);
-   }
-
-   public void setFootCoPOffsetY(double offseY)
-   {
-      footCoPOffsetY.set(offseY);
    }
 
    public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)

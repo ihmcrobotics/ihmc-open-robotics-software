@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -127,7 +126,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          "Amount of time to stay in single support after the ICP trajectory is done if you haven't registered a touchdown yet", registry);
 
    private final BooleanYoVariable loopControllerForever = new BooleanYoVariable("loopControllerForever", "For checking memory and profiling", registry);
-   private final BooleanYoVariable justFall = new BooleanYoVariable("justFall", registry);
 
    private final BooleanYoVariable controlPelvisHeightInsteadOfCoMHeight = new BooleanYoVariable("controlPelvisHeightInsteadOfCoMHeight", registry);
 
@@ -205,7 +203,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final DoubleYoVariable[] unconstrainedDesiredPositions;
 
-   private final FootExplorationControlModule footExplorationControlModule;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final BooleanYoVariable hasWalkingControllerBeenInitialized = new BooleanYoVariable("hasWalkingControllerBeenInitialized", registry);
@@ -377,9 +374,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
 
       pushRecoveryModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
-
-      footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime, centerOfMassHeightTrajectoryGenerator,
-            swingTimeCalculationProvider, feetManager);
 
       setupStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -684,11 +678,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredICPVelocity.set(desiredICPVelocityLocal);
 
          desiredECMP.set(ecmpLocal);
-
-         if (footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
-         {
-            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d, desiredCMP);
-         }
 
          if (VISUALIZE)
          {
@@ -1037,8 +1026,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // In middle of walking or leaving foot pose, pelvis is good leave it like that.
          else
             pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-
-         footExplorationControlModule.setSwingIsFinished(true);
       }
 
       @Override
@@ -1069,8 +1056,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
 
          desiredICPVelocity.set(0.0, 0.0);
-
-         footExplorationControlModule.reset();
       }
    }
 
@@ -1083,7 +1068,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
       private final FramePoint2d ecmpLocal = new FramePoint2d();
       private final FramePoint2d capturePoint2d = new FramePoint2d();
-      private final FramePoint2d desiredCMP = new FramePoint2d();
 
       private final FramePoint2d transferToFootstepLocation = new FramePoint2d();
       
@@ -1202,12 +1186,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          desiredECMP.set(ecmpLocal);
 
-         if (footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
-         {
-            icpAndMomentumBasedController.getDesiredCMP(desiredCMP);
-            footExplorationControlModule.masterFullExploration(desiredICP, desiredICPVelocity, capturePoint2d, desiredCMP);
-         }
-
          if (VISUALIZE)
          {
             ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
@@ -1296,12 +1274,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             swingTimeCalculationProvider.updateSwingTime();
             nextFootstep = upcomingFootstepList.getNextFootstep();
-         }
-
-         if (footExplorationControlModule.isActive())
-         {
-            FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
-            footExplorationControlModule.initialize(nextFootstep, footPolygon, swingSide);
          }
 
          if (nextFootstep != null)
@@ -1576,9 +1548,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
-         if (footExplorationControlModule.isControllingSwingFoot() && !stayInTransferWalkingState.getBooleanValue())
-            return footExplorationControlModule.isDone();
-
          if (stayInTransferWalkingState.getBooleanValue())
             return false;
 
@@ -1652,6 +1621,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          RobotSide swingSide = supportLeg.getEnumValue().getOppositeSide();
          hasMinimumTimePassed.set(hasMinimumTimePassed());
 
+         if (!hasMinimumTimePassed.getBooleanValue())
+            return false;
+
          if (!hasICPPlannerFinished.getBooleanValue())
          {
             hasICPPlannerFinished.set(capturePointPlannerAdapter.isDone(yoTime.getDoubleValue()));
@@ -1689,19 +1661,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             footSwitchActivated = footSwitch.hasFootHitGround();
          }
 
-         if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue() && !footExplorationControlModule.isControllingSwingFoot())
-            return true;
-
          boolean finishSingleSupportWhenICPPlannerIsDone = walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone();// || pushRecoveryModule.isRecovering();
 
          if (finishSingleSupportWhenICPPlannerIsDone && !isInFlamingoStance.getBooleanValue())
          {
-            if (!footExplorationControlModule.isControllingSwingFoot())
-            {
                if (hasICPPlannerFinished.getBooleanValue()
                      && (yoTime.getDoubleValue() > timeThatICPPlannerFinished.getDoubleValue() + dwellInSingleSupportDuration.getDoubleValue()))
                   return true;
-            }
          }
          
          boolean hasNewFootLoadBearingRequest = desiredFootStateProvider != null && desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide);
@@ -1756,7 +1722,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return true;
          }
 
-         boolean isNotExploringFoothold = !footExplorationControlModule.isControllingSwingFoot();
          boolean isNextFootstepNull = upcomingFootstepList.getNextFootstep() == null;
          // This is to fix a bug occuring for instance when doing transfer to right side and receiving a right footstep the walking would do a left footstep instead.
          boolean isNextFootstepForThisSide = true;
@@ -1773,7 +1738,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean noMoreFootstepsForThisSide = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull || !isNextFootstepForThisSide;
          boolean noMoreFootPoses = footPoseProvider == null || !footPoseProvider.checkForNewPose(robotSide.getOppositeSide());
          boolean noMoreFootTrajectoryMessages = footTrajectoryMessageSubscriber == null || !footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide.getOppositeSide());
-         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootPoses && noMoreFootTrajectoryMessages && (isSupportLegNull || super.checkCondition()) && isNotExploringFoothold;
+         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootPoses && noMoreFootTrajectoryMessages && (isSupportLegNull || super.checkCondition());
          return readyToStopWalking;
       }
    }
