@@ -1549,9 +1549,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             hasNewFootTrajectoryMessage = false;
          }
-         if (hasNewFootTrajectoryMessage)
-            System.out.println();
-         
+
          boolean transferringToThisRobotSide = hasNewFootPose || hasNewFootTrajectoryMessage;
 
          if (transferringToThisRobotSide && doubleSupportTimeHasPassed)
@@ -1710,18 +1708,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             hasNewFootLoadBearingRequest = endEffectorLoadBearingMessageSubscriber != null && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide);
          }
          
-         if (hasNewFootLoadBearingRequest)
+         if (isInFlamingoStance.getBooleanValue() && hasNewFootLoadBearingRequest)
          {
-            if (isInFlamingoStance.getBooleanValue())
-            {
-               initiateFootLoadingProcedure(swingSide);
-            }
-            
-            if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
-            {
-               loadFoot.set(false);
-               return true;
-            }
+            initiateFootLoadingProcedure(swingSide);
+         }
+
+         if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
+         {
+            loadFoot.set(false);
+            return true;
          }
 
          return hasMinimumTimePassed.getBooleanValue() && footSwitchActivated;
