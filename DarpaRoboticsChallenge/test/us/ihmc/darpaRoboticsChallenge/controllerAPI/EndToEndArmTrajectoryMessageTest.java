@@ -37,7 +37,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
-   public void testArmTrajectoryMessageWithSingleWaypoint() throws Exception
+   public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 

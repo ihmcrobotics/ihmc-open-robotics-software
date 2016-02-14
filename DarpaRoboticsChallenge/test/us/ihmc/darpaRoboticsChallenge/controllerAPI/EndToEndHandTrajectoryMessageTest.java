@@ -39,8 +39,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test//(timeout = 300000)
-   public void testHandTrajectoryMessageWithSingleWaypoint() throws Exception
+   @Test(timeout = 300000)
+   public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 
