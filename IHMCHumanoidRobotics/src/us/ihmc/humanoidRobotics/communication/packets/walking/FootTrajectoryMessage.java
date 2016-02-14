@@ -139,4 +139,16 @@ public class FootTrajectoryMessage extends IHMCRosApiMessage<FootTrajectoryMessa
 
       return transformedFootTrajectoryMessage;
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = "";
+      if (taskspaceWaypoints != null)
+         ret = "Foot SE3 trajectory: number of SE3 waypoints = " + getNumberOfWaypoints();
+      else
+         ret = "Foot SE3 trajectory: no SE3 waypoints";
+
+      return ret + ", robotSide = " + robotSide + ".";
+   }
 }
