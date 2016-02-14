@@ -15,31 +15,27 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
  *        [0 -I] rho <= -rhoMin
  */
 
-
 public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
 {
    static final int nPointsPerPlane = 4;
-   static final int nSupportVectorsPerPoint=4;
-   static final int nPlanes=4;
-   static final int nWrench=6;
-   static final int nRho = nPlanes*nPointsPerPlane*nSupportVectorsPerPoint;
+   static final int nSupportVectorsPerPoint = 4;
+   static final int nPlanes = 4;
+   static final int nWrench = 6;
+   static final int nRho = nPlanes * nPointsPerPlane * nSupportVectorsPerPoint;
    final int nDoF;
 
-   protected DenseMatrix64F
-      A, b, C,    //quad(vd)
-      Js, ps, Ws,  //quad(vd)
-      Jp, pp,      //quad(vd)
+   protected DenseMatrix64F A, b, C, //quad(vd)
+         Js, ps, Ws, //quad(vd)
+         Jp, pp, //quad(vd)
 
-      WRho, Lambda, //reg
+         WRho, Lambda, //reg
 
-      WRhoSmoother, //quad(rho)
+         WRhoSmoother, //quad(rho)
 
-      rhoPrevMean, WRhoCoPPenalty, //quad(rho)
+         rhoPrevMean, WRhoCoPPenalty, //quad(rho)
 
-      QRho, c, rhoMin,  //constraints
-   
-      QfeetCop;
-     
+         QRho, c, rhoMin; //constraints
+
    public DenseMatrix64F vd, rho;
    public DenseMatrix64F prevVd, prevRho;
    double optVal;
@@ -48,30 +44,27 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
    public QPMomentumOptimizer(int _nDoF)
    {
       nDoF = _nDoF;
-      vd = new DenseMatrix64F(nDoF,1);
-      rho = new DenseMatrix64F(getRhoSize(),1);
-      prevVd = new DenseMatrix64F(nDoF,1);
-      prevRho = new DenseMatrix64F(getRhoSize(),1);
+      vd = new DenseMatrix64F(nDoF, 1);
+      rho = new DenseMatrix64F(getRhoSize(), 1);
+      prevVd = new DenseMatrix64F(nDoF, 1);
+      prevRho = new DenseMatrix64F(getRhoSize(), 1);
 
       //Size of constraints may change on the fly
-      Js = new DenseMatrix64F(nDoF,nDoF);
-      ps = new DenseMatrix64F(nDoF,1);
+      Js = new DenseMatrix64F(nDoF, nDoF);
+      ps = new DenseMatrix64F(nDoF, 1);
       Jp = new DenseMatrix64F(nDoF, nDoF);
       pp = new DenseMatrix64F(nDoF, 1);
       Ws = new DenseMatrix64F(nDoF, nDoF);
-      
-      QfeetCop = null;
    }
-
 
    @Override
    public void setInputs(DenseMatrix64F _a, DenseMatrix64F _b, DenseMatrix64F _momentumDotWeight, DenseMatrix64F _jSecondary, DenseMatrix64F _pSecondary,
          DenseMatrix64F _weightMatrixSecondary, DenseMatrix64F _WRho, DenseMatrix64F _Lambda, DenseMatrix64F _WRhoSmoother, DenseMatrix64F _rhoPrevAvg,
-         DenseMatrix64F _WRhoCop, DenseMatrix64F _QRho, DenseMatrix64F _c, DenseMatrix64F _rhoMin, DenseMatrix64F QfeetCoP)
+         DenseMatrix64F _WRhoCop, DenseMatrix64F _QRho, DenseMatrix64F _c, DenseMatrix64F _rhoMin)
    {
-      A=_a;
-      b=_b;
-      C=_momentumDotWeight;
+      A = _a;
+      b = _b;
+      C = _momentumDotWeight;
       if (!(A.numRows == nWrench && A.numCols == nDoF && b.numRows == nWrench && b.numCols == 1 && C.numRows == nWrench && C.numCols == nWrench))
          throw new RuntimeException("Incorrect input size A/b/c");
 
@@ -79,36 +72,30 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
       CommonOps.insert(_jSecondary, Js, 0, 0);
       CommonOps.insert(_pSecondary, ps, 0, 0);
       CommonOps.insert(_weightMatrixSecondary, Ws, 0, 0);
-      
+
       CommonOps.fill(Jp, Double.NaN);
       CommonOps.fill(pp, Double.NaN);
 
-      WRho=_WRho;
-      Lambda=_Lambda;
-      
-      WRhoSmoother =_WRhoSmoother;
+      WRho = _WRho;
+      Lambda = _Lambda;
+
+      WRhoSmoother = _WRhoSmoother;
 
       rhoPrevMean = _rhoPrevAvg;
       WRhoCoPPenalty = _WRhoCop;
 
-      QRho = _QRho; 
+      QRho = _QRho;
       c = _c;
       rhoMin = _rhoMin;
-      
-      this.QfeetCop = QfeetCoP;
-
    }
 
    @Override
    public void setInputs(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, DenseMatrix64F jPrimary, DenseMatrix64F pPrimary,
          DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F WRho, DenseMatrix64F Lambda,
-         DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin,
-         DenseMatrix64F QfeetCoP)
+         DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin)
    {
-      setInputs(a, b, momentumDotWeight, jSecondary, pSecondary,
-         weightMatrixSecondary, WRho, Lambda, WRhoSmoother, rhoPrevAvg,
-         WRhoCop, QRho, c, rhoMin, QfeetCoP);
-      
+      setInputs(a, b, momentumDotWeight, jSecondary, pSecondary, weightMatrixSecondary, WRho, Lambda, WRhoSmoother, rhoPrevAvg, WRhoCop, QRho, c, rhoMin);
+
       //note: the nrow(Jp vd=pp) may change
       Jp.reshape(jPrimary.numRows, jPrimary.numCols);
       CommonOps.insert(jPrimary, Jp, 0, 0);
@@ -125,11 +112,10 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
       ps.zero();
    }
 
-
    @Override
    public int getRhoSize()
    {
-      return nPlanes*nPointsPerPlane*nSupportVectorsPerPoint;
+      return nPlanes * nPointsPerPlane * nSupportVectorsPerPoint;
    }
 
    @Override
@@ -150,21 +136,18 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
       WRhoSmoother = _wRhoSmoother;
    }
 
-
    @Override
    public int getNPlanes()
    {
       return nPlanes;
-   } 
-   
+   }
 
    @Override
    public DenseMatrix64F getOutputRho()
    {
       return rho;
    }
-   
-   
+
    @Override
    public DenseMatrix64F getOutputJointAccelerations()
    {
