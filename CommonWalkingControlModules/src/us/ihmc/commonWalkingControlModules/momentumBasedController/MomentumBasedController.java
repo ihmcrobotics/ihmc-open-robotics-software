@@ -90,7 +90,6 @@ public class MomentumBasedController
    private static final boolean DO_PASSIVE_KNEE_CONTROL = true;
    private static final boolean VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES = false;
 
-   public static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final DesiredSpatialAccelerationCommandPool desiredSpatialAccelerationCommandPool = new DesiredSpatialAccelerationCommandPool();
@@ -162,7 +161,6 @@ public class MomentumBasedController
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true); // FIXME: not general enough; this should not be here
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
-   private final MomentumBasedControllerSpy momentumBasedControllerSpy;
    private final ContactPointVisualizer contactPointVisualizer;
    private final WrenchVisualizer wrenchVisualizer;
 
@@ -239,11 +237,6 @@ public class MomentumBasedController
 
       this.footSwitches = footSwitches;
       this.wristForceSensors = wristForceSensors;
-
-      if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
-         momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry);
-      else
-         momentumBasedControllerSpy = null;
 
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -521,22 +514,12 @@ public class MomentumBasedController
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setExternalWrenchToCompensateFor(rigidBody, wrench);
-      }
-
       optimizationMomentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.doPrioritaryControl();
-      }
-
       robotJacobianHolder.compute();
 
       callUpdatables();
@@ -558,8 +541,6 @@ public class MomentumBasedController
 
       if (contactPointVisualizer != null)
          contactPointVisualizer.update();
-
-      updateMomentumBasedControllerSpy();
 
       MomentumModuleSolution momentumModuleSolution;
 
@@ -592,9 +573,6 @@ public class MomentumBasedController
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {
-         if (momentumBasedControllerSpy != null)
-            momentumBasedControllerSpy.printMomentumCommands(System.err);
-
          // Don't crash and burn. Instead do the best you can with what you have.
          // Or maybe just use the previous ticks solution.
          // Need to test these.
@@ -861,25 +839,6 @@ public class MomentumBasedController
       }
    }
 
-   private void updateMomentumBasedControllerSpy()
-   {
-      if (momentumBasedControllerSpy != null)
-      {
-         for (int i = 0; i < contactablePlaneBodyList.size(); i++)
-         {
-            ContactablePlaneBody contactablePlaneBody = contactablePlaneBodyList.get(i);
-            YoPlaneContactState contactState = yoPlaneContactStates.get(contactablePlaneBody);
-            if (contactState.inContact())
-            {
-               momentumBasedControllerSpy.setPlaneContactState(contactablePlaneBody, contactState.getContactFramePoints2dInContactCopy(),
-                     contactState.getCoefficientOfFriction(), contactState.getContactNormalFrameVectorCopy());
-            }
-         }
-
-         momentumBasedControllerSpy.doSecondaryControl();
-      }
-   }
-
    public void callUpdatables()
    {
       double time = yoTime.getDoubleValue();
@@ -952,11 +911,6 @@ public class MomentumBasedController
       }
 
       jointAcceleration.set(0, 0, desiredAcceleration);
-
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setDesiredJointAcceleration(joint, jointAcceleration);
-      }
 
       DesiredJointAccelerationCommand desiredJointAccelerationCommand = tempDesiredJointAccelerationCommands.get(joint);
 
@@ -1237,11 +1191,6 @@ public class MomentumBasedController
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
-      }
-
       DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = desiredSpatialAccelerationCommandPool
             .getUnusedDesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
       optimizationMomentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
@@ -1250,11 +1199,6 @@ public class MomentumBasedController
    public void setDesiredPointAcceleration(int rootToEndEffectorJacobianId, FramePoint contactPoint, FrameVector desiredAcceleration)
    {
       GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
-
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
-      }
 
       DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
             desiredAcceleration);
@@ -1266,11 +1210,6 @@ public class MomentumBasedController
    {
       GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
 
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
-      }
-
       DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
             desiredAcceleration, selectionMatrix);
       optimizationMomentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
@@ -1278,11 +1217,6 @@ public class MomentumBasedController
 
    public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
    {
-      if (momentumBasedControllerSpy != null)
-      {
-         momentumBasedControllerSpy.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
-      }
-
       DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);
       optimizationMomentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
    }
