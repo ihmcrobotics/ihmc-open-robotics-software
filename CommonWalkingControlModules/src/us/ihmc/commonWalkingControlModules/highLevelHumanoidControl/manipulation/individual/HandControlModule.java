@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TrajectoryBasedTaskspaceHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.UserControlModeState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
@@ -29,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePoseTraj
 import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
@@ -127,6 +129,7 @@ public class HandControlModule
    private final TrajectoryBasedTaskspaceHandControlState taskSpacePositionControlState;
    private final JointSpaceHandControlState jointSpaceHandControlState;
    private final LoadBearingHandControlState loadBearingControlState;
+   private final UserControlModeState userControlModeState;
 
    private final EnumYoVariable<HandControlState> requestedState;
    private final OneDoFJoint[] oneDoFJoints;
@@ -298,18 +301,19 @@ public class HandControlModule
 
       doPositionControl = armControlParameters.doLowLevelPositionControl();
       String stateNamePrefix = namePrefix + "Hand";
-      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains,
-            controlDT, registry);
+      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
 
       if (doPositionControl)
       {
          // TODO Not implemented for position control.
          loadBearingControlState = null;
+         userControlModeState = null;
          taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(stateNamePrefix, robotSide,
                momentumBasedController, chest, hand, registry);
       }
       else
       {
+         userControlModeState = new UserControlModeState(stateNamePrefix, robotSide, oneDoFJoints, momentumBasedController, registry);
          loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
                fullRobotModel.getElevator(), hand, jacobianId, registry);
 
@@ -353,11 +357,19 @@ public class HandControlModule
       {
          addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, loadBearingControlState);
          addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
+
          addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
          addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
 
+         addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, userControlModeState);
+         addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, userControlModeState);
+
+         addRequestedStateTransition(requestedState, false, userControlModeState, taskSpacePositionControlState);
+         addRequestedStateTransition(requestedState, false, userControlModeState, jointSpaceHandControlState);
+
          setupTransitionToSupport(taskSpacePositionControlState);
          stateMachine.addState(loadBearingControlState);
+         stateMachine.addState(userControlModeState);
       }
 
       stateMachine.attachStateChangedListener(stateChangedlistener);
@@ -413,6 +425,11 @@ public class HandControlModule
       else if (!isAtLeastOneJointDisabled)
       {
          areAllArmJointEnabled.set(true);
+      }
+
+      if (stateMachine.getCurrentStateEnum() == HandControlState.USER_CONTROL_MODE && userControlModeState.isAbortUserControlModeRequested())
+      {
+         holdPositionInJointSpace();
       }
 
       stateMachine.checkTransitionConditions();
@@ -571,6 +588,30 @@ public class HandControlModule
       executeJointspaceTrajectory(waypointJointTrajectoryGenerators);
    }
 
+   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   {
+      if (!checkArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage))
+         return;
+
+      if (userControlModeState == null)
+         return;
+
+      switch (armDesiredAccelerationsMessage.getArmControlMode())
+      {
+      case IHMC_CONTROL_MODE:
+         if (stateMachine.getCurrentStateEnum() == HandControlState.USER_CONTROL_MODE)
+            holdPositionInJointSpace();
+         return;
+      case USER_CONTROL_MODE:
+         userControlModeState.handleArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage);
+         requestedState.set(userControlModeState.getStateEnum());
+         stateMachine.checkTransitionConditions();
+         return;
+      default:
+         throw new RuntimeException("Unknown ArmControlMode: " + armDesiredAccelerationsMessage.getArmControlMode());
+      }
+   }
+
    private boolean checkArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
       if (armTrajectoryMessage.getRobotSide() != robotSide)
@@ -593,6 +634,20 @@ public class HandControlModule
                return false;
          }
       }
+
+      return true;
+   }
+
+   private boolean checkArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   {
+      if (armDesiredAccelerationsMessage.getRobotSide() != robotSide)
+      {
+         PrintTools.warn(this, "Received a " + ArmDesiredAccelerationsMessage.class.getSimpleName() + " for the wrong side.");
+         return false;
+      }
+
+      if (armDesiredAccelerationsMessage.getNumberOfJoints() != oneDoFJoints.length)
+         return false;
 
       return true;
    }

@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
@@ -22,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -60,6 +62,7 @@ public class ManipulationControlModule
 
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
    private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
+   private final ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
@@ -92,6 +95,7 @@ public class ManipulationControlModule
 
       handTrajectoryMessageSubscriber = variousWalkingProviders.getHandTrajectoryMessageSubscriber();
       armTrajectoryMessageSubscriber = variousWalkingProviders.geArmTrajectoryMessageSubscriber();
+      armDesiredAccelerationsMessageSubscriber = variousWalkingProviders.getArmDesiredAccelerationsMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
@@ -177,11 +181,11 @@ public class ManipulationControlModule
       {
          handleHandTrajectoryMessages(robotSide);
          handleArmTrajectoryMessages(robotSide);
+         handleArmDesiredAccelerationsMessages(robotSide);
          handleStopAllTrajectoryMessages(robotSide);
+
          handleCompliantControlRequests(robotSide);
-
          handleDefaultState(robotSide);
-
          handleHandPoses(robotSide);
          handleHandsteps(robotSide);
          handleLoadBearing(robotSide);
@@ -214,6 +218,15 @@ public class ManipulationControlModule
 
       ArmTrajectoryMessage message = armTrajectoryMessageSubscriber.pollMessage(robotSide);
       handControlModules.get(robotSide).handleArmTrajectoryMessage(message);
+   }
+
+   private void handleArmDesiredAccelerationsMessages(RobotSide robotSide)
+   {
+      if (armDesiredAccelerationsMessageSubscriber == null || !armDesiredAccelerationsMessageSubscriber.isNewControlMessageAvailable(robotSide))
+         return;
+
+      ArmDesiredAccelerationsMessage message = armDesiredAccelerationsMessageSubscriber.pollMessage(robotSide);
+      handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(message);
    }
 
    private void handleStopAllTrajectoryMessages(RobotSide robotSide)
