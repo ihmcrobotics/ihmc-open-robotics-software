@@ -7,14 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPolygon;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -26,11 +18,18 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPolygon;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class GroundReactionWrenchDistributorVisualizer
 {
-   private static final double FORCE_VECTOR_SCALE = 1.0 / 600.0;    // 6000N is drawn 1 meter long.
-   private static final double MOMENT_VECTOR_SCALE = 1.0 / 50.0;    // 50 Nm is drawn 1 meter long.
+   private static final double FORCE_VECTOR_SCALE = 1.0 / 600.0; // 6000N is drawn 1 meter long.
+   private static final double MOMENT_VECTOR_SCALE = 1.0 / 50.0; // 50 Nm is drawn 1 meter long.
    private static final double COM_VIZ_RADIUS = 0.1;
    private static final double COP_VIZ_RADIUS = 0.05;
 
@@ -51,13 +50,9 @@ public class GroundReactionWrenchDistributorVisualizer
    private final ArrayList<YoFramePoint> contactCenterOfPressures = new ArrayList<YoFramePoint>();
    private final ArrayList<YoFrameVector> contactForces = new ArrayList<YoFrameVector>();
    private final ArrayList<YoFrameVector> contactMoments = new ArrayList<YoFrameVector>();
-   
-   private final ArrayList<YoFramePoint> cylinderCenterPoints = new ArrayList<YoFramePoint>();
-   private final ArrayList<YoFrameVector> cylinderWrenchForces = new ArrayList<YoFrameVector>();
-   private final ArrayList<YoFrameVector> cylinderWrenchTorques= new ArrayList<YoFrameVector>();
 
    public GroundReactionWrenchDistributorVisualizer(int maxNumberOfFeet, int maxNumberOfVertices, int maxNumberOfCylinders, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList("GroundReactionWrenchDistributorVisuzalizer");
 
@@ -72,8 +67,8 @@ public class GroundReactionWrenchDistributorVisualizer
          YoFrameOrientation contactPlaneOrientation = new YoFrameOrientation("contactOrientation" + i, worldFrame, registry);
          contactPlaneOrientations.add(contactPlaneOrientation);
 
-         YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("contactPolygon" + i, contactPolygon, contactReferencePoint,
-                                                                 contactPlaneOrientation, 1.0, YoAppearance.Green());
+         YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("contactPolygon" + i, contactPolygon, contactReferencePoint, contactPlaneOrientation,
+               1.0, YoAppearance.Green());
          yoGraphicsList.add(dynamicGraphicPolygon);
 
          YoFramePoint contactCenterOfPressure = new YoFramePoint("contactCoPViz" + i, worldFrame, registry);
@@ -88,15 +83,14 @@ public class GroundReactionWrenchDistributorVisualizer
          yoGraphicsList.add(contactCoPViz);
 
          YoGraphicVector contactForceViz = new YoGraphicVector("contactForceViz" + i, contactCenterOfPressure, contactForce, FORCE_VECTOR_SCALE,
-                                                   YoAppearance.Pink());
+               YoAppearance.Pink());
          yoGraphicsList.add(contactForceViz);
 
          YoGraphicVector contactMomentViz = new YoGraphicVector("contactMomentViz" + i, contactCenterOfPressure, contactMoment, MOMENT_VECTOR_SCALE,
-                                                    YoAppearance.Black());
+               YoAppearance.Black());
          yoGraphicsList.add(contactMomentViz);
 
       }
-
 
       AppearanceDefinition desiredForceAppearance = YoAppearance.Yellow();
       desiredForceAppearance.setTransparency(0.9);
@@ -105,15 +99,15 @@ public class GroundReactionWrenchDistributorVisualizer
       desiredMomentAppearance.setTransparency(0.9);
 
       YoGraphicPosition centerOfMassWorldViz = new YoGraphicPosition("centerOfMassViz", centerOfMassWorld, COM_VIZ_RADIUS, YoAppearance.Purple(),
-                                                       GraphicType.BALL_WITH_CROSS);
+            GraphicType.BALL_WITH_CROSS);
       YoGraphicVector desiredForceWorldViz = new YoGraphicVector("desiredForceViz", centerOfMassWorld, desiredForceWorld, FORCE_VECTOR_SCALE,
-                                                     desiredForceAppearance);
+            desiredForceAppearance);
       YoGraphicVector desiredMomentWorldViz = new YoGraphicVector("desiredMomentViz", centerOfMassWorld, desiredMomentWorld, MOMENT_VECTOR_SCALE,
-                                                      desiredMomentAppearance);
+            desiredMomentAppearance);
       YoGraphicVector achievedForceWorldViz = new YoGraphicVector("achievedForceViz", centerOfMassWorld, achievedForceWorld, FORCE_VECTOR_SCALE,
-                                                      YoAppearance.Yellow());
+            YoAppearance.Yellow());
       YoGraphicVector achievedMomentWorldViz = new YoGraphicVector("achievedMomentViz", centerOfMassWorld, achievedMomentWorld, MOMENT_VECTOR_SCALE,
-                                                       YoAppearance.Purple());
+            YoAppearance.Purple());
 
       yoGraphicsList.add(centerOfMassWorldViz);
       yoGraphicsList.add(desiredForceWorldViz);
@@ -127,7 +121,7 @@ public class GroundReactionWrenchDistributorVisualizer
    }
 
    public void update(SimulationConstructionSet scs, GroundReactionWrenchDistributorOutputData distributedWrench, ReferenceFrame centerOfMassFrame,
-                      ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench, ArrayList<CylindricalContactState> cylinderContacts)
+         ArrayList<PlaneContactState> contactStates, SpatialForceVector desiredBodyWrench)
    {
       try
       {
@@ -179,15 +173,9 @@ public class GroundReactionWrenchDistributorVisualizer
             normalForceInWorld.changeFrame(worldFrame);
             contactMomentForViz.set(normalForceInWorld);
          }
-         
-         
-         for (int i=0; i< cylinderContacts.size(); i++)
-         {
-            CylindricalContactState contactState = cylinderContacts.get(i);
-         }
 
          SpatialForceVector achievedWrenchOnCenterOfMass = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributedWrench,
-                                                              desiredBodyWrench.getExpressedInFrame(), contactStates);
+               desiredBodyWrench.getExpressedInFrame(), contactStates);
 
          FrameVector temp = new FrameVector();
          achievedWrenchOnCenterOfMass.packLinearPart(temp);
@@ -197,7 +185,6 @@ public class GroundReactionWrenchDistributorVisualizer
          temp.changeFrame(worldFrame);
          achievedMomentWorld.set(temp);
 
-
          scs.tickAndUpdate();
       }
       catch (RuntimeException exception)
@@ -205,6 +192,5 @@ public class GroundReactionWrenchDistributorVisualizer
          System.err.println("Exception Thrown in GroundReactionWrenchDistributorVisualizer.update(): " + exception);
       }
    }
-
 
 }
