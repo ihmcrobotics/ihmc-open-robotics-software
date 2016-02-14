@@ -752,7 +752,7 @@ public abstract class PacketValidityChecker
       }
       
       boolean isInUserControlMode = armDesiredAccelerationsMessage.armControlMode == ArmControlMode.USER_CONTROL_MODE;
-      if (isInUserControlMode && armDesiredAccelerationsMessage.armJointDesiredAccelerations == null)
+      if (isInUserControlMode && armDesiredAccelerationsMessage.armDesiredJointAccelerations == null)
       {
          errorMessage = "The field with desired joint acceleration is empty.";
          globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);

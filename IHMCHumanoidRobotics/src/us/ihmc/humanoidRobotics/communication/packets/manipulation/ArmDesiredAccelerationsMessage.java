@@ -46,25 +46,25 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
    public RobotSide robotSide;
    @FieldDocumentation("Specifies the control mode for controlling the arm joints. See ArmControlMode.")
    public ArmControlMode armControlMode;
-   @FieldDocumentation("Specifies the joint desired accelerations. Only necessary when armControlMode == USER_CONTROL_MODE.")
-   public double[] armJointDesiredAccelerations;
+   @FieldDocumentation("Specifies the desired joint accelerations. Only necessary when armControlMode == USER_CONTROL_MODE.")
+   public double[] armDesiredJointAccelerations;
 
    public ArmDesiredAccelerationsMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public ArmDesiredAccelerationsMessage(RobotSide robotSide, ArmControlMode armControlMode, double[] armJointDesiredAccelerations)
+   public ArmDesiredAccelerationsMessage(RobotSide robotSide, ArmControlMode armControlMode, double[] armDesiredJointAccelerations)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.armControlMode = armControlMode;
-      this.armJointDesiredAccelerations = armJointDesiredAccelerations;
+      this.armDesiredJointAccelerations = armDesiredJointAccelerations;
    }
 
    public int getNumberOfJoints()
    {
-      return armJointDesiredAccelerations.length;
+      return armDesiredJointAccelerations.length;
    }
 
    public RobotSide getRobotSide()
@@ -77,9 +77,14 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
       return armControlMode;
    }
 
-   public double[] getArmJointDesiredAccelerations()
+   public double[] getArmDesiredJointAccelerations()
    {
-      return armJointDesiredAccelerations;
+      return armDesiredJointAccelerations;
+   }
+
+   public double getArmDesiredJointAcceleration(int jointIndex)
+   {
+      return armDesiredJointAccelerations[jointIndex];
    }
 
    @Override
@@ -89,7 +94,7 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
          return false;
       if (armControlMode != other.armControlMode)
          return false;
-      if (ArrayTools.deltaEquals(armJointDesiredAccelerations, other.armJointDesiredAccelerations, epsilon))
+      if (ArrayTools.deltaEquals(armDesiredJointAccelerations, other.armDesiredJointAccelerations, epsilon))
          return false;
       return true;
    }
