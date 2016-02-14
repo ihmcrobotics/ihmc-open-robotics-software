@@ -536,7 +536,7 @@ public class MomentumBasedController
 
       try
       {
-         momentumModuleSolution = optimizationMomentumControlModule.compute(this.yoPlaneContactStates, upcomingSupportLeg.getEnumValue());
+         momentumModuleSolution = optimizationMomentumControlModule.compute(this.yoPlaneContactStates);
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {

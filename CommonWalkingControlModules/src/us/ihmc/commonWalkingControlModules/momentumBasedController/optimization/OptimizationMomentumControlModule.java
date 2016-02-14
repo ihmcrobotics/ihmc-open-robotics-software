@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.Mom
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
@@ -37,7 +36,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.optimization.EqualityConstraintEnforcer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
@@ -50,7 +48,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-public class OptimizationMomentumControlModule implements MomentumControlModule
+public class OptimizationMomentumControlModule
 {
    public enum QPSolverFlavor
    {
@@ -205,7 +203,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       this.momentumControlModuleSolverListener = momentumControlModuleSolverListener;
    }
 
-   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg)
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
          throws MomentumControlModuleException
 
    {
@@ -221,13 +219,13 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       case SIMPLE_ACTIVE_SET:
 
          //          case CQP_JOPT_DIRECT:
-         return compute(contactStates, upcomingSupportLeg, false);
+         return compute(contactStates, false);
 
       case CVX_NULL:
       case EIGEN_ACTIVESET_NULL:
       case EIGEN_NULL:
       case SIMPLE_ACTIVE_SET_NULL:
-         return compute(contactStates, upcomingSupportLeg, true);
+         return compute(contactStates, true);
 
       default:
          throw new RuntimeException("Unlisted solverFlavor, please added it in the case above");
@@ -242,7 +240,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          {
             momentumOptimizer = momentumOptimizers.get(requestedQPSolver.getEnumValue());
             if (momentumOptimizer instanceof ActiveSetQPMomentumOptimizer)
-               ((ActiveSetQPMomentumOptimizer) momentumOptimizer).loadNativeLibraries();
+               ActiveSetQPMomentumOptimizer.loadNativeLibraries();
             currentQPSolver.set(requestedQPSolver.getEnumValue());
          }
          else
@@ -253,8 +251,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
    }
 
-   private MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg,
-         boolean useNullSpaceProjection) throws MomentumControlModuleException
+   private MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, boolean useNullSpaceProjection) throws MomentumControlModuleException
 
    {
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
