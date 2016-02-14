@@ -171,16 +171,6 @@ public class OptimizationMomentumControlModule
       reset();
    }
 
-   public void setPrimaryMotionConstraintListener(MotionConstraintListener motionConstraintListener)
-   {
-      primaryMotionConstraintHandler.setMotionConstraintListener(motionConstraintListener);
-   }
-
-   public void setSecondaryMotionConstraintListener(MotionConstraintListener motionConstraintListener)
-   {
-      secondaryMotionConstraintHandler.setMotionConstraintListener(motionConstraintListener);
-   }
-
    public void initialize()
    {
       centroidalMomentumHandler.initialize();

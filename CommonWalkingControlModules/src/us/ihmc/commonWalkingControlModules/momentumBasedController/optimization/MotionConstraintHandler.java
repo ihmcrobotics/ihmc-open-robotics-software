@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import gnu.trove.list.array.TIntArrayList;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,19 +11,18 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
-
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.robotics.screwTheory.ConvectiveTermCalculator;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -60,7 +57,6 @@ public class MotionConstraintHandler
    private final DenseMatrix64F w = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F jBlockCompact = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F nCompactBlock = new DenseMatrix64F(1, 1);
 
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
    private final PointJacobian pointJacobian = new PointJacobian();
@@ -68,9 +64,6 @@ public class MotionConstraintHandler
    private int motionConstraintIndex = 0;
    private final FrameVector pPointVelocity = new FrameVector();
    private final PointJacobianConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
-
-   private MotionConstraintListener motionConstraintListener;
-   private final MotionConstraintSingularityEscapeHandler motionConstraintSingularityEscapeHandler = new MotionConstraintSingularityEscapeHandler();
 
    private final YoVariableRegistry registry; 
    private final BooleanYoVariable removeNullspaceFromJ;
@@ -105,12 +98,6 @@ public class MotionConstraintHandler
       parentRegistry.addChild(registry);
    }
 
-   public void setMotionConstraintListener(MotionConstraintListener motionConstraintListener)
-   {
-      if (this.motionConstraintListener != null) throw new RuntimeException("Motion Constraint Listener was already set!");
-      this.motionConstraintListener = motionConstraintListener;
-   }
-   
    public void reset()
    {
       motionConstraintIndex = 0;
@@ -143,49 +130,7 @@ public class MotionConstraintHandler
       MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
       weightBlock.setValue(weight);
 
-      reportPointAccelerationMotionContraint(null, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
-      
       motionConstraintIndex++;
-   }
-   
-   private void reportJointAccelerationMotionContraint(DesiredJointAccelerationCommand desiredJointAccelerationCommand, int motionConstraintIndex, DenseMatrix64F jFullBlock, DenseMatrix64F jBlockCompact, DenseMatrix64F pBlock, MutableDouble weightBlock)
-   {
-      if (motionConstraintListener != null)
-      {
-         motionConstraintListener.jointAccelerationMotionConstraintWasAdded(desiredJointAccelerationCommand, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
-      }
-   }
-   
-   private void reportSpatialAccelerationMotionContraint(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand, int motionConstraintIndex, DenseMatrix64F jacobianMatrix, DenseMatrix64F jFullBlock, DenseMatrix64F jBlockCompact, DenseMatrix64F pBlock, MutableDouble weightBlock)
-   {
-      if (motionConstraintListener != null)
-      {
-         motionConstraintListener.spatialAccelerationMotionConstraintWasAdded(desiredSpatialAccelerationCommand, motionConstraintIndex, jacobianMatrix, jFullBlock, jBlockCompact, pBlock, weightBlock);
-      }
-   }
-   
-   private void reportNullSpaceMultiplierForSpatialAccelerationMotionContraint(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand, int motionConstraintIndex, DenseMatrix64F jFullBlock, DenseMatrix64F jBlockCompact, DenseMatrix64F pBlock, MutableDouble weightBlock)
-   {
-      if (motionConstraintListener != null)
-      {
-         motionConstraintListener.nullSpaceMultiplierForSpatialAccelerationMotionContraintWasAdded(desiredSpatialAccelerationCommand, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
-      }
-   }
-   
-   
-   
-   private void reportPointAccelerationMotionContraint(DesiredPointAccelerationCommand desiredPointAccelerationCommand, int motionConstraintIndex, DenseMatrix64F jFullBlock, DenseMatrix64F jBlockCompact, DenseMatrix64F pBlock, MutableDouble weightBlock)
-   {
-      if (motionConstraintListener != null)
-      {
-         motionConstraintListener.pointAccelerationMotionConstraintWasAdded(desiredPointAccelerationCommand, motionConstraintIndex, jFullBlock, jBlockCompact, pBlock, weightBlock);
-      }
-   }
-
-   public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
-   {
-//      setDesiredSpatialAccelerationOld(desiredSpatialAccelerationCommand);
-      setDesiredSpatialAccelerationNew(desiredSpatialAccelerationCommand);
    }
    
    private final DenseMatrix64F tempBaseToEndEffectorJacobianMatrix = new DenseMatrix64F(1, 1);
@@ -215,7 +160,7 @@ public class MotionConstraintHandler
       return svd;
    }
    
-   public void setDesiredSpatialAccelerationNew(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
+   public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
       GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
@@ -340,8 +285,6 @@ public class MotionConstraintHandler
             MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
             weightBlock.setValue(weight);
 
-            reportSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, tempJacobianMatrix, jFullBlock, jBlockCompact, pBlock, weightBlock);
-
             motionConstraintIndex++;
          }
          else
@@ -359,94 +302,12 @@ public class MotionConstraintHandler
             MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
             weightBlock.setValue(weight);
 
-            reportSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, tempJacobianMatrix, jFullBlock, jBlockCompact, pBlock, weightBlock);
-
             motionConstraintIndex++;
          }
       }
    }
    
    
-   public void setDesiredSpatialAccelerationOld(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
-   {
-      // (S * J) * vdot = S * (Tdot - Jdot * v)
-      GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
-      TaskspaceConstraintData taskspaceConstraintData = desiredSpatialAccelerationCommand.getTaskspaceConstraintData();
-      double weight = desiredSpatialAccelerationCommand.getWeight();
-      
-      SpatialAccelerationVector taskSpaceAcceleration = taskspaceConstraintData.getSpatialAcceleration();
-      DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
-      DenseMatrix64F nullspaceMultipliers = taskspaceConstraintData.getNullspaceMultipliers();
-
-      if (selectionMatrix.getNumRows() > 0)
-      {
-         RigidBody base = getBase(taskSpaceAcceleration);
-         RigidBody endEffector = getEndEffector(taskSpaceAcceleration);
-
-         int baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
-         GeometricJacobian baseToEndEffectorJacobian = geometricJacobianHolder.getJacobian(baseToEndEffectorJacobianId);
-         if (jacobiansHaveToBeUpdated)
-            baseToEndEffectorJacobian.compute();
-
-         // TODO: inefficient
-         convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);
-         convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
-         convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
-         convectiveTerm.packMatrix(convectiveTermMatrix, 0);
-
-         jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
-
-
-         DenseMatrix64F baseToEndEffectorJacobianMatrix = baseToEndEffectorJacobian.getJacobianMatrix();
-         DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-
-         //TODO: Is this all done correctly here? What does it actually do? Shouldn't the weight block be set too?
-
-         int nullity = nullspaceMultipliers.getNumRows();
-         if (nullity > 0)
-         {
-            DenseMatrix64F zBlock = getMatrixFromList(pList, motionConstraintIndex, nullity, 1);
-            DenseMatrix64F nFullBLock = getMatrixFromList(jList, motionConstraintIndex, nullity, nDegreesOfFreedom);
-            
-            // Handle singularity escape:
-            motionConstraintSingularityEscapeHandler.computeConstraintBlocksForSingularityEscape(selectionMatrix, nullspaceMultipliers, baseToEndEffectorJacobianMatrix, jacobianMatrix, zBlock,
-                  nCompactBlock, jBlockCompact);
-            
-            
-//            System.out.println("Singularity escape. nCompactBlock = " + nCompactBlock);
-//            System.out.println("Singularity escape. zBlock = " + zBlock);
-            compactBlockToFullBlock(jacobian.getJointsInOrder(), nCompactBlock, nFullBLock);
-            reportNullSpaceMultiplierForSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, nFullBLock, nCompactBlock, zBlock, null);
-
-            motionConstraintIndex++;
-         }
-         else
-         {
-            CommonOps.mult(selectionMatrix, baseToEndEffectorJacobianMatrix, jBlockCompact);
-         }
-
-         DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
-         compactBlockToFullBlock(baseToEndEffectorJacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
-
-//         if (jMatrixToPack != null) jMatrixToPack.setReshape(jFullBlock);
-         
-         DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
-         taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
-         CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, pBlock);
-         CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, pBlock);
-
-//         if (pVectorToPack != null) pVectorToPack.setReshape(pBlock);
-         
-         MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
-         weightBlock.setValue(weight);
-
-         reportSpatialAccelerationMotionContraint(desiredSpatialAccelerationCommand, motionConstraintIndex, jacobianMatrix, jFullBlock, jBlockCompact, pBlock, weightBlock);
-
-         motionConstraintIndex++;
-      }
-   }
-
-
    private void compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullBlock)
    {
       fullBlock.zero();
@@ -496,8 +357,6 @@ public class MotionConstraintHandler
          MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
          weightBlock.setValue(weight);
 
-         reportJointAccelerationMotionContraint(desiredJointAccelerationCommand, motionConstraintIndex, jBlock, jBlock, pBlock, weightBlock);
-
          motionConstraintIndex++;
       }
    }
@@ -521,8 +380,6 @@ public class MotionConstraintHandler
 
       MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
       weightBlock.setValue(weight);
-
-      reportPointAccelerationMotionContraint(null, motionConstraintIndex, jFullBlock, pointJacobianMatrix, pBlock, weightBlock);
 
       motionConstraintIndex++;
    }
