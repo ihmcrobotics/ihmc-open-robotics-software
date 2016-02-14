@@ -12,7 +12,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
@@ -40,8 +39,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    {
       super(ConstraintType.MOVE_VIA_WAYPOINTS, footControlHelper, gains, registry);
 
-      RigidBody rigidBody = contactableFoot.getRigidBody();
-      String namePrefix = rigidBody.getName() + "MoveViaWaypoints";
+      String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression() + "FootMoveViaWaypoints";
 
       footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
 
