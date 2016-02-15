@@ -15,7 +15,8 @@ public class DesiredPointAccelerationCommand
    private final FrameVector desiredAcceleration;
    private final DenseMatrix64F selectionMatrix;
 
-   public DesiredPointAccelerationCommand(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
+   public DesiredPointAccelerationCommand(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration,
+         DenseMatrix64F selectionMatrix)
    {
       this.rootToEndEffectorJacobian = rootToEndEffectorJacobian;
       this.contactPoint = contactPoint;
@@ -27,7 +28,7 @@ public class DesiredPointAccelerationCommand
    {
       this(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
    }
-   
+
    public DesiredPointAccelerationCommand(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
       this.rootToEndEffectorJacobian = desiredPointAccelerationCommand.rootToEndEffectorJacobian;
@@ -60,24 +61,23 @@ public class DesiredPointAccelerationCommand
    {
       return "DesiredPointAccelerationCommand: rootToEndEffectorJacobian = " + rootToEndEffectorJacobian;
    }
-   
+
    public void computeAchievedPointAcceleration(DenseMatrix64F achievedSpatialAcceleration)
    {
       DenseMatrix64F jacobianMatrix = rootToEndEffectorJacobian.getJacobianMatrix();
       InverseDynamicsJoint[] jointsInOrder = rootToEndEffectorJacobian.getJointsInOrder();
-      
+
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(rootToEndEffectorJacobian.getNumberOfColumns(), 1);
-      
+
       int index = 0;
-      for (int i=0; i<jointsInOrder.length; i++)
+      for (int i = 0; i < jointsInOrder.length; i++)
       {
          InverseDynamicsJoint joint = jointsInOrder[i];
-         
+
          jointsInOrder[i].packDesiredAccelerationMatrix(jointAccelerations, index);
          index = index + joint.getDegreesOfFreedom();
       }
-      
+
       CommonOps.mult(jacobianMatrix, jointAccelerations, achievedSpatialAcceleration);
    }
 }
-

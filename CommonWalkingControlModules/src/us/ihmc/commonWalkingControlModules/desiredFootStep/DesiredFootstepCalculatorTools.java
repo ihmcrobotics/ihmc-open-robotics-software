@@ -70,9 +70,9 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempVector.set(tempFramePoint.getPoint());    // foot point w.r.t. ankle in foot frame
-         footToWorldRotation.transform(tempVector);    // foot point w.r.t. ankle in world frame
-         worldToDesiredHeadingFrame.transform(tempVector);    // foot point w.r.t. ankle in desired heading frame
+         tempVector.set(tempFramePoint.getPoint()); // foot point w.r.t. ankle in foot frame
+         footToWorldRotation.transform(tempVector); // foot point w.r.t. ankle in world frame
+         worldToDesiredHeadingFrame.transform(tempVector); // foot point w.r.t. ankle in desired heading frame
          if (tempVector.getX() > maxX)
             maxX = tempVector.getX();
       }
@@ -90,7 +90,7 @@ public class DesiredFootstepCalculatorTools
    }
 
    public static FramePoint computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, List<FramePoint> footPoints, ReferenceFrame bodyFrame,
-           ReferenceFrame frame)
+         ReferenceFrame frame)
    {
       FramePoint minFramePoint = new FramePoint(frame);
       minFramePoint.setZ(Double.POSITIVE_INFINITY);
@@ -162,9 +162,9 @@ public class DesiredFootstepCalculatorTools
    public static int[] findMaximumPointIndexesInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
    {
       List<FramePoint> maximumPoints = computeMaximumPointsInDirection(framePoints, searchDirection, nPoints);
-      
+
       int[] indexes = new int[nPoints];
-      
+
       for (int i = 0; i < nPoints; i++)
       {
          indexes[i] = framePoints.indexOf(maximumPoints.get(i));

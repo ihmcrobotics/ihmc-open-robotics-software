@@ -23,7 +23,7 @@ public class TaskspaceConstraintData
       this.base = base;
       this.endEffector = endEffector;
    }
-   
+
    public void set(SpatialAccelerationVector spatialAcceleration)
    {
       this.spatialAcceleration.set(spatialAcceleration);
@@ -54,7 +54,7 @@ public class TaskspaceConstraintData
       this.spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
 
       this.nullspaceMultipliers.set(nullspaceMultipliers);
-      
+
       this.selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
       this.selectionMatrix.set(0, 0, 1.0);
       this.selectionMatrix.set(1, 1, 1.0);
@@ -67,7 +67,7 @@ public class TaskspaceConstraintData
       this.spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
 
       this.nullspaceMultipliers.reshape(0, 1);
-      
+
       this.selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
       this.selectionMatrix.set(0, 0, 1.0);
       this.selectionMatrix.set(1, 1, 1.0);

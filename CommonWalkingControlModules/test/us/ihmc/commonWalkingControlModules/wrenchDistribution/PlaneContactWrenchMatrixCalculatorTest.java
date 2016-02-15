@@ -37,8 +37,8 @@ public class PlaneContactWrenchMatrixCalculatorTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-	@DeployableTestMethod(estimatedDuration = 5.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 5.0)
+   @Test(timeout = 30000)
    public void testComputePlaneContactWrenchMatrix() throws Exception
    {
       Random random = new Random(12341253L);
@@ -54,11 +54,9 @@ public class PlaneContactWrenchMatrixCalculatorTest
                randomFloatingChain.getElevator());
          centerOfMassFrame.update();
 
-
          List<RigidBody> bodies = new ArrayList<RigidBody>();
          bodies.add(randomFloatingChain.getRevoluteJoints().get(2).getSuccessor());
          bodies.add(randomFloatingChain.getRevoluteJoints().get(4).getSuccessor());
-
 
          LinkedHashMap<RigidBody, PlaneContactState> contactStates = new LinkedHashMap<RigidBody, PlaneContactState>();
          YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -79,7 +77,8 @@ public class PlaneContactWrenchMatrixCalculatorTest
                contactPoints.add(contactPoint);
             }
 
-            YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, body, planeFrame, contactPoints, coefficientOfFriction, registry);
+            YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, body, planeFrame, contactPoints, coefficientOfFriction,
+                  registry);
             contactStates.put(body, contactState);
          }
 
@@ -88,7 +87,8 @@ public class PlaneContactWrenchMatrixCalculatorTest
          double wRho = 0.0;
          double wRhoSmoother = 0.0;
          double wRhoPenalizer = 0.0;
-         PlaneContactWrenchMatrixCalculator calculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nContactPoints, nSupportVectorsPerContactPoint, wRho, wRhoSmoother, wRhoPenalizer, contactStates.values(), registry);
+         PlaneContactWrenchMatrixCalculator calculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nContactPoints,
+               nSupportVectorsPerContactPoint, wRho, wRhoSmoother, wRhoPenalizer, contactStates.values(), registry);
 
          calculator.computeMatrices();
          DenseMatrix64F q = calculator.getQRho();
@@ -105,7 +105,8 @@ public class PlaneContactWrenchMatrixCalculatorTest
 
    }
 
-   private void assertTotalWrenchIsSumOfIndividualWrenches(CenterOfMassReferenceFrame centerOfMassFrame, Collection<Wrench> rigidBodyWrenchMap, DenseMatrix64F q, DenseMatrix64F rho)
+   private void assertTotalWrenchIsSumOfIndividualWrenches(CenterOfMassReferenceFrame centerOfMassFrame, Collection<Wrench> rigidBodyWrenchMap,
+         DenseMatrix64F q, DenseMatrix64F rho)
    {
       DenseMatrix64F totalWrenchFromQ = new DenseMatrix64F(Wrench.SIZE, 1);
       CommonOps.mult(q, rho, totalWrenchFromQ);
@@ -132,8 +133,7 @@ public class PlaneContactWrenchMatrixCalculatorTest
     * @param rigidBodyWrenchMap
     * @param coefficientOfFriction
     */
-   private void assertWrenchesOK(Map<RigidBody, PlaneContactState> contactStates,
-                                 Map<RigidBody, Wrench> rigidBodyWrenchMap, double coefficientOfFriction)
+   private void assertWrenchesOK(Map<RigidBody, PlaneContactState> contactStates, Map<RigidBody, Wrench> rigidBodyWrenchMap, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
       for (RigidBody rigidBody : rigidBodyWrenchMap.keySet())

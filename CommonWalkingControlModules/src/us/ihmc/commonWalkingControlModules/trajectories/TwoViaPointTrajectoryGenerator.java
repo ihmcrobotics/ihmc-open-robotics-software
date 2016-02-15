@@ -380,13 +380,13 @@ public class TwoViaPointTrajectoryGenerator extends PositionTrajectoryGeneratorI
       double[] newInterpolationValues = Arrays.copyOf(interpolationValues, interpolationValues.length);
       if (interpolationValues[1] != 0)
       {
-         PolynomialFunction poly1 = distancePoly.subtract(new PolynomialFunction(new double[] { interpolationValues[1] * totalDistance }));
+         PolynomialFunction poly1 = distancePoly.subtract(new PolynomialFunction(new double[] {interpolationValues[1] * totalDistance}));
          newInterpolationValues[1] = distSolver.solve(1000, poly1, 0, endTime) / endTime;
       }
 
       if (interpolationValues[2] != 0)
       {
-         PolynomialFunction poly2 = distancePoly.subtract(new PolynomialFunction(new double[] { interpolationValues[2] * totalDistance }));
+         PolynomialFunction poly2 = distancePoly.subtract(new PolynomialFunction(new double[] {interpolationValues[2] * totalDistance}));
          newInterpolationValues[2] = distSolver.solve(1000, poly2, 0, endTime) / endTime;
       }
 
@@ -429,12 +429,12 @@ public class TwoViaPointTrajectoryGenerator extends PositionTrajectoryGeneratorI
       }
       else
       {
-         xPolynomial3.setCubicInitialPositionThreeFinalConditions(timeValues[2], timeValues[3], secondViaPosition.getX(), finalPosition.getX(), finalVelocity
-               * finalDirection.getX(), 0);
-         yPolynomial3.setCubicInitialPositionThreeFinalConditions(timeValues[2], timeValues[3], secondViaPosition.getY(), finalPosition.getY(), finalVelocity
-               * finalDirection.getY(), 0);
-         zPolynomial3.setCubicInitialPositionThreeFinalConditions(timeValues[2], timeValues[3], secondViaPosition.getZ(), finalPosition.getZ(), finalVelocity
-               * finalDirection.getZ(), 0);
+         xPolynomial3.setCubicInitialPositionThreeFinalConditions(timeValues[2], timeValues[3], secondViaPosition.getX(), finalPosition.getX(),
+               finalVelocity * finalDirection.getX(), 0);
+         yPolynomial3.setCubicInitialPositionThreeFinalConditions(timeValues[2], timeValues[3], secondViaPosition.getY(), finalPosition.getY(),
+               finalVelocity * finalDirection.getY(), 0);
+         zPolynomial3.setCubicInitialPositionThreeFinalConditions(timeValues[2], timeValues[3], secondViaPosition.getZ(), finalPosition.getZ(),
+               finalVelocity * finalDirection.getZ(), 0);
       }
       xPolynomial3.compute(timeValues[2]);
       yPolynomial3.compute(timeValues[2]);

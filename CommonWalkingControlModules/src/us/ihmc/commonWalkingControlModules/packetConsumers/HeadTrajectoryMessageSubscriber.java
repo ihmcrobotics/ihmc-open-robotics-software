@@ -11,7 +11,7 @@ public class HeadTrajectoryMessageSubscriber implements PacketConsumer<HeadTraje
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    private final AtomicReference<HeadTrajectoryMessage> latestMessageReference = new AtomicReference<HeadTrajectoryMessage>(null);
-   
+
    public HeadTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

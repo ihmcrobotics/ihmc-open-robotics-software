@@ -16,11 +16,11 @@ public interface FootstepProvider
    public abstract void notifyComplete(FramePose footPoseInWorld);
 
    public abstract void notifyWalkingComplete();
-   
+
    public abstract int getNumberOfFootstepsToProvide();
-   
+
    public abstract boolean isBlindWalking();
-   
+
    public abstract boolean isPaused();
 
    public abstract void cancelPlan();

@@ -54,7 +54,7 @@ public class ContactableBodiesFactory
       this.chestBackContactPoints = chestBackContactPoints;
       this.chestBackContactPointTransform = chestBackContactPointTransform;
    }
-   
+
    public void addHandContactParameters(SideDependentList<String> namesOfJointsBeforeHands, SideDependentList<List<Point2d>> handContactPoints,
          SideDependentList<RigidBodyTransform> handContactPointTransforms)
    {
@@ -117,8 +117,8 @@ public class ContactableBodiesFactory
 
          RigidBody hand = jointBeforeHandArray[0].getSuccessor();
          String name = robotSide.getCamelCaseNameForStartOfExpression() + "HandContact";
-         ListOfPointsContactablePlaneBody handContactableBody = createListOfPointsContactablePlaneBody(name, hand,
-               handContactPointTransforms.get(robotSide), handContactPoints.get(robotSide));
+         ListOfPointsContactablePlaneBody handContactableBody = createListOfPointsContactablePlaneBody(name, hand, handContactPointTransforms.get(robotSide),
+               handContactPoints.get(robotSide));
          handContactableBodies.put(robotSide, handContactableBody);
       }
       return handContactableBodies;
@@ -141,14 +141,15 @@ public class ContactableBodiesFactory
 
          RigidBody thigh = jointBeforeThighArray[0].getSuccessor();
          String name = robotSide.getCamelCaseNameForStartOfExpression() + "ThighContact";
-         ListOfPointsContactablePlaneBody thighContactableBody = createListOfPointsContactablePlaneBody(name, thigh,
-               thighContactPointTransforms.get(robotSide), thighContactPoints.get(robotSide));
+         ListOfPointsContactablePlaneBody thighContactableBody = createListOfPointsContactablePlaneBody(name, thigh, thighContactPointTransforms.get(robotSide),
+               thighContactPoints.get(robotSide));
          thighContactableBodies.put(robotSide, thighContactableBody);
       }
       return thighContactableBodies;
    }
 
-   public SideDependentList<ContactablePlaneBody> createFootContactableBodies(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   public SideDependentList<ContactablePlaneBody> createFootContactableBodies(FullHumanoidRobotModel fullRobotModel,
+         CommonHumanoidReferenceFrames referenceFrames)
    {
       if (footContactPoints == null)
          return null;

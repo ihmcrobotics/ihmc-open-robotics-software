@@ -23,18 +23,26 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final SideDependentList<AtomicReference<Point3d>> steeringWheelCenterAtomic = new SideDependentList<>(new AtomicReference<Point3d>(null), new AtomicReference<Point3d>(null));
-   private final SideDependentList<AtomicReference<Vector3d>> steeringWheelRotationAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
-   private final SideDependentList<AtomicReference<Vector3d>> steeringWheelZeroAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
-   private final SideDependentList<AtomicDouble> steeringWheelRadiusAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
-   private final SideDependentList<AtomicDouble> graspOffsetFromCotnrolFrameAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
+   private final SideDependentList<AtomicReference<Point3d>> steeringWheelCenterAtomic = new SideDependentList<>(new AtomicReference<Point3d>(null),
+         new AtomicReference<Point3d>(null));
+   private final SideDependentList<AtomicReference<Vector3d>> steeringWheelRotationAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null),
+         new AtomicReference<Vector3d>(null));
+   private final SideDependentList<AtomicReference<Vector3d>> steeringWheelZeroAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null),
+         new AtomicReference<Vector3d>(null));
+   private final SideDependentList<AtomicDouble> steeringWheelRadiusAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN),
+         new AtomicDouble(Double.NaN));
+   private final SideDependentList<AtomicDouble> graspOffsetFromCotnrolFrameAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN),
+         new AtomicDouble(Double.NaN));
    private final SideDependentList<AtomicInteger> steeringWheelIdAtomic = new SideDependentList<>(new AtomicInteger(-1), new AtomicInteger(-1));
 
    private final SideDependentList<AtomicDouble> desiredAbsoluteSteeringAngle = new SideDependentList<>(new AtomicDouble(0.0), new AtomicDouble(0.0));
-   private final SideDependentList<AtomicDouble> desiredSteeringSpeedAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
+   private final SideDependentList<AtomicDouble> desiredSteeringSpeedAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN),
+         new AtomicDouble(Double.NaN));
 
-   private final SideDependentList<AtomicBoolean> hasReceivedNewSteeringWheelInformation = new SideDependentList<>(new AtomicBoolean(false), new AtomicBoolean(false));
-   private final SideDependentList<AtomicBoolean> hasReceivedNewDesiredSteeringAngle = new SideDependentList<>(new AtomicBoolean(false), new AtomicBoolean(false));
+   private final SideDependentList<AtomicBoolean> hasReceivedNewSteeringWheelInformation = new SideDependentList<>(new AtomicBoolean(false),
+         new AtomicBoolean(false));
+   private final SideDependentList<AtomicBoolean> hasReceivedNewDesiredSteeringAngle = new SideDependentList<>(new AtomicBoolean(false),
+         new AtomicBoolean(false));
 
    private final PacketConsumer<DesiredSteeringAnglePacket> desiredSteeringAngleProvider;
 
@@ -92,7 +100,7 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
 
    public boolean checkForNewSteeringWheelInformation(RobotSide robotSide)
    {
-      return hasReceivedNewSteeringWheelInformation.get(robotSide).getAndSet(false);   
+      return hasReceivedNewSteeringWheelInformation.get(robotSide).getAndSet(false);
    }
 
    public boolean checkForNewDesiredAbsoluteSteeringAngle(RobotSide robotSide)

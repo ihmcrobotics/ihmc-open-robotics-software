@@ -29,8 +29,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class TorusPosePacketTransformerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTransformTorusPosePacket()
    {
       int numberOfTests = 10;

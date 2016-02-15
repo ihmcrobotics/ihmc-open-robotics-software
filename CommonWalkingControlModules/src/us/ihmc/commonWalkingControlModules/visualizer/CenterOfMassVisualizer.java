@@ -27,20 +27,22 @@ public class CenterOfMassVisualizer implements Updatable
    YoGraphicVector yoMomentumGraphics;
    YoGraphicPosition yoCoMGraphics;
 
-   public CenterOfMassVisualizer(String name, OneDoFJoint rootJoint, TwistCalculator twistCalculator, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry)
+   public CenterOfMassVisualizer(String name, OneDoFJoint rootJoint, TwistCalculator twistCalculator, YoVariableRegistry registry,
+         YoGraphicsListRegistry graphicsRegistry)
    {
       this(name, twistCalculator, registry, graphicsRegistry, ScrewTools.computeRigidBodiesAfterThisJoint(rootJoint));
    }
 
-   public CenterOfMassVisualizer(String name, TwistCalculator twistCalculator, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry, RigidBody... rigidBodies)
+   public CenterOfMassVisualizer(String name, TwistCalculator twistCalculator, YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry,
+         RigidBody... rigidBodies)
    {
       comCalculator = new CenterOfMassCalculator(rigidBodies, ReferenceFrame.getWorldFrame());
       momentumCalculator = new MomentumCalculator(twistCalculator, rigidBodies);
-      yoPoint = new YoFramePoint(name+"CoM", ReferenceFrame.getWorldFrame(), registry);
-      yoVector = new YoFrameVector(name+"Momentum", ReferenceFrame.getWorldFrame(), registry);
+      yoPoint = new YoFramePoint(name + "CoM", ReferenceFrame.getWorldFrame(), registry);
+      yoVector = new YoFrameVector(name + "Momentum", ReferenceFrame.getWorldFrame(), registry);
 
-      yoCoMGraphics = new YoGraphicPosition(name+"CoM", yoPoint, 0.05, YoAppearance.Brown());
-      yoMomentumGraphics = new YoGraphicVector(name+"Momentum", yoPoint, yoVector, 0.05, YoAppearance.Brown());
+      yoCoMGraphics = new YoGraphicPosition(name + "CoM", yoPoint, 0.05, YoAppearance.Brown());
+      yoMomentumGraphics = new YoGraphicVector(name + "Momentum", yoPoint, yoVector, 0.05, YoAppearance.Brown());
       graphicsRegistry.registerYoGraphic(name, yoCoMGraphics);
       graphicsRegistry.registerYoGraphic(name, yoMomentumGraphics);
 
@@ -48,6 +50,7 @@ public class CenterOfMassVisualizer implements Updatable
 
    Momentum momentum = new Momentum(ReferenceFrame.getWorldFrame());
    FrameVector frameVector = new FrameVector();
+
    @Override
    public void update(double time)
    {

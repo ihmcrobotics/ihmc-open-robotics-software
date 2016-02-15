@@ -43,19 +43,19 @@ public class FootstepPathCoordinatorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void showMemoryUsageAfterTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    /**
     * This test only verifies that polling returns the first footstep in the list *
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
    public void testPoll() throws Exception
    {
       // create a random list of footsteps
@@ -64,10 +64,11 @@ public class FootstepPathCoordinatorTest
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
-      
+
       @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator,
+            blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 
@@ -83,8 +84,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.4)
+   @Test(timeout = 30000)
    public void testIsEmpty() throws Exception
    {
       // verify list is initially empty
@@ -93,11 +94,12 @@ public class FootstepPathCoordinatorTest
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
-      
+
       @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
-      
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator,
+            blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
+
       assertTrue(footstepPathCoordinator.isEmpty());
 
       // create a random list of footsteps
@@ -117,8 +119,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
    public void testUpdatePath() throws Exception
    {
       // create a random list of footsteps
@@ -127,11 +129,12 @@ public class FootstepPathCoordinatorTest
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
-      
+
       @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
-     
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator,
+            blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
+
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 
@@ -160,8 +163,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
    public void testSetPaused() throws Exception
    {
       // create a random list of footsteps
@@ -170,11 +173,12 @@ public class FootstepPathCoordinatorTest
       BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator = null;
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
-      
+
       @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
-     
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator,
+            blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
+
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
       footstepPathCoordinator.updatePath(footsteps);
 
@@ -277,12 +281,13 @@ public class FootstepPathCoordinatorTest
          RigidBody endEffector = createRigidBody("rigid_" + footstepNumber);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
+               new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
          Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), null, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
-         
+
          footsteps.add(footstep);
       }
       return footsteps;

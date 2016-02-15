@@ -45,8 +45,8 @@ public class NewDoubleSupportICPComputer
    {
       double initialDoubleSupportDuration = doubleSupportDuration * (1.0 - doubleSupportFirstStepFraction);
 
-      JojosICPutilities.extrapolateDCMposAndVel(singleSupportICPToPack, singleSupportICPVelocityToPack, constantCenterOfPressure, initialDoubleSupportDuration
-            + singleSupportDuration, omega0, cornerPoint0);
+      JojosICPutilities.extrapolateDCMposAndVel(singleSupportICPToPack, singleSupportICPVelocityToPack, constantCenterOfPressure,
+            initialDoubleSupportDuration + singleSupportDuration, omega0, cornerPoint0);
    }
 
    public static Point3d computeSingleSupportStartICP(Point3d constantCenterOfPressure, Point3d cornerPoint0, double doubleSupportDuration,
@@ -71,8 +71,8 @@ public class NewDoubleSupportICPComputer
 
       double initialDoubleSupportDuration = doubleSupportDuration * (1.0 - doubleSupportFirstStepFraction);
 
-      JojosICPutilities.extrapolateDCMposAndVel(singleSupportStateICP, singleSupportStateICPVelocity, constantCenterOfPressure, initialDoubleSupportDuration
-            + singleSupportDuration, omega0, cornerPoint0);
+      JojosICPutilities.extrapolateDCMposAndVel(singleSupportStateICP, singleSupportStateICPVelocity, constantCenterOfPressure,
+            initialDoubleSupportDuration + singleSupportDuration, omega0, cornerPoint0);
 
       return singleSupportStateICP;
    }
@@ -148,8 +148,9 @@ public class NewDoubleSupportICPComputer
 
       toeCornerPointsToModify.get(numberOfCornerPoints - 1).set(icpToeCornerPoint);
 
-      Point3d icpFootCenterCornerPoint = JojosICPutilities.extrapolateDCMpos(constantFootCenterCentersOfPressureToModify.get(numberOfCornerPoints - 1)
-            .getPoint3dCopy(), -footCenterToToeShiftDuration, omega0, icpToeCornerPoint);
+      Point3d icpFootCenterCornerPoint = JojosICPutilities.extrapolateDCMpos(
+            constantFootCenterCentersOfPressureToModify.get(numberOfCornerPoints - 1).getPoint3dCopy(), -footCenterToToeShiftDuration, omega0,
+            icpToeCornerPoint);
       footCenterCornerPointsToModify.get(numberOfCornerPoints - 1).set(icpFootCenterCornerPoint);
 
       for (int i = numberOfCornerPoints - 1; i > 0; i--)

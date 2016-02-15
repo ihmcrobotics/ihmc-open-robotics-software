@@ -53,7 +53,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new TrajectoryParameters());
 
-   private final DoubleProvider swingTimeProvider;   
+   private final DoubleProvider swingTimeProvider;
 
    private final DoubleYoVariable swingTimeSpeedUpFactor;
    private final DoubleYoVariable maxSwingTimeSpeedUpFactor;
@@ -74,7 +74,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final ReferenceFrame footFrame;
 
    public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
-                     VectorProvider touchdownAccelerationProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
+         VectorProvider touchdownAccelerationProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
 
@@ -110,13 +110,12 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
             finalConfigurationProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingTimeProvider, registry);
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
-      swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
-            initialConfigurationProvider, initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
-            registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
+      swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider, initialConfigurationProvider,
+            initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
+            yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
 
       pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
             pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
-
 
       positionTrajectoryGenerators.add(swingTrajectoryGenerator);
       positionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
@@ -149,8 +148,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       pushRecoveryPositionTrajectoryGenerators.add(pushRecoverySwingTrajectoryGenerator);
       pushRecoveryPositionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
 
-      PositionTrajectoryGenerator pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(pushRecoveryPositionTrajectoryGenerators, namePrefix
-            + "PushRecoveryTrajectoryGenerator", registry);
+      PositionTrajectoryGenerator pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(
+            pushRecoveryPositionTrajectoryGenerators, namePrefix + "PushRecoveryTrajectoryGenerator", registry);
       return pushRecoveryPositionTrajectoryGenerator;
    }
 
@@ -172,7 +171,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       }
 
       orientationTrajectoryGenerator.setTrajectoryTime(swingTimeProvider.getValue());
-      
+
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
 
@@ -246,7 +245,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       newFootstepPose.changeFrame(worldFrame);
       oldFootstepPosition.changeFrame(worldFrame);
 
-      boolean worldFrameDeltaZAboveThreshold = Math.abs(newFootstepPose.getZ() - oldFootstepPosition.getZ()) > TwoWaypointTrajectoryGeneratorParameters.getMinimumHeightDifferenceForStepOnOrOff();
+      boolean worldFrameDeltaZAboveThreshold = Math.abs(newFootstepPose.getZ() - oldFootstepPosition.getZ()) > TwoWaypointTrajectoryGeneratorParameters
+            .getMinimumHeightDifferenceForStepOnOrOff();
 
       if (footstep.getTrajectoryType() == TrajectoryType.PUSH_RECOVERY)
       {
@@ -282,8 +282,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
             return;
          speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
 
-//         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, 0.7, maxSwingTimeSpeedUpFactor.getDoubleValue());
-//         if (speedUpFactor < 1.0) speedUpFactor = 1.0 - 0.5 * (1.0 - speedUpFactor);
+         //         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, 0.7, maxSwingTimeSpeedUpFactor.getDoubleValue());
+         //         if (speedUpFactor < 1.0) speedUpFactor = 1.0 - 0.5 * (1.0 - speedUpFactor);
 
          swingTimeSpeedUpFactor.set(speedUpFactor);
          if (currentTimeWithSwingSpeedUp.isNaN())

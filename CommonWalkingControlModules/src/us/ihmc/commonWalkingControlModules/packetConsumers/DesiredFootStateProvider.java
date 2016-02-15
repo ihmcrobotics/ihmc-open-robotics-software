@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class DesiredFootStateProvider implements PacketConsumer<FootStatePacket>
 {
    private SideDependentList<AtomicBoolean> hasLoadBearingBeenRequested = new SideDependentList<AtomicBoolean>();
-   
+
    public DesiredFootStateProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -18,7 +18,7 @@ public class DesiredFootStateProvider implements PacketConsumer<FootStatePacket>
          hasLoadBearingBeenRequested.put(robotSide, new AtomicBoolean(false));
       }
    }
-   
+
    public boolean checkForNewLoadBearingRequest(RobotSide robotSide)
    {
       return hasLoadBearingBeenRequested.get(robotSide).getAndSet(false);
@@ -26,6 +26,7 @@ public class DesiredFootStateProvider implements PacketConsumer<FootStatePacket>
 
    public void receivedPacket(FootStatePacket object)
    {
-      hasLoadBearingBeenRequested.get(object.getRobotSide()).set(true);;
+      hasLoadBearingBeenRequested.get(object.getRobotSide()).set(true);
+      ;
    }
 }

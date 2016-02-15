@@ -93,7 +93,8 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       TwoWaypointPositionTrajectoryGenerator trajectoryGenerator = getTrajectoryGenerator();
 
       int initialBufferSize = 8192;
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {new Robot("null")}, graphics3DAdapterToUse, new SimulationConstructionSetParameters(initialBufferSize));
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {new Robot("null")}, graphics3DAdapterToUse,
+            new SimulationConstructionSetParameters(initialBufferSize));
       scs.setDT(stepTime.getDoubleValue() / (double) numberOfTicks, 5);
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -101,7 +102,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
       YoFramePoint[] positions = new YoFramePoint[] {initialPosition, waypoints.get(0), waypoints.get(1), finalPosition};
       YoFrameVector[] velocities = new YoFrameVector[] {initialVelocity, finalVelocity};
-      
+
       for (int i = 0; i < positions.length; i++)
       {
          sliderBoardConfigurationManager.setSlider(i + 1, positions[i].getYoX(), -2.0, 2.0);
@@ -115,9 +116,9 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
          sliderBoardConfigurationManager.setSlider(i + 5, velocities[i].getYoY(), -2.0, 2.0);
          sliderBoardConfigurationManager.setSlider(i + 5, velocities[i].getYoZ(), -2.0, 2.0);
       }
-      
+
       sliderBoardConfigurationManager.setSlider(7, stepTime, 0.01, 2.0);
-      
+
       Thread thread = new Thread(scs);
 
       thread.start();
@@ -128,7 +129,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
          {
             scs.setInPoint();
             drawTrajectory.set(false);
-            
+
             trajectoryBagOfBalls.hideAll();
             trajectoryGenerator.initialize();
 
@@ -181,44 +182,43 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       YoVelocityProvider finalDesiredVelocityProvider = new YoVelocityProvider(finalVelocity);
 
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider();
-      
+
       int arcLengthCalculatorDivisionsPerPolynomial = 20;
 
       return new TwoWaypointPositionTrajectorySpecifiedByPoints(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
-              initialVelocityProvider, null,  finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
-              arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, null, false, waypoints);
+            initialVelocityProvider, null, finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
+            arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, null, false, waypoints);
    }
-   
+
    public static class TwoWaypointPositionTrajectorySpecifiedByPoints extends TwoWaypointPositionTrajectoryGenerator
    {
       private final ReferenceFrame referenceFrame;
       private final List<YoFramePoint> waypoints;
-      
+
       public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
-            VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-            int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry yoGraphicsListRegistry,
+            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider,
+            PositionProvider finalPositionProvider, VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider,
+            YoVariableRegistry parentRegistry, int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry yoGraphicsListRegistry,
             WalkingControllerParameters walkingControllerParameters, boolean visualize, List<YoFramePoint> waypoints)
       {
-         super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, stancePositionProvider, finalPositionProvider, finalDesiredVelocityProvider,
-               trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry, walkingControllerParameters,
-               visualize);
-         
+         super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, stancePositionProvider, finalPositionProvider,
+               finalDesiredVelocityProvider, trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry, walkingControllerParameters, visualize);
+
          this.referenceFrame = referenceFrame;
          this.waypoints = waypoints;
       }
-      
+
       @Override
       protected void setWaypointPositions()
       {
          int[] waypointIndices = new int[] {2, 3};
          List<FramePoint> wayFramePoints = new ArrayList<FramePoint>();
-         
+
          for (int i = 0; i < 2; i++)
          {
             wayFramePoints.add(waypoints.get(i).getFramePointCopy());
          }
-         
+
          for (int i = 0; i < 2; i++)
          {
             wayFramePoints.get(i).changeFrame(referenceFrame);

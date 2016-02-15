@@ -15,7 +15,6 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class MultiContactTestHumanoidControllerFactory implements HighLevelBehaviorFactory
 {
    private final boolean transitionRequested;
@@ -54,8 +53,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelBehav
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       MultiContactTestHumanoidController multiContactTestHumanoidController = new MultiContactTestHumanoidController(variousWalkingProviders,
-            variousWalkingManagers, momentumRateOfChangeControlModule, momentumBasedController, multiContactControllerParameters,
-            yoGraphicsListRegistry);
+            variousWalkingManagers, momentumRateOfChangeControlModule, momentumBasedController, multiContactControllerParameters, yoGraphicsListRegistry);
       multiContactTestHumanoidController.initializeContactStates(areHandsInContact, areFeetInContact);
       return multiContactTestHumanoidController;
    }

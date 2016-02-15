@@ -101,17 +101,17 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       //TODO: If we reinitialize after singularity escape, we 
       // need to do it smartly. The stuff below causes really
       // bad swing tracking due to a huge discontinuity in the desireds.
-//      if (footControlHelper.isDoingSingularityEscape())
-//      {
-//         initializeTrajectory();
-//      }
+      //      if (footControlHelper.isDoingSingularityEscape())
+      //      {
+      //         initializeTrajectory();
+      //      }
 
       computeAndPackTrajectory();
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
       {
          legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-                 desiredLinearAcceleration, desiredAngularAcceleration);
+               desiredLinearAcceleration, desiredAngularAcceleration);
       }
 
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
@@ -128,8 +128,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-              desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
+      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration,
+            desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
       footControlHelper.updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment();

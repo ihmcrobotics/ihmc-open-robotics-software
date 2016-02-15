@@ -97,6 +97,7 @@ public class WalkingFailureDetectionControlModule
    }
 
    private final FrameVector2d tempFallingDirection = new FrameVector2d();
+
    public void checkIfRobotIsFalling(YoFramePoint currentCapturePoint, YoFramePoint2d desiredCapturePoint)
    {
       updateCombinedPolygon();
@@ -112,7 +113,8 @@ public class WalkingFailureDetectionControlModule
       boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint.distance(capturePoint) < icpDistanceFromFootPolygonThreshold.getDoubleValue();
       isRobotFalling.set(!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint);
 
-      if (isRobotFalling.getBooleanValue()){
+      if (isRobotFalling.getBooleanValue())
+      {
          tempFallingDirection.set(capturePoint);
          FramePoint2d footCenter = combinedFootPolygon.getCentroid();
          tempFallingDirection.changeFrame(ReferenceFrame.getWorldFrame());
@@ -130,7 +132,8 @@ public class WalkingFailureDetectionControlModule
       return isRobotFalling.getBooleanValue();
    }
 
-   public FrameVector2d getFallingDirection(){
+   public FrameVector2d getFallingDirection()
+   {
       return fallingDirection;
    }
 

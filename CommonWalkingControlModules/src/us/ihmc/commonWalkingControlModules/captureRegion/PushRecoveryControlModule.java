@@ -120,10 +120,10 @@ public class PushRecoveryControlModule
    {
       if (!isICPOutside.getBooleanValue())
          return null;
-      
+
       return swingSideForDoubleSupportRecovery.getEnumValue();
    }
-   
+
    public void initializeParametersForDoubleSupportPushRecovery()
    {
       recoveringFromDoubleSupportFall.set(true);
@@ -253,7 +253,7 @@ public class PushRecoveryControlModule
    {
       if (!enablePushRecovery.getBooleanValue())
          return null;
-      
+
       Footstep footstepForPushRecovery = createFootstepAtCurrentLocation(swingSide);
       checkAndUpdateFootstep(swingTimeRemaining, footstepForPushRecovery);
       return footstepForPushRecovery;

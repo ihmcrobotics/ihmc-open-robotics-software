@@ -84,8 +84,9 @@ public class PartialFootholdControlModule
       }
 
       footRotationCalculator = new FootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
-      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, walkingControllerParameters.getFootLength(), walkingControllerParameters.getFootWidth(), 20, 10, yoGraphicsListRegistry, registry);
-      
+      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, walkingControllerParameters.getFootLength(),
+            walkingControllerParameters.getFootWidth(), 20, 10, yoGraphicsListRegistry, registry);
+
       thresholdForCoPCellOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPCellOccupancy", registry);
       thresholdForCoPCellOccupancy.set(3);
       footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
@@ -94,7 +95,7 @@ public class PartialFootholdControlModule
       thresholdForCoPRegionOccupancy.set(2);
       distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleYoVariable(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry);
       distanceFromLineOfRotationToComputeCoPOccupancy.set(0.02);
-      
+
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
    }
@@ -148,7 +149,8 @@ public class PartialFootholdControlModule
 
    private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
    {
-      int numberOfCellsOccupiedOnSideOfLine = footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT, distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue());
+      int numberOfCellsOccupiedOnSideOfLine = footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
+            distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue());
       boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine >= thresholdForCoPRegionOccupancy.getIntegerValue();
       if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {

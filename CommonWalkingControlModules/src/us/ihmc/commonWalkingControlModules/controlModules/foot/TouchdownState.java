@@ -57,7 +57,8 @@ public class TouchdownState extends AbstractFootControlState
 
    private final YoSE3PIDGains gains;
 
-   public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public TouchdownState(ConstraintType stateEnum, FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, YoSE3PIDGains gains,
+         YoVariableRegistry registry)
    {
       super(stateEnum, footControlHelper, registry);
 
@@ -146,7 +147,7 @@ public class TouchdownState extends AbstractFootControlState
       footPitchdd = onEdgePitchAngleTrajectoryGenerator.getAcceleration();
       //      desiredOnEdgeAngle.set(footPitch);
 
-//      desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]); // Only damp the foot
+      //      desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]); // Only damp the foot
 
       desiredLinearVelocity.setToZero(worldFrame);
       desiredAngularVelocity.setIncludingFrame(contactableFoot.getFrameAfterParentJoint(), 0.0, footPitchd, 0.0);
@@ -157,7 +158,8 @@ public class TouchdownState extends AbstractFootControlState
       desiredAngularAcceleration.changeFrame(worldFrame);
 
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
+      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration,
+            desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
 
       edgeToRotateAbout.getFrameVector(axisOfRotation2d);

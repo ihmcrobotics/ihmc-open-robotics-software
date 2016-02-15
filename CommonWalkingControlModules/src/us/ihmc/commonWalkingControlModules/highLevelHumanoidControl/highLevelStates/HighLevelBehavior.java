@@ -4,7 +4,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.stateMachines.State;
 
-
 public abstract class HighLevelBehavior extends State<HighLevelState>
 {
 

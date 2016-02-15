@@ -9,7 +9,7 @@ public class JointPositionControllerFactory implements HighLevelBehaviorFactory
 {
    private final boolean transitionRequested;
 
-   public JointPositionControllerFactory( boolean transitionRequested)
+   public JointPositionControllerFactory(boolean transitionRequested)
    {
       this.transitionRequested = transitionRequested;
    }

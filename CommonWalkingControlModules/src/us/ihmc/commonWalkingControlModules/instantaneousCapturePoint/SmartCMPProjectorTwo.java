@@ -11,12 +11,11 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class SmartCMPProjectorTwo
 {
    private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedToPushTowardFinalDesiredICP, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
-   private final FrameVector2d finalDesiredICPToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());   
+   private final FrameVector2d finalDesiredICPToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
    private final FrameLine2d rayFromICPAwayFromFinalDesiredICP = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
    private final FramePoint2d finalDesiredICPLocation = new FramePoint2d();
 
@@ -32,7 +31,6 @@ public class SmartCMPProjectorTwo
          parentRegistry.addChild(registry);
    }
 
-
    /**
     * Project the CMP to the support polygon by moving it along the ray from ICP through CMP.
     * Where that ray intersects the support polygon, will be a good point since that point will still
@@ -41,7 +39,8 @@ public class SmartCMPProjectorTwo
     * and we can no longer push the ICP in the originally intended direction.
     * Therefore we try to direct the ICP towards the final desired ICP location (almost equivalent to the next footstep location).
     */
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
+         FramePoint2d desiredCMP)
    {
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
 
@@ -55,9 +54,8 @@ public class SmartCMPProjectorTwo
       capturePoint.changeFrame(returnFrame);
    }
 
-   
-   
-   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
+   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
+         FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
    {
       cmpProjectedAlongRay.set(false);
       cmpProjectedToPushTowardFinalDesiredICP.set(false);
@@ -101,7 +99,7 @@ public class SmartCMPProjectorTwo
             FramePoint2d closestIntersection = findClosestIntersection(finalDesiredICPToICPIntersections, capturePoint);
             desiredCMP.set(closestIntersection);
             return;
-        }
+         }
 
          cmpProjectedToVertex.set(true);
          boolean success = supportPolygon.getClosestVertexWithRay(desiredCMP, rayFromICPAwayFromFinalDesiredICP, true);
@@ -109,7 +107,7 @@ public class SmartCMPProjectorTwo
             supportPolygon.getClosestVertex(desiredCMP, capturePoint);
          return;
       }
-      
+
       supportPolygon.orthogonalProjection(desiredCMP);
    }
 
@@ -135,14 +133,12 @@ public class SmartCMPProjectorTwo
       return (cmpProjectedAlongRay.getBooleanValue() || cmpProjectedToVertex.getBooleanValue());
    }
 
-
    public void setCMPEdgeProjectionInside(double cmpEdgeProjectionInside)
-   {      
+   {
    }
 
-
    public void setMinICPToCMPProjection(double minICPToCMPProjection)
-   {      
+   {
    }
 
 }

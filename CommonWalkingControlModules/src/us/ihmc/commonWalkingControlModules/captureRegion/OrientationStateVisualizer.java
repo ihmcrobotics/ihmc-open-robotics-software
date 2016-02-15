@@ -53,8 +53,10 @@ public class OrientationStateVisualizer
       if (yoGraphicsListRegistry != null)
       {
          yoGraphicsListRegistry.registerArtifact(reducedSupportPolygonCaption, reducedSupportPolygonArtifact);
-         yoGraphicsListRegistry.registerArtifact("PelvisCoordinate", new YoArtifactLineSegment2d("Pelvis X Axis", yoPelvisXAxisLineSegment, PELVIS_X_AXIS_COLOR, 0.007, 0.01));
-         yoGraphicsListRegistry.registerArtifact("PelvisCoordinate", new YoArtifactLineSegment2d("Pelvis Y Axis", yoPelvisYAxisLineSegment, PELVIS_Y_AXIS_COLOR, 0.007, 0.01));
+         yoGraphicsListRegistry.registerArtifact("PelvisCoordinate",
+               new YoArtifactLineSegment2d("Pelvis X Axis", yoPelvisXAxisLineSegment, PELVIS_X_AXIS_COLOR, 0.007, 0.01));
+         yoGraphicsListRegistry.registerArtifact("PelvisCoordinate",
+               new YoArtifactLineSegment2d("Pelvis Y Axis", yoPelvisYAxisLineSegment, PELVIS_Y_AXIS_COLOR, 0.007, 0.01));
       }
 
       parentRegistry.addChild(registry);

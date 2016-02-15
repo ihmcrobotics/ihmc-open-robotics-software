@@ -9,8 +9,7 @@ public class DesiredSpatialAccelerationCommandPool
 
    private final ArrayList<DesiredSpatialAccelerationCommand> desiredSpatialAccelerationCommandUnusedPool = new ArrayList<DesiredSpatialAccelerationCommand>();
    private final ArrayList<DesiredSpatialAccelerationCommand> desiredSpatialAccelerationCommandUsedPool = new ArrayList<DesiredSpatialAccelerationCommand>();
-   
-   
+
    public DesiredSpatialAccelerationCommand getUnusedDesiredSpatialAccelerationCommand()
    {
       if (desiredSpatialAccelerationCommandUnusedPool.isEmpty())
@@ -31,16 +30,16 @@ public class DesiredSpatialAccelerationCommandPool
          return commandToReturn;
       }
    }
-   
+
    public void recycleObjectPool()
    {
-      while(!desiredSpatialAccelerationCommandUsedPool.isEmpty())
+      while (!desiredSpatialAccelerationCommandUsedPool.isEmpty())
       {
          int lastIndex = desiredSpatialAccelerationCommandUsedPool.size() - 1;
          DesiredSpatialAccelerationCommand removedCommand = desiredSpatialAccelerationCommandUsedPool.remove(lastIndex);
-         
+
          desiredSpatialAccelerationCommandUnusedPool.add(removedCommand);
-      }   
+      }
    }
 
    public DesiredSpatialAccelerationCommand getUnusedDesiredSpatialAccelerationCommand(GeometricJacobian jacobian,

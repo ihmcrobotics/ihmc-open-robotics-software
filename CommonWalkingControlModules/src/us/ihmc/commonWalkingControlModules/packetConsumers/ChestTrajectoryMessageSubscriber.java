@@ -11,7 +11,7 @@ public class ChestTrajectoryMessageSubscriber implements PacketConsumer<ChestTra
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    private final AtomicReference<ChestTrajectoryMessage> latestMessageReference = new AtomicReference<ChestTrajectoryMessage>(null);
-   
+
    public ChestTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

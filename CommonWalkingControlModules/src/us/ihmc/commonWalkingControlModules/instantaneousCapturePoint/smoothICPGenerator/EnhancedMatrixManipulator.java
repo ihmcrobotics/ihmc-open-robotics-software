@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-
 import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -10,7 +9,6 @@ public class EnhancedMatrixManipulator
    public EnhancedMatrixManipulator()
    {
    }
-
 
    public static void setMatrixColumnToVector(int columnIndex, DenseMatrix64F Matrix, DenseMatrix64F vector)
    {
@@ -27,10 +25,11 @@ public class EnhancedMatrixManipulator
          Matrix.set(rowIndex, i, vector.get(i));
       }
    }
-   
+
    public static void setMatrixRowToTuple3d(int rowIndex, DenseMatrix64F Matrix, Tuple3d tuple3d)
    {
-      if (Matrix.getNumCols() != 3) throw new RuntimeException("(Matrix.getNumCols() != 3)");
+      if (Matrix.getNumCols() != 3)
+         throw new RuntimeException("(Matrix.getNumCols() != 3)");
 
       Matrix.set(rowIndex, 0, tuple3d.getX());
       Matrix.set(rowIndex, 1, tuple3d.getY());

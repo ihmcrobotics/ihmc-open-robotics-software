@@ -15,33 +15,33 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 public interface HandPoseProvider
 {
    public abstract FramePose getDesiredHandPose(RobotSide robotSide);
-   
+
    public abstract FramePose[] getDesiredHandPoses(RobotSide robotSide);
 
    public abstract ReferenceFrame getDesiredReferenceFrame(RobotSide robotSide);
 
    public abstract double getTrajectoryTime();
-   
+
    public abstract void clear();
-   
+
    public abstract boolean checkForNewPose(RobotSide robotSide);
 
    public abstract boolean checkForNewPoseList(RobotSide robotSide);
-   
+
    public abstract boolean checkForNewRotateAboutAxisPacket(RobotSide robotSide);
-   
+
    public abstract Point3d getRotationAxisOriginInWorld(RobotSide robotSide);
-   
+
    public abstract Vector3d getRotationAxisInWorld(RobotSide robotSide);
-   
+
    public abstract HandRotateAboutAxisPacket.DataType checkHandRotateAboutAxisDataType(RobotSide robotSide);
-   
+
    public abstract double getRotationAngleRightHandRule(RobotSide robotSide);
 
    public abstract boolean controlHandAngleAboutAxis(RobotSide robotSide);
-   
+
    public abstract double getGraspOffsetFromControlFrame(RobotSide robotSide);
-   
+
    public abstract boolean checkForHomePosition(RobotSide robotSide);
 
    public abstract HandPosePacket.DataType checkHandPosePacketDataType(RobotSide robotSide);
@@ -53,7 +53,7 @@ public interface HandPoseProvider
    public abstract Map<OneDoFJoint, double[]> getDesiredJointAngleForWaypointTrajectory(RobotSide robotSide);
 
    public abstract Vector3d getForceConstraint(RobotSide robotSide);
-   
+
    public abstract double getTangentialForce(RobotSide robotSide);
 
    /**

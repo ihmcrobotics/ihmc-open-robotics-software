@@ -67,12 +67,12 @@ public class DesiredFootstepTest
     * @throws IOException 
     */
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+   @DeployableTestMethod(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testPassingFootstepData() throws IOException
    {
       Random random = new Random(5642769L);
-      
+
       // setup comms
       NetworkPorts port = NetworkPorts.createRandomTestPort(random);
       //      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
@@ -102,7 +102,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.4)
+   @DeployableTestMethod(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
@@ -132,12 +132,12 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.5, targets = TestPlanTarget.Flaky)
+   @DeployableTestMethod(estimatedDuration = 1.5, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
       Random random = new Random(5642568L);
-      
+
       // setup comms
       NetworkPorts port = NetworkPorts.createRandomTestPort(random);
       //      QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
@@ -173,12 +173,12 @@ public class DesiredFootstepTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.4)
+   @DeployableTestMethod(estimatedDuration = 2.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
       Random random = new Random(5632469L);
-      
+
       // Create one server for two types of data
       NetworkPorts pathPort = NetworkPorts.createRandomTestPort(random);
 
@@ -244,12 +244,12 @@ public class DesiredFootstepTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.4)
+   @DeployableTestMethod(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {
       Random random = new Random(3642569L);
-      
+
       // setup comms
       NetworkPorts port = NetworkPorts.createRandomTestPort(random);
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
@@ -330,7 +330,8 @@ public class DesiredFootstepTest
          RigidBody endEffector = createRigidBody(robotSide);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
+               new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
@@ -387,13 +388,15 @@ public class DesiredFootstepTest
       public void receivedPacket(FootstepDataMessage packet)
       {
          RigidBody endEffector = createRigidBody(packet.getRobotSide());
-         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
+               ReferenceFrame.getWorldFrame());
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame,
+               trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -413,7 +416,8 @@ public class DesiredFootstepTest
          for (FootstepDataMessage footstepData : packet)
          {
             RigidBody endEffector = createRigidBody(footstepData.getRobotSide());
-            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
+            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
+                  ReferenceFrame.getWorldFrame());
 
             Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, contactablePlaneBody);
             reconstructedFootstepPath.add(footstep);

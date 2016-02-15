@@ -21,14 +21,12 @@ public class SCSDoubleSupportICPTester
       double initialTransferSupportTime = 0.4;
       double steppingTime = singleSupportTime + doubleSupportTime;
       SCSDoubleSupportICPTesterController5 controller = new SCSDoubleSupportICPTesterController5(pointAndLinePlotter, testRobot.getYoTime(), scs.getDT(),
-                                      singleSupportTime, doubleSupportTime, initialTransferSupportTime);
+            singleSupportTime, doubleSupportTime, initialTransferSupportTime);
       controller.initialize();
 
-      
       pointAndLinePlotter.createAndShowOverheadPlotterInSCS(scs);
 
-      
-      testRobot.setController(controller, 1);    // Jojo: was 5 before
+      testRobot.setController(controller, 1); // Jojo: was 5 before
 
       pointAndLinePlotter.addGraphicObjectsAndArtifactsToSCS(scs);
 

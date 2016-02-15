@@ -34,7 +34,8 @@ public class ExternalWrenchHandler
    private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final SpatialForceVector tempWrench = new SpatialForceVector();
 
-   public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, InverseDynamicsJoint rootJoint, Collection<? extends PlaneContactState> planeContactStates)
+   public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, InverseDynamicsJoint rootJoint,
+         Collection<? extends PlaneContactState> planeContactStates)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 

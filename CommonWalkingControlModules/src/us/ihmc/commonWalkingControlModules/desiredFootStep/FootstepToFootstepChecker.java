@@ -31,14 +31,14 @@ public class FootstepToFootstepChecker
    private static final double MAXIMUM_DELTA_R_SQUARED = MAXIMUM_DELTA_R * MAXIMUM_DELTA_R;
    private static final double MAXIMUM_DELTA_Z = 0.3;
 
-   private static final double MAXIMUM_DELTA_ROLL = Math.toRadians(15.0);    // 0.26
-   private static final double MAXIMUM_DELTA_PITCH = Math.toRadians(15.0);    // 0.26
-   private static final double MAXIMUM_DELTA_YAW = Math.toRadians(90.0);    // 1.57 radians
+   private static final double MAXIMUM_DELTA_ROLL = Math.toRadians(15.0); // 0.26
+   private static final double MAXIMUM_DELTA_PITCH = Math.toRadians(15.0); // 0.26
+   private static final double MAXIMUM_DELTA_YAW = Math.toRadians(90.0); // 1.57 radians
    private static final double MINIMUM_DELTA_YAW = Math.toRadians(26.0);
-   private static final double semiCircleOffset = 0.14;    // From RangeOfStepGraphicsManager: Should have a unified source, not just a magic number.
+   private static final double semiCircleOffset = 0.14; // From RangeOfStepGraphicsManager: Should have a unified source, not just a magic number.
 
    public static boolean isFootstepToFootstepChangeLarge(Footstep initialFootstep, Footstep stanceFootstep, Footstep endingFootstep,
-           RobotSide stanceFootstepSide)
+         RobotSide stanceFootstepSide)
    {
       initialFootstep.getPose(initialFramePose);
       stanceFootstep.getPose(stanceFramePose);
@@ -103,7 +103,7 @@ public class FootstepToFootstepChecker
       double deltaYaw = AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getYaw(), stanceFramePose.getYaw());
       if (stanceFootstepSide == RobotSide.LEFT)
          deltaYaw = -deltaYaw;
-      
+
       double deltaPitch = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getPitch(), stanceFramePose.getPitch()));
       double deltaRoll = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endingFramePose.getRoll(), stanceFramePose.getRoll()));
 
@@ -127,15 +127,13 @@ public class FootstepToFootstepChecker
          FrameLineSegment2d swingLine = new FrameLineSegment2d(initialPoint, endPoint);
          double swingLineDistance = swingLine.distance(stancePoint);
 
-         swingsThroughStanceLeg = swingsThroughStanceLeg(
-               stanceFootstepSide, swingLine);
-         
+         swingsThroughStanceLeg = swingsThroughStanceLeg(stanceFootstepSide, swingLine);
+
          swingsThroughStanceLeg |= swingLineDistance < semiCircleOffset;
       }
 
       boolean ret;
 
-      
       if (deltaRSquared > MAXIMUM_DELTA_R_SQUARED)
          ret = true;
       else if (deltaZ > MAXIMUM_DELTA_Z)
@@ -158,16 +156,16 @@ public class FootstepToFootstepChecker
       return ret;
    }
 
-   private static boolean swingsThroughStanceLeg(RobotSide stanceFootstepSide,
-         FrameLineSegment2d swingLine) {
+   private static boolean swingsThroughStanceLeg(RobotSide stanceFootstepSide, FrameLineSegment2d swingLine)
+   {
       FrameVector offset1 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, semiCircleOffset);
-      FrameVector offset2 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, -3*MAXIMUM_DELTA_R_SQUARED);
-      FramePoint2d stanceInsideOffset = new FramePoint2d(worldFrame,offset1.getX(),offset1.getY());
-      FramePoint2d stanceOutsideOffset = new FramePoint2d(worldFrame,offset2.getX(),offset2.getY());
+      FrameVector offset2 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, -3 * MAXIMUM_DELTA_R_SQUARED);
+      FramePoint2d stanceInsideOffset = new FramePoint2d(worldFrame, offset1.getX(), offset1.getY());
+      FramePoint2d stanceOutsideOffset = new FramePoint2d(worldFrame, offset2.getX(), offset2.getY());
       FrameLineSegment2d crossThroughLine = new FrameLineSegment2d(stanceInsideOffset, stanceOutsideOffset);
       FramePoint2d intersectionPoint = crossThroughLine.intersectionWith(swingLine);
       boolean swingsThroughStanceLeg;
-      if (intersectionPoint==null)
+      if (intersectionPoint == null)
          swingsThroughStanceLeg = false;
       else
          swingsThroughStanceLeg = true;
@@ -241,10 +239,10 @@ public class FootstepToFootstepChecker
          return;
 
       if (ret)
-         System.err.println("FootstepToFootstepChecker: " + ret + ", x" + x + ", y" + y + ", z" + z + ", r" + Math.sqrt(r2) + ", y" + yaw + ", p" + pitch
-                            + ", r" + roll);
+         System.err.println(
+               "FootstepToFootstepChecker: " + ret + ", x" + x + ", y" + y + ", z" + z + ", r" + Math.sqrt(r2) + ", y" + yaw + ", p" + pitch + ", r" + roll);
       else
-         System.out.println("FootstepToFootstepChecker: " + ret + ", x" + x + ", y" + y + ", z" + z + ", r" + Math.sqrt(r2) + ", y" + yaw + ", p" + pitch
-                            + ", r" + roll);
+         System.out.println(
+               "FootstepToFootstepChecker: " + ret + ", x" + x + ", y" + y + ", z" + z + ", r" + Math.sqrt(r2) + ", y" + yaw + ", p" + pitch + ", r" + roll);
    }
 }

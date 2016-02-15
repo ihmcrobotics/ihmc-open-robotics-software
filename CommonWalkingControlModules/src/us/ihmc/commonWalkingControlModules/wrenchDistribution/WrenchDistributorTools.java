@@ -34,9 +34,9 @@ public class WrenchDistributorTools
    public static FramePoint computePseudoCMP3d(FramePoint centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
    {
       FramePoint pseudoCMP3d = new FramePoint();
-      
+
       computePseudoCMP3d(pseudoCMP3d, centerOfMass, cmp, fZ, totalMass, omega0);
-      
+
       return pseudoCMP3d;
    }
 
@@ -51,7 +51,7 @@ public class WrenchDistributorTools
    public static FrameVector computeForce(FramePoint centerOfMass, FramePoint cmp, double fZ)
    {
       FrameVector force = new FrameVector(centerOfMass);
-      
+
       computeForce(force, centerOfMass, cmp, fZ);
 
       return force;
@@ -88,7 +88,7 @@ public class WrenchDistributorTools
    }
 
    public static void computeSupportVectorMatrixBlock(DenseMatrix64F supportVectorMatrixBlock, ArrayList<FrameVector> normalizedSupportVectors,
-           ReferenceFrame referenceFrame)
+         ReferenceFrame referenceFrame)
    {
       for (int i = 0; i < normalizedSupportVectors.size(); i++)
       {

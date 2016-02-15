@@ -79,12 +79,16 @@ public class HandCompliantControlHelper
       ReferenceFrame forceSensorMeasurementFrame = momentumBasedController.getWristForceSensor(robotSide).getMeasurementFrame();
 
       forceDeadzoneSize = new DoubleYoVariable(namePrefix + "ForceDeadzoneSize", registry);
-      deadzoneMeasuredForce = DeadzoneYoFrameVector.createDeadzoneYoFrameVector(namePrefix + "DeadzoneMeasuredForce", registry, forceDeadzoneSize, forceSensorMeasurementFrame);
+      deadzoneMeasuredForce = DeadzoneYoFrameVector.createDeadzoneYoFrameVector(namePrefix + "DeadzoneMeasuredForce", registry, forceDeadzoneSize,
+            forceSensorMeasurementFrame);
       torqueDeadzoneSize = new DoubleYoVariable(namePrefix + "TorqueDeadzoneSize", registry);
-      deadzoneMeasuredTorque = DeadzoneYoFrameVector.createDeadzoneYoFrameVector(namePrefix + "DeadzoneMeasuredTorque", registry, torqueDeadzoneSize, forceSensorMeasurementFrame);
+      deadzoneMeasuredTorque = DeadzoneYoFrameVector.createDeadzoneYoFrameVector(namePrefix + "DeadzoneMeasuredTorque", registry, torqueDeadzoneSize,
+            forceSensorMeasurementFrame);
       measuredForceAlpha = new DoubleYoVariable(namePrefix + "MeasuredForceAlpha", registry);
-      filteredMeasuredForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredMeasuredForce", "", registry, measuredForceAlpha, deadzoneMeasuredForce);
-      filteredMeasuredTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredMeasuredTorque", "", registry, measuredForceAlpha, deadzoneMeasuredTorque);
+      filteredMeasuredForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredMeasuredForce", "", registry,
+            measuredForceAlpha, deadzoneMeasuredForce);
+      filteredMeasuredTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredMeasuredTorque", "", registry,
+            measuredForceAlpha, deadzoneMeasuredTorque);
 
       measuredForceAtControlFrame = new YoFrameVector(namePrefix + "MeasuredForceAtControlFrame", null, registry);
       measuredTorqueAtControlFrame = new YoFrameVector(namePrefix + "MeasuredTorqueAtControlFrame", null, registry);
@@ -105,7 +109,7 @@ public class HandCompliantControlHelper
       for (int i = 0; i < 3; i++)
       {
          doCompliantControlLinear[i].set(true);
-//         doCompliantControlAngular[i].set(true);
+         //         doCompliantControlAngular[i].set(true);
       }
 
       linearGain = new DoubleYoVariable(namePrefix + "CompliantControlLinearGain", registry);
@@ -128,7 +132,7 @@ public class HandCompliantControlHelper
       compliantControlMaxAngularDisplacement.set(0.2);
       compliantControlLeakRatio.set(0.999);
       compliantControlResetLeakRatio.set(0.9999);
-      
+
       forceDeadzoneSize.set(10.0);
       torqueDeadzoneSize.set(0.5);
    }
@@ -213,13 +217,13 @@ public class HandCompliantControlHelper
    private void updateWristMeasuredWrench(FrameVector measuredForceToPack, FrameVector measuredTorqueToPack)
    {
       momentumBasedController.getWristMeasuredWrenchHandWeightCancelled(measuredWrench, robotSide);
-      
+
       measuredWrench.packLinearPartIncludingFrame(tempForceVector);
       measuredWrench.packAngularPartIncludingFrame(tempTorqueVector);
-      
+
       deadzoneMeasuredForce.update(tempForceVector);
       deadzoneMeasuredTorque.update(tempTorqueVector);
-      
+
       filteredMeasuredForce.update();
       filteredMeasuredTorque.update();
 

@@ -29,7 +29,7 @@ public class HandPoseStatusProducer
       HandPoseStatus handPoseStatus = HandPoseStatus.createPositionIsReachedPacket(robotSide);
       objectCommunicator.queueDataToSend(handPoseStatus);
    }
-   
+
    public void sendStartedStatus(RobotSide robotSide)
    {
       HandPoseStatus handPoseStatus = HandPoseStatus.createHandPoseIsStarted(robotSide);

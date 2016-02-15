@@ -18,7 +18,8 @@ public abstract class TrajectoryBasedTaskspaceHandControlState extends Taskspace
 
    public abstract void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator);
 
-   public void setTrajectoryWithAngularControlQuality(PoseTrajectoryGenerator poseTrajectoryGenerator, double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
+   public void setTrajectoryWithAngularControlQuality(PoseTrajectoryGenerator poseTrajectoryGenerator, double percentOfTrajectoryWithOrientationBeingControlled,
+         double trajectoryTime)
    {
       setTrajectory(poseTrajectoryGenerator);
    }

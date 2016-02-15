@@ -80,7 +80,8 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       knee = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
       joints.remove(knee);
-      gimpedJacobianId = momentumBasedController.getOrCreateGeometricJacobian(joints.toArray(new InverseDynamicsJoint[joints.size()]), jacobian.getJacobianFrame());
+      gimpedJacobianId = momentumBasedController.getOrCreateGeometricJacobian(joints.toArray(new InverseDynamicsJoint[joints.size()]),
+            jacobian.getJacobianFrame());
 
       selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
@@ -175,12 +176,10 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
          {
             legLength = (lowerLegLength + upperLegLength - 1e-6);
          }
-         estimatedFinalKneeAngle
-               .set(Math.PI
-                     - Math.acos((upperLegLength * upperLegLength + lowerLegLength * lowerLegLength - legLength * legLength)
-                           / (2 * upperLegLength * lowerLegLength)));
+         estimatedFinalKneeAngle.set(Math.PI - Math
+               .acos((upperLegLength * upperLegLength + lowerLegLength * lowerLegLength - legLength * legLength) / (2 * upperLegLength * lowerLegLength)));
       }
-      
+
       estimatedFinalKneeAngle.set(initialKneeAngle.getDoubleValue());
 
       kneeTrajectory.setSexticUsingWaypoint(0, swingTimeProvider.getValue() / 2.0, swingTimeProvider.getValue(), initialKneeAngle.getDoubleValue(), 0, 0,
@@ -193,8 +192,8 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-            desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
+      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration,
+            desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
 
       footControlHelper.submitTaskspaceConstraint(gimpedJacobianId, footAcceleration);
@@ -231,6 +230,6 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    public void requestSwingSpeedUp(double speedUpFactor)
    {
       // TODO Auto-generated method stub
-      
+
    }
 }

@@ -184,8 +184,7 @@ public class OptimizationMomentumControlModule
       externalWrenchHandler.reset();
    }
 
-   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates)
-         throws MomentumControlModuleException
+   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates) throws MomentumControlModuleException
 
    {
       checkQPSolverSwitch();
@@ -232,7 +231,8 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   private MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, boolean useNullSpaceProjection) throws MomentumControlModuleException
+   private MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, boolean useNullSpaceProjection)
+         throws MomentumControlModuleException
 
    {
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());

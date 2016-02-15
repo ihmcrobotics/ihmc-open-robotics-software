@@ -5,7 +5,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-
 public class UserDesiredHandLoadBearingProvider implements HandLoadBearingProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

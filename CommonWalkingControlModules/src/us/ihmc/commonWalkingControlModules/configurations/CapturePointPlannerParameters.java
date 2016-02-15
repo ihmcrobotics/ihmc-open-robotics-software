@@ -189,7 +189,7 @@ public interface CapturePointPlannerParameters
     * Only used when using the new ICP planner with two CMPs per support.
     * The forward offset of the CMPs is computed according to the upcoming step length times the returned factor
     * One third seems to be a reasonable value.
-    */ 
+    */
    public abstract double getStepLengthToCMPOffsetFactor();
 
    /**
@@ -197,7 +197,7 @@ public interface CapturePointPlannerParameters
     * If true, the ICP planner will put the exit CMP on the toes of the trailing foot when stepping down and forward.
     */
    public abstract boolean useExitCMPOnToesForSteppingDown();
-   
+
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * Threshold used to figure out if the exit CMP should be put on the toes.

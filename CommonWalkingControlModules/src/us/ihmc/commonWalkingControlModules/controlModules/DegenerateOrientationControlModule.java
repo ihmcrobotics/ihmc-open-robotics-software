@@ -19,7 +19,6 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-
 public abstract class DegenerateOrientationControlModule
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -45,7 +44,7 @@ public abstract class DegenerateOrientationControlModule
    private final double controlDT;
 
    private final SelectionMatrixComputer selectionMatrixComputer = new SelectionMatrixComputer();
-   
+
    public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
          TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -98,7 +97,8 @@ public abstract class DegenerateOrientationControlModule
       this.selectionMatrices.add(new DenseMatrix64F(jacobian.getNumberOfColumns(), Twist.SIZE));
 
       int index = jacobians.size() - 1;
-      if (index != selectionMatrices.size() - 1) throw new RuntimeException("RepInvariant Violation");
+      if (index != selectionMatrices.size() - 1)
+         throw new RuntimeException("RepInvariant Violation");
 
       jacobianIndex.set(index);
 
@@ -137,14 +137,16 @@ public abstract class DegenerateOrientationControlModule
 
    public void compute()
    {
-      if (jacobians.get(jacobianIndex.getIntegerValue()).getNumberOfColumns() == 0) return;
+      if (jacobians.get(jacobianIndex.getIntegerValue()).getNumberOfColumns() == 0)
+         return;
 
       packDesiredFrameOrientation(desiredOrientation);
       packDesiredAngularVelocity(desiredAngularVelocity);
       packDesiredAngularAccelerationFeedForward(feedForwardAngularAcceleration);
 
       int localJacobianIndex = this.jacobianIndex.getIntegerValue();
-      if (localJacobianIndex == -1) return;
+      if (localJacobianIndex == -1)
+         return;
 
       GeometricJacobian jacobian = jacobians.get(localJacobianIndex);
       DenseMatrix64F selectionMatrix = selectionMatrices.get(localJacobianIndex);
@@ -153,7 +155,8 @@ public abstract class DegenerateOrientationControlModule
       controlledAngularAcceleration.setToZero(expressedInFrame);
 
       int localBaseIndex = baseIndex.getIntegerValue();
-      if (localBaseIndex == -1) return;
+      if (localBaseIndex == -1)
+         return;
 
       RigidBodyOrientationControlModule rigidBodyOrientationControlModule = rigidBodyOrientationControlModules.get(localBaseIndex);
       rigidBodyOrientationControlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
@@ -253,5 +256,4 @@ public abstract class DegenerateOrientationControlModule
       return bases;
    }
 
-   
 }

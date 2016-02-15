@@ -113,8 +113,8 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       if (mass < minimumMassOfRigidBodies.getDoubleValue())
          mass = minimumMassOfRigidBodies.getDoubleValue();
 
-      float massScale = (float) ((mass - minimumMassOfRigidBodies.getDoubleValue()) / (maximumMassOfRigidBodies.getDoubleValue() - minimumMassOfRigidBodies
-            .getDoubleValue()));
+      float massScale = (float) ((mass - minimumMassOfRigidBodies.getDoubleValue())
+            / (maximumMassOfRigidBodies.getDoubleValue() - minimumMassOfRigidBodies.getDoubleValue()));
 
       float H = (1.0f - massScale) * 0.4f;
       float S = 0.9f;

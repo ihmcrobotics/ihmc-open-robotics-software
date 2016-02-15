@@ -17,7 +17,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 
-
 public class CapturabilityBasedDesiredCoPVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("CapturabilityBasedDesiredCoPVisualizer");
@@ -30,7 +29,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private final YoFramePoint pseudoCMP = new YoFramePoint("pseudoCMP", "", world, registry);
    private final YoFramePoint finalDesiredCapturePoint = new YoFramePoint("finalDesiredCapturePoint", "", world, registry);
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", world, registry);
-   
+
    public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoGraphicsList yoGraphicList = new YoGraphicsList("CapturabilityBasedDesiredCoPVisualizer");
@@ -51,27 +50,24 @@ public class CapturabilityBasedDesiredCoPVisualizer
       desiredCMP.setToNaN();
       pseudoCMP.setToNaN();
       centerOfMass.setToNaN();
-      
+
       parentRegistry.addChild(registry);
    }
 
    private void addDesiredCoPViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
-      YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired Center of Pressure", desiredCoP, 0.012, YoAppearance.Gray(),
-                                                GraphicType.CROSS);
+      YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired Center of Pressure", desiredCoP, 0.012, YoAppearance.Gray(), GraphicType.CROSS);
       yoGraphicList.add(desiredCoPViz);
       artifactList.add(desiredCoPViz.createArtifact());
    }
 
    private void addDesiredCMPViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
-      YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", desiredCMP, 0.012, YoAppearance.Red(),
-                                                GraphicType.CROSS);
+      YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", desiredCMP, 0.012, YoAppearance.Red(), GraphicType.CROSS);
       yoGraphicList.add(desiredCMPViz);
       artifactList.add(desiredCMPViz.createArtifact());
-      
-      YoGraphicPosition pseudoCMPViz = new YoGraphicPosition("Pseudo CMP", pseudoCMP, 0.012, YoAppearance.Purple(),
-            GraphicType.CROSS);
+
+      YoGraphicPosition pseudoCMPViz = new YoGraphicPosition("Pseudo CMP", pseudoCMP, 0.012, YoAppearance.Purple(), GraphicType.CROSS);
       yoGraphicList.add(pseudoCMPViz);
       artifactList.add(pseudoCMPViz.createArtifact());
    }
@@ -79,7 +75,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private void addDesiredCapturePointViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", desiredCapturePoint, 0.01, YoAppearance.Yellow(),
-                                                         GraphicType.ROTATED_CROSS);
+            GraphicType.ROTATED_CROSS);
       yoGraphicList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
    }
@@ -87,7 +83,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private void addFinalDesiredCapturePointViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", finalDesiredCapturePoint, 0.01, YoAppearance.Beige(),
-                                                         GraphicType.ROTATED_CROSS);
+            GraphicType.ROTATED_CROSS);
       yoGraphicList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
    }
@@ -113,7 +109,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    }
 
    private final FramePoint tempPoint = new FramePoint();
-   
+
    public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint2d)
    {
       tempPoint.setIncludingFrame(desiredCapturePoint2d.getReferenceFrame(), desiredCapturePoint2d.getX(), desiredCapturePoint2d.getY(), 0.0);

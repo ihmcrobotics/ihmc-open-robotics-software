@@ -31,7 +31,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
 
    private final FramePoint tmpCapturePointPosition;
    private final FrameVector tmpCapturePointVelocity;
-   
+
    public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -48,7 +48,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.isTimeBeingFrozen = new BooleanYoVariable(namePrefix + "IsTimeBeingFrozen", registry);
       this.tmpCapturePointPosition = new FramePoint(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector(worldFrame);
-      
+
       this.isTimeBeingFrozen.set(false);
       this.timeDelay.set(0.0);
       this.capturePointPositionError.set(0.0);
@@ -60,8 +60,8 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
-   public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack, FramePoint currentCapturePointPosition,
-         double time)
+   public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
+         FramePoint currentCapturePointPosition, double time)
    {
       super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
 

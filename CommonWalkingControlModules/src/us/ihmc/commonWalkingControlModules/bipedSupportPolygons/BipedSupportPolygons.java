@@ -236,7 +236,7 @@ public class BipedSupportPolygons
    }
 
    private final FramePoint2d tempFramePoint2d = new FramePoint2d();
-   
+
    private void updateSupportPolygon(boolean inDoubleSupport, boolean neitherFootIsSupportingFoot, RobotSide supportSide)
    {
       // Get the support polygon. If in double support, it is the combined polygon.
@@ -269,7 +269,7 @@ public class BipedSupportPolygons
 
       sweetSpotsInMidFeetZUp.get(RobotSide.LEFT).getFrameTuple2dIncludingFrame(tempFramePoint2d);
       footToFootLineSegmentInMidFeetZUp.setFirstEndPoint(tempFramePoint2d);
-      
+
       sweetSpotsInMidFeetZUp.get(RobotSide.RIGHT).getFrameTuple2dIncludingFrame(tempFramePoint2d);
       footToFootLineSegmentInMidFeetZUp.setSecondEndPoint(tempFramePoint2d);
 

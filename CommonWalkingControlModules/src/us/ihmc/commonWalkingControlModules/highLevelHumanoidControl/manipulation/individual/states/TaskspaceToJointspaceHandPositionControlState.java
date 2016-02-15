@@ -150,7 +150,8 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
          for (OneDoFJoint joint : oneDoFJoints)
          {
-            AlphaFilteredYoVariable filteredFeedForwardAcceleration = new AlphaFilteredYoVariable("qdd_ff_filt_" + joint.getName(), registry, feedForwardAccelerationAlpha);
+            AlphaFilteredYoVariable filteredFeedForwardAcceleration = new AlphaFilteredYoVariable("qdd_ff_filt_" + joint.getName(), registry,
+                  feedForwardAccelerationAlpha);
             filteredFeedForwardAccelerations.put(joint, filteredFeedForwardAcceleration);
          }
       }
@@ -345,7 +346,8 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       }
       else
       {
-         double timeToDecayOrientationControl = 0.5 * percentOfTrajectoryWithOrientationBeingControlled.getDoubleValue() * activeTrajectoryTime.getDoubleValue();
+         double timeToDecayOrientationControl = 0.5 * percentOfTrajectoryWithOrientationBeingControlled.getDoubleValue()
+               * activeTrajectoryTime.getDoubleValue();
          startTimeInStateToIgnoreOrientation.set(timeToDecayOrientationControl);
          endTimeInStateToIgnoreOrientation.set(activeTrajectoryTime.getDoubleValue() - timeToDecayOrientationControl);
       }
@@ -442,7 +444,8 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    }
 
    @Override
-   public void setTrajectoryWithAngularControlQuality(PoseTrajectoryGenerator poseTrajectoryGenerator, double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
+   public void setTrajectoryWithAngularControlQuality(PoseTrajectoryGenerator poseTrajectoryGenerator, double percentOfTrajectoryWithOrientationBeingControlled,
+         double trajectoryTime)
    {
       this.poseTrajectoryGenerator = poseTrajectoryGenerator;
       percentOfTrajectoryWithOrientationBeingControlled = MathTools.clipToMinMax(percentOfTrajectoryWithOrientationBeingControlled, 0.0, 1.0);
@@ -466,7 +469,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    @Override
    public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
    {
-      if(handCompliantControlHelper != null)
+      if (handCompliantControlHelper != null)
       {
          this.taskspaceToJointspaceCalculator = taskspaceToJointspaceCalculator;
          handCompliantControlHelper.setCompliantControlFrame(this.taskspaceToJointspaceCalculator.getControlFrame());

@@ -11,7 +11,7 @@ public class FootstepTimingParameters
    private double footstepPathTransferTime;
    private double slowBlindWalkingTransferTime;
    private double blindWalkingInMudTransferTime;
-   
+
    private FootstepTimingParameters()
    {
 
@@ -47,18 +47,18 @@ public class FootstepTimingParameters
       return footstepTimingParameters;
    }
 
-   public void setSwingTime(double swingTime) 
+   public void setSwingTime(double swingTime)
    {
-      if (swingTime < 0.01) 
+      if (swingTime < 0.01)
       {
          return;
       }
       this.footstepPathSwingTime = swingTime;
    }
-   
-   public void setTransferTime(double transferTime) 
+
+   public void setTransferTime(double transferTime)
    {
-      if (transferTime < 0.01) 
+      if (transferTime < 0.01)
       {
          return;
       }

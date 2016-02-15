@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
-
 public class DesiredRateOfChangeOfMomentumCommand
 {
    private MomentumRateOfChangeData momentumRateOfChangeData;

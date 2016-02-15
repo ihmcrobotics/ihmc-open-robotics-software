@@ -11,15 +11,19 @@ public class HeightCalculatorParameters
    private double zHeightForOutlierQualification;
    private int numberOfOutliersToIgnore;
 
-   public HeightCalculatorParameters(double verticalBuffer, double pathWidth){
+   public HeightCalculatorParameters(double verticalBuffer, double pathWidth)
+   {
       this(0.0, verticalBuffer, pathWidth);
    }
 
-   public HeightCalculatorParameters(double horizontalBuffer, double verticalBuffer, double pathWidth){
+   public HeightCalculatorParameters(double horizontalBuffer, double verticalBuffer, double pathWidth)
+   {
       this(horizontalBuffer, verticalBuffer, pathWidth, 0.0, 0);
    }
 
-   public HeightCalculatorParameters(double horizontalBuffer, double verticalBuffer, double pathWidth, double zHeightForOutlierQualification, int numberOfOutliersToIgnore){
+   public HeightCalculatorParameters(double horizontalBuffer, double verticalBuffer, double pathWidth, double zHeightForOutlierQualification,
+         int numberOfOutliersToIgnore)
+   {
       this.horizontalBuffer = horizontalBuffer;
       this.verticalBuffer = verticalBuffer;
       this.pathWidth = pathWidth;

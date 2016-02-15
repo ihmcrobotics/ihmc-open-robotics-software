@@ -27,7 +27,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-
 public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
 {
    private final BooleanYoVariable matchSupportFootPlane = new BooleanYoVariable("matchSupportFootPlane", registry);
@@ -144,7 +143,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final FrameVector2d desiredHeading = new FrameVector2d();
    private final FrameVector2d desiredVelocity = new FrameVector2d();
    private final FrameVector2d toLeftOfDesiredHeading = new FrameVector2d();
-   
+
    // TODO: clean up
    private FrameVector2d computeDesiredOffsetFromSupportAnkle(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
    {
@@ -255,32 +254,25 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       if (heightMap == null)
       {
          /*
-          * Assume that the ground height is constant.
-          *
-          * Specifically, if we assume that: 1) the lowest contact point on the
-          * upcoming swing foot is in contact with the ground 2) the ground
-          * height at the lowest upcoming swing foot contact point is the same
-          * as the ground height at the lowest swing foot contact point
-          *
-          * then the following holds:
-          *
-          * let upcomingSwingMinZ be the z coordinate of the vector (expressed
-          * in world frame) from upcoming swing ankle to the lowest contact
-          * point on the stance foot (compared in world frame). Current foot
-          * orientation is used to determine this value.
-          *
-          * let footstepMinZ be the z coordinate of the vector (expressed in
-          * world frame) from planned swing ankle to the lowest contact point on
-          * the planned swing foot (compared in world frame). Planned foot
-          * orientation is used to determine this value
-          *
-          * let zUpcomingSwing be the z coordinate of the upcoming swing ankle,
-          * expressed in world frame. let zFootstep be the z coordinate of the
-          * footstep, expressed in world frame (this is what we're after) let
-          * zGround be the z coordinate of the lowest point on the stance foot
-          * i.e. of the ground zUpcomingSwing = zGround - upcomingSwingMinZ
-          * zFootstep = zGround - footstepMinZ = zUpcomingSwing +
-          * upcomingSwingMinZ - footstepMinZ
+          * Assume that the ground height is constant. Specifically, if we
+          * assume that: 1) the lowest contact point on the upcoming swing foot
+          * is in contact with the ground 2) the ground height at the lowest
+          * upcoming swing foot contact point is the same as the ground height
+          * at the lowest swing foot contact point then the following holds: let
+          * upcomingSwingMinZ be the z coordinate of the vector (expressed in
+          * world frame) from upcoming swing ankle to the lowest contact point
+          * on the stance foot (compared in world frame). Current foot
+          * orientation is used to determine this value. let footstepMinZ be the
+          * z coordinate of the vector (expressed in world frame) from planned
+          * swing ankle to the lowest contact point on the planned swing foot
+          * (compared in world frame). Planned foot orientation is used to
+          * determine this value let zUpcomingSwing be the z coordinate of the
+          * upcoming swing ankle, expressed in world frame. let zFootstep be the
+          * z coordinate of the footstep, expressed in world frame (this is what
+          * we're after) let zGround be the z coordinate of the lowest point on
+          * the stance foot i.e. of the ground zUpcomingSwing = zGround -
+          * upcomingSwingMinZ zFootstep = zGround - footstepMinZ =
+          * zUpcomingSwing + upcomingSwingMinZ - footstepMinZ
           */
 
          FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getFrameAfterParentJoint());
@@ -288,8 +280,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
          double zUpcomingSwing = upcomingSwingAnkle.getZ();
 
          FrameVector searchDirection = new FrameVector(upcomingSupportAnkleZUpFrame, 0.0, 0.0, -1.0);
-         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(upcomingSwingFoot.getContactPointsCopy(),
-               searchDirection, 1).get(0);
+         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools
+               .computeMaximumPointsInDirection(upcomingSwingFoot.getContactPointsCopy(), searchDirection, 1).get(0);
          upcomingSwingMinZPoint.changeFrame(ankleZUpFrames.get(upcomingSwingLegSide));
          double upcomingSwingMinZ = upcomingSwingMinZPoint.getZ();
 

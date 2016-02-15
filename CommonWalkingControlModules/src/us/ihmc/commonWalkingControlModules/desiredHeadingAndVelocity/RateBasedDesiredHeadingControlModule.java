@@ -8,9 +8,8 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class RateBasedDesiredHeadingControlModule implements DesiredHeadingControlModule
-{  
+{
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);
    private final DoubleYoVariable desiredHeadingDot = new DoubleYoVariable("desiredHeadingDot", registry);
@@ -18,14 +17,13 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
 
    private final double controlDT;
-   
-   public RateBasedDesiredHeadingControlModule(double initialDesiredHeading, double controlDT,
-           YoVariableRegistry parentRegistry)
+
+   public RateBasedDesiredHeadingControlModule(double initialDesiredHeading, double controlDT, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.controlDT = controlDT;
       this.desiredHeading.set(initialDesiredHeading);
-      
+
       updateDesiredHeadingFrame();
    }
 
@@ -39,7 +37,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    {
       throw new RuntimeException("Don't use this. It should be removed from the interface");
    }
-   
+
    public FrameVector2d getFinalHeadingTarget()
    {
       throw new RuntimeException("Don't use this. It should be removed from the interface");
@@ -57,14 +55,14 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    }
 
    public double getDesiredHeadingAngle()
-   {      
+   {
       return desiredHeading.getDoubleValue();
    }
-   
+
    public void getDesiredHeading(FrameVector2d desiredHeadingToPack)
    {
       desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
-                                    Math.sin(desiredHeading.getDoubleValue()));
+            Math.sin(desiredHeading.getDoubleValue()));
    }
 
    public void resetHeadingAngle(double newHeading)
@@ -99,6 +97,6 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
 
    public void setFinalHeadingTargetAngle(double finalHeadingTargetAngle)
    {
-      throw new RuntimeException("Don't use this. It should be removed from the interface");      
+      throw new RuntimeException("Don't use this. It should be removed from the interface");
    }
 }

@@ -16,7 +16,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-
 public abstract class AbstractAdjustableDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

@@ -4,10 +4,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
-
 public class SwingTimeCalculationProvider implements DoubleProvider
 {
-//   private int instanceNumber = 0;
+   //   private int instanceNumber = 0;
    private final ConstantSwingTimeCalculator swingTimeCalculator;
    private final DoubleYoVariable swingTime;
 
@@ -19,12 +18,12 @@ public class SwingTimeCalculationProvider implements DoubleProvider
       this.swingTimeCalculator = swingTimeCalculator;
       this.swingTime.set(defaultSwingTime);
    }
-   
+
    public double getValue()
    {
       return swingTime.getDoubleValue();
    }
-   
+
    public void updateSwingTime()
    {
       swingTime.set(swingTimeCalculator.getSwingTime());

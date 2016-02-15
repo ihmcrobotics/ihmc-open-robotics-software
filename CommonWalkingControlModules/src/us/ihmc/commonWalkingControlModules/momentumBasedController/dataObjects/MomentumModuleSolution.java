@@ -16,7 +16,8 @@ public class MomentumModuleSolution
    private final SpatialForceVector centroidalMomentumRateSolution;
    private final Map<RigidBody, Wrench> externalWrenchSolution;
 
-   public MomentumModuleSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations, SpatialForceVector centroidalMomentumRateSolution, Map<RigidBody, Wrench> externalWrenchSolution)
+   public MomentumModuleSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations,
+         SpatialForceVector centroidalMomentumRateSolution, Map<RigidBody, Wrench> externalWrenchSolution)
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
       this.jointAccelerations = jointAccelerations;
@@ -33,7 +34,7 @@ public class MomentumModuleSolution
    {
       return externalWrenchSolution;
    }
-   
+
    public InverseDynamicsJoint[] getJointsToOptimizeFor()
    {
       return jointsToOptimizeFor;

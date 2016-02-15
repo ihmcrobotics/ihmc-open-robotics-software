@@ -34,8 +34,8 @@ public class StraightLinePoseTrajectoryGeneratorTest
 
    private static final double EPSILON = 1.0e-10;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testRuntimeExceptions()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -83,8 +83,8 @@ public class StraightLinePoseTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testCompareWithSingleFrameTrajectoryGenerators()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -150,8 +150,8 @@ public class StraightLinePoseTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testNegativeTime()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -196,8 +196,8 @@ public class StraightLinePoseTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTooBigTime()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -242,8 +242,8 @@ public class StraightLinePoseTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {
       YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
@@ -319,10 +319,10 @@ public class StraightLinePoseTrajectoryGeneratorTest
       finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, frameA);
       finalOrientationProvider = new ConstantOrientationProvider(finalOrientation);
 
-      originalPosition = new StraightLinePositionTrajectoryGenerator("position2", frameA, trajectoryTimeProvider,
-            initialPositionProvider, finalPositionProvider, registry);
-      originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation2", frameA,
-            trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
+      originalPosition = new StraightLinePositionTrajectoryGenerator("position2", frameA, trajectoryTimeProvider, initialPositionProvider,
+            finalPositionProvider, registry);
+      originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation2", frameA, trajectoryTimeProvider, initialOrientationProvider,
+            finalOrientationProvider, registry);
 
       trajToTest.registerNewTrajectoryFrame(frameA);
       trajToTest.switchTrajectoryFrame(frameA);

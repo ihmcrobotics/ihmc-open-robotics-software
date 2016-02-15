@@ -141,7 +141,8 @@ public class PelvisOrientationManager
       activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
 
       boolean allowMultipleFrames = true;
-      waypointOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", 15, allowMultipleFrames, desiredPelvisFrame, registry);
+      waypointOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", 15, allowMultipleFrames,
+            desiredPelvisFrame, registry);
       waypointOrientationOffsetTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
       parentRegistry.addChild(registry);
@@ -278,7 +279,7 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.getFrameTupleIncludingFrame(tempAngularAcceleration);
       orientationTrajectoryData.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
    }
-   
+
    private void handleStopAllTrajectoryMessage()
    {
       if (stopAllTrajectoryMessageSubscriber == null || !stopAllTrajectoryMessageSubscriber.pollMessage(this))

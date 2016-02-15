@@ -113,10 +113,12 @@ public class FootControlModule
       touchdownAccelerationProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration()));
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
-      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, edgeTouchdownFootControlGains, registry);
+      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, edgeTouchdownFootControlGains,
+            registry);
       states.add(touchdownOnToesState);
 
-      touchdownOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, edgeTouchdownFootControlGains, registry);
+      touchdownOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, edgeTouchdownFootControlGains,
+            registry);
       states.add(touchdownOnHeelState);
 
       onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
@@ -136,7 +138,8 @@ public class FootControlModule
       }
       else
       {
-         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
+         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, touchdownAccelerationProvider,
+               swingFootControlGains, registry);
          states.add(swingState);
          this.swingState = swingState;
       }
@@ -175,7 +178,8 @@ public class FootControlModule
       {
          for (AbstractFootControlState stateToTransitionTo : states)
          {
-            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
+            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper,
+                  waitSingularityEscapeBeforeTransitionToNextState);
             ConstraintType nextStateEnum = stateToTransitionTo.getStateEnum();
             state.addStateTransition(new StateTransition<ConstraintType>(nextStateEnum, footStateTransitionCondition, footStateTransitionAction));
          }
@@ -366,8 +370,8 @@ public class FootControlModule
             pelvisZUpFrame, getCurrentConstraintType());
    }
 
-   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
-         double zCurrent, ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
+   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+         ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
             pelvisZUpFrame, footLoadPercentage, getCurrentConstraintType());

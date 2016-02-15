@@ -52,8 +52,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
       VectorProvider touchdownVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, 0.0, 0.0, -0.3));
       VectorProvider touchdownAccelerationProvider = new ConstantVectorProvider(new FrameVector(worldFrame, 0.0, 0.0, -1.0));
-      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
-            currentDesiredFootPosition, touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
+      positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame, currentDesiredFootPosition,
+            touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
    }
 
    public void handleFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage, boolean initializeToCurrent)
@@ -129,7 +129,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       {
          positionTrajectoryGenerator.compute(getTimeInCurrentState());
          orientationTrajectoryGenerator.compute(getTimeInCurrentState());
-         
+
          positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
          orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       }

@@ -12,8 +12,9 @@ public class ArmTrajectoryMessageSubscriber implements PacketConsumer<ArmTraject
 {
    private final HumanoidGlobalDataProducer globalDataProducer;
 
-   private final SideDependentList<AtomicReference<ArmTrajectoryMessage>> latestMessageReferences = new SideDependentList<>(new AtomicReference<ArmTrajectoryMessage>(null), new AtomicReference<ArmTrajectoryMessage>(null));
-   
+   private final SideDependentList<AtomicReference<ArmTrajectoryMessage>> latestMessageReferences = new SideDependentList<>(
+         new AtomicReference<ArmTrajectoryMessage>(null), new AtomicReference<ArmTrajectoryMessage>(null));
+
    public ArmTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

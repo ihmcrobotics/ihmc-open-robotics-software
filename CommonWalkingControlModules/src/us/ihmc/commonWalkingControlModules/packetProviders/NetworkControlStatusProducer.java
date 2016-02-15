@@ -7,9 +7,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class NetworkControlStatusProducer implements ControlStatusProducer
 {
-   
+
    private final HumanoidGlobalDataProducer globalDataProducer;
-   
+
    public NetworkControlStatusProducer(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

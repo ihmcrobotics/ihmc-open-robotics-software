@@ -22,14 +22,14 @@ public class BatchedDesiredSteeringAngleAndSingleJointAngleProvider implements P
    {
       singleJointPositionProvider.notifyWatchdogEventReceived();
 
-      if(p.getDesiredSteeringAnglePacket() != null)
+      if (p.getDesiredSteeringAnglePacket() != null)
       {
          desiredSteeringAngleConsumer.receivedPacket(p.getDesiredSteeringAnglePacket());
       }
-      if(p.getSingleJointAnglePacket() != null)
+      if (p.getSingleJointAnglePacket() != null)
       {
          singleJointPositionProvider.receivedPacket(p.getSingleJointAnglePacket());
       }
-      
+
    }
 }

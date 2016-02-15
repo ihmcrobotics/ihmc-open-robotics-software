@@ -15,7 +15,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-
 public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleFootstepCalculator");
@@ -32,8 +31,8 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    private final DoubleYoVariable stepRoll = new DoubleYoVariable("stepRoll", registry);
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
-   public SimpleDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+   public SimpleDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SideDependentList<ReferenceFrame> ankleZUpFrames,
+         DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -108,7 +107,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       stepYaw.set(0.0);
       stepPitch.set(0.0);
       stepRoll.set(0.0);
-      
+
       // stairs:
       stepLength.set(0.315);
 

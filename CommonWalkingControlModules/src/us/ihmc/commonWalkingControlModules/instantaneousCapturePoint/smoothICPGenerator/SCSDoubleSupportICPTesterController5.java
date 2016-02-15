@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-
 import java.awt.Color;
 import java.util.ArrayList;
 
@@ -26,7 +25,6 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
    int numberOfStepsInStepList = 5;
    private final ArrayList<YoFramePoint> footStepLocationsFramePoints = new ArrayList<YoFramePoint>();
 
-
    private final ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints = new ArrayList<YoFramePoint>();
 
    private final ArrayList<YoFramePoint> equivalentConstantCoPsFramePoints = new ArrayList<YoFramePoint>();
@@ -36,13 +34,12 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
    private final ArrayList<Point3d> initialICPsVectors = new ArrayList<Point3d>();
 
    private final YoFramePoint initialDoubleSupportICPposFramePoint = new YoFramePoint("initialDoubleSupportICPposFramePoint", "",
-                                                                        ReferenceFrame.getWorldFrame(), registry);
+         ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint finalDoubleSupportICPposFramePoint = new YoFramePoint("finalDoubleSupportICPposFramePoint", "", ReferenceFrame.getWorldFrame(),
-                                                                      registry);
+         registry);
 
    private final YoFramePoint desiredDCMposOfTimeFramePoint = new YoFramePoint("desiredDCMposOfTime", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint desiredECMPofTimeFramePoint = new YoFramePoint("desiredECMPofTime", "", ReferenceFrame.getWorldFrame(), registry);
-
 
    private ArrayList<YoFrameLineSegment2d> listOfICPLineSegments = new ArrayList<YoFrameLineSegment2d>();
 
@@ -84,7 +81,7 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
    double halfStepWidth = 0.1;
 
    public SCSDoubleSupportICPTesterController5(PointAndLinePlotter pointAndLinePlotter, DoubleYoVariable yoTime, double simDText, double singleSupportTimeExt,
-           double doubleSupportTimeExt, double initialTransferSupportTimeExt)
+         double doubleSupportTimeExt, double initialTransferSupportTimeExt)
    {
       this.equivalentCoPAndICPPlotter = pointAndLinePlotter;
 
@@ -97,7 +94,6 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       tempstepListElement1.set(0, -leftRightFlip * halfStepWidth, 0.5);
       footStepLocationsFramePoints.add(tempstepListElement1);
 
-
       for (int i = 0; i < numberOfStepsInStepList; i++)
       {
          YoFramePoint tempstepListElement = new YoFramePoint("stepListElement" + i, "", ReferenceFrame.getWorldFrame(), registry);
@@ -106,7 +102,6 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
          footStepLocationsFramePoints.add(tempstepListElement);
          leftRightFlip = -leftRightFlip;
       }
-
 
       for (int i = 0; i < numberOfConsideredFootstepLocations; i++)
       {
@@ -117,10 +112,9 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       {
          YoFramePoint tempFramePoint = new YoFramePoint("equivalentConstantCoPframepoint" + i, "", ReferenceFrame.getWorldFrame(), registry);
          equivalentConstantCoPsFramePoints.add(tempFramePoint);
-         
+
          equivalentConstantCoPsVectors.add(new Point3d());
       }
-
 
       for (int i = 0; i < numberOfConsideredFootstepLocations - 1; i++)
       {
@@ -136,7 +130,7 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       equivalentCoPAndICPPlotter.plotYoFramePoints("currentFoot", consideredFootStepLocationsFramePoints, YoAppearance.Black(), 0.01);
       equivalentCoPAndICPPlotter.plotYoFramePoints("equivalentConstCoP", equivalentConstantCoPsFramePoints, YoAppearance.Red(), 0.005);
       equivalentCoPAndICPPlotter.plotYoFramePoints("initialICP", initialICPsFramePoints, YoAppearance.Green(), 0.01);
-      
+
       equivalentCoPAndICPPlotter.plotYoFramePoint("initialDoubleSupportICPpos", initialDoubleSupportICPposFramePoint, YoAppearance.Cyan(), 0.01);
       equivalentCoPAndICPPlotter.plotYoFramePoint("finalDoubleSupportICPpos", finalDoubleSupportICPposFramePoint, YoAppearance.Cyan(), 0.01);
       equivalentCoPAndICPPlotter.plotYoFramePoint("desiredDCMposOfTime", desiredDCMposOfTimeFramePoint, YoAppearance.OrangeRed(), 0.01);
@@ -147,7 +141,6 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       equivalentCoPAndICPPlotter.plotLineSegment("icpVelocityLine", icpVelocityLine, Color.gray);
       equivalentCoPAndICPPlotter.plotLineSegment("comVelocityLine", comVelocityLine, Color.blue);
    }
-
 
    public PointAndLinePlotter getPointAndLinePlotter()
    {
@@ -162,7 +155,7 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       isSingleSupport.set(supportState.getIsSingleSupport());
       isFirstStep.set(supportState.getIsFirstStep());
 
-//    supportState
+      //    supportState
 
       double steppingTime = supportState.getSteppingTime();
       double eCMPheight = 1.0;
@@ -173,81 +166,68 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       if (supportState.getStepListUpdateRequestFlag() == true)
       {
          dsICPcomputer.updateSubFootListForSmoothICPTrajectory(footStepLocationsFramePoints, equivalentConstantCoPsFramePoints,
-                 consideredFootStepLocationsFramePoints, numberOfConsideredFootstepLocations, equivalentConstantCoPsVectors, supportState.getIsFirstStep());
+               consideredFootStepLocationsFramePoints, numberOfConsideredFootstepLocations, equivalentConstantCoPsVectors, supportState.getIsFirstStep());
 
          supportState.setStepListUpdateRequestFlag(false);
       }
 
-
       if (supportState.getIsSingleSupport())
       {
-         dsICPcomputer.computeDoubleSupportPolynomialParams(equivalentConstantCoPsVectors, consideredFootStepLocationsFramePoints, omega0, steppingTime, doubleSupportFirstStepFraction,
-                 initialICPsVectors, supportState.getIsFirstStep(), supportState.getInitialTransferSupportTime(), supportState.getDoubleSupportTime());
+         dsICPcomputer.computeDoubleSupportPolynomialParams(equivalentConstantCoPsVectors, consideredFootStepLocationsFramePoints, omega0, steppingTime,
+               doubleSupportFirstStepFraction, initialICPsVectors, supportState.getIsFirstStep(), supportState.getInitialTransferSupportTime(),
+               supportState.getDoubleSupportTime());
       }
 
-
-      dsICPcomputer.calcDCMandECMPofTime(equivalentConstantCoPsVectors, consideredFootStepLocationsFramePoints, doubleSupportFirstStepFraction, omega0, initialICPsVectors,
-                                         supportState.getIsFirstStep(), supportState.getInitialTransferSupportTime(), supportState.getDoubleSupportTime(),
-                                         supportState.getIsSingleSupport(), supportState.getCurrentTime(), supportState.getSteppingTime());
-
-
-
+      dsICPcomputer.calcDCMandECMPofTime(equivalentConstantCoPsVectors, consideredFootStepLocationsFramePoints, doubleSupportFirstStepFraction, omega0,
+            initialICPsVectors, supportState.getIsFirstStep(), supportState.getInitialTransferSupportTime(), supportState.getDoubleSupportTime(),
+            supportState.getIsSingleSupport(), supportState.getCurrentTime(), supportState.getSteppingTime());
 
       for (int i = 0; i < numberOfConsideredFootstepLocations; i++)
       {
          equivalentConstantCoPsFramePoints.get(i).set(equivalentConstantCoPsVectors.get(i));
       }
 
-
       for (int i = 0; i < initialICPsVectors.size(); i++)
       {
          initialICPsFramePoints.get(i).set(initialICPsVectors.get(i));
       }
 
-
       initialDoubleSupportICPposFramePoint.set(dsICPcomputer.getInitialDoubleSupportICPpos());
 
       finalDoubleSupportICPposFramePoint.set(dsICPcomputer.getFinalDoubleSupportICPpos());
-
 
       desiredDCMposOfTimeFramePoint.set(dsICPcomputer.getDesiredDCMposOfTime());
       desiredDCMvelOfTimeFrameVector.set(dsICPcomputer.getDesiredDCMvelOfTime());
       desiredECMPofTimeFramePoint.set(dsICPcomputer.getDesiredECMPofTime());
 
       desiredDCMvelAbsolute.set(Math.sqrt(Math.pow(desiredDCMvelOfTimeFrameVector.getX(), 2) + Math.pow(desiredDCMvelOfTimeFrameVector.getY(), 2)
-              + Math.pow(desiredDCMvelOfTimeFrameVector.getZ(), 2)));
-
-
+            + Math.pow(desiredDCMvelOfTimeFrameVector.getZ(), 2)));
 
       JojosICPutilities.discreteIntegrateCoMAndGetCoMVelocity(simDT.getDoubleValue(), omega0, dsICPcomputer.getDesiredDCMposOfTime(), comPositionVector,
-              comVelocityVector);
+            comVelocityVector);
 
       comPositionFramePoint.set(comPositionVector);
       comVelocityFrameVector.set(comVelocityVector);
 
-      desiredCOMvelAbsolute.set(Math.sqrt(Math.pow(comVelocityFrameVector.getX(), 2) + Math.pow(comVelocityFrameVector.getY(), 2)
-              + Math.pow(comVelocityFrameVector.getZ(), 2)));
-
+      desiredCOMvelAbsolute.set(
+            Math.sqrt(Math.pow(comVelocityFrameVector.getX(), 2) + Math.pow(comVelocityFrameVector.getY(), 2) + Math.pow(comVelocityFrameVector.getZ(), 2)));
 
       PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(0),
-              equivalentConstantCoPsFramePoints.get(0).getFramePoint2dCopy(), initialICPsFramePoints.get(1).getFramePoint2dCopy());
-
+            equivalentConstantCoPsFramePoints.get(0).getFramePoint2dCopy(), initialICPsFramePoints.get(1).getFramePoint2dCopy());
 
       PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(1),
-              equivalentConstantCoPsFramePoints.get(1).getFramePoint2dCopy(), initialICPsFramePoints.get(2).getFramePoint2dCopy());
+            equivalentConstantCoPsFramePoints.get(1).getFramePoint2dCopy(), initialICPsFramePoints.get(2).getFramePoint2dCopy());
 
       PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(listOfICPLineSegments.get(2),
-              equivalentConstantCoPsFramePoints.get(2).getFramePoint2dCopy(), equivalentConstantCoPsFramePoints.get(3).getFramePoint2dCopy());
+            equivalentConstantCoPsFramePoints.get(2).getFramePoint2dCopy(), equivalentConstantCoPsFramePoints.get(3).getFramePoint2dCopy());
 
-
-      
       PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpVelocityArrowTip, desiredDCMposOfTimeFramePoint, desiredDCMvelOfTimeFrameVector, 0.5);
       PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLine, desiredDCMposOfTimeFramePoint.getFramePoint2dCopy(),
-              icpVelocityArrowTip.getFramePoint2dCopy());
+            icpVelocityArrowTip.getFramePoint2dCopy());
 
       PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(comVelocityArrowTip, comPositionFramePoint, comVelocityFrameVector, 0.5);
       PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(comVelocityLine, comPositionFramePoint.getFramePoint2dCopy(),
-              comVelocityArrowTip.getFramePoint2dCopy());
+            comVelocityArrowTip.getFramePoint2dCopy());
    }
 
    public void initialize()
@@ -257,7 +237,6 @@ public class SCSDoubleSupportICPTesterController5 implements RobotController
       boolean initialIsSingleSupport = false;
       this.supportState.initializeSupportState(initialIsSingleSupport, singleSupportTime, doubleSupportTime, initialTransferSupportTime);
    }
-
 
    public YoVariableRegistry getYoVariableRegistry()
    {

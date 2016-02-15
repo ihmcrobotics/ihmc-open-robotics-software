@@ -29,7 +29,6 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-
 /**
  * @author twan
  *         Date: 6/12/13
@@ -54,15 +53,15 @@ public class CirclePoseTrajectoryGeneratorTest
       FrameOrientation initialOrientation = new FrameOrientation();
       initialPose.getOrientationIncludingFrame(initialOrientation);
       initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
-      
+
       trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
-      
+
       trajectoryGenerator = new CirclePoseTrajectoryGenerator("test", worldFrame, trajectoryTimeProvider, registry, null);
       trajectoryGenerator.setDesiredRotationAngle(Math.PI);
       trajectoryGenerator.setInitialPose(initialPose);
       trajectoryGenerator.initialize();
    }
-   
+
    @After
    public void tearDown()
    {
@@ -74,23 +73,23 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOrientation()
    {
-	   trajectoryGenerator.setControlHandAngleAboutAxis(true);
-	   
+      trajectoryGenerator.setControlHandAngleAboutAxis(true);
+
       // v = omega x r
       checkVEqualsOmegaCrossR(worldFrame, trajectoryGenerator, random);
 
       checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getValue(), worldFrame);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCompute()
    {
-	   trajectoryGenerator.setControlHandAngleAboutAxis(true);
+      trajectoryGenerator.setControlHandAngleAboutAxis(true);
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() * 0.5);
 
       FrameVector velocityToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
@@ -102,7 +101,7 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.packAngularAcceleration(accelerationToPack);
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
-//      assertTrue(accelerationToPack.getZ() != 0.0); // Not the case anymore as we've switched to cubic spline
+      //      assertTrue(accelerationToPack.getZ() != 0.0); // Not the case anymore as we've switched to cubic spline
 
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() + 1.0);
 
@@ -120,8 +119,8 @@ public class CirclePoseTrajectoryGeneratorTest
 
    @Ignore
 
-	@DeployableTestMethod
-	@Test(timeout=300000)
+   @DeployableTestMethod
+   @Test(timeout = 300000)
    //TODO: implement a real test
    public void testGetPosition()
    {
@@ -131,8 +130,8 @@ public class CirclePoseTrajectoryGeneratorTest
       currentPosition.getX();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIsDone()
    {
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() / 2.0);
@@ -142,8 +141,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertTrue(trajectoryGenerator.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGet_FramePoint()
    {
       FramePoint positionToPack = new FramePoint();
@@ -153,8 +152,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGet_FrameOrientation()
    {
       FrameOrientation orientationToPack = new FrameOrientation();
@@ -164,8 +163,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(worldFrame, orientationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPackVelocity()
    {
       FrameVector velocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -180,8 +179,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, velocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPackAcceleration()
    {
       FrameVector accelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -196,8 +195,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPackAngularVelocity()
    {
       FrameVector angularVelocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -212,8 +211,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, angularVelocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPackAngularAcceleration()
    {
       FrameVector angularAccelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -228,8 +227,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPackLinearData()
    {
       FramePoint positionToPack = new FramePoint(worldFrame);
@@ -270,8 +269,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPackAngularData()
    {
       FramePoint positionToPack = new FramePoint(worldFrame);
@@ -311,9 +310,9 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(0.0, angularAccelerationToPack.getZ(), EPSILON);
       assertSame(worldFrame, angularAccelerationToPack.getReferenceFrame());
    }
-   
-   private void checkOrientationAtVariousPoints(CirclePoseTrajectoryGenerator trajectoryGenerator,
-         OrientationProvider initialOrientationProvider, double tMax, ReferenceFrame frame)
+
+   private void checkOrientationAtVariousPoints(CirclePoseTrajectoryGenerator trajectoryGenerator, OrientationProvider initialOrientationProvider, double tMax,
+         ReferenceFrame frame)
    {
       FrameOrientation orientation = new FrameOrientation(frame);
 
@@ -348,7 +347,7 @@ public class CirclePoseTrajectoryGeneratorTest
 
          FramePoint rotatedInitialPosition = new FramePoint(initialPosition);
          rotationMatrix.transform(rotatedInitialPosition.getPoint());
-//         JUnitTools.assertFramePointEquals(newPosition, rotatedInitialPosition, 1e-9);
+         //         JUnitTools.assertFramePointEquals(newPosition, rotatedInitialPosition, 1e-9);
       }
    }
 

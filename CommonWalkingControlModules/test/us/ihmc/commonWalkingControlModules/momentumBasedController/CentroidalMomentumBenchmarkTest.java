@@ -42,16 +42,16 @@ public class CentroidalMomentumBenchmarkTest
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
-//   @Ignore
+   //   @Ignore
 
-	@DeployableTestMethod(estimatedDuration = 24.7)
-	@Test(timeout = 120000)
+   @DeployableTestMethod(estimatedDuration = 24.7)
+   @Test(timeout = 120000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
-      int numberOfJoints = 34; 
+      int numberOfJoints = 34;
       Vector3d[] jointAxes = new Vector3d[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
@@ -65,13 +65,13 @@ public class CentroidalMomentumBenchmarkTest
       assertADotV(random, joints, elevator, robot, numberOfJoints + 1);
    }
 
-   private void assertADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBody elevator, SCSRobotFromInverseDynamicsRobotModel robot,int numJoints)
+   private void assertADotV(Random random, ArrayList<RevoluteJoint> joints, RigidBody elevator, SCSRobotFromInverseDynamicsRobotModel robot, int numJoints)
          throws UnreasonableAccelerationException
    {
       int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(ScrewTools.computeSubtreeJoints(elevator));
       DenseMatrix64F v = new DenseMatrix64F(numberOfDoFs, 1);
 
-      InverseDynamicsJoint[] idJoints = new InverseDynamicsJoint[numJoints]; 
+      InverseDynamicsJoint[] idJoints = new InverseDynamicsJoint[numJoints];
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
 
       CentroidalMomentumMatrix centroidalMomentumMatrixCalculator = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
@@ -83,7 +83,7 @@ public class CentroidalMomentumBenchmarkTest
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       CentroidalMomentumRateADotVTerm aDotVAnalyticalCalculator = new CentroidalMomentumRateADotVTerm(elevator, centerOfMassFrame,
             centroidalMomentumMatrixCalculator, totalMass, v);
-      
+
       CentroidalMomentumRateTermCalculator testTermCalc = new CentroidalMomentumRateTermCalculator(elevator, centerOfMassFrame, v, totalMass);
 
       ScrewTestTools.setRandomVelocities(joints, random);
@@ -105,36 +105,37 @@ public class CentroidalMomentumBenchmarkTest
       robot.updateJointVelocities_SCS_to_ID();
       elevator.updateFramesRecursively();
       centerOfMassFrame.update();
-      
+
       robot.packIdJoints(idJoints);
       ScrewTools.packJointVelocitiesMatrix(idJoints, v);
 
       long startTime = System.nanoTime();
-      for(int i = 0; i<iters; i++)
+      for (int i = 0; i < iters; i++)
       {
          testTermCalc.compute();
       }
-      long duration = (System.nanoTime() - startTime)/(iters);
-      double termCalculatorTime = ((double)duration/1000000000);
-      
+      long duration = (System.nanoTime() - startTime) / (iters);
+      double termCalculatorTime = ((double) duration / 1000000000);
+
       // Compute aDotV analytically
       aDotVAnalyticalCalculator.compute();
       aDotVAnalytical.set(aDotVAnalyticalCalculator.getMatrix());
 
       // Compute aDotV numerically
       startTime = System.nanoTime();
-      for(int i = 0; i<iters; i++)
+      for (int i = 0; i < iters; i++)
       {
          centroidalMomentumMatrixCalculator.compute();
          a.set(centroidalMomentumMatrixCalculator.getMatrix());
          MatrixTools.numericallyDifferentiate(aDot, aPrevVal, a, controlDT);
          CommonOps.mult(aDot, v, aDotVNumerical);
       }
-      duration = (System.nanoTime() - startTime)/(iters);
-      double numericallyDifferentiatedTime = ((double)duration/1000000000);
-      
+      duration = (System.nanoTime() - startTime) / (iters);
+      double numericallyDifferentiatedTime = ((double) duration / 1000000000);
+
       System.out.println("solution time using analytical solution: " + new DecimalFormat("#.##########").format(termCalculatorTime) + " Seconds");
-      System.out.println("solution time using numerically differentiated solution: " + new DecimalFormat("#.##########").format(numericallyDifferentiatedTime) + " Seconds");
+      System.out.println(
+            "solution time using numerically differentiated solution: " + new DecimalFormat("#.##########").format(numericallyDifferentiatedTime) + " Seconds");
 
    }
 }

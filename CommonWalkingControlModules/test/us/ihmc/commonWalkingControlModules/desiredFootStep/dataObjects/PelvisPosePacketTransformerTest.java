@@ -29,8 +29,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class PelvisPosePacketTransformerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPelvisPosePacketTransformer()
    {
       int numberOfTests = 10;
@@ -64,12 +64,12 @@ public class PelvisPosePacketTransformerTest
 
    private static void performEqualsTestForQuat(PelvisPosePacket starting, RigidBodyTransform transform3D, PelvisPosePacket ending)
    {
-//    public Quat4d quaternion;
+      //    public Quat4d quaternion;
       Quat4d startQuat = starting.getOrientation();
       Quat4d endQuat = ending.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
 
-//    public Point3d point;
+      //    public Point3d point;
       assertTrue(starting.getPosition() == null);
       assertTrue(ending.getPosition() == null);
 
@@ -77,13 +77,13 @@ public class PelvisPosePacketTransformerTest
 
    private static void performEqualsTestForPoint(PelvisPosePacket starting, RigidBodyTransform transform3D, PelvisPosePacket ending)
    {
-//    public Quat4d quaternion;
+      //    public Quat4d quaternion;
       Point3d startPoint = starting.getPosition();
       Point3d endPoint = ending.getPosition();
       double distance = getDistanceBetweenPoints(startPoint, transform3D, endPoint);
       assertEquals("not equal", 0.0, distance, 1e-6);
 
-//    public Point3d point;
+      //    public Point3d point;
       assertTrue(starting.getOrientation() == null);
       assertTrue(ending.getOrientation() == null);
    }

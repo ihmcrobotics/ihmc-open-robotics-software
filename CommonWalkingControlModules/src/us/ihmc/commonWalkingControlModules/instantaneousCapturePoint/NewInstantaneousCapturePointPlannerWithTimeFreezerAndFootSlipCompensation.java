@@ -37,10 +37,10 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    private final FrameVector normalizedCapturePointVelocityVector;
    private final FramePoint currentTransferToFootLocation;
    private final FramePoint initialTransferToFootLocation;
-   
+
    private final FramePoint tmpCapturePointPosition;
    private final FrameVector tmpCapturePointVelocity;
-   
+
    private final AlphaFilteredYoFrameVector changeInTransferToFootPosition;
 
    public NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(CapturePointPlannerParameters capturePointPlannerParameters,
@@ -69,9 +69,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.currentTransferToSide = new EnumYoVariable<RobotSide>("icpPlannerCurrentTransferToSide", registry, RobotSide.class);
       this.tmpCapturePointPosition = new FramePoint(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector(worldFrame);
-      
-      this.changeInTransferToFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("icpPlannerChangeInTransferToFootPositionFiltered", "", registry,
-            alphaDeltaFootPosition, worldFrame);
+
+      this.changeInTransferToFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("icpPlannerChangeInTransferToFootPositionFiltered", "",
+            registry, alphaDeltaFootPosition, worldFrame);
 
       this.isTimeBeingFrozen.set(false);
       this.timeDelay.set(0.0);
@@ -93,7 +93,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
          double time, FramePoint currentCapturePointPosition, FramePoint transferToFoot)
    {
       super.packDesiredCapturePointPositionAndVelocity(tmpCapturePointPosition, tmpCapturePointVelocity, getTimeWithDelay(time));
-      
+
       if (doFootSlipCompensation.getBooleanValue() && isDoubleSupport.getBooleanValue() && currentTransferToSide.getEnumValue() != null)
       {
          this.currentTransferToFootLocation.setIncludingFrame(transferToFoot);
@@ -107,7 +107,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
       desiredCapturePointPositionToPack.setIncludingFrame(tmpCapturePointPosition);
       desiredCapturePointVelocityToPack.setIncludingFrame(tmpCapturePointVelocity);
-      
+
       previousTime.set(time);
    }
 
@@ -163,11 +163,11 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
     * @param time
     */
    private void doFootSlipCompensation(double time)
-   {  
+   {
       double deltaX = currentTransferToFootLocation.getX() - initialTransferToFootLocation.getX();
       double deltaY = currentTransferToFootLocation.getY() - initialTransferToFootLocation.getY();
-      
-      changeInTransferToFootPosition.update(deltaX,deltaY,0.0);
+
+      changeInTransferToFootPosition.update(deltaX, deltaY, 0.0);
       changeInTransferToFootPositionMagnitude.set(changeInTransferToFootPosition.length());
       double timeInState = super.computeAndReturnTimeInCurrentState(time);
       double timeLeft = super.computeAndReturnTimeRemaining(time);
@@ -179,7 +179,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       changeInTransferToFootPosition.scale(percentIn);
       tmpCapturePointPosition.setX(tmpCapturePointPosition.getX() + changeInTransferToFootPosition.getX());
       tmpCapturePointPosition.setY(tmpCapturePointPosition.getY() + changeInTransferToFootPosition.getY());
-  
+
       // Scale back on the velocity if the foot slipped a lot.
       // And when coming to the end of the trajectory.
       // This is very hackish. We should make the trajectories better so we don't have
@@ -194,7 +194,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 
       if (doICPVelocityReductionInEndOfTranfer.getBooleanValue())
       {
-         tmpCapturePointVelocity.scale(percentToScaleBackOnVelocity.getDoubleValue());         
+         tmpCapturePointVelocity.scale(percentToScaleBackOnVelocity.getDoubleValue());
       }
    }
 
@@ -227,12 +227,12 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    @Override
    public void cancelPlan(double time, FrameTupleArrayList<FramePoint> footstepList)
    {
-	   if(isDoubleSupport.getBooleanValue())
-	   {
-		   timeDelay.set(0.0);
-	   }
-		
-	   super.cancelPlan(getTimeWithDelay(time), footstepList);
+      if (isDoubleSupport.getBooleanValue())
+      {
+         timeDelay.set(0.0);
+      }
+
+      super.cancelPlan(getTimeWithDelay(time), footstepList);
    }
 
    public boolean getIsTimeBeingFrozen()
@@ -244,7 +244,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    {
       return time - timeDelay.getDoubleValue();
    }
-   
+
    public void reset(double time, RobotSide transferToSide, FramePoint transferToFootLocation)
    {
       changeInTransferToFootPosition.reset();
@@ -252,21 +252,21 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       previousTime.set(time);
       initialTransferToFootLocation.setIncludingFrame(transferToFootLocation);
       currentTransferToSide.set(transferToSide);
-	   super.reset(time);
+      super.reset(time);
    }
 
    @Override
    public boolean isDone(double time)
    {
-      return super.isDone(getTimeWithDelay(time));   
+      return super.isDone(getTimeWithDelay(time));
    }
-   
+
    @Override
    public boolean getHasBeenWokenUp()
    {
       return super.getHasBeenWokenUp();
    }
-   
+
    @Override
    public void wakeUp()
    {

@@ -34,7 +34,6 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelBehavior
 {
    private final String name = getClass().getSimpleName();
@@ -117,7 +116,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       coefficientOfFriction.set(1.0);
 
       // Setup foot control modules:
-//    setupFootControlModules(); //TODO: get rid of that?
+      //    setupFootControlModules(); //TODO: get rid of that?
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the RootJointAngularAccelerationControlModule for PelvisOrientation control ////////
@@ -133,7 +132,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
       String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
-      
+
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
@@ -167,7 +166,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       // Head joints
       unconstrainedJointList.removeAll(Arrays.asList(headOrientationControlJoints));
- 
+
       // Chest joints
       unconstrainedJointList.removeAll(Arrays.asList(chestOrientationControlJoints));
 

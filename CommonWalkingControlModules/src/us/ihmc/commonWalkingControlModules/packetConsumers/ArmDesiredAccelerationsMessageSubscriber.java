@@ -13,7 +13,7 @@ public class ArmDesiredAccelerationsMessageSubscriber implements PacketConsumer<
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    private final SideDependentList<AtomicReference<ArmDesiredAccelerationsMessage>> latestMessageReferences = new SideDependentList<>();
-   
+
    public ArmDesiredAccelerationsMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

@@ -58,7 +58,6 @@ public class ICPAndMomentumBasedController
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    private final Omega0CalculatorInterface omega0Calculator;
 
-
    private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
    private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d(worldFrame);
@@ -100,7 +99,7 @@ public class ICPAndMomentumBasedController
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
       momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
-      
+
       if (USE_CONSTANT_OMEGA0)
       {
          this.omega0Calculator = new ConstantOmega0Calculator(omega0, registry);
@@ -191,7 +190,8 @@ public class ICPAndMomentumBasedController
          yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
          centerOfMassPosition.setToZero(centerOfMassFrame);
          centerOfMassPosition.changeFrame(worldFrame);
-         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, centerOfMassPosition, bipedSupportPolygons.getFootPolygonsInWorldFrame());
+         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, centerOfMassPosition,
+               bipedSupportPolygons.getFootPolygonsInWorldFrame());
       }
    }
 
@@ -219,7 +219,7 @@ public class ICPAndMomentumBasedController
       yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocity2d);
 
       icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
-      
+
       icpBasedLinearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setOmega0(omega0.getDoubleValue());
 

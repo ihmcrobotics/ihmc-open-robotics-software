@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
@@ -37,7 +36,6 @@ public class FootCenterToToeEvaluator
    private SimulationConstructionSet scs = null;
    private DoubleYoVariable timeYoVariable = null;
 
-
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private YoFramePoint icpArrowTip = null;
@@ -46,15 +44,13 @@ public class FootCenterToToeEvaluator
    private YoFramePoint ecmpPositionYoFramePoint = null;
 
    private ArrayList<YoFramePoint> footstepYoFramePoints = null;
-   
-   
+
    private ArrayList<YoFramePoint> toePointFramePoints = null;
-   
-   private ArrayList<YoFramePoint> icpFootCenterCornerPointsViz = null; 
-   private ArrayList<YoFramePoint> icpToeCornerPointsViz = null; 
-   
-   private ArrayList<YoFramePoint> constantCoPsViz = null; 
-   
+
+   private ArrayList<YoFramePoint> icpFootCenterCornerPointsViz = null;
+   private ArrayList<YoFramePoint> icpToeCornerPointsViz = null;
+
+   private ArrayList<YoFramePoint> constantCoPsViz = null;
 
    private YoFramePoint doubleSupportStartICPYoFramePoint = null;
    private YoFramePoint doubleSupportEndICPYoFramePoint = null;
@@ -63,8 +59,7 @@ public class FootCenterToToeEvaluator
 
    private double doubleSupportFirstStepFraction = 0.5;
    private int maxNumberOfConsideredFootsteps = 3;
-   private DoubleSupportFootCenterToToeICPComputer smoothICPComputer;  
-
+   private DoubleSupportFootCenterToToeICPComputer smoothICPComputer;
 
    private YoFrameLineSegment2d icpVelocityLineSegment = null;
 
@@ -72,8 +67,8 @@ public class FootCenterToToeEvaluator
    public void createRegistryBeforeTests()
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(deltaT, doubleSupportFirstStepFraction,  
-            maxNumberOfConsideredFootsteps, registry, yoGraphicsListRegistry);
+      smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(deltaT, doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry,
+            yoGraphicsListRegistry);
    }
 
    private DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
@@ -100,10 +95,10 @@ public class FootCenterToToeEvaluator
       icpVelocityYoFramePoint = null;
 
       footstepYoFramePoints = null;
-      
-      toePointFramePoints = null; 
+
+      toePointFramePoints = null;
       icpFootCenterCornerPointsViz = null;
-      icpToeCornerPointsViz = null; 
+      icpToeCornerPointsViz = null;
 
       constantCoPsViz = null;
 
@@ -119,7 +114,6 @@ public class FootCenterToToeEvaluator
       stopSignalTime.set(1.9e100);
 
       createVisualizers(maxNumberOfConsideredFootsteps);
-
 
       RobotSide stepSide = RobotSide.LEFT;
       int numberOfStepsInStepList = 7;
@@ -138,7 +132,7 @@ public class FootCenterToToeEvaluator
 
       ArrayList<YoFramePoint> stepList = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength, halfStepWidth);
 
-//      ArrayList<YoFramePoint> stepList = createABunchOfRandomWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength, halfStepWidth);
+      //      ArrayList<YoFramePoint> stepList = createABunchOfRandomWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength, halfStepWidth);
 
       Point3d initialICPPosition = new Point3d();
       Point3d initialECMPPosition = new Point3d();
@@ -151,16 +145,16 @@ public class FootCenterToToeEvaluator
       Point3d ecmpPosition = new Point3d();
 
       double initialTime = 0.0;
-      ArrayList<FramePoint> footLocations = getFirstSteps(stepList, 4); 
-      ArrayList<ReferenceFrame> dummyReferenceFrameList = new ArrayList<ReferenceFrame>(); 
-      
+      ArrayList<FramePoint> footLocations = getFirstSteps(stepList, 4);
+      ArrayList<ReferenceFrame> dummyReferenceFrameList = new ArrayList<ReferenceFrame>();
+
       if (visualize)
       {
          for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
          {
             footstepYoFramePoints.get(i).set(footLocations.get(i));
-            
-            FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame()); 
+
+            FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame());
             tempPoint.set(0.1, 0.0, 0.0);
             tempPoint.add(footstepYoFramePoints.get(i).getFramePointCopy());
             toePointFramePoints.get(i).set(tempPoint);
@@ -170,43 +164,42 @@ public class FootCenterToToeEvaluator
       initialICPPosition.set(footLocations.get(0).getPoint());
       initialICPPosition.add(footLocations.get(1).getPoint());
       initialICPPosition.scale(0.5);
-      
+
       dummyReferenceFrameList.clear();
       for (int i = 0; i < footLocations.size(); i++)
       {
-         dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
+         dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame());
       }
 
-      smoothICPComputer.initializeDoubleSupportInitialTransfer(footLocations, dummyReferenceFrameList, initialICPPosition, singleSupportDuration, doubleSupportDuration,
-              doubleSupportInitialTransferDuration, omega0, initialTime);
-      smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
+      smoothICPComputer.initializeDoubleSupportInitialTransfer(footLocations, dummyReferenceFrameList, initialICPPosition, singleSupportDuration,
+            doubleSupportDuration, doubleSupportInitialTransferDuration, omega0, initialTime);
+      smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition,
+            initialTime);
 
       if (visualize)
       {
          doubleSupportStartICPYoFramePoint.set(smoothICPComputer.getDoubleSupportStartICP());
          doubleSupportEndICPYoFramePoint.set(smoothICPComputer.getDoubleSupportEndICP());
-         
-         
-         
+
          for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
          {
-            constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+            constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy());
          }
-         
-         for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+
+         for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
          {
-            icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
-            
+            icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy());
+
             if (smoothICPComputer.getDoHeelToToeTransfer())
             {
-            icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
+               icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy());
             }
          }
       }
 
       Point3d transferFromFoot = footLocations.get(0).getPoint();
-      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, doubleSupportInitialTransferDuration, initialTime,
-              deltaT, omega0, initialICPPosition, stepList, footLocations);
+      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, doubleSupportInitialTransferDuration,
+            initialTime, deltaT, omega0, initialICPPosition, stepList, footLocations);
 
       initialTime = initialTime + doubleSupportInitialTransferDuration;
 
@@ -219,12 +212,12 @@ public class FootCenterToToeEvaluator
          removeAllStepsFromStepListExceptFirstTwo(stepList);
          footLocations.clear();
          footLocations.addAll(getFirstSteps(stepList, 4));
-         
+
          for (int i = 1; i < footstepYoFramePoints.size(); i++)
          {
-            footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size())-1));
-            
-            FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame()); 
+            footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size()) - 1));
+
+            FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame());
             tempPoint.set(0.1, 0.0, 0.0);
             tempPoint.add(footstepYoFramePoints.get(i).getFramePointCopy());
             toePointFramePoints.get(i).set(tempPoint);
@@ -235,19 +228,19 @@ public class FootCenterToToeEvaluator
       {
          doubleSupportStartICPYoFramePoint.set(smoothICPComputer.getDoubleSupportStartICP());
          doubleSupportEndICPYoFramePoint.set(smoothICPComputer.getDoubleSupportEndICP());
-         
+
          for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
          {
-            constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+            constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy());
          }
-         
-         for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+
+         for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
          {
-            icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
-            
+            icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy());
+
             if (smoothICPComputer.getDoHeelToToeTransfer())
             {
-            icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
+               icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy());
             }
          }
       }
@@ -261,98 +254,97 @@ public class FootCenterToToeEvaluator
             for (int i = 0; i < Math.min(footLocations.size(), footstepYoFramePoints.size()); i++)
             {
                footstepYoFramePoints.get(i).set(footLocations.get(i));
-               
-               FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame()); 
+
+               FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame());
                tempPoint.set(0.1, 0.0, 0.0);
                tempPoint.add(footstepYoFramePoints.get(i).getFramePointCopy());
                toePointFramePoints.get(i).set(tempPoint);
             }
          }
 
-         
-         dummyReferenceFrameList.clear(); 
+         dummyReferenceFrameList.clear();
          for (int i = 0; i < footLocations.size(); i++)
          {
-            dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
+            dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame());
          }
-         
+
          smoothICPComputer.initializeSingleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, initialTime);
 
          if (visualize)
          {
             doubleSupportStartICPYoFramePoint.set(smoothICPComputer.getDoubleSupportStartICP());
             doubleSupportEndICPYoFramePoint.set(smoothICPComputer.getDoubleSupportEndICP());
-            
+
             for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
             {
-               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy());
             }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+
+            for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
             {
-               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
-               
+               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy());
+
                if (smoothICPComputer.getDoHeelToToeTransfer())
                {
-               icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
+                  icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy());
                }
             }
          }
 
-         smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
-
+         smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition,
+               initialTime);
 
          transferFromFoot = footLocations.get(0).getPoint();
 
-         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, singleSupportDuration, initialTime, omega0,
-                 initialICPPosition, transferFromFoot, stepList, footLocations);
+         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, singleSupportDuration, initialTime,
+               omega0, initialICPPosition, transferFromFoot, stepList, footLocations);
 
          initialTime = initialTime + singleSupportDuration;
 
-         dummyReferenceFrameList.clear(); 
+         dummyReferenceFrameList.clear();
          for (int i = 0; i < footLocations.size(); i++)
          {
-            dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame()); 
+            dummyReferenceFrameList.add(ReferenceFrame.getWorldFrame());
          }
-         
-         smoothICPComputer.initializeDoubleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, null, null, initialTime);
-         smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition, initialTime);
 
+         smoothICPComputer.initializeDoubleSupport(footLocations, dummyReferenceFrameList, singleSupportDuration, doubleSupportDuration, omega0, null, null,
+               initialTime);
+         smoothICPComputer.computeICPPositionVelocityAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration, initialECMPPosition,
+               initialTime);
 
          if (visualize)
          {
             doubleSupportStartICPYoFramePoint.set(smoothICPComputer.getDoubleSupportStartICP());
             doubleSupportEndICPYoFramePoint.set(smoothICPComputer.getDoubleSupportEndICP());
-            
+
             for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
             {
-               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy());
             }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+
+            for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
             {
-               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
-               
+               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy());
+
                if (smoothICPComputer.getDoHeelToToeTransfer())
                {
-               icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
+                  icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy());
                }
             }
          }
 
-         simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, doubleSupportDuration, initialTime, deltaT, omega0,
-                 initialICPPosition, stepList, footLocations);
+         simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, doubleSupportDuration, initialTime,
+               deltaT, omega0, initialICPPosition, stepList, footLocations);
 
          initialTime = initialTime + doubleSupportDuration;
-
 
          stepList.remove(0);
       }
 
       double timeToSimulateAtEnd = 1.0;
       initialICPPosition.set(icpPosition);
-      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, timeToSimulateAtEnd, initialTime, deltaT, omega0,
-              initialICPPosition, stepList, footLocations);
+      simulateForwardAndCheckDoubleSupport(icpPosition, icpVelocity, icpAcceleration, ecmpPosition, smoothICPComputer, timeToSimulateAtEnd, initialTime, deltaT,
+            omega0, initialICPPosition, stepList, footLocations);
 
       if (visualize)
       {
@@ -362,8 +354,6 @@ public class FootCenterToToeEvaluator
          ThreadTools.sleepForever();
       }
    }
-
-
 
    private void removeAllStepsFromStepListExceptFirstTwo(ArrayList<YoFramePoint> stepList)
    {
@@ -388,8 +378,8 @@ public class FootCenterToToeEvaluator
       return ret;
    }
 
-   private ArrayList<YoFramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp, int numberOfStepsInStepList,
-           double stepLength, double halfStepWidth)
+   private ArrayList<YoFramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp, int numberOfStepsInStepList, double stepLength,
+         double halfStepWidth)
    {
       ArrayList<YoFramePoint> footLocations = new ArrayList<YoFramePoint>();
 
@@ -416,9 +406,8 @@ public class FootCenterToToeEvaluator
       return footLocations;
    }
 
-
    private ArrayList<YoFramePoint> createABunchOfRandomWalkingSteps(RobotSide stepSide, boolean startSquaredUp, int numberOfStepsInStepList, double stepLength,
-           double halfStepWidth)
+         double halfStepWidth)
    {
       Random random = new Random(1776L);
       ArrayList<YoFramePoint> footLocations = new ArrayList<YoFramePoint>();
@@ -426,7 +415,6 @@ public class FootCenterToToeEvaluator
       double height = 0.5;
 
       Point3d previousStepLocation = new Point3d(0.0, 0.0, height);
-
 
       if (startSquaredUp)
       {
@@ -472,9 +460,9 @@ public class FootCenterToToeEvaluator
       return footLocations;
    }
 
-   private void simulateForwardAndCheckSingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, Point3d ecmpPositionToPack,
-         DoubleSupportFootCenterToToeICPComputer smoothICPComputer, double singleSupportDuration, double initialTime, double omega0, Point3d initialICPPosition,
-           Point3d transferFromFoot, ArrayList<YoFramePoint> stepList, ArrayList<FramePoint> footLocations)
+   private void simulateForwardAndCheckSingleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack,
+         Point3d ecmpPositionToPack, DoubleSupportFootCenterToToeICPComputer smoothICPComputer, double singleSupportDuration, double initialTime, double omega0,
+         Point3d initialICPPosition, Point3d transferFromFoot, ArrayList<YoFramePoint> stepList, ArrayList<FramePoint> footLocations)
    {
       double deltaT = 0.001;
       Point3d previousICPPosition = new Point3d(initialICPPosition);
@@ -487,33 +475,32 @@ public class FootCenterToToeEvaluator
             removeAllStepsFromStepListExceptFirstTwo(stepList);
             footLocations.clear();
             footLocations.addAll(getFirstSteps(stepList, 4));
-            
+
             for (int i = 1; i < footstepYoFramePoints.size(); i++)
             {
-               footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size())-1));
-               
-               FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame()); 
+               footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size()) - 1));
+
+               FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame());
                tempPoint.set(0.1, 0.0, 0.0);
                tempPoint.add(footstepYoFramePoints.get(i).getFramePointCopy());
                toePointFramePoints.get(i).set(tempPoint);
             }
-            
+
             for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
             {
-               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy());
             }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+
+            for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
             {
-               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
-               
+               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy());
+
                if (smoothICPComputer.getDoHeelToToeTransfer())
                {
-               icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
+                  icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy());
                }
             }
          }
-
 
          smoothICPComputer.computeICPPositionVelocityAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, ecmpPositionToPack, time);
 
@@ -526,9 +513,9 @@ public class FootCenterToToeEvaluator
       }
    }
 
-   private void simulateForwardAndCheckDoubleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack, Point3d ecmpPositionToPack,
-         DoubleSupportFootCenterToToeICPComputer smoothICPComputer, double doubleSupportDuration, double initialTime, double deltaT, double omega0, Point3d initialICPPosition,
-           ArrayList<YoFramePoint> stepList, ArrayList<FramePoint> footLocations)
+   private void simulateForwardAndCheckDoubleSupport(Point3d icpPositionToPack, Vector3d icpVelocityToPack, Vector3d icpAccelerationToPack,
+         Point3d ecmpPositionToPack, DoubleSupportFootCenterToToeICPComputer smoothICPComputer, double doubleSupportDuration, double initialTime, double deltaT,
+         double omega0, Point3d initialICPPosition, ArrayList<YoFramePoint> stepList, ArrayList<FramePoint> footLocations)
    {
       Point3d previousICPPosition = new Point3d(initialICPPosition);
       for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
@@ -540,33 +527,32 @@ public class FootCenterToToeEvaluator
             removeAllStepsFromStepListExceptFirstTwo(stepList);
             footLocations.clear();
             footLocations.addAll(getFirstSteps(stepList, 4));
-            
+
             for (int i = 1; i < footstepYoFramePoints.size(); i++)
             {
-               footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size())-1));
-               
-               FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame()); 
+               footstepYoFramePoints.get(i).set(footLocations.get(Math.min(footLocations.size(), footstepYoFramePoints.size()) - 1));
+
+               FramePoint tempPoint = new FramePoint(footstepYoFramePoints.get(i).getReferenceFrame());
                tempPoint.set(0.1, 0.0, 0.0);
                tempPoint.add(footstepYoFramePoints.get(i).getFramePointCopy());
                toePointFramePoints.get(i).set(tempPoint);
             }
-            
+
             for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
             {
-               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy()); 
+               constantCoPsViz.get(i).set(smoothICPComputer.getConstantCentersOfPressure().get(i).getFramePointCopy());
             }
-            
-            for (int i = 0; i < maxNumberOfConsideredFootsteps-1; i++)
+
+            for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
             {
-               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy()); 
-               
+               icpFootCenterCornerPointsViz.get(i).set(smoothICPComputer.getFootCenterICPCornerPoints().get(i).getFramePointCopy());
+
                if (smoothICPComputer.getDoHeelToToeTransfer())
                {
-               icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy()); 
+                  icpToeCornerPointsViz.get(i).set(smoothICPComputer.getToeICPCornerPoints().get(i).getFramePointCopy());
                }
             }
          }
-
 
          smoothICPComputer.computeICPPositionVelocityAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack, ecmpPositionToPack, time);
 
@@ -578,7 +564,6 @@ public class FootCenterToToeEvaluator
          previousICPPosition.set(icpPositionToPack);
       }
    }
-
 
    public void visualizeICPAndECMP(Point3d icpPosition, Vector3d icpVelocity, Point3d ecmpPosition, double time)
    {
@@ -594,8 +579,6 @@ public class FootCenterToToeEvaluator
       timeYoVariable.set(time);
       scs.tickAndUpdate();
    }
-
-
 
    private void createVisualizers(int maxNumberOfConsideredFootsteps)
    {
@@ -625,42 +608,38 @@ public class FootCenterToToeEvaluator
       doubleSupportStartICPYoFramePoint = new YoFramePoint("doubleSupportICPStart", "", worldFrame, registry);
       doubleSupportEndICPYoFramePoint = new YoFramePoint("doubleSupportICPEnd", "", worldFrame, registry);
 
-
       footstepYoFramePoints = new ArrayList<YoFramePoint>();
       toePointFramePoints = new ArrayList<YoFramePoint>();
       icpFootCenterCornerPointsViz = new ArrayList<YoFramePoint>();
       icpToeCornerPointsViz = new ArrayList<YoFramePoint>();
       constantCoPsViz = new ArrayList<YoFramePoint>();
-      
+
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
          YoFramePoint footstepYoFramePoint = pointAndLinePlotter.plotPoint3d("footstep" + i, new Point3d(), YoAppearance.Black(), 0.003);
          footstepYoFramePoints.add(footstepYoFramePoint);
-         
+
          YoFramePoint toeFramePoint = pointAndLinePlotter.plotPoint3d("toePoint" + i, new Point3d(), YoAppearance.Black(), 0.003);
          toePointFramePoints.add(toeFramePoint);
       }
-      
+
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
          YoFramePoint constantCoPPoint = pointAndLinePlotter.plotPoint3d("constantCoPsViz" + i, new Point3d(), YoAppearance.Red(), 0.004);
-         constantCoPsViz.add(constantCoPPoint); 
+         constantCoPsViz.add(constantCoPPoint);
       }
-      
-      
+
       for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
       {
          YoFramePoint cornerICPFramePoint = pointAndLinePlotter.plotPoint3d("cornerICPFramePoint" + i, new Point3d(), YoAppearance.Green(), 0.003);
          icpFootCenterCornerPointsViz.add(cornerICPFramePoint);
-         
+
          if (smoothICPComputer.getDoHeelToToeTransfer())
          {
             YoFramePoint toeCornerICPFramePoint = pointAndLinePlotter.plotPoint3d("toeCornerICPFramePoint" + i, new Point3d(), YoAppearance.Blue(), 0.003);
             icpToeCornerPointsViz.add(toeCornerICPFramePoint);
          }
       }
-      
-    
 
       pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.OrangeRed(), 0.003);
       pointAndLinePlotter.plotYoFramePoint("ecmpPosition", ecmpPositionYoFramePoint, YoAppearance.Magenta(), 0.005);
@@ -671,6 +650,5 @@ public class FootCenterToToeEvaluator
 
       yoGraphicsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
    }
-
 
 }

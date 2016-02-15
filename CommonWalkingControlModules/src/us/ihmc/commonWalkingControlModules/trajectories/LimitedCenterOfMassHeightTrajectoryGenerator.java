@@ -5,7 +5,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 
-
 public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
@@ -13,7 +12,7 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTraje
    private final DoubleYoVariable desiredCenterOfMassHeightFinal;
    private final DoubleYoVariable maxCenterOfMassHeight;
    private final DoubleYoVariable minCenterOfMassHeight;
-   
+
    private final DoubleYoVariable maxCoMHeightDot;
    private final DoubleYoVariable desiredCenterOfMassHeightVelocity;
    private final double controlDT;
@@ -21,34 +20,34 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTraje
    public LimitedCenterOfMassHeightTrajectoryGenerator(double controlDT, double initialDesiredHeight, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry); 
-      desiredCenterOfMassHeightFinal = new DoubleYoVariable("desiredCenterOfMassHeightFinal", registry); 
-      maxCenterOfMassHeight = new DoubleYoVariable("maxCenterOfMassHeight", registry); 
-      minCenterOfMassHeight = new DoubleYoVariable("minCenterOfMassHeightFinal", registry); 
-      
+      desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry);
+      desiredCenterOfMassHeightFinal = new DoubleYoVariable("desiredCenterOfMassHeightFinal", registry);
+      maxCenterOfMassHeight = new DoubleYoVariable("maxCenterOfMassHeight", registry);
+      minCenterOfMassHeight = new DoubleYoVariable("minCenterOfMassHeightFinal", registry);
+
       parentRegistry.addChild(registry);
 
       desiredCenterOfMassHeight.set(initialDesiredHeight);
-      
+
       maxCoMHeightDot = new DoubleYoVariable("maxCoMHeightDot", registry);
       desiredCenterOfMassHeightVelocity = new DoubleYoVariable("desiredCenterOfMassHeightVelocity", registry);
       this.controlDT = controlDT;
-      
+
       desiredCenterOfMassHeightFinal.set(1.15);
       maxCoMHeightDot.set(0.1);
-      
+
    }
 
    public void setFinalDesiredHeight(double height)
    {
       this.desiredCenterOfMassHeightFinal.set(height);
    }
-   
+
    public void setMaximumDesiredHeight(double maxHeight)
    {
       maxCenterOfMassHeight.set(maxHeight);
    }
-   
+
    public void setMinimumDesiredHeight(double minHeight)
    {
       minCenterOfMassHeight.set(minHeight);
@@ -61,7 +60,8 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTraje
 
    public void compute(double time)
    {
-      double finalHeight = MathTools.clipToMinMax(desiredCenterOfMassHeightFinal.getDoubleValue(), minCenterOfMassHeight.getDoubleValue(), maxCenterOfMassHeight.getDoubleValue());
+      double finalHeight = MathTools.clipToMinMax(desiredCenterOfMassHeightFinal.getDoubleValue(), minCenterOfMassHeight.getDoubleValue(),
+            maxCenterOfMassHeight.getDoubleValue());
       double error = finalHeight - desiredCenterOfMassHeight.getDoubleValue();
       double maximumChangePerTick = maxCoMHeightDot.getDoubleValue() * controlDT;
 

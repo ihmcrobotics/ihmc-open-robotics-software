@@ -79,8 +79,8 @@ public class HighLevelHumanoidControllerFactoryHelper
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       SideDependentList<ReferenceFrame> ankleZUpReferenceFrames = referenceFrames.getAnkleZUpReferenceFrames();
       SideDependentList<ReferenceFrame> footReferenceFrames = referenceFrames.getFootReferenceFrames();
-      desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight, pelvisZUpFrame, ankleZUpReferenceFrames,
-            footReferenceFrames, bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
+      desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight, pelvisZUpFrame, ankleZUpReferenceFrames, footReferenceFrames,
+            bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
       desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());

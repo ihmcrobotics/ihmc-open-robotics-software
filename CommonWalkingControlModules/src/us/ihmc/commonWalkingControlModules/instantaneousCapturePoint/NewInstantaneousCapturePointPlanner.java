@@ -220,14 +220,16 @@ public class NewInstantaneousCapturePointPlanner
       }
       else
       {
-         CapturePointTools.computeConstantCMPs(constantCentroidalMomentumPivots, footstepList, 0, indexOfLastFootstepToConsider, atAStop.getBooleanValue(), comeToStop.getBooleanValue());
+         CapturePointTools.computeConstantCMPs(constantCentroidalMomentumPivots, footstepList, 0, indexOfLastFootstepToConsider, atAStop.getBooleanValue(),
+               comeToStop.getBooleanValue());
       }
    }
 
    protected void computeCapturePointCornerPoints(double steppingDuration)
    {
       boolean skipFirstCornerPoint = wasPushedInSingleSupport.getBooleanValue();
-      CapturePointTools.computeDesiredCornerPoints(capturePointCornerPoints, constantCentroidalMomentumPivots, skipFirstCornerPoint, steppingDuration, omega0.getDoubleValue());
+      CapturePointTools.computeDesiredCornerPoints(capturePointCornerPoints, constantCentroidalMomentumPivots, skipFirstCornerPoint, steppingDuration,
+            omega0.getDoubleValue());
    }
 
    protected void computeDesiredCapturePointPosition(double time)
@@ -335,9 +337,8 @@ public class NewInstantaneousCapturePointPlanner
 
       capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
 
-      CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCentroidalMomentumPivots.get(0),
-            capturePointCornerPoints.get(1), capturePointCornerPoints.get(0), omega0.getDoubleValue(),
-            timeRemaining + doubleSupportDuration.getDoubleValue());
+      CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCentroidalMomentumPivots.get(0), capturePointCornerPoints.get(1),
+            capturePointCornerPoints.get(0), omega0.getDoubleValue(), timeRemaining + doubleSupportDuration.getDoubleValue());
 
       initialTime.set(time);
    }

@@ -59,9 +59,9 @@ public class CapturePointPlannerAdapter
 
    private double omega0;
 
-   public CapturePointPlannerAdapter(CapturePointPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         BipedSupportPolygons bipedSupportPolygons)
+   public CapturePointPlannerAdapter(CapturePointPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, BipedSupportPolygons bipedSupportPolygons)
    {
       useNewICPPlanner = capturePointPlannerParameters.useNewICPPlanner();
       this.currentTransferToSide = new EnumYoVariable<RobotSide>("icpPlannerAdapterCurrentTransferToSide", registry, RobotSide.class);
@@ -77,7 +77,8 @@ public class CapturePointPlannerAdapter
       }
       else
       {
-         capturePointPlanner = new NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+         capturePointPlanner = new NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(capturePointPlannerParameters, registry,
+               yoGraphicsListRegistry);
          icpPlanner = null;
       }
 
@@ -108,7 +109,7 @@ public class CapturePointPlannerAdapter
    {
       if (useNewICPPlanner)
          icpPlanner.setInitialDoubleSupportTime(doubleSupportTime);
-      else      
+      else
          capturePointPlanner.setInitialDoubleSupportTime(doubleSupportTime);
    }
 
@@ -166,7 +167,7 @@ public class CapturePointPlannerAdapter
       desiredICP.getFrameTupleIncludingFrame(currentDesiredICP);
       desiredICPVelocity.getFrameTupleIncludingFrame(currentDesiredICPVelocity);
    }
-   
+
    public void setDesiredCapturePointState(FramePoint2d desiredICP, FrameVector2d desiredICPVelocity)
    {
       currentDesiredICP.setXY(desiredICP);
@@ -198,7 +199,7 @@ public class CapturePointPlannerAdapter
    {
       if (desiredICP != null)
          setCurrentDesiredICPState(desiredICP, desiredICPVelocity);
-      
+
       if (useNewICPPlanner)
       {
          icpPlanner.setDesiredCapturePointState(currentDesiredICP, currentDesiredICPVelocity);
@@ -206,7 +207,8 @@ public class CapturePointPlannerAdapter
       }
       else
       {
-         if (transferToSide == null) transferToSide = RobotSide.LEFT;
+         if (transferToSide == null)
+            transferToSide = RobotSide.LEFT;
          RobotSide transferFromSide = transferToSide.getOppositeSide();
          currentTransferToSide.set(transferToSide);
 
@@ -227,10 +229,11 @@ public class CapturePointPlannerAdapter
          setSupportFootLocation(transferFromSide, transferFromFootLocation);
          setSupportFootLocation(transferToSide, transferToFootLocation);
 
-      transferToFootLocation = new FramePoint(soleFrames.get(transferToSide));
-      transferToFootLocation.changeFrame(worldFrame);
+         transferToFootLocation = new FramePoint(soleFrames.get(transferToSide));
+         transferToFootLocation.changeFrame(worldFrame);
 
-         capturePointPlanner.initializeDoubleSupport(currentDesiredICP, currentDesiredICPVelocity, initialTime, footstepLocations, transferToSide, transferToFootLocation);
+         capturePointPlanner.initializeDoubleSupport(currentDesiredICP, currentDesiredICPVelocity, initialTime, footstepLocations, transferToSide,
+               transferToFootLocation);
       }
    }
 
@@ -357,7 +360,7 @@ public class CapturePointPlannerAdapter
    {
       if (useNewICPPlanner)
          icpPlanner.getFinalDesiredCapturePointPosition(tmpFramePoint);
-      else         
+      else
          capturePointPlanner.getFinalDesiredCapturePointPosition(tmpFramePoint);
       tmpFramePoint.changeFrame(worldFrame);
       tmpFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(tmpFramePoint);
