@@ -22,8 +22,8 @@ public class QuaternionCalculusTest
 {
    private static final double EPSILON = 1.0e-10;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.07)
+   @Test(timeout = 500)
    public void testConversionQDotToAngularVelocityBackAndForth() throws Exception
    {
       Random random = new Random(651651961L);
@@ -46,8 +46,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.04)
+   @Test(timeout = 300)
    public void testConversionQDDotToAngularAccelerationBackAndForth() throws Exception
    {
       Random random = new Random(651651961L);
@@ -87,8 +87,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 1000)
    public void testVelocityFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -133,8 +133,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.07)
+   @Test(timeout = 500)
    public void testAccelerationFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -181,8 +181,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.5)
+   @Test(timeout = 3000)
    public void testInterpolateAgainstQuat4d() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -201,8 +201,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.02)
+   @Test(timeout = 200)
    public void testTransformOnVector() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -231,8 +231,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.02)
+   @Test(timeout = 200)
    public void testInvertTransformOnVector() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -262,7 +262,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.005)
+   @Test(timeout = 100)
    public void testTransformOnQuaternion() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -296,7 +297,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.005)
+   @Test(timeout = 100)
    public void testInvertTransformOnQuaternion() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
