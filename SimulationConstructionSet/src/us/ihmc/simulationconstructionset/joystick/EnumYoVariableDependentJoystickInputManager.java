@@ -63,6 +63,11 @@ public class EnumYoVariableDependentJoystickInputManager<T>
       return joysticks.get(index);
    }
    
+   public int getNumberOfJoysticks()
+   {
+      return joysticks.size();
+   }
+   
    public void initialize()
    {
       updateListeners(enumYoVariable);
