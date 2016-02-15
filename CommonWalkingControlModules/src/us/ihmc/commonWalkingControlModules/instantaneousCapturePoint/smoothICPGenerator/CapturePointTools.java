@@ -438,6 +438,40 @@ public class CapturePointTools
    }
 
    /**
+    * Compute the distance along the capture point guide line from the 
+    * current capture point position to the desired capture point position.
+    * 
+    * @param currentCapturePointPosition
+    * @param desiredCapturePointPosition
+    * @param desiredCapturePointVelocity
+    * @return
+    */
+   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint2d currentCapturePointPosition, FramePoint2d desiredCapturePointPosition,
+         FrameVector2d desiredCapturePointVelocity)
+   {
+      currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
+      desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
+
+      double desiredCapturePointVelocityMagnitude = Math
+            .sqrt(MathTools.square(desiredCapturePointVelocity.getX()) + MathTools.square(desiredCapturePointVelocity.getY()));
+
+      if (desiredCapturePointVelocityMagnitude == 0.0)
+      {
+         return Double.NaN;
+      }
+      else
+      {
+         double normalizedCapturePointVelocityX = desiredCapturePointVelocity.getX() / desiredCapturePointVelocityMagnitude;
+         double normalizedCapturePointVelocityY = desiredCapturePointVelocity.getY() / desiredCapturePointVelocityMagnitude;
+
+         double capturePointErrorX = currentCapturePointPosition.getX() - desiredCapturePointPosition.getX();
+         double capturePointErrorY = currentCapturePointPosition.getY() - desiredCapturePointPosition.getY();
+
+         return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY);
+      }
+   }
+
+   /**
     * Given a capture point trajectory line and the actual 
     * capture point position, project the current capture point 
     * onto the capture point trajectory line.
