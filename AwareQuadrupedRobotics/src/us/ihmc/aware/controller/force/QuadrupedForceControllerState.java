@@ -5,5 +5,6 @@ public enum QuadrupedForceControllerState
    JOINT_INITIALIZATION,
    STAND_PREP,
    STAND,
-   STEP
+   STEP,
+   TROT
 }

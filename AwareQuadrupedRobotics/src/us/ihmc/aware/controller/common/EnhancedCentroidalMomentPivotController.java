@@ -51,7 +51,7 @@ public class EnhancedCentroidalMomentPivotController
       comForceOutput.changeFrame(comFrame);
       cmpPositionInput.changeFrame(comFrame);
 
-      // compute the horizontal components of the CoM force
+      // compute the CoM force
       double omega = getNaturalFrequency();
       double fX = mass * Math.pow(omega, 2) * -cmpPositionInput.getX();
       double fY = mass * Math.pow(omega, 2) * -cmpPositionInput.getY();
