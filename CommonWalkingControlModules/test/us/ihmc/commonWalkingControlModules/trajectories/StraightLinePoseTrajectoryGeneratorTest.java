@@ -7,15 +7,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;

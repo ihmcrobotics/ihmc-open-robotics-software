@@ -8,11 +8,11 @@ import java.util.List;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {

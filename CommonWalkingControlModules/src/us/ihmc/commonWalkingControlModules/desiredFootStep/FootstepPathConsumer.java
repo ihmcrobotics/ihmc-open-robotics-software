@@ -7,12 +7,12 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.commonWalkingControlModules.packetConsumers.PacketValidityChecker;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 
 /**
  * User: Matt

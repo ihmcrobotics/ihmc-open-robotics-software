@@ -433,4 +433,24 @@ public class CapturePointTools
       projectedCapturePoint.set(actualICP.getX(), actualICP.getY());
       capturePointTrajectoryLine.orthogonalProjection(projectedCapturePoint);
    }
+
+   /**
+    * Compute the capture point position at a given time.
+    * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCMP
+    * @param desiredCapturePointToPack
+    */
+   public static void computeCapturePointPosition(double omega0, double time, FramePoint2d initialCapturePoint, FramePoint2d initialCMP, FramePoint2d desiredCapturePointToPack)
+   {
+      desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
+
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
+      else
+         desiredCapturePointToPack.set(initialCapturePoint);
+   }
 }

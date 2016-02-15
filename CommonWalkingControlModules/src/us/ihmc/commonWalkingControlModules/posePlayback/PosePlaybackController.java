@@ -18,8 +18,8 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 
 public class PosePlaybackController extends HighLevelBehavior

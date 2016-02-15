@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class KinematicsBasedFootSwitch implements FootSwitchInterface
 {

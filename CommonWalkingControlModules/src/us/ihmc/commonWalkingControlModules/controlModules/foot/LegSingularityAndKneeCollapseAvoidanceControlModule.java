@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -18,22 +19,21 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class LegSingularityAndKneeCollapseAvoidanceControlModule
 {

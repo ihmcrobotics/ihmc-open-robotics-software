@@ -7,7 +7,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class SimpleDesiredVelocityControlModule implements DesiredVelocityControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SimpleDesiredVelocityControlModule");
@@ -18,7 +17,7 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
    private final DesiredHeadingControlModule desiredHeadingControlModule;
 
    public SimpleDesiredVelocityControlModule(DesiredHeadingControlModule desiredHeadingControlModule, double initialDesiredVelocity,
-           YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       this.desiredHeadingControlModule = desiredHeadingControlModule;
 
@@ -41,7 +40,7 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
       {
          double desiredHeading = this.desiredHeadingControlModule.getDesiredHeadingAngle();
          this.desiredVelocity.set(desiredVelocityNorm.getDoubleValue() * Math.cos(desiredHeading),
-                                  desiredVelocityNorm.getDoubleValue() * Math.sin(desiredHeading));
+               desiredVelocityNorm.getDoubleValue() * Math.sin(desiredHeading));
       }
    }
 

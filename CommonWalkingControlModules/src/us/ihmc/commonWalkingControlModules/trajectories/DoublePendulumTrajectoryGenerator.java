@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.Arrays;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
-import us.ihmc.robotics.numericalMethods.RungeKuttaSimulation;
 
-import java.util.Arrays;
+import us.ihmc.robotics.numericalMethods.RungeKuttaSimulation;
 
 /**
  * Created by agrabertilton on 2/8/15.

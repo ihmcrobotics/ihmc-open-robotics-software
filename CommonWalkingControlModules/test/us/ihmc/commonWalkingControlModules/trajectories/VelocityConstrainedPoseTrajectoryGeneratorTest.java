@@ -10,20 +10,18 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class VelocityConstrainedPoseTrajectoryGeneratorTest

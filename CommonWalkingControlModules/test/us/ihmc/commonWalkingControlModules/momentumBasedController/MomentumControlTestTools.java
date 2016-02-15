@@ -1,5 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import static junit.framework.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -13,11 +18,6 @@ import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-
-import java.util.Collection;
-import java.util.Map;
-
-import static junit.framework.Assert.assertTrue;
 
 /**
  * @author twan

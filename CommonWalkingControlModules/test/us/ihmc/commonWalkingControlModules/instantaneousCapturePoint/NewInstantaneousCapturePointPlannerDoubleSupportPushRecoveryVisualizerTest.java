@@ -13,23 +13,23 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.PointAndLinePlotter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.FrameTupleArrayList;
+import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.thread.ThreadTools;
 
 // FIXME I've changed the way push recovery is handled with the planner but didn't take the time to fix the visualizer. (Sylvain)
 

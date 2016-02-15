@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.Random;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ContactablePlaneBodyTools

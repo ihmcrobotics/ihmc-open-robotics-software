@@ -6,6 +6,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 /**
  * @author twan

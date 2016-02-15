@@ -20,14 +20,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProviderTestH
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.ViewportConfiguration;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -44,6 +36,14 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.ViewportConfiguration;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.ArrayTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class LookAheadCoMHeightTrajectoryGeneratorTest
 {

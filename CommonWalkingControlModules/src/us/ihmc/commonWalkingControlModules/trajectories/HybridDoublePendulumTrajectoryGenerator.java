@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.Arrays;
+
 import org.ejml.simple.SimpleMatrix;
+
 import us.ihmc.robotics.numericalMethods.RungeKuttaSimulation;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectory;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolver;
-
-import java.util.Arrays;
 
 /**
  * Created by agrabertilton on 2/10/15.

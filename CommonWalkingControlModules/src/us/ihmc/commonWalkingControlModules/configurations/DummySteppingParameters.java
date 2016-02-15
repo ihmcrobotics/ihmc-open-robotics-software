@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-
 /**
  * Created by agrabertilton on 2/20/15.
  */

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -9,7 +10,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinat
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 
 public class TransferToAndNextFootstepsDataVisualizer

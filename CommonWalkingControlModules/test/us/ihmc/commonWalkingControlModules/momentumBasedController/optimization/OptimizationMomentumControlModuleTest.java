@@ -1,11 +1,28 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -26,8 +43,6 @@ import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.NullspaceCalculator;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -47,21 +62,8 @@ import us.ihmc.robotics.screwTheory.TotalWrenchCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertRootJointWrenchZero;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesInFrictionCones;
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
+import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * @author twan

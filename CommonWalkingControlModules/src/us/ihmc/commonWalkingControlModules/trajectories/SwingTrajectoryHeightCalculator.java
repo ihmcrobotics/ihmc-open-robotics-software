@@ -1,22 +1,23 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.InclusionFunction;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.InclusionFunction;
 
 /**
  * Created by agrabertilton on 2/11/15.

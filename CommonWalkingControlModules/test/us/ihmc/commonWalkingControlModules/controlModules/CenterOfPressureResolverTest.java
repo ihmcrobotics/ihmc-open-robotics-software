@@ -9,22 +9,21 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import us.ihmc.tools.MemoryTools;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 

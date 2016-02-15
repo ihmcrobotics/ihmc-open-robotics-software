@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

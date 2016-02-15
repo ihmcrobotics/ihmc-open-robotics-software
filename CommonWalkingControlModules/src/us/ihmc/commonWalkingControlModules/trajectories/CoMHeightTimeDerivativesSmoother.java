@@ -2,17 +2,17 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
-import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
-import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
+import Jama.Matrix;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
+import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
+import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import Jama.Matrix;
 
 public class CoMHeightTimeDerivativesSmoother
 {

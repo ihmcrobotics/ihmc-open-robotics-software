@@ -6,12 +6,12 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
 {

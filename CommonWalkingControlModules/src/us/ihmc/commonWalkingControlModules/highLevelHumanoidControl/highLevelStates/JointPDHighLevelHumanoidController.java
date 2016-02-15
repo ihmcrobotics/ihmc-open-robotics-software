@@ -6,11 +6,11 @@ import java.util.HashSet;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 
 public class JointPDHighLevelHumanoidController extends HighLevelBehavior
 {

@@ -7,12 +7,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.tools.FormattingTools;
 
 
 public abstract class TaskspaceHandControlState extends State<HandControlState>

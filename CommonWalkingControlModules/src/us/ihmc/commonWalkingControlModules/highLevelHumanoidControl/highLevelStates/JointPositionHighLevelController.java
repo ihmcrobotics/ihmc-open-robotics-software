@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,6 +11,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
@@ -46,16 +45,16 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;

@@ -2,13 +2,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 
 public class TypicalMotionConstraintsTestHelper

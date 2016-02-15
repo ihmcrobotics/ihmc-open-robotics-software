@@ -8,7 +8,6 @@ import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -16,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimpleStanceController;
@@ -78,7 +78,7 @@ public class AtlasSimpleStanceController
       int simulationTicksPerControlTick = (int) (controlDT / simDT);
       robot.setController(controller, simulationTicksPerControlTick);
 
-      DRCSCSInitialSetup drcscsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_ZERO, simDT);
+      DRCSCSInitialSetup drcscsInitialSetup = new DRCSCSInitialSetup(new FlatGroundProfile(), simDT);
       drcscsInitialSetup.initializeRobot(robot, model, yoGraphicsListsRegistry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);

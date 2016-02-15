@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
@@ -16,8 +18,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import com.google.common.util.concurrent.AtomicDouble;
 
 public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWheelInformationPacket>
 {

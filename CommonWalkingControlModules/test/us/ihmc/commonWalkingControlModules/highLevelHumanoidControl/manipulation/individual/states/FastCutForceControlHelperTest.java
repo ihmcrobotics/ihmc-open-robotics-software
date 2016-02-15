@@ -18,9 +18,9 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class FastCutForceControlHelperTest {

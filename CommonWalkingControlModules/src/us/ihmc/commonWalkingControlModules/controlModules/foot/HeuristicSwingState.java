@@ -24,12 +24,12 @@ import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerato
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.CurrentConfigurationProvider;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.trajectories.providers.CurrentConfigurationProvider;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class HeuristicSwingState extends AbstractFootControlState implements SwingStateInterface
 {

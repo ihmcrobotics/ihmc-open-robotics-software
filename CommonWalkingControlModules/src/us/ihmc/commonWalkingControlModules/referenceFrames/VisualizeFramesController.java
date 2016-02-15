@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.referenceFrames;
 
 import java.util.ArrayList;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
    public class VisualizeFramesController implements RobotController
    {

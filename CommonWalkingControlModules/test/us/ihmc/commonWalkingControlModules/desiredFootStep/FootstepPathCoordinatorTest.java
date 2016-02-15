@@ -19,10 +19,8 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
@@ -31,6 +29,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * User: Matt
