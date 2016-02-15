@@ -19,8 +19,9 @@ public class QuadrupedTrotWalkSliderBoardConfiguration
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            System.out.println("loading configuration " + selectedMode.getEnumValue());
-            sliderBoardConfigurationManager.loadConfiguration(selectedMode.getEnumValue().toString());
+            SliderBoardModes sliderBoardMode = SliderBoardModes.values()[selectedMode.getOrdinal()];
+            System.out.println("loading configuration " + sliderBoardMode);
+            sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.toString());
          }
       });
       

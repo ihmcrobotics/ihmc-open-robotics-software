@@ -14,14 +14,15 @@ public class JoystickUpdater implements Runnable
    private final Controller joystickController;
    private final Object listnerConch = new Object();
    private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
-   private final ArrayList<JoystickGeneralListener> generalListenersList;
+   private final ArrayList<JoystickStatusListener> generalListenersList;
    
    private HashMap<String, Float> lastValues = new HashMap<String, Float>();
    private int pollIntervalMillis = 5;
    private float deadband = 0.0f;
    private boolean connected;
+   private boolean threadRunning = false;
 
-   public JoystickUpdater(Controller joystickController, ArrayList<JoystickGeneralListener> generalListenersList)
+   public JoystickUpdater(Controller joystickController, ArrayList<JoystickStatusListener> generalListenersList)
    {
       this.joystickController = joystickController;
       this.generalListenersList = generalListenersList;
@@ -48,7 +49,8 @@ public class JoystickUpdater implements Runnable
    @Override
    public void run()
    {
-      while (true)
+      threadRunning = true;
+      while (threadRunning)
       {
          joystickController.poll();
          EventQueue queue = joystickController.getEventQueue();
@@ -83,7 +85,7 @@ public class JoystickUpdater implements Runnable
                   }
                }
 
-               for (JoystickGeneralListener listener : generalListenersList)
+               for (JoystickStatusListener listener : generalListenersList)
                {
                   listener.updateConnectivity(connected);
 
@@ -100,6 +102,11 @@ public class JoystickUpdater implements Runnable
             e.printStackTrace();
          }
       }
+   }
+   
+   public void stopThread()
+   {
+      threadRunning = false;
    }
 
    private boolean isNewValue(Event event)

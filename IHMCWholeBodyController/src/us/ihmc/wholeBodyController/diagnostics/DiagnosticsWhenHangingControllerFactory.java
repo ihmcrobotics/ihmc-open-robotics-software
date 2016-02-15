@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
@@ -57,7 +58,8 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
    public HighLevelBehavior createHighLevelBehavior(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
    {
-      controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, useArms, robotIsHanging, momentumBasedController, this.torqueOffsetPrinter);
+      BipedSupportPolygons bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
+      controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, bipedSupportPolygons, useArms, robotIsHanging, momentumBasedController, this.torqueOffsetPrinter);
 
       controller.addUpdatables(updatables);
 

@@ -1,4 +1,4 @@
-package us.ihmc.graphics3DAdapter.utils;
+package org.jmonkeyengine.hub.tralala;
 
 /** 
  * Encapsulation of 2 objects, the key and its value.

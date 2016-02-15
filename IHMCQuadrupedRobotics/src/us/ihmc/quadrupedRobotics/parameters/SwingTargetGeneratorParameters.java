@@ -16,5 +16,7 @@ public interface SwingTargetGeneratorParameters
    double getMaxLateralSkew();
 
    double getMaxYawPerStep();
+   
+   double getXOffsetFromCenterOfHips();
 
 }

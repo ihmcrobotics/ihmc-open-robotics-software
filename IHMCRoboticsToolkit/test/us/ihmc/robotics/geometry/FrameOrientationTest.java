@@ -1,19 +1,21 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FrameOrientationTest
 {
@@ -65,7 +67,7 @@ public class FrameOrientationTest
    }
 	
 	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test//(timeout = 30000)
 	public void testSetOrientationFromOneToTwo()
 	{
 	   Random random = new Random(1776L);
@@ -249,12 +251,100 @@ public class FrameOrientationTest
 //   {
 //      fail("Not yet implemented");    // TODO
 //   }
-//
-//   @Test(timeout=300000)
-//   public void testApplyTransformCopy()
-//   {
-//      fail("Not yet implemented");    // TODO
-//   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout=300000)
+   public void testApplyTransform()
+   {
+      Random random = new Random(56165161L);
+
+      RigidBodyTransform expectedTransformedTransform = new RigidBodyTransform();
+      RigidBodyTransform actualTransformedTransform = new RigidBodyTransform();
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      FrameOrientation testedFrameOrientation = new FrameOrientation();
+
+      for (int i = 0; i < 100000; i ++)
+      {
+         RigidBodyTransform originalTransform = RigidBodyTransform.generateRandomTransform(random);
+         originalTransform.setTranslation(0.0, 0.0, 0.0);
+         ReferenceFrame randomFrame_A = ReferenceFrame.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
+         ReferenceFrame randomFrame_B = ReferenceFrame.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
+         RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
+         randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
+         Quat4d randomQuaternionForTransformToWorld = new Quat4d();
+         randomTransformToWorld.get(randomQuaternionForTransformToWorld);
+
+         testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
+         testedFrameOrientation.applyTransform(randomTransformToWorld);
+         testedFrameOrientation.getTransform3D(actualTransformedTransform);
+
+         expectedTransformedTransform.multiply(randomTransformToWorld, originalTransform);
+         
+         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+
+         RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
+         randomTransformToA.setTranslation(0.0, 0.0, 0.0);
+         Quat4d randomQuaternionForTransformToA = new Quat4d();
+         randomTransformToA.get(randomQuaternionForTransformToA);
+
+         testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
+         testedFrameOrientation.applyTransform(randomTransformToA);
+         testedFrameOrientation.getTransform3D(actualTransformedTransform);
+
+         expectedTransformedTransform.multiply(randomTransformToA, originalTransform);
+
+         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+      }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout=300000)
+   public void testChangeFrame()
+   {
+      Random random = new Random(56165161L);
+
+      RigidBodyTransform expectedTransformedTransform = new RigidBodyTransform();
+      RigidBodyTransform actualTransformedTransform = new RigidBodyTransform();
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      FrameOrientation testedFrameOrientation = new FrameOrientation();
+
+      for (int i = 0; i < 100000; i ++)
+      {
+         RigidBodyTransform originalTransform = RigidBodyTransform.generateRandomTransform(random);
+         originalTransform.setTranslation(0.0, 0.0, 0.0);
+         ReferenceFrame randomFrame_A = ReferenceFrame.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
+         ReferenceFrame randomFrame_B = ReferenceFrame.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
+         RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
+         randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
+         Quat4d randomQuaternionForTransformToWorld = new Quat4d();
+         randomTransformToWorld.get(randomQuaternionForTransformToWorld);
+
+         testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
+         testedFrameOrientation.changeFrame(worldFrame);
+         testedFrameOrientation.getTransform3D(actualTransformedTransform);
+
+         expectedTransformedTransform.multiply(randomTransformToWorld, originalTransform);
+         
+         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+
+         RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
+         randomTransformToA.setTranslation(0.0, 0.0, 0.0);
+         Quat4d randomQuaternionForTransformToA = new Quat4d();
+         randomTransformToA.get(randomQuaternionForTransformToA);
+
+         testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
+         testedFrameOrientation.changeFrame(randomFrame_A);
+         testedFrameOrientation.getTransform3D(actualTransformedTransform);
+
+         expectedTransformedTransform.multiply(randomTransformToA, originalTransform);
+
+         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+      }
+   }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
