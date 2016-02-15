@@ -9,7 +9,7 @@ public class YoPoseWeights
    private final YoPositionWeights yoPositionWeights;
    private final YoOrientationWeights yoOrientationWeights;
 
-   YoPoseWeights(String prefix, YoVariableRegistry registry)
+   public YoPoseWeights(String prefix, YoVariableRegistry registry)
    {
       yoPositionWeights = new YoPositionWeights(prefix, registry);
       yoOrientationWeights = new YoOrientationWeights(prefix, registry);
