@@ -60,6 +60,7 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -260,7 +261,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrantDependentList<YoGraphicReferenceFrame> desiredAttachmentFrames = new QuadrantDependentList<YoGraphicReferenceFrame>();
    private final QuadrantDependentList<YoGraphicReferenceFrame> actualAttachmentFrames = new QuadrantDependentList<YoGraphicReferenceFrame>();
 
-   
+   private final DoubleYoVariable timeToFilterDesiredAtCrawlStart = new DoubleYoVariable("timeToFilterDesiredAtCrawlStart", registry);
+
    /** body sway trajectory **/
    private final BooleanYoVariable comTrajectoryGeneratorRequiresReInitailization = new BooleanYoVariable("comTrajectoryGeneratorRequiresReInitailization", registry);
    private final VelocityConstrainedPositionTrajectoryGenerator comTrajectoryGenerator = new VelocityConstrainedPositionTrajectoryGenerator("comTraj", ReferenceFrame.getWorldFrame(), registry);
@@ -350,6 +352,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       minimumCoMTrajectoryDuration.set(0.01);
        
       shrunkenPolygonSize.set(0.02);
+
+      timeToFilterDesiredAtCrawlStart.set(4.0);
       
       comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", referenceFrames.getCenterOfMassFrame(), registry, 0.25, YoAppearance.Green());
       feedForwardCoMPoseYoGraphic = new YoGraphicReferenceFrame("feedForwardRasta_", feedForwardReferenceFrames.getCenterOfMassFrame(), registry, 0.25, YoAppearance.Purple());
@@ -1115,17 +1119,15 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private class FilterDesiredsToMatchCrawlControllerState extends State<CrawlGateWalkingState>
    {
-      private final AlphaFilteredYoVariable filterStandPrepDesiredsToWalkingDesireds;
       private final SDFFullRobotModel initialDesiredsUponEnteringFullRobotModel;
-      
+
+      private final MinimumJerkTrajectory minimumJerkTrajectory = new MinimumJerkTrajectory();
+
       public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedRobotParameters robotParameters)
       {
          super(stateEnum);
          
          initialDesiredsUponEnteringFullRobotModel = robotParameters.createFullRobotModel();
-         
-         double filterStandPrepDesiredsToWalkingDesiredsAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt);
-         filterStandPrepDesiredsToWalkingDesireds = new AlphaFilteredYoVariable("filterStandPrepDesiredsToWalkingDesireds", registry, filterStandPrepDesiredsToWalkingDesiredsAlpha);
       }
 
       public void filterDesireds(OneDoFJoint[] oneDoFJointsActual)
@@ -1136,9 +1138,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             String jointName = actualOneDoFJoint.getName();
             
             OneDoFJoint intialOneDoFJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(jointName);
-//            OneDoFJoint desiredOneDofJoint = finalDesiredsFullRobotModel.getOneDoFJointByName(jointName);
-            
-            double alpha = filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
+
+            double alpha = minimumJerkTrajectory.getPosition(); //filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
             
             double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
             actualOneDoFJoint.setqDesired(alphaFilteredQ);
@@ -1147,21 +1148,21 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       public boolean isInterpolationFinished()
       {
-         return filterStandPrepDesiredsToWalkingDesireds.getDoubleValue() >= 0.9999;
+         return  minimumJerkTrajectory.getTimeInMove() >=  timeToFilterDesiredAtCrawlStart.getDoubleValue(); //filterStandPrepDesiredsToWalkingDesireds.getDoubleValue() >= 0.9999;
       }
 
       @Override
       public void doAction()
       {
-         filterStandPrepDesiredsToWalkingDesireds.update(1.0);
+         double newTime = minimumJerkTrajectory.getTimeInMove() + dt;
+         minimumJerkTrajectory.computeTrajectory(newTime);
       }
 
       @Override
       public void doTransitionIntoAction()
       {
-         filterStandPrepDesiredsToWalkingDesireds.reset();
-         filterStandPrepDesiredsToWalkingDesireds.update(0.0);
-         
+         minimumJerkTrajectory.setMoveParameters(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, timeToFilterDesiredAtCrawlStart.getDoubleValue());
+
          for(int i = 0; i < oneDoFJointsActual.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
