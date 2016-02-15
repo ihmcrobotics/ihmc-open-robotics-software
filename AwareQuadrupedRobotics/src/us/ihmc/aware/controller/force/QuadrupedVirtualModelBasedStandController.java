@@ -184,7 +184,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStandController.class);
-      params.setDefault(JOINT_DAMPING, 0);
+      params.setDefault(JOINT_DAMPING, 1);
       params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 2500);
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
@@ -197,7 +197,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       params.setDefault(COM_HEIGHT_INTEGRAL_GAIN, 0);
       params.setDefault(COM_HEIGHT_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 0.95);
-      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
+      params.setDefault(COM_HEIGHT_NOMINAL, 0.60);
 
       // utilities
       jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
