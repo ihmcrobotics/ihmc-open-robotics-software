@@ -3,6 +3,7 @@ package us.ihmc.aware.planning;
 import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -30,6 +31,9 @@ public class QuadrupedXGaitFootstepPlanner
     * The phase offset of the front and back feet pairs in deg.
     */
    private double phaseShift = 90.0;
+
+   private double stanceLength = 1.1;
+   private double stanceWidth = 0.5;
 
    private double strideLength = 0.3;
    private double strideWidth = 0.0;
@@ -86,9 +90,20 @@ public class QuadrupedXGaitFootstepPlanner
          QuadrupedTimedStep step = addZeroStep(startTime + stepIndex * (swingDuration + endPairSupportDuration),
                quadrant);
 
-         step.getGoalPosition().setToZero(referenceFrames.getFootFrame(quadrant));
-         step.getGoalPosition().changeFrame(referenceFrames.getBodyZUpFrame());
+         // Set initial stance position based on stanceWidth/stanceHeight in the body frame
+         FramePoint stepGoalPosition = step.getGoalPosition();
+         stepGoalPosition.setToZero(referenceFrames.getBodyZUpFrame());
 
+         double initialX = quadrant.getEnd().negateIfHindEnd(stanceLength / 2.0);
+         double initialY = quadrant.getSide().negateIfRightSide(stanceWidth / 2.0);
+
+         stepGoalPosition.set(initialX, initialY, 0.0);
+
+         // Project onto the ground.
+         stepGoalPosition.changeFrame(referenceFrames.getWorldFrame());
+         stepGoalPosition.setZ(0.0);
+
+         // Shift right feet forward half a stride.
          if (quadrant.isQuadrantOnRightSide())
          {
             step.getGoalPosition().add(strideLength / 2.0, strideWidth / 2.0, 0.0);
@@ -223,6 +238,26 @@ public class QuadrupedXGaitFootstepPlanner
    public void setPhaseShift(double phaseShift)
    {
       this.phaseShift = phaseShift;
+   }
+
+   public double getStanceLength()
+   {
+      return stanceLength;
+   }
+
+   public void setStanceLength(double stanceLength)
+   {
+      this.stanceLength = stanceLength;
+   }
+
+   public double getStanceWidth()
+   {
+      return stanceWidth;
+   }
+
+   public void setStanceWidth(double stanceWidth)
+   {
+      this.stanceWidth = stanceWidth;
    }
 
    public double getStrideLength()
