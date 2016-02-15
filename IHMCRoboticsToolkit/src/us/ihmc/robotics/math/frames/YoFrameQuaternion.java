@@ -18,17 +18,16 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
 public class YoFrameQuaternion extends ReferenceFrameHolder
 {
    private final String namePrefix;
    private final String nameSuffix;
 
    private final DoubleYoVariable qx, qy, qz, qs;
-   private final Quat4d quaternion = new Quat4d();
-   private final Quat4d tempQuaternion2 = new Quat4d();
+   private final FrameOrientation frameOrientation = new FrameOrientation();
    private final ReferenceFrame referenceFrame;
 
    public YoFrameQuaternion(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
@@ -62,84 +61,90 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       this.referenceFrame = referenceFrame;
    }
 
-   public void set(Quat4d quat)
+   public void set(Quat4d quaternion)
    {
-      quaternion.set(quat);
-      getYoValuesFromQuat4d();
+      frameOrientation.set(quaternion);
+      getYoValuesFromFrameOrientation();
    }
 
    public void set(Matrix3d matrix)
    {
-      RotationTools.convertMatrixToQuaternion(matrix, quaternion);
-      getYoValuesFromQuat4d();
+      frameOrientation.set(matrix);
+      getYoValuesFromFrameOrientation();
    }
 
    public void set(AxisAngle4d axisAngle)
    {
-      quaternion.set(axisAngle);
-      getYoValuesFromQuat4d();
+      frameOrientation.set(axisAngle);
+      getYoValuesFromFrameOrientation();
    }
 
    public void set(double[] yawPitchRoll)
    {
-      RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, quaternion);
-      getYoValuesFromQuat4d();
+      frameOrientation.setYawPitchRoll(yawPitchRoll);
+      getYoValuesFromFrameOrientation();
    }
 
    public void set(double yaw, double pitch, double roll)
    {
-      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, quaternion);
-      getYoValuesFromQuat4d();
+      frameOrientation.setYawPitchRoll(yaw, pitch, roll);
+      getYoValuesFromFrameOrientation();
    }
 
    public void set(FrameOrientation frameOrientation)
    {
       checkReferenceFrameMatch(frameOrientation);
-      frameOrientation.getQuaternion(quaternion);
-      getYoValuesFromQuat4d();
+      this.frameOrientation.setIncludingFrame(frameOrientation);
+      getYoValuesFromFrameOrientation();
    }
 
    public void set(YoFrameQuaternion yoFrameQuaternion)
    {
       checkReferenceFrameMatch(yoFrameQuaternion);
-      yoFrameQuaternion.get(quaternion);
-      getYoValuesFromQuat4d();
+      yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientation);
+      getYoValuesFromFrameOrientation();
    }
 
-   public void get(Quat4d quat)
+   public void get(Quat4d quaternionToPack)
    {
-      putYoValuesIntoQuat4d();
-      quat.set(quaternion);
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.getQuaternion(quaternionToPack);
    }
 
-   public void get(Matrix3d matrix)
+   public void get(Matrix3d matrixToPack)
    {
-      putYoValuesIntoQuat4d();
-      matrix.set(quaternion);
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.getMatrix3d(matrixToPack);
    }
 
-   public void get(Matrix3f matrix)
+   public void get(Matrix3f matrixToPack)
    {
-      putYoValuesIntoQuat4d();
-      matrix.set(quaternion);
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.getMatrix3f(matrixToPack);
    }
 
-   public void get(AxisAngle4d axisAngle)
+   public void get(AxisAngle4d axisAngleToPack)
    {
-      putYoValuesIntoQuat4d();
-      axisAngle.set(quaternion);
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.getAxisAngle(axisAngleToPack);
    }
 
-   public void getYawPitchRoll(double[] yawPitchRoll)
+   public void getYawPitchRoll(double[] yawPitchRollToPack)
    {
-      putYoValuesIntoQuat4d();
-      RotationTools.convertQuaternionToYawPitchRoll(quaternion, yawPitchRoll);
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.getYawPitchRoll(yawPitchRollToPack);
    }
 
-   public void getFrameOrientationIncludingFrame(FrameOrientation frameOrientation)
+   public void getFrameOrientation(FrameOrientation frameOrientationToPack)
    {
-      putYoValuesIntoQuat4d();
-      frameOrientation.setIncludingFrame(getReferenceFrame(), quaternion);
+      putYoValuesIntoFrameOrientation();
+      frameOrientationToPack.set(this.frameOrientation);
+   }
+
+   public void getFrameOrientationIncludingFrame(FrameOrientation frameOrientationToPack)
+   {
+      putYoValuesIntoFrameOrientation();
+      frameOrientationToPack.setIncludingFrame(frameOrientation);
    }
 
    public DoubleYoVariable getYoQx()
@@ -164,49 +169,40 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public void interpolate(YoFrameQuaternion yoFrameQuaternion1, YoFrameQuaternion yoFrameQuaternion2, double alpha)
    {
-      checkReferenceFrameMatch(yoFrameQuaternion1);
-      checkReferenceFrameMatch(yoFrameQuaternion2);
+      yoFrameQuaternion1.putYoValuesIntoFrameOrientation();
+      yoFrameQuaternion2.putYoValuesIntoFrameOrientation();
 
-      yoFrameQuaternion1.putYoValuesIntoQuat4d();
-      yoFrameQuaternion2.putYoValuesIntoQuat4d();
+      interpolate(yoFrameQuaternion1.frameOrientation, yoFrameQuaternion2.frameOrientation, alpha);
+   }
 
-      interpolate(yoFrameQuaternion1.quaternion, yoFrameQuaternion2.quaternion, alpha);
+   public void interpolate(FrameOrientation frameOrientation1, FrameOrientation frameOrientation2, double alpha)
+   {
+      checkReferenceFrameMatch(frameOrientation1);
+      checkReferenceFrameMatch(frameOrientation2);
+
+      frameOrientation.interpolate(frameOrientation1, frameOrientation2, alpha);
+      frameOrientation.checkQuaternionIsUnitMagnitude();
+      getYoValuesFromFrameOrientation();
    }
 
    public void interpolate(Quat4d quaternion1, Quat4d quaternion2, double alpha)
    {
       alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
 
-      quaternion.interpolate(quaternion1, quaternion2, alpha); 
-      checkQuaternionIsUnitMagnitude(quaternion);
-      getYoValuesFromQuat4d();
-   }
-   public void checkQuaternionIsUnitMagnitude()
-   {
-      putYoValuesIntoQuat4d();
-      checkQuaternionIsUnitMagnitude(this.quaternion);
-   }
-
-   private static void checkQuaternionIsUnitMagnitude(Quat4d quaternion)
-   {
-      double normSquared = (quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w);
-      if (Math.abs(normSquared - 1.0) > 1e-12)
-      {
-         System.err.println("\nQuaternion " + quaternion + " is not unit magnitude! normSquared = " + normSquared);
-
-         throw new RuntimeException("Quaternion " + quaternion + " is not unit magnitude! normSquared = " + normSquared);
-      }
+      frameOrientation.interpolate(quaternion1, quaternion2, alpha); 
+      frameOrientation.checkQuaternionIsUnitMagnitude();
+      getYoValuesFromFrameOrientation();
    }
 
    /**
     * Method used to concatenate the orientation represented by this YoFrameQuaternion and the orientation represented by the FrameOrientation.
-    * @param quat4d
+    * @param quaternion
     */
-   public void mul(Quat4d quat4d)
+   public void mul(Quat4d quaternion)
    {
-      putYoValuesIntoQuat4d();
-      quaternion.mul(quat4d);
-      getYoValuesFromQuat4d();
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.mul(quaternion);
+      getYoValuesFromFrameOrientation();
    }
 
    /**
@@ -215,9 +211,9 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
     */
    public void mul(FrameOrientation frameOrientation)
    {
-      checkReferenceFrameMatch(frameOrientation.getReferenceFrame());
-      frameOrientation.getQuaternion(tempQuaternion2);
-      mul(tempQuaternion2);
+      putYoValuesIntoFrameOrientation();
+      this.frameOrientation.mul(frameOrientation);
+      getYoValuesFromFrameOrientation();
    }
 
    /**
@@ -227,7 +223,8 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
     */
    public double dot(YoFrameQuaternion other)
    {
-      return qx.getDoubleValue() * other.qx.getDoubleValue() + qy.getDoubleValue() * other.qy.getDoubleValue() + qz.getDoubleValue() * other.qz.getDoubleValue() + qs.getDoubleValue() * other.qs.getDoubleValue();
+      putYoValuesIntoFrameOrientation();
+      return frameOrientation.dot(other.frameOrientation);
    }
 
    public void negate()
@@ -238,18 +235,24 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       qs.set(- qs.getDoubleValue());
    }
 
+   public void checkQuaternionIsUnitMagnitude()
+   {
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.checkQuaternionIsUnitMagnitude();
+   }
+
    @Override
    public ReferenceFrame getReferenceFrame()
    {
       return referenceFrame;
    }
 
-   private void getYoValuesFromQuat4d()
+   private void getYoValuesFromFrameOrientation()
    {
-      qx.set(quaternion.getX());
-      qy.set(quaternion.getY());
-      qz.set(quaternion.getZ());
-      qs.set(quaternion.getW());
+      qx.set(frameOrientation.getQx());
+      qy.set(frameOrientation.getQy());
+      qz.set(frameOrientation.getQz());
+      qs.set(frameOrientation.getQs());
    }
 
    public void setToNaN()
@@ -265,9 +268,9 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       return qx.isNaN() || qy.isNaN() || qz.isNaN() || qs.isNaN();
    }
 
-   private void putYoValuesIntoQuat4d()
+   private void putYoValuesIntoFrameOrientation()
    {
-      quaternion.set(qx.getDoubleValue(), qy.getDoubleValue(), qz.getDoubleValue(), qs.getDoubleValue());
+      frameOrientation.setIncludingFrame(getReferenceFrame(), qx.getDoubleValue(), qy.getDoubleValue(), qz.getDoubleValue(), qs.getDoubleValue());
    }
 
    public void attachVariableChangedListener(VariableChangedListener variableChangedListener)

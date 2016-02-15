@@ -2,6 +2,9 @@ package us.ihmc.quadrupedRobotics.trajectory;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
+import us.ihmc.robotics.alphaToAlpha.MultipleSegmentConstantSlope;
+import us.ihmc.robotics.alphaToAlpha.StretchedSlowAtEndAlphaToAlphaFunction;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -15,6 +18,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+
+import javax.vecmath.Point2d;
 
 public class QuadrupedSwingTrajectoryGenerator
 {
@@ -36,6 +41,9 @@ public class QuadrupedSwingTrajectoryGenerator
    private final FrameVector finalDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector zeroVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
 
+   private final DoubleYoVariable timeInStep, alphaTimeInStep, alphaIn, alphaOut;
+   private final DoubleYoVariable alphaSlopeAtStart;
+   private final AlphaToAlphaFunction alphaToAlphaFunction;
    private BagOfBalls bagOfBalls;
    private int ballCounter = 0;
 
@@ -49,7 +57,18 @@ public class QuadrupedSwingTrajectoryGenerator
       swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       
-      cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
+      cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator(prefix + "swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
+      timeInStep = new DoubleYoVariable(prefix + "TimeInStep", registry);
+      alphaTimeInStep = new DoubleYoVariable(prefix + "AlphaTimeInStep", registry);
+      alphaIn = new DoubleYoVariable(prefix + "AlphaIn", registry);
+      alphaOut = new DoubleYoVariable(prefix + "AlphaOut", registry);
+      alphaSlopeAtStart = new DoubleYoVariable(prefix + "AlphaSlopeAtStart", registry);
+      alphaSlopeAtStart.set(1.5);
+
+      //stretchedSlowAtEndAlphaToAlphaFunction = new StretchedSlowAtEndAlphaToAlphaFunction(alphaSlopeAtStart.getDoubleValue());
+      Point2d[] listOfPoints = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.5, 0.8), new Point2d(1.0, 1.0)};
+      alphaToAlphaFunction = new MultipleSegmentConstantSlope(listOfPoints);
+
 
 
       DoubleProvider stepTimeProvider = new DoubleProvider()
@@ -75,8 +94,10 @@ public class QuadrupedSwingTrajectoryGenerator
       initialPosition.setIncludingFrame(swingInitial);
       finalDesiredVelocity.set(desiredFinalVelocity);
 
+      //alphaToAlphaFunction.setSlopeAtStart(alphaSlopeAtStart.getDoubleValue());
       cartesianTrajectoryGenerator.setTrajectoryParameters(swingTime, initialPosition, swingHeight, swingTarget, finalDesiredVelocity);
       cartesianTrajectoryGenerator.initialize();
+      timeInStep.set(0.0);
 
       //New traj generator
       parabolicCartesianTrajectoryGenerator.updateGroundClearance(swingHeight);
@@ -87,7 +108,12 @@ public class QuadrupedSwingTrajectoryGenerator
    {
       if (USE_NEW_SWING_GENERATOR)
       {
-         parabolicCartesianTrajectoryGenerator.computeNextTick(framePointToPack, dt);
+         alphaIn.set(timeInStep.getDoubleValue()/swingTimeDoubleProvider.getValue());
+         alphaOut.set(alphaToAlphaFunction.getAlphaPrime(alphaIn.getDoubleValue()));
+         alphaTimeInStep.set(swingTimeDoubleProvider.getValue() * alphaOut.getDoubleValue());
+         parabolicCartesianTrajectoryGenerator.compute(alphaTimeInStep.getDoubleValue());  //computeNextTick(framePointToPack, dt);
+         parabolicCartesianTrajectoryGenerator.packPosition(framePointToPack);
+         timeInStep.set(timeInStep.getDoubleValue() + dt);
          updateBagOfBalls(framePointToPack);
       }
       else

@@ -774,13 +774,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getDesiredTouchdownHeightOffset()
    {
-      return -0.02;
+      return runningOnRealRobot ? -0.02 : 0.0;
    }
 
    @Override
    public double getDesiredTouchdownVelocity()
    {
-      return -0.1;
+      return runningOnRealRobot ? -0.1 : -0.3;
    }
 
    @Override
