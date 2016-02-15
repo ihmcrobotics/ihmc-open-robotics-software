@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.darpaRoboticsChallenge.footstepGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;

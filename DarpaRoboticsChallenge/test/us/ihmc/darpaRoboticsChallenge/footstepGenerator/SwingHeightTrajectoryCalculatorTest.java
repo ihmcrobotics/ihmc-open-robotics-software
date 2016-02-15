@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.darpaRoboticsChallenge.footstepGenerator;
 
 import static org.junit.Assert.assertTrue;
 
@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.darpaRoboticsChallenge.footstepGenerator.HeightCalculatorParameters;
+import us.ihmc.darpaRoboticsChallenge.footstepGenerator.SwingTrajectoryHeightCalculator;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
