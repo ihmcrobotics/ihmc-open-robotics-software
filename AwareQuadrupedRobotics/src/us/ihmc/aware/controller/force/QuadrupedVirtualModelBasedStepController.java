@@ -226,12 +226,12 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStepController.class);
-      params.setDefault(JOINT_DAMPING, 0);
+      params.setDefault(JOINT_DAMPING, 1);
       params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 5000);
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 750);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 40000, 40000, 40000);
+      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 50000, 50000, 50000);
       params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 500, 500, 500);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
@@ -245,7 +245,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(COM_HEIGHT_INTEGRAL_GAIN, 0);
       params.setDefault(COM_HEIGHT_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 0.95);
-      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
+      params.setDefault(COM_HEIGHT_NOMINAL, 0.60);
 
       // utilities
       jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
