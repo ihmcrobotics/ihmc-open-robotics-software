@@ -25,8 +25,8 @@ public class FootstepTools
          contactPoints = null;
          emptyContactPointListErrorMessage();
       }
-      Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame,
-            true, contactPoints);
+      Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true,
+            contactPoints);
       footstep.trajectoryType = footstepData.getTrajectoryType();
       footstep.swingHeight = footstepData.swingHeight;
 

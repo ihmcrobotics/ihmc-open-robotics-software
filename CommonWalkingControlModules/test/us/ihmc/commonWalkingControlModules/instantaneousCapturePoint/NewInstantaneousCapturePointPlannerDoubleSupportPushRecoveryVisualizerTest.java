@@ -33,7 +33,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 // FIXME I've changed the way push recovery is handled with the planner but didn't take the time to fix the visualizer. (Sylvain)
 
-@DeployableTestClass(targets = { TestPlanTarget.UI })
+@DeployableTestClass(targets = {TestPlanTarget.UI})
 public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -347,7 +347,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       icpVelocityLineSegment = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.0)
+   @DeployableTestMethod(estimatedDuration = 2.0)
    @Test(timeout = 30000)
    public void visualizePlanner()
    {

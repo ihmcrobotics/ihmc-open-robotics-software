@@ -34,8 +34,8 @@ public class FootstepDataTansformerTest
 {
    private static Random random = new Random(100L);
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test()
    {
       RigidBodyTransform transform3D;
@@ -49,7 +49,7 @@ public class FootstepDataTansformerTest
          originalFootstepData = getTestFootstepData();
          transform3D = new RigidBodyTransform();
          transform3D = RigidBodyTransform.generateRandomTransform(random);
-         
+
          transformedFootstepData = originalFootstepData.transform(transform3D);
 
          performEqualsTestsWithTransform(originalFootstepData, transform3D, transformedFootstepData);
@@ -72,11 +72,12 @@ public class FootstepDataTansformerTest
             listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
          }
       }
-      
+
       return ret;
    }
 
-   private static void performEqualsTestsWithTransform(FootstepDataMessage footstepData, RigidBodyTransform transform3D, FootstepDataMessage transformedFootstepData)
+   private static void performEqualsTestsWithTransform(FootstepDataMessage footstepData, RigidBodyTransform transform3D,
+         FootstepDataMessage transformedFootstepData)
    {
       double distance;
 
@@ -93,8 +94,8 @@ public class FootstepDataTansformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testDistance()
    {
       Point3d startPoint = new Point3d(2.0, 6.0, 5.0);

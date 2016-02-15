@@ -17,7 +17,6 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
-
 public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
@@ -45,8 +44,9 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
    private final FrameVector tempVector = new FrameVector(ReferenceFrame.getWorldFrame());
 
    public FifthOrderWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-           PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, VectorProvider initialAccelerationProvider,
-           PositionProvider finalPositionProvider, DoubleProvider finalPositionZOffsetProvider, VectorProvider finalDesiredVelocityProvider, double groundClearance, YoVariableRegistry parentRegistry)
+         PositionProvider initialPositionProvider, VectorProvider initalVelocityProvider, VectorProvider initialAccelerationProvider,
+         PositionProvider finalPositionProvider, DoubleProvider finalPositionZOffsetProvider, VectorProvider finalDesiredVelocityProvider,
+         double groundClearance, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
 
@@ -184,13 +184,13 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       initialAcceleration.changeFrame(referenceFrame);
       finalDesiredPosition.changeFrame(referenceFrame);
       finalDesiredVelocity.changeFrame(referenceFrame);
-      
+
       FramePoint intermediatePosition = new FramePoint(initialPosition);
 
-//    FramePoint intermediatePosition = new FramePoint(referenceFrame);
-//    intermediatePosition.interpolate(initialPosition, finalDesiredPosition, 0.1);
+      //    FramePoint intermediatePosition = new FramePoint(referenceFrame);
+      //    intermediatePosition.interpolate(initialPosition, finalDesiredPosition, 0.1);
       intermediatePosition.setZ(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()) + waypointHeight.getDoubleValue());
-      
+
       finalDesiredPosition.setZ(finalDesiredPosition.getZ() + finalPositionZOffsetProvider.getValue());
 
       timeIntoStep.set(0.0);
@@ -205,7 +205,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       for (Direction direction : Direction.values())
       {
          double t0 = 0.0;
-         double tIntermediate = 0.4;    // 0.6; // TODO
+         double tIntermediate = 0.4; // 0.6; // TODO
          double tFinal = 1.0;
          double z0 = initialPosition.get(direction);
          double zd0 = initialDirection.get(direction);
@@ -222,12 +222,12 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       else
          initialParameterd = initialVelocity.length() / initialDirection.length();
 
-//    double initialParameterdd;
-//    if (initialDirection.length() == 0.0)
-//       initialParameterdd = 0.0;
-//    else
-//       initialParameterdd = (initialAcceleration.length() - initialDirectionChange.length() * MathTools.square(initialParameterd))
-//             / initialDirection.length();
+      //    double initialParameterdd;
+      //    if (initialDirection.length() == 0.0)
+      //       initialParameterdd = 0.0;
+      //    else
+      //       initialParameterdd = (initialAcceleration.length() - initialDirectionChange.length() * MathTools.square(initialParameterd))
+      //             / initialDirection.length();
 
       double finalParameterd;
       if (finalDesiredVelocity.length() == 0.0)

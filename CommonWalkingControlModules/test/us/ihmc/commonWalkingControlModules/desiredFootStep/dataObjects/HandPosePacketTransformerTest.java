@@ -31,8 +31,8 @@ public class HandPosePacketTransformerTest
 {
    private final static int numberOfArmJoints = 6;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTransformHandPosePacket()
    {
       int numberOfTests = 10;
@@ -56,7 +56,7 @@ public class HandPosePacketTransformerTest
             robotSide = RobotSide.LEFT;
          else
             robotSide = RobotSide.RIGHT;
-         
+
          if (i % 2 == 0)
             dataType = HandPosePacket.DataType.HAND_POSE;
          else
@@ -90,8 +90,6 @@ public class HandPosePacketTransformerTest
       {
          // Frame referenceFrame;
          assertTrue(starting.getReferenceFrame().equals(ending.getReferenceFrame()));
-
-
 
          // Point3d position;
          double distance = getDistanceBetweenPoints(starting.getPosition(), transform3D, ending.getPosition());

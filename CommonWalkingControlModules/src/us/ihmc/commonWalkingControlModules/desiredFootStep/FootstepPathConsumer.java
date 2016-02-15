@@ -26,7 +26,7 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataListMess
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    public FootstepPathConsumer(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FootstepPathCoordinator footstepPathCoordinator,
-                               HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, HumanoidGlobalDataProducer globalDataProducer)
+         HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       this.footstepPathCoordinator = footstepPathCoordinator;

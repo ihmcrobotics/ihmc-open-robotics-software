@@ -16,12 +16,18 @@ public class HandComplianceControlParametersProvider implements PacketConsumer<H
 {
    public final SideDependentList<AtomicBoolean> hasNewRequest = new SideDependentList<AtomicBoolean>(new AtomicBoolean(false), new AtomicBoolean(false));
    public final SideDependentList<AtomicBoolean> isResetRequested = new SideDependentList<AtomicBoolean>(new AtomicBoolean(false), new AtomicBoolean(false));
-   public final SideDependentList<AtomicReference<boolean[]>> enableLinearCompliance = new SideDependentList<AtomicReference<boolean[]>>(new AtomicReference<boolean[]>(null), new AtomicReference<boolean[]>(null));
-   public final SideDependentList<AtomicReference<boolean[]>> enableAngularCompliance = new SideDependentList<AtomicReference<boolean[]>>(new AtomicReference<boolean[]>(null), new AtomicReference<boolean[]>(null));
-   public final SideDependentList<AtomicReference<Vector3d>> desiredForce = new SideDependentList<AtomicReference<Vector3d>>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
-   public final SideDependentList<AtomicReference<Vector3d>> desiredTorque = new SideDependentList<AtomicReference<Vector3d>>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
-   public final SideDependentList<AtomicDouble> forceDeadzoneSize = new SideDependentList<AtomicDouble>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
-   public final SideDependentList<AtomicDouble> torqueDeadzoneSize = new SideDependentList<AtomicDouble>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
+   public final SideDependentList<AtomicReference<boolean[]>> enableLinearCompliance = new SideDependentList<AtomicReference<boolean[]>>(
+         new AtomicReference<boolean[]>(null), new AtomicReference<boolean[]>(null));
+   public final SideDependentList<AtomicReference<boolean[]>> enableAngularCompliance = new SideDependentList<AtomicReference<boolean[]>>(
+         new AtomicReference<boolean[]>(null), new AtomicReference<boolean[]>(null));
+   public final SideDependentList<AtomicReference<Vector3d>> desiredForce = new SideDependentList<AtomicReference<Vector3d>>(
+         new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
+   public final SideDependentList<AtomicReference<Vector3d>> desiredTorque = new SideDependentList<AtomicReference<Vector3d>>(
+         new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
+   public final SideDependentList<AtomicDouble> forceDeadzoneSize = new SideDependentList<AtomicDouble>(new AtomicDouble(Double.NaN),
+         new AtomicDouble(Double.NaN));
+   public final SideDependentList<AtomicDouble> torqueDeadzoneSize = new SideDependentList<AtomicDouble>(new AtomicDouble(Double.NaN),
+         new AtomicDouble(Double.NaN));
 
    public HandComplianceControlParametersProvider()
    {

@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;

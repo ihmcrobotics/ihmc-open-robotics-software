@@ -15,7 +15,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-
 public class DesiredHandstepProvider implements PacketConsumer<HandstepPacket>, HandstepProvider
 {
    private final AtomicReference<HandstepPacket> handstepPacket = new AtomicReference<HandstepPacket>();

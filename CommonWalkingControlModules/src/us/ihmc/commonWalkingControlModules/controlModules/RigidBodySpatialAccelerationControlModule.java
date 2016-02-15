@@ -17,7 +17,6 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-
 public class RigidBodySpatialAccelerationControlModule
 {
    private static final boolean VISUALIZE = true;
@@ -95,7 +94,8 @@ public class RigidBodySpatialAccelerationControlModule
    {
       packDesiredEndEffectorPoseFromDesiredPositions(desiredEndEffectorPose, desiredPosition, desiredOrientation);
       packDesiredEndEffectorTwist(desiredEndEffectorTwist, desiredLinearVelocityOfOrigin, desiredAngularVelocity, base);
-      calculateDesiredEndEffectorSpatialAcceleration(feedForwardEndEffectorSpatialAcceleration, desiredLinearAccelerationOfOrigin, desiredAngularAcceleration, base);
+      calculateDesiredEndEffectorSpatialAcceleration(feedForwardEndEffectorSpatialAcceleration, desiredLinearAccelerationOfOrigin, desiredAngularAcceleration,
+            base);
       doPositionControl(desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, base);
    }
 
@@ -200,12 +200,12 @@ public class RigidBodySpatialAccelerationControlModule
    {
       se3pdController.setOrientationMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
-   
+
    public void packEndeffectorVelocity(FrameVector vectorToPack)
    {
       currentTwist.packBodyOriginLinearPartInBaseFrame(vectorToPack);
    }
-   
+
    public void packEndeffectorPosition(FramePoint pointToPack)
    {
       pointToPack.setIncludingFrame(endEffectorPosition);

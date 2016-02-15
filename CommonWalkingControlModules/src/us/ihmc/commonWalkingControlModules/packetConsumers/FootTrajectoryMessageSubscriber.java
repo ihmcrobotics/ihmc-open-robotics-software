@@ -12,8 +12,9 @@ public class FootTrajectoryMessageSubscriber implements PacketConsumer<FootTraje
 {
    private final HumanoidGlobalDataProducer globalDataProducer;
 
-   private final SideDependentList<AtomicReference<FootTrajectoryMessage>> latestMessageReferences = new SideDependentList<>(new AtomicReference<FootTrajectoryMessage>(null), new AtomicReference<FootTrajectoryMessage>(null));
-   
+   private final SideDependentList<AtomicReference<FootTrajectoryMessage>> latestMessageReferences = new SideDependentList<>(
+         new AtomicReference<FootTrajectoryMessage>(null), new AtomicReference<FootTrajectoryMessage>(null));
+
    public FootTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

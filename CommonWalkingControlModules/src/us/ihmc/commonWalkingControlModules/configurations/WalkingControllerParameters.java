@@ -15,7 +15,6 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
-
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters, SteppingParameters
 {
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
@@ -111,7 +110,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getSwingSingularityEscapeMultiplier();
 
    public abstract boolean doPrepareManipulationForLocomotion();
-   
+
    public abstract boolean controlHeadAndHandsWithSliders();
 
    public abstract double getDefaultTransferTime();
@@ -149,10 +148,10 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getContactThresholdForce();
 
    public abstract double getSecondContactThresholdForceIgnoringCoP();
-   
+
    /** Returns a map of neck joint names and associated min/max value joint limits. */
-   public abstract LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
-   
+   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
+
    public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract double getCoPThresholdFraction();
@@ -168,6 +167,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getContactThresholdHeight();
 
    public abstract double getMaxICPErrorBeforeSingleSupportX();
+
    public abstract double getMaxICPErrorBeforeSingleSupportY();
 
    /**

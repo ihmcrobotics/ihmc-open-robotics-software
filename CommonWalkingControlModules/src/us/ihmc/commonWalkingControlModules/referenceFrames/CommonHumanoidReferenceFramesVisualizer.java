@@ -17,8 +17,7 @@ public class CommonHumanoidReferenceFramesVisualizer implements Updatable, Robot
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
-   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String vizName = referenceFrames.getClass().getSimpleName();
       for (RobotSide robotSide : RobotSide.values)

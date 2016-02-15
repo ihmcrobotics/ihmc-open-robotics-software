@@ -9,55 +9,55 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReference
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-   public class VisualizeFramesController implements RobotController
+public class VisualizeFramesController implements RobotController
+{
+   private final YoVariableRegistry registry = new YoVariableRegistry("VisualizeFramesController");
+
+   private final ArrayList<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
+
+   private final YoGraphicsList yoGraphicsList = new YoGraphicsList("TestFramesController");
+
+   public VisualizeFramesController(ArrayList<ReferenceFrame> referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, double coordinateSystemLength)
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry("VisualizeFramesController");
-
-      private final ArrayList<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
-
-      private final YoGraphicsList yoGraphicsList = new YoGraphicsList("TestFramesController");
-
-      public VisualizeFramesController(ArrayList<ReferenceFrame> referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, double coordinateSystemLength)
+      for (ReferenceFrame frame : referenceFrames)
       {
-         for (ReferenceFrame frame : referenceFrames)
-         {
-            YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(frame, registry, coordinateSystemLength);
-            dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-            yoGraphicsList.add(dynamicGraphicReferenceFrame);
-         }
-
-         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+         YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(frame, registry, coordinateSystemLength);
+         dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
+         yoGraphicsList.add(dynamicGraphicReferenceFrame);
       }
 
-      public void doControl()
-      {
-         updateDynamicGraphicReferenceFrames();
-      }
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+   }
 
-      public YoVariableRegistry getYoVariableRegistry()
-      {
-         return registry;
-      }
+   public void doControl()
+   {
+      updateDynamicGraphicReferenceFrames();
+   }
 
-      public String getName()
-      {
-         return "visualizeFramesController";
-      }
-      
-      public void initialize()
-      {      
-      }
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
 
-      public String getDescription()
-      {
-         return getName();
-      }
+   public String getName()
+   {
+      return "visualizeFramesController";
+   }
 
-      private void updateDynamicGraphicReferenceFrames()
+   public void initialize()
+   {
+   }
+
+   public String getDescription()
+   {
+      return getName();
+   }
+
+   private void updateDynamicGraphicReferenceFrames()
+   {
+      for (YoGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
       {
-         for (YoGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
-         {
-            frame.update();
-         }
+         frame.update();
       }
    }
+}

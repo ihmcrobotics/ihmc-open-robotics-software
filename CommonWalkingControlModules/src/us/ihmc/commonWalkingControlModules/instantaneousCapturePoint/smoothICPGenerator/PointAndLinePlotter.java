@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-
 import java.awt.Color;
 import java.util.ArrayList;
 
@@ -29,7 +28,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
-
 public class PointAndLinePlotter
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -54,10 +52,10 @@ public class PointAndLinePlotter
       parentRegistry.addChild(registry);
    }
 
-public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
-{
-   return yoGraphicsListRegistry;
-}
+   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   {
+      return yoGraphicsListRegistry;
+   }
 
    public void createAndShowOverheadPlotterInSCS(SimulationConstructionSet scs)
    {
@@ -74,9 +72,9 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
       StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
-      if (standardSimulationGUI != null) standardSimulationGUI.selectPanel(plotterName);
+      if (standardSimulationGUI != null)
+         standardSimulationGUI.selectPanel(plotterName);
    }
-
 
    public void plotYoFramePoints(String name, ArrayList<YoFramePoint> pointList, AppearanceDefinition appearance, double size)
    {
@@ -85,7 +83,6 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
          plotYoFramePoint(name, yoFramePoint, appearance, size);
       }
    }
-
 
    public void plotPoints(String name, ArrayList<Point3d> pointList, AppearanceDefinition appearance, double size)
    {
@@ -116,7 +113,7 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       YoFramePoint yoFramePoint = new YoFramePoint(name + numberOfRegisteredPoints, worldFrame, registry);
       yoFramePoint.set(point3d);
       plotYoFramePoint(name, yoFramePoint, appearance, size);
-      
+
       return yoFramePoint;
    }
 
@@ -161,8 +158,6 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
    }
 
-
-   
    public static void setLineSegmentBasedOnStartAndEndPoints(YoFrameLineSegment2d lineSegmentToPack, Point2d startPoint, Point2d endPoint)
    {
       FramePoint2d startFramePoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), startPoint.getX(), startPoint.getY());
@@ -170,7 +165,6 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
 
       if (startFramePoint.distanceSquared(endFramePoint) < 1e-6)
          startFramePoint.setX(startFramePoint.getX() + 1e-6);
-
 
       FrameLineSegment2d lineSegment = new FrameLineSegment2d(startFramePoint, endFramePoint);
       lineSegmentToPack.setFrameLineSegment2d(lineSegment);
@@ -184,8 +178,6 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       FrameLineSegment2d lineSegment = new FrameLineSegment2d(startPoint, endPoint);
       lineSegmentToPack.setFrameLineSegment2d(lineSegment);
    }
-   
-
 
    public static void setLineSegmentBasedOnStartAndEndFramePoints(YoFrameLineSegment2d lineSegmentToPack, Point2d startPoint, Point2d endPoint)
    {
@@ -196,20 +188,20 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       lineSegmentToPack.setFrameLineSegment2d(lineSegment);
    }
 
-   public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, YoFramePoint startPoint, YoFrameVector additionalVector, double scaling)
-   {
-      endPointToSet.set(additionalVector);
-      endPointToSet.scale(scaling);
-      endPointToSet.add(startPoint);
-   }
-   
-   public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, FramePoint startPoint, FrameVector additionalVector, double scaling)
+   public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, YoFramePoint startPoint, YoFrameVector additionalVector,
+         double scaling)
    {
       endPointToSet.set(additionalVector);
       endPointToSet.scale(scaling);
       endPointToSet.add(startPoint);
    }
 
+   public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, FramePoint startPoint, FrameVector additionalVector, double scaling)
+   {
+      endPointToSet.set(additionalVector);
+      endPointToSet.scale(scaling);
+      endPointToSet.add(startPoint);
+   }
 
    public static void setEndPointGivenStartAndAdditionalVector(YoFramePoint endPointToSet, Point3d startPoint, Vector3d additionalVector, double scaling)
    {
@@ -218,5 +210,4 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       endPointToSet.add(startPoint);
    }
 
-  
 }

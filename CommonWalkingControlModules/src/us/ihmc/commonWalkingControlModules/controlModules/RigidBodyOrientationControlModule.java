@@ -10,7 +10,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-
 public class RigidBodyOrientationControlModule
 {
    private final AxisAngleOrientationController axisAngleOrientationController;
@@ -38,7 +37,8 @@ public class RigidBodyOrientationControlModule
    {
       this.base = base;
       this.endEffector = endEffector;
-      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, visualize, parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, visualize,
+            parentRegistry);
       this.twistCalculator = twistCalculator;
    }
 
@@ -47,7 +47,8 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.reset();
    }
 
-   public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity,
+         FrameVector feedForwardAngularAcceleration)
    {
       // using twists is a bit overkill; optimize if needed.
       twistCalculator.packRelativeTwist(endEffectorTwist, base, endEffector);

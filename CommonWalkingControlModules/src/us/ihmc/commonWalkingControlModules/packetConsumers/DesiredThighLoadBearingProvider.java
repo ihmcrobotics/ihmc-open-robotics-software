@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class DesiredThighLoadBearingProvider implements PacketConsumer<ThighStatePacket>
 {
    private final SideDependentList<AtomicInteger> loadBearingState = new SideDependentList<AtomicInteger>();
-   
+
    public DesiredThighLoadBearingProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -18,12 +18,12 @@ public class DesiredThighLoadBearingProvider implements PacketConsumer<ThighStat
          loadBearingState.put(robotSide, new AtomicInteger(-1));
       }
    }
-   
+
    public boolean checkForNewLoadBearingState(RobotSide robotSide)
    {
       return loadBearingState.get(robotSide).get() != -1;
    }
-   
+
    public boolean getDesiredThighLoadBearingState(RobotSide robotSide)
    {
       return loadBearingState.get(robotSide).getAndSet(-1) == 1;

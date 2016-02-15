@@ -7,27 +7,23 @@ public class MaximumConstantJerkFinalToeOffAngleComputer
    // If the maximum toe off angle, reachible by the maximum feasible jerk trajectory is bigger then the maximumToeOffAngle, it is cut down to that value. 
    // This leads to trajectories that are either performed with maximum jerk and (most of the times) ending at a final toe off ankle of less then maximumToeOffAngle, or (if there is enough time) 
    // they end at maximumToeOffAngle and are performed with a constant jerk lower than the maximum feasible one. 
-   
-   private double maximumToeOffAngle; 
-   private double referenceTime; 
-   
-   
-   
+
+   private double maximumToeOffAngle;
+   private double referenceTime;
+
    public MaximumConstantJerkFinalToeOffAngleComputer()
    {
    }
-   
-   
+
    public void reinitialize(double maximumToeOffAngle, double referenceTime)
    {
-      this.maximumToeOffAngle = maximumToeOffAngle; 
-      this.referenceTime = referenceTime; 
+      this.maximumToeOffAngle = maximumToeOffAngle;
+      this.referenceTime = referenceTime;
    }
-   
-   
+
    public double getMaximumFeasibleConstantJerkFinalToeOffAngle(double initialFootPitchAngle, double toeOffDuration)
    {
-      return Math.min(maximumToeOffAngle, initialFootPitchAngle + maximumToeOffAngle * Math.pow(toeOffDuration/referenceTime, 3)); 
+      return Math.min(maximumToeOffAngle, initialFootPitchAngle + maximumToeOffAngle * Math.pow(toeOffDuration / referenceTime, 3));
    }
-   
+
 }

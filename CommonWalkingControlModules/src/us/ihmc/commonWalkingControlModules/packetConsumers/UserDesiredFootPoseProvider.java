@@ -15,7 +15,6 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-
    private final BooleanYoVariable userFootPoseTakeEm = new BooleanYoVariable("userFootPoseTakeEm", registry);
    private final DoubleYoVariable userFootPoseTrajectoryTime = new DoubleYoVariable("userDesiredPelvisTrajectoryTime", registry);
 
@@ -29,7 +28,6 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
    private final DoubleYoVariable footPosePitchCheck = new DoubleYoVariable("footPosePitchCheck", registry);
    private final DoubleYoVariable footPoseRollCheck = new DoubleYoVariable("footPoseRollCheck", registry);
 
-   
    private final FullHumanoidRobotModel fullRobotModel;
 
    public UserDesiredFootPoseProvider(FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
@@ -39,7 +37,6 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
       parentRegistry.addChild(registry);
       userFootPoseTrajectoryTime.set(defaultTrajectoryTime);
    }
-
 
    @Override
    public boolean checkForNewPose(RobotSide robotSide)
@@ -71,22 +68,20 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
    public FramePose getDesiredFootPose(RobotSide robotSide)
    {
       ReferenceFrame footFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
-      
+
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(userFootPoseX.getDoubleValue(), userFootPoseY.getDoubleValue(), userFootPoseZ.getDoubleValue());
-      
-      
+
       FramePose framePose = new FramePose(footFrame, transform);
-      
+
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
-      
+
       footPoseYawCheck.set(framePose.getYaw());
       footPosePitchCheck.set(framePose.getPitch());
       footPoseRollCheck.set(framePose.getRoll());
 
-      
       userFootPoseTakeEm.set(false);
-      
+
       return framePose;
    }
 

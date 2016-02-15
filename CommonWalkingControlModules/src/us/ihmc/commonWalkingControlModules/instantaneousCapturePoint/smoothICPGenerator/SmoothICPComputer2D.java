@@ -20,7 +20,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer implements InstantaneousCapturePointPlanner
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -208,9 +207,9 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    }
 
    @Override
-   public void updatePlanForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition,double time)
+   public void updatePlanForSingleSupportPush(TransferToAndNextFootstepsData transferToAndNextFootstepsData, FramePoint actualCapturePointPosition, double time)
    {
-      throw new RuntimeException("Not implemented.");      
+      throw new RuntimeException("Not implemented.");
    }
 
    @Override

@@ -302,7 +302,8 @@ public class HandControlModule
 
       doPositionControl = armControlParameters.doLowLevelPositionControl();
       String stateNamePrefix = namePrefix + "Hand";
-      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
+      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains,
+            controlDT, registry);
 
       if (doPositionControl)
       {
@@ -647,7 +648,8 @@ public class HandControlModule
          return false;
       }
 
-      if (armDesiredAccelerationsMessage.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE && armDesiredAccelerationsMessage.getNumberOfJoints() != oneDoFJoints.length)
+      if (armDesiredAccelerationsMessage.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE
+            && armDesiredAccelerationsMessage.getNumberOfJoints() != oneDoFJoints.length)
          return false;
 
       return true;

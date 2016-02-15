@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Momentum;
 
-
 public class GroundReactionMomentControlModule
 {
    private final String name = getClass().getSimpleName();

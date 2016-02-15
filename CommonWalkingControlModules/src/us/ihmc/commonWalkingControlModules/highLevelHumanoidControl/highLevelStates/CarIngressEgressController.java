@@ -138,8 +138,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       pelvisGainsChangedListener.variableChanged(null);
 
-      pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel
-            .getPelvis().getBodyFixedFrame());
+      pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(),
+            fullRobotModel.getPelvis().getBodyFixedFrame());
 
       pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 50, worldFrame, registry);
 

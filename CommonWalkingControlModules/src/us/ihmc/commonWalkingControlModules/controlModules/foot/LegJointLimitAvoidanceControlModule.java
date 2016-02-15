@@ -70,7 +70,6 @@ public class LegJointLimitAvoidanceControlModule
    private YoFrameVector originalDesiredLinearVelocity;
    private YoFrameVector adjustedDesiredLinearVelocity;
 
-
    private final LinearSolver<DenseMatrix64F> solver;
    private final DenseMatrix64F jacobianMatrix;
    private final DenseMatrix64F jacobianMatrixTransposed;
@@ -96,7 +95,7 @@ public class LegJointLimitAvoidanceControlModule
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length - 1].getSuccessor().getBodyFixedFrame());
 
       inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize,
-              minRandomSearchScalar, maxRandomSearchScalar);
+            minRandomSearchScalar, maxRandomSearchScalar);
       inverseKinematicsCalculator.setLimitJointAngles(true);
 
       numJoints = ikJoints.length;
@@ -129,7 +128,6 @@ public class LegJointLimitAvoidanceControlModule
       percentJointRangeForThreshold = new DoubleYoVariable(prefix + "percentJointRangeForThreshold", registry);
       percentJointRangeForThreshold.set(0.5);
 
-
       jacobianMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, numJoints);
       jacobianMatrixTransposed = new DenseMatrix64F(numJoints, SpatialMotionVector.SIZE);
       jacobianTimesJaconianTransposedMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
@@ -158,11 +156,11 @@ public class LegJointLimitAvoidanceControlModule
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       if (visualize)
       {
-         yoDesiredFootPositionGraphic = new YoGraphicPosition(prefix + "DesiredFootPosition", originalDesiredYoPose.getPosition(), 0.025,
-                 YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL);
+         yoDesiredFootPositionGraphic = new YoGraphicPosition(prefix + "DesiredFootPosition", originalDesiredYoPose.getPosition(), 0.025, YoAppearance.Yellow(),
+               YoGraphicPosition.GraphicType.BALL);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
          yoCorrectedDesiredFootPositionGraphic = new YoGraphicPosition(prefix + "CorrectedDesiredFootPosition", adjustedDesiredPose.getPosition(), 0.025,
-                 YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL);
+               YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
       }
       else
@@ -173,7 +171,7 @@ public class LegJointLimitAvoidanceControlModule
    }
 
    public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
-           FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
+         FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
 
    {
       // update joint positions in the ikJoints to the current positions
@@ -190,18 +188,18 @@ public class LegJointLimitAvoidanceControlModule
       originalDesiredYoPose.set(originalDesiredPose);
       originalDesiredPose.changeFrame(jacobian.getBaseFrame());
 
-//    originalDesiredPose.translate(linearRootJointVelocity.getX(), linearRootJointVelocity.getY(), linearRootJointVelocity.getZ());
+      //    originalDesiredPose.translate(linearRootJointVelocity.getX(), linearRootJointVelocity.getY(), linearRootJointVelocity.getZ());
       originalDesiredPose.getPose(desiredTransform);
       originalDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-//    if (translationFixOnly){
-//       inverseKinematicsCalculator.setSelectionMatrix(translationSelectionMatrix);
-//    }else{
-//       inverseKinematicsCalculator.setSelectionMatrix(allSelectionMatrix);
-//    }
-      inverseKinematicsCalculator.solve(desiredTransform);    // sets the qs of the one-dof ikJoints
+      //    if (translationFixOnly){
+      //       inverseKinematicsCalculator.setSelectionMatrix(translationSelectionMatrix);
+      //    }else{
+      //       inverseKinematicsCalculator.setSelectionMatrix(allSelectionMatrix);
+      //    }
+      inverseKinematicsCalculator.solve(desiredTransform); // sets the qs of the one-dof ikJoints
 
-//    adjust joints based on joint angle limits
+      //    adjust joints based on joint angle limits
       adjustJointPositions();
 
       // calculate the new desired position and orientation
@@ -237,7 +235,7 @@ public class LegJointLimitAvoidanceControlModule
       calculateAdjustedVelocities();
       double[] adjustedVelocities = adjustedDesiredVelocity.getData();
 
-//    if (enableCorrection)
+      //    if (enableCorrection)
       {
          if (!translationFixOnly)
          {
@@ -284,7 +282,7 @@ public class LegJointLimitAvoidanceControlModule
          originalDesiredPositions[i].set(ikJoints[i].getQ());
          double adjustedPosition = originalDesiredPositions[i].getDoubleValue();
 
-         double comparisonValue = (2 * (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range);    // should range between -1 and 1, which are the limits
+         double comparisonValue = (2 * (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range); // should range between -1 and 1, which are the limits
          comparisonValue = Math.min(comparisonValue, 1.0);
          comparisonValue = Math.max(comparisonValue, -1.0);
 
@@ -321,14 +319,13 @@ public class LegJointLimitAvoidanceControlModule
       // J J^T
       CommonOps.multOuter(jacobianMatrix, jacobianTimesJaconianTransposedMatrix);
 
-
       intermediateResult.reshape(numberOfConstraints, 1);
 
       lamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       CommonOps.setIdentity(lamdaSquaredMatrix);
       lamdaSquaredMatrix.zero();
 
-//    CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
+      //    CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
 
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.set(jacobianTimesJaconianTransposedMatrix);

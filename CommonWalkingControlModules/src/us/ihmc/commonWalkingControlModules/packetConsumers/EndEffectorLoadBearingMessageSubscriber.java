@@ -18,7 +18,7 @@ public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<E
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    private final LinkedHashMap<EndEffector, AtomicInteger> latestMessageReferencePerEndEffector = new LinkedHashMap<>();
-   
+
    public EndEffectorLoadBearingMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
@@ -89,7 +89,7 @@ public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<E
 
       EndEffector endEffector = endEffectorLoadBearingMessage.getEndEffector();
       RobotSide robotSide = endEffectorLoadBearingMessage.getRobotSide();
-      
+
       AtomicInteger latestMessage = latestMessageReferencePerEndEffector.get(endEffector);
 
       if (endEffector.isRobotSideNeeded())

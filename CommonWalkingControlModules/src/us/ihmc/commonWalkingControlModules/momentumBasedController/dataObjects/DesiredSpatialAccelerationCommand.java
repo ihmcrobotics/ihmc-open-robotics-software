@@ -30,7 +30,7 @@ public class DesiredSpatialAccelerationCommand
       this.hasWeight = true;
       this.weight = weight;
    }
-   
+
    public DesiredSpatialAccelerationCommand(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       this.jacobian = desiredSpatialAccelerationCommand.jacobian;
@@ -44,9 +44,9 @@ public class DesiredSpatialAccelerationCommand
       this.jacobian = jacobian;
       this.taskspaceConstraintData = taskspaceConstraintData;
       this.hasWeight = false;
-      this.weight = Double.POSITIVE_INFINITY; 
+      this.weight = Double.POSITIVE_INFINITY;
    }
-  
+
    public boolean getHasWeight()
    {
       return hasWeight;
@@ -66,7 +66,7 @@ public class DesiredSpatialAccelerationCommand
    {
       return taskspaceConstraintData;
    }
-   
+
    public void setHasWeight(boolean hasWeight)
    {
       this.hasWeight = hasWeight;
@@ -91,7 +91,5 @@ public class DesiredSpatialAccelerationCommand
    {
       return "DesiredSpatialAccelerationCommand: GeometricJacobian = " + jacobian.getShortInfo() + ", taskspaceConstraintData = " + taskspaceConstraintData;
    }
-
-
 
 }

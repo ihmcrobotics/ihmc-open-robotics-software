@@ -45,7 +45,7 @@ public class HoldPositionState extends AbstractFootControlState
 
    private final BooleanYoVariable doSmartHoldPosition;
    private final YoFrameOrientation desiredHoldOrientation;
-   
+
    public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, footControlHelper, registry);
@@ -115,8 +115,8 @@ public class HoldPositionState extends AbstractFootControlState
 
       RigidBody baseForControl = CONTROL_WRT_PELVIS ? pelvisBody : rootBody;
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-            desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
+      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration,
+            desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
       footControlHelper.submitTaskspaceConstraint(footAcceleration);
@@ -134,10 +134,10 @@ public class HoldPositionState extends AbstractFootControlState
          return;
 
       boolean isCoPOnEdge = !footPolygon.isPointInside(cop, -EPSILON);
-      
+
       if (!isCoPOnEdge)
          return;
-      
+
       footPolygon.getClosestEdge(closestEdgeToCoP, cop);
       closestEdgeToCoP.getFrameVector(edgeVector2d);
       edgeVector.setXYIncludingFrame(edgeVector2d);
@@ -161,7 +161,7 @@ public class HoldPositionState extends AbstractFootControlState
          if (rotationOnEdge < 0.0)
             holdRotationAroundEdge = false;
       }
-      
+
       if (holdRotationAroundEdge)
          return;
 

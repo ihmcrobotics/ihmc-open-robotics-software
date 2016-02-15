@@ -17,7 +17,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 
-
 /**
  * @author twan
  *         Date: 5/30/13
@@ -44,14 +43,14 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
          RigidBody elevator, RigidBody endEffector, int jacobianId, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, elevator, endEffector, parentRegistry);
-      
+
       coefficientOfFriction = new DoubleYoVariable(name + "CoefficientOfFriction", registry);
       handAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
 
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       elevatorFrame = fullRobotModel.getElevatorFrame();
       handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
-      
+
       SideDependentList<ContactablePlaneBody> contactableHands = momentumBasedController.getContactableHands();
       if (contactableHands != null)
       {

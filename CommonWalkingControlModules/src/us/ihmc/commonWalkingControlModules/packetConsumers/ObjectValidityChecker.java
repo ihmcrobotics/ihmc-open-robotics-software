@@ -172,7 +172,7 @@ public abstract class ObjectValidityChecker
 
       return null;
    }
-   
+
    /**
     * Checks the validity of an enum
     * @param enumToCheck

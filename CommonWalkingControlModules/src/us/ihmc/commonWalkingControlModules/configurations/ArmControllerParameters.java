@@ -9,7 +9,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-
 public interface ArmControllerParameters
 {
    public abstract YoPIDGains createJointspaceControlGains(YoVariableRegistry registry);
@@ -23,6 +22,6 @@ public interface ArmControllerParameters
    public abstract boolean doLowLevelPositionControl();
 
    public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide);
-   
+
    public abstract double getWristHandCenterOffset();
 }

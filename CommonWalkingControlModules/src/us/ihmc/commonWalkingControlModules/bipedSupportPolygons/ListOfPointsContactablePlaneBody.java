@@ -24,12 +24,12 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    {
       this.rigidBody = rigidBody;
       this.soleFrame = soleFrame;
-      
-      for(Point2d contactPoint : contactPointsInSoleFrame)
+
+      for (Point2d contactPoint : contactPointsInSoleFrame)
       {
          this.contactPoints.add(new Point2d(contactPoint));
       }
-      
+
       totalNumberOfContactPoints = contactPoints.size();
    }
 
@@ -37,7 +37,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    {
       return rigidBody;
    }
-   
+
    public String getName()
    {
       return rigidBody.getName();
@@ -51,7 +51,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
          Tuple2d point = contactPoints.get(i);
          ret.add(new FramePoint(soleFrame, point.getX(), point.getY(), 0.0));
       }
-   
+
       return ret;
    }
 
@@ -78,7 +78,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
          Tuple2d point = contactPoints.get(i);
          ret.add(new FramePoint2d(soleFrame, point));
       }
-   
+
       return ret;
    }
 

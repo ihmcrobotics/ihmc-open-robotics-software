@@ -10,8 +10,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-
-
 public class YoFootOrientationGains implements YoOrientationPIDGains
 {
    private final DoubleYoVariable proportionalXYGain, proportionalZGain;
@@ -94,8 +92,9 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
 
       proportionalXYGain.addVariableChangedListener(kdXYUpdater);
       dampingRatioXY.addVariableChangedListener(kdXYUpdater);
-      
-      if (updateNow) kdXYUpdater.variableChanged(null);
+
+      if (updateNow)
+         kdXYUpdater.variableChanged(null);
 
       VariableChangedListener kdZUpdater = new VariableChangedListener()
       {
@@ -107,8 +106,9 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
 
       proportionalZGain.addVariableChangedListener(kdZUpdater);
       dampingRatioZ.addVariableChangedListener(kdZUpdater);
-      
-      if (updateNow) kdZUpdater.variableChanged(null);
+
+      if (updateNow)
+         kdZUpdater.variableChanged(null);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -140,7 +140,7 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
       this.dampingRatioXY.set(dampingRatio);
       this.dampingRatioZ.set(dampingRatio);
    }
-   
+
    public void setDampingRatios(double dampingRatioXY, double dampingRatioZ)
    {
       this.dampingRatioXY.set(dampingRatioXY);
@@ -192,26 +192,29 @@ public class YoFootOrientationGains implements YoOrientationPIDGains
    }
 
    private double[] tempPropotionalGains = new double[3];
+
    public double[] getProportionalGains()
    {
       tempPropotionalGains[0] = proportionalXYGain.getDoubleValue();
       tempPropotionalGains[1] = proportionalXYGain.getDoubleValue();
       tempPropotionalGains[2] = proportionalZGain.getDoubleValue();
-      
+
       return tempPropotionalGains;
    }
 
    private double[] tempDerivativeGains = new double[3];
+
    public double[] getDerivativeGains()
    {
       tempDerivativeGains[0] = derivativeXYGain.getDoubleValue();
       tempDerivativeGains[1] = derivativeXYGain.getDoubleValue();
       tempDerivativeGains[2] = derivativeZGain.getDoubleValue();
-      
+
       return tempDerivativeGains;
    }
 
    private double[] tempIntegralGains = new double[3];
+
    public double[] getIntegralGains()
    {
       return tempIntegralGains;

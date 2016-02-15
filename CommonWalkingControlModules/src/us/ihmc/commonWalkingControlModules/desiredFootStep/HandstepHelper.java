@@ -16,18 +16,19 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class HandstepHelper
 {
    private final FullHumanoidRobotModel fullRobotModel;
-   
+
    public HandstepHelper(FullHumanoidRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
    }
-   
-   public Handstep getDesiredHandstep(RobotSide robotSide, Tuple3d position, Vector3d surfaceNormal, double rotationAngleAboutNormal, double swingTrajectoryTime)
+
+   public Handstep getDesiredHandstep(RobotSide robotSide, Tuple3d position, Vector3d surfaceNormal, double rotationAngleAboutNormal,
+         double swingTrajectoryTime)
    {
       RigidBodyTransform transformOne = computeHandstepTransform(true, position, surfaceNormal, rotationAngleAboutNormal);
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transformOne);
       FrameVector surfaceNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), surfaceNormal);
-      
+
       RigidBody hand = fullRobotModel.getHand(robotSide);
       Handstep handstep = new Handstep(robotSide, hand, framePose, surfaceNormalFrameVector, swingTrajectoryTime);
 
@@ -52,10 +53,10 @@ public class HandstepHelper
       if (rotateZIntoX)
       {
          RigidBodyTransform transformThree = new RigidBodyTransform();
-         transformThree.rotY(Math.PI/2.0);
+         transformThree.rotY(Math.PI / 2.0);
          transformOne.multiply(transformThree);
       }
-      
+
       transformOne.setTranslation(new Vector3d(position));
 
       return transformOne;

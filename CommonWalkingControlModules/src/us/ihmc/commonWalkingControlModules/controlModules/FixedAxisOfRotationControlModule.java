@@ -17,7 +17,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 
-
 public class FixedAxisOfRotationControlModule
 {
    private final YoVariableRegistry registry;
@@ -55,10 +54,10 @@ public class FixedAxisOfRotationControlModule
       bodyToBase.get(translation);
       this.initialPosition.set(translation);
       this.initialOrientation.set(bodyToBase);
-      
+
       axisOfRotation.changeFrame(baseFrame);
       offset.changeFrame(baseFrame);
-      
+
       this.axisOfRotation.set(axisOfRotation);
       this.offset.set(offset);
    }
@@ -89,10 +88,10 @@ public class FixedAxisOfRotationControlModule
 
       FrameVector axisOfRotation = this.axisOfRotation.getFrameVectorCopy();
       FramePoint offset = this.offset.getFramePointCopy();
-      
+
       axisOfRotation.changeFrame(bodyFrame);
       offset.changeFrame(bodyFrame);
-      
+
       desiredTwist.setScrew(bodyFrame, baseFrame, bodyFrame, qd, 0.0, axisOfRotation.getVector(), offset.getVectorCopy());
       feedForward.setScrew(bodyFrame, baseFrame, bodyFrame, qd, qdd, 0.0, 0.0, axisOfRotation.getVector(), zero, offset.getVectorCopy(), zero);
    }

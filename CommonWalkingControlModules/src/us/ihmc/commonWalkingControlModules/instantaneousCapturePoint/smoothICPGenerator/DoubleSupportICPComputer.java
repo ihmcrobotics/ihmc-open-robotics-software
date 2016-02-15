@@ -14,7 +14,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class DoubleSupportICPComputer
 {
    private FramePoint tempFramePointI = new FramePoint();
@@ -31,15 +30,13 @@ public class DoubleSupportICPComputer
    private final Point3d finalDoubleSupportICPpos = new Point3d();
    private final Vector3d finalDoubleSupportICPvel = new Vector3d();
 
-
    private boolean finalStepReached;
    private int finalCounter;
 
-
    public DoubleSupportICPComputer(YoVariableRegistry registryExt)
    {
-//    tempFramePointI.set("pointTemp1","",ReferenceFrame.getWorldFrame(), registry);
-//    tempFramePointIminus1 =  new YoFramePoint("pointTemp2","",ReferenceFrame.getWorldFrame(), registry);
+      //    tempFramePointI.set("pointTemp1","",ReferenceFrame.getWorldFrame(), registry);
+      //    tempFramePointIminus1 =  new YoFramePoint("pointTemp2","",ReferenceFrame.getWorldFrame(), registry);
 
       finalStepReached = false;
       finalCounter = 0;
@@ -51,20 +48,20 @@ public class DoubleSupportICPComputer
       return initialDoubleSupportICPpos;
    }
 
-// public DenseMatrix64F getInitialDoubleSupportICPvel()
-// {
-//    return initialDoubleSupportICPvel;
-// }
+   // public DenseMatrix64F getInitialDoubleSupportICPvel()
+   // {
+   //    return initialDoubleSupportICPvel;
+   // }
 
    public Point3d getFinalDoubleSupportICPpos()
    {
       return finalDoubleSupportICPpos;
    }
 
-// public DenseMatrix64F getFinalDoubleSupportICPvel()
-// {
-//    return finalDoubleSupportICPvel;
-// }
+   // public DenseMatrix64F getFinalDoubleSupportICPvel()
+   // {
+   //    return finalDoubleSupportICPvel;
+   // }
 
    public Point3d getDesiredDCMposOfTime()
    {
@@ -81,15 +78,15 @@ public class DoubleSupportICPComputer
       return desiredECMPofTime;
    }
 
-// public DenseMatrix64F getPolynomialParamMatrix()
-// {
-//    return paramMatrix;
-// }
+   // public DenseMatrix64F getPolynomialParamMatrix()
+   // {
+   //    return paramMatrix;
+   // }
 
-// public DenseMatrix64F getPolynomialParamMatrixColumn(int colIndex)
-// {
-//    return EnhancedMatrixManipulator.getMatrixColumn(colIndex, paramMatrix);
-// }
+   // public DenseMatrix64F getPolynomialParamMatrixColumn(int colIndex)
+   // {
+   //    return EnhancedMatrixManipulator.getMatrixColumn(colIndex, paramMatrix);
+   // }
 
    public void reset()
    {
@@ -98,8 +95,7 @@ public class DoubleSupportICPComputer
 
    }
 
-   private void updateDCMCornerPoints(ArrayList<Point3d> initialICPsToPack, ArrayList<Point3d> constantEquivalentCoPs, double omega0,
-                                      double steppingTime)
+   private void updateDCMCornerPoints(ArrayList<Point3d> initialICPsToPack, ArrayList<Point3d> constantEquivalentCoPs, double omega0, double steppingTime)
    {
       int initialICPsSize = initialICPsToPack.size();
 
@@ -108,14 +104,14 @@ public class DoubleSupportICPComputer
 
       for (int i = initialICPsToPack.size() - 1; i > 0; i--)
       {
-         initialICPsToPack.get(i - 1).set(JojosICPutilities.extrapolateDCMpos(constantEquivalentCoPs.get(i - 1), -steppingTime, omega0, initialICPsToPack.get(i)));
+         initialICPsToPack.get(i - 1)
+               .set(JojosICPutilities.extrapolateDCMpos(constantEquivalentCoPs.get(i - 1), -steppingTime, omega0, initialICPsToPack.get(i)));
       }
    }
 
-
-   public void computeDoubleSupportPolynomialParams(ArrayList<Point3d> constantEquivalentCoPs, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints, double omega0, double steppingTime,
-           double doubleSupportFirstStepFraction, ArrayList<Point3d> initialICPs, boolean isFirstStep, double initialTransferSupportTime,
-           double doubleSupportTime)
+   public void computeDoubleSupportPolynomialParams(ArrayList<Point3d> constantEquivalentCoPs, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints,
+         double omega0, double steppingTime, double doubleSupportFirstStepFraction, ArrayList<Point3d> initialICPs, boolean isFirstStep,
+         double initialTransferSupportTime, double doubleSupportTime)
    {
       double doubleSupportDuration;
 
@@ -128,35 +124,33 @@ public class DoubleSupportICPComputer
          doubleSupportDuration = doubleSupportTime;
       }
 
-
       double doubleSupportTimeCurrentStep = -doubleSupportFirstStepFraction * doubleSupportDuration;
       double doubleSupportTimeNextStep = (1 - doubleSupportFirstStepFraction) * doubleSupportTime;
-      
 
       updateDCMCornerPoints(initialICPs, constantEquivalentCoPs, omega0, steppingTime);
 
       // Calculate DCM position and velocity at beginning of Double Support phase
 
-      if (isFirstStep)    // (false) //
+      if (isFirstStep) // (false) //
       {
-//         FramePoint tempFramePointI = new FramePoint(ReferenceFrame.getWorldFrame());
-//         FramePoint tempFramePointIminus1 = new FramePoint(ReferenceFrame.getWorldFrame());
-//
-//
-//         tempFramePointI.set(constantEquivalentCoPs.get(0).get(0), constantEquivalentCoPs.get(0).get(1), constantEquivalentCoPs.get(0).get(2));
-//
-//         tempFramePointIminus1.set(constantEquivalentCoPs.get(1).get(0), constantEquivalentCoPs.get(1).get(1), constantEquivalentCoPs.get(1).get(2));
-//         tempFramePointI.add(tempFramePointIminus1);
-//         tempFramePointI.scale(0.5);
-         
-         
-         FramePoint tempFramePointI =  new FramePoint(ReferenceFrame.getWorldFrame());
-         FramePoint tempFramePointIminus1 =  new FramePoint(ReferenceFrame.getWorldFrame());
-         
-         
-         tempFramePointI.set(consideredFootStepLocationsFramePoints.get(0).getX(), consideredFootStepLocationsFramePoints.get(0).getY(), consideredFootStepLocationsFramePoints.get(0).getZ());  
-         
-         tempFramePointIminus1.set(consideredFootStepLocationsFramePoints.get(1).getX(), consideredFootStepLocationsFramePoints.get(1).getY(), consideredFootStepLocationsFramePoints.get(1).getZ());
+         //         FramePoint tempFramePointI = new FramePoint(ReferenceFrame.getWorldFrame());
+         //         FramePoint tempFramePointIminus1 = new FramePoint(ReferenceFrame.getWorldFrame());
+         //
+         //
+         //         tempFramePointI.set(constantEquivalentCoPs.get(0).get(0), constantEquivalentCoPs.get(0).get(1), constantEquivalentCoPs.get(0).get(2));
+         //
+         //         tempFramePointIminus1.set(constantEquivalentCoPs.get(1).get(0), constantEquivalentCoPs.get(1).get(1), constantEquivalentCoPs.get(1).get(2));
+         //         tempFramePointI.add(tempFramePointIminus1);
+         //         tempFramePointI.scale(0.5);
+
+         FramePoint tempFramePointI = new FramePoint(ReferenceFrame.getWorldFrame());
+         FramePoint tempFramePointIminus1 = new FramePoint(ReferenceFrame.getWorldFrame());
+
+         tempFramePointI.set(consideredFootStepLocationsFramePoints.get(0).getX(), consideredFootStepLocationsFramePoints.get(0).getY(),
+               consideredFootStepLocationsFramePoints.get(0).getZ());
+
+         tempFramePointIminus1.set(consideredFootStepLocationsFramePoints.get(1).getX(), consideredFootStepLocationsFramePoints.get(1).getY(),
+               consideredFootStepLocationsFramePoints.get(1).getZ());
          tempFramePointI.add(tempFramePointIminus1);
          tempFramePointI.scale(0.5);
 
@@ -165,32 +159,30 @@ public class DoubleSupportICPComputer
       }
       else
       {
-         
-         JojosICPutilities.extrapolateDCMposAndVel(initialDoubleSupportICPpos, initialDoubleSupportICPvel, 
-               constantEquivalentCoPs.get(0), steppingTime + doubleSupportTimeCurrentStep, omega0, initialICPs.get(0));
+
+         JojosICPutilities.extrapolateDCMposAndVel(initialDoubleSupportICPpos, initialDoubleSupportICPvel, constantEquivalentCoPs.get(0),
+               steppingTime + doubleSupportTimeCurrentStep, omega0, initialICPs.get(0));
       }
-
-
 
       // Calculate DCM position and velocity at end of Double Support phase
 
-      JojosICPutilities.extrapolateDCMposAndVel(finalDoubleSupportICPpos, finalDoubleSupportICPvel, 
-            constantEquivalentCoPs.get(1), doubleSupportTimeNextStep, omega0, initialICPs.get(1));
-      
-      computeThirdOrderPolynomialParameterMatrix(doubleSupportParameterMatrix, doubleSupportDuration, initialDoubleSupportICPpos, initialDoubleSupportICPvel, finalDoubleSupportICPpos, finalDoubleSupportICPvel);
+      JojosICPutilities.extrapolateDCMposAndVel(finalDoubleSupportICPpos, finalDoubleSupportICPvel, constantEquivalentCoPs.get(1), doubleSupportTimeNextStep,
+            omega0, initialICPs.get(1));
+
+      computeThirdOrderPolynomialParameterMatrix(doubleSupportParameterMatrix, doubleSupportDuration, initialDoubleSupportICPpos, initialDoubleSupportICPvel,
+            finalDoubleSupportICPpos, finalDoubleSupportICPvel);
    }
-   
-   
-   public static void computeThirdOrderPolynomialParameterMatrix(DenseMatrix64F parameterMatrixToPack, double doubleSupportDuration, Point3d initialDoubleSupportICPpos,
-   Vector3d initialDoubleSupportICPvel, Point3d finalDoubleSupportICPpos, Vector3d finalDoubleSupportICPvel)
+
+   public static void computeThirdOrderPolynomialParameterMatrix(DenseMatrix64F parameterMatrixToPack, double doubleSupportDuration,
+         Point3d initialDoubleSupportICPpos, Vector3d initialDoubleSupportICPvel, Point3d finalDoubleSupportICPpos, Vector3d finalDoubleSupportICPvel)
    {
       double doubleSupportTimePow2 = Math.pow(doubleSupportDuration, 2);
       double doubleSupportTimePow3 = Math.pow(doubleSupportDuration, 3);
-      
+
       // Calculate time-dependency matrix for polynomial calculation (part of inversion problem)
-      DenseMatrix64F TimeBoundaryConditionMatrix = new DenseMatrix64F(4, 4, true, -2.0, 1.0, 2.0, 1.0, 3.0 * doubleSupportDuration, -2.0 * doubleSupportDuration,
-                                                      -3.0 * doubleSupportDuration, -doubleSupportDuration, 0.0, doubleSupportTimePow2, 0.0, 0.0,
-                                                      -doubleSupportTimePow3, 0.0, 0.0, 0.0);
+      DenseMatrix64F TimeBoundaryConditionMatrix = new DenseMatrix64F(4, 4, true, -2.0, 1.0, 2.0, 1.0, 3.0 * doubleSupportDuration,
+            -2.0 * doubleSupportDuration, -3.0 * doubleSupportDuration, -doubleSupportDuration, 0.0, doubleSupportTimePow2, 0.0, 0.0, -doubleSupportTimePow3,
+            0.0, 0.0, 0.0);
 
       // TimeBoundaryConditionMatrix.print();
 
@@ -214,12 +206,10 @@ public class DoubleSupportICPComputer
       EnhancedMatrixManipulator.setMatrixRowToTuple3d(2, StateBoundaryConditionMatrix, finalDoubleSupportICPpos);
       EnhancedMatrixManipulator.setMatrixRowToTuple3d(3, StateBoundaryConditionMatrix, finalDoubleSupportICPvel);
 
-      
-      
-//      EnhancedMatrixManipulator.setMatrixRowToVector(0, StateBoundaryConditionMatrix, initialDoubleSupportICPpos);
-//      EnhancedMatrixManipulator.setMatrixRowToVector(1, StateBoundaryConditionMatrix, initialDoubleSupportICPvel);
-//      EnhancedMatrixManipulator.setMatrixRowToVector(2, StateBoundaryConditionMatrix, finalDoubleSupportICPpos);
-//      EnhancedMatrixManipulator.setMatrixRowToVector(3, StateBoundaryConditionMatrix, finalDoubleSupportICPvel);
+      //      EnhancedMatrixManipulator.setMatrixRowToVector(0, StateBoundaryConditionMatrix, initialDoubleSupportICPpos);
+      //      EnhancedMatrixManipulator.setMatrixRowToVector(1, StateBoundaryConditionMatrix, initialDoubleSupportICPvel);
+      //      EnhancedMatrixManipulator.setMatrixRowToVector(2, StateBoundaryConditionMatrix, finalDoubleSupportICPpos);
+      //      EnhancedMatrixManipulator.setMatrixRowToVector(3, StateBoundaryConditionMatrix, finalDoubleSupportICPvel);
 
       // System.out.println("StateBoundaryConditionMatrix: ");
       // StateBoundaryConditionMatrix.print();
@@ -232,24 +222,24 @@ public class DoubleSupportICPComputer
       parameterMatrixToPack.set(tempParamMatrix);
    }
 
-   public void calcDCMandECMPofTime(ArrayList<Point3d> constantEquivalentCoPs, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints, double doubleSupportFirstStepFraction, double omega0,
-                                    ArrayList<Point3d> initialICPs, boolean isFirstStep, double initialTransferSupportTime, double doubleSupportTime,
-                                    boolean isSingleSupport, double currentTime, double steppingTime)
+   public void calcDCMandECMPofTime(ArrayList<Point3d> constantEquivalentCoPs, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints,
+         double doubleSupportFirstStepFraction, double omega0, ArrayList<Point3d> initialICPs, boolean isFirstStep, double initialTransferSupportTime,
+         double doubleSupportTime, boolean isSingleSupport, double currentTime, double steppingTime)
    {
-//    double currentTime = supportState.getCurrentTime();
-//    double steppingTime = supportState.getSteppingTime();
-
+      //    double currentTime = supportState.getCurrentTime();
+      //    double steppingTime = supportState.getSteppingTime();
 
       if (isSingleSupport)
       {
          double singleSupportComputationTime = currentTime + (1 - doubleSupportFirstStepFraction) * doubleSupportTime;
-         JojosICPutilities.extrapolateDCMposAndVel(desiredDCMposOfTime, desiredDCMvelOfTime, constantEquivalentCoPs.get(0), singleSupportComputationTime, omega0, initialICPs.get(0));
+         JojosICPutilities.extrapolateDCMposAndVel(desiredDCMposOfTime, desiredDCMvelOfTime, constantEquivalentCoPs.get(0), singleSupportComputationTime,
+               omega0, initialICPs.get(0));
          desiredECMPofTime.set(constantEquivalentCoPs.get(0));
       }
       else
       {
-         computeDoubleSupportPolynomialParams(constantEquivalentCoPs, consideredFootStepLocationsFramePoints, omega0, steppingTime, doubleSupportFirstStepFraction, initialICPs, isFirstStep,
-                 initialTransferSupportTime, doubleSupportTime);
+         computeDoubleSupportPolynomialParams(constantEquivalentCoPs, consideredFootStepLocationsFramePoints, omega0, steppingTime,
+               doubleSupportFirstStepFraction, initialICPs, isFirstStep, initialTransferSupportTime, doubleSupportTime);
 
          double timePow3 = Math.pow(currentTime, 3.0);
          double timePow2 = Math.pow(currentTime, 2.0);
@@ -258,32 +248,33 @@ public class DoubleSupportICPComputer
          DenseMatrix64F dcmPositionTimeVector = new DenseMatrix64F(4, 1, true, timePow3, timePow2, currentTime, 1);
          DenseMatrix64F dcmVelocityTimeVector = new DenseMatrix64F(4, 1, true, 3 * timePow2, 2 * currentTime, 1, 0);
 
-         
          multiplyMatricesAndPutInPoint3d(desiredDCMposOfTime, doubleSupportParameterMatrix, dcmPositionTimeVector);
          multiplyMatricesAndPutInPoint3d(desiredDCMvelOfTime, doubleSupportParameterMatrix, dcmVelocityTimeVector);
          tempVector.set(desiredDCMvelOfTime);
-         tempVector.scale(-1.0/omega0);
+         tempVector.scale(-1.0 / omega0);
          desiredECMPofTime.set(desiredDCMposOfTime);
          desiredECMPofTime.add(tempVector);
       }
    }
-   
+
    private void multiplyMatricesAndPutInPoint3d(Tuple3d tuple3dToPack, DenseMatrix64F matrixOne, DenseMatrix64F matrixTwo)
    {
       DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 1);
       CommonOps.mult(matrixOne, matrixTwo, tempMatrix);
-      
-      if (tempMatrix.getNumCols() != 1) throw new RuntimeException("tempMatrix.getNumCols() != 1");
-      if (tempMatrix.getNumRows() != 3) throw new RuntimeException("tempMatrix.getNumRows() != 3");
-      
+
+      if (tempMatrix.getNumCols() != 1)
+         throw new RuntimeException("tempMatrix.getNumCols() != 1");
+      if (tempMatrix.getNumRows() != 3)
+         throw new RuntimeException("tempMatrix.getNumRows() != 3");
+
       tuple3dToPack.setX(tempMatrix.get(0, 0));
       tuple3dToPack.setY(tempMatrix.get(1, 0));
       tuple3dToPack.setZ(tempMatrix.get(2, 0));
    }
 
    public void updateSubFootListForSmoothICPTrajectory(ArrayList<YoFramePoint> footStepLocationsFramePoints,
-           ArrayList<YoFramePoint> equivalentConstantCoPsFramePoints, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints,
-           int numberOfConsideredFootstepLocations, ArrayList<Point3d> equivalentConstantCoPsVectors, boolean isFirstStep)
+         ArrayList<YoFramePoint> equivalentConstantCoPsFramePoints, ArrayList<YoFramePoint> consideredFootStepLocationsFramePoints,
+         int numberOfConsideredFootstepLocations, ArrayList<Point3d> equivalentConstantCoPsVectors, boolean isFirstStep)
    {
       int footListSize = footStepLocationsFramePoints.size();
 
@@ -311,7 +302,6 @@ public class DoubleSupportICPComputer
          tempFramePointI.add(tempFramePointIminus1);
          tempFramePointI.scale(0.5);
 
-
          equivalentConstantCoPsFramePoints.get(0).set(tempFramePointI);
 
          consideredFootStepLocationsFramePoints.get(0).set(footStepLocationsFramePoints.get(0));
@@ -319,17 +309,16 @@ public class DoubleSupportICPComputer
       }
       else
       {
-//         equivalentConstantCoPsFramePoints.get(0).set(footStepLocationsFramePoints.get(0));
-         
+         //         equivalentConstantCoPsFramePoints.get(0).set(footStepLocationsFramePoints.get(0));
+
          if (isFirstStep)
          {
-            tempFramePointI.set(footStepLocationsFramePoints.get(0).getFramePointCopy());  
-            
+            tempFramePointI.set(footStepLocationsFramePoints.get(0).getFramePointCopy());
+
             tempFramePointIminus1.set(footStepLocationsFramePoints.get(1).getFramePointCopy());
             tempFramePointI.add(tempFramePointIminus1);
             tempFramePointI.scale(0.5);
-            
-            
+
             equivalentConstantCoPsFramePoints.get(0).set(tempFramePointI);
          }
          else

@@ -28,8 +28,8 @@ public class NewDoubleSupportICPComputerTest
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testComputeICPCornerPoints()
    {
       boolean visualize = false;
@@ -61,7 +61,7 @@ public class NewDoubleSupportICPComputerTest
 
       int numberOfCornerPoints = footLocations.size() - 1;
       Point3d[] icpCornerPoints = newDoubleSupportICPComputer.computeICPCornerPoints(numberOfCornerPoints, footLocations,
-                                     singleSupportDuration + doubleSupportDuration, omega0);
+            singleSupportDuration + doubleSupportDuration, omega0);
 
       if (visualize)
       {
@@ -80,8 +80,7 @@ public class NewDoubleSupportICPComputerTest
       }
 
       assertTrue(GeometryTools.arePointsInOrderAndColinear(footLocations.get(numberOfCornerPoints - 1), icpCornerPoints[numberOfCornerPoints - 1],
-              footLocations.get(numberOfCornerPoints), 1e-4));
-
+            footLocations.get(numberOfCornerPoints), 1e-4));
 
       if (visualize)
       {
@@ -93,8 +92,8 @@ public class NewDoubleSupportICPComputerTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testComputeSingleSupportICP()
    {
       boolean visualize = false;
@@ -107,7 +106,7 @@ public class NewDoubleSupportICPComputerTest
       PointAndLinePlotter pointAndLinePlotter = null;
       SimulationConstructionSet scs = null;
       YoVariableRegistry registry = null;
-      
+
       if (visualize)
       {
          Robot robot = new Robot(getClass().getSimpleName());
@@ -119,7 +118,7 @@ public class NewDoubleSupportICPComputerTest
          pointAndLinePlotter.plotPoint3d("supportFoot", supportFoot, YoAppearance.Black(), 0.01);
          pointAndLinePlotter.plotPoint3d("cornerPoint0", cornerPoint0, YoAppearance.Green(), 0.01);
       }
-      
+
       double omega0 = 0.7;
       double singleSupportDuration = 0.7;
       double doubleSupportDuration = 1.1;
@@ -130,16 +129,16 @@ public class NewDoubleSupportICPComputerTest
       Vector3d icpVelocity = new Vector3d();
 
       Point3d singleSupportStartICP = newDoubleSupportICPComputer.computeSingleSupportStartICP(supportFoot, cornerPoint0, doubleSupportDuration,
-                                         doubleSupportFirstStepFraction, omega0);
+            doubleSupportFirstStepFraction, omega0);
       Point3d singleSupportEndICP = newDoubleSupportICPComputer.computeSingleSupportEndICP(supportFoot, cornerPoint0, doubleSupportDuration,
-                                       doubleSupportFirstStepFraction, singleSupportDuration, omega0);
+            doubleSupportFirstStepFraction, singleSupportDuration, omega0);
 
       if (visualize)
       {
          pointAndLinePlotter.plotPoint3d("singleSupportStartICP", singleSupportStartICP, YoAppearance.Cyan(), 0.01);
          pointAndLinePlotter.plotPoint3d("singleSupportEndICP", singleSupportEndICP, YoAppearance.Cyan(), 0.01);
       }
-      
+
       assertTrue(GeometryTools.arePointsInOrderAndColinear(supportFoot, cornerPoint0, singleSupportStartICP, 1e-4));
       assertTrue(GeometryTools.arePointsInOrderAndColinear(cornerPoint0, singleSupportStartICP, singleSupportEndICP, 1e-4));
 
@@ -154,11 +153,11 @@ public class NewDoubleSupportICPComputerTest
          icpArrowTip = new YoFramePoint("icpVelocityTip", "", worldFrame, registry);
          icpVelocityLineSegment = new YoFrameLineSegment2d("icpVelocity", "", worldFrame, registry);
          icpPositionYoFramePoint = new YoFramePoint("icpPosition", "", worldFrame, registry);
-         
+
          pointAndLinePlotter.plotYoFramePoint("icpPosition", icpPositionYoFramePoint, YoAppearance.OrangeRed(), 0.01);
          pointAndLinePlotter.plotLineSegment("icpVelocity", icpVelocityLineSegment, Color.gray);
       }
-      
+
       double deltaT = 0.001;
       for (double time = deltaT; time <= singleSupportDuration; time = time + deltaT)
       {
@@ -171,10 +170,10 @@ public class NewDoubleSupportICPComputerTest
             Point2d icpPosition2d = new Point2d(icpPosition.getX(), icpPosition.getY());
             PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLineSegment, icpPosition2d,
                   icpArrowTip.getFramePoint2dCopy().getPointCopy());
-            
+
             scs.tickAndUpdate();
          }
-         
+
          assertTrue(GeometryTools.arePointsInOrderAndColinear(supportFoot, initialICPPosition, icpPosition, 1e-4));
 
          Vector3d approximateVelocity = new Vector3d(icpPosition);
@@ -186,7 +185,7 @@ public class NewDoubleSupportICPComputerTest
       }
 
       JUnitTools.assertTuple3dEquals(singleSupportEndICP, icpPosition, 1e-3);
-      
+
       if (visualize)
       {
          pointAndLinePlotter.addPointsAndLinesToSCS(scs);
@@ -196,6 +195,5 @@ public class NewDoubleSupportICPComputerTest
          ThreadTools.sleepForever();
       }
    }
-
 
 }

@@ -24,13 +24,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
-
 public class UserDesiredHandPoseProvider implements HandPoseProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final EnumYoVariable<HandPosePacket.DataType> userHandPoseDataType = new EnumYoVariable<HandPosePacket.DataType>("userHandPoseDataType", registry,
-                                                                                   HandPosePacket.DataType.class);
+         HandPosePacket.DataType.class);
    private final DoubleYoVariable userHandPoseTrajectoryTime = new DoubleYoVariable("userHandPoseTrajectoryTime", registry);
    private final BooleanYoVariable userHandPoseTakeEm = new BooleanYoVariable("userHandPoseTakeEm", registry);
 
@@ -47,14 +46,16 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    private final BooleanYoVariable[] yoUserHandControlledOrientationAxes = new BooleanYoVariable[3];
    private final boolean[] userHandControlledOrientationAxes = new boolean[SpatialMotionVector.SIZE];
 
-   private final DoubleYoVariable userHandPercentOfTrajectoryWithOrientationControlled = new DoubleYoVariable("userHandPercentOfTrajectoryWithOrientationControlled", registry);
+   private final DoubleYoVariable userHandPercentOfTrajectoryWithOrientationControlled = new DoubleYoVariable(
+         "userHandPercentOfTrajectoryWithOrientationControlled", registry);
 
    private final ReferenceFrame chestFrame;
 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public UserDesiredHandPoseProvider(FullHumanoidRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame, YoVariableRegistry parentRegistry)
+   public UserDesiredHandPoseProvider(FullHumanoidRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame,
+         YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
@@ -64,7 +65,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       {
          FramePose homePose = new FramePose(chestFrame, desiredHandPosesWithRespectToChestFrame.get(robotSide));
          homePositions.put(robotSide, homePose);
-         
+
          desiredHandPoses.put(robotSide, homePose);
 
          finalDesiredJointAngleMaps.put(robotSide, new LinkedHashMap<OneDoFJoint, Double>());
@@ -79,7 +80,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
 
       userHandPercentOfTrajectoryWithOrientationControlled.set(1.0);
       userHandPoseTrajectoryTime.set(1.0);
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -97,7 +98,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       desiredHandPoses.put(robotSide, userDesiredHandPose);
       packetReferenceFrames.put(robotSide, userDesiredHandPose.getReferenceFrame());
 
-//      System.out.println("userDesiredHandPose = " + userDesiredHandPose);
+      //      System.out.println("userDesiredHandPose = " + userDesiredHandPose);
 
       Map<OneDoFJoint, Double> finalDesiredJointAngleMap = finalDesiredJointAngleMaps.get(robotSide);
 
@@ -132,17 +133,17 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    @Override
    public boolean checkForHomePosition(RobotSide robotSide)
    {
-      return false; 
-      
-//      if (!checkForNewPose(robotSide))
-//         return false;
-//
-////    if (!packets.get(robotSide).get().isToHomePosition())
-////       return false;
-//
-//      desiredHandPoses.put(robotSide, homePositions.get(robotSide));
-//
-//      return true;
+      return false;
+
+      //      if (!checkForNewPose(robotSide))
+      //         return false;
+      //
+      ////    if (!packets.get(robotSide).get().isToHomePosition())
+      ////       return false;
+      //
+      //      desiredHandPoses.put(robotSide, homePositions.get(robotSide));
+      //
+      //      return true;
    }
 
    @Override

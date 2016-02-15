@@ -22,39 +22,41 @@ public class CapturabilityBasedStatusProducer implements Runnable, CloseableAndD
    private final PeriodicThreadScheduler scheduler;
    private final ConcurrentRingBuffer<CapturabilityBasedStatus> capturabilityBuffer;
 
-   public CapturabilityBasedStatusProducer(CloseableAndDisposableRegistry closeAndDisposeRegistry, PeriodicThreadScheduler scheduler, HumanoidGlobalDataProducer objectCommunicator)
+   public CapturabilityBasedStatusProducer(CloseableAndDisposableRegistry closeAndDisposeRegistry, PeriodicThreadScheduler scheduler,
+         HumanoidGlobalDataProducer objectCommunicator)
    {
       this.scheduler = scheduler;
       this.objectCommunicator = objectCommunicator;
       this.capturabilityBuffer = new ConcurrentRingBuffer<>(new CapturabilityBasedStatusBuilder(), 16);
       scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
-      
+
       closeAndDisposeRegistry.registerCloseableAndDisposable(this);
    }
 
-   public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, FramePoint centerOfMass, SideDependentList<FrameConvexPolygon2d> footSupportPolygons)
+   public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, FramePoint centerOfMass,
+         SideDependentList<FrameConvexPolygon2d> footSupportPolygons)
    {
       capturePoint2d.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       desiredCapturePoint2d.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       centerOfMass.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      
+
       CapturabilityBasedStatus nextStatus = capturabilityBuffer.next();
-      
-      if(nextStatus != null)
+
+      if (nextStatus != null)
       {
          capturePoint2d.get(nextStatus.capturePoint);
          desiredCapturePoint2d.get(nextStatus.desiredCapturePoint);
          centerOfMass.get(nextStatus.centerOfMass);
-         for(RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : RobotSide.values)
          {
             nextStatus.setSupportPolygon(robotSide, footSupportPolygons.get(robotSide));
-         }         
+         }
          capturabilityBuffer.commit();
       }
 
    }
-   
+
    public void closeAndDispose()
    {
       scheduler.shutdown();
@@ -63,10 +65,10 @@ public class CapturabilityBasedStatusProducer implements Runnable, CloseableAndD
    @Override
    public void run()
    {
-      if(capturabilityBuffer.poll())
+      if (capturabilityBuffer.poll())
       {
          CapturabilityBasedStatus status;
-         while((status = capturabilityBuffer.read()) != null)
+         while ((status = capturabilityBuffer.read()) != null)
          {
             objectCommunicator.send(status);
          }

@@ -18,7 +18,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class UserDesiredHandstepProvider implements HandstepProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -33,18 +32,17 @@ public class UserDesiredHandstepProvider implements HandstepProvider
    private final YoGraphicCoordinateSystem userDesiredHandstepCoordinateSystem;
 
    private final HandstepHelper handstepHelper;
-   
-   public UserDesiredHandstepProvider(FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry)
+
+   public UserDesiredHandstepProvider(FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.handstepHelper = new HandstepHelper(fullRobotModel); 
-      
+      this.handstepHelper = new HandstepHelper(fullRobotModel);
+
       userHandstepTakeIt.set(false);
       userHandstepNormal.set(-1.0, 0.0, 0.0);
       userHandstepRobotSide.set(RobotSide.LEFT);
 
       userDesiredHandstepCoordinateSystem = new YoGraphicCoordinateSystem("userHandstepViz", "", parentRegistry, 0.3);
-      
+
       VariableChangedListener listener = new VariableChangedListener()
       {
          public void variableChanged(YoVariable<?> v)
@@ -52,7 +50,8 @@ public class UserDesiredHandstepProvider implements HandstepProvider
             Vector3d position = userHandstepPosition.getVector3dCopy();
             Vector3d surfaceNormal = userHandstepNormal.getVector3dCopy();
             double rotationAngleAboutNormal = userHandstepRotationAboutNormal.getDoubleValue();
-            userDesiredHandstepCoordinateSystem.setTransformToWorld(HandstepHelper.computeHandstepTransform(false, position, surfaceNormal, rotationAngleAboutNormal));
+            userDesiredHandstepCoordinateSystem
+                  .setTransformToWorld(HandstepHelper.computeHandstepTransform(false, position, surfaceNormal, rotationAngleAboutNormal));
          }
       };
 
@@ -71,11 +70,11 @@ public class UserDesiredHandstepProvider implements HandstepProvider
          return null;
       if (userHandstepRobotSide.getEnumValue() != robotSide)
          return null;
-      
+
       Vector3d surfaceNormal = userHandstepNormal.getVector3dCopy();
       double rotationAngleAboutNormal = userHandstepRotationAboutNormal.getDoubleValue();
       Vector3d position = userHandstepPosition.getVector3dCopy();
-      
+
       Handstep handstep = handstepHelper.getDesiredHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime.getDoubleValue());
       userHandstepTakeIt.set(false);
       return handstep;

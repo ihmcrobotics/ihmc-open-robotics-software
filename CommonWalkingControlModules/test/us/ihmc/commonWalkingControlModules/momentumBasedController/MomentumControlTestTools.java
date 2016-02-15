@@ -25,8 +25,8 @@ import us.ihmc.robotics.screwTheory.Wrench;
  */
 public class MomentumControlTestTools
 {
-   public static void assertWrenchesSumUpToMomentumDot(Collection<Wrench> externalWrenches, SpatialForceVector desiredCentroidalMomentumRate,
-                                                       double gravityZ, double mass, ReferenceFrame centerOfMassFrame, double epsilon)
+   public static void assertWrenchesSumUpToMomentumDot(Collection<Wrench> externalWrenches, SpatialForceVector desiredCentroidalMomentumRate, double gravityZ,
+         double mass, ReferenceFrame centerOfMassFrame, double epsilon)
    {
       SpatialForceVector totalWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench tempWrench = new Wrench();
@@ -45,7 +45,7 @@ public class MomentumControlTestTools
    }
 
    public static void assertWrenchesInFrictionCones(Map<RigidBody, Wrench> externalWrenches,
-                                                    Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
+         Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 

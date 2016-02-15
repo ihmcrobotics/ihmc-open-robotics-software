@@ -29,7 +29,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.trajectories.providers.ChangeableConfigurationProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.MULTI_CONTACT;
@@ -39,17 +38,16 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    private final FootPoseProvider footPoseProvider;
 
-   private final SideDependentList<ChangeableConfigurationProvider> desiredConfigurationProviders = 
-         new SideDependentList<ChangeableConfigurationProvider>();
+   private final SideDependentList<ChangeableConfigurationProvider> desiredConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
 
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
    private final OneDoFJoint[] neckJoints;
-   
+
    private final SideDependentList<MutableBoolean> initializeHandsInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
    private final SideDependentList<MutableBoolean> initializeFeetInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
 
    private final MomentumRateOfChangeData momentumRateOfChangeData = new MomentumRateOfChangeData(momentumBasedController.getCenterOfMassFrame());
-   
+
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -71,7 +69,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       {
          private final FrameOrientation tempOrientation = new FrameOrientation(desiredChestYawPitchRoll.getReferenceFrame());
          private final FrameVector zeroFrameVector = new FrameVector(desiredChestYawPitchRoll.getReferenceFrame());
-         
+
          @Override
          public void variableChanged(YoVariable<?> v)
          {
@@ -89,7 +87,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          initializeFeetInContact.get(robotSide).setValue(areFeetInContact.get(robotSide));
       }
    }
-   
+
    public void initialize()
    {
       super.initialize();
@@ -99,13 +97,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       desiredCoMPosition.set(currentCoM);
 
       pelvisOrientationManager.setToHoldCurrentInWorldFrame();
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          if (initializeHandsInContact.get(robotSide).booleanValue())
          {
             HandLoadBearingPacket handLoadBearingPacket = new HandLoadBearingPacket(robotSide, true);
-            DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = (DesiredHandLoadBearingProvider) variousWalkingProviders.getDesiredHandLoadBearingProvider();
+            DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = (DesiredHandLoadBearingProvider) variousWalkingProviders
+                  .getDesiredHandLoadBearingProvider();
             desiredHandLoadBearingProvider.receivedPacket(handLoadBearingPacket);
          }
 

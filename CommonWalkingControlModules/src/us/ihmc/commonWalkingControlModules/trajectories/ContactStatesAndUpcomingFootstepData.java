@@ -63,7 +63,7 @@ public class ContactStatesAndUpcomingFootstepData
    public void setContactStates(List<? extends PlaneContactState> contactStates)
    {
       this.contactStates.clear();
-      for (int i=0; i<contactStates.size(); i++)
+      for (int i = 0; i < contactStates.size(); i++)
       {
          this.contactStates.add(contactStates.get(i));
       }

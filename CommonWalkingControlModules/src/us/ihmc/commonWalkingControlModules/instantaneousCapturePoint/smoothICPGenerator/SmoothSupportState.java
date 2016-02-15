@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-
 public class SmoothSupportState
 {
    private boolean isFirstStep;
@@ -89,12 +88,10 @@ public class SmoothSupportState
       }
    }
 
-
    public boolean getIsFirstStep()
    {
       return isFirstStep;
    }
-
 
    public boolean getIsSingleSupport()
    {
@@ -132,6 +129,5 @@ public class SmoothSupportState
    {
       return initialTransferSupportTime;
    }
-
 
 }

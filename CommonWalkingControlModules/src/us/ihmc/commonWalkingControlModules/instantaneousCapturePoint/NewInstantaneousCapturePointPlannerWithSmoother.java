@@ -31,7 +31,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private boolean VISUALIZE = true;
    private double ICP_CORNER_POINT_SIZE = 0.004;
    private double ICP_CONSTANT_COP_POINT_SIZE = 0.005;
-   
+
    private final String namePrefix = "icpPlanner";
 
    private final FramePoint tmpFramePoint1 = new FramePoint(worldFrame);
@@ -57,9 +57,12 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final DoubleYoVariable remainingTime = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
    private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable(namePrefix + "NumberFootstepsToConsider", registry);
    private final IntegerYoVariable footstepsToStop = new IntegerYoVariable(namePrefix + "NumberFootstepsToStop", registry);
-   private final YoFramePoint singleSupportInitialDesiredCapturePointPosition = new YoFramePoint(namePrefix + "FinalDesiredCapturePointPosition", worldFrame, registry);
-   private final YoFrameVector singleSupportInitialDesiredCapturePointVelocity = new YoFrameVector(namePrefix + "FinalDesiredCapturePointVelocity", worldFrame, registry);
-   private final YoFramePoint nextSingleSupportInitialCapturePointPosition = new YoFramePoint(namePrefix + "NextSingleSupportInitialCapturePointPosition", worldFrame, registry);
+   private final YoFramePoint singleSupportInitialDesiredCapturePointPosition = new YoFramePoint(namePrefix + "FinalDesiredCapturePointPosition", worldFrame,
+         registry);
+   private final YoFrameVector singleSupportInitialDesiredCapturePointVelocity = new YoFrameVector(namePrefix + "FinalDesiredCapturePointVelocity", worldFrame,
+         registry);
+   private final YoFramePoint nextSingleSupportInitialCapturePointPosition = new YoFramePoint(namePrefix + "NextSingleSupportInitialCapturePointPosition",
+         worldFrame, registry);
    private final YoFramePoint desiredCentroidalMomentumPivotPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    private final YoFramePoint desiredCapturePointPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
    private final YoFrameVector desiredCapturePointVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
@@ -128,21 +131,25 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue(); i++)
       {
-         YoGraphicPosition constantFootCenterCentersOfPressureViz = new YoGraphicPosition("icpConstantCoP" + i, constantCentroidalMomentumPivots.get(i), ICP_CONSTANT_COP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
+         YoGraphicPosition constantFootCenterCentersOfPressureViz = new YoGraphicPosition("icpConstantCoP" + i, constantCentroidalMomentumPivots.get(i),
+               ICP_CONSTANT_COP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
          yoGraphicsList.add(constantFootCenterCentersOfPressureViz);
          artifactList.add(constantFootCenterCentersOfPressureViz.createArtifact());
       }
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
       {
-         YoGraphicPosition icpCornerPointsViz = new YoGraphicPosition("icpCornerPoints" + i, capturePointCornerPoints.get(i), ICP_CORNER_POINT_SIZE, YoAppearance.Blue(), GraphicType.SOLID_BALL);
+         YoGraphicPosition icpCornerPointsViz = new YoGraphicPosition("icpCornerPoints" + i, capturePointCornerPoints.get(i), ICP_CORNER_POINT_SIZE,
+               YoAppearance.Blue(), GraphicType.SOLID_BALL);
 
          yoGraphicsList.add(icpCornerPointsViz);
          artifactList.add(icpCornerPointsViz.createArtifact());
       }
 
-      YoGraphicPosition singleSupportInitialICP = new YoGraphicPosition("singleSupportInitialICP", singleSupportInitialDesiredCapturePointPosition, 0.004, YoAppearance.Chocolate(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition nextSingleSupportInitialICP = new YoGraphicPosition("nextSingleSupportInitialICP", nextSingleSupportInitialCapturePointPosition, 0.004, YoAppearance.Chocolate(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition singleSupportInitialICP = new YoGraphicPosition("singleSupportInitialICP", singleSupportInitialDesiredCapturePointPosition, 0.004,
+            YoAppearance.Chocolate(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition nextSingleSupportInitialICP = new YoGraphicPosition("nextSingleSupportInitialICP", nextSingleSupportInitialCapturePointPosition, 0.004,
+            YoAppearance.Chocolate(), GraphicType.BALL_WITH_CROSS);
       yoGraphicsList.add(singleSupportInitialICP);
       yoGraphicsList.add(nextSingleSupportInitialICP);
       artifactList.add(singleSupportInitialICP.createArtifact());
@@ -227,8 +234,9 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       if (!Double.isNaN(deltaTimeToBeAccounted))
       {
          deltaTimeToBeAccounted *= timeCorrectionFactor.getDoubleValue();
-         deltaTimeToBeAccounted = MathTools.clipToMinMax(deltaTimeToBeAccounted, 0.0, Math.max(0.0, computeAndReturnTimeRemaining(time) - minSingleSupportDuration.getDoubleValue()));
-         
+         deltaTimeToBeAccounted = MathTools.clipToMinMax(deltaTimeToBeAccounted, 0.0,
+               Math.max(0.0, computeAndReturnTimeRemaining(time) - minSingleSupportDuration.getDoubleValue()));
+
          initialTime.sub(deltaTimeToBeAccounted);
       }
    }
@@ -251,7 +259,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       comeToStop.set(footstepList.size() <= footstepsToStop.getIntegerValue());
 
       int indexOfLastFootstepToConsider = Math.min(footstepList.size(), numberFootstepsToConsider.getIntegerValue()) - 1;
-      CapturePointTools.computeConstantCMPs(constantCentroidalMomentumPivots, footstepList, 0, indexOfLastFootstepToConsider, atAStop.getBooleanValue(), comeToStop.getBooleanValue());
+      CapturePointTools.computeConstantCMPs(constantCentroidalMomentumPivots, footstepList, 0, indexOfLastFootstepToConsider, atAStop.getBooleanValue(),
+            comeToStop.getBooleanValue());
    }
 
    protected void initializeDoubleSupportCapturePointTrajectory(YoFramePoint initialCapturePointPosition, YoFrameVector initialCapturePointVelocity,
@@ -269,7 +278,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
 
    protected void computeCapturePointCornerPoints(double steppingDuration)
    {
-      CapturePointTools.computeDesiredCornerPoints(capturePointCornerPoints, constantCentroidalMomentumPivots, false, steppingDuration, omega0.getDoubleValue());
+      CapturePointTools.computeDesiredCornerPoints(capturePointCornerPoints, constantCentroidalMomentumPivots, false, steppingDuration,
+            omega0.getDoubleValue());
    }
 
    protected void computeDesiredCapturePointPosition(double time)
@@ -278,7 +288,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       {
          singleSupportInitialDesiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
          constantCentroidalMomentumPivots.get(0).getFrameTupleIncludingFrame(tmpFramePoint2);
-         
+
          time = MathTools.clipToMinMax(time, 0.0, singleSupportDuration.getDoubleValue());
          CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), time, tmpFramePoint1, tmpFramePoint2, tmpFramePoint3);
          desiredCapturePointPosition.set(tmpFramePoint3);

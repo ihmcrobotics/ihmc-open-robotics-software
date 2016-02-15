@@ -89,8 +89,8 @@ public class PelvisICPBasedTranslationManager
    private final FrameVector2d tempICPOffset = new FrameVector2d();
    private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
 
-   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
-         YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider,
+         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
       frozenOffsetDecayAlpha.set(0.998);

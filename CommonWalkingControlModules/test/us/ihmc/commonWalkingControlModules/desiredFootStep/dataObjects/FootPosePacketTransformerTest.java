@@ -30,8 +30,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class FootPosePacketTransformerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTransformHandPosePacket() throws Exception
    {
       int numberOfTests = 10;
@@ -44,15 +44,13 @@ public class FootPosePacketTransformerTest
          Quat4d quat = new Quat4d();
          quat.set(axisAngle);
 
-
-
          if (i % 2 == 0)
             robotSide = RobotSide.LEFT;
          else
             robotSide = RobotSide.RIGHT;
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-         
+
          double trajectoryTime = RandomTools.generateRandomDouble(random, 0.6, 5.0);
 
          FootPosePacket starting = new FootPosePacket(robotSide, point3d, quat, trajectoryTime);

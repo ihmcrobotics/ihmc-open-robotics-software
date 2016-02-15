@@ -26,13 +26,13 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    private boolean inContact;
 
    public NonFlatGroundPlaneContactState(double footLength, double footWidth, Point3d midfootLocation, Vector3d normalToContactPlane,
-           double coefficientOfFriction, RigidBody rigidBody)
+         double coefficientOfFriction, RigidBody rigidBody)
    {
       this.rigidBody = rigidBody;
       contactFramePoints = new ArrayList<FramePoint>();
       contactFramePoints2d = new ArrayList<FramePoint2d>();
       planeFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis("planeFrame", new FramePoint(ReferenceFrame.getWorldFrame(), midfootLocation),
-              new FrameVector(ReferenceFrame.getWorldFrame(), normalToContactPlane));
+            new FrameVector(ReferenceFrame.getWorldFrame(), normalToContactPlane));
 
       Point3d frontLeft = new Point3d(midfootLocation);
       frontLeft.setX(frontLeft.getX() + footLength / 2.0);
@@ -61,7 +61,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
       contactFramePoints2d.add(new FramePoint2d(planeFrame, projectToXY(backLeft)));
 
       this.coefficientOfFriction = coefficientOfFriction;
-      
+
       this.contactNormalFrameVector = new FrameVector(planeFrame, 0.0, 0.0, 1.0);
 
       contactPoints = new ArrayList<ContactPoint>();
@@ -71,9 +71,9 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
          contactPoint.setInContact(true);
          contactPoints.add(contactPoint);
       }
-      
+
       inContact = true;
-      
+
       totalNumberOfContactPoints = contactPoints.size();
    }
 
@@ -85,13 +85,13 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    public List<FramePoint> getContactFramePointsInContactCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>();
-      
+
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
          ContactPoint contactPoint = contactPoints.get(i);
          if (!contactPoint.isInContact())
             continue;
-         
+
          FramePoint e = new FramePoint();
          contactPoint.getPosition(e);
          ret.add(e);
@@ -107,13 +107,13 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
          ContactPoint contactPoint = contactPoints.get(i);
          if (!contactPoint.isInContact())
             continue;
-         
+
          if (counter >= contactPointListToPack.size())
             contactPointListToPack.add(new FramePoint());
-         
+
          contactPoint.getPosition(contactPointListToPack.get(counter));
       }
-      
+
       for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
       {
          contactPointListToPack.remove(i);
@@ -123,13 +123,13 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
    public List<FramePoint2d> getContactFramePoints2dInContactCopy()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>();
-      
+
       for (int i = 0; i < contactFramePoints2d.size(); i++)
       {
          ContactPoint contactPoint = contactPoints.get(i);
          if (!contactPoint.isInContact())
             continue;
-         
+
          FramePoint2d e = new FramePoint2d();
          contactPoint.getPosition2d(e);
          ret.add(e);
@@ -169,9 +169,9 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
 
    public void getContactNormalFrameVector(FrameVector frameVectorToPack)
    {
-	   frameVectorToPack.setIncludingFrame(contactNormalFrameVector);
+      frameVectorToPack.setIncludingFrame(contactNormalFrameVector);
    }
-   
+
    public List<ContactPoint> getContactPoints()
    {
       return contactPoints;

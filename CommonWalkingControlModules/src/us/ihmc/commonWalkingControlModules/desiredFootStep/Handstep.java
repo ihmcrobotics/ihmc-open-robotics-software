@@ -39,7 +39,8 @@ public class Handstep
       this(createAutomaticID(endEffector), robotSide, endEffector, poseReferenceFrame, surfaceNormal, swingTrajectoryTime);
    }
 
-   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal, double swingTrajectoryTime)
+   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal,
+         double swingTrajectoryTime)
    {
       poseReferenceFrame.getParent().checkIsWorldFrame();
 
@@ -70,7 +71,7 @@ public class Handstep
    {
       return poseReferenceFrame.getParent();
    }
-   
+
    public void setX(double x)
    {
       poseReferenceFrame.setX(x);
@@ -105,7 +106,7 @@ public class Handstep
    {
       poseReferenceFrame.setXYFromPosition2dAndUpdate(position2d);
    }
-   
+
    public void setSurfaceNormal(FrameVector surfaceNormal)
    {
       this.surfaceNormal.set(surfaceNormal);
@@ -119,8 +120,8 @@ public class Handstep
    public RobotSide getRobotSide()
    {
       return robotSide;
-   } 
-   
+   }
+
    public double getX()
    {
       return poseReferenceFrame.getX();
@@ -175,17 +176,16 @@ public class Handstep
    {
       poseReferenceFrameToPackAndUpdate.setPoseAndUpdate(poseReferenceFrame);
    }
-   
+
    public void getSurfaceNormal(FrameVector surfaceNormalToPack)
    {
       surfaceNormalToPack.setIncludingFrame(surfaceNormal);
    }
-   
+
    public void getSurfaceNormal(Vector3d surfaceNormalToPack)
    {
       this.surfaceNormal.get(surfaceNormalToPack);
    }
-
 
    public RigidBody getBody()
    {

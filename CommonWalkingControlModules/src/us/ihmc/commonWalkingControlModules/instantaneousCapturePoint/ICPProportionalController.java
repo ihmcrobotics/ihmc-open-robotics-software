@@ -21,9 +21,8 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class ICPProportionalController
-{   
+{
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector2d tempControl = new FrameVector2d(worldFrame);
@@ -31,7 +30,7 @@ public class ICPProportionalController
    private final YoFrameVector2d icpErrorIntegrated = new YoFrameVector2d("icpErrorIntegrated", "", worldFrame, registry);
 
    private final YoFrameVector2d feedbackPart = new YoFrameVector2d("feedbackPart", "", worldFrame, registry);
-   
+
    private final DoubleYoVariable alphaICPVelocityFeedForward = new DoubleYoVariable("alphaICPVelocityFeedForward", registry);
 
    private final YoFrameVector2d desiredCMPToICP = new YoFrameVector2d("desiredCMPToICP", "", worldFrame, registry);
@@ -45,7 +44,7 @@ public class ICPProportionalController
    private final FilteredVelocityYoFrameVector icpVelocity;
    private final FrameVector2d icpDamping = new FrameVector2d(worldFrame);
    private final FrameVector2d icpIntegral = new FrameVector2d(worldFrame);
-   
+
    private final double controlDT;
    private final DoubleYoVariable captureKpParallelToMotion = new DoubleYoVariable("captureKpParallel", registry);
    private final DoubleYoVariable captureKpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal", registry);
@@ -53,9 +52,9 @@ public class ICPProportionalController
    private final DoubleYoVariable captureKd = new DoubleYoVariable("captureKd", registry);
    private final DoubleYoVariable captureKi = new DoubleYoVariable("captureKi", registry);
    private final DoubleYoVariable captureKiBleedoff = new DoubleYoVariable("captureKiBleedoff", registry);
-   
+
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
-   
+
    private final FrameVector2d tempICPErrorIntegrated = new FrameVector2d(worldFrame);
 
    private final SmartCMPProjectorTwo smartCMPProjector;
@@ -71,12 +70,13 @@ public class ICPProportionalController
       this.controlDT = controlDT;
 
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
-      
+
       icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
       alphaICPVelocity = new DoubleYoVariable("alphaICPVelocity", registry);
-      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("icpVelocity", "", alphaICPVelocity, controlDT, parentRegistry, icpPosition);
+      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("icpVelocity", "", alphaICPVelocity, controlDT, parentRegistry,
+            icpPosition);
       parentRegistry.addChild(registry);
-      
+
       captureKpParallelToMotion.set(gains.getKpParallelToMotion());
       captureKpOrthogonalToMotion.set(gains.getKpOrthogonalToMotion());
       captureKi.set(gains.getKi());
@@ -97,7 +97,8 @@ public class ICPProportionalController
          DoubleYoVariable accelerationLimitCMP = new DoubleYoVariable("accelerationLimitCMP", registry);
 
          filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "", registry, alphaCMP, rawCMPOutput);
-         rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, accelerationLimitCMP, controlDT, filteredCMPOutput);      
+         rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP,
+               accelerationLimitCMP, controlDT, filteredCMPOutput);
 
          double filterBreakFrequencyHertz = gains.getCMPFilterBreakFrequencyInHertz();
          alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
@@ -115,7 +116,7 @@ public class ICPProportionalController
          }
 
       }
-   
+
    }
 
    public void reset()
@@ -132,15 +133,15 @@ public class ICPProportionalController
    private final FrameLineSegment2d desiredICPToFinalDesiredICPSegment = new FrameLineSegment2d();
    private final FramePoint2d icpProjected = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
-      
-   public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
-           double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
-   {      
+
+   public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint,
+         FrameVector2d desiredCapturePointVelocity, double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
+   {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
       finalDesiredCapturePoint.changeFrame(worldFrame);
       desiredCapturePointVelocity.changeFrame(worldFrame);
-      
+
       desiredCMP.setIncludingFrame(capturePoint);
 
       icpPosition.set(capturePoint.getX(), capturePoint.getY(), 0.0);
@@ -151,14 +152,13 @@ public class ICPProportionalController
       // feed forward part
       tempControl.setIncludingFrame(desiredCapturePointVelocity);
       tempControl.scale(alphaICPVelocityFeedForward.getDoubleValue() / omega0);
-      
-      
+
       desiredCMP.sub(tempControl);
 
       // feedback part
       icpError.set(capturePoint);
       icpError.sub(desiredCapturePoint);
-      
+
       icpError.getFrameTuple2d(tempControl);
       double epsilonZeroICPVelocity = 1e-5;
       if (desiredCapturePointVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
@@ -180,32 +180,32 @@ public class ICPProportionalController
       double maxLength = 0.02;
       if (length > maxLength)
       {
-         icpDamping.scale(maxLength/length);
+         icpDamping.scale(maxLength / length);
       }
-      
+
       tempControl.add(icpDamping);
-      
+
       icpError.getFrameTuple2d(tempICPErrorIntegrated);
       tempICPErrorIntegrated.scale(controlDT);
       tempICPErrorIntegrated.scale(captureKi.getDoubleValue());
-      
+
       icpErrorIntegrated.scale(captureKiBleedoff.getDoubleValue());
       icpErrorIntegrated.add(tempICPErrorIntegrated);
 
       length = icpErrorIntegrated.length();
       if (length > maxLength)
       {
-         icpErrorIntegrated.scale(maxLength/length);
+         icpErrorIntegrated.scale(maxLength / length);
       }
-      
+
       if (Math.abs(captureKi.getDoubleValue()) < 1e-10)
       {
          icpErrorIntegrated.set(0.0, 0.0);
       }
-      
+
       icpErrorIntegrated.getFrameTuple2d(icpIntegral);
       tempControl.add(icpIntegral);
-      
+
       feedbackPart.set(tempControl);
       desiredCMP.add(tempControl);
 
@@ -216,20 +216,20 @@ public class ICPProportionalController
          smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);
          capturePoint.changeFrame(worldFrame);
          desiredCMP.changeFrame(worldFrame);
-         
+
          if (desiredCMP.containsNaN())
          {
             //TODO: Track down why we get NaNs and fix them, rather than just setting CMP to ICP...
             desiredCMP.set(capturePoint);
             System.err.println("ICPProportionalController: desiredCMP contained NaN. Set it to capturePoint...");
-//            throw new RuntimeException("desiredCMP.containsNaN()!");
+            //            throw new RuntimeException("desiredCMP.containsNaN()!");
          }
          if (smartCMPProjector.getWasCMPProjected())
          {
             icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
          }
       }
-      
+
       desiredCMP.changeFrame(rawCMPOutput.getReferenceFrame());
       rawCMPOutput.set(desiredCMP);
 
@@ -251,7 +251,8 @@ public class ICPProportionalController
          desICPToFinalDesICPVector.setIncludingFrame(desiredCapturePoint);
          desICPToFinalDesICPVector.sub(finalDesiredCapturePoint);
          boolean isDesICPMovingTowardsFinalDesICP = desiredCapturePointVelocity.dot(desICPToFinalDesICPVector) > 0.0;
-         if (!isDesICPMovingTowardsFinalDesICP && desiredCapturePointVelocity.lengthSquared() > 1e-3 && finalDesiredCapturePoint.distance(desiredCapturePoint) > 0.01)
+         if (!isDesICPMovingTowardsFinalDesICP && desiredCapturePointVelocity.lengthSquared() > 1e-3
+               && finalDesiredCapturePoint.distance(desiredCapturePoint) > 0.01)
          {
             desiredICPToFinalDesiredICPSegment.setAndChangeFrame(finalDesiredCapturePoint, desiredCapturePoint);
             icpProjected.setIncludingFrame(capturePoint);
@@ -262,7 +263,7 @@ public class ICPProportionalController
          }
       }
    }
-   
+
    private class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;

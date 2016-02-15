@@ -20,20 +20,18 @@ public class SCSDoubleSupportICPTesterHeelToToe
       double doubleSupportTime = 0.2;
       double initialTransferSupportTime = 0.4;
       double steppingTime = singleSupportTime + doubleSupportTime;
-//      SCSDoubleSupportICPTesterControllerHeelToToe controller = new SCSDoubleSupportICPTesterControllerHeelToToe(pointAndLinePlotter, testRobot.getYoTime(), scs.getDT(),
-//                                      singleSupportTime, doubleSupportTime, initialTransferSupportTime);
-      SCSDoubleSupportICPTesterControllerHeelToToe2 controller = new SCSDoubleSupportICPTesterControllerHeelToToe2(pointAndLinePlotter, testRobot.getYoTime(), scs.getDT(),
-            singleSupportTime, doubleSupportTime, initialTransferSupportTime);
-      
-//      private DoubleSupportHeelToToeICPComputer dsICPcomputer = new DoubleSupportHeelToToeICPComputer();
+      //      SCSDoubleSupportICPTesterControllerHeelToToe controller = new SCSDoubleSupportICPTesterControllerHeelToToe(pointAndLinePlotter, testRobot.getYoTime(), scs.getDT(),
+      //                                      singleSupportTime, doubleSupportTime, initialTransferSupportTime);
+      SCSDoubleSupportICPTesterControllerHeelToToe2 controller = new SCSDoubleSupportICPTesterControllerHeelToToe2(pointAndLinePlotter, testRobot.getYoTime(),
+            scs.getDT(), singleSupportTime, doubleSupportTime, initialTransferSupportTime);
+
+      //      private DoubleSupportHeelToToeICPComputer dsICPcomputer = new DoubleSupportHeelToToeICPComputer();
 
       controller.initialize();
 
-      
       pointAndLinePlotter.createAndShowOverheadPlotterInSCS(scs);
 
-      
-      testRobot.setController(controller, 1);    // Jojo: was 5 before
+      testRobot.setController(controller, 1); // Jojo: was 5 before
 
       pointAndLinePlotter.addGraphicObjectsAndArtifactsToSCS(scs);
 

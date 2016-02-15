@@ -29,7 +29,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-
 public class WalkOnTheEdgesManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -80,17 +79,14 @@ public class WalkOnTheEdgesManager
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(
-         new DoubleYoVariable("angleFootWithDesiredLeft", registry),
-         new DoubleYoVariable("angleFootWithDesiredRight", registry));
+         new DoubleYoVariable("angleFootWithDesiredLeft", registry), new DoubleYoVariable("angleFootWithDesiredRight", registry));
    private BooleanYoVariable enabledDoubleState = new BooleanYoVariable("enabledDoubleState", registry);
 
    private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<YoFrameOrientation>(
-         new YoFrameOrientation("orientationLeftFoot", worldFrame, registry),
-         new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
+         new YoFrameOrientation("orientationLeftFoot", worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
 
    private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(
-         new BooleanYoVariable("l_Desired_Pitch", registry),
-         new BooleanYoVariable("r_Desired_Pitch", registry));
+         new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
    private Footstep desiredFootstep;
 
    private final BooleanYoVariable isRearAnklePitchHittingLimit;
@@ -101,8 +97,9 @@ public class WalkOnTheEdgesManager
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
-         SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
+   public WalkOnTheEdgesManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<FootControlModule> footEndEffectorControlModules,
+         YoVariableRegistry parentRegistry)
    {
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeOffIfPossibleInSingleSupport.set(walkingControllerParameters.doToeOffIfPossibleInSingleSupport());
@@ -229,7 +226,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      if(checkRearLegJacobianDeterminant.getBooleanValue())
+      if (checkRearLegJacobianDeterminant.getBooleanValue())
       {
          FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
          doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
@@ -269,9 +266,9 @@ public class WalkOnTheEdgesManager
 
       if (ENABLE_TOE_OFF_FOR_STEP_DOWN)
       {
-          boolean isNextStepLowEnough = stepHeight < -minStepHeightForToeOff.getDoubleValue();
-          if (isNextStepLowEnough)
-             return true;
+         boolean isNextStepLowEnough = stepHeight < -minStepHeightForToeOff.getDoubleValue();
+         if (isNextStepLowEnough)
+            return true;
       }
       else
       {
@@ -468,12 +465,12 @@ public class WalkOnTheEdgesManager
    {
       return doToeOffIfPossible.getBooleanValue();
    }
-   
+
    public boolean doToeOffIfPossibleInSingleSupport()
    {
       return doToeOffIfPossibleInSingleSupport.getBooleanValue();
    }
-   
+
    public void setDoToeOffIfPossible(boolean value)
    {
       doToeOffIfPossible.set(value);
@@ -492,7 +489,7 @@ public class WalkOnTheEdgesManager
       doToeOff.set(false);
    }
 
-   private final FramePoint[] toePoints = new FramePoint[]{new FramePoint(), new FramePoint()};
+   private final FramePoint[] toePoints = new FramePoint[] {new FramePoint(), new FramePoint()};
    private final FramePoint middleToePoint = new FramePoint();
 
    private void computeToePoints(RobotSide supportSide)
@@ -500,7 +497,7 @@ public class WalkOnTheEdgesManager
       FrameConvexPolygon2d footDefaultPolygon = footDefaultPolygons.get(supportSide);
       toePoints[0].setIncludingFrame(footDefaultPolygon.getReferenceFrame(), Double.NEGATIVE_INFINITY, 0.0, 0.0);
       toePoints[1].setIncludingFrame(footDefaultPolygon.getReferenceFrame(), Double.NEGATIVE_INFINITY, 0.0, 0.0);
-      
+
       for (int i = 0; i < footDefaultPolygon.getNumberOfVertices(); i++)
       {
          FramePoint2d footPoint = footDefaultPolygon.getFrameVertex(i);

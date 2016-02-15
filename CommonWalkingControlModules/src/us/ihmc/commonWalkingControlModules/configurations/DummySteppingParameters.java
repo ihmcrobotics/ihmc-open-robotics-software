@@ -18,7 +18,6 @@ public class DummySteppingParameters implements SteppingParameters
    {
    }
 
-
    @Override
    public double getFootForwardOffset()
    {
@@ -111,7 +110,7 @@ public class DummySteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      return Math.PI/4.0;
+      return Math.PI / 4.0;
    }
 
    @Override

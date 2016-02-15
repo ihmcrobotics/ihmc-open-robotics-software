@@ -91,7 +91,8 @@ public class ChestOrientationManager
          simpleOrientationTrajectoryGenerator.initialize();
          activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
 
-         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", 15, allowMultipleFrames, pelvisZUpFrame, registry);
+         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", 15, allowMultipleFrames, pelvisZUpFrame,
+               registry);
          waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
          initializeToCurrent = new BooleanYoVariable("initializeChestOrientationToCurrent", registry);

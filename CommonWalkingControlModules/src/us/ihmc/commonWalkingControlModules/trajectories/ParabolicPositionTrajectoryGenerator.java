@@ -12,7 +12,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
-
 public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
@@ -28,7 +27,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    private final PositionProvider finalPositionProvider;
 
    public ParabolicPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-           PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, double groundClearance, YoVariableRegistry parentRegistry)
+         PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, double groundClearance, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
       this.minimumJerkTrajectory = new YoMinimumJerkTrajectory(namePrefix, registry);
@@ -128,7 +127,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
 
       FramePoint finalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       finalPositionProvider.get(finalPosition);
-      
+
       initialPosition.changeFrame(parabolicTrajectoryGenerator.getReferenceFrame());
       finalPosition.changeFrame(parabolicTrajectoryGenerator.getReferenceFrame());
       double maxAnkleHeight = Math.max(initialPosition.getZ(), finalPosition.getZ());

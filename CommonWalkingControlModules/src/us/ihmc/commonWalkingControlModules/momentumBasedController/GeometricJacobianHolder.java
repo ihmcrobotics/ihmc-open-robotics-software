@@ -13,7 +13,7 @@ public class GeometricJacobianHolder
 {
    private final List<GeometricJacobian> robotJacobians = new ArrayList<GeometricJacobian>();
    private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
-   
+
    public void compute()
    {
       for (int i = 0; i < robotJacobians.size(); i++)
@@ -21,7 +21,7 @@ public class GeometricJacobianHolder
          robotJacobians.get(i).compute();
       }
    }
-   
+
    /**
     * Find or create a Jacobian and register it in the MomentumBasedController.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
@@ -60,7 +60,7 @@ public class GeometricJacobianHolder
          InverseDynamicsJoint[] existingJacobianJoints = jacobian.getJointsInOrder();
          boolean sameNumberOfJoints = numberOfJointsToConsider == existingJacobianJoints.length;
          boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
-         
+
          if (sameNumberOfJoints && areExpressedFrameTheSame)
          {
             boolean allJointsAreTheSame = true;
@@ -94,7 +94,7 @@ public class GeometricJacobianHolder
       robotJacobians.add(newJacobian);
       return jacobianId;
    }
-   
+
    /**
     * Return a jacobian previously created with the getOrCreate method using a jacobianId.
     * @param jacobianId

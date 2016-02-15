@@ -33,7 +33,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReference
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class HeadOrientationControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -45,10 +44,13 @@ public class HeadOrientationControlModule
    private final YoGraphicReferenceFrame pointTrackingFrameFiz;
    private final FramePoint positionToPointAt = new FramePoint();
 
-   private enum HeadTrackingMode {ORIENTATION, POINT}
+   private enum HeadTrackingMode
+   {
+      ORIENTATION, POINT
+   }
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   
+
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
 
    private final DoubleYoVariable yawLimit = new DoubleYoVariable("yawLimit", registry);
@@ -151,14 +153,15 @@ public class HeadOrientationControlModule
          RigidBody cloneOfHead = cloneOfControlledJoints[numberOfDoFs - 1].getSuccessor();
          ReferenceFrame cloneOfHeadFrame = cloneOfHead.getBodyFixedFrame();
          GeometricJacobian jacobian = new GeometricJacobian(cloneOfControlledJoints, cloneOfHeadFrame);
-         
+
          int maxIterations = 2;
          double lambdaLeastSquares = 0.0009;
          double tolerance = 1e-12;
          double maxStepSize = 0.01;
          double minRandomSearchScalar = 1.0;
          double maxRandomSearchScalar = 1.0;
-         numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize,
+               minRandomSearchScalar, maxRandomSearchScalar);
          desiredJointAngles = new DenseMatrix64F(numberOfDoFs, 1);
 
          selectionMatrix = new DenseMatrix64F(numberOfDoFs, SpatialMotionVector.SIZE);
@@ -241,9 +244,9 @@ public class HeadOrientationControlModule
    {
       controlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       controlledLinearAcceleration.setToZero(headFrame);
-      
+
       controlledSpatialAcceleration.set(headFrame, elevator.getBodyFixedFrame(), headFrame, controlledLinearAcceleration, controlledAngularAcceleration);
-      
+
       taskspaceConstraintData.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
    }
@@ -286,26 +289,26 @@ public class HeadOrientationControlModule
 
       switch (headTrackingMode.getEnumValue())
       {
-         case ORIENTATION :
-         {
-            orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
-            orientationToTrack.getFrameOrientationIncludingFrame(orientationToPack);
+      case ORIENTATION:
+      {
+         orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
+         orientationToTrack.getFrameOrientationIncludingFrame(orientationToPack);
 
-            break;
-         }
+         break;
+      }
 
-         case POINT :
-         {
-            pointTrackingFrame.update();
-            pointTrackingFrameFiz.update();
+      case POINT:
+      {
+         pointTrackingFrame.update();
+         pointTrackingFrameFiz.update();
 
-            orientationToPack.setToZero(pointTrackingFrame);
+         orientationToPack.setToZero(pointTrackingFrame);
 
-            break;
-         }
+         break;
+      }
 
-         default :
-            throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
+      default:
+         throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
 
       orientationToPack.changeFrame(baseFrame);

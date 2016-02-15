@@ -87,7 +87,8 @@ public class SwingTrajectoryHeightCalculator
       return getSwingHeight(startPoint, endPoint, stanceHeight, groundProfile);
    }
 
-   public double getSwingHeight(FootstepDataMessage initialFootstep, FootstepDataMessage stanceFootstep, FootstepDataMessage endFootstep, HeightMapWithPoints heightMap)
+   public double getSwingHeight(FootstepDataMessage initialFootstep, FootstepDataMessage stanceFootstep, FootstepDataMessage endFootstep,
+         HeightMapWithPoints heightMap)
    {
       return getSwingHeight(initialFootstep.getLocation(), endFootstep.getLocation(), stanceFootstep.getLocation().getZ(), heightMap);
    }
@@ -111,44 +112,51 @@ public class SwingTrajectoryHeightCalculator
       double z0 = startPoint.z;
       double maxZDiffFromStart = Math.max(0.0, endPoint.z - z0);
 
-      Collections.sort(pointsBetweenFeet, new Comparator<Point3d>() {
+      Collections.sort(pointsBetweenFeet, new Comparator<Point3d>()
+      {
          @Override
          public int compare(Point3d o1, Point3d o2)
          {
-            if (o1.getZ() == o2.getZ()) return 0;
-            if (o1.getZ() > o2.getZ()) return -1;
+            if (o1.getZ() == o2.getZ())
+               return 0;
+            if (o1.getZ() > o2.getZ())
+               return -1;
             return 1;
          }
       });
 
-      if (pointsBetweenFeet.size() >= 1){
-    	  double[] zHeightsFromStart = new double[pointsBetweenFeet.size()];
-    	  int index = 0;
-    	  for (Point3d point : pointsBetweenFeet)
-    	  {
-    		  zHeightsFromStart[index] = point.z - z0;
-    		  index ++;
-    	  }
+      if (pointsBetweenFeet.size() >= 1)
+      {
+         double[] zHeightsFromStart = new double[pointsBetweenFeet.size()];
+         int index = 0;
+         for (Point3d point : pointsBetweenFeet)
+         {
+            zHeightsFromStart[index] = point.z - z0;
+            index++;
+         }
 
-    	  //use the max height
-    	  //TODO filter using the first few points
-    	  int numberOfOutliersToIgnore = calculatorParameters.getNumberOfOutliersToIgnore();
-    	  double zHeightForOutlierQualification = calculatorParameters.getzHeightForOutlierQualification();
-    	  int firstInvalidIndex = zHeightsFromStart.length - numberOfOutliersToIgnore;
+         //use the max height
+         //TODO filter using the first few points
+         int numberOfOutliersToIgnore = calculatorParameters.getNumberOfOutliersToIgnore();
+         double zHeightForOutlierQualification = calculatorParameters.getzHeightForOutlierQualification();
+         int firstInvalidIndex = zHeightsFromStart.length - numberOfOutliersToIgnore;
 
-    	  int indexOfMax;
-    	  for (indexOfMax = 0; indexOfMax < numberOfOutliersToIgnore && indexOfMax < firstInvalidIndex; indexOfMax++){
-    		  if (zHeightsFromStart[indexOfMax] - zHeightsFromStart[indexOfMax + numberOfOutliersToIgnore] < zHeightForOutlierQualification){
-    			  break;
-    		  }
-    	  }
-    	  maxZDiffFromStart = Math.max(maxZDiffFromStart, zHeightsFromStart[indexOfMax]);
+         int indexOfMax;
+         for (indexOfMax = 0; indexOfMax < numberOfOutliersToIgnore && indexOfMax < firstInvalidIndex; indexOfMax++)
+         {
+            if (zHeightsFromStart[indexOfMax] - zHeightsFromStart[indexOfMax + numberOfOutliersToIgnore] < zHeightForOutlierQualification)
+            {
+               break;
+            }
+         }
+         maxZDiffFromStart = Math.max(maxZDiffFromStart, zHeightsFromStart[indexOfMax]);
       }
-      
+
       double swingHeight = maxZDiffFromStart + calculatorParameters.getVerticalBuffer();
       //crop based on stance foot
       double distanceAboveStanceFoot = startPoint.getZ() + swingHeight - stanceHeight;
-      if (distanceAboveStanceFoot > steppingParameters.getMaxSwingHeightFromStanceFoot()){
+      if (distanceAboveStanceFoot > steppingParameters.getMaxSwingHeightFromStanceFoot())
+      {
          swingHeight = stanceHeight + steppingParameters.getMaxSwingHeightFromStanceFoot() - startPoint.getZ();
       }
       return swingHeight;
@@ -188,12 +196,12 @@ public class SwingTrajectoryHeightCalculator
 
       // search for points in area between the foot positions (range decreased by horizontal buffer size)
       Point2d bufferedStartPoint = new Point2d(startPoint.x + calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.x,
-                                      startPoint.y + calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.y);
+            startPoint.y + calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.y);
 
-      Point2d bufferedEndPoint = new Point2d(endPoint.x - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.x, endPoint.y - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.y);
+      Point2d bufferedEndPoint = new Point2d(endPoint.x - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.x,
+            endPoint.y - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.y);
 
       FootSwingInclusionFunction inclusionFunction = new FootSwingInclusionFunction(bufferedStartPoint, bufferedEndPoint, calculatorParameters.getPathWidth());
-
 
       // get all points in the buffered region
       double x = (bufferedStartPoint.x + bufferedEndPoint.x) / 2.0;
@@ -231,7 +239,7 @@ public class SwingTrajectoryHeightCalculator
       {
          currentPoint = convexPolygon2d.getVertex(i);
 
-         if (!currentPoint.epsilonEquals(dummyPointA, 1e-13) &&!currentPoint.epsilonEquals(dummyPointB, 1e-13))
+         if (!currentPoint.epsilonEquals(dummyPointA, 1e-13) && !currentPoint.epsilonEquals(dummyPointB, 1e-13))
          {
             newInnerPoints.add(currentPoint);
          }
@@ -258,7 +266,6 @@ public class SwingTrajectoryHeightCalculator
       bufferedPoints.add(new Point2d(0 + calculatorParameters.getHorizontalBuffer(), startPoint.z + calculatorParameters.getVerticalBuffer()));
       bufferedPoints.add(new Point2d(horizonalDistance - calculatorParameters.getHorizontalBuffer(), endPoint.z + calculatorParameters.getVerticalBuffer()));
 
-
       convexPolygon2d.clear();
       convexPolygon2d.addVertices(bufferedPoints, bufferedPoints.size());
       convexPolygon2d.update();
@@ -270,7 +277,7 @@ public class SwingTrajectoryHeightCalculator
       {
          currentPoint = convexPolygon2d.getVertex(i);
 
-         if (!currentPoint.epsilonEquals(dummyPoint1, 1e-13) &&!currentPoint.epsilonEquals(dummyPoint2, 1e-13))
+         if (!currentPoint.epsilonEquals(dummyPoint1, 1e-13) && !currentPoint.epsilonEquals(dummyPoint2, 1e-13))
          {
             currentX = startPoint.x + currentPoint.x * startToEnd2dDirection.x;
             currentY = startPoint.y + currentPoint.x * startToEnd2dDirection.y;

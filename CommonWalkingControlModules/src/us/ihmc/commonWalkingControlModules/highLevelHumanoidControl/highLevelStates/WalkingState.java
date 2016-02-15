@@ -16,4 +16,3 @@ public enum WalkingState
       return transferToSide == RobotSide.LEFT ? TRANSFER_TO_LEFT_SUPPORT : TRANSFER_TO_RIGHT_SUPPORT;
    }
 }
-

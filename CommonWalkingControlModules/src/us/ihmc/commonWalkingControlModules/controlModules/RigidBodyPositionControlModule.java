@@ -10,7 +10,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-
 public class RigidBodyPositionControlModule
 {
    private static final boolean VISUALIZE = true;
@@ -51,14 +50,16 @@ public class RigidBodyPositionControlModule
       return endEffector;
    }
 
-   public void doPositionControl(FrameVector outputToPack, FramePoint desiredPosition, FrameVector desiredLinearVelocityOfOrigin, FrameVector desiredLinearAccelerationOfOrigin, RigidBody base)
+   public void doPositionControl(FrameVector outputToPack, FramePoint desiredPosition, FrameVector desiredLinearVelocityOfOrigin,
+         FrameVector desiredLinearAccelerationOfOrigin, RigidBody base)
    {
       // using twists is a bit overkill; optimize if needed.
       twistCalculator.packRelativeTwist(endEffectorTwist, base, endEffector);
       currentLinearVelocity.setToZero(endEffectorTwist.getExpressedInFrame());
       endEffectorTwist.packLinearPart(currentLinearVelocity.getVector());
 
-      euclideanPositionController.compute(outputToPack, desiredPosition, desiredLinearVelocityOfOrigin, currentLinearVelocity, desiredLinearAccelerationOfOrigin);
+      euclideanPositionController.compute(outputToPack, desiredPosition, desiredLinearVelocityOfOrigin, currentLinearVelocity,
+            desiredLinearAccelerationOfOrigin);
    }
 
    public void setProportionalGains(double kpx, double kpy, double kpz)

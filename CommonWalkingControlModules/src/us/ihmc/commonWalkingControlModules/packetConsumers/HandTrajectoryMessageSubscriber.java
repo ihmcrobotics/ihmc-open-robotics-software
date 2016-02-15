@@ -12,8 +12,9 @@ public class HandTrajectoryMessageSubscriber implements PacketConsumer<HandTraje
 {
    private final HumanoidGlobalDataProducer globalDataProducer;
 
-   private final SideDependentList<AtomicReference<HandTrajectoryMessage>> latestMessageReferences = new SideDependentList<>(new AtomicReference<HandTrajectoryMessage>(null), new AtomicReference<HandTrajectoryMessage>(null));
-   
+   private final SideDependentList<AtomicReference<HandTrajectoryMessage>> latestMessageReferences = new SideDependentList<>(
+         new AtomicReference<HandTrajectoryMessage>(null), new AtomicReference<HandTrajectoryMessage>(null));
+
    public HandTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

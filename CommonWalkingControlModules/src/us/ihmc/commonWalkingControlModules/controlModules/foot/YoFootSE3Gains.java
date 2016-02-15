@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-
 public class YoFootSE3Gains implements YoSE3PIDGains
 {
    private final YoFootPositionGains positionGains;

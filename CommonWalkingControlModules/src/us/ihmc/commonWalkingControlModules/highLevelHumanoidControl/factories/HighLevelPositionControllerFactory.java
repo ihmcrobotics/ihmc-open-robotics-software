@@ -13,7 +13,7 @@ public class HighLevelPositionControllerFactory implements HighLevelBehaviorFact
    {
       this.transitionRequested = transitionRequested;
    }
-   
+
    @Override
    public HighLevelBehavior createHighLevelBehavior(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
@@ -25,6 +25,6 @@ public class HighLevelPositionControllerFactory implements HighLevelBehaviorFact
    public boolean isTransitionToBehaviorRequested()
    {
       return transitionRequested;
-      }
+   }
 
 }

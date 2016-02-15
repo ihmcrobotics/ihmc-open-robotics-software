@@ -39,13 +39,13 @@ public class SwingHeightTrajectoryCalculatorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHeightFromPose()
    {
       double boxHeight = 0.2;
       CombinedTerrainObject3D groundProfile = createBoxTerrainProfile(boxHeight);
-      double verticalBuffer = 0.05;    // 5cm
+      double verticalBuffer = 0.05; // 5cm
 
       double centerX = 0;
       double centerY = 0;
@@ -71,7 +71,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHeightFromOffsetBox()
    {
@@ -89,7 +89,7 @@ public class SwingHeightTrajectoryCalculatorTest
       BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
 
-      double verticalBuffer = 0.05;    // 5cm
+      double verticalBuffer = 0.05; // 5cm
 
       SwingTrajectoryHeightCalculator generator = createSwingHeightTrajectoryCalculator();
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -107,47 +107,47 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-       @Test(timeout = 30000)
-       public void testWithBoxOutOfRange()
-{
-   double boxHeight = 0.5;
-   CombinedTerrainObject3D groundProfile = new CombinedTerrainObject3D("BoxTerrain");
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testWithBoxOutOfRange()
+   {
+      double boxHeight = 0.5;
+      CombinedTerrainObject3D groundProfile = new CombinedTerrainObject3D("BoxTerrain");
 
-   AppearanceDefinition color = YoAppearance.DarkGray();
-   groundProfile.addBox(-100.0, -100.0, 100.0, 100.0, 0.001, color);
-   groundProfile.addBox(0.10, -0.5, 0.4, -0.15, boxHeight);
+      AppearanceDefinition color = YoAppearance.DarkGray();
+      groundProfile.addBox(-100.0, -100.0, 100.0, 100.0, 0.001, color);
+      groundProfile.addBox(0.10, -0.5, 0.4, -0.15, boxHeight);
 
-   double centerX = 0;
-   double centerY = 0;
-   double halfWidth = 1.0;
-   double resolution = 0.02;
-   BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
-   QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
+      double centerX = 0;
+      double centerY = 0;
+      double halfWidth = 1.0;
+      double resolution = 0.02;
+      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
 
-   double verticalBuffer = 0.05;    // 5cm
-   SwingTrajectoryHeightCalculator generator = createSwingHeightTrajectoryCalculator();
-   FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
-   FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
+      double verticalBuffer = 0.05; // 5cm
+      SwingTrajectoryHeightCalculator generator = createSwingHeightTrajectoryCalculator();
+      FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
 
-   Point3d startPosition = new Point3d(0.0, 0.0, 0.0);
-   Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
-   startPose.setPose(startPosition, startOrientation);
+      Point3d startPosition = new Point3d(0.0, 0.0, 0.0);
+      Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      startPose.setPose(startPosition, startOrientation);
 
-   Point3d endPosition = new Point3d(0.5, 0.0, 0.0);
-   Quat4d endOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
-   endPose.setPose(endPosition, endOrientation);
+      Point3d endPosition = new Point3d(0.5, 0.0, 0.0);
+      Quat4d endOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      endPose.setPose(endPosition, endOrientation);
 
-   double swingHeight = generator.getSwingHeight(startPose, endPose, startPose.getZ(), groundMap);
-   assertTrue(swingHeight < boxHeight + verticalBuffer);
-}
+      double swingHeight = generator.getSwingHeight(startPose, endPose, startPose.getZ(), groundMap);
+      assertTrue(swingHeight < boxHeight + verticalBuffer);
+   }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithMultipleBoxes()
    {
       double EPSILON = 1e-13;
-      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();    // don't check in true
+      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp(); // don't check in true
       CombinedTerrainObject3D groundProfile = new CombinedTerrainObject3D("BoxTerrain");
 
       double boxInside1Height = 0.1;
@@ -167,7 +167,7 @@ public class SwingHeightTrajectoryCalculatorTest
       BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
 
-      double verticalBuffer = 0.05;    // 5cm
+      double verticalBuffer = 0.05; // 5cm
       SwingTrajectoryHeightCalculator generator = createSwingHeightTrajectoryCalculator();
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
       FramePose endPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -189,7 +189,7 @@ public class SwingHeightTrajectoryCalculatorTest
 
    public void testWithHeightMap()
    {
-      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();    // don't check in true
+      boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp(); // don't check in true
 
       CombinedTerrainObject3D groundProfile = createWalledTerrainProfile();
       double centerX = 0;
@@ -198,7 +198,6 @@ public class SwingHeightTrajectoryCalculatorTest
       double resolution = 0.02;
       BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       QuadTreeHeightMapInterface groundMap = QuadTreeHeightMapGeneratorTools.createHeightMap(groundProfile, rangeOfPointsToTest, resolution);
-
 
       SwingTrajectoryHeightCalculator generator = createSwingHeightTrajectoryCalculator();
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -222,14 +221,14 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();
 
-      double horizontalBuffer = .1;    // 10cm
-      double verticalBuffer = 0.05;    // 5cm
+      double horizontalBuffer = .1; // 10cm
+      double verticalBuffer = 0.05; // 5cm
 
       SwingTrajectoryHeightCalculator generator = createSwingHeightTrajectoryCalculator();
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -256,7 +255,6 @@ public class SwingHeightTrajectoryCalculatorTest
 
       assertTrue(trajectoryPoints.get(2).epsilonEquals(endPosition, 1e-13));
 
-
       if (VISUALIZE)
       {
          visualizeTrajectoryPoints(createSCSNullRobotInstance(), trajectoryPoints);
@@ -264,13 +262,13 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBigXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = false;
-      double horizontalBuffer = .1;    // 10cm
-      double verticalBuffer = 0.05;    // 5cm
+      double horizontalBuffer = .1; // 10cm
+      double verticalBuffer = 0.05; // 5cm
 
       SwingTrajectoryHeightCalculator generator = createSwingHeightTrajectoryCalculator();
       FramePose startPose = new FramePose(ReferenceFrame.getWorldFrame());
@@ -297,7 +295,6 @@ public class SwingHeightTrajectoryCalculatorTest
 
       assertTrue(trajectoryPoints.get(3).epsilonEquals(endPosition, 1e-13));
 
-
       if (VISUALIZE)
       {
          visualizeTrajectoryPoints(createSCSNullRobotInstance(), trajectoryPoints);
@@ -305,10 +302,11 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   private SwingTrajectoryHeightCalculator createSwingHeightTrajectoryCalculator(){
-      double horizontalBuffer = .1;    // 10cm
-      double verticalBuffer = 0.05;    // 5cm
-      double pathWidth = 0.12;    // 12cm
+   private SwingTrajectoryHeightCalculator createSwingHeightTrajectoryCalculator()
+   {
+      double horizontalBuffer = .1; // 10cm
+      double verticalBuffer = 0.05; // 5cm
+      double pathWidth = 0.12; // 12cm
       SteppingParameters steppingParameters = new DummySteppingParameters();
       HeightCalculatorParameters calculatorParameters = new HeightCalculatorParameters(horizontalBuffer, verticalBuffer, pathWidth);
       SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(calculatorParameters, steppingParameters);

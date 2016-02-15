@@ -72,7 +72,7 @@ public class FootControlHelper
    private final BooleanYoVariable jacobianDeterminantInRange;
 
    private final DoubleYoVariable minJacobianDeterminantForSingularityEscape;
-   
+
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    private final DenseMatrix64F selectionMatrix;
@@ -122,7 +122,6 @@ public class FootControlHelper
       partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, walkingControllerParameters,
             registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
 
-
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody pelvis = fullRobotModel.getPelvis();
       RevoluteJoint[] legJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), RevoluteJoint.class);
@@ -149,7 +148,7 @@ public class FootControlHelper
 
       minJacobianDeterminantForSingularityEscape = new DoubleYoVariable("minJacobianDeterminantForSingularityEscape", registry);
       minJacobianDeterminantForSingularityEscape.set(0.025);
-      
+
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, momentumBasedController, registry);
 
@@ -182,7 +181,7 @@ public class FootControlHelper
          isDesiredCoPOnEdge.set(false);
       else
          isDesiredCoPOnEdge.set(!contactPolygon.isPointInside(cop, -EPSILON_POINT_ON_EDGE)); // Minus means that the check is done with a smaller polygon
-   
+
       computeNullspaceMultipliers();
    }
 
@@ -197,7 +196,8 @@ public class FootControlHelper
       jacobianDeterminantInRange.set(Math.abs(jacobianDeterminant.getDoubleValue()) < minJacobianDeterminantForSingularityEscape.getDoubleValue());
       computeJointsAlignmentFactor();
 
-      if (jacobianDeterminantInRange.getBooleanValue() && ankleRollAndHipYawAlignmentFactor.getDoubleValue() < ankleRollAndHipYawAlignmentTreshold.getDoubleValue())
+      if (jacobianDeterminantInRange.getBooleanValue()
+            && ankleRollAndHipYawAlignmentFactor.getDoubleValue() < ankleRollAndHipYawAlignmentTreshold.getDoubleValue())
       {
          nullspaceMultipliers.reshape(1, 1);
          if (doSingularityEscape.getBooleanValue())

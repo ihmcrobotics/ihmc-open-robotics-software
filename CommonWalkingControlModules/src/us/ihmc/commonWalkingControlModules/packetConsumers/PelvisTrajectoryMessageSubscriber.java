@@ -11,7 +11,7 @@ public class PelvisTrajectoryMessageSubscriber implements PacketConsumer<PelvisT
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    private final AtomicReference<PelvisTrajectoryMessage> latestMessageReference = new AtomicReference<PelvisTrajectoryMessage>(null);
-   
+
    public PelvisTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;

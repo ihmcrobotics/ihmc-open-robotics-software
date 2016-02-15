@@ -12,7 +12,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-
 public class RootJointAngularAccelerationControlModule
 {
    private final YoVariableRegistry registry;
@@ -25,7 +24,7 @@ public class RootJointAngularAccelerationControlModule
 
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    private MomentumBasedController momentumBasedController;
-   
+
    private final int rootJacobianId;
    private final RigidBody rootPredecessor;
    private final RigidBody rootSuccessor;
@@ -35,36 +34,39 @@ public class RootJointAngularAccelerationControlModule
       this(momentumBasedController, null, parentRegistry);
    }
 
-   public RootJointAngularAccelerationControlModule(MomentumBasedController momentumBasedController, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   public RootJointAngularAccelerationControlModule(MomentumBasedController momentumBasedController, YoOrientationPIDGains gains,
+         YoVariableRegistry parentRegistry)
    {
       this.rootJoint = momentumBasedController.getFullRobotModel().getRootJoint();
-      
+
       rootPredecessor = rootJoint.getPredecessor();
       rootSuccessor = rootJoint.getSuccessor();
       rootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootPredecessor, rootSuccessor, rootJoint.getFrameAfterJoint());
       taskspaceConstraintData.set(rootPredecessor, rootSuccessor);
-      
+
       registry = new YoVariableRegistry(getClass().getSimpleName());
       double controlDT = momentumBasedController.getControlDT();
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootPredecessor, rootSuccessor,
-              momentumBasedController.getTwistCalculator(), controlDT, gains, registry);
+            momentumBasedController.getTwistCalculator(), controlDT, gains, registry);
       this.controlledPelvisAngularAcceleration = new YoFrameVector("controlled" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
-              registry);
+            registry);
 
       this.momentumBasedController = momentumBasedController;
       parentRegistry.addChild(registry);
    }
-   
+
    public void reset()
    {
       rootJointOrientationControlModule.reset();
    }
 
    private final FrameVector rootJointAngularAcceleration = new FrameVector();
+
    public void doControl(OrientationTrajectoryData orientationTrajectoryData)
    {
       computeDesiredRootJointAngularAcceleration(orientationTrajectoryData, rootJointAngularAcceleration);
-      taskspaceConstraintData.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration, rootJointNullspaceMultipliers);
+      taskspaceConstraintData.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration,
+            rootJointNullspaceMultipliers);
       momentumBasedController.setDesiredSpatialAcceleration(rootJacobianId, taskspaceConstraintData);
 
       rootJointAngularAcceleration.changeFrame(this.controlledPelvisAngularAcceleration.getReferenceFrame());
@@ -76,13 +78,14 @@ public class RootJointAngularAccelerationControlModule
       // empty
    }
 
-   private final FrameVector tempFrameVector= new FrameVector();
+   private final FrameVector tempFrameVector = new FrameVector();
+
    private void computeDesiredRootJointAngularAcceleration(OrientationTrajectoryData orientationTrajectoryData, FrameVector vectorToPack)
    {
       vectorToPack.setToZero(rootJoint.getFrameAfterJoint());
       rootJointOrientationControlModule.compute(vectorToPack, orientationTrajectoryData.getOrientation(), orientationTrajectoryData.getAngularVelocity(),
             orientationTrajectoryData.getAngularAcceleration());
-//      ret.changeFrame(rootJoint.getFrameAfterJoint());
+      //      ret.changeFrame(rootJoint.getFrameAfterJoint());
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -98,6 +101,6 @@ public class RootJointAngularAccelerationControlModule
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       rootJointOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
-      
+
    }
 }

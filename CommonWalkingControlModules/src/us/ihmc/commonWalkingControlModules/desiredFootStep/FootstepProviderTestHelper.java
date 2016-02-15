@@ -29,7 +29,7 @@ public class FootstepProviderTestHelper
    private final double dt;
 
    public FootstepProviderTestHelper(SideDependentList<? extends ContactablePlaneBody> contactableFeet, SideDependentList<ReferenceFrame> ankleZUpFrames,
-                                     SideDependentList<ReferenceFrame> ankleFrames, double dt)
+         SideDependentList<ReferenceFrame> ankleFrames, double dt)
    {
       this.contactableFeet = contactableFeet;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -150,16 +150,16 @@ public class FootstepProviderTestHelper
 
       return createFootstep(robotSide, footstepPose);
    }
-   
+
    public Footstep createFootstep(RobotSide robotSide, Point3d position, double[] orientationYawPitchRoll)
    {
-      FramePose footstepPose = new FramePose();      
+      FramePose footstepPose = new FramePose();
       footstepPose.setPosition(position);
       footstepPose.setOrientation(orientationYawPitchRoll);
-      
+
       return createFootstep(robotSide, footstepPose);
    }
-   
+
    public Footstep createFootstep(RobotSide robotSide, FramePose footstepPose)
    {
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
@@ -181,12 +181,11 @@ public class FootstepProviderTestHelper
       desiredHeadingControlModule.updateDesiredHeadingFrame();
       boolean cycleThroughAllEvents = true;
       HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, dt,
-                                                                                 desiredHeadingControlModule, desiredVelocityControlModule, registry);
+            desiredHeadingControlModule, desiredVelocityControlModule, registry);
       updatables.add(headingAndVelocityEvaluationScript);
 
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(0.084, null, ankleZUpFrames, ankleFrames,
-                                                                             contactableFeet, desiredHeadingControlModule, desiredVelocityControlModule,
-                                                                             registry);
+            contactableFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       double inPlaceWidth = 0.25;
       double maxStepLength = 0.6;
@@ -201,7 +200,7 @@ public class FootstepProviderTestHelper
       desiredFootstepCalculator.setStepPitch(stepPitch);
 
       DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
-                                                                             registry);
+            registry);
       footstepProvider.setWalk(true);
 
       return footstepProvider;

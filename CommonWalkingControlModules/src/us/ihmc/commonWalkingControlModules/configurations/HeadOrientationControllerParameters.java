@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-
 public interface HeadOrientationControllerParameters
 {
    public abstract String[] getDefaultHeadOrientationControlJointNames();
@@ -21,6 +20,6 @@ public interface HeadOrientationControllerParameters
    public abstract double getHeadYawLimit();
 
    public abstract double getHeadRollLimit();
-   
+
    public abstract double getTrajectoryTimeHeadOrientation();
 }

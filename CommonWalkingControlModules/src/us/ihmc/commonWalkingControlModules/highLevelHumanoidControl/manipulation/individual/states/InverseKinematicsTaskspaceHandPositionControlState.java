@@ -59,8 +59,8 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Trajecto
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, parentRegistry);
       this.controlStatusProducer = controlStatusProducer;
       this.robotSide = robotSide;
-      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(namePrefix, base, endEffector, controlDT, momentumBasedController.getTwistCalculator(),
-            parentRegistry, yoGraphicsListRegistry);
+      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(namePrefix, base, endEffector, controlDT,
+            momentumBasedController.getTwistCalculator(), parentRegistry, yoGraphicsListRegistry);
 
       inverseKinematicsSolutionIsValid = new BooleanYoVariable("inverseKinematicsSolutionIsValid", registry);
 
@@ -83,7 +83,6 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Trajecto
 
       this.controlDT = controlDT;
       maxAccelerationArmJointspace = gains.getYoMaximumAcceleration();
-
 
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
@@ -199,9 +198,9 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Trajecto
    {
       if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
          return false;
-      
-      boolean isTrajectoryDone =  getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
-   
+
+      boolean isTrajectoryDone = getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
+
       return isTrajectoryDone || !inverseKinematicsSolutionIsValid.getBooleanValue();
    }
 
@@ -225,7 +224,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Trajecto
    @Override
    public void setHoldPositionDuration(double holdPositionDuration)
    {
-     this.holdPositionDuration.set(holdPositionDuration);
+      this.holdPositionDuration.set(holdPositionDuration);
    }
 
    @Override

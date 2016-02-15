@@ -110,31 +110,31 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       switch (walkMethod.getEnumValue())
       {
-         case STOP:
-         {
-            stepInProgress = null;
+      case STOP:
+      {
+         stepInProgress = null;
 
-            break;
-         }
+         break;
+      }
 
-         case BLIND:
-         {
-            stepInProgress = desiredFootstepCalculatorFootstepProviderWrapper.poll();
+      case BLIND:
+      {
+         stepInProgress = desiredFootstepCalculatorFootstepProviderWrapper.poll();
 
-            break;
-         }
+         break;
+      }
 
-         case FOOTSTEP_PATH:
-         {
-            stepInProgress = footstepQueue.poll();
+      case FOOTSTEP_PATH:
+      {
+         stepInProgress = footstepQueue.poll();
 
-            break;
-         }
+         break;
+      }
 
-         default:
-         {
-            throw new RuntimeException("Shouldn't get here!");
-         }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
       }
    }
 
@@ -143,25 +143,25 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       switch (walkMethod.getEnumValue())
       {
-         case STOP:
-         {
-            return footstepQueue.peek();
-         }
+      case STOP:
+      {
+         return footstepQueue.peek();
+      }
 
-         case BLIND:
-         {
-            return desiredFootstepCalculatorFootstepProviderWrapper.peek();
-         }
+      case BLIND:
+      {
+         return desiredFootstepCalculatorFootstepProviderWrapper.peek();
+      }
 
-         case FOOTSTEP_PATH:
-         {
-            return footstepQueue.peek();
-         }
+      case FOOTSTEP_PATH:
+      {
+         return footstepQueue.peek();
+      }
 
-         default:
-         {
-            throw new RuntimeException("Shouldn't get here!");
-         }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
       }
    }
 
@@ -170,25 +170,25 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       switch (walkMethod.getEnumValue())
       {
-         case STOP:
-         {
-            return peekPeekUsingFootstepQueue();
-         }
+      case STOP:
+      {
+         return peekPeekUsingFootstepQueue();
+      }
 
-         case BLIND:
-         {
-            return desiredFootstepCalculatorFootstepProviderWrapper.peekPeek();
-         }
+      case BLIND:
+      {
+         return desiredFootstepCalculatorFootstepProviderWrapper.peekPeek();
+      }
 
-         case FOOTSTEP_PATH:
-         {
-            return peekPeekUsingFootstepQueue();
-         }
+      case FOOTSTEP_PATH:
+      {
+         return peekPeekUsingFootstepQueue();
+      }
 
-         default:
-         {
-            throw new RuntimeException("Shouldn't get here!");
-         }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
       }
    }
 
@@ -241,25 +241,25 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       switch (walkMethod.getEnumValue())
       {
-         case STOP:
-         {
-            return true;
-         }
+      case STOP:
+      {
+         return true;
+      }
 
-         case BLIND:
-         {
-            return isPaused.getBooleanValue() || desiredFootstepCalculatorFootstepProviderWrapper.isEmpty();
-         }
+      case BLIND:
+      {
+         return isPaused.getBooleanValue() || desiredFootstepCalculatorFootstepProviderWrapper.isEmpty();
+      }
 
-         case FOOTSTEP_PATH:
-         {
-            return footstepQueue.isEmpty() || isPaused.getBooleanValue();
-         }
+      case FOOTSTEP_PATH:
+      {
+         return footstepQueue.isEmpty() || isPaused.getBooleanValue();
+      }
 
-         default:
-         {
-            throw new RuntimeException("Shouldn't get here!");
-         }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
       }
    }
 
@@ -350,25 +350,25 @@ public class FootstepPathCoordinator implements FootstepProvider
    {
       switch (walkMethod.getEnumValue())
       {
-         case STOP:
-         {
-            return 0;
-         }
+      case STOP:
+      {
+         return 0;
+      }
 
-         case BLIND:
-         {
-            return desiredFootstepCalculatorFootstepProviderWrapper.getNumberOfFootstepsToProvide();
-         }
+      case BLIND:
+      {
+         return desiredFootstepCalculatorFootstepProviderWrapper.getNumberOfFootstepsToProvide();
+      }
 
-         case FOOTSTEP_PATH:
-         {
-            return footstepQueue.size();
-         }
+      case FOOTSTEP_PATH:
+      {
+         return footstepQueue.size();
+      }
 
-         default:
-         {
-            throw new RuntimeException("Shouldn't get here!");
-         }
+      default:
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
       }
    }
 
@@ -393,82 +393,82 @@ public class FootstepPathCoordinator implements FootstepProvider
 
       switch (blindWalkingSpeed)
       {
-         case SLOW:
+      case SLOW:
+      {
+         if (isInMud)
          {
-            if (isInMud)
-            {
-               stepLength = 0.25;
-               stepWidth = 0.12;
-               stepSideward = 0.1;
-               swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
-               transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime();
-            }
-            else
-            {
-               stepLength = 0.2;
-               stepWidth = 0.25;
-               stepSideward = 0.1;
-               swingTime = footstepTimingParameters.getSlowBlindWalkingSwingTime();
-               transferTime = footstepTimingParameters.getSlowBlindWalkingTransferTime();
-            }
-
-            break;
+            stepLength = 0.25;
+            stepWidth = 0.12;
+            stepSideward = 0.1;
+            swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
+            transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime();
          }
-
-         case MEDIUM:
+         else
          {
-            if (isInMud)
-            {
-               stepLength = 0.35;
-               stepWidth = 0.12;
-               stepSideward = 0.3;
-               swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
-               transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime();
-            }
-            else
-            {
-               stepLength = 0.35;
-               stepWidth = 0.25;
-               stepSideward = 0.25;
-               swingTime = footstepTimingParameters.getFootstepPathSwingTime();
-               transferTime = footstepTimingParameters.getFootstepPathTransferTime();
-            }
-
-            break;
-         }
-
-         case FAST:
-         {
-            if (isInMud)
-            {
-               stepLength = 0.5;
-               stepWidth = 0.12;
-               stepSideward = 0.5;
-               swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
-               transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime();
-            }
-            else
-            {
-               stepLength = 0.5;
-               stepWidth = 0.25;
-               stepSideward = 0.6;
-               swingTime = footstepTimingParameters.getFootstepPathSwingTime();
-               transferTime = footstepTimingParameters.getFootstepPathTransferTime();
-            }
-
-            break;
-         }
-
-         default:
-         {
-            stepLength = 0.0;
-            stepWidth = 0.15;
-            stepSideward = 0.0;
+            stepLength = 0.2;
+            stepWidth = 0.25;
+            stepSideward = 0.1;
             swingTime = footstepTimingParameters.getSlowBlindWalkingSwingTime();
             transferTime = footstepTimingParameters.getSlowBlindWalkingTransferTime();
-
-            break;
          }
+
+         break;
+      }
+
+      case MEDIUM:
+      {
+         if (isInMud)
+         {
+            stepLength = 0.35;
+            stepWidth = 0.12;
+            stepSideward = 0.3;
+            swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
+            transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime();
+         }
+         else
+         {
+            stepLength = 0.35;
+            stepWidth = 0.25;
+            stepSideward = 0.25;
+            swingTime = footstepTimingParameters.getFootstepPathSwingTime();
+            transferTime = footstepTimingParameters.getFootstepPathTransferTime();
+         }
+
+         break;
+      }
+
+      case FAST:
+      {
+         if (isInMud)
+         {
+            stepLength = 0.5;
+            stepWidth = 0.12;
+            stepSideward = 0.5;
+            swingTime = footstepTimingParameters.getBlindWalkingInMudSwingTime();
+            transferTime = footstepTimingParameters.getBlindWalkingInMudTransferTime();
+         }
+         else
+         {
+            stepLength = 0.5;
+            stepWidth = 0.25;
+            stepSideward = 0.6;
+            swingTime = footstepTimingParameters.getFootstepPathSwingTime();
+            transferTime = footstepTimingParameters.getFootstepPathTransferTime();
+         }
+
+         break;
+      }
+
+      default:
+      {
+         stepLength = 0.0;
+         stepWidth = 0.15;
+         stepSideward = 0.0;
+         swingTime = footstepTimingParameters.getSlowBlindWalkingSwingTime();
+         transferTime = footstepTimingParameters.getSlowBlindWalkingTransferTime();
+
+         break;
+      }
       }
 
       blindWalkingToDestinationDesiredFootstepCalculator.setDesiredStepWidth(stepWidth);
@@ -502,12 +502,12 @@ public class FootstepPathCoordinator implements FootstepProvider
       notifyWalkingHasBeenCancelled();
       switch (walkMethod.getEnumValue())
       {
-         case BLIND:
-            desiredFootstepCalculatorFootstepProviderWrapper.cancelPlan();
-            break;
-         case FOOTSTEP_PATH:
-            footstepQueue.clear();
-            break;
+      case BLIND:
+         desiredFootstepCalculatorFootstepProviderWrapper.cancelPlan();
+         break;
+      case FOOTSTEP_PATH:
+         footstepQueue.clear();
+         break;
       }
    }
 }

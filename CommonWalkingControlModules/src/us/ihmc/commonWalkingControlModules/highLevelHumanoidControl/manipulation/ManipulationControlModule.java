@@ -84,7 +84,8 @@ public class ManipulationControlModule
 
    private final DoubleYoVariable yoTime;
 
-   public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+   public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
+         MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       fullRobotModel = momentumBasedController.getFullRobotModel();
       this.armControlParameters = armControllerParameters;
@@ -113,8 +114,9 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters, jointspaceControlGains, taskspaceGains, taskspaceLoadBearingGains,
-               variousWalkingProviders.getControlStatusProducer(), variousWalkingProviders.getHandPoseStatusProducer(), registry);
+         HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters,
+               jointspaceControlGains, taskspaceGains, taskspaceLoadBearingGains, variousWalkingProviders.getControlStatusProducer(),
+               variousWalkingProviders.getHandPoseStatusProducer(), registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }
 
@@ -265,7 +267,8 @@ public class ManipulationControlModule
             boolean[] controlledOrientationAxes = handPoseProvider.getControlledOrientationAxes(robotSide);
             double percentOfTrajectoryWithOrientationBeingControlled = handPoseProvider.getPercentOfTrajectoryWithOrientationBeingControlled(robotSide);
 
-            handControlModules.get(robotSide).moveInStraightLine(desiredHandPose, trajectoryTime, desiredReferenceFrame, controlledOrientationAxes, percentOfTrajectoryWithOrientationBeingControlled, handSwingClearance.getDoubleValue());
+            handControlModules.get(robotSide).moveInStraightLine(desiredHandPose, trajectoryTime, desiredReferenceFrame, controlledOrientationAxes,
+                  percentOfTrajectoryWithOrientationBeingControlled, handSwingClearance.getDoubleValue());
          }
          else
          {
@@ -300,7 +303,8 @@ public class ManipulationControlModule
          boolean controlHandAngleAboutAxis = handPoseProvider.controlHandAngleAboutAxis(robotSide);
          double graspOffsetFromControlFrame = handPoseProvider.getGraspOffsetFromControlFrame(robotSide);
          double trajectoryTime = handPoseProvider.getTrajectoryTime();
-         handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, graspOffsetFromControlFrame, trajectoryTime);
+         handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis,
+               graspOffsetFromControlFrame, trajectoryTime);
       }
    }
 
@@ -316,8 +320,8 @@ public class ManipulationControlModule
 
          ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
          double swingTrajectoryTime = desiredHandstep.getSwingTrajectoryTime();
-         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, handSwingClearance.getDoubleValue(), swingTrajectoryTime, trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue(),
-               timeTransitionBeforeLoadBearing.getDoubleValue());
+         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, handSwingClearance.getDoubleValue(),
+               swingTrajectoryTime, trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue(), timeTransitionBeforeLoadBearing.getDoubleValue());
       }
    }
 
@@ -352,7 +356,8 @@ public class ManipulationControlModule
             Vector3d desiredTorque = handComplianceControlParametersProvider.getDesiredTorque(robotSide);
             double forceDeadzone = handComplianceControlParametersProvider.getForceDeadzone(robotSide);
             double torqueDeadzone = handComplianceControlParametersProvider.getTorqueDeadzone(robotSide);
-            handControlModules.get(robotSide).setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce, desiredTorque, forceDeadzone, torqueDeadzone);
+            handControlModules.get(robotSide).setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce, desiredTorque,
+                  forceDeadzone, torqueDeadzone);
          }
       }
    }

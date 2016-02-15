@@ -43,7 +43,8 @@ public enum CommonNames
 
    private String name;
 
-   CommonNames(String name) {
+   CommonNames(String name)
+   {
       this.name = name;
    }
 

@@ -92,11 +92,11 @@ public class DesiredFootPoseProvider implements PacketConsumer<FootPosePacket>, 
             return;
          }
       }
-      
+
       RobotSide robotSide = object.getRobotSide();
       footPoseSide.set(robotSide == RobotSide.LEFT ? 0 : 1);
       trajectoryTime = object.getTrajectoryTime();
-      if (Double.isNaN(trajectoryTime) || trajectoryTime < 0.01) 
+      if (Double.isNaN(trajectoryTime) || trajectoryTime < 0.01)
          trajectoryTime = defaultTrajectoryTime;
       footPosePacket.set(object);
    }

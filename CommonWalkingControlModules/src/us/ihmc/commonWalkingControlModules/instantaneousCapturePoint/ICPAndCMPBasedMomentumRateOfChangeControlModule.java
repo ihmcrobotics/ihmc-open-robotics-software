@@ -72,7 +72,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
    private final FramePoint2d desiredCapturePoint = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
-   
+
    private final FrameOrientation desiredPelvisOrientation = new FrameOrientation();
 
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
@@ -194,7 +194,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
       desiredPelvisOrientation.getMatrix3d(desiredPelvisToPelvis);
 
       AxisAngle4d desiredPelvisToPelvisAxisAngle = new AxisAngle4d();
-//      desiredPelvisToPelvisAxisAngle.set(desiredPelvisToPelvis);
+      //      desiredPelvisToPelvisAxisAngle.set(desiredPelvisToPelvis);
       RotationTools.convertMatrixToAxisAngle(desiredPelvisToPelvis, desiredPelvisToPelvisAxisAngle);
       FrameVector proportionalPart = new FrameVector(pelvisFrame, desiredPelvisToPelvisAxisAngle.getX(), desiredPelvisToPelvisAxisAngle.getY(), 0.0);
       proportionalPart.scale(desiredPelvisToPelvisAxisAngle.getAngle());

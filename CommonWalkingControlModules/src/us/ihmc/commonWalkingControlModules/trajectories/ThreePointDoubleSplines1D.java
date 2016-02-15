@@ -6,7 +6,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
-
 public class ThreePointDoubleSplines1D
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -44,7 +43,7 @@ public class ThreePointDoubleSplines1D
       for (int i = 0; i < splines.length; i++)
       {
          splines[i].setQuintic(points[i].x, points[i + 1].x, points[i].y, slopes[i], secondDerivatives[i], points[i + 1].y, slopes[i + 1],
-                               secondDerivatives[i + 1]);
+               secondDerivatives[i + 1]);
       }
    }
 

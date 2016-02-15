@@ -31,7 +31,7 @@ public class AutomaticManipulationAbortCommunicator implements PacketConsumer<Au
    public void reportManipulationAborted()
    {
       ManipulationAbortedStatus packet = new ManipulationAbortedStatus();
-//      packet.setDestination(PacketDestination.UI);
+      //      packet.setDestination(PacketDestination.UI);
       globalDataProducer.queueDataToSend(packet);
    }
 

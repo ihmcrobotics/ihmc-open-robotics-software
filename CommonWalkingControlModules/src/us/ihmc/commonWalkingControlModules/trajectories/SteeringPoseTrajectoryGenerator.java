@@ -58,7 +58,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final YoFramePoint yoInitialPosition;
    private final YoFramePoint yoFinalPosition;
-   
+
    private final YoFramePoint yoCurrentPosition;
    private final YoFrameVector yoCurrentVelocity;
    private final YoFrameVector yoCurrentAcceleration;
@@ -74,21 +74,21 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final YoFramePoint yoFinalPositionWorld;
    private final YoFramePoint yoCurrentPositionWorld;
    private final YoFramePoint yoCurrentAdjustedPositionWorld;
-   
+
    private final FramePoint initialPosition = new FramePoint();
    private final FramePoint currentPosition = new FramePoint();
    private final FramePoint finalPosition = new FramePoint();
-   
+
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameOrientation finalOrientation = new FrameOrientation();
    private final FrameOrientation currentOrientation = new FrameOrientation();
-   
+
    private final FrameVector currentVelocity = new FrameVector();
    private final FrameVector currentAcceleration = new FrameVector();
-   
+
    private final FrameVector currentAngularVelocity = new FrameVector();
    private final FrameVector currentAngularAcceleration = new FrameVector();
-   
+
    private boolean visualize = true;
    private final BagOfBalls bagOfBalls;
    private final FramePoint ballPosition = new FramePoint();
@@ -135,7 +135,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       initialSteeringAngle = new DoubleYoVariable(namePrefix + "InitialSteeringAngle", registry);
       currentRelativeSteeringAngle = new DoubleYoVariable(namePrefix + "CurrentRelativeSteeringAngle", registry);
       finalSteeringAngle = new DoubleYoVariable(namePrefix + "FinalSteeringAngle", registry);
-      
+
       yoInitialPosition = new YoFramePoint(namePrefix + "InitialSteeringPosition", trajectoryFrame, registry);
       yoFinalPosition = new YoFramePoint(namePrefix + "FinalSteeringPosition", trajectoryFrame, registry);
 
@@ -186,7 +186,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
             steeringWheelZeroAxis.set(localXAxis);
             if (steeringWheelZeroAxis.containsNaN())
                System.out.println();
-            
+
             steeringWheelCenter.get(localTranslation);
             localRotation.setColumn(0, localXAxis);
             localRotation.setColumn(1, localYAxis);
@@ -202,13 +202,18 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
       if (this.visualize && yoGraphicsListRegistry != null)
       {
-         final YoGraphicPosition currentPositionViz = new YoGraphicPosition(namePrefix + "CurrentSteeringPosition", yoCurrentPositionWorld, 0.025, YoAppearance.Blue());
-         final YoGraphicPosition currentAdjustedPositionViz = new YoGraphicPosition(namePrefix + "CurrentAdjustedSteeringPosition", yoCurrentAdjustedPositionWorld, 0.023, YoAppearance.Gold());
-         final YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialSteeringPosition", yoInitialPositionWorld, 0.02, YoAppearance.BlueViolet());
+         final YoGraphicPosition currentPositionViz = new YoGraphicPosition(namePrefix + "CurrentSteeringPosition", yoCurrentPositionWorld, 0.025,
+               YoAppearance.Blue());
+         final YoGraphicPosition currentAdjustedPositionViz = new YoGraphicPosition(namePrefix + "CurrentAdjustedSteeringPosition",
+               yoCurrentAdjustedPositionWorld, 0.023, YoAppearance.Gold());
+         final YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialSteeringPosition", yoInitialPositionWorld, 0.02,
+               YoAppearance.BlueViolet());
          final YoGraphicPosition finalPositionViz = new YoGraphicPosition(namePrefix + "FinalSteeringPosition", yoFinalPositionWorld, 0.02, YoAppearance.Red());
-         final YoGraphicCoordinateSystem tangentialFrameViz = new YoGraphicCoordinateSystem(namePrefix + "TangentialSteeringFrame", yoTangentialSteeringFramePose, 0.2, YoAppearance.Pink());
-         final YoGraphicCoordinateSystem steeringWheelFrameViz = new YoGraphicCoordinateSystem(namePrefix + "SteeringWheelFrame", yoSteeringWheelFramePose, 0.2, YoAppearance.Green());
-         
+         final YoGraphicCoordinateSystem tangentialFrameViz = new YoGraphicCoordinateSystem(namePrefix + "TangentialSteeringFrame",
+               yoTangentialSteeringFramePose, 0.2, YoAppearance.Pink());
+         final YoGraphicCoordinateSystem steeringWheelFrameViz = new YoGraphicCoordinateSystem(namePrefix + "SteeringWheelFrame", yoSteeringWheelFramePose, 0.2,
+               YoAppearance.Green());
+
          YoGraphicsList yoGraphicsList = new YoGraphicsList(namePrefix + "SteeringTrajectory");
          yoGraphicsList.add(currentPositionViz);
          yoGraphicsList.add(currentAdjustedPositionViz);
@@ -500,7 +505,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       compute(0.0);
    }
-   
+
    public double getCurrentAngularDisplacement()
    {
       return currentRelativeSteeringAngle.getDoubleValue();
@@ -540,7 +545,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
-   
+
    public void packAngularVelocity(FrameVector angularVelocityToPack)
    {
       yoCurrentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);

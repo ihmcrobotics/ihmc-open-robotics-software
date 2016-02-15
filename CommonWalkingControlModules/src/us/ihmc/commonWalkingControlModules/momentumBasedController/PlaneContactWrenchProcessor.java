@@ -63,12 +63,11 @@ public class PlaneContactWrenchProcessor
          FramePoint2d footCenter2d = new FramePoint2d(contactableBody.getSoleFrame());
          footCenter2d.setToNaN();
          cops.put(contactableBody, footCenter2d);
-      
-         
+
          YoFramePoint2d yoCop = new YoFramePoint2d(contactableBody.getName() + "CoP", contactableBody.getSoleFrame(), registry);
          yoCop.set(footCenter2d);
          yoCops.put(contactableBody, yoCop);
-         
+
          if (yoGraphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
@@ -82,7 +81,7 @@ public class PlaneContactWrenchProcessor
 
    private final FramePoint tempCoP3d = new FramePoint();
    private final FrameVector tempForce = new FrameVector();
-   
+
    public void compute(Map<RigidBody, Wrench> externalWrenches)
    {
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
@@ -91,7 +90,7 @@ public class PlaneContactWrenchProcessor
          FramePoint2d cop = cops.get(contactablePlaneBody);
          YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
          yoCop.getFrameTuple2d(cop);
-         
+
          Wrench wrench = externalWrenches.get(contactablePlaneBody.getRigidBody());
 
          if (wrench != null)
@@ -113,7 +112,7 @@ public class PlaneContactWrenchProcessor
             centersOfPressureWorld.get(contactablePlaneBody).setToNaN();
             cop.setToNaN();
          }
-         
+
          yoCop.set(cop);
       }
    }
@@ -131,7 +130,7 @@ public class PlaneContactWrenchProcessor
    {
       YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
       FramePoint2d cop = cops.get(contactablePlaneBody);
-      
+
       yoCop.getFrameTuple2d(cop);
       return cop;
    }

@@ -9,7 +9,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-
 public class DesiredFootstepCalculatorFootstepProviderWrapper implements FootstepProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -22,7 +21,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       this.desiredFootstepCalculator = desiredFootstepCalculator;
       parentRegistry.addChild(registry);
-         
+
       walk.addVariableChangedListener(new VariableChangedListener()
       {
          @Override

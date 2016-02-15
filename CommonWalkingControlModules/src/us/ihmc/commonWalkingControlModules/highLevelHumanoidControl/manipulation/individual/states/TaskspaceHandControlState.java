@@ -14,7 +14,6 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.tools.FormattingTools;
 
-
 public abstract class TaskspaceHandControlState extends State<HandControlState>
 {
    protected final String name;
@@ -23,13 +22,13 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
 
    private RigidBody base;
    private RigidBody endEffector;
-   
+
    protected final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    protected final MomentumBasedController momentumBasedController;
    protected final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    public TaskspaceHandControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
-                                    RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
+         RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 

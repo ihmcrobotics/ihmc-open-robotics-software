@@ -46,7 +46,7 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       };
 
       userPelvisOrientation.attachVariableChangedListener(variableChangedListener);
-      
+
       userPelvisPosition.attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -109,7 +109,7 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       isNewPelvisOrientationInformationAvailable.set(false);
 
       frameOrientation.setIncludingFrame(desiredPelvisFrame, desiredQuat);
-      
+
       return frameOrientation;
    }
 
@@ -124,11 +124,11 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    {
       if (!isNewPelvisPositionInformationAvailable.getBooleanValue())
          return null;
-      
+
       isNewPelvisPositionInformationAvailable.set(false);
-      
+
       framePoint.setIncludingFrame(supportFrame, desiredPoint);
-      
+
       return framePoint;
    }
 
