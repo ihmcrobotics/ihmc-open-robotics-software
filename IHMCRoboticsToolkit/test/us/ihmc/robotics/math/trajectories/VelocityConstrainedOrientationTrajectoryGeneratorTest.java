@@ -15,12 +15,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = true;
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 2.0)
+   @Test(timeout = 10000)
    public void testDerivativesConsistency() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -82,7 +84,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 2000)
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -142,7 +145,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.6)
+   @Test(timeout = 2000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -243,7 +247,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.4)
+   @Test(timeout = 2000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
