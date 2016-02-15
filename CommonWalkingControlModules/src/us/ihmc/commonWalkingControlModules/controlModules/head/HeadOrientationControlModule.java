@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;

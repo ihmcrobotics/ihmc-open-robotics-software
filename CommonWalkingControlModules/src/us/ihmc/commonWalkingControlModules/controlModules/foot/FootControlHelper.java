@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;

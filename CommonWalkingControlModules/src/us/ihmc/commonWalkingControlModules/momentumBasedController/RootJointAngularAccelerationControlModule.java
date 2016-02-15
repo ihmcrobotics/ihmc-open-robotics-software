@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;

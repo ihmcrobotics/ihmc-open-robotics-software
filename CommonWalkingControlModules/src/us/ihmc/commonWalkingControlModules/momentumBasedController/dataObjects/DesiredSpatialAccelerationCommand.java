@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public class DesiredSpatialAccelerationCommand

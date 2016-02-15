@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
