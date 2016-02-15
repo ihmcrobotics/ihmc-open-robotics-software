@@ -40,6 +40,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
             return "The location of the footstep refers to the location of the ankle frame."
                   + " The ankle frame is fixed in the foot, centered at the last ankle joint."
                   + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+                  + " This option is for backward compatibility only and will be gone in an upcoming release."
                   + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.";
          case AT_SOLE_FRAME:
             return "The location of the footstep refers to the location of the sole frame."
