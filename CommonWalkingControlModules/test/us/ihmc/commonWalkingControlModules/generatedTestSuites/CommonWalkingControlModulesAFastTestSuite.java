@@ -41,7 +41,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.StraightUpThenParabolicCartesianTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.SwingHeightTrajectoryCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines1DTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines2DTest.class,
