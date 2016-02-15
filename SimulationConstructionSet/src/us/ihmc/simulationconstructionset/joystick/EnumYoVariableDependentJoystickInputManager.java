@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.joystick;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -10,25 +10,26 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
+import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 
 public class EnumYoVariableDependentJoystickInputManager<T>
 {
-   private final int pollIntervalMillis = 20;
-   private final Joystick rightJoystick;
-   private final Joystick leftJoystick;
+   private static final int JOYSTICK_POLL_INTERVAL_MS = 20;
+   private final List<Joystick> joysticks = new ArrayList<>();
    private final HashMap<Enum<?>, ArrayList<JoystickEventListener>> eventListeners = new HashMap<>();
    private final EnumYoVariable<?> enumYoVariable;
    private final T[] enumValues;
    
-   public EnumYoVariableDependentJoystickInputManager(final EnumYoVariable<?> enumYoVariable, Class<T> enumType) throws IOException
+   public EnumYoVariableDependentJoystickInputManager(final EnumYoVariable<?> enumYoVariable, Class<T> enumType, boolean createFirstJoystick) throws JoystickNotFoundException
    {
       this.enumValues = enumType.getEnumConstants();
       this.enumYoVariable = enumYoVariable;
       
-      rightJoystick = new Joystick(JoystickModel.MAD_CATZ_FLY5_STICK, 0);
-      rightJoystick.setPollInterval(pollIntervalMillis);
-      leftJoystick = new Joystick(JoystickModel.MAD_CATZ_V1_STICK, 0);
-      leftJoystick.setPollInterval(pollIntervalMillis);
+      if (createFirstJoystick)
+      {
+         joysticks.add(new Joystick());
+         joysticks.get(joysticks.size() - 1).setPollInterval(JOYSTICK_POLL_INTERVAL_MS);
+      }
       
       enumYoVariable.addVariableChangedListener(new VariableChangedListener()
       {
@@ -40,14 +41,31 @@ public class EnumYoVariableDependentJoystickInputManager<T>
       });
    }
    
-   public Joystick getRightJoystick()
+   public void addJoystick(JoystickModel joystickModel, int indexFoundOnSystem) throws JoystickNotFoundException
    {
-      return rightJoystick;
+      joysticks.add(new Joystick(joystickModel, indexFoundOnSystem));
+      joysticks.get(joysticks.size() - 1).setPollInterval(JOYSTICK_POLL_INTERVAL_MS);
    }
    
-   public Joystick getLeftJoystick()
+   public void addFirstJoystickFoundOnSystem() throws JoystickNotFoundException
    {
-      return leftJoystick;
+      joysticks.add(new Joystick());
+      joysticks.get(joysticks.size() - 1).setPollInterval(JOYSTICK_POLL_INTERVAL_MS);
+   }
+   
+   public Joystick getFirstJoystick()
+   {
+      return joysticks.get(0);
+   }
+   
+   public Joystick getJoystick(int index)
+   {
+      return joysticks.get(index);
+   }
+   
+   public int getNumberOfJoysticks()
+   {
+      return joysticks.size();
    }
    
    public void initialize()
@@ -57,20 +75,26 @@ public class EnumYoVariableDependentJoystickInputManager<T>
    
    private void updateListeners(final EnumYoVariable<?> enumYoVariable)
    {
-      rightJoystick.clearEventListeners();
-      T enumValue = enumValues[enumYoVariable.getOrdinal()];
-      if(eventListeners.containsKey(enumValue))
+      for (Joystick joystick : joysticks)
       {
-         for(JoystickEventListener eventListener : eventListeners.get(enumValue))
+         joystick.clearEventListeners();
+         T enumValue = enumValues[enumYoVariable.getOrdinal()];
+         if(eventListeners.containsKey(enumValue))
          {
-            rightJoystick.addJoystickEventListener(eventListener);
+            for(JoystickEventListener eventListener : eventListeners.get(enumValue))
+            {
+               joystick.addJoystickEventListener(eventListener);
+            }
          }
       }
    }
    
-   public void disableJoystick()
+   public void disableJoysticks()
    {
-      rightJoystick.clearEventListeners();
+      for (Joystick joystick : joysticks)
+      {
+         joystick.clearEventListeners();
+      }
    }
    
    public void addJoystickMapping(EnumDependentJoystickMapping joystickMap)
