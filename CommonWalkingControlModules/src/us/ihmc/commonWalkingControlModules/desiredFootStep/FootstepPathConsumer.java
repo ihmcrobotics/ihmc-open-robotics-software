@@ -37,7 +37,7 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataListMess
    {
       if (globalDataProducer != null)
       {
-         String errorMessage = PacketValidityChecker.validateFootstepDataList(footstepList);
+         String errorMessage = PacketValidityChecker.validateFootstepDataListMessage(footstepList);
          if (errorMessage != null)
          {
             globalDataProducer.notifyInvalidPacketReceived(FootstepDataListMessage.class, errorMessage);

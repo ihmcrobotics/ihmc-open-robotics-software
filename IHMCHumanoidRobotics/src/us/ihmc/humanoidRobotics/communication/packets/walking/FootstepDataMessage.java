@@ -29,8 +29,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
 {
    public enum FootstepOrigin implements DocumentedEnum<FootstepOrigin>
    {
-      @Deprecated AT_ANKLE_FRAME,
-      AT_SOLE_FRAME;
+      @Deprecated AT_ANKLE_FRAME, AT_SOLE_FRAME;
 
       @Override
       public String getDocumentation(FootstepOrigin var)
@@ -44,9 +43,9 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
                   + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.";
          case AT_SOLE_FRAME:
             return "The location of the footstep refers to the location of the sole frame."
-            + " The sole frame is fixed in the foot, centered at the center of the sole."
-            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-            + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.";
+                  + " The sole frame is fixed in the foot, centered at the center of the sole."
+                  + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+                  + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.";
 
          default:
             return "No documentation available.";
@@ -187,14 +186,6 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       return origin;
    }
 
-   public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
-   {
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         throw new RuntimeException(
-               "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
-      this.predictedContactPoints = predictedContactPoints;
-   }
-
    public ArrayList<Point2d> getPredictedContactPoints()
    {
       return predictedContactPoints;
@@ -210,11 +201,6 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       locationToPack.set(location);
    }
 
-   public void setLocation(Point3d location)
-   {
-      this.location.set(location);
-   }
-
    public Quat4d getOrientation()
    {
       return orientation;
@@ -223,12 +209,6 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
    public void getOrientation(Quat4d orientationToPack)
    {
       orientationToPack.set(this.orientation);
-   }
-
-   public void setOrientation(Quat4d orientation)
-   {
-      this.orientation.set(orientation);
-      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public RobotSide getRobotSide()
@@ -241,12 +221,35 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       return swingHeight;
    }
 
+   public void setOrigin(FootstepOrigin origin)
+   {
+      this.origin = origin;
+   }
+
+   public void setLocation(Point3d location)
+   {
+      this.location.set(location);
+   }
+
+   public void setOrientation(Quat4d orientation)
+   {
+      this.orientation.set(orientation);
+      RotationTools.checkQuaternionNormalized(this.orientation);
+   }
+
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
       if (trajectoryType == TrajectoryType.DEFAULT)
          trajectoryType = TrajectoryType.BASIC;
+   }
 
+   public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
+   {
+      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
+         throw new RuntimeException(
+               "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
+      this.predictedContactPoints = predictedContactPoints;
    }
 
    public TrajectoryType getTrajectoryType()
