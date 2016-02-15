@@ -1,77 +1,65 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
+import java.util.List;
+
+import javax.vecmath.Point2d;
+
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.io.printing.PrintTools;
-
-import javax.vecmath.Point2d;
-
-import java.util.List;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class FootstepTools
 {
-   public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody, int index)
-   {
-      String id = "footstep_" + index;
-      FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
-      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
-      if ((contactPoints != null) && (contactPoints.size() == 0))
-      {
-         contactPoints = null;
-         emptyContactPointListErrorMessage();
-      }
-      Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame,
-            true, contactPoints);
-      footstep.trajectoryType = footstepData.getTrajectoryType();
-      footstep.swingHeight = footstepData.swingHeight;
-
-      return footstep;
-   }
+   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody)
    {
-      FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
-      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
-      if ((contactPoints != null) && (contactPoints.size() == 0))
-      {
-         contactPoints = null;
-         emptyContactPointListErrorMessage();
-      }
-      Footstep footstep = new Footstep(contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true,
-            contactPoints);
-      footstep.trajectoryType = footstepData.getTrajectoryType();
-      footstep.swingHeight = footstepData.swingHeight;
-
-      return footstep;
+      return generateFootstepFromFootstepData(footstepData, contactableBody, -1);
    }
 
-   public static Footstep generateFootstepFromFootstepDataSole(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody)
+   public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody, int index)
    {
-      FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+      FramePose footstepPose = new FramePose(worldFrame, footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+      
       List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
-      if ((contactPoints != null) && (contactPoints.size() == 0))
-      {
+      if (contactPoints != null && contactPoints.size() == 0)
          contactPoints = null;
-         emptyContactPointListErrorMessage();
-      }
-      Footstep footstep = new Footstep(contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true,
-            contactPoints);
-      footstep.trajectoryType = footstepData.getTrajectoryType();
-      footstep.swingHeight = footstepData.swingHeight;
-      footstep.setSolePose(footstepPose);
-      return footstep;
-   }
 
-   private static void emptyContactPointListErrorMessage()
-   {
-      PrintTools.error(FootstepTools.class, "Should not have an empty list of contact points in FootstepData."
-            + "Should be null to use the default controller contact points. Setting it to null");
+
+      RobotSide robotSide = footstepData.getRobotSide();
+      TrajectoryType trajectoryType = footstepData.getTrajectoryType();
+
+      ReferenceFrame soleFrame = contactableBody.getSoleFrame();
+      RigidBody rigidBody = contactableBody.getRigidBody();
+
+      Footstep footstep;
+
+      if (index == -1)
+         footstep = new Footstep(rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
+      else
+      {
+         String id = "footstep_" + index;
+         footstep = new Footstep(id, rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
+      }
+
+      footstep.trajectoryType = trajectoryType;
+      footstep.swingHeight = footstepData.swingHeight;
+      switch (footstepData.getOrigin())
+      {
+      case AT_ANKLE_FRAME:
+         break;
+      case AT_SOLE_FRAME:
+         footstep.setSolePose(footstepPose);
+      default:
+         throw new RuntimeException("Should not get there.");
+      }
+      return footstep;
    }
 }

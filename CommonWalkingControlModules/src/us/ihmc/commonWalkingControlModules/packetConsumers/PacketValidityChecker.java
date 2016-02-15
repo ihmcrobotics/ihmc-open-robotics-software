@@ -175,28 +175,25 @@ public abstract class PacketValidityChecker
     * @param packetToCheck
     * @return null if the packet is valid, or the error message.
     */
-   public static String validateFootstepData(FootstepDataMessage packetToCheck)
+   public static String validateFootstepDataMessage(FootstepDataMessage packetToCheck)
    {
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getOrigin());
       if (packetFieldErrorType != null)
-      {
-         String errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
+         return "origin field " + packetFieldErrorType.getMessage();
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
+      if (packetFieldErrorType != null)
+         return "robotSide field" + packetFieldErrorType.getMessage();
 
       packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getLocation());
       if (packetFieldErrorType != null)
-      {
-         String errorMessage = "location field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
+         return "location field " + packetFieldErrorType.getMessage();
 
       packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
       if (packetFieldErrorType != null)
-      {
-         String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
+         return "orientation field " + packetFieldErrorType.getMessage();
 
       if (packetToCheck.getPredictedContactPoints() != null)
       {
@@ -205,11 +202,7 @@ public abstract class PacketValidityChecker
             packetFieldErrorType = ObjectValidityChecker.validateTuple2d(packetToCheck.getPredictedContactPoints().get(arrayListIndex));
 
             if (packetFieldErrorType != null)
-            {
-               String errorMessage = "predictedContactPoints field " + packetFieldErrorType.getMessage();
-               return errorMessage;
-            }
-
+               return "predictedContactPoints field " + packetFieldErrorType.getMessage();
          }
       }
 
@@ -236,9 +229,11 @@ public abstract class PacketValidityChecker
     * @param packetToCheck
     * @return null if the packet is valid, or the error message.
     */
-   public static String validateFootstepDataList(FootstepDataListMessage packetToCheck)
+   public static String validateFootstepDataListMessage(FootstepDataListMessage packetToCheck)
    {
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.swingTime);
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.swingTime);
       if (packetFieldErrorType != null)
       {
          String errorMessage = "swingTime field" + packetFieldErrorType.getMessage();
@@ -256,7 +251,7 @@ public abstract class PacketValidityChecker
       {
          for (int arrayListIndex = 0; arrayListIndex < packetToCheck.getDataList().size(); arrayListIndex++)
          {
-            String footstepDataListErrorMessage = validateFootstepData(packetToCheck.getDataList().get(arrayListIndex));
+            String footstepDataListErrorMessage = validateFootstepDataMessage(packetToCheck.getDataList().get(arrayListIndex));
 
             if (footstepDataListErrorMessage != null)
             {
