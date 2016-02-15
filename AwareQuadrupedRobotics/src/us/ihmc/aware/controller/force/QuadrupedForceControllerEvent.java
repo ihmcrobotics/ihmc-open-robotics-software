@@ -8,4 +8,5 @@ public enum QuadrupedForceControllerEvent
    REQUEST_STAND_PREP,
    REQUEST_STAND,
    REQUEST_STEP,
+   REQUEST_TROT
 }
