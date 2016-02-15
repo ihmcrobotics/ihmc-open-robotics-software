@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
+import java.util.List;
+
+import javax.vecmath.Point2d;
+
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -7,10 +11,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
-
-import javax.vecmath.Point2d;
-
-import java.util.List;
 
 public class FootstepTools
 {

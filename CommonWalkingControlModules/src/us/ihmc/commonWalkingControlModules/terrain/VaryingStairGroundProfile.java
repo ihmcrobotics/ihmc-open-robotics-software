@@ -4,10 +4,9 @@ import java.util.Arrays;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
-
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
 
 public class VaryingStairGroundProfile extends GroundProfileFromHeightMap

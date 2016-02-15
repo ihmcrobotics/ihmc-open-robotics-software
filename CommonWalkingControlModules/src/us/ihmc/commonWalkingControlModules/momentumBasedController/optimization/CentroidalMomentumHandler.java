@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import gnu.trove.list.array.TIntArrayList;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;

@@ -10,11 +10,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ContactPointWrenchOptimizerNative;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -31,7 +31,7 @@ public class ContactPointWrenchMatrixCalculator
    private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
 
    // intermediate result storage:
-   private final ArrayList<FrameVector> normalizedSupportVectors = new ArrayList<FrameVector>(ContactPointWrenchOptimizerNative.NUMBER_OF_SUPPORT_VECTORS);
+   private final ArrayList<FrameVector> normalizedSupportVectors = new ArrayList<FrameVector>(4);
    private final FramePoint tempContactPoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FrameVector tempVector = new FrameVector(ReferenceFrame.getWorldFrame());
    private final DenseMatrix64F qBlock = new DenseMatrix64F(1, 1);

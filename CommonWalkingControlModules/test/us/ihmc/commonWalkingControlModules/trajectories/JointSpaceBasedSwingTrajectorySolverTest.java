@@ -22,9 +22,9 @@ import us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolver;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
  * Created by agrabertilton on 2/5/15.

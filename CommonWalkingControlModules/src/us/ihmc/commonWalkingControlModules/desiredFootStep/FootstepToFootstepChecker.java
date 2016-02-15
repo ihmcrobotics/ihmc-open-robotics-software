@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -8,7 +9,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 /**
  * Created with IntelliJ IDEA.

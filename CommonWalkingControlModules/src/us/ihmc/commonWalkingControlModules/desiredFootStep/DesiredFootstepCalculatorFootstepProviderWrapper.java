@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -7,7 +8,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 
 public class DesiredFootstepCalculatorFootstepProviderWrapper implements FootstepProvider

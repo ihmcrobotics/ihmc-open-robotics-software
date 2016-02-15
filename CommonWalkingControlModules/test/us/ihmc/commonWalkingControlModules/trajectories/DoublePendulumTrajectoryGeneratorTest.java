@@ -14,13 +14,13 @@ import javax.vecmath.Point2d;
 import org.junit.Test;
 
 import us.ihmc.plotting.Plotter;
+import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
  * Created by agrabertilton on 2/9/15.

@@ -12,12 +12,12 @@ import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerato
 import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.providers.ChangeableConfigurationProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class MoveStraightState extends AbstractUnconstrainedState
 {
