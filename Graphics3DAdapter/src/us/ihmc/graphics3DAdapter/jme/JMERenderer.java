@@ -28,7 +28,7 @@ import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 import javax.vecmath.Color3f;
 
-import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
+import org.jmonkeyengine.scene.plugins.ihmc.ogre.MaterialLoader;
 
 import com.google.common.collect.HashBiMap;
 import com.jme3.app.Application;
