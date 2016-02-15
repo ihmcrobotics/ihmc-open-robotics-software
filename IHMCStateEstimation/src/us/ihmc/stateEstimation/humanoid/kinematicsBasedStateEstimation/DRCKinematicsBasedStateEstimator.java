@@ -2,7 +2,9 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -23,7 +25,9 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.TimeTools;
@@ -54,6 +58,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final ForceSensorStateUpdater forceSensorStateUpdater;
+   private final IMUOrientationBiasEstimator imuOrientationBiasEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -68,6 +73,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
+   private final RobotMotionStatusHolder robotMotionStatusFromController;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
@@ -77,6 +83,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      this.robotMotionStatusFromController = robotMotionStatusFromController;
 
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
@@ -113,9 +120,20 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       }
 
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, registry);
+      
+      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
+      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
+         footSwitchMap.put(foot, footSwitches.get(robotSide));
+         bipedFeetMap.put(foot, bipedFeet.get(robotSide));
+      }
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, centerOfPressureDataHolderFromController, bipedFeet, gravitationalAcceleration, yoTime,
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitchMap, centerOfPressureDataHolderFromController, bipedFeetMap, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
+      imuOrientationBiasEstimator = new IMUOrientationBiasEstimator(inverseDynamicsStructure, pelvisRotationalStateUpdater.getIMUUsedForEstimation(), estimatorDT, registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -195,6 +213,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
             forceSensorStateUpdater.updateForceSensorState();
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
+            imuOrientationBiasEstimator.compute(robotMotionStatusFromController.getCurrentRobotMotionStatus());
             break;
       }
 

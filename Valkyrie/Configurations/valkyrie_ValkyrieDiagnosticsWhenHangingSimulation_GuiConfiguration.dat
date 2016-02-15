@@ -1,0 +1,329 @@
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.DiagnosticsState</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.HumanoidJointPoseList.desiredArmPose</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftShoulderPitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftShoulderPitch</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightShoulderPitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightShoulderPitch</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftShoulderRoll,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftShoulderRoll</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightShoulderRoll,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightShoulderRoll</Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftShoulderYaw,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftShoulderYaw</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightShoulderYaw,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightShoulderYaw</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftElbowPitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftElbowPitch</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightElbowPitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightElbowPitch</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>startDiagnostics,pauseDiagnostics</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>1</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>1</ScreenID>
+<WindowLocation>5759.0, 0.0</WindowLocation>
+<WindowSize>1922.0, 1081.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftHipYaw,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftHipYaw</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightHipYaw,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightHipYaw</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftHipPitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftHipPitch</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightHipPitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightHipPitch</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftHipRoll,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftHipRoll</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightHipRoll,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightHipRoll</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftKneePitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftKneePitch</Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightKneePitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightKneePitch</Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftAnklePitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftAnklePitch</Variables>
+		<GraphConfiguration>
+			<Name>config19</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightAnklePitch,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightAnklePitch</Variables>
+		<GraphConfiguration>
+			<Name>config20</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_leftAnkleRoll,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_leftAnkleRoll</Variables>
+		<GraphConfiguration>
+			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_est_rightAnkleRoll,root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.tau_app_rightAnkleRoll</Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1>
+
+<Extra Panels>
+<Main Viewport>
+Plotter,
+</Main Viewport></Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>false</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>false</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
+</Fix Position>
+</Canvas 1>

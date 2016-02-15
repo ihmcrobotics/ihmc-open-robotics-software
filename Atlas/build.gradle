@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.10'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.12'
 }
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
@@ -12,11 +12,7 @@ project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
 project.ext.licenseName = "GPLv3"
 project.ext.bintrayLicenseName = "GPL-3.0"
 
-repositories {
-	maven {
-	    url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
-	}
-}
+
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
@@ -45,7 +41,7 @@ dependencies {
     compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
     compile group: 'colt', name: 'colt', version: '1.2.0'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
-   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
+   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
 	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
 
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")

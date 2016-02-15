@@ -14,6 +14,7 @@ public class ValkyrieIpToNiceNameRemapper implements LogSessionDisplay.RobotIPTo
       put("10.185.0.10", "Valkyrie Unit A");
       put("10.185.0.20", "Valkyrie Unit B");
       put("10.185.0.30", "Valkyrie Unit C");
+      put("10.185.0.40", "Valkyrie Unit D");
    }};
 
    @Override public String getRemap(String ipAddress)

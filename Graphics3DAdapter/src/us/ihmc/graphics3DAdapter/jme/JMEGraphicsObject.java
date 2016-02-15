@@ -10,6 +10,8 @@ import java.util.concurrent.Callable;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.jmonkeyengine.hub.tralala.ShapeUtilities;
+
 import jme3tools.optimize.GeometryBatchFactory;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor;
@@ -31,7 +33,6 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScal
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphics3DAdapter.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.graphics3DAdapter.utils.ShapeUtilities;
 import us.ihmc.robotics.geometry.RotationTools;
 
 import com.jme3.app.Application;

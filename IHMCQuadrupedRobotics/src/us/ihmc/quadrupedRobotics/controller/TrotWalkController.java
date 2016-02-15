@@ -351,7 +351,7 @@ public class TrotWalkController extends QuadrupedController
       centerOfMassVelocity.set(comVelocity);
 
       // compute instantaneous capture point
-      double lowestFootZ = fourFootSupportPolygon.getLowestFootStepZHeight();
+      double lowestFootZ = fourFootSupportPolygon.getLowestFootstepZHeight();
       double zDelta = coMPosition.getZ() - lowestFootZ;
       double omega = Math.sqrt(GRAVITY / zDelta);
       icp.setX(coMPosition.getX() + centerOfMassVelocity.getX() / omega);
@@ -510,7 +510,7 @@ public class TrotWalkController extends QuadrupedController
 
    private void computeBodyRelativePositionsVelocities()
    {
-      double footZ = fourFootSupportPolygon.getLowestFootStepZHeight();
+      double footZ = fourFootSupportPolygon.getLowestFootstepZHeight();
       body_rel_z.set(bodyPose.getZ() - footZ);
    }
 
