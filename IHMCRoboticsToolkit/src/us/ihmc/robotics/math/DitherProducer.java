@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllers;
+package us.ihmc.robotics.math;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
