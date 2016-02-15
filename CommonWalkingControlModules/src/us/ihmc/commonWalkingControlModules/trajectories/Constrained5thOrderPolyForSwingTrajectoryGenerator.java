@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -37,19 +36,18 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    
    double maxHeightOfSwingFoot;
    
-   private final WalkingControllerParameters walkingControllerParameters; 
-   
    private final Constrained5thOrderPolyForSwingFootTrajectory swingFootTrajectory;
    
    private final ReferenceFrame referenceFrame;
    
    private final YoVariableRegistry registry;
    private boolean isInitialized;
+   private final double nominalMaxTrajectoryHeight;
    
    public Constrained5thOrderPolyForSwingTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double initialTime,
          DoubleProvider stepTimeProvider,PositionProvider initialPositionProvider, PositionProvider finalDesiredPositionProvider, 
          VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
-         WalkingControllerParameters walkingControllerParameters)
+         double nominalMaxTrajectoryHeight)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(this.registry);
@@ -75,7 +73,7 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
       this.stepTime = stepTimeProvider.getValue();
       this.initialTime = initialTime;
       
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.nominalMaxTrajectoryHeight = nominalMaxTrajectoryHeight;
       
       swingFootTrajectory = new Constrained5thOrderPolyForSwingFootTrajectory(namePrefix + "swingFootTrajectoryZ", this.registry);
    }
@@ -86,16 +84,14 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
 	  {
 		   setInitialAndFinalPositionsAndVelocities();
 	  }
-      double nominalMaxTrajectoryHeight;
       boolean steppingDown = false;
       boolean steppingUp = false;
       
       double stepUpFraction = 0.2;
       double stepDownFraction = 0.15;
       
-      if(walkingControllerParameters != null)
+      if(!Double.isNaN(nominalMaxTrajectoryHeight))
       {
-    	  nominalMaxTrajectoryHeight = walkingControllerParameters.getSwingHeightMaxForPushRecoveryTrajectory();
     	  if(initialPosition1D.getDoubleValue() - finalDesiredPosition1D.getDoubleValue()>0.03)
     	  {
     		  steppingDown = true;
