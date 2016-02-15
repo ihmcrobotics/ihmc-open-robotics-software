@@ -188,6 +188,37 @@ public class Joystick
       }
    }
    
+   public static boolean isJoystickComboFoundOnSystem(JoystickModel model1, JoystickModel model2)
+   {
+      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+      
+      int occurancesOfModel1 = 0;
+      int occurancesOfModel2 = 0;
+      for (Controller controller : controllers)
+      {
+         if (controller.getType() == Controller.Type.STICK)
+         {
+            if (JoystickModel.getModelFromName(controller.getName()) == model1)
+            {
+               ++occurancesOfModel1;
+            }
+            if (JoystickModel.getModelFromName(controller.getName()) == model2)
+            {
+               ++occurancesOfModel2;
+            }
+         }
+      }
+      
+      if (model1 == model2)
+      {
+         return occurancesOfModel1 >= 2;
+      }
+      else
+      {
+         return occurancesOfModel1 >= 1 && occurancesOfModel2 >= 1;
+      }
+   }
+   
    private static Controller getJoystickOfModelOnSystem(JoystickModel model, int nthToPick) throws JoystickNotFoundException
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
