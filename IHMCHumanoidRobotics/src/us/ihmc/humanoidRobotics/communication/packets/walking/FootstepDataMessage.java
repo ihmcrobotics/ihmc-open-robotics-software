@@ -23,8 +23,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n"
-                                  + "world frame")
+@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n" + "world frame")
 public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
    @FieldDocumentation("Specifies which foot will swing to reach the foostep.")
@@ -33,16 +32,13 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
    public Point3d location;
    @FieldDocumentation("Specifies the orientation of the footstep. It is expressed in world frame.")
    public Quat4d orientation;
-   
+
    @FieldDocumentation("predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
-                                     + "the world. A value of null will default to using the entire foot. Contact points should be specified\n"
-                                     + "in foot sole frame, where the origin is at the center of the foot. Order of the points does not matter.\n"
-                                     + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n"
-                                     + "predicted_contact_points:\n"
-                                     + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n"
-                                     + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
-                                     + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n"
-                                     + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
+         + "the world. A value of null will default to using the entire foot. Contact points should be specified\n"
+         + "in foot sole frame, where the origin is at the center of the foot. Order of the points does not matter.\n"
+         + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
+         + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
+         + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2d> predictedContactPoints;
 
    @FieldDocumentation("This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
@@ -64,16 +60,18 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       this(robotSide, location, orientation, null);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints){
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints)
+   {
       this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
+
    public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, TrajectoryType trajectoryType, double swingHeight)
    {
       this(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints,
+         TrajectoryType trajectoryType, double swingHeight)
    {
       this.robotSide = robotSide;
       this.location = location;
@@ -92,11 +90,15 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       this.location = new Point3d(footstepData.location);
       this.orientation = new Quat4d(footstepData.orientation);
       RotationTools.checkQuaternionNormalized(this.orientation);
-      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty()){
+      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
+      {
          this.predictedContactPoints = null;
-      }else{
+      }
+      else
+      {
          this.predictedContactPoints = new ArrayList<>();
-         for (Point2d contactPoint : footstepData.predictedContactPoints){
+         for (Point2d contactPoint : footstepData.predictedContactPoints)
+         {
             this.predictedContactPoints.add(new Point2d(contactPoint));
          }
       }
@@ -104,11 +106,13 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       this.swingHeight = footstepData.swingHeight;
    }
 
-   public FootstepDataMessage clone(){
+   public FootstepDataMessage clone()
+   {
       return new FootstepDataMessage(this);
    }
 
-   public FootstepDataMessage(Footstep footstep){
+   public FootstepDataMessage(Footstep footstep)
+   {
       robotSide = footstep.getRobotSide();
       location = new Point3d();
       orientation = new Quat4d();
@@ -116,17 +120,23 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       footstep.getOrientationInWorldFrame(orientation);
 
       List<Point2d> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null){
+      if (footstepContactPoints != null)
+      {
          if (predictedContactPoints == null)
          {
             predictedContactPoints = new ArrayList<>();
-         }else{
+         }
+         else
+         {
             predictedContactPoints.clear();
          }
-         for (Point2d contactPoint: footstepContactPoints){
-               predictedContactPoints.add((Point2d)contactPoint.clone());
+         for (Point2d contactPoint : footstepContactPoints)
+         {
+            predictedContactPoints.add((Point2d) contactPoint.clone());
          }
-      }else{
+      }
+      else
+      {
          predictedContactPoints = null;
       }
       trajectoryType = footstep.trajectoryType;
@@ -136,15 +146,16 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
    public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
    {
       if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         throw new RuntimeException("Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
+         throw new RuntimeException(
+               "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
       this.predictedContactPoints = predictedContactPoints;
    }
-   
+
    public ArrayList<Point2d> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
-   
+
    public Point3d getLocation()
    {
       return location;
@@ -181,7 +192,6 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       return robotSide;
    }
 
-
    public double getSwingHeight()
    {
       return swingHeight;
@@ -214,7 +224,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       ret = location.toString();
       ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
       ret += "Predicted Contact Points: ";
-      if(predictedContactPoints != null)
+      if (predictedContactPoints != null)
       {
          ret += "size = " + predictedContactPoints.size() + "\n";
       }
@@ -238,23 +248,27 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
          temp.negate(orientation);
          orientationEquals = temp.epsilonEquals(footstepData.orientation, epsilon);
       }
-      
+
       boolean contactPointsEqual = true;
-      
-      if ((this.predictedContactPoints == null) && (footstepData.predictedContactPoints != null)) contactPointsEqual = false;
-      else if ((this.predictedContactPoints != null) && (footstepData.predictedContactPoints == null)) contactPointsEqual = false;
+
+      if ((this.predictedContactPoints == null) && (footstepData.predictedContactPoints != null))
+         contactPointsEqual = false;
+      else if ((this.predictedContactPoints != null) && (footstepData.predictedContactPoints == null))
+         contactPointsEqual = false;
       else if (this.predictedContactPoints != null)
       {
          int size = predictedContactPoints.size();
-         if (size != footstepData.predictedContactPoints.size()) contactPointsEqual = false;
-         else 
+         if (size != footstepData.predictedContactPoints.size())
+            contactPointsEqual = false;
+         else
          {
-            for (int i=0; i<size; i++)
+            for (int i = 0; i < size; i++)
             {
                Point2d pointOne = predictedContactPoints.get(i);
                Point2d pointTwo = footstepData.predictedContactPoints.get(i);
-               
-               if (!(pointOne.distanceSquared(pointTwo) < 1e-7)) contactPointsEqual = false;
+
+               if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
+                  contactPointsEqual = false;
             }
          }
       }
@@ -278,17 +292,18 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
    {
       TrajectoryType[] trajectoryTypes = TrajectoryType.values();
       int randomOrdinal = random.nextInt(trajectoryTypes.length);
-      
-      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;;
+
+      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
+      ;
       this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
       this.orientation = RandomTools.generateRandomQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
-      if(numberOfPredictedContactPoints == 0)
+      if (numberOfPredictedContactPoints == 0)
          predictedContactPoints = null;
       else
       {
          this.predictedContactPoints = new ArrayList<>();
-         for(int i = 0; i < numberOfPredictedContactPoints; i++)
+         for (int i = 0; i < numberOfPredictedContactPoints; i++)
          {
             predictedContactPoints.add(new Point2d(random.nextDouble(), random.nextDouble()));
          }
