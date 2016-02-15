@@ -22,7 +22,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
@@ -155,7 +156,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final YoFrameVector2d icpAdjustment = new YoFrameVector2d("icpAdjustment", null, registry);
 
-   private final CapturePointPlannerAdapter capturePointPlannerAdapter;
+   private final ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner;
 
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
 
@@ -259,7 +260,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
-         CapturePointPlannerAdapter capturePointPlannerAdapter, ICPAndMomentumBasedController icpAndMomentumBasedController,
+         ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
          MomentumBasedController momentumBasedController)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
@@ -331,7 +332,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.footSwitches = momentumBasedController.getFootSwitches();
 
-      this.capturePointPlannerAdapter = capturePointPlannerAdapter;
+      this.instantaneousCapturePointPlanner = instantaneousCapturePointPlanner;
 
       this.timeICPPlannerFinishedAt = new DoubleYoVariable("timeICPPlannerFinishedAt", registry);
       this.desiredICPVelocityReductionDuration = new DoubleYoVariable("desiredICPVelocityReductionDuration", registry);
@@ -580,7 +581,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       tmpFramePoint.setXY(tempFramePoint2d);
 
       tmpFramePoint.changeFrame(worldFrame);
-      capturePointPlannerAdapter.holdCurrentICP(yoTime.getDoubleValue(), tmpFramePoint);
+      instantaneousCapturePointPlanner.holdCurrentICP(yoTime.getDoubleValue(), tmpFramePoint);
    }
 
    private void initializeContacts()
@@ -632,8 +633,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
          // TODO: Make a LOADING state and clean all of these timing hacks up.
-         doneFinishingSingleSupportTransfer.set(capturePointPlannerAdapter.isPerformingICPDoubleSupport());
-         double estimatedTimeRemainingForState = capturePointPlannerAdapter.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
+         doneFinishingSingleSupportTransfer.set(instantaneousCapturePointPlanner.isInDoubleSupport());
+         double estimatedTimeRemainingForState = instantaneousCapturePointPlanner.computeAndReturnTimeRemaining(yoTime.getDoubleValue());
 
          if (doneFinishingSingleSupportTransfer.getBooleanValue() || (estimatedTimeRemainingForState < 0.02))
          {
@@ -657,7 +658,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          ecmpLocal.setToZero(worldFrame);
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
 
-         capturePointPlannerAdapter.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d, yoTime.getDoubleValue());
+         instantaneousCapturePointPlanner.packDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, capturePoint2d, yoTime.getDoubleValue());
+         CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(), ecmpLocal);
 
          if (transferToSide != null)
          {
@@ -690,7 +692,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          initializeECMPbasedToeOffIfNotInitializedYet();
 
-         boolean isICPPlannerDone = capturePointPlannerAdapter.isDone(yoTime.getDoubleValue());
+         boolean isICPPlannerDone = instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());
          if (transferToSide != null && isICPPlannerDone)
          {
             if (!isICPPlannerDonePreviousValue)
@@ -767,7 +769,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public void initializeICPPlannerIfNecessary()
       {
-         if (!icpTrajectoryHasBeenInitialized.getBooleanValue() && capturePointPlannerAdapter.isDone(yoTime.getDoubleValue()))
+         if (!icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()))
          {
             initializingICPTrajectory.set(true);
 
@@ -781,14 +783,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                desiredICP.set(finalDesiredICP);
 
                updateICPPlannerTimesAndOmega0();
-               capturePointPlannerAdapter.clear();
+               instantaneousCapturePointPlanner.clearPlan();
                Footstep nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
-               capturePointPlannerAdapter.addFootstep(nextNextFootstep);
-               capturePointPlannerAdapter.addFootstep(upcomingFootstepList.getNextNextNextFootstep());
+               instantaneousCapturePointPlanner.addFootstepToPlan(nextNextFootstep);
+               instantaneousCapturePointPlanner.addFootstepToPlan(upcomingFootstepList.getNextNextNextFootstep());
                RobotSide upcomingTransferToside = null;
                if (nextNextFootstep != null)
                   upcomingTransferToside = nextNextFootstep.getRobotSide().getOppositeSide();
-               capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, yoTime.getDoubleValue(), upcomingTransferToside);
+               instantaneousCapturePointPlanner.setDesiredCapturePointState(desiredICP, desiredICPVelocity);
+               instantaneousCapturePointPlanner.initializeDoubleSupport(yoTime.getDoubleValue(), upcomingTransferToside);
 
                hasICPPlannerBeenInitializedAtStart.set(true);
             }
@@ -812,7 +815,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             RobotSide trailingLeg = transferToSide.getOppositeSide();
             icpAndMomentumBasedController.getDesiredCMP(desiredCMP);
 
-            double predictedToeOffDuration = capturePointPlannerAdapter.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
+            double predictedToeOffDuration = instantaneousCapturePointPlanner.computeAndReturnTimeRemaining(yoTime.getDoubleValue());
             desiredICP.getFrameTuple2dIncludingFrame(desiredICPLocal);
 
             // If trailing leg is doing toe off, then use front leg for reference frames for com height trajectory.
@@ -865,25 +868,27 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             updateICPPlannerTimesAndOmega0();
-            capturePointPlannerAdapter.clear();
+            instantaneousCapturePointPlanner.clearPlan();
             boolean hasNewFootPose = footPoseProvider != null && footPoseProvider.checkForNewPose() != null;
             boolean hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber != null
                   && footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
             if (hasNewFootPose || hasNewFootTrajectoryMessage)
             {
-               capturePointPlannerAdapter.setSingleSupportTime(Double.POSITIVE_INFINITY);
-               capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
+               instantaneousCapturePointPlanner.setSingleSupportTime(Double.POSITIVE_INFINITY);
+               instantaneousCapturePointPlanner.addFootstepToPlan(createFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
             }
             else
             {
-               capturePointPlannerAdapter.addFootstep(upcomingFootstepList.getNextFootstep());
-               capturePointPlannerAdapter.addFootstep(upcomingFootstepList.getNextNextFootstep());
+               instantaneousCapturePointPlanner.addFootstepToPlan(upcomingFootstepList.getNextFootstep());
+               instantaneousCapturePointPlanner.addFootstepToPlan(upcomingFootstepList.getNextNextFootstep());
             }
 
             // When going from double support to transfer state.
-            capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, yoTime.getDoubleValue(), transferToSide);
+            instantaneousCapturePointPlanner.setDesiredCapturePointState(desiredICP, desiredICPVelocity);
+            instantaneousCapturePointPlanner.initializeDoubleSupport(yoTime.getDoubleValue(), transferToSide);
 
-            FramePoint2d finalDesiredICP = capturePointPlannerAdapter.getFinalDesiredICP();
+            FramePoint2d finalDesiredICP = new FramePoint2d();
+            instantaneousCapturePointPlanner.getFinalDesiredCapturePointPosition(finalDesiredICP);
             double trajectoryTime = transferTimeCalculationProvider.getValue();
 
             tempFramePoint2d.setIncludingFrame(finalDesiredICP);
@@ -937,7 +942,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          preparingForLocomotion.set(false);
 
          pelvisICPBasedTranslationManager.enable();
-         capturePointPlannerAdapter.clear();
+         instantaneousCapturePointPlanner.clearPlan();
          isICPPlannerDonePreviousValue = false;
          timeICPPlannerFinishedAt.set(Double.NaN);
          desiredICPVelocityRedutionFactor.set(Double.NaN);
@@ -1010,7 +1015,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean isPreviousStateDoubleSupport = getPreviousState().getStateEnum() == WalkingState.DOUBLE_SUPPORT;
          if (isPreviousStateDoubleSupport)
          {
-            transferTime = capturePointPlannerAdapter.getInitialTransferDuration();
+            transferTime = instantaneousCapturePointPlanner.getInitialTransferDuration();
          }
          else
          {
@@ -1100,7 +1105,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
 
-         capturePointPlannerAdapter.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d, yoTime.getDoubleValue());
+         instantaneousCapturePointPlanner.packDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, capturePoint2d, yoTime.getDoubleValue());
+         CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(), ecmpLocal);
 
          if (isInFlamingoStance.getBooleanValue())
          {
@@ -1139,7 +1145,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
             pushRecoveryModule.updateForSingleSupport(desiredICPLocal, capturePoint2d, icpAndMomentumBasedController.getOmega0());
 
-            double estimatedTimeRemaining = capturePointPlannerAdapter.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
+            double estimatedTimeRemaining = instantaneousCapturePointPlanner.computeAndReturnTimeRemaining(yoTime.getDoubleValue());
             boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(estimatedTimeRemaining, nextFootstep);
             if (footstepHasBeenAdjusted)
             {
@@ -1154,11 +1160,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                upcomingFootstepList.requestCancelPlanToProvider();
                upcomingFootstepList.clearCurrentFootsteps();
 
-               capturePointPlannerAdapter.clear();
-               capturePointPlannerAdapter.addFootstep(nextFootstep);
+               instantaneousCapturePointPlanner.clearPlan();
+               instantaneousCapturePointPlanner.addFootstepToPlan(nextFootstep);
                capturePoint.getFrameTupleIncludingFrame(tmpFramePoint);
 
-               capturePointPlannerAdapter.updatePlanForSingleSupportDisturbances(tmpFramePoint, yoTime.getDoubleValue(), supportSide);
+               instantaneousCapturePointPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), tmpFramePoint);
                // Force the final ICP to be in the planned footstep so the smart CMP projection will be way more effective
                finalDesiredCapturePoint2d.setToZero(nextFootstep.getSoleReferenceFrame());
                finalDesiredICPInWorld.setAndMatchFrame(finalDesiredCapturePoint2d);
@@ -1208,13 +1214,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             boolean willDoToeOff = feetManager.willDoToeOff(nextFootstep, swingSide);
 
-            if (feetManager.isInFlatSupportState(supportSide) && willDoToeOff && capturePointPlannerAdapter.isOnExitCMP())
+            if (feetManager.isInFlatSupportState(supportSide) && willDoToeOff && instantaneousCapturePointPlanner.isOnExitCMP())
             {
-               capturePointPlannerAdapter.getNextExitCMP(nextExitCMP);
+               instantaneousCapturePointPlanner.getNextExitCMP(nextExitCMP);
                nextExitCMP.changeFrame(feet.get(supportSide).getSoleFrame());
                toeOffContactPoint.setByProjectionOntoXYPlaneIncludingFrame(nextExitCMP);
                feetManager.registerDesiredContactPointForToeOff(supportSide, toeOffContactPoint);
-               double predictedToeOffDuration = capturePointPlannerAdapter.getEstimatedTimeRemainingForState(yoTime.getDoubleValue())
+               double predictedToeOffDuration = instantaneousCapturePointPlanner.computeAndReturnTimeRemaining(yoTime.getDoubleValue())
                      + transferTimeCalculationProvider.getValue();
                feetManager.requestToeOff(supportSide, predictedToeOffDuration);
             }
@@ -1226,10 +1232,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private void requestSwingSpeedUpIfNeeded()
       {
-         remainingSwingTimeAccordingToPlan.set(capturePointPlannerAdapter.getEstimatedTimeRemainingForState(yoTime.getDoubleValue()));
+         remainingSwingTimeAccordingToPlan.set(instantaneousCapturePointPlanner.computeAndReturnTimeRemaining(yoTime.getDoubleValue()));
          tmpFramePoint.set(capturePoint.getX(), capturePoint.getY(), 0.0);
          estimatedRemainingSwingTimeUnderDisturbance
-               .set(capturePointPlannerAdapter.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), tmpFramePoint));
+               .set(instantaneousCapturePointPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), tmpFramePoint));
 
          if (estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue() > 1.0e-3)
          {
@@ -1267,7 +1273,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          RobotSide supportSide = swingSide.getOppositeSide();
          supportLeg.set(supportSide);
-         capturePointPlannerAdapter.clear();
+         instantaneousCapturePointPlanner.clearPlan();
 
          footSwitches.get(swingSide).reset();
 
@@ -1306,16 +1312,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             updateFootstepParameters();
 
             updateICPPlannerTimesAndOmega0();
-            capturePointPlannerAdapter.addFootstep(nextFootstep);
-            capturePointPlannerAdapter.addFootstep(upcomingFootstepList.getNextNextFootstep());
-            capturePointPlannerAdapter.addFootstep(upcomingFootstepList.getNextNextNextFootstep());
-            capturePointPlannerAdapter.initializeSingleSupport(yoTime.getDoubleValue(), supportSide);
-            finalDesiredICPInWorld.setAndMatchFrame(capturePointPlannerAdapter.getFinalDesiredICP());
+            instantaneousCapturePointPlanner.addFootstepToPlan(nextFootstep);
+            instantaneousCapturePointPlanner.addFootstepToPlan(upcomingFootstepList.getNextNextFootstep());
+            instantaneousCapturePointPlanner.addFootstepToPlan(upcomingFootstepList.getNextNextNextFootstep());
+            instantaneousCapturePointPlanner.initializeSingleSupport(yoTime.getDoubleValue(), supportSide);
+            instantaneousCapturePointPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
 
             if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
             {
                capturePoint.getFrameTupleIncludingFrame(tmpFramePoint);
-               capturePointPlannerAdapter.updatePlanForSingleSupportDisturbances(tmpFramePoint, yoTime.getDoubleValue(), supportSide);
+               instantaneousCapturePointPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), tmpFramePoint);
                holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
                // Force the final ICP to be in the planned footstep so the smart CMP projection will be way more effective
                finalDesiredCapturePoint2d.setToZero(nextFootstep.getSoleReferenceFrame());
@@ -1415,11 +1421,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       loadFoot.set(true);
       loadFootStartTime.set(yoTime.getDoubleValue());
-      capturePointPlannerAdapter.setSingleSupportTime(loadFootDuration.getDoubleValue());
-      capturePointPlannerAdapter.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
-      capturePointPlannerAdapter.clear();
-      capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(swingSide));
-      capturePointPlannerAdapter.initializeSingleSupport(yoTime.getDoubleValue(), supportLeg.getEnumValue());
+      instantaneousCapturePointPlanner.setSingleSupportTime(loadFootDuration.getDoubleValue());
+      instantaneousCapturePointPlanner.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
+      instantaneousCapturePointPlanner.clearPlan();
+      instantaneousCapturePointPlanner.addFootstepToPlan(createFootstepAtCurrentLocation(swingSide));
+      instantaneousCapturePointPlanner.initializeSingleSupport(yoTime.getDoubleValue(), supportLeg.getEnumValue());
 
       pelvisICPBasedTranslationManager.freeze();
    }
@@ -1562,7 +1568,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (!feetManager.isEdgeTouchDownDone(robotSide))
             return false;
 
-         boolean icpTrajectoryIsDone = icpTrajectoryHasBeenInitialized.getBooleanValue() && capturePointPlannerAdapter.isDone(yoTime.getDoubleValue());
+         boolean icpTrajectoryIsDone = icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());
 
          if (!icpTrajectoryIsDone)
             return false;
@@ -1634,7 +1640,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (!hasICPPlannerFinished.getBooleanValue())
          {
-            hasICPPlannerFinished.set(capturePointPlannerAdapter.isDone(yoTime.getDoubleValue()));
+            hasICPPlannerFinished.set(instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue()));
 
             if (hasICPPlannerFinished.getBooleanValue())
             {
@@ -1765,15 +1771,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
          }
 
-         capturePointPlannerAdapter.reset(yoTime.getDoubleValue());
+         instantaneousCapturePointPlanner.reset(yoTime.getDoubleValue());
       }
    }
 
    private void updateICPPlannerTimesAndOmega0()
    {
-      capturePointPlannerAdapter.setOmega0(icpAndMomentumBasedController.getOmega0());
-      capturePointPlannerAdapter.setDoubleSupportTime(transferTimeCalculationProvider.getValue());
-      capturePointPlannerAdapter.setSingleSupportTime(swingTimeCalculationProvider.getValue());
+      instantaneousCapturePointPlanner.setOmega0(icpAndMomentumBasedController.getOmega0());
+      instantaneousCapturePointPlanner.setDoubleSupportTime(transferTimeCalculationProvider.getValue());
+      instantaneousCapturePointPlanner.setSingleSupportTime(swingTimeCalculationProvider.getValue());
    }
 
    private FramePoint2d getDoubleSupportFinalDesiredICPForDoubleSupportStance()

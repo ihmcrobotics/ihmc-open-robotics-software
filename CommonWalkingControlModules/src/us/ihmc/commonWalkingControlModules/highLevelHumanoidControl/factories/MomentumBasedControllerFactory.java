@@ -14,9 +14,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
@@ -199,8 +199,8 @@ public class MomentumBasedControllerFactory
             registry);
       centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
 
-      CapturePointPlannerAdapter instantaneousCapturePointPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, walkingControllerParameters,
-            registry, yoGraphicsListRegistry, controlDT, feet, bipedSupportPolygons);
+      ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, feet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+      instantaneousCapturePointPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////

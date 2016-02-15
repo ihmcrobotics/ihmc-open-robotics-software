@@ -592,6 +592,16 @@ public class ICPPlanner
             desiredCentroidalMomentumPivotPosition);
    }
 
+   public void packDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack,
+         double time)
+   {
+      computeTimeInCurrentState(time);
+      computeDesiredCapturePoint(timeInCurrentState.getDoubleValue());
+
+      desiredCapturePointPosition.getFrameTuple2dIncludingFrame(desiredCapturePointPositionToPack);
+      desiredCapturePointVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
+   }
+
    public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
          double time)
    {
@@ -693,6 +703,17 @@ public class ICPPlanner
    public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
    {
       entryCornerPoints.get(1).getFrameTupleIncludingFrame(finalDesiredCapturePointPositionToPack);
+   }
+
+   public void getFinalDesiredCapturePointPosition(FramePoint2d finalDesiredCapturePointPositionToPack)
+   {
+      entryCornerPoints.get(1).getFrameTuple2dIncludingFrame(finalDesiredCapturePointPositionToPack);
+      finalDesiredCapturePointPositionToPack.changeFrameAndProjectToXYPlane(worldFrame);
+   }
+
+   public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
+   {
+      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(entryCornerPoints.get(1));
    }
 
    public void reset(double time)
