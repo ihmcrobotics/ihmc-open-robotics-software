@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.darpaRoboticsChallenge.footstepGenerator;
 
 /**
  * Created by agrabertilton on 3/10/15.
