@@ -45,7 +45,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
  * TODO There is not enough HumanoidReferenceFrames in that class, it is pretty fragile
  *
  */
-public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
+public class LookAheadCoMHeightTrajectoryGenerator
 {
    private static final boolean CONSIDER_NEXT_FOOTSTEP = false;
 
@@ -243,7 +243,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
    }
 
-   @Override
    public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
    {
       this.walkOnTheEdgesManager = walkOnTheEdgesManager;
@@ -274,7 +273,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final double[] endpointSlopes = new double[] {0.0, 0.0};
    private final double[] waypointSlopes = new double[2];
 
-   @Override
    public void setSupportLeg(RobotSide supportLeg)
    {
       ReferenceFrame newFrame = ankleZUpFrames.get(supportLeg);
@@ -319,7 +317,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       frameOfLastFoostep = newFrame;
    }
 
-   @Override
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
          List<PlaneContactState> contactStates)
    {
@@ -750,7 +747,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final Point2d queryPoint = new Point2d();
    private final Point2d solutionPoint = new Point2d();
 
-   @Override
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       getCenterOfMass2d(queryPoint, centerOfMassHeightInputData.getCenterOfMassFrame());
@@ -961,7 +957,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       getPoint2d(point2dToPack, coM);
    }
 
-   @Override
    public boolean hasBeenInitializedWithNextStep()
    {
       return hasBeenInitializedWithNextStep.getBooleanValue();
