@@ -1,8 +1,7 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public class DesiredSpatialAccelerationCommandPool
