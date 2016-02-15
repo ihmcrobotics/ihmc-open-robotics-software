@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.posePlayback;
+package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

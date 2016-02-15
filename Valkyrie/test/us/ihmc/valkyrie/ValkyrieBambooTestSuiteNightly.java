@@ -9,7 +9,6 @@ import org.junit.runners.Suite;
 //   us.ihmc.valkyrie.codeGenerators.APIBuilderTest.class,
 //   us.ihmc.valkyrie.networkProcessor.depthData.ValkyrieDepthDataProcessorTest.class,
 //   us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
-   us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class,
    us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
    us.ihmc.valkyrie.ValkyrieObstacleCourseEveryBuildTest.class,
    us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class,
