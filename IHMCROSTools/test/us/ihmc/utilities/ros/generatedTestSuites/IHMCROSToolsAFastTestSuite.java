@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.generatedTestSuites;
+package us.ihmc.utilities.ros.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -12,12 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased.RootJointOrientationCorrectorHelperTest.class,
-   us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased.RootJointPoseCorrectorHelperTest.class,
-   us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygonTest.class
+   us.ihmc.utilities.ros.ROSMessageFolderExistsTest.class
 })
 
-public class IHMCQuadrupedRoboticsAFastTestSuite
+public class IHMCROSToolsAFastTestSuite
 {
    public static void main(String[] args)
    {
