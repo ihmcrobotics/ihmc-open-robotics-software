@@ -14,7 +14,7 @@ public class YoAngularAccelerationWeights
    {
       yawAccelerationWeight = new DoubleYoVariable(prefix + "_YawAccelerationWeight", registry);
       pitchAccelerationWeight = new DoubleYoVariable(prefix + "_PitchAccelerationWeight", registry);
-      rollAccelerationWeight = new DoubleYoVariable(prefix + "_PitchAccelerationWeight", registry);
+      rollAccelerationWeight = new DoubleYoVariable(prefix + "_RollAccelerationWeight", registry);
    }
 
    public void reset()
