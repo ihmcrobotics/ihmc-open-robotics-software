@@ -22,10 +22,46 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n" + "world frame")
+@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.")
 public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
+   public enum FootstepOrigin implements DocumentedEnum<FootstepOrigin>
+   {
+      @Deprecated AT_ANKLE_FRAME,
+      AT_SOLE_FRAME;
+
+      @Override
+      public String getDocumentation(FootstepOrigin var)
+      {
+         switch (var)
+         {
+         case AT_ANKLE_FRAME:
+            return "The location of the footstep refers to the location of the ankle frame."
+                  + " The ankle frame is fixed in the foot, centered at the last ankle joint."
+                  + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+                  + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.";
+         case AT_SOLE_FRAME:
+            return "The location of the footstep refers to the location of the sole frame."
+            + " The sole frame is fixed in the foot, centered at the center of the sole."
+            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+            + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.";
+
+         default:
+            return "No documentation available.";
+         }
+      }
+
+      @Override
+      public FootstepOrigin[] getDocumentedValues()
+      {
+         return values();
+      }
+   }
+
+   @FieldDocumentation("Specifies whether the given location is the location of the ankle or the sole.")
+   public FootstepOrigin origin;
    @FieldDocumentation("Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
    @FieldDocumentation("Specifies the position of the footstep. It is expressed in world frame.")
@@ -34,8 +70,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
    public Quat4d orientation;
 
    @FieldDocumentation("predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
-         + "the world. A value of null will default to using the entire foot. Contact points should be specified\n"
-         + "in foot sole frame, where the origin is at the center of the foot. Order of the points does not matter.\n"
+         + "the world. A value of null or an empty list will default to using the entire foot. Contact points  are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
@@ -53,6 +88,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
     */
    public FootstepDataMessage()
    {
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation)
@@ -73,6 +109,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
    public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints,
          TrajectoryType trajectoryType, double swingHeight)
    {
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = robotSide;
       this.location = location;
       this.orientation = orientation;
@@ -86,6 +123,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
 
    public FootstepDataMessage(FootstepDataMessage footstepData)
    {
+      this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
       this.location = new Point3d(footstepData.location);
       this.orientation = new Quat4d(footstepData.orientation);
@@ -113,6 +151,7 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
 
    public FootstepDataMessage(Footstep footstep)
    {
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
       location = new Point3d();
       orientation = new Quat4d();
@@ -141,6 +180,11 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       }
       trajectoryType = footstep.trajectoryType;
       swingHeight = footstep.swingHeight;
+   }
+
+   public FootstepOrigin getOrigin()
+   {
+      return origin;
    }
 
    public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
@@ -293,8 +337,8 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       TrajectoryType[] trajectoryTypes = TrajectoryType.values();
       int randomOrdinal = random.nextInt(trajectoryTypes.length);
 
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      ;
       this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
       this.orientation = RandomTools.generateRandomQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
