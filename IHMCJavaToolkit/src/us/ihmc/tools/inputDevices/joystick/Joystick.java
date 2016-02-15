@@ -25,7 +25,7 @@ public class Joystick
     * 
     * @throws IOException
     */
-   public Joystick() throws IOException
+   public Joystick() throws JoystickNotFoundException
    {
       try
       {
@@ -57,13 +57,13 @@ public class Joystick
     * Connects to the nth joystick of model type found on the system.
     * 
     * @param joystickModel
-    * @param nthJoystick
+    * @param indexFoundOnSystem
     */
-   public Joystick(JoystickModel joystickModel, int nthJoystick) throws IOException
+   public Joystick(JoystickModel joystickModel, int indexFoundOnSystem) throws JoystickNotFoundException
    {
       try
       {
-         joystickController = getNthJoystickOfModelOnSystem(joystickModel, nthJoystick);
+         joystickController = getJoystickOfModelOnSystem(joystickModel, indexFoundOnSystem);
       }
       catch (JoystickNotFoundException joystickNotFoundException)
       {
@@ -188,7 +188,7 @@ public class Joystick
       }
    }
    
-   private static Controller getNthJoystickOfModelOnSystem(JoystickModel model, int nthToPick) throws JoystickNotFoundException
+   private static Controller getJoystickOfModelOnSystem(JoystickModel model, int nthToPick) throws JoystickNotFoundException
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
    
