@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.joystick;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,7 @@ public class EnumYoVariableDependentJoystickInputManager<T>
    private final EnumYoVariable<?> enumYoVariable;
    private final T[] enumValues;
    
-   public EnumYoVariableDependentJoystickInputManager(final EnumYoVariable<?> enumYoVariable, Class<T> enumType, boolean createFirstJoystick) throws IOException
+   public EnumYoVariableDependentJoystickInputManager(final EnumYoVariable<?> enumYoVariable, Class<T> enumType, boolean createFirstJoystick) throws JoystickNotFoundException
    {
       this.enumValues = enumType.getEnumConstants();
       this.enumYoVariable = enumYoVariable;
@@ -45,6 +44,12 @@ public class EnumYoVariableDependentJoystickInputManager<T>
    public void addJoystick(JoystickModel joystickModel, int indexFoundOnSystem) throws JoystickNotFoundException
    {
       joysticks.add(new Joystick(joystickModel, indexFoundOnSystem));
+      joysticks.get(joysticks.size() - 1).setPollInterval(JOYSTICK_POLL_INTERVAL_MS);
+   }
+   
+   public void addFirstJoystickFoundOnSystem() throws JoystickNotFoundException
+   {
+      joysticks.add(new Joystick());
       joysticks.get(joysticks.size() - 1).setPollInterval(JOYSTICK_POLL_INTERVAL_MS);
    }
    
