@@ -132,17 +132,12 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       for (GroundContactPoint groundContactPoint : allGroundContactPoints)
       {
          String groundContactPointName = groundContactPoint.getName();
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            if (RobotQuadrant.guessQuadrantFromName(groundContactPointName).equals(robotQuadrant))
-            {
-               groundContactPoint.getForce(tempGroundForceVectors.get(robotQuadrant));
-               groundForceVectors.get(robotQuadrant).set(tempGroundForceVectors.get(robotQuadrant));
-               groundContactPoint.getPosition(tempGroundForceOriginPoints.get(robotQuadrant));
-//               groundContactPoint.getTouchdownLocation(tempGroundForceOriginPoints.get(robotQuadrant));
-               groundForceOriginPoints.get(robotQuadrant).set(tempGroundForceOriginPoints.get(robotQuadrant));
-            }
-         }
+         RobotQuadrant robotQuadrant = RobotQuadrant.guessQuadrantFromName(groundContactPointName);
+         groundContactPoint.getForce(tempGroundForceVectors.get(robotQuadrant));
+         groundForceVectors.get(robotQuadrant).set(tempGroundForceVectors.get(robotQuadrant));
+         groundContactPoint.getPosition(tempGroundForceOriginPoints.get(robotQuadrant));
+//         groundContactPoint.getTouchdownLocation(tempGroundForceOriginPoints.get(robotQuadrant));
+         groundForceOriginPoints.get(robotQuadrant).set(tempGroundForceOriginPoints.get(robotQuadrant));
       }
    }
    

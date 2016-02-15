@@ -41,6 +41,11 @@ public class StretchedSlowAtEndAlphaToAlphaFunction implements AlphaToAlphaFunct
       return 1.0;
    }
 
+   public void setSlopeAtStart(double slopeAtStart)
+   {
+      stretchedSlowAtStartAlphaToAlphaFunction.setDerivativeAtEnd(slopeAtStart);
+   }
+
    public double getDerivativeAtAlpha(double alpha)
    {
       throw new RuntimeException("Not implemented yet!");
@@ -52,9 +57,11 @@ public class StretchedSlowAtEndAlphaToAlphaFunction implements AlphaToAlphaFunct
    }
 
 
-   public static void main(String[] args)
-   {
-      @SuppressWarnings("unused")
-      StretchedSlowAtEndAlphaToAlphaFunction stretchedSlowAtEndAlphaToAlphaFunction = new StretchedSlowAtEndAlphaToAlphaFunction(6.0);
-   }
+//   public static void main(String[] args)
+//   {
+//      @SuppressWarnings("unused")
+//      StretchedSlowAtEndAlphaToAlphaFunction stretchedSlowAtEndAlphaToAlphaFunction = new StretchedSlowAtEndAlphaToAlphaFunction(6.0);
+//
+//      JFreePlot jFreePlot;
+//   }
 }

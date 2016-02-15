@@ -51,7 +51,7 @@ dependencies {
 
 	compile group: 'com.sun.jersey', name: 'jersey-core', version: '1.9'
 	compile group: 'com.sun.jersey', name: 'jersey-client', version: '1.9'
-   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: 'internal-151123'
+   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
 	compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1-M1'
 
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
