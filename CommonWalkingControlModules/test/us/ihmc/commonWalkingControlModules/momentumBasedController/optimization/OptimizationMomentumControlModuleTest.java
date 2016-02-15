@@ -26,7 +26,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.MomentumOptimizerNative;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerWithGRFPenalizedSmootherNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
@@ -611,9 +611,9 @@ public class OptimizationMomentumControlModuleTest
 
    {
       ContactPointWrenchMatrixCalculator contactPointWrenchMatrixCalculator = new ContactPointWrenchMatrixCalculator(centerOfMassFrame,
-                                                                                 MomentumOptimizerNative.nSupportVectors, MomentumOptimizerNative.rhoSize);
+            CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nSupportVectors, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
       contactPointWrenchMatrixCalculator.computeMatrix(contactStates.values());
-      DenseMatrix64F rho = new DenseMatrix64F(MomentumOptimizerNative.rhoSize, 1);
+      DenseMatrix64F rho = new DenseMatrix64F(CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize, 1);
       RandomMatrices.setRandom(rho, random);
       CommonOps.add(rho, rhoMin);
       Map<RigidBody, Wrench> rigidBodyWrenchMap = contactPointWrenchMatrixCalculator.computeWrenches(convertContactStates(contactStates), rho);

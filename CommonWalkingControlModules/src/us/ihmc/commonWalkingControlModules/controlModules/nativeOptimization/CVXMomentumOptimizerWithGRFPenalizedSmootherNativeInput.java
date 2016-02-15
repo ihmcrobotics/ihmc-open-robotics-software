@@ -44,9 +44,9 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput()
    {
-      int rhoSize = CVXMomentumOptimizerWithGRFSmootherNative.rhoSize;
-      int wrenchLength = CVXMomentumOptimizerWithGRFSmootherNative.wrenchLength;
-      int nDoF = CVXMomentumOptimizerWithGRFSmootherNative.nDoF;
+      int rhoSize = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize;
+      int wrenchLength = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.wrenchLength;
+      int nDoF = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF;
 
       AMatrix = new DenseMatrix64F(wrenchLength, nDoF);
       bMatrix = new DenseMatrix64F(wrenchLength, 1);
