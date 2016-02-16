@@ -145,7 +145,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
          MomentumModuleSolution momentumModuleSolution;
          try
          {
-            momentumModuleSolution = momentumControlModule.compute(contactStates);
+            momentumModuleSolution = momentumControlModule.compute();
          }
          catch (MomentumControlModuleException momentumControlModuleException)
          {
@@ -232,7 +232,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
          constrainFeet(elevator, feet, momentumControlModule, taskspaceConstraintDataMap);
          constrainPelvis(random, fullRobotModel, momentumControlModule, taskspaceConstraintDataMap);
 
-         MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates);
+         MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
          Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
          
          assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumModuleSolution.getCentroidalMomentumRateSolution(),

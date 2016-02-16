@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -184,7 +183,7 @@ public class OptimizationMomentumControlModule
       externalWrenchHandler.reset();
    }
 
-   public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates) throws MomentumControlModuleException
+   public MomentumModuleSolution compute() throws MomentumControlModuleException
 
    {
       checkQPSolverSwitch();
@@ -199,13 +198,13 @@ public class OptimizationMomentumControlModule
       case SIMPLE_ACTIVE_SET:
 
          //          case CQP_JOPT_DIRECT:
-         return compute(contactStates, false);
+         return compute(false);
 
       case CVX_NULL:
       case EIGEN_ACTIVESET_NULL:
       case EIGEN_NULL:
       case SIMPLE_ACTIVE_SET_NULL:
-         return compute(contactStates, true);
+         return compute(true);
 
       default:
          throw new RuntimeException("Unlisted solverFlavor, please added it in the case above");
@@ -231,8 +230,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   private MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, boolean useNullSpaceProjection)
-         throws MomentumControlModuleException
+   private MomentumModuleSolution compute(boolean useNullSpaceProjection) throws MomentumControlModuleException
 
    {
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
