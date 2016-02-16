@@ -914,12 +914,4 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
    }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useICPPlannerHackN13()
-   {
-      // TODO When using new ICP planner, set that one to false.
-      return true;
-   }
 }
