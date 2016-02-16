@@ -33,16 +33,19 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       totalNumberOfContactPoints = contactPoints.size();
    }
 
+   @Override
    public RigidBody getRigidBody()
    {
       return rigidBody;
    }
 
+   @Override
    public String getName()
    {
       return rigidBody.getName();
    }
 
+   @Override
    public List<FramePoint> getContactPointsCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(contactPoints.size());
@@ -55,6 +58,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return ret;
    }
 
+   @Override
    public ReferenceFrame getFrameAfterParentJoint()
    {
       return rigidBody.getParentJoint().getFrameAfterJoint();
@@ -65,11 +69,13 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return new FrameConvexPolygon2d(soleFrame, contactPoints);
    }
 
+   @Override
    public ReferenceFrame getSoleFrame()
    {
       return soleFrame;
    }
 
+   @Override
    public List<FramePoint2d> getContactPoints2d()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactPoints.size());
@@ -82,11 +88,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return ret;
    }
 
-   public boolean inContact()
-   {
-      throw new RuntimeException();
-   }
-
+   @Override
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
