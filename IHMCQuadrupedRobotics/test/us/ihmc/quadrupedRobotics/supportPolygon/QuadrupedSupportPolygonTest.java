@@ -1043,36 +1043,28 @@ public class QuadrupedSupportPolygonTest
    
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testTangentTangentRadiusCircleCenter()
+   public void testGetCenterOfCircleOfRadiusInCornerOfPolygon()
    {
       final QuadrupedSupportPolygon poly = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
       poly.setFootstep(RobotQuadrant.FRONT_RIGHT, new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 1.0, 0.0));
       final FramePoint2d centerToPack = new FramePoint2d();
-      poly.getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant.HIND_LEFT, 0.309015, centerToPack);
+      poly.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_LEFT, 0.309015, centerToPack);
       JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
          {
-            poly.getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant.HIND_LEFT, 0.5, centerToPack);
-         }
-      });
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            poly.getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant.FRONT_LEFT, 0.5, centerToPack);
+            poly.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.FRONT_LEFT, 0.5, centerToPack);
          }
       });
       Vector2d expected = new Vector2d(0.5, 0.309);
       assertTrue("not correct expected: " + expected + " actual: " + centerToPack, centerToPack.epsilonEquals(expected, 1e-3));
       
       QuadrupedSupportPolygon simple = createSimplePolygon();
-      simple.getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant.HIND_LEFT, 0.5, centerToPack);
+      simple.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_LEFT, 0.5, centerToPack);
       expected = new Vector2d(0.5, 0.5);
       assertTrue("not correct expected: " + expected + " actual: " + centerToPack, centerToPack.epsilonEquals(expected, 1e-3));
-      simple.getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant.HIND_RIGHT, 0.25, centerToPack);
+      simple.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_RIGHT, 0.25, centerToPack);
       expected = new Vector2d(0.75, 0.25);
       assertTrue("not correct expected: " + expected + " actual: " + centerToPack, centerToPack.epsilonEquals(expected, 1e-3));
    }
