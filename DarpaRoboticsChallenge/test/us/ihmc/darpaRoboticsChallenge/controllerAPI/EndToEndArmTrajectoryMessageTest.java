@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -150,12 +150,12 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          assertTrue(success);
 
 
-         HandControlState controllerState = findControllerState(robotSide, scs);
+         HandControlMode controllerState = findControllerState(robotSide, scs);
          double switchTime = findControllerSwitchTime(robotSide, scs);
          double[] controllerDesiredJointPositions = findControllerDesiredPositions(robotSide, armJoints, numberOfJoints, scs);
          double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(robotSide, armJoints, numberOfJoints, scs);
 
-         assertEquals(HandControlState.JOINT_SPACE, controllerState);
+         assertEquals(HandControlMode.JOINT_SPACE, controllerState);
          assertEquals(timeStopSent, switchTime, getRobotModel().getControllerDT());
          assertArrayEquals(actualJointPositions, controllerDesiredJointPositions, 0.01);
          assertArrayEquals(zeroVelocities, controllerDesiredJointVelocities, 1.0e-10);
@@ -190,10 +190,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    }
 
    @SuppressWarnings("unchecked")
-   public static HandControlState findControllerState(RobotSide robotSide, SimulationConstructionSet scs)
+   public static HandControlMode findControllerState(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-      return ((EnumYoVariable<HandControlState>) scs.getVariable(handControlModuleName, handControlModuleName)).getEnumValue();
+      return ((EnumYoVariable<HandControlMode>) scs.getVariable(handControlModuleName, handControlModuleName)).getEnumValue();
    }
 
    public static double findControllerSwitchTime(RobotSide robotSide, SimulationConstructionSet scs)

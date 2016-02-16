@@ -94,7 +94,7 @@ public class HandControlModule
 
    private final YoVariableRegistry registry;
 
-   private final StateMachine<HandControlState> stateMachine;
+   private final StateMachine<HandControlMode> stateMachine;
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator;
    private final FrameMatrix3D selectionFrameMatrix = new FrameMatrix3D();
@@ -132,7 +132,7 @@ public class HandControlModule
    private final LoadBearingHandControlState loadBearingControlState;
    private final UserControlModeState userControlModeState;
 
-   private final EnumYoVariable<HandControlState> requestedState;
+   private final EnumYoVariable<HandControlMode> requestedState;
    private final OneDoFJoint[] oneDoFJoints;
    private final Map<OneDoFJoint, BooleanYoVariable> areJointsEnabled;
    private final String name;
@@ -146,7 +146,7 @@ public class HandControlModule
 
    private final YoSE3PIDGains taskspaceGains, taskspaceLoadBearingGains;
 
-   private final StateChangedListener<HandControlState> stateChangedlistener;
+   private final StateChangedListener<HandControlMode> stateChangedlistener;
    private final HandPoseStatusProducer handPoseStatusProducer;
    private final BooleanYoVariable hasHandPoseStatusBeenSent;
 
@@ -191,10 +191,10 @@ public class HandControlModule
       areAllArmJointEnabled = new BooleanYoVariable(namePrefix + "AreAllArmJointEnabled", registry);
       areAllArmJointEnabled.set(true);
 
-      stateChangedlistener = new StateChangedListener<HandControlState>()
+      stateChangedlistener = new StateChangedListener<HandControlMode>()
       {
          @Override
-         public void stateChanged(State<HandControlState> oldState, State<HandControlState> newState, double time)
+         public void stateChanged(State<HandControlMode> oldState, State<HandControlMode> newState, double time)
          {
             hasHandPoseStatusBeenSent.set(false);
          }
@@ -226,7 +226,7 @@ public class HandControlModule
          qdDesireds.put(joint, new DoubleYoVariable("qd_d_" + joint.getName() + "HandControlModule", registry));
       }
 
-      requestedState = new EnumYoVariable<HandControlState>(name + "RequestedState", "", registry, HandControlState.class, true);
+      requestedState = new EnumYoVariable<HandControlMode>(name + "RequestedState", "", registry, HandControlMode.class, true);
       requestedState.set(null);
 
       trajectoryTimeProvider = new YoVariableDoubleProvider(name + "TrajectoryTime", registry);
@@ -261,7 +261,7 @@ public class HandControlModule
       }
 
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
-      stateMachine = new StateMachine<HandControlState>(name, name + "SwitchTime", HandControlState.class, yoTime, registry);
+      stateMachine = new StateMachine<HandControlMode>(name, name + "SwitchTime", HandControlMode.class, yoTime, registry);
 
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(name, twistCalculator, hand, handControlFrame, controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
@@ -316,7 +316,7 @@ public class HandControlModule
       else
       {
          userControlModeState = new UserControlModeState(stateNamePrefix, robotSide, oneDoFJoints, momentumBasedController, registry);
-         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
+         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController,
                fullRobotModel.getElevator(), hand, jacobianId, registry);
 
          if (armControlParameters.useInverseKinematicsTaskspaceControl())
@@ -326,7 +326,7 @@ public class HandControlModule
          }
          else
          {
-            taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlState.TASK_SPACE_POSITION,
+            taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlMode.TASK_SPACE_POSITION,
                   momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, registry);
          }
       }
@@ -377,7 +377,7 @@ public class HandControlModule
       stateMachine.attachStateChangedListener(stateChangedlistener);
    }
 
-   private void setupTransitionToSupport(final State<HandControlState> fromState)
+   private void setupTransitionToSupport(final State<HandControlMode> fromState)
    {
       StateTransitionCondition swingToSupportCondition = new StateTransitionCondition()
       {
@@ -396,7 +396,7 @@ public class HandControlModule
             handSpatialAccelerationControlModule.setGains(taskspaceLoadBearingGains);
          }
       };
-      StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition,
+      StateTransition<HandControlMode> swingToSupportTransition = new StateTransition<HandControlMode>(HandControlMode.LOAD_BEARING, swingToSupportCondition,
             swingToSupportAction);
       fromState.addStateTransition(swingToSupportTransition);
    }
@@ -429,7 +429,7 @@ public class HandControlModule
          areAllArmJointEnabled.set(true);
       }
 
-      if (stateMachine.getCurrentStateEnum() == HandControlState.USER_CONTROL_MODE && userControlModeState.isAbortUserControlModeRequested())
+      if (stateMachine.getCurrentStateEnum() == HandControlMode.USER_CONTROL_MODE && userControlModeState.isAbortUserControlModeRequested())
       {
          holdPositionInJointSpace();
       }
@@ -459,8 +459,8 @@ public class HandControlModule
 
    private void checkAndSendHandPoseStatusIsCompleted()
    {
-      boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_POSITION;
-      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.JOINT_SPACE;
+      boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlMode.TASK_SPACE_POSITION;
+      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlMode.JOINT_SPACE;
 
       if ((handPoseStatusProducer != null) && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
       {
@@ -502,7 +502,7 @@ public class HandControlModule
       {
          handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
       }
-      else if (stateMachine.getCurrentStateEnum() == HandControlState.LOAD_BEARING)
+      else if (stateMachine.getCurrentStateEnum() == HandControlMode.LOAD_BEARING)
       {
          handTaskspaceToJointspaceCalculator.initializeFromCurrentJointAngles();
       }
@@ -601,7 +601,7 @@ public class HandControlModule
       switch (armDesiredAccelerationsMessage.getArmControlMode())
       {
       case IHMC_CONTROL_MODE:
-         if (stateMachine.getCurrentStateEnum() == HandControlState.USER_CONTROL_MODE)
+         if (stateMachine.getCurrentStateEnum() == HandControlMode.USER_CONTROL_MODE)
             holdPositionInJointSpace();
          return;
       case USER_CONTROL_MODE:
@@ -1072,7 +1072,7 @@ public class HandControlModule
    {
       if (doPositionControl)
          return false;
-      return stateMachine.getCurrentStateEnum() == HandControlState.LOAD_BEARING;
+      return stateMachine.getCurrentStateEnum() == HandControlMode.LOAD_BEARING;
    }
 
    public void holdPositionInBase()
@@ -1103,7 +1103,7 @@ public class HandControlModule
 
    public boolean isControllingPoseInWorld()
    {
-      State<HandControlState> currentState = stateMachine.getCurrentState();
+      State<HandControlMode> currentState = stateMachine.getCurrentState();
 
       if (currentState == taskSpacePositionControlState)
          return taskSpacePositionControlState.getReferenceFrame() == worldFrame;

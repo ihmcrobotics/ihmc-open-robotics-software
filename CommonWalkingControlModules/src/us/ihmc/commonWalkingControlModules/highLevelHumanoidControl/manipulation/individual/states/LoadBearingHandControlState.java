@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -39,7 +39,7 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
 
    private RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule;
 
-   public LoadBearingHandControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
+   public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
          RigidBody elevator, RigidBody endEffector, int jacobianId, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, elevator, endEffector, parentRegistry);

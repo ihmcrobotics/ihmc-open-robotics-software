@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.tools.FormattingTools;
 
-public abstract class TaskspaceHandControlState extends State<HandControlState>
+public abstract class TaskspaceHandControlState extends State<HandControlMode>
 {
    protected final String name;
    protected final YoVariableRegistry registry;
@@ -27,7 +27,7 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
    protected final MomentumBasedController momentumBasedController;
    protected final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
-   public TaskspaceHandControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
+   public TaskspaceHandControlState(String namePrefix, HandControlMode stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
          RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);

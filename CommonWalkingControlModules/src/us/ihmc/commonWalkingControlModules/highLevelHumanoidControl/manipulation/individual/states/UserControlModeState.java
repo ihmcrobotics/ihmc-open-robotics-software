@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.State;
 
-public class UserControlModeState extends State<HandControlState>
+public class UserControlModeState extends State<HandControlMode>
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
@@ -26,7 +26,7 @@ public class UserControlModeState extends State<HandControlState>
    public UserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController,
          YoVariableRegistry parentRegistry)
    {
-      super(HandControlState.USER_CONTROL_MODE);
+      super(HandControlMode.USER_CONTROL_MODE);
 
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
