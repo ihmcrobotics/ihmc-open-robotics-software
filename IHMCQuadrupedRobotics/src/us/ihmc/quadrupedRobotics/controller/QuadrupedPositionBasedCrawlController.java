@@ -1622,14 +1622,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private void calculateTrajectoryTarget(RobotQuadrant upcommingSwingLeg, QuadrupedSupportPolygon commonTriangle, FramePoint2d comTargetToPack)
       {
          commonSupportPolygon.set(commonTriangle);
-         boolean ttrCircleSuccess = false;
          double radius = subCircleRadius.getDoubleValue();
-         if(useSubCircleForBodyShiftTarget.getBooleanValue())
+         boolean hasEnoughSides = commonSupportPolygon.size() >= 3;
+         if(useSubCircleForBodyShiftTarget.getBooleanValue() && hasEnoughSides)
          {
-            ttrCircleSuccess = commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(upcommingSwingLeg, radius, comTargetToPack);
+            commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(upcommingSwingLeg, radius, comTargetToPack);
          }
-         
-         if(!ttrCircleSuccess && commonSupportPolygon.size() >= 3)
+         else if(hasEnoughSides)
          {
             radius = commonSupportPolygon.getInCircle2d(circleCenter3d);
             comTargetToPack.set(circleCenter3d.getX(), circleCenter3d.getY());

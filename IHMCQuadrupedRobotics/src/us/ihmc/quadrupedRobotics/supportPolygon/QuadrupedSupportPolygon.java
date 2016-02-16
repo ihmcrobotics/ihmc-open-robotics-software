@@ -1392,12 +1392,14 @@ public class QuadrupedSupportPolygon implements Serializable
    /**
     * Gets the center point of a circle of radius in the corner of a triangle.
     * 
+    * This polygon must have size of 3 or 4.
+    * 
     * @param cornerToPutCircle
     * @param radius
     * @param centerToPack
     * @return
     */
-   public boolean getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
+   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
    {
       if (containsFootstep(cornerToPutCircle))
       {
@@ -1434,8 +1436,6 @@ public class QuadrupedSupportPolygon implements Serializable
 
          tempCorner.add(bisectorVector);
          centerToPack.set(tempCorner);
-
-         return true;
       }
       else
       {
