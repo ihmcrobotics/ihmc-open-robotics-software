@@ -18,6 +18,8 @@ public class PiecewiseForwardDcmTrajectory
    private final FramePoint[] vrpPositionAtSoS;
    private final FramePoint dcmPosition;
    private final FrameVector dcmVelocity;
+   private final double[] temporaryDouble;
+   private final FramePoint[] temporaryFramePoint;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public PiecewiseForwardDcmTrajectory(int numberOfSteps, double gravity, double comHeight, YoVariableRegistry parentRegistry)
@@ -39,6 +41,8 @@ public class PiecewiseForwardDcmTrajectory
       }
       this.dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       this.dcmVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+      this.temporaryDouble = new double[] {0.0};
+      this.temporaryFramePoint = new FramePoint[] {new FramePoint(ReferenceFrame.getWorldFrame())};
 
       if (parentRegistry != null)
       {
@@ -84,6 +88,13 @@ public class PiecewiseForwardDcmTrajectory
       this.initialized = true;
    }
 
+   public void initializeTrajectory(double timeAtSoS, FramePoint cmpPositionAtSoS, FramePoint dcmPositionAtSoS)
+   {
+      this.temporaryDouble[0] = timeAtSoS;
+      this.temporaryFramePoint[0].setIncludingFrame(cmpPositionAtSoS);
+      this.initializeTrajectory(temporaryDouble, temporaryFramePoint, dcmPositionAtSoS);
+   }
+
    public void computeTrajectory(double currentTime)
    {
       if (!initialized)
@@ -106,6 +117,11 @@ public class PiecewiseForwardDcmTrajectory
             break;
          }
       }
+   }
+
+   public void setComHeight(double comHeight)
+   {
+      this.comHeight = comHeight;
    }
 
    public void getPosition(FramePoint dcmPosition)
