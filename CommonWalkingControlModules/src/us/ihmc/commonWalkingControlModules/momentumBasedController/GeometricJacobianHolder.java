@@ -11,14 +11,14 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class GeometricJacobianHolder
 {
-   private final List<GeometricJacobian> robotJacobians = new ArrayList<GeometricJacobian>();
+   private final List<GeometricJacobian> geometricJacobians = new ArrayList<GeometricJacobian>();
    private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
 
    public void compute()
    {
-      for (int i = 0; i < robotJacobians.size(); i++)
+      for (int i = 0; i < geometricJacobians.size(); i++)
       {
-         robotJacobians.get(i).compute();
+         geometricJacobians.get(i).compute();
       }
    }
 
@@ -54,9 +54,9 @@ public class GeometricJacobianHolder
       if (joints == null || numberOfJointsToConsider == 0)
          return -1;
 
-      for (int i = 0; i < robotJacobians.size(); i++)
+      for (int i = 0; i < geometricJacobians.size(); i++)
       {
-         GeometricJacobian jacobian = robotJacobians.get(i);
+         GeometricJacobian jacobian = geometricJacobians.get(i);
          InverseDynamicsJoint[] existingJacobianJoints = jacobian.getJointsInOrder();
          boolean sameNumberOfJoints = numberOfJointsToConsider == existingJacobianJoints.length;
          boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
@@ -90,8 +90,8 @@ public class GeometricJacobianHolder
          newJacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame);
       }
       newJacobian.compute(); // Compute in case you need it right away
-      int jacobianId = robotJacobians.size();
-      robotJacobians.add(newJacobian);
+      int jacobianId = geometricJacobians.size();
+      geometricJacobians.add(newJacobian);
       return jacobianId;
    }
 
@@ -102,8 +102,8 @@ public class GeometricJacobianHolder
     */
    public GeometricJacobian getJacobian(int jacobianId)
    {
-      if (jacobianId >= robotJacobians.size() || jacobianId < 0)
+      if (jacobianId >= geometricJacobians.size() || jacobianId < 0)
          return null;
-      return robotJacobians.get(jacobianId);
+      return geometricJacobians.get(jacobianId);
    }
 }
