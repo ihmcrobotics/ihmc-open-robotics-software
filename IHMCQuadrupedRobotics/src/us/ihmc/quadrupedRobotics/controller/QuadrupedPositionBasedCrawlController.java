@@ -312,7 +312,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       this.actualFullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>(name, "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
+      this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       
       referenceFrames.updateFrames();
