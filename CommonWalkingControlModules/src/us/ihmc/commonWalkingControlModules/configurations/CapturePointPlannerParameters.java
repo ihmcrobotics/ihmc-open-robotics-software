@@ -43,18 +43,6 @@ public interface CapturePointPlannerParameters
     */
    public abstract int getNumberOfFootstepsToConsider();
 
-   /** TODO Dangerous parameter, should be set to 4. */
-   @Deprecated
-   public abstract int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory();
-
-   /** TODO This is not a parameter, where it is used it is supposed to be equal to 2. */
-   @Deprecated
-   public abstract int getNumberOfFootstepsToStop();
-
-   /** TODO That is not a user parameter, should be less than the control DT. */
-   @Deprecated
-   public abstract double getIsDoneTimeThreshold();
-
    /**
     * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
     * The returned value should be between 0.0 and 1.0:
@@ -87,18 +75,6 @@ public interface CapturePointPlannerParameters
    public abstract boolean getDoTimeFreezing();
 
    /**
-    * Used only with the old planner (inherent in the new planner).
-    * Enable/disable foot slip compensation.
-    */
-   public abstract boolean getDoFootSlipCompensation();
-
-   /**
-    * Used only with the old planner (inherent in the new planner).
-    * Refers on how fast a foot slipping error should be corrected.
-    */
-   public abstract double getAlphaDeltaFootPositionForFootslipCompensation();
-
-   /**
     * This parameter forces the entry CMPs to be more inside or outside in the foot.
     */
    public abstract double getEntryCMPInsideOffset();
@@ -119,14 +95,6 @@ public interface CapturePointPlannerParameters
     * This parameter forces the exit CMPs to be more forward or backward in the foot.
     */
    public abstract double getExitCMPForwardOffset();
-
-   /**
-    * Switch between the old and new ICP planner.
-    * The new ICP planner has the advantage of exploiting way more the current feet locations.
-    * By doing so, it is inherently robust to foot slipping, stepping error, and potential drift in the state estimator when using an external corrector as LIDAR localization.
-    * It also allows the use of two reference CMPs per support.
-    */
-   public abstract boolean useNewICPPlanner();
 
    /**
     * Only used when using the new ICP planner.
@@ -180,10 +148,6 @@ public interface CapturePointPlannerParameters
     *  This parameter allows to reduce unexpected behaviors due to smoothing the exponentially unstable motion of the ICP with a minimum acceleration trajectory (cubic).
     */
    public abstract double getMaxDurationForSmoothingEntryToExitCMPSwitch();
-
-   /** TODO Hack that reduces the desired ICP velocity only at the end of transfer. It is just terrible and makes the robot cry. */
-   @Deprecated
-   public abstract boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer();
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.

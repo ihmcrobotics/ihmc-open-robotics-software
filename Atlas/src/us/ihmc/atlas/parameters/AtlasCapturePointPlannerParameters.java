@@ -5,15 +5,13 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 /** {@inheritDoc} */
 public class AtlasCapturePointPlannerParameters implements CapturePointPlannerParameters
 {
-   private boolean runningOnRealRobot;
+   private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;
-   private final boolean useNewICPPlanner;
 
    public AtlasCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       useTwoCMPsPerSupport = true;
-      useNewICPPlanner = true;
    }
 
    /** {@inheritDoc} */
@@ -53,28 +51,6 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
 
    /** {@inheritDoc} */
    @Override
-   public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
-   {
-      // Using higher order for the trajectory degrade the pseudo CMP trajectory (going a lot outside the support polygon) when using two CMPs per support.
-      return useTwoCMPsPerSupport ? 4 : 5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public int getNumberOfFootstepsToStop()
-   {
-      return 2;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getIsDoneTimeThreshold()
-   {
-      return -1e-4;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getDoubleSupportSplitFraction()
    {
       return 0.5;
@@ -99,20 +75,6 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    public boolean getDoTimeFreezing()
    {
       return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getDoFootSlipCompensation()
-   {
-      return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getAlphaDeltaFootPositionForFootslipCompensation()
-   {
-      return 0.65;
    }
 
    /** {@inheritDoc} */
@@ -148,20 +110,6 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    public double getMaxAllowedErrorWithoutPartialTimeFreeze()
    {
       return 0.03;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
-   {
-      return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useNewICPPlanner()
-   {
-      return useNewICPPlanner;
    }
 
    /** {@inheritDoc} */

@@ -5,16 +5,14 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 /** {@inheritDoc} */
 public class BonoCapturePointPlannerParameters implements CapturePointPlannerParameters
 {
-   private boolean runningOnRealRobot;
+   private final boolean runningOnRealRobot;
    // TODO Try using new ICP planner with two CMPs.
    private final boolean useTwoCMPsPerSupport;
-   private final boolean useNewICPPlanner;
 
    public BonoCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       useTwoCMPsPerSupport = false;
-      useNewICPPlanner = false;
    }
 
    /** {@inheritDoc} */
@@ -54,28 +52,6 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 
    /** {@inheritDoc} */
    @Override
-   public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
-   {
-      // Using higher order for the trajectory degrade the pseudo CMP trajectory (going a lot outside the support polygon) when using two CMPs per support.
-      return useTwoCMPsPerSupport ? 4 : 5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public int getNumberOfFootstepsToStop()
-   {
-      return 2;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getIsDoneTimeThreshold()
-   {
-      return -1e-4;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getDoubleSupportSplitFraction()
    {
       return 0.5;
@@ -111,20 +87,6 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 
    /** {@inheritDoc} */
    @Override
-   public boolean getDoFootSlipCompensation()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getAlphaDeltaFootPositionForFootslipCompensation()
-   {
-      return 0.65;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getEntryCMPInsideOffset()
    {
       return 0.005;
@@ -149,21 +111,6 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    public double getExitCMPForwardOffset()
    {
       return -0.00;//0.00;//0.02-.025/2;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
-   {
-      // TODO Try to deactivate that one.
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useNewICPPlanner()
-   {
-      return useNewICPPlanner;
    }
 
    /** {@inheritDoc} */
