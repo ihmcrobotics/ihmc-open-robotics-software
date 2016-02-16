@@ -114,8 +114,8 @@ public class SimpleStanceController implements RobotController
       double coefficientOfFriction = 1.0;
       contactStates = createContactStates(feet, registry, coefficientOfFriction);
       
-      this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), controlDT, gravityZ,
-            momentumOptimizationSettings, twistCalculator, null, contactStates.values(), null, registry);
+      this.momentumControlModule = new OptimizationMomentumControlModule(rootJoint, referenceFrames.getCenterOfMassFrame(), gravityZ, momentumOptimizationSettings,
+            twistCalculator, null, contactStates.values(), null, registry);
 
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 

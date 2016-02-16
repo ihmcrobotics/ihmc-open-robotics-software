@@ -101,12 +101,12 @@ public class OptimizationMomentumControlModule
    private final DenseMatrix64F bOriginal = new DenseMatrix64F(Momentum.SIZE, 1);
    private final int nDoF;
 
-   public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, double gravityZ,
-         MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
-         Collection<? extends PlaneContactState> planeContactStates, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double gravityZ, MomentumOptimizationSettings momentumOptimizationSettings,
+         TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder, Collection<? extends PlaneContactState> planeContactStates,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
-      this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, controlDT, registry);
+      this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, registry);
       this.externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, planeContactStates);
       this.primaryMotionConstraintHandler = new MotionConstraintHandler("primary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
       this.secondaryMotionConstraintHandler = new MotionConstraintHandler("secondary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
