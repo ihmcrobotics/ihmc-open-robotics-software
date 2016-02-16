@@ -872,24 +872,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0;
-   }
-
-   @Override
-   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0;
-   }
-
-   @Override
-   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0;
-   }
-
-   @Override
    public double pelvisToAnkleThresholdForWalking()
    {
       return 0;

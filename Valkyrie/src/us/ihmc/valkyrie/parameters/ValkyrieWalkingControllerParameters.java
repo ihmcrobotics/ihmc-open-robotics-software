@@ -993,24 +993,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.9649;
-   }
-
-   @Override
-   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.8949;
-   }
-
-   @Override
-   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.65;
-   }
-
-   @Override
    public double pelvisToAnkleThresholdForWalking()
    {
       return 0.8157;
