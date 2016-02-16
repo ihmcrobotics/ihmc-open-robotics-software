@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 
-public class JointspaceAccelerationCommand
+public class JointspaceAccelerationCommand extends InverseDynamicsCommand
 {
    private final boolean hasWeight;
    private final double weight;

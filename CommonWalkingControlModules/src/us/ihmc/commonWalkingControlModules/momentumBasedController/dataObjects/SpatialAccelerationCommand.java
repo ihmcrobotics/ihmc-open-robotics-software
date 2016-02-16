@@ -6,7 +6,7 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
-public class SpatialAccelerationCommand
+public class SpatialAccelerationCommand extends InverseDynamicsCommand
 {
    private boolean hasWeight;
    private double weight;
