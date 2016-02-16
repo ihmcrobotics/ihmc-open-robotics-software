@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -12,7 +12,7 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOfChangeControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final MomentumRateOfChangeData momentumRateOfChangeData;
+   private final MomentumRateData momentumRateOfChangeData;
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final EuclideanPositionController comPositionController;
@@ -21,7 +21,7 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
    public CoMBasedMomentumRateOfChangeControlModule(double dt, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
          YoVariableRegistry parentRegistry)
    {
-      momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
       this.centerOfMassJacobian = centerOfMassJacobian;
       boolean visualizeCom = false;
@@ -66,7 +66,7 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
    }
 
    @Override
-   public void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack)
+   public void getMomentumRateOfChange(MomentumRateData momentumRateOfChangeDataToPack)
    {
       momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
    }

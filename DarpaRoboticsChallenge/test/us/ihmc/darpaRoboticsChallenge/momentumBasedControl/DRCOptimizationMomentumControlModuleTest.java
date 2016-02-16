@@ -27,8 +27,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularConta
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
@@ -138,7 +138,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
             DenseMatrix64F vdDesired = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
             
             
-            DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(inverseDynamicsJoint, vdDesired);
+            JointspaceAccelerationCommand desiredJointAccelerationCommand = new JointspaceAccelerationCommand(inverseDynamicsJoint, vdDesired);
             momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
          }
 
@@ -297,7 +297,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       CommonOps.setIdentity(orientationSelectionMatrix);
       pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, orientationSelectionMatrix);
       
-      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(rootJointJacobian, pelvisTaskspaceConstraintData);
+      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(rootJointJacobian, pelvisTaskspaceConstraintData);
       momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
       taskspaceConstraintDataMap.put(rootJointJacobian, pelvisTaskspaceConstraintData);
    }
@@ -314,7 +314,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
                                                             foot.getBodyFixedFrame());
          taskspaceConstraintData.set(spatialAcceleration);
          
-         DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
+         SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskspaceConstraintData);
          momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
          taskspaceConstraintDataMap.put(jacobian, taskspaceConstraintData);
       }

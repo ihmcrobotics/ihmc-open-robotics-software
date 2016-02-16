@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 
 public interface MomentumRateOfChangeControlModule
 {
@@ -8,5 +8,5 @@ public interface MomentumRateOfChangeControlModule
 
    public abstract void compute();
 
-   public abstract void getMomentumRateOfChange(MomentumRateOfChangeData momentumRateOfChangeDataToPack);
+   public abstract void getMomentumRateOfChange(MomentumRateData momentumRateOfChangeDataToPack);
 }

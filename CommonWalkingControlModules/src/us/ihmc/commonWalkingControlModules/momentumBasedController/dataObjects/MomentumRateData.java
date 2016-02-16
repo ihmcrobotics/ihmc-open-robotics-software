@@ -9,13 +9,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
-public class MomentumRateOfChangeData
+public class MomentumRateData
 {
    private final ReferenceFrame centerOfMassFrame;
    private final DenseMatrix64F momentumSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F momentumMultipliers = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
-   public MomentumRateOfChangeData(ReferenceFrame centerOfMassFrame)
+   public MomentumRateData(ReferenceFrame centerOfMassFrame)
    {
       this.centerOfMassFrame = centerOfMassFrame;
    }
@@ -25,8 +25,8 @@ public class MomentumRateOfChangeData
       momentumRateOfChange.changeFrame(centerOfMassFrame);
       momentumSubspace.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
       CommonOps.setIdentity(momentumSubspace);
-      momentumMultipliers.reshape(SpatialForceVector.SIZE, 1);
-      momentumRateOfChange.packMatrix(momentumMultipliers);
+      selectionMatrix.reshape(SpatialForceVector.SIZE, 1);
+      momentumRateOfChange.packMatrix(selectionMatrix);
    }
 
    public void setLinearMomentumRateOfChange(FrameVector linearMomentumRateOfChange)
@@ -37,14 +37,14 @@ public class MomentumRateOfChangeData
       momentumSubspace.set(4, 1, 1.0);
       momentumSubspace.set(5, 2, 1.0);
 
-      momentumMultipliers.reshape(momentumSubspace.getNumCols(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(momentumMultipliers, linearMomentumRateOfChange.getVector(), 0, 0);
+      selectionMatrix.reshape(momentumSubspace.getNumCols(), 1);
+      MatrixTools.setDenseMatrixFromTuple3d(selectionMatrix, linearMomentumRateOfChange.getVector(), 0, 0);
    }
 
    public void setEmpty()
    {
       momentumSubspace.reshape(SpatialForceVector.SIZE, 0);
-      momentumMultipliers.reshape(0, 1);
+      selectionMatrix.reshape(0, 1);
    }
 
    public DenseMatrix64F getMomentumSubspace()
@@ -54,18 +54,18 @@ public class MomentumRateOfChangeData
 
    public DenseMatrix64F getMomentumMultipliers()
    {
-      return momentumMultipliers;
+      return selectionMatrix;
    }
 
-   public void set(MomentumRateOfChangeData other)
+   public void set(MomentumRateData other)
    {
       this.momentumSubspace.set(other.momentumSubspace);
-      this.momentumMultipliers.set(other.momentumMultipliers);
+      this.selectionMatrix.set(other.selectionMatrix);
    }
 
    public void setMomentumMultipliers(DenseMatrix64F momentumMultipliers)
    {
-      this.momentumMultipliers.set(momentumMultipliers);
+      this.selectionMatrix.set(momentumMultipliers);
    }
 
    public void setMomentumSubspace(DenseMatrix64F momentumSubspace)

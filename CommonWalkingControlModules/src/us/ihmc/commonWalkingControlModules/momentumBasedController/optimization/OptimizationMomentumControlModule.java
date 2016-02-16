@@ -18,12 +18,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.Mom
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -94,7 +94,7 @@ public class OptimizationMomentumControlModule
    private final EnumYoVariable<QPSolverFlavor> currentQPSolver = new EnumYoVariable<>("currentQPSolver", registry, QPSolverFlavor.class);
    private final IntegerYoVariable qpSolverIteration = new IntegerYoVariable("qpSolverInteration", registry);
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
-   private final MomentumRateOfChangeData momentumRateOfChangeData;
+   private final MomentumRateData momentumRateOfChangeData;
    private final LinearSolver<DenseMatrix64F> hardMotionConstraintSolver;
 
    private final DenseMatrix64F dampedLeastSquaresFactorMatrix;
@@ -161,7 +161,7 @@ public class OptimizationMomentumControlModule
 
       dampedLeastSquaresFactorMatrix = new DenseMatrix64F(nDoF, nDoF);
 
-      this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      this.momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
 
       this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1, momentumOptimizationSettings.getDampedLeastSquaresFactor());
       this.equalityConstraintEnforcer = new EqualityConstraintEnforcer(hardMotionConstraintSolver);
@@ -380,7 +380,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
+   public void setDesiredJointAcceleration(JointspaceAccelerationCommand desiredJointAccelerationCommand)
    {
       if (desiredJointAccelerationCommand.getHasWeight())
       {
@@ -392,7 +392,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
+   public void setDesiredSpatialAcceleration(SpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       if (desiredSpatialAccelerationCommand.getHasWeight())
       {
@@ -404,7 +404,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
+   public void setDesiredPointAcceleration(PointAccelerationCommand desiredPointAccelerationCommand)
    {
       GeometricJacobian rootToEndEffectorJacobian = desiredPointAccelerationCommand.getRootToEndEffectorJacobian();
       FramePoint bodyFixedPoint = desiredPointAccelerationCommand.getContactPoint();
@@ -423,9 +423,9 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredRateOfChangeOfMomentum(DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand)
+   public void setDesiredRateOfChangeOfMomentum(MomentumRateCommand desiredRateOfChangeOfMomentumCommand)
    {
-      this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData());
+      this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateData());
    }
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)

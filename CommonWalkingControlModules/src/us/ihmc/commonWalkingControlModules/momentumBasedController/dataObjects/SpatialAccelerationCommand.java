@@ -2,20 +2,20 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
-public class DesiredSpatialAccelerationCommand
+public class SpatialAccelerationCommand
 {
    private boolean hasWeight;
    private double weight;
    private GeometricJacobian jacobian;
    private TaskspaceConstraintData taskspaceConstraintData;
 
-   public DesiredSpatialAccelerationCommand()
+   public SpatialAccelerationCommand()
    {
       this.hasWeight = false;
       this.weight = Double.POSITIVE_INFINITY;
    }
 
-   public DesiredSpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   public SpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
       this.jacobian = jacobian;
       this.taskspaceConstraintData = taskspaceConstraintData;
@@ -23,7 +23,7 @@ public class DesiredSpatialAccelerationCommand
       this.weight = Double.POSITIVE_INFINITY;
    }
 
-   public DesiredSpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
+   public SpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
    {
       this.jacobian = jacobian;
       this.taskspaceConstraintData = taskspaceConstraintData;
@@ -31,7 +31,7 @@ public class DesiredSpatialAccelerationCommand
       this.weight = weight;
    }
 
-   public DesiredSpatialAccelerationCommand(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
+   public SpatialAccelerationCommand(SpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       this.jacobian = desiredSpatialAccelerationCommand.jacobian;
       this.taskspaceConstraintData = desiredSpatialAccelerationCommand.taskspaceConstraintData;

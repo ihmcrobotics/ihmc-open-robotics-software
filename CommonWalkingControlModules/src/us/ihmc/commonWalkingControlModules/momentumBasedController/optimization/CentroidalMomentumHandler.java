@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -121,7 +121,7 @@ public class CentroidalMomentumHandler
       return centroidalMomentumRate;
    }
 
-   public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateOfChangeData momentumRateOfChangeData)
+   public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateData momentumRateOfChangeData)
    {
       DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
       DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
