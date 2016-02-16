@@ -7,6 +7,8 @@ import java.util.List;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple2d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
@@ -466,21 +468,26 @@ public class GeometryTools
    }
    
    /**
-    * @deprecated Creates garbage. Use {@link GeometryTools.intersection}.
+    * Finds the intersection between two 2D lines.
+    * Each line is represented as a Point2d and a Vector2d.
+    * This should work as long as the two lines are not parallel.
+    * If they are parallel, it tries to return something without crashing.
+    *
+    * @deprecated Creates garbage. Use {@link GeometryTools.getIntersectionBetweenTwoLines2d(Tuple2d, Tuple2d, Tuple2d, Tuple2d, Tuple2d)}.
     * @param lineStart1
     * @param lineEnd1
     * @param lineStart2
     * @param lineEnd2
-    * @return
+    * @return intersection
     */
-   public static Point2d getIntersectionBetweenTwoLines(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
+   public static Point2d getIntersectionBetweenTwoLines(Tuple2d lineStart1, Tuple2d lineEnd1, Tuple2d lineStart2, Tuple2d lineEnd2)
    {
-      Line2d line1 = new Line2d(lineStart1, lineEnd1);
-      Line2d line2 = new Line2d(lineStart2, lineEnd2);
+      Line2d line1 = new Line2d(lineStart1.getX(), lineStart1.getY(), lineEnd1.getX(), lineEnd1.getY());
+      Line2d line2 = new Line2d(lineStart2.getX(), lineStart2.getY(), lineEnd2.getX(), lineEnd2.getY());
 
       return line1.intersectionWith(line2);
    }
-   
+
    private static final ThreadLocal<double[]> tempAlphaBeta = new ThreadLocal<double[]>()
    {
       @Override
@@ -516,27 +523,25 @@ public class GeometryTools
       
       intersectionToPack.set(point1.getX() + direction1.getX() * tempAlphaBeta.get()[0], point1.getY() + direction1.getY() * tempAlphaBeta.get()[0], intersectionToPack.getZ());
    }
-
-   /**
-    * Finds the intersection between two 2D lines.
-    * Each line is represented as a Point2d and a Vector2d.
-    * This should work as long as the two lines are not parallel.
-    * If they are parallel, it tries to return something without crashing.
-    *
-    * @param point1 Start Point of first line.
-    * @param vector1 Direction Vector of first line.
-    * @param point2 Start Point of second line.
-    * @param vector2 Direction Vector of second line.
-    * @return Point of Intersection.
-    * @deprecated Creates garbage. Use {@link GeometryTools.intersection}.
-    * TODO ensure consistant with line2D
-    */
-   public static Point2d getIntersectionBetweenTwoLines(Point2d point1, Vector2d vector1, Point2d point2, Vector2d vector2)
+   
+   public static void getIntersectionBetweenTwoLines2d(Tuple2d intersectionToPack, Tuple2d point1, Tuple2d direction1, Tuple2d point2, Tuple2d direction2)
    {
-      Line2d line1 = new Line2d(point1, vector1);
-      Line2d line2 = new Line2d(point2, vector2);
-
-      return line1.intersectionWith(line2);
+      GeometryTools.intersection(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(), direction2.getY(), tempAlphaBeta.get());
+      
+      if (Double.isNaN(tempAlphaBeta.get()[0]) || Double.isNaN(tempAlphaBeta.get()[1]))
+         throw new UndefinedOperationException("Lines are parallel.");
+      
+      intersectionToPack.set(point1.getX() + direction1.getX() * tempAlphaBeta.get()[0], point1.getY() + direction1.getY() * tempAlphaBeta.get()[0]);
+   }
+   
+   public static void getIntersectionBetweenTwoLines2d(Tuple3d intersectionToPack, Tuple3d point1, Tuple3d direction1, Tuple3d point2, Tuple3d direction2)
+   {
+      GeometryTools.intersection(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(), direction2.getY(), tempAlphaBeta.get());
+      
+      if (Double.isNaN(tempAlphaBeta.get()[0]) || Double.isNaN(tempAlphaBeta.get()[1]))
+         throw new UndefinedOperationException("Lines are parallel.");
+      
+      intersectionToPack.set(point1.getX() + direction1.getX() * tempAlphaBeta.get()[0], point1.getY() + direction1.getY() * tempAlphaBeta.get()[0], intersectionToPack.getZ());
    }
 
    /**
