@@ -6,7 +6,7 @@ import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
-import us.ihmc.aware.planning.PiecewisePeriodicDCMTrajectory;
+import us.ihmc.aware.planning.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
 import us.ihmc.aware.state.StateMachine;
@@ -107,7 +107,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final AxisAngleOrientationController bodyOrientationController;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrantDependentList<EuclideanPositionController> swingPositionController;
-   private final PiecewisePeriodicDCMTrajectory nominalPeriodicDcmTrajectory;
+   private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
 
    // state machines
    public enum TrotState
@@ -265,7 +265,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
-      nominalPeriodicDcmTrajectory = new PiecewisePeriodicDCMTrajectory(1, gravity, params.get(COM_HEIGHT_NOMINAL), null);
+      nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, params.get(COM_HEIGHT_NOMINAL), null);
 
       // controllers
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);

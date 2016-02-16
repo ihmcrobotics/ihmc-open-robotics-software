@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class PiecewisePeriodicDCMTrajectory
+public class PiecewisePeriodicDcmTrajectory
 {
    private boolean initialized;
    private final int numberOfSteps;
@@ -22,7 +22,7 @@ public class PiecewisePeriodicDCMTrajectory
    private final DenseMatrix64F x = new DenseMatrix64F(3, 1);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public PiecewisePeriodicDCMTrajectory(int numberOfSteps, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public PiecewisePeriodicDcmTrajectory(int numberOfSteps, double gravity, double comHeight, YoVariableRegistry parentRegistry)
    {
       if (numberOfSteps < 1)
          throw new RuntimeException("numberOfSteps must be greater than 0");
@@ -54,26 +54,32 @@ public class PiecewisePeriodicDCMTrajectory
     *
     * @param timeAtSoS time at the start of each step
     * @param cmpPositionAtSoS centroidal moment pivot position at the start of each step
+    * @param timeAtEoS time at the end of the final step
+    * @param cmpPositionAtEoS centroidal moment pivot position at the end of the final step
     * @param relativeYawAtEoS relative yaw angle at end of the final step
     */
-   public void initializeTrajectory(double[] timeAtSoS, FramePoint[] cmpPositionAtSoS, double relativeYawAtEoS)
+   public void initializeTrajectory(double[] timeAtSoS, FramePoint[] cmpPositionAtSoS, double timeAtEoS, FramePoint cmpPositionAtEoS, double relativeYawAtEoS)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double naturalFrequency = Math.sqrt(gravity / comHeight);
 
-      if ((timeAtSoS.length != numberOfSteps + 1) || (cmpPositionAtSoS.length != numberOfSteps + 1))
+      if ((timeAtSoS.length != numberOfSteps) || (cmpPositionAtSoS.length != numberOfSteps))
       {
-         throw new RuntimeException("length of input vector must be equal to the number of steps plus one");
+         throw new RuntimeException("length of input vector must be equal to the number of steps");
       }
 
       // compute initial dcm position assuming a periodic gait
-      for (int i = 0; i <= numberOfSteps; i++)
+      for (int i = 0; i < numberOfSteps; i++)
       {
          this.timeAtSoS[i] = timeAtSoS[i];
          this.vrpPositionAtSoS[i].setIncludingFrame(cmpPositionAtSoS[i]);
          this.vrpPositionAtSoS[i].changeFrame(worldFrame);
          this.vrpPositionAtSoS[i].add(0, 0, comHeight);
       }
+      this.timeAtSoS[numberOfSteps] = timeAtEoS;
+      this.vrpPositionAtSoS[numberOfSteps].setIncludingFrame(cmpPositionAtEoS);
+      this.vrpPositionAtSoS[numberOfSteps].changeFrame(worldFrame);
+      this.vrpPositionAtSoS[numberOfSteps].add(0, 0, comHeight);
 
       // A = (R - e^(w(t[n] - t[0])) * I)^-1
       A.zero();
@@ -84,7 +90,7 @@ public class PiecewisePeriodicDCMTrajectory
       A.set(2, 2, 1);
       for (int i = 0; i < 3; i++)
       {
-         A.add(i, i, -Math.exp(naturalFrequency * (timeAtSoS[numberOfSteps] - timeAtSoS[0])));
+         A.add(i, i, -Math.exp(naturalFrequency * (this.timeAtSoS[numberOfSteps] - this.timeAtSoS[0])));
       }
       CommonOps.invert(A);
 
@@ -92,7 +98,7 @@ public class PiecewisePeriodicDCMTrajectory
       for (int i = 0; i < numberOfSteps; i++)
       {
          // x = e^(w(t[i + 1] - t[i])) * x + vrp[i] - vrp[i + 1]
-         CommonOps.scale(Math.exp(naturalFrequency * (timeAtSoS[i + 1] - timeAtSoS[i])), x);
+         CommonOps.scale(Math.exp(naturalFrequency * (this.timeAtSoS[i + 1] - this.timeAtSoS[i])), x);
          x.add(0, 0, this.vrpPositionAtSoS[i].getX());
          x.add(1, 0, this.vrpPositionAtSoS[i].getY());
          x.add(2, 0, this.vrpPositionAtSoS[i].getZ());
@@ -115,7 +121,7 @@ public class PiecewisePeriodicDCMTrajectory
       {
          this.dcmPositionAtSoS[i + 1].set(this.dcmPositionAtSoS[i]);
          this.dcmPositionAtSoS[i + 1].sub(this.vrpPositionAtSoS[i]);
-         this.dcmPositionAtSoS[i + 1].scale(Math.exp(naturalFrequency * (timeAtSoS[i + 1] - timeAtSoS[i])));
+         this.dcmPositionAtSoS[i + 1].scale(Math.exp(naturalFrequency * (this.timeAtSoS[i + 1] - this.timeAtSoS[i])));
          this.dcmPositionAtSoS[i + 1].add(this.vrpPositionAtSoS[i]);
       }
       this.initialized = true;
@@ -138,10 +144,7 @@ public class PiecewisePeriodicDCMTrajectory
             dcmPosition.scale(Math.exp(naturalFrequency * (currentTime - timeAtSoS[i])));
             dcmPosition.add(vrpPositionAtSoS[i]);
             dcmVelocity.set(dcmPosition);
-            if (currentTime == timeAtSoS[i + 1])
-               dcmVelocity.sub(vrpPositionAtSoS[i + 1]);
-            else
-               dcmVelocity.sub(vrpPositionAtSoS[i]);
+            dcmVelocity.sub(vrpPositionAtSoS[i]);
             dcmVelocity.scale(naturalFrequency);
             break;
          }
@@ -162,30 +165,30 @@ public class PiecewisePeriodicDCMTrajectory
    {
       double comHeight = 1.0;
       double gravity = 9.81;
-      PiecewisePeriodicDCMTrajectory dcmTrajectory = new PiecewisePeriodicDCMTrajectory(2, gravity, comHeight, null);
+      PiecewisePeriodicDcmTrajectory dcmTrajectory = new PiecewisePeriodicDcmTrajectory(2, gravity, comHeight, null);
 
-      FramePoint[] cmpPosition = new FramePoint[3];
-      cmpPosition[0] = new FramePoint(ReferenceFrame.getWorldFrame());
-      cmpPosition[1] = new FramePoint(ReferenceFrame.getWorldFrame());
-      cmpPosition[2] = new FramePoint(ReferenceFrame.getWorldFrame());
-      cmpPosition[0].set(0, 0, 0);
-      cmpPosition[1].set(0, -0.4, 0);
-      cmpPosition[2].set(0, -0.2, 0);
-      double[] time = new double[] {0.0, 0.4, 0.8};
-      double relativeYaw = 0.0;
+      double[] timeAtSoS = new double[] {0.0, 0.4};
+      FramePoint[] cmpPositionAtSoS = new FramePoint[2];
+      cmpPositionAtSoS[0] = new FramePoint(ReferenceFrame.getWorldFrame());
+      cmpPositionAtSoS[1] = new FramePoint(ReferenceFrame.getWorldFrame());
+      cmpPositionAtSoS[0].set(0.0, 0.0, 0.0);
+      cmpPositionAtSoS[1].set(0.0,-0.4, 0.0);
 
-      dcmTrajectory.initializeTrajectory(time, cmpPosition, relativeYaw);
+      double timeAtEoS = 0.8;
+      FramePoint cmpPositionAtEoS = new FramePoint(ReferenceFrame.getWorldFrame());
+      cmpPositionAtEoS.set(0.0, -0.2, 0.0);
+
+      dcmTrajectory.initializeTrajectory(timeAtSoS, cmpPositionAtSoS, timeAtEoS, cmpPositionAtEoS, 0.0);
 
       FramePoint dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-      FrameVector dcmVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-      for (int i = 0; i < time.length; i++)
-      {
-         dcmTrajectory.computeTrajectory(time[i]);
-         dcmTrajectory.getPosition(dcmPosition);
-         dcmTrajectory.getVelocity(dcmVelocity);
-         dcmPosition.sub(cmpPosition[i]);
-         System.out.println("dcm-cmp offset at step " + i + " : " + dcmPosition);
-      }
+      dcmTrajectory.computeTrajectory(timeAtSoS[0]);
+      dcmTrajectory.getPosition(dcmPosition);
+      dcmPosition.sub(cmpPositionAtSoS[0]);
+      System.out.println("dcm-cmp offset at start of first step : " + dcmPosition);
+      dcmTrajectory.computeTrajectory(timeAtEoS);
+      dcmTrajectory.getPosition(dcmPosition);
+      dcmPosition.sub(cmpPositionAtEoS);
+      System.out.println("dcm-cmp offset at end of final step   : " + dcmPosition);
    }
 }
 
