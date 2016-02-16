@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import java.awt.Color;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -38,6 +39,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
@@ -49,6 +51,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -116,6 +119,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final FramePoint tempCoMPosition = new FramePoint();
    private final ReferenceFrame feedForwardBodyFrame;
    private final ReferenceFrame comFrame;
+   private final DoubleYoVariable feedForwardCenterOfMassOffsetAlpha;
+   private final YoFramePoint feedForwardCenterOfMassOffset;
+   private final AlphaFilteredYoFramePoint filteredFeedForwardCenterOfMassOffset;
+   
+   private final TranslationReferenceFrame feedForwardCenterOfMassFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -313,6 +321,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       feedForwardFullRobotModel = robotParameters.createFullRobotModel();
       this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator());
       feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      feedForwardCenterOfMassFrame = new TranslationReferenceFrame("offsetFeedForwardCenterOfMassFrame", feedForwardReferenceFrames.getCenterOfMassFrame());
       feedForwardReferenceFrames.updateFrames();
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
 //      this.nextSwingLegChooser = new QuadrupedGaitSwingLegChooser(feedForwardReferenceFrames, registry, yoGraphicsListRegistry);
@@ -355,8 +364,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
       timeToFilterDesiredAtCrawlStart.set(4.0);
       
-      comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", referenceFrames.getCenterOfMassFrame(), registry, 0.25, YoAppearance.Green());
-      feedForwardCoMPoseYoGraphic = new YoGraphicReferenceFrame("feedForwardRasta_", feedForwardReferenceFrames.getCenterOfMassFrame(), registry, 0.25, YoAppearance.Purple());
+      comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", comFrame, registry, 0.25, YoAppearance.Green());
+      feedForwardCoMPoseYoGraphic = new YoGraphicReferenceFrame("feedForwardRasta_", feedForwardCenterOfMassFrame, registry, 0.25, YoAppearance.Purple());
+      
+      feedForwardCenterOfMassOffsetAlpha = new DoubleYoVariable("feedForwardCenterOfMassOffsetAlpha", registry);
+      feedForwardCenterOfMassOffsetAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, dt));
+      feedForwardCenterOfMassOffset = new YoFramePoint("feedForwardCenterOfMassOffset", feedForwardCenterOfMassFrame, registry);
+      filteredFeedForwardCenterOfMassOffset = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint("filteredFeedForwardCenterOfMassOffset", "", registry, feedForwardCenterOfMassOffsetAlpha, feedForwardCenterOfMassOffset);
       
 
       leftMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.LEFT), registry, 0.2);
@@ -674,7 +688,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       feedForwardReferenceFrames.updateFrames();
       
-      centerOfMassFramePoint.setToZero(feedForwardReferenceFrames.getCenterOfMassFrame());
+      centerOfMassFramePoint.setToZero(feedForwardCenterOfMassFrame);
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassPosition.set(centerOfMassFramePoint);
       desiredCoMPosition.set(centerOfMassPosition);
@@ -738,7 +752,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 //	   rootJoint.packTranslation(rootJointPosition);
 //	   feedForwardRootJoint.setPosition(rootJointPosition);
 	   
-	   centerOfMassInBody.setIncludingFrame(feedForwardReferenceFrames.getCenterOfMassFrame(), 0.0, 0.0, 0.0);
+	   centerOfMassInBody.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
 	   centerOfMassInBody.changeFrame(feedForwardRootJoint.getFrameAfterJoint());
 	   
 	   vectorToSubtractHolder.setIncludingFrame(feedForwardFullRobotModel.getRootJoint().getFrameAfterJoint(), centerOfMassInBody.getPoint());
@@ -781,6 +795,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       }
    }
    
+   private final Point3d centerOfMassOffset = new Point3d();
    private final FramePoint actualFootLocation = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
    /**
@@ -788,8 +803,12 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private void updateEstimates()
    {
+      filteredFeedForwardCenterOfMassOffset.update();
+      filteredFeedForwardCenterOfMassOffset.get(centerOfMassOffset);
+      feedForwardCenterOfMassFrame.updateTranslation(centerOfMassOffset);
+      
       // compute center of mass position and velocity
-      feedForwardCoMPosition.setIncludingFrame(feedForwardReferenceFrames.getCenterOfMassFrame(), 0.0, 0.0, 0.0);
+      feedForwardCoMPosition.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
       feedForwardCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardCenterOfMassJacobian.compute();
       feedForwardCenterOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
@@ -958,8 +977,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       desiredFootPosition.changeFrame(desiredCoMPoseReferenceFrame);
 
       // Fix this for feed forward!!!
-      desiredFootPositionInBody.setIncludingFrame(comFrame, desiredFootPosition.getPoint());
-      desiredFootPositionInBody.changeFrame(referenceFrames.getLegAttachmentFrame(robotQuadrant));
+      desiredFootPositionInBody.setIncludingFrame(feedForwardCenterOfMassFrame, desiredFootPosition.getPoint());
+      desiredFootPositionInBody.changeFrame(feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant));
 
       desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInBody.getPoint());
    }
@@ -1378,7 +1397,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             break;
             
          case TTR:
-            trippleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfTriangle(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
+            trippleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfPolygon(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
             break;
             
          case TROTLINE_MIDPOINT:
@@ -1607,7 +1626,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          double radius = subCircleRadius.getDoubleValue();
          if(useSubCircleForBodyShiftTarget.getBooleanValue())
          {
-            ttrCircleSuccess = commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangle(upcommingSwingLeg, radius, comTargetToPack);
+            ttrCircleSuccess = commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(upcommingSwingLeg, radius, comTargetToPack);
          }
          
          if(!ttrCircleSuccess && commonSupportPolygon.size() >= 3)

@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.13'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
 }
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
@@ -14,6 +14,12 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 
 
 repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+   mavenLocal()
+   jcenter()
+   mavenCentral()
+}
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
