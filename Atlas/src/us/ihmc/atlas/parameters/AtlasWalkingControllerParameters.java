@@ -949,24 +949,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.3818;
-   }
-
-   @Override
-   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.7049;
-   }
-
-   @Override
-   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.7749;
-   }
-
-   @Override
    public double pelvisToAnkleThresholdForWalking()
    {
       return 0.623;
