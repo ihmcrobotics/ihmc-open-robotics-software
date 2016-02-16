@@ -345,47 +345,10 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       tempAngularVelocity.scale(piInteger.getIntegerValue() * Math.PI);
       controlAngularVelocities[2].add(tempAngularVelocity);
 
-      //      System.out.println(controlAngularVelocities[2]);
-      //
-      //      Quat4d tempQuatForOlger = new Quat4d();
-      //
-      //      System.out.println(tempControlQuaternions[0]);
-      //      tempQuatForOlger.set(tempControlQuaternions[0]);
-      //      quaternionCalculus.exp(controlAngularVelocities[1].getVector3dCopy(),tempQuatForControlQuats);
-      //      tempQuatForOlger.mul(tempQuatForControlQuats);
-      //      System.out.println(tempQuatForControlQuats);
-      //
-      //      quaternionCalculus.inverseMultiply(tempControlQuaternions[0], tempControlQuaternions[1], tempQuatForControlQuats);
-      //      System.out.println(tempQuatForControlQuats);
-      //      quaternionCalculus.exp(controlAngularVelocities[2].getVector3dCopy(),tempQuatForControlQuats);
-      //      tempQuatForOlger.mul(tempQuatForControlQuats);
-      //      System.out.println(tempQuatForControlQuats);
-      //
-      //      quaternionCalculus.inverseMultiply(tempControlQuaternions[1], tempControlQuaternions[2], tempQuatForControlQuats);
-      //      System.out.println(tempQuatForControlQuats);
-      //      quaternionCalculus.exp(controlAngularVelocities[3].getVector3dCopy(),tempQuatForControlQuats);
-      //      tempQuatForOlger.mul(tempQuatForControlQuats);
-      //
-      //      System.out.println(tempQuatForControlQuats);
-      //      quaternionCalculus.inverseMultiply(tempControlQuaternions[2], tempControlQuaternions[3], tempQuatForControlQuats);
-      //      System.out.println(tempQuatForControlQuats);
-      //      System.out.println("qb should be : " + tempQuatForOlger);
-      //
-      //      tempAngularVelocity.set(controlAngularVelocities[3].getVector3dCopy());
-      ////      tempAngularVelocity.scale(3);
-      //      quaternionCalculus.multiply(tempControlQuaternions[3], tempAngularVelocity, tempQuatForOlger);
-      //      System.out.println(tempQuatForOlger);
-      //      System.out.println(controlAngularVelocities[3].getVector3dCopy());
-
-
-
       for (int i = 0; i <= 3; i++)
       {
          controlQuaternions[i].set(tempControlQuaternions[i]);
-         //      System.out.println(controlQuaternions[i]);
       }
-
-      //      System.out.println("end");
    }
 
    private final Vector3d tempAngularVelocity = new Vector3d();
@@ -427,12 +390,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       interpolateOrientation(time, qInterpolated);
 
       quaternionCalculus.computeQDotByFiniteDifferenceCentral(qInterpolatedPrevious, qInterpolatedNext, dtForFiniteDifference, qDot);
-
-      //      interpolateQdot(time, qDot);
-      //      qDotOldVersion.sub(qDot);
-      //      System.out.println(qDotOldVersion);
-      //      qDot.set(qDotOldVersion);
-
 
       quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qInterpolatedPrevious, qInterpolated, qInterpolatedNext, dtForFiniteDifference, qDDot);
 
