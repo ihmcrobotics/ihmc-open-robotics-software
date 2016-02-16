@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.13'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
 }
 
 
@@ -10,6 +10,12 @@ version = '1.0'
 
 
 repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+   mavenLocal()
+   jcenter()
+   mavenCentral()
+}
 
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
