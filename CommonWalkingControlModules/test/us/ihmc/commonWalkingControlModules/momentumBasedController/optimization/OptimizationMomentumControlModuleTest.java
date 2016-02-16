@@ -114,7 +114,7 @@ public class OptimizationMomentumControlModuleTest
       InverseDynamicsJoint[] revoluteJointsArray = revoluteJoints.toArray(new InverseDynamicsJoint[revoluteJoints.size()]);
       DenseMatrix64F desiredJointAccelerations = setRandomJointAccelerations(random, momentumControlModule, revoluteJoints);
 
-      MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates);
+      MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
 
       SpatialForceVector momentumRateOfChangeOut = momentumModuleSolution.getCentroidalMomentumRateSolution();
       Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
@@ -179,7 +179,7 @@ public class OptimizationMomentumControlModuleTest
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModule.compute(contactStates);
+         momentumModuleSolution = momentumControlModule.compute();
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {
@@ -249,7 +249,7 @@ public class OptimizationMomentumControlModuleTest
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModule.compute(contactStates);
+         momentumModuleSolution = momentumControlModule.compute();
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {
@@ -328,7 +328,7 @@ public class OptimizationMomentumControlModuleTest
          DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);
          momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
 
-         MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates);
+         MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
 
          SpatialForceVector momentumRateOfChangeOut = momentumModuleSolution.getCentroidalMomentumRateSolution();
          Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
@@ -404,7 +404,7 @@ public class OptimizationMomentumControlModuleTest
       MomentumModuleSolution momentumModuleSolution;
       try
       {
-         momentumModuleSolution = momentumControlModule.compute(contactStates);
+         momentumModuleSolution = momentumControlModule.compute();
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {
@@ -495,7 +495,7 @@ public class OptimizationMomentumControlModuleTest
       DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
       momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
 
-      MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute(contactStates);
+      MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
 
       NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
