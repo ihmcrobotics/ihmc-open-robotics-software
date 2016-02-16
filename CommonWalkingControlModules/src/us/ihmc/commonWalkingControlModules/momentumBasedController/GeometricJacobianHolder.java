@@ -9,6 +9,12 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
+/*
+ * Change the strategy to be less expensive in terms of computation.
+ * The method compute() should be replaced a method reset() which should flip a boolean somehow linked to each jacobian indicating that they need to be updated.
+ * When a getter is called, call GeometricJacobian.compute() only if needed.
+ * That should allow the user to create as many jacobian as needed and update only the ones that are actually being used.
+ */
 public class GeometricJacobianHolder
 {
    private final List<GeometricJacobian> geometricJacobians = new ArrayList<GeometricJacobian>();
