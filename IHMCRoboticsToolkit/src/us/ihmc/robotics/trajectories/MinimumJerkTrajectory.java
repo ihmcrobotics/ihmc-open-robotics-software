@@ -40,7 +40,16 @@ public class MinimumJerkTrajectory
       return timeInMove;
    }
 
-
+   /**
+    * Calling this method will reset the timeInMove value from a previous move.
+    * @param X0
+    * @param V0
+    * @param A0
+    * @param Xf
+    * @param Vf
+    * @param Af
+    * @param moveDuration
+    */
    public void setMoveParameters(double X0, double V0, double A0, double Xf, double Vf, double Af, double moveDuration)
    {
       if (moveDuration <= 0.0)
@@ -58,6 +67,7 @@ public class MinimumJerkTrajectory
       C4 = 15.0000 * X0 + 8.0000 * V0 * DT + 1.5000 * A0 * DT2 - 15.0000 * Xf + 7.0000 * Vf * DT - 1.0000 * Af * DT2;
       C5 = -6.0000 * X0 - 3.0000 * V0 * DT - 0.5000 * A0 * DT2 + 6.0000 * Xf - 3.0000 * Vf * DT + 0.5000 * Af * DT2;
 
+      this.timeInMove = 0.0;
       moveInitialized = true;
    }
 

@@ -57,6 +57,10 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final PoseReferenceFrame centerOfFourHipsFrame;
    private final FramePose centerOfFourHipsFramePose;
    private final FramePoint centerOfFourHipsFramePoint = new FramePoint();
+   
+   private final PoseReferenceFrame centerOfFourFeetFrame;
+   private final FramePose centerOfFourFeetFramePose;
+   private final FramePoint centerOfFourFeetFramePoint = new FramePoint();
 
    public QuadrupedReferenceFrames(SDFFullRobotModel fullRobotModel, QuadrupedJointNameMap quadrupedJointNameMap, QuadrupedPhysicalProperties quadrupedPhysicalProperties)
    {
@@ -149,6 +153,9 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       
       centerOfFourHipsFramePose = new FramePose(bodyFrame);
       centerOfFourHipsFrame = new PoseReferenceFrame("centerOfFourHipsFrame", bodyFrame);
+      
+      centerOfFourFeetFramePose = new FramePose(bodyFrame);
+      centerOfFourFeetFrame = new PoseReferenceFrame("centerOfFourFeetFrame", bodyFrame);
       updateHipsCentroid();
       
       initializeCommonValues();
@@ -170,6 +177,26 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfFourHipsFramePoint.scale(0.25);
       centerOfFourHipsFramePose.setPosition(centerOfFourHipsFramePoint);
       centerOfFourHipsFrame.setPoseAndUpdate(centerOfFourHipsFramePose);
+   }
+   
+   private final FramePoint soleFramePointTemp = new FramePoint();
+   private void updateFeetCentroid()
+   {
+      centerOfFourFeetFramePose.setToZero(bodyFrame);
+      centerOfFourFeetFramePoint.setToZero(bodyFrame);
+      
+      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         ReferenceFrame soleFrame = soleFrames.get(quadrant);
+         soleFramePointTemp.setToZero(soleFrame);
+         
+         soleFramePointTemp.changeFrame(bodyFrame);
+         centerOfFourFeetFramePoint.add(soleFramePointTemp);
+         
+      }
+      centerOfFourFeetFramePoint.scale(0.25);
+      centerOfFourFeetFramePose.setPosition(centerOfFourFeetFramePoint);
+      centerOfFourFeetFrame.setPoseAndUpdate(centerOfFourFeetFramePose);
    }
 
    public static ReferenceFrame getWorldFrame()
@@ -313,11 +340,17 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfMassZUpFrame.update();
       
       updateHipsCentroid();
+      updateFeetCentroid();
    }
 
    @Override
    public ReferenceFrame getCenterOfFourHipsFrame()
    {
       return centerOfFourHipsFrame;
+   }
+
+   public ReferenceFrame getCenterOfFourFeetFrame()
+   {
+      return centerOfFourFeetFrame;
    }
 }
