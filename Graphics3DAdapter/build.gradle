@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.12'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
 }
 
 
@@ -15,6 +15,12 @@ project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+   mavenLocal()
+   jcenter()
+   mavenCentral()
+}
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
@@ -38,8 +44,9 @@ dependencies {
 	compile group: 'com.jme3', name: 'jme3-terrain', version: '3.1.0-SNAPSHOT'
 	compile group: 'com.jme3', name: 'jme3-effects', version: '3.1.0-SNAPSHOT'
 	compile group: 'com.jme3', name: 'jme3-plugins', version: '3.1.0-SNAPSHOT'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-dae', version: '1.0.0-internal1'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-ogre', version: '1.0.0-internal2'
+	compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-dae', version: '1.0.1'
+	compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-ogre', version: '1.0.1'
+	compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-shape3d', version: '1.0.1'
 	compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'

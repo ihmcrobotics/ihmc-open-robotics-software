@@ -60,7 +60,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    
    private final YoFramePoint miniCircleCenter = new YoFramePoint("miniCircleCenter", ReferenceFrame.getWorldFrame(), registry);
    
-   private final BooleanYoVariable miniCircleRadiusSuccess = new BooleanYoVariable("miniCircleRadiusSuccess", registry);
+//   private final BooleanYoVariable miniCircleRadiusSuccess = new BooleanYoVariable("miniCircleRadiusSuccess", registry);
    private final DoubleYoVariable miniCircleRadius = new DoubleYoVariable("miniCircleRadius", registry);
    private final YoArtifactCircle miniCircle = new YoArtifactCircle("miniCircle", miniCircleCenter, miniCircleRadius, Color.YELLOW);
    
@@ -207,16 +207,12 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       inscribedCircleRadius.set(radius);
       
       FramePoint2d centerOfMiniCircle = new FramePoint2d();
-      if (supportPolygon.size() == 3)
+      if (supportPolygon.size() >= 3)
       {
-         boolean successful = supportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
+         supportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_LEFT, miniCircleRadius.getDoubleValue(), centerOfMiniCircle);
 
-         miniCircleRadiusSuccess.set(successful);
-         if (successful)
-         {
-            miniCircleCenter.setX(centerOfMiniCircle.getX());
-            miniCircleCenter.setY(centerOfMiniCircle.getY());
-         }
+         miniCircleCenter.setX(centerOfMiniCircle.getX());
+         miniCircleCenter.setY(centerOfMiniCircle.getY());
       }
       ThreadTools.sleep(10);
    }

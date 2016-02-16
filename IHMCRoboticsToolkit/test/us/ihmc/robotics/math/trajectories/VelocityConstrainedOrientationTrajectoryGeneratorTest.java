@@ -15,12 +15,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = false;
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 2.0)
+   @Test(timeout = 10000)
    public void testDerivativesConsistency() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -82,7 +84,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 2000)
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -112,7 +115,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
          traj.compute(0.0 + dt);
          traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-         double epsilon = 1.0e-4;
+         double epsilon = 5.0e-5;
+         double accelerationEpsilon = 5.0e-4;
          assertTrue(initialOrientation.epsilonEquals(currentOrientation, epsilon));
          boolean goodInitialVelocity = initialAngularVelocity.epsilonEquals(currentAngularVelocity, epsilon);
          if (DEBUG && !goodInitialVelocity)
@@ -123,7 +127,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
             printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
          }
          assertTrue(goodInitialVelocity);
-         boolean goodInitialAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, epsilon);
+         boolean goodInitialAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
          assertTrue(goodInitialAngularAcceleration);
 
          traj.compute(trajectoryTime - dt);
@@ -131,7 +135,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 
          assertTrue(finalOrientation.epsilonEquals(currentOrientation, epsilon));
          assertTrue(finalAngularVelocity.epsilonEquals(currentAngularVelocity, epsilon));
-         boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, epsilon);
+         boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
          if (DEBUG && !goodFinalAngularAcceleration)
          {
             System.out.println("Bad final acceleration: " + currentAngularAcceleration);
@@ -141,7 +145,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.6)
+   @Test(timeout = 2000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -242,7 +247,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.4)
+   @Test(timeout = 2000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
