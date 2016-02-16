@@ -115,8 +115,8 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
       referenceSignalBuffer.reshape(bufferSize, 1);
       delayedSignalBuffer.reshape(bufferSize, 1);
 
-      correlationBuffer.reshape(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 0);
-      filteredCorrelationBuffer.reshape(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 0);
+      correlationBuffer.reshape(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
+      filteredCorrelationBuffer.reshape(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
    }
 
    public void setEstimationParameters(double maxAbsoluteLead, double maxAbsoluteLag, double observationWindow)
