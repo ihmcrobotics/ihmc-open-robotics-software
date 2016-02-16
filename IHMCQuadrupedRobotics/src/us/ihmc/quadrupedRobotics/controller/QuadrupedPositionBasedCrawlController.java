@@ -440,7 +440,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
 //      for (int i = 0; i < tripleSupportPolygons.length; i++)
 //      {
-//         String polygonName = "trippleSupport" + i;
+//         String polygonName = "tripleSupport" + i;
 //         YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
 //         tripleSupportPolygons[i] = yoFrameConvexPolygon2d;
 //
@@ -1205,10 +1205,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private final QuadrupedSupportPolygon quadStateAfterThirdStep = new QuadrupedSupportPolygon();
       
       private final QuadrantDependentList<QuadrupedSupportPolygon> upcommingTrippleSupportPolygons = new QuadrantDependentList<>();
-      private final QuadrupedSupportPolygon trippleStateWithFirstStepSwinging = new QuadrupedSupportPolygon();
-      private final QuadrupedSupportPolygon trippleStateAfterFirstStepWithSecondSwinging = new QuadrupedSupportPolygon();
-      private final QuadrupedSupportPolygon trippleStateAfterSecondStepWithThirdSwinging = new QuadrupedSupportPolygon();
-      private final QuadrupedSupportPolygon trippleStateAfterThirdStepWithFourthSwinging = new QuadrupedSupportPolygon(); 
+      private final QuadrupedSupportPolygon tripleStateWithFirstStepSwinging = new QuadrupedSupportPolygon();
+      private final QuadrupedSupportPolygon tripleStateAfterFirstStepWithSecondSwinging = new QuadrupedSupportPolygon();
+      private final QuadrupedSupportPolygon tripleStateAfterSecondStepWithThirdSwinging = new QuadrupedSupportPolygon();
+      private final QuadrupedSupportPolygon tripleStateAfterThirdStepWithFourthSwinging = new QuadrupedSupportPolygon(); 
       private final QuadrupedSupportPolygon temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg = new QuadrupedSupportPolygon();
       
       private final QuadrantDependentList<QuadrupedSupportPolygon> estimatedCommonTriangle = new QuadrantDependentList<>();
@@ -1363,8 +1363,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          FramePoint2d comProjectionOnOutsideLegs2d = new FramePoint2d(ReferenceFrame.getWorldFrame());
          FramePoint comProjectionOnOutsideLegs = new FramePoint(ReferenceFrame.getWorldFrame());
          
-         QuadrupedSupportPolygon trippleStateWithoutCurrentSwing = new QuadrupedSupportPolygon();
-         fourFootSupportPolygon.getAndRemoveFootstep(trippleStateWithoutCurrentSwing, currentSwingLeg);
+         QuadrupedSupportPolygon tripleStateWithoutCurrentSwing = new QuadrupedSupportPolygon();
+         fourFootSupportPolygon.getAndRemoveFootstep(tripleStateWithoutCurrentSwing, currentSwingLeg);
          
          switch(safeToShiftMode.getEnumValue())
          {
@@ -1380,7 +1380,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             break;
             
          case CENTROID:
-            trippleStateWithoutCurrentSwing.getCentroid2d(circleCenter2d);
+            tripleStateWithoutCurrentSwing.getCentroid2d(circleCenter2d);
             break;
             
          case COM_INCIRCLE:
@@ -1397,7 +1397,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             break;
             
          case TTR:
-            trippleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfPolygon(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
+            tripleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfPolygon(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
             break;
             
          case TROTLINE_MIDPOINT:
@@ -1408,7 +1408,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             FrameVector2d perpendicularBisector = new FrameVector2d();
             lineSegment.getPerpendicularBisector(perpendicularBisector, bisectorLengthDesired);
             circleCenter2d.add(midpoint, perpendicularBisector);
-            if(!trippleStateWithoutCurrentSwing.isInside(circleCenter2d))
+            if(!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))
             {
                perpendicularBisector.scale(-1.0);
                circleCenter2d.add(midpoint, perpendicularBisector);
@@ -1419,10 +1419,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          /**
           * something went wrong! 
           */
-         if(!trippleStateWithoutCurrentSwing.isInside(circleCenter2d))
+         if(!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))
          {
             System.err.println(safeToShiftMode + " tried to shift outside of the support polygon. Fix this");
-            trippleStateWithoutCurrentSwing.getCentroid2d(circleCenter2d);
+            tripleStateWithoutCurrentSwing.getCentroid2d(circleCenter2d);
          }
        
          initializeCoMTrajectory(circleCenter2d);
@@ -1521,33 +1521,33 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          swingTargetGenerator.getSwingTarget(quadStateAfterSecondStep, thirdSwingLeg, desiredVelocityVector, swingDesired, yawRate);
          quadStateAfterSecondStep.getAndReplaceFootstep(quadStateAfterThirdStep, thirdSwingLeg, swingDesired);
          
-         quadStateAfterFirstStep.getAndRemoveFootstep(trippleStateWithFirstStepSwinging, secondSwingLeg);
-         quadStateAfterFirstStep.getAndRemoveFootstep(trippleStateAfterFirstStepWithSecondSwinging, secondSwingLeg);
-         quadStateAfterSecondStep.getAndRemoveFootstep(trippleStateAfterSecondStepWithThirdSwinging, thirdSwingLeg);
-         quadStateAfterThirdStep.getAndRemoveFootstep(trippleStateAfterThirdStepWithFourthSwinging, fourthSwingLeg);
+         quadStateAfterFirstStep.getAndRemoveFootstep(tripleStateWithFirstStepSwinging, secondSwingLeg);
+         quadStateAfterFirstStep.getAndRemoveFootstep(tripleStateAfterFirstStepWithSecondSwinging, secondSwingLeg);
+         quadStateAfterSecondStep.getAndRemoveFootstep(tripleStateAfterSecondStepWithThirdSwinging, thirdSwingLeg);
+         quadStateAfterThirdStep.getAndRemoveFootstep(tripleStateAfterThirdStepWithFourthSwinging, fourthSwingLeg);
          
-         drawSupportPolygon(trippleStateWithFirstStepSwinging, tripleSupportPolygons.get(firstSwingLeg));
-         drawSupportPolygon(trippleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons.get(secondSwingLeg));
+         drawSupportPolygon(tripleStateWithFirstStepSwinging, tripleSupportPolygons.get(firstSwingLeg));
+         drawSupportPolygon(tripleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons.get(secondSwingLeg));
          QuadrupedSupportPolygon firstAndSecondCommonPolygon = new QuadrupedSupportPolygon(); 
-         trippleStateWithFirstStepSwinging.getShrunkenCommonTriangle2d(trippleStateAfterFirstStepWithSecondSwinging, firstAndSecondCommonPolygon, firstSwingLeg, shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue());
+         tripleStateWithFirstStepSwinging.getShrunkenCommonTriangle2d(tripleStateAfterFirstStepWithSecondSwinging, firstAndSecondCommonPolygon, firstSwingLeg, shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue());
          estimatedCommonTriangle.set(firstSwingLeg, firstAndSecondCommonPolygon);
          estimatedCommonTriangle.set(firstSwingLeg.getSameSideQuadrant(), new QuadrupedSupportPolygon());
          firstAndSecondCommonPolygon.getAndSwapSameSideFootsteps(estimatedCommonTriangle.get(firstSwingLeg.getSameSideQuadrant()), firstSwingLeg.getSide());
          drawSupportPolygon(firstAndSecondCommonPolygon, commonTriplePolygons.get(firstSwingLeg.getSide()));
          
-         drawSupportPolygon(trippleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons.get(thirdSwingLeg));
-         drawSupportPolygon(trippleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons.get(fourthSwingLeg));
+         drawSupportPolygon(tripleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons.get(thirdSwingLeg));
+         drawSupportPolygon(tripleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons.get(fourthSwingLeg));
          QuadrupedSupportPolygon secondAndThirdCommonPolygon = new QuadrupedSupportPolygon();
-         trippleStateAfterFirstStepWithSecondSwinging.getShrunkenCommonTriangle2d(trippleStateAfterSecondStepWithThirdSwinging, secondAndThirdCommonPolygon, secondSwingLeg, shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue());
+         tripleStateAfterFirstStepWithSecondSwinging.getShrunkenCommonTriangle2d(tripleStateAfterSecondStepWithThirdSwinging, secondAndThirdCommonPolygon, secondSwingLeg, shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue());
          estimatedCommonTriangle.set(secondSwingLeg, secondAndThirdCommonPolygon);
          estimatedCommonTriangle.set(secondSwingLeg.getSameSideQuadrant(), new QuadrupedSupportPolygon());
          secondAndThirdCommonPolygon.getAndSwapSameSideFootsteps(estimatedCommonTriangle.get(secondSwingLeg.getSameSideQuadrant()), secondSwingLeg.getSide());
          drawSupportPolygon(secondAndThirdCommonPolygon, commonTriplePolygons.get(secondSwingLeg.getSide()));
          
-         drawSupportPolygon(trippleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons.get(thirdSwingLeg));
-         drawSupportPolygon(trippleStateAfterThirdStepWithFourthSwinging, tripleSupportPolygons.get(fourthSwingLeg));
+         drawSupportPolygon(tripleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons.get(thirdSwingLeg));
+         drawSupportPolygon(tripleStateAfterThirdStepWithFourthSwinging, tripleSupportPolygons.get(fourthSwingLeg));
          QuadrupedSupportPolygon thirdAndFourthCommonPolygon = new QuadrupedSupportPolygon();
-         trippleStateAfterSecondStepWithThirdSwinging.getShrunkenCommonTriangle2d(trippleStateAfterThirdStepWithFourthSwinging, thirdAndFourthCommonPolygon, thirdSwingLeg, shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue());
+         tripleStateAfterSecondStepWithThirdSwinging.getShrunkenCommonTriangle2d(tripleStateAfterThirdStepWithFourthSwinging, thirdAndFourthCommonPolygon, thirdSwingLeg, shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue());
          estimatedCommonTriangle.set(thirdSwingLeg, thirdAndFourthCommonPolygon);
          estimatedCommonTriangle.set(thirdSwingLeg.getSameSideQuadrant(), new QuadrupedSupportPolygon());
          thirdAndFourthCommonPolygon.getAndSwapSameSideFootsteps(estimatedCommonTriangle.get(thirdSwingLeg.getSameSideQuadrant()), thirdSwingLeg.getSide());
@@ -1577,19 +1577,19 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          upcommingTrippleSupportPolygons.set(secondSwingLeg, new QuadrupedSupportPolygon());
          fourFootSupportPolygon.getAndRemoveFootstep(upcommingTrippleSupportPolygons.get(secondSwingLeg), firstSwingLeg);
          
-         fourFootSupportPolygon.getAndRemoveFootstep(trippleStateWithFirstStepSwinging, secondSwingLeg);
-         quadStateAfterFirstStep.getAndRemoveFootstep(trippleStateAfterFirstStepWithSecondSwinging, secondSwingLeg);
-         quadStateAfterSecondStep.getAndRemoveFootstep(trippleStateAfterSecondStepWithThirdSwinging, thirdSwingLeg);
-         quadStateAfterThirdStep.getAndRemoveFootstep(trippleStateAfterThirdStepWithFourthSwinging, fourthSwingLeg);
+         fourFootSupportPolygon.getAndRemoveFootstep(tripleStateWithFirstStepSwinging, secondSwingLeg);
+         quadStateAfterFirstStep.getAndRemoveFootstep(tripleStateAfterFirstStepWithSecondSwinging, secondSwingLeg);
+         quadStateAfterSecondStep.getAndRemoveFootstep(tripleStateAfterSecondStepWithThirdSwinging, thirdSwingLeg);
+         quadStateAfterThirdStep.getAndRemoveFootstep(tripleStateAfterThirdStepWithFourthSwinging, fourthSwingLeg);
          
          for(RobotQuadrant robotQuadrant :  RobotQuadrant.values)
          {
             tripleSupportPolygons.get(robotQuadrant).hide();
          }
          
-         updateAndDrawCommonTriangle(trippleStateWithFirstStepSwinging, trippleStateAfterFirstStepWithSecondSwinging, firstSwingLeg, secondSwingLeg, shrunkenPolygonOffset);
-         updateAndDrawCommonTriangle(trippleStateAfterFirstStepWithSecondSwinging, trippleStateAfterSecondStepWithThirdSwinging, secondSwingLeg, thirdSwingLeg, shrunkenPolygonOffset);
-         updateAndDrawCommonTriangle(trippleStateAfterSecondStepWithThirdSwinging, trippleStateAfterThirdStepWithFourthSwinging, thirdSwingLeg, fourthSwingLeg, shrunkenPolygonOffset);
+         updateAndDrawCommonTriangle(tripleStateWithFirstStepSwinging, tripleStateAfterFirstStepWithSecondSwinging, firstSwingLeg, secondSwingLeg, shrunkenPolygonOffset);
+         updateAndDrawCommonTriangle(tripleStateAfterFirstStepWithSecondSwinging, tripleStateAfterSecondStepWithThirdSwinging, secondSwingLeg, thirdSwingLeg, shrunkenPolygonOffset);
+         updateAndDrawCommonTriangle(tripleStateAfterSecondStepWithThirdSwinging, tripleStateAfterThirdStepWithFourthSwinging, thirdSwingLeg, fourthSwingLeg, shrunkenPolygonOffset);
       }
       
       private void calculateNextSupportPolygon(QuadrupedSupportPolygon supportPolygon, RobotQuadrant nextSwingLeg, FrameVector desiredVelocity, double desiredYawRate, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
