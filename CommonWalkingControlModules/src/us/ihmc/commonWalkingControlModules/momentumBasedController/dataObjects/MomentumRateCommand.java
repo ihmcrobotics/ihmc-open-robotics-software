@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
-public class MomentumRateCommand
+public class MomentumRateCommand extends InverseDynamicsCommand
 {
    private MomentumRateData momentumRateData;
 

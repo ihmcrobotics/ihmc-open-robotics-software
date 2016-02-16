@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 
-public class PointAccelerationCommand
+public class PointAccelerationCommand extends InverseDynamicsCommand
 {
    private final GeometricJacobian rootToEndEffectorJacobian;
    private final FramePoint contactPoint;
