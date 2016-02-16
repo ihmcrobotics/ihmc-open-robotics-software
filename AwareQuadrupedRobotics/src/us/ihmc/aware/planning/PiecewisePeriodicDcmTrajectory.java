@@ -18,6 +18,8 @@ public class PiecewisePeriodicDcmTrajectory
    private final FramePoint[] vrpPositionAtSoS;
    private final FramePoint dcmPosition;
    private final FrameVector dcmVelocity;
+   private final double[] temporaryDouble;
+   private final FramePoint[] temporaryFramePoint;
    private final DenseMatrix64F A = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F x = new DenseMatrix64F(3, 1);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -41,6 +43,8 @@ public class PiecewisePeriodicDcmTrajectory
       }
       this.dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       this.dcmVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+      this.temporaryDouble = new double[] {0.0};
+      this.temporaryFramePoint = new FramePoint[] {new FramePoint(ReferenceFrame.getWorldFrame())};
 
       if (parentRegistry != null)
       {
@@ -127,6 +131,13 @@ public class PiecewisePeriodicDcmTrajectory
       this.initialized = true;
    }
 
+   public void initializeTrajectory(double timeAtSoS, FramePoint cmpPositionAtSoS, double timeAtEoS, FramePoint cmpPositionAtEoS, double relativeYawAtEoS)
+   {
+      this.temporaryDouble[0] = timeAtSoS;
+      this.temporaryFramePoint[0].setIncludingFrame(cmpPositionAtSoS);
+      this.initializeTrajectory(temporaryDouble, temporaryFramePoint, timeAtEoS, cmpPositionAtEoS, relativeYawAtEoS);
+   }
+
    public void computeTrajectory(double currentTime)
    {
       if (!initialized)
@@ -149,6 +160,11 @@ public class PiecewisePeriodicDcmTrajectory
             break;
          }
       }
+   }
+
+   public void setComHeight(double comHeight)
+   {
+      this.comHeight = comHeight;
    }
 
    public void getPosition(FramePoint dcmPosition)

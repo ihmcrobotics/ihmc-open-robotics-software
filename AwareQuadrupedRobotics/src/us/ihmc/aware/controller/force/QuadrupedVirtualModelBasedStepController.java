@@ -133,8 +133,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private static int STEP_QUEUE_CAPACITY = 60;
    private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
    private final QuadrantDependentList<QuadrupedTimedStep> stepCache;
-   private final FrameOrientation bodyOrientationDesired;
-   private double comHeightDesired;
+   private final FrameOrientation bodyOrientationInput;
+   private double comHeightInput;
 
    // setpoints
    private final QuadrantDependentList<FramePoint> solePositionSetpoint;
@@ -174,8 +174,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    // YoVariables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameOrientation yoBodyOrientationDesired;
-   private final DoubleYoVariable yoComHeightDesired;
+   private final YoFrameOrientation yoBodyOrientationInput;
+   private final DoubleYoVariable yoComHeightInput;
    private final QuadrantDependentList<YoFramePoint> yoSolePositionSetpoint;
    private final QuadrantDependentList<YoFrameVector> yoSoleLinearVelocitySetpoint;
    private final QuadrantDependentList<YoFrameVector> yoSoleForceFeedforwardSetpoint;
@@ -310,8 +310,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       {
          stepCache.set(robotQuadrant, new QuadrupedTimedStep(robotQuadrant));
       }
-      bodyOrientationDesired = new FrameOrientation(worldFrame);
-      comHeightDesired = params.get(COM_HEIGHT_NOMINAL);
+      bodyOrientationInput = new FrameOrientation(worldFrame);
+      comHeightInput = params.get(COM_HEIGHT_NOMINAL);
 
       // setpoints
       solePositionSetpoint = new QuadrantDependentList<>();
@@ -368,8 +368,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       comHeightEstimate = params.get(COM_HEIGHT_NOMINAL);
 
       // YoVariables
-      yoBodyOrientationDesired = new YoFrameOrientation("bodyOrientationDesired", supportFrame, registry);
-      yoComHeightDesired = new DoubleYoVariable("comHeightDesired", registry);
+      yoBodyOrientationInput = new YoFrameOrientation("bodyOrientationInput", supportFrame, registry);
+      yoComHeightInput = new DoubleYoVariable("comHeightInput", registry);
       yoSolePositionSetpoint = new QuadrantDependentList<>();
       yoSoleLinearVelocitySetpoint = new QuadrantDependentList<>();
       yoSoleForceFeedforwardSetpoint = new QuadrantDependentList<>();
@@ -582,7 +582,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // compute body torque setpoints to track desired body orientation
       bodyTorqueSetpoint.changeFrame(bodyFrame);
-      bodyOrientationSetpoint.setIncludingFrame(bodyOrientationDesired);
+      bodyOrientationSetpoint.setIncludingFrame(bodyOrientationInput);
       bodyOrientationSetpoint.changeFrame(bodyFrame);
       bodyAngularVelocitySetpoint.setToZero(bodyFrame);
       bodyAngularVelocityEstimate.changeFrame(bodyFrame);
@@ -611,7 +611,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
       // compute vertical force to track desired center of mass height
-      comHeightSetpoint = comHeightDesired;
+      comHeightSetpoint = comHeightInput;
       double comForceZ = params.get(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT) * mass * gravity + comHeightController.compute(comHeightEstimate, comHeightSetpoint, comVelocityEstimate.getZ(), 0, controlDT);
       comForceSetpoint.changeFrame(worldFrame);
       comForceSetpoint.setZ(comForceZ);
@@ -633,8 +633,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    private void readYoVariables()
    {
-      yoBodyOrientationDesired.getFrameOrientationIncludingFrame(bodyOrientationDesired);
-      comHeightDesired = yoComHeightDesired.getDoubleValue();
+      yoBodyOrientationInput.getFrameOrientationIncludingFrame(bodyOrientationInput);
+      comHeightInput = yoComHeightInput.getDoubleValue();
    }
 
    private void writeYoVariables()
@@ -695,8 +695,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       virtualModelController.setVisible(false);
 
       // initialize desired values (provider inputs)
-      yoBodyOrientationDesired.setYawPitchRoll(0.0, 0.0, 0.0);
-      yoComHeightDesired.set(params.get(COM_HEIGHT_NOMINAL));
+      yoBodyOrientationInput.setYawPitchRoll(0.0, 0.0, 0.0);
+      yoComHeightInput.set(params.get(COM_HEIGHT_NOMINAL));
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
