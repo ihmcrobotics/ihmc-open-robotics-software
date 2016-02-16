@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.UserControlModeState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -64,14 +64,14 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.USER_CONTROL_MODE, armDesiredJointAccelerations);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-         assertEquals(HandControlState.JOINT_SPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(HandControlMode.JOINT_SPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
 
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
          assertTrue(success);
 
-         assertEquals(HandControlState.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
          double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(robotSide, armJoints, scs);
          assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
          double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
@@ -84,7 +84,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
          assertTrue(success);
 
-         assertEquals(HandControlState.JOINT_SPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(HandControlMode.JOINT_SPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
 
          armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.USER_CONTROL_MODE, armDesiredJointAccelerations);
 
@@ -93,12 +93,12 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(UserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
-         assertEquals(HandControlState.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
          assertTrue(success);
 
-         assertEquals(HandControlState.JOINT_SPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(HandControlMode.JOINT_SPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
       }
    }
 

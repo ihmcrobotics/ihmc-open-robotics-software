@@ -9,7 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.MathTools;
@@ -97,7 +97,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private TaskspaceToJointspaceHandPositionControlState(String namePrefix, RobotSide robotSide, MomentumBasedController momentumBasedController,
          RigidBody base, RigidBody endEffector, boolean doPositionControl, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController, -1, base, endEffector, parentRegistry);
+      super(namePrefix, HandControlMode.TASK_SPACE_POSITION, momentumBasedController, -1, base, endEffector, parentRegistry);
 
       yoTime = momentumBasedController.getYoTime();
 

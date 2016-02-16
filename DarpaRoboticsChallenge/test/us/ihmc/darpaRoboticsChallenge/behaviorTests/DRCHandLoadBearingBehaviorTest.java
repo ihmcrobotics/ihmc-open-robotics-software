@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
@@ -98,11 +98,11 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
 
       ScriptedHandstepGenerator scriptedHandstepGenerator = drcBehaviorTestHelper.createScriptedHandstepGenerator();
 
-      EnumYoVariable<HandControlState> leftHandControlModule = (EnumYoVariable<HandControlState>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
-      EnumYoVariable<HandControlState> rightHandControlModule = (EnumYoVariable<HandControlState>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
+      EnumYoVariable<HandControlMode> leftHandControlModule = (EnumYoVariable<HandControlMode>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
+      EnumYoVariable<HandControlMode> rightHandControlModule = (EnumYoVariable<HandControlMode>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
       
-      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlState.JOINT_SPACE));
-      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlState.JOINT_SPACE));
+      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlMode.JOINT_SPACE));
+      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlMode.JOINT_SPACE));
       
       double bodyY = 0.0;
 
@@ -140,8 +140,8 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
             + EXTRA_SIM_TIME_FOR_SETTLING);
       PrintTools.debug(this, "Behavior Should be done");
 
-      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlState.LOAD_BEARING));
-      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlState.LOAD_BEARING));
+      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlMode.LOAD_BEARING));
+      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlMode.LOAD_BEARING));
       
       assertTrue(success);
 

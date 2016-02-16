@@ -4,7 +4,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
  * @author twan
  *         Date: 5/9/13
  */
-public enum HandControlState
+public enum HandControlMode
 {
    JOINT_SPACE, TASK_SPACE_POSITION, LOAD_BEARING, USER_CONTROL_MODE
 }

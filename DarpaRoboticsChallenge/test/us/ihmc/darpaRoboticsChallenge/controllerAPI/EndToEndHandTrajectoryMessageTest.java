@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -137,8 +137,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          
-         HandControlState controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
-         assertEquals(HandControlState.TASK_SPACE_POSITION, controllerState);
+         HandControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         assertEquals(HandControlMode.TASK_SPACE_POSITION, controllerState);
          
          double timeStopSent = scs.getRobots()[0].getYoTime().getDoubleValue();
          int numberOfJoints = armJoints.length;
@@ -160,7 +160,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(robotSide, armJoints, numberOfJoints, scs);
          double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(robotSide, armJoints, numberOfJoints, scs);
 
-         assertEquals(HandControlState.JOINT_SPACE, controllerState);
+         assertEquals(HandControlMode.JOINT_SPACE, controllerState);
          assertEquals(timeStopSent, switchTime, getRobotModel().getControllerDT());
          assertArrayEquals(actualJointPositions, controllerDesiredJointPositions, 0.01);
          assertArrayEquals(zeroVelocities, controllerDesiredJointVelocities, 1.0e-10);

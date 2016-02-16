@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.State;
 
-public class JointSpaceHandControlState extends State<HandControlState>
+public class JointSpaceHandControlState extends State<HandControlMode>
 {
    private final OneDoFJoint[] oneDoFJoints;
    private Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories;
@@ -45,7 +45,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
    public JointSpaceHandControlState(String namePrefix, InverseDynamicsJoint[] controlledJoints, boolean doPositionControl,
          MomentumBasedController momentumBasedController, YoPIDGains gains, double dt, YoVariableRegistry parentRegistry)
    {
-      super(HandControlState.JOINT_SPACE);
+      super(HandControlMode.JOINT_SPACE);
 
       this.dt = dt;
       this.doPositionControl = doPositionControl;
