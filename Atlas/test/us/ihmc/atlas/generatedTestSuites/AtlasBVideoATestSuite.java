@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.AtlasFlatGroundWalkingTest.class,
-   us.ihmc.atlas.AtlasMultiContactTest.class
 })
 
 public class AtlasBVideoATestSuite
