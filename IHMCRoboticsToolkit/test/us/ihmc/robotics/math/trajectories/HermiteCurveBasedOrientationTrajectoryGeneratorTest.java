@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
@@ -26,7 +27,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       double dt = 1.0e-5;
-      double trajectoryTime = 1.0;
+      double trajectoryTime = 2.0;
       double startIntegrationTime = 1.0;
       double endIntegrationTime = 2.0;
 
@@ -47,17 +48,17 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 
       for (int i = 0; i < 5; i++)
       {
-         //         FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         //         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         //         FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         //         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
-         FrameOrientation initialOrientation = new FrameOrientation(worldFrame, 0.6579420232196302, 0.17732195760133315, 0.07200300264569377,
-               0.13124777496975762);
-         FrameVector initialAngularVelocity = new FrameVector(worldFrame, -0.02759865067979206, -0.2021838458432974, -0.4798897991734828);
-         FrameOrientation finalOrientation = new FrameOrientation(worldFrame, -0.18759129900237537, 0.7641405778050858, -0.010281133940664896,
-               0.6170842569497338);
-         FrameVector finalAngularVelocity = new FrameVector(worldFrame, 0.71553462542028115, 0.8065521991952352, 0.5759047959607656);
+         //         FrameOrientation initialOrientation = new FrameOrientation(worldFrame, 0.6579420232196302, 0.17732195760133315, 0.07200300264569377,
+         //               0.13124777496975762);
+         //         FrameVector initialAngularVelocity = new FrameVector(worldFrame, -0.02759865067979206, -0.2021838458432974, -0.4798897991734828);
+         //         FrameOrientation finalOrientation = new FrameOrientation(worldFrame, -0.18759129900237537, 0.7641405778050858, -0.010281133940664896,
+         //               0.6170842569497338);
+         //         FrameVector finalAngularVelocity = new FrameVector(worldFrame, 0.71553462542028115, 0.8065521991952352, 0.5759047959607656);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
@@ -82,12 +83,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             integratedAngularAcceleration.scale(dt);
             angularVelocityFromIntegration.add(integratedAngularAcceleration);
 
-            System.out.println(currentOrientation.getQuaternionCopy());
-            System.out.println(orientationFromIntegration.getQuaternionCopy());
-
-
             assertTrue(currentOrientation.epsilonEquals(orientationFromIntegration, 1.0e-4));
-            //            assertTrue(currentAngularVelocity.epsilonEquals(angularVelocityFromIntegration, 1.0e-3));
+            assertTrue(currentAngularVelocity.epsilonEquals(angularVelocityFromIntegration, 1.0e-3));
          }
       }
    }
@@ -100,22 +97,15 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       Random random = new Random(4566561L);
 
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
-      double trajectoryTime = 1.0;
+      double trajectoryTime = 3.0;
       traj.setTrajectoryTime(trajectoryTime);
 
       for (int i = 0; i < 10000; i++)
       {
-         //         FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         //         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         //         FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         //         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-
-         FrameOrientation initialOrientation = new FrameOrientation(worldFrame, 0.6579420232196302, 0.17732195760133315, 0.07200300264569377,
-               0.13124777496975762);
-         FrameVector initialAngularVelocity = new FrameVector(worldFrame, -0.02759865067979206, -0.2021838458432974, -0.4798897991734828);
-         FrameOrientation finalOrientation = new FrameOrientation(worldFrame, -0.18759129900237537, 0.7641405778050858, -0.010281133940664896,
-               0.6170842569497338);
-         FrameVector finalAngularVelocity = new FrameVector(worldFrame, 0.71553462542028115, 0.8065521991952352, 0.5759047959607656);
+         FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -5.0, 5, -5, 5, -5, 5);
+         FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -5, 5, -5, 5, -5, 5);
 
          FrameVector zeroAngularAcceleration = new FrameVector();
 
@@ -135,24 +125,24 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          double velocityEpsilon = 5.0e-4;
          double accelerationEpsilon = 5.0e-4;
 
-         assertTrue(initialOrientation.epsilonEquals(currentOrientation, orientationEpsilon));
-         boolean goodInitialVelocity = initialAngularVelocity.epsilonEquals(currentAngularVelocity, velocityEpsilon);
-         if (DEBUG && !goodInitialVelocity)
-         {
-            FrameVector error = new FrameVector();
-            error.sub(initialAngularVelocity, currentAngularVelocity);
-            System.out.println("Bad initial velocity, error: " + error);
-            printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
-         }
-         assertTrue(goodInitialVelocity);
+         boolean goodInitialOrientation = initialOrientation.epsilonEquals(currentOrientation, orientationEpsilon);
 
-         //         boolean goodInitialAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
+         boolean goodInitialVelocity = initialAngularVelocity.epsilonEquals(currentAngularVelocity, velocityEpsilon);
+         //            if (DEBUG && !goodInitialVelocity)
+         //            {
+         //               FrameVector error = new FrameVector();
+         //               error.sub(initialAngularVelocity, currentAngularVelocity);
+         //               System.out.println("Bad initial velocity, error: " + error);
+         //               printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
+         //            }
+
+         //                     boolean goodInitialAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
          //         if (DEBUG && !goodInitialAngularAcceleration)
          //         {
          //            FrameVector error = new FrameVector();
          //            error.sub(zeroAngularAcceleration, currentAngularAcceleration);
          //            System.out.println("Bad initial acceleration, error: " + error);
-//            printLimitConditions(initialOrientation, zeroAngularAcceleration, finalOrientation, zeroAngularAcceleration);
+         //            printLimitConditions(initialOrientation, zeroAngularAcceleration, finalOrientation, zeroAngularAcceleration);
          //         }
          //
          //         assertTrue(goodInitialAngularAcceleration);
@@ -160,22 +150,20 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          traj.compute(trajectoryTime - dt);
          traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-         assertTrue(finalOrientation.epsilonEquals(currentOrientation, orientationEpsilon));
+         boolean goodFinalOrientation = finalOrientation.epsilonEquals(currentOrientation, orientationEpsilon);
 
          boolean goodFinalAngularVelocity = finalAngularVelocity.epsilonEquals(currentAngularVelocity, velocityEpsilon);
-         if (DEBUG && !goodFinalAngularVelocity)
-         {
-            FrameVector error = new FrameVector();
-            error.sub(finalAngularVelocity, currentAngularVelocity);
-            System.out.println("Bad final velocity, error: " + error);
-            System.out.println("final X angular velocity " + currentAngularVelocity.getX());
-            System.out.println("final Y angular velocity " + currentAngularVelocity.getY());
-            System.out.println("final Z angular velocity " + currentAngularVelocity.getZ());
-
-            printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
-         }
-
-         assertTrue(goodFinalAngularVelocity);
+         //            if (DEBUG && !goodFinalAngularVelocity)
+         //            {
+         //               FrameVector error = new FrameVector();
+         //               error.sub(finalAngularVelocity, currentAngularVelocity);
+         //               System.out.println("Bad final velocity, error: " + error);
+         //               System.out.println("final X angular velocity " + currentAngularVelocity.getX());
+         //               System.out.println("final Y angular velocity " + currentAngularVelocity.getY());
+         //               System.out.println("final Z angular velocity " + currentAngularVelocity.getZ());
+         //
+         //               printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
+         //            }
 
          //         boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
          //         if (DEBUG && !goodFinalAngularAcceleration)
@@ -184,6 +172,31 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          //            printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
          //         }
          //         assertTrue(goodFinalAngularAcceleration);
+         if (traj.isSolvable(trajectoryTime, initialAngularVelocity.getVectorCopy(), finalAngularVelocity.getVectorCopy()))
+         {
+            if (!(goodInitialOrientation && goodFinalOrientation && goodInitialVelocity && goodFinalAngularVelocity))
+            {
+               printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
+            }
+
+            assertTrue(goodInitialOrientation);
+            assertTrue(goodFinalOrientation);
+            assertTrue(goodInitialVelocity);
+            assertTrue(goodFinalAngularVelocity);
+         }
+         else
+         {
+            if (goodInitialOrientation && goodFinalOrientation && goodInitialVelocity && goodFinalAngularVelocity)
+            {
+               printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
+            }
+
+            Vector3d extraOrientationVelocity = traj.getExtraLimitVelocity(initialOrientation.getQuaternionCopy(), finalOrientation.getQuaternionCopy());
+
+            //            System.out.println(traj.isSolvable(trajectoryTime/2, initialAngularVelocity.getVectorCopy(), extraOrientationVelocity));
+            //            System.out.println(traj.isSolvable(trajectoryTime/2, extraOrientationVelocity, finalAngularVelocity.getVectorCopy()));
+            assertFalse(goodInitialOrientation && goodFinalOrientation && goodInitialVelocity && goodFinalAngularVelocity);
+         }
       }
    }
 
@@ -194,7 +207,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
-      double trajectoryTime = 1.0;
+      double trajectoryTime = 2.0;
 
       double maxVelocityRecorded = 0.0;
       double maxAccelerationRecorded = 0.0;
@@ -302,7 +315,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
-      double trajectoryTime = 1.0;
+      double trajectoryTime = 2.0;
 
       double maxVelocityRecorded = 0.0;
       double maxAccelerationRecorded = 0.0;
