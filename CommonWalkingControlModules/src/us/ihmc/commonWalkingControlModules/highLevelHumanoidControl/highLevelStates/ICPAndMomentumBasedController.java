@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.calculators.Omega0CalculatorInterface
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -79,7 +79,7 @@ public class ICPAndMomentumBasedController
 
    private final ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule;
 
-   private final MomentumRateOfChangeData momentumRateOfChangeData;
+   private final MomentumRateData momentumRateOfChangeData;
 
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, double omega0,
          ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule, BipedSupportPolygons bipedSupportPolygons,
@@ -98,7 +98,7 @@ public class ICPAndMomentumBasedController
       centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
 
-      momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
 
       if (USE_CONSTANT_OMEGA0)
       {

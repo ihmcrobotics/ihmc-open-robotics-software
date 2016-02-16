@@ -8,14 +8,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 
-public class DesiredPointAccelerationCommand
+public class PointAccelerationCommand
 {
    private final GeometricJacobian rootToEndEffectorJacobian;
    private final FramePoint contactPoint;
    private final FrameVector desiredAcceleration;
    private final DenseMatrix64F selectionMatrix;
 
-   public DesiredPointAccelerationCommand(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration,
+   public PointAccelerationCommand(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration,
          DenseMatrix64F selectionMatrix)
    {
       this.rootToEndEffectorJacobian = rootToEndEffectorJacobian;
@@ -24,12 +24,12 @@ public class DesiredPointAccelerationCommand
       this.selectionMatrix = selectionMatrix;
    }
 
-   public DesiredPointAccelerationCommand(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   public PointAccelerationCommand(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
    {
       this(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
    }
 
-   public DesiredPointAccelerationCommand(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
+   public PointAccelerationCommand(PointAccelerationCommand desiredPointAccelerationCommand)
    {
       this.rootToEndEffectorJacobian = desiredPointAccelerationCommand.rootToEndEffectorJacobian;
       this.contactPoint = desiredPointAccelerationCommand.contactPoint;

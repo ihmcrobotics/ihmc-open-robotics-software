@@ -17,11 +17,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -87,7 +87,7 @@ public class SimpleStanceController implements RobotController
    private final List<OneDoFJoint> positionControlJoints;
    private final SixDoFJoint rootJoint;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
-   private final MomentumRateOfChangeData momentumRateOfChangeData;
+   private final MomentumRateData momentumRateOfChangeData;
 
    public SimpleStanceController(SDFRobot robot, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, double controlDT,
                                  InverseDynamicsJoint[] jointsToOptimize, double gravityZ, double footForward, double footBack, double footWidth)
@@ -158,7 +158,7 @@ public class SimpleStanceController implements RobotController
 
       spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootJoint.getPredecessor(), twistCalculator, gravityZ, true);
       
-      momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
+      momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
       momentumRateOfChangeData.setEmpty();
    }
 
@@ -236,7 +236,7 @@ public class SimpleStanceController implements RobotController
       momentumRateOfChangeControlModule.compute();
       momentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       
-      DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);
+      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
       momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
    }
 
@@ -269,7 +269,7 @@ public class SimpleStanceController implements RobotController
          TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
          taskspaceConstraintData.set(new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(), jacobian.getEndEffectorFrame()));
          
-         DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
+         SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskspaceConstraintData);
          momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
       }
    }
@@ -295,7 +295,7 @@ public class SimpleStanceController implements RobotController
 
       taskspaceConstraintData.setAngularAcceleration(pelvisFrame, pelvisJacobian.getBaseFrame(), output, nullspaceMultipliers);
 
-      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(pelvisJacobian, taskspaceConstraintData, 1.0);
+      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(pelvisJacobian, taskspaceConstraintData, 1.0);
       momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
 
 
@@ -319,7 +319,7 @@ public class SimpleStanceController implements RobotController
       double desiredAcceleration = kp * (desiredPosition - joint.getQ()) + kd * (desiredVelocity - joint.getQd());
       DenseMatrix64F desiredAccelerationMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       desiredAccelerationMatrix.set(0, 0, desiredAcceleration);
-      DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, desiredAccelerationMatrix);
+      JointspaceAccelerationCommand desiredJointAccelerationCommand = new JointspaceAccelerationCommand(joint, desiredAccelerationMatrix);
       momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
    }
 

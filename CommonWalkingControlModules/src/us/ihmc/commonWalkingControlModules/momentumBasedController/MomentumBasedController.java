@@ -21,13 +21,13 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommandPool;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommandPool;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -93,7 +93,7 @@ public class MomentumBasedController
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final DesiredSpatialAccelerationCommandPool desiredSpatialAccelerationCommandPool = new DesiredSpatialAccelerationCommandPool();
+   private final SpatialAccelerationCommandPool desiredSpatialAccelerationCommandPool = new SpatialAccelerationCommandPool();
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -868,7 +868,7 @@ public class MomentumBasedController
    }
 
    private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
-   private final Map<OneDoFJoint, DesiredJointAccelerationCommand> tempDesiredJointAccelerationCommands = new LinkedHashMap<>();
+   private final Map<OneDoFJoint, JointspaceAccelerationCommand> tempDesiredJointAccelerationCommands = new LinkedHashMap<>();
 
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
@@ -881,11 +881,11 @@ public class MomentumBasedController
 
       jointAcceleration.set(0, 0, desiredAcceleration);
 
-      DesiredJointAccelerationCommand desiredJointAccelerationCommand = tempDesiredJointAccelerationCommands.get(joint);
+      JointspaceAccelerationCommand desiredJointAccelerationCommand = tempDesiredJointAccelerationCommands.get(joint);
 
       if (desiredJointAccelerationCommand == null)
       {
-         desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, jointAcceleration);
+         desiredJointAccelerationCommand = new JointspaceAccelerationCommand(joint, jointAcceleration);
          tempDesiredJointAccelerationCommands.put(joint, desiredJointAccelerationCommand);
       }
       else
@@ -1160,7 +1160,7 @@ public class MomentumBasedController
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
-      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = desiredSpatialAccelerationCommandPool
+      SpatialAccelerationCommand desiredSpatialAccelerationCommand = desiredSpatialAccelerationCommandPool
             .getUnusedDesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
       optimizationMomentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
    }
@@ -1169,7 +1169,7 @@ public class MomentumBasedController
    {
       GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
 
-      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
+      PointAccelerationCommand desiredPointAccelerationCommand = new PointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
             desiredAcceleration);
       optimizationMomentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
@@ -1179,14 +1179,14 @@ public class MomentumBasedController
    {
       GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
 
-      DesiredPointAccelerationCommand desiredPointAccelerationCommand = new DesiredPointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
+      PointAccelerationCommand desiredPointAccelerationCommand = new PointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
             desiredAcceleration, selectionMatrix);
       optimizationMomentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
    }
 
-   public void setDesiredRateOfChangeOfMomentum(MomentumRateOfChangeData momentumRateOfChangeData)
+   public void setDesiredRateOfChangeOfMomentum(MomentumRateData momentumRateOfChangeData)
    {
-      DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = new DesiredRateOfChangeOfMomentumCommand(momentumRateOfChangeData);
+      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
       optimizationMomentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
    }
 
