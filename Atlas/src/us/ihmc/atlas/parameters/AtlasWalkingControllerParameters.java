@@ -989,11 +989,4 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
    }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useICPPlannerHackN13()
-   {
-      return false;
-   }
 }

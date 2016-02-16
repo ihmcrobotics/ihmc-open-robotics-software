@@ -1015,11 +1015,4 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return 0.8157;
    }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useICPPlannerHackN13()
-   {
-      return false;
-   }
 }
