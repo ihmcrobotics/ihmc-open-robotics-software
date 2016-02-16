@@ -189,6 +189,8 @@ public class NetworkParametersCreator
    {
       try
       {
+         file.getParentFile().mkdirs();
+
          FileOutputStream out = new FileOutputStream(file);
          Properties properties = new Properties();
          for (NetworkParameterKeys key : NetworkParameterKeys.values())
