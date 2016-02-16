@@ -1653,7 +1653,8 @@ public class GeometryTools
       }
       else
       {
-         throw new RuntimeException("Unable to build a Triangle of the given triangle sides");
+         throw new RuntimeException("Unable to build a Triangle of the given triangle sides a: "
+                                    + lengthNeighbourSideA + " b: " + lengthNeighbourSideB + " c: " + lengthOppositeSideC);
       }
    }
 
