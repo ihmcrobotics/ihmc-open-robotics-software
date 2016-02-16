@@ -77,6 +77,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
    }
 
+   @Override
    public List<YoContactPoint> getContactPoints()
    {
       return contactPoints;
@@ -144,6 +145,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.contactPointCentroid.getFrameTuple2dIncludingFrame(centroidToPack);
    }
 
+   @Override
    public List<FramePoint> getContactFramePointsInContactCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(totalNumberOfContactPoints);
@@ -163,6 +165,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return ret;
    }
 
+   @Override
    public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
    {
       int counter = 0;
@@ -199,6 +202,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
    }
 
+   @Override
    public List<FramePoint2d> getContactFramePoints2dInContactCopy()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(totalNumberOfContactPoints);
@@ -269,32 +273,38 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
    }
 
+   @Override
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
    }
 
+   @Override
    public ReferenceFrame getFrameAfterParentJoint()
    {
       return rigidBody.getParentJoint().getFrameAfterJoint();
    }
 
+   @Override
    public ReferenceFrame getPlaneFrame()
    {
       return planeFrame;
    }
 
+   @Override
    public boolean inContact()
    {
       return inContact.getBooleanValue();
    }
 
+   @Override
    public double getCoefficientOfFriction()
    {
       return coefficientOfFriction.getDoubleValue();
    }
 
    // TODO can do better than that
+   @Override
    public int getNumberOfContactPointsInContact()
    {
       int numberOfContactPointsInContact = 0;
@@ -308,16 +318,19 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return numberOfContactPointsInContact;
    }
 
+   @Override
    public FrameVector getContactNormalFrameVectorCopy()
    {
       return new FrameVector(contactNormalFrameVector);
    }
 
+   @Override
    public void getContactNormalFrameVector(FrameVector frameVectorToPack)
    {
       frameVectorToPack.setIncludingFrame(contactNormalFrameVector);
    }
 
+   @Override
    public void clear()
    {
       for (int i = 0; i < totalNumberOfContactPoints; i++)
@@ -338,11 +351,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       inContact.set(true);
    }
 
+   @Override
    public RigidBody getRigidBody()
    {
       return rigidBody;
    }
 
+   @Override
    public String toString()
    {
       return "Body: " + rigidBody.getName() + ", in contact: " + inContact() + ", nunber of CPs: " + getTotalNumberOfContactPoints();
