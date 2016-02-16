@@ -1397,16 +1397,10 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param centerToPack
     * @return
     */
-   public boolean getCenterOfCircleOfRadiusInCornerOfTriangle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
+   public boolean getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
    {
       if (containsFootstep(cornerToPutCircle))
       {
-         double maximumInCircleRadius = getInCircleRadius2d();
-         if (cornerCircleRadius > maximumInCircleRadius)
-         {
-            throw new UndefinedOperationException("Desired radius (" + cornerCircleRadius + ") larger than max (" + maximumInCircleRadius + ").");
-         }
-
          // Corner and A and B form a V with corner as the vertex
          FramePoint cornerPoint = getFootstep(cornerToPutCircle);
          FramePoint pointA = getFootstep(getNextClockwiseSupportingQuadrant(cornerToPutCircle));
