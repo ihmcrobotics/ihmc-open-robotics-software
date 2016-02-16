@@ -12,10 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class
+   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class
 })
 
-public class AtlasGInDevelopmentTestSuite
+public class AtlasKInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {
