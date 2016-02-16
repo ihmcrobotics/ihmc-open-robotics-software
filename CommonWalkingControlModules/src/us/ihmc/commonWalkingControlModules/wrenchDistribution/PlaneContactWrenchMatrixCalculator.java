@@ -30,8 +30,6 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class PlaneContactWrenchMatrixCalculator
 {
-   public static final int footCoPXYComponents = 2;
-
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
