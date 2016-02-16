@@ -760,6 +760,20 @@ public class QuadrupedSupportPolygonTest
             poly8.getCommonTriangle2d(poly4, poly9, RobotQuadrant.HIND_LEFT);
          }
       });
+      
+      // Test diagonal swing legs throw exception
+      final QuadrupedSupportPolygon poly10 = createPolygonWithoutLeg(RobotQuadrant.FRONT_RIGHT);
+      final QuadrupedSupportPolygon poly11 = createPolygonWithoutLeg(RobotQuadrant.HIND_LEFT);
+      final QuadrupedSupportPolygon poly12 = new QuadrupedSupportPolygon();
+      
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly10.getCommonTriangle2d(poly11, poly12, RobotQuadrant.FRONT_RIGHT);
+         }
+      });
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
