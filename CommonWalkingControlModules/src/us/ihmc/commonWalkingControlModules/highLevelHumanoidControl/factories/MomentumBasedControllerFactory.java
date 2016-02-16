@@ -177,7 +177,7 @@ public class MomentumBasedControllerFactory
          throw new RuntimeException("Couldn't create various walking providers!");
 
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
-            registry, yoGraphicsListRegistry, false);
+            registry, yoGraphicsListRegistry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup different things for walking ///////////////////////////////////////////////////////

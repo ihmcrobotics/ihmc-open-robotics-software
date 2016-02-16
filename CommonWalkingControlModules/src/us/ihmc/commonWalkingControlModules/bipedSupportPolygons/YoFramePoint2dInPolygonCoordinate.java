@@ -17,9 +17,6 @@ import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
 
 public class YoFramePoint2dInPolygonCoordinate
 {
-
-   private static final long serialVersionUID = -8823375225398751085L;
-
    private DoubleYoVariable eccentricity, angle;
    private FramePoint2d framePoint2d;
    private Point2dInConvexPolygon2d point2dInConvexPolygon2d; //this will be using

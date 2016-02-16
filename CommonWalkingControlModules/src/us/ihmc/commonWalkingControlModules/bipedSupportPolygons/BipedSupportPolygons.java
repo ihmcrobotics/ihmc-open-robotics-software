@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.awt.Color;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -58,9 +57,6 @@ public class BipedSupportPolygons
    private final YoFrameConvexPolygon2d supportPolygonViz;
    private final YoFrameLineSegment2d footToFootSegmentViz;
 
-   // Connecting edges between the two foot polygons to create the support polygon when in double support; null in single support
-   private final FrameLineSegment2d connectingEdge1, connectingEdge2;
-
    // 'Sweet spots', the spots inside each of the footPolygons where capture point placement leads to really good balance. Typically the middle of the foot or so:
    private final SideDependentList<YoFramePoint2d> sweetSpotsInAnkleZUp = new SideDependentList<YoFramePoint2d>();
    private final SideDependentList<YoFramePoint2d> sweetSpotsInMidFeetZUp = new SideDependentList<YoFramePoint2d>();
@@ -69,18 +65,13 @@ public class BipedSupportPolygons
    private final FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
    private final FrameLineSegment2d footToFootLineSegmentInWorld;
 
-   // In order to deal with intersecting polygons, it is much harder to calculate the connecting edges
-   // So let's not use the connecting edges unles we need
-   private boolean useConnectingEdges;
-
    private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
 
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, boolean useConnectingEdges)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFeetZUp = midFeetZUpFrame;
-      this.useConnectingEdges = useConnectingEdges;
 
       supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 30, registry);
       footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", worldFrame, registry);
@@ -103,8 +94,6 @@ public class BipedSupportPolygons
 
       footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(midFeetZUp);
       footToFootLineSegmentInWorld = new FrameLineSegment2d(worldFrame);
-      connectingEdge1 = new FrameLineSegment2d(midFeetZUp);
-      connectingEdge2 = new FrameLineSegment2d(midFeetZUp);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -124,16 +113,6 @@ public class BipedSupportPolygons
       return supportPolygonInWorld;
    }
 
-   public FrameLineSegment2d getConnectingEdge1()
-   {
-      return connectingEdge1;
-   }
-
-   public FrameLineSegment2d getConnectingEdge2()
-   {
-      return connectingEdge2;
-   }
-
    public FrameConvexPolygon2d getFootPolygonInAnkleZUp(RobotSide robotSide)
    {
       return footPolygonsInAnkleZUp.get(robotSide);
@@ -146,7 +125,7 @@ public class BipedSupportPolygons
 
    public FrameConvexPolygon2d getFootPolygonInWorldFrame(RobotSide robotSide)
    {
-      return footPolygonsInSoleFrame.get(robotSide);
+      return footPolygonsInWorldFrame.get(robotSide);
    }
 
    public FrameConvexPolygon2d getFootPolygonInMidFeetZUp(RobotSide robotSide)
@@ -177,9 +156,6 @@ public class BipedSupportPolygons
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
       RobotSide supportSide = null;
-
-      connectingEdge1.setToNaN();
-      connectingEdge2.setToNaN();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -245,22 +221,9 @@ public class BipedSupportPolygons
       if (neitherFootIsSupportingFoot)
          throw new RuntimeException("neither foot is a supporting foot!");
 
-      boolean useDumbCombination = !useConnectingEdges;
-
       if (inDoubleSupport)
       {
-         if (useConnectingEdges)
-         {
-            useDumbCombination = !ConvexPolygonTools.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT),
-                  footPolygonsInMidFeetZUp.get(RobotSide.RIGHT), supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2);
-            if (useDumbCombination)
-               System.err.println("Feet polygons overlap!!!");
-         }
-
-         if (useDumbCombination)
-         {
-            supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
-         }
+         supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
       }
       else
       {
