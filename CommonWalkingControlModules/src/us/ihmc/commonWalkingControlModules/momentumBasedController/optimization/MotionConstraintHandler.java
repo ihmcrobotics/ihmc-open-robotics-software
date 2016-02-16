@@ -15,7 +15,6 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -158,22 +157,20 @@ public class MotionConstraintHandler
       return svd;
    }
 
-   public void setDesiredSpatialAcceleration(SpatialAccelerationCommand desiredSpatialAccelerationCommand)
+   public void setDesiredSpatialAcceleration(SpatialAccelerationCommand spatialAccelerationCommand)
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
-      GeometricJacobian jacobian = desiredSpatialAccelerationCommand.getJacobian();
-      TaskspaceConstraintData taskspaceConstraintData = desiredSpatialAccelerationCommand.getTaskspaceConstraintData();
-      double weight = desiredSpatialAccelerationCommand.getWeight();
+      GeometricJacobian jacobian = spatialAccelerationCommand.getJacobian();
+      double weight = spatialAccelerationCommand.getWeight();
 
-      SpatialAccelerationVector taskSpaceAcceleration = taskspaceConstraintData.getSpatialAcceleration();
-      DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
-      DenseMatrix64F nullspaceMultipliers = taskspaceConstraintData.getNullspaceMultipliers();
+      SpatialAccelerationVector taskSpaceAcceleration = spatialAccelerationCommand.getSpatialAcceleration();
+      DenseMatrix64F selectionMatrix = spatialAccelerationCommand.getSelectionMatrix();
+      DenseMatrix64F nullspaceMultipliers = spatialAccelerationCommand.getNullspaceMultipliers();
 
       if (selectionMatrix.getNumRows() > 0)
       {
-         RigidBody base = (taskspaceConstraintData.getBase() == null) ? getBase(taskSpaceAcceleration) : taskspaceConstraintData.getBase();
-         RigidBody endEffector = (taskspaceConstraintData.getEndEffector() == null) ? getEndEffector(taskSpaceAcceleration)
-               : taskspaceConstraintData.getEndEffector();
+         RigidBody base = (spatialAccelerationCommand.getBase() == null) ? getBase(taskSpaceAcceleration) : spatialAccelerationCommand.getBase();
+         RigidBody endEffector = (spatialAccelerationCommand.getEndEffector() == null) ? getEndEffector(taskSpaceAcceleration) : spatialAccelerationCommand.getEndEffector();
 
          int baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
          GeometricJacobian baseToEndEffectorJacobian = geometricJacobianHolder.getJacobian(baseToEndEffectorJacobianId);
