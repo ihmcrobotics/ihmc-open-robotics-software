@@ -185,7 +185,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
    private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
-   
+
+   private final DoubleYoVariable distanceInside = new DoubleYoVariable("distanceInside", registry);
+
+
    private final QuadrantDependentList<ReferenceFrame> legAttachmentFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> actualFeetLocations = new QuadrantDependentList<YoFramePoint>();
    private final QuadrantDependentList<YoFramePoint> desiredFeetLocations = new QuadrantDependentList<YoFramePoint>();
@@ -1253,6 +1256,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          {
             shiftCoMToSafeStartingPosition();
          }
+
+         centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         distanceInside.set(fourFootSupportPolygon.distanceInside2d(centerOfMassFramePoint));
       }
 
       /**
@@ -1760,7 +1766,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private final FramePoint currentDesiredInTrajectory = new FramePoint();
       private final FrameVector speedMatchVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       private final DoubleYoVariable speedMatchScalar = new DoubleYoVariable("speedMatchScalar", registry);
-      
+      private final QuadrupedSupportPolygon threeFootSupportPolygon = new QuadrupedSupportPolygon();
+
       public TripleSupportState(CrawlGateWalkingState stateEnum)
       {
          super(stateEnum);
@@ -1771,12 +1778,16 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       public void doAction()
       {
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
-         
+
          computeFootPositionAlongSwingTrajectory(swingQuadrant, currentDesiredInTrajectory);
          currentDesiredInTrajectory.changeFrame(ReferenceFrame.getWorldFrame());
          currentSwingTarget.set(currentDesiredInTrajectory);
-         
+
          desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
+
+         threeFootSupportPolygon.set(fourFootSupportPolygon);
+         threeFootSupportPolygon.removeFootstep(swingQuadrant); centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         distanceInside.set(threeFootSupportPolygon.distanceInside2d(centerOfMassFramePoint));
       }
 
       @Override
