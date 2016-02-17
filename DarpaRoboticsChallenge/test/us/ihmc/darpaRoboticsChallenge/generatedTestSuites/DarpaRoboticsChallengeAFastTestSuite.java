@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.darpaRoboticsChallenge.DRCConfigParametersTest.class,
-   us.ihmc.darpaRoboticsChallenge.driving.imageProcessing.OccupancyGridTest.class,
    us.ihmc.darpaRoboticsChallenge.footstepGenerator.BasicFootstepValidityMetricTest.class,
    us.ihmc.darpaRoboticsChallenge.footstepGenerator.PathToFootstepGeneratorTest.class,
    us.ihmc.darpaRoboticsChallenge.frictionCompensation.JointFrictionModelsHolderTest.class,
