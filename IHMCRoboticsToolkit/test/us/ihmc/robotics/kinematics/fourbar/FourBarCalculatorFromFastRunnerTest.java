@@ -66,7 +66,7 @@ public class FourBarCalculatorFromFastRunnerTest
 
 	@DeployableTestMethod
 	@Test(timeout = 300000)
-   public void testRandomQuadralatteral()
+   public void testRandomQuadrilatteral()
    {
       Random rand = new Random(1986L);
       for (int i = 0; i < 10000; i++)
