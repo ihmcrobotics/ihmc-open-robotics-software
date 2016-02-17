@@ -173,7 +173,7 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
       FrameLineSegment2d connectingEdge1 = bipedSupportPolygons.getConnectingEdge1();
       FrameLineSegment2d connectingEdge2 = bipedSupportPolygons.getConnectingEdge2();
 
-      packVirtualToePoints(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2,
+      getVirtualToePoints(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2,
             upcomingSupportSide);
    }
 
@@ -182,11 +182,11 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
    {
       SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<FrameConvexPolygon2d>(supportPolygonAndEdges.getOriginalPolygon1(),
             supportPolygonAndEdges.getOriginalPolygon2());
-      packVirtualToePoints(virtualToePoints, copDesired, footPolygons, supportPolygonAndEdges.getFrameConvexPolygon2d(),
+      getVirtualToePoints(virtualToePoints, copDesired, footPolygons, supportPolygonAndEdges.getFrameConvexPolygon2d(),
             supportPolygonAndEdges.getConnectingEdge1(), supportPolygonAndEdges.getConnectingEdge2(), upcomingSupportSide);
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d copDesired,
+   public void getVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d copDesired,
          SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FrameConvexPolygon2d supportPolygonInMidFeetZUp, FrameLineSegment2d connectingEdge1,
          FrameLineSegment2d connectingEdge2, RobotSide upcomingSupportSide)
    {

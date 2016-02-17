@@ -89,7 +89,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
             desiredAngularAcceleration, getBase());
 
-      handSpatialAccelerationControlModule.packAcceleration(handAcceleration);
+      handSpatialAccelerationControlModule.getAcceleration(handAcceleration);
 
       ReferenceFrame handFrame = handSpatialAccelerationControlModule.getEndEffector().getBodyFixedFrame();
       handAcceleration.changeBodyFrameNoRelativeAcceleration(handFrame);

@@ -376,7 +376,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		icpPlanner.setOmega0(omega0);
 		icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations);
 
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPosition, icpVelocity, icpAcceleration, initialTime);
+		icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(icpPosition, icpVelocity, icpAcceleration, initialTime);
 
 		JUnitTools.assertPoint3dEquals("", initialICPPosition.getPointCopy(), icpPosition.getPointCopy(), 1e-10);
 		JUnitTools.assertVector3dEquals("", initialICPVelocity.getVectorCopy(), icpVelocity.getVectorCopy(), 1e-10);
@@ -397,7 +397,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 
 		icpPlanner.initializeSingleSupport(initialTime, footLocations);
 
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
+		icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
 				initialTime);
 
 		simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
@@ -458,7 +458,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		icpPlanner.setOmega0(omega0);
 		icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations);
 
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPosition, icpVelocity, icpAcceleration, initialTime);
+		icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(icpPosition, icpVelocity, icpAcceleration, initialTime);
 
 		JUnitTools.assertPoint3dEquals("", initialICPPosition.getPointCopy(), icpPosition.getPointCopy(), 1e-10);
 		JUnitTools.assertVector3dEquals("", initialICPVelocity.getVectorCopy(), icpVelocity.getVectorCopy(), 1e-10);
@@ -479,7 +479,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 
 		icpPlanner.initializeSingleSupport(initialTime, footLocations);
 
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
+		icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
 				initialTime);
 
 		simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
@@ -488,7 +488,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		initialTime = initialTime + singleSupportDuration;
 
 		icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations);
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
+		icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
 				initialTime);
 
 		simulateForwardAndCheckDoubleSupport(footLocations, icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner,
@@ -550,7 +550,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
 		singleSupportInitialICPPosition.set(singleSupportStartICP);
 
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
+		icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
 				initialTime);
 
 		if (visualize)
@@ -600,7 +600,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 				}
 			}
 
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
 					initialICPAcceleration, initialTime);
 
 			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
@@ -611,7 +611,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 			initialTime = initialTime + singleSupportDuration;
 
 			icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations);
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
 					initialICPAcceleration, initialTime);
 
 			icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
@@ -756,9 +756,9 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
 		{
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
 					time);
-			icpPlanner.packDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
+			icpPlanner.getDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
 
 			if (visualize)
 			{
@@ -796,9 +796,9 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
 		{
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
 					time);
-			icpPlanner.packDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
+			icpPlanner.getDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
 
 			if (visualize)
 			{

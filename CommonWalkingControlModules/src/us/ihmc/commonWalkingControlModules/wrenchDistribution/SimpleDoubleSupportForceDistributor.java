@@ -17,7 +17,7 @@ public class SimpleDoubleSupportForceDistributor implements DoubleSupportForceDi
       this.pelvisFrame = referenceFrames.getPelvisFrame();
    }
 
-   public void packForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesOnPelvis,
+   public void getForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesOnPelvis,
                                     double zForceInPelvisFrameTotal, FrameVector torqueOnPelvisTotal,
                                     SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints)
    {

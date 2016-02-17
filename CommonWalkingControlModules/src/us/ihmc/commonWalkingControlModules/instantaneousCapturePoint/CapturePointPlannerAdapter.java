@@ -268,9 +268,9 @@ public class CapturePointPlannerAdapter
 
       tmpFramePoint2.setXYIncludingFrame(actualICP);
       if (useNewICPPlanner)
-         icpPlanner.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, tmpFramePoint2, time);
+         icpPlanner.getDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, tmpFramePoint2, time);
       else
-         capturePointPlanner.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, time, tmpFramePoint2, transferToFootLocation);
+         capturePointPlanner.getDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, time, tmpFramePoint2, transferToFootLocation);
 
       icpPositionToPack.setByProjectionOntoXYPlaneIncludingFrame(tmpFramePoint);
       icpVelocityToPack.setByProjectionOntoXYPlaneIncludingFrame(tmpFrameVector);

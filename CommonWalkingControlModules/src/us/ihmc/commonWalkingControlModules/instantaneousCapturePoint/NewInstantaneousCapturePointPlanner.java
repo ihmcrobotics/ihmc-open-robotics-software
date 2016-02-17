@@ -289,7 +289,7 @@ public class NewInstantaneousCapturePointPlanner
       CapturePointTools.computeDesiredCornerPoints(capturePointCornerPoints, constantCentersOfPressure, false, stepTime, omega0);
    }
 
-   public void packDesiredCapturePointPositionVelocityAndAcceleration(FramePoint desiredCapturePointPositionToPack,
+   public void getDesiredCapturePointPositionVelocityAndAcceleration(FramePoint desiredCapturePointPositionToPack,
          FrameVector desiredCapturePointVelocityToPack, FrameVector desiredCapturePointAccelerationToPack, double time)
    {
       computeTimeInCurrentState(time);
@@ -307,7 +307,7 @@ public class NewInstantaneousCapturePointPlanner
       desiredCapturePointAccelerationToPack.set(tmpFrameVector2);
    }
 
-   public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
          double time)
    {
       computeTimeInCurrentState(time);
