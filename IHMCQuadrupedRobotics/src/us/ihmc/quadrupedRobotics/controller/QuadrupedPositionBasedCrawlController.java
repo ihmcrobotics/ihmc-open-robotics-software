@@ -178,6 +178,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final FramePoint2d centroidFramePoint2d = new FramePoint2d();
    
    private final QuadrupedSupportPolygon safeToStepSupportPolygon = new QuadrupedSupportPolygon();
+   private final QuadrupedSupportPolygon currentSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
    private final ConvexPolygon2d supportPolygonHolder = new ConvexPolygon2d();
@@ -524,11 +525,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
    private void createGraphicsAndArtifacts(YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
-      YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("quadSupportPolygonArtifact", supportPolygon, Color.blue, false);
+      YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("quadSupportPolygonArtifact", supportPolygon, Color.BLUE, false);
       YoArtifactPolygon currentTriplePolygonArtifact = new YoArtifactPolygon("currentTriplePolygonArtifact", currentTriplePolygon, Color.GREEN, false);
       YoArtifactPolygon upcomingTriplePolygonArtifact = new YoArtifactPolygon("upcomingTriplePolygonArtifact", upcomingTriplePolygon, Color.yellow, false);
       YoArtifactPolygon commonTriplePolygonArtifact = new YoArtifactPolygon("commonTriplePolygonArtifact", commonTriplePolygon, Color.RED, false);
-      YoArtifactPolygon commonTriplePolygonLeftArtifact = new YoArtifactPolygon("commonTriplePolygonLeftArtifact", commonTriplePolygonLeft, Color.BLUE, false);
+      YoArtifactPolygon commonTriplePolygonLeftArtifact = new YoArtifactPolygon("commonTriplePolygonLeftArtifact", commonTriplePolygonLeft, Color.pink, false);
       YoArtifactPolygon commonTriplePolygonRightArtifact = new YoArtifactPolygon("commonTriplePolygonRightArtifact", commonTriplePolygonRight, Color.MAGENTA, false);
       
       yoGraphicsListRegistry.registerArtifact("supportPolygon", supportPolygonArtifact);
@@ -877,7 +878,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       centerOfMassFramePoint.setToZero(desiredCoMPoseReferenceFrame);
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassPosition.set(centerOfMassFramePoint);
-      drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
+      drawSupportPolygon(currentSupportPolygon, supportPolygon);
       
       for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
       {
@@ -1257,8 +1258,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             shiftCoMToSafeStartingPosition();
          }
 
+         currentSupportPolygon.set(fourFootSupportPolygon);
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         distanceInside.set(fourFootSupportPolygon.distanceInside2d(centerOfMassFramePoint));
+         distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));
       }
 
       /**
@@ -1403,7 +1405,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             break;
             
          case TTR:
-            tripleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfPolygon(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
+            tripleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
             break;
             
          case TROTLINE_MIDPOINT:
@@ -1630,11 +1632,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          commonSupportPolygon.set(commonTriangle);
          double radius = subCircleRadius.getDoubleValue();
          boolean hasEnoughSides = commonSupportPolygon.size() >= 3;
+         boolean requestedRadiusLargerThanInCircle = true;
          if(useSubCircleForBodyShiftTarget.getBooleanValue() && hasEnoughSides)
          {
-            commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(upcomingSwingLeg, radius, comTargetToPack);
+            requestedRadiusLargerThanInCircle = 
+                  !commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(upcomingSwingLeg, radius, comTargetToPack);
          }
-         else if(hasEnoughSides)
+         if(hasEnoughSides && requestedRadiusLargerThanInCircle)
          {
             radius = commonSupportPolygon.getInCircle2d(circleCenter3d);
             comTargetToPack.set(circleCenter3d.getX(), circleCenter3d.getY());
@@ -1766,8 +1770,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private final FramePoint currentDesiredInTrajectory = new FramePoint();
       private final FrameVector speedMatchVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       private final DoubleYoVariable speedMatchScalar = new DoubleYoVariable("speedMatchScalar", registry);
-      private final QuadrupedSupportPolygon threeFootSupportPolygon = new QuadrupedSupportPolygon();
-
+      
       public TripleSupportState(CrawlGateWalkingState stateEnum)
       {
          super(stateEnum);
@@ -1785,9 +1788,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
          desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
 
-         threeFootSupportPolygon.set(fourFootSupportPolygon);
-         threeFootSupportPolygon.removeFootstep(swingQuadrant); centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         distanceInside.set(threeFootSupportPolygon.distanceInside2d(centerOfMassFramePoint));
+         currentSupportPolygon.set(fourFootSupportPolygon);
+         currentSupportPolygon.removeFootstep(swingQuadrant); centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+         distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));
       }
 
       @Override
