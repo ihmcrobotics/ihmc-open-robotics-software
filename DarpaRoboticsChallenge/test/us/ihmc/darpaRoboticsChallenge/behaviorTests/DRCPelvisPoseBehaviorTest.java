@@ -205,8 +205,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-//   @Ignore
-//   @DeployableTestMethod(duration = 50.0)
+//   @DeployableTestMethod(duration = 50.0, targets = TestPlanTarget.Exclude)
 //   @Test(timeout = 300000)
 //   public void testPelvisZTranslation() throws SimulationExceededMaximumTimeException
 //   {

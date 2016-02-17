@@ -12,9 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.darpaRoboticsChallenge.calib.DRCArmKinematicsCalibrationTest.class,
    us.ihmc.darpaRoboticsChallenge.DRCConfigParametersTest.class,
-   us.ihmc.darpaRoboticsChallenge.driving.imageProcessing.DrcColorPixelDrivingClassifierTest.class,
    us.ihmc.darpaRoboticsChallenge.driving.imageProcessing.OccupancyGridTest.class,
    us.ihmc.darpaRoboticsChallenge.footstepGenerator.BasicFootstepValidityMetricTest.class,
    us.ihmc.darpaRoboticsChallenge.footstepGenerator.PathToFootstepGeneratorTest.class,

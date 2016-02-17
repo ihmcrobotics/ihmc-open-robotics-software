@@ -20,6 +20,7 @@ import com.joptimizer.optimizers.OptimizationRequest;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public abstract class ConvexOptimizationAdapterTest
 {
@@ -27,8 +28,7 @@ public abstract class ConvexOptimizationAdapterTest
    public abstract double getTestErrorEpsilon();
    
    @SuppressWarnings("unchecked")
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void qpsFileTest() throws IOException
    {
@@ -174,9 +174,8 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(5.0, solution[0], 1e-5);
    }
    
-   @Ignore // Need to implement addQuadraticInequalities
-
-	@DeployableTestMethod
+   // Need to implement addQuadraticInequalities
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLinearCostQuadraticInequalityOptimizationProblem()
    {
@@ -243,8 +242,8 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(4.0, solution[0] + solution[1], getTestErrorEpsilon());
    }
    
-   @Ignore //Not implemented yet!
-	@DeployableTestMethod
+   //Not implemented yet!
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -273,8 +272,8 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0/2.0 * (9.0 + Math.sqrt(17.0)), solution[1], 1e-5);
    }
 
-   @Ignore //Not implemented yet!
-	@DeployableTestMethod
+   //Not implemented yet!
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {

@@ -34,6 +34,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
@@ -287,8 +288,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
    
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 70.0)
+   @DeployableTestMethod(estimatedDuration = 70.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testGraspingStandingDebrisWithLeftHand() throws SimulationExceededMaximumTimeException
    {
