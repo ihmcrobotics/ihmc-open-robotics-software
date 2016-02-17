@@ -15,22 +15,6 @@ import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters
 {
-   public abstract RigidBodyTransform getPelvisContactPointTransform();
-
-   public abstract List<Point2d> getPelvisContactPoints();
-
-   public abstract RigidBodyTransform getPelvisBackContactPointTransform();
-
-   public abstract List<Point2d> getPelvisBackContactPoints();
-
-   public abstract RigidBodyTransform getChestBackContactPointTransform();
-
-   public abstract List<Point2d> getChestBackContactPoints();
-
-   public abstract SideDependentList<RigidBodyTransform> getThighContactPointTransforms();
-
-   public abstract SideDependentList<List<Point2d>> getThighContactPoints();
-
    public abstract List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap();
 
    public abstract SideDependentList<ArrayList<Point2d>> getFootContactPoints();
