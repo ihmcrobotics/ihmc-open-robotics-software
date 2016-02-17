@@ -84,7 +84,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
       poseTrajectoryGenerator.getPose(desiredPose);
       poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-      poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
             desiredAngularAcceleration, getBase());

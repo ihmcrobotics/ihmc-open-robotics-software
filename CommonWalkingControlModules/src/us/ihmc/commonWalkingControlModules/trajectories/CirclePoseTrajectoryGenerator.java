@@ -559,12 +559,12 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
    
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
       yoCurrentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
       yoCurrentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
@@ -584,11 +584,11 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAcceleration(accelerationToPack);
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 
    public void showVisualization()

@@ -147,14 +147,14 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       orientationTrajectoryGenerator.getOrientation(orientationToPack);
    }
 
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
-      orientationTrajectoryGenerator.packAngularVelocity(angularVelocityToPack);
+      orientationTrajectoryGenerator.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
-      orientationTrajectoryGenerator.packAngularAcceleration(angularAccelerationToPack);
+      orientationTrajectoryGenerator.getAngularAcceleration(angularAccelerationToPack);
    }
 
    public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
@@ -164,11 +164,11 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       getAcceleration(accelerationToPack);
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 
    public void getPose(FramePose framePoseToPack)

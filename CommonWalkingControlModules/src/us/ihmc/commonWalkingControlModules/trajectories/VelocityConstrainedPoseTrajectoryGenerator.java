@@ -645,12 +645,12 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
@@ -662,11 +662,11 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       getAcceleration(accelerationToPack);
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 
    private final Quat4d temp = new Quat4d();

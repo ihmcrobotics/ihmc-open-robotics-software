@@ -53,20 +53,20 @@ public class ProviderBasedConstantOrientationTrajectoryGenerator implements Orie
       orientationToPack.changeFrame(referenceFrame);
    }
 
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(referenceFrame);
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
       angularAccelerationToPack.setToZero(referenceFrame);
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 }

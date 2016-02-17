@@ -6,9 +6,9 @@ import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
 public interface OrientationTrajectoryGenerator extends TrajectoryGenerator, OrientationProvider
 {
-   public abstract void packAngularVelocity(FrameVector angularVelocityToPack);
+   public abstract void getAngularVelocity(FrameVector angularVelocityToPack);
 
-   public abstract void packAngularAcceleration(FrameVector angularAccelerationToPack);
+   public abstract void getAngularAcceleration(FrameVector angularAccelerationToPack);
 
-   public abstract void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack);
+   public abstract void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack);
 }

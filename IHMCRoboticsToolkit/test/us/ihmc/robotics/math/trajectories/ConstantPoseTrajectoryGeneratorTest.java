@@ -223,7 +223,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
       assertFalse(referenceFrame.equals(angularVelocityToPack.getReferenceFrame()));
 
-      generator.packAngularVelocity(angularVelocityToPack);
+      generator.getAngularVelocity(angularVelocityToPack);
 
       assertEquals(0.0, angularVelocityToPack.getX(), EPSILON);
       assertEquals(0.0, angularVelocityToPack.getY(), EPSILON);
@@ -239,7 +239,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
       assertFalse(referenceFrame.equals(angularAccelerationToPack.getReferenceFrame()));
 
-      generator.packAngularAcceleration(angularAccelerationToPack);
+      generator.getAngularAcceleration(angularAccelerationToPack);
 
       assertEquals(0.0, angularAccelerationToPack.getX(), EPSILON);
       assertEquals(0.0, angularAccelerationToPack.getY(), EPSILON);
@@ -313,7 +313,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertFalse(referenceFrame.equals(angularAccelerationToPack.getReferenceFrame()));
       assertFalse(ReferenceFrame.getWorldFrame().equals(angularAccelerationToPack.getReferenceFrame()));
 
-      generator.packAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
+      generator.getAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
 
       assertEquals(0.0, orientationToPack.getPitch(), EPSILON);
       assertEquals(0.0, orientationToPack.getYaw(), EPSILON);

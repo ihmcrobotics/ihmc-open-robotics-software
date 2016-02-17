@@ -362,7 +362,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 		desiredVelocity.scale(timeParameterScaleFactor.getDoubleValue());
 		desiredAcceleration.scale(timeParameterScaleFactor.getDoubleValue() * timeParameterScaleFactor.getDoubleValue());
-		poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+		poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 		desiredAngularVelocity.scale(timeParameterScaleFactor.getDoubleValue());
 		desiredAngularAcceleration.scale(timeParameterScaleFactor.getDoubleValue() * timeParameterScaleFactor.getDoubleValue());
 
@@ -413,7 +413,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
 		poseTrajectoryGenerator.getPose(desiredPose);
 		poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-		poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+		poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
 		ReferenceFrame controlFrame = taskspaceToJointspaceCalculator.getControlFrame();
 

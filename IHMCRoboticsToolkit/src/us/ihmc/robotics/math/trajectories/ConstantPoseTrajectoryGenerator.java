@@ -165,21 +165,21 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(orientation.getReferenceFrame());
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
       angularAccelerationToPack.setToZero(orientation.getReferenceFrame());
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 
    private final Quat4d temp = new Quat4d();
