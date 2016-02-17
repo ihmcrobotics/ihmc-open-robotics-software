@@ -124,8 +124,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable dwellInSingleSupportDuration = new DoubleYoVariable("dwellInSingleSupportDuration",
          "Amount of time to stay in single support after the ICP trajectory is done if you haven't registered a touchdown yet", registry);
 
-   private final BooleanYoVariable loopControllerForever = new BooleanYoVariable("loopControllerForever", "For checking memory and profiling", registry);
-
    private final BooleanYoVariable controlPelvisHeightInsteadOfCoMHeight = new BooleanYoVariable("controlPelvisHeightInsteadOfCoMHeight", registry);
 
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
@@ -198,8 +196,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable isInFlamingoStance = new BooleanYoVariable("isInFlamingoStance", registry);
 
-   private final DoubleYoVariable[] unconstrainedDesiredPositions;
-
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final BooleanYoVariable hasWalkingControllerBeenInitialized = new BooleanYoVariable("hasWalkingControllerBeenInitialized", registry);
@@ -247,13 +243,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setupManagers(variousWalkingManagers);
 
       hasWalkingControllerBeenInitialized.set(false);
-
-      unconstrainedDesiredPositions = new DoubleYoVariable[unconstrainedJoints.length];
-
-      for (int i = 0; i < unconstrainedDesiredPositions.length; i++)
-      {
-         unconstrainedDesiredPositions[i] = new DoubleYoVariable(unconstrainedJoints[i].getName() + "_unconstrained_q_d", registry);
-      }
 
       timeToGetPreparedForLocomotion.set(walkingControllerParameters.getTimeToGetPreparedForLocomotion());
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
@@ -484,11 +473,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void initialize()
    {
       super.initialize();
-
-      for (int i = 0; i < unconstrainedDesiredPositions.length; i++)
-      {
-         unconstrainedDesiredPositions[i].set(unconstrainedJoints[i].getQ());
-      }
 
       initializeContacts();
 
@@ -1758,25 +1742,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return transferToAndNextFootstepsData;
    }
 
-   public void doMotionControl()
-   {
-      if (loopControllerForever.getBooleanValue())
-      {
-         while (true)
-         {
-            doMotionControlInternal();
-         }
-      }
-      else
-      {
-         doMotionControlInternal();
-      }
-   }
-
    private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
 
-   // FIXME: don't override
-   private void doMotionControlInternal()
+   public void doMotionControl()
    {
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
       if (failureDetectionControlModule.isRobotFalling())
@@ -1837,16 +1805,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
       icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
-   }
-
-   @Override
-   protected void doUnconstrainedJointControl()
-   {
-      for (int i = 0; i < unconstrainedDesiredPositions.length; i++)
-      {
-         unconstrainedJoints[i].setqDesired(unconstrainedDesiredPositions[i].getDoubleValue());
-      }
-      super.doUnconstrainedJointControl();
    }
 
    // Temporary objects to reduce garbage collection.

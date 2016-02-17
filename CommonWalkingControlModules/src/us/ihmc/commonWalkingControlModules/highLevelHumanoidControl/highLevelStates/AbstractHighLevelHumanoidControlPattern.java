@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
@@ -16,13 +17,16 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -41,12 +45,18 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+   
    protected final DoubleYoVariable yoTime;
    protected final double controlDT;
    protected final double gravity;
    protected final CommonHumanoidReferenceFrames referenceFrames;
 
    protected final TwistCalculator twistCalculator;
+
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> unconstrainedDesiredPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> preRateLimitedDesiredAccelerations = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedDesiredAccelerations = new LinkedHashMap<>();
 
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
@@ -123,6 +133,16 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       // Setup joint constraints
       unconstrainedJoints = findUnconstrainedJoints();
+
+      for (OneDoFJoint joint : unconstrainedJoints)
+      {
+
+         jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
+         String jointName = joint.getName();
+         unconstrainedDesiredPositions.put(joint, new DoubleYoVariable("unconstrained_q_d_" + jointName, registry));
+         preRateLimitedDesiredAccelerations.put(joint, new DoubleYoVariable("prl_unconstrained_qdd_d_" + jointName, registry));
+         rateLimitedDesiredAccelerations.put(joint, new RateLimitedYoVariable("rl_unconstrained_qdd_d_" + jointName, registry, Double.POSITIVE_INFINITY, controlDT));
+      }
    }
 
    protected OneDoFJoint[] findUnconstrainedJoints()
@@ -183,6 +203,12 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    public void initialize()
    {
+      for (int i = 0; i < unconstrainedJoints.length; i++)
+      {
+         OneDoFJoint joint = unconstrainedJoints[i];
+         unconstrainedDesiredPositions.get(joint).set(joint.getQ());
+      }
+
       momentumBasedController.initialize();
       variousWalkingManagers.initializeManagers();
       variousWalkingProviders.clearPoseProviders();
@@ -252,9 +278,31 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       pelvisOrientationManager.compute();
    }
 
-   protected void doUnconstrainedJointControl()
+   protected JointspaceAccelerationCommand doUnconstrainedJointControl()
    {
-      momentumBasedController.doPDControl(unconstrainedJoints, unconstrainedJointsControlGains);
+      double kp = unconstrainedJointsControlGains.getKp();
+      double kd = unconstrainedJointsControlGains.getKd();
+      double maxAcceleration = unconstrainedJointsControlGains.getMaximumAcceleration();
+      double maxJerk = unconstrainedJointsControlGains.getMaximumJerk();
+
+      for (int i = 0; i < unconstrainedJoints.length; i++)
+      {
+         OneDoFJoint joint = unconstrainedJoints[i];
+         double qDesired = unconstrainedDesiredPositions.get(joint).getDoubleValue();
+         double desiredAcceleration = kp * (qDesired -  joint.getQ()) - kd * joint.getQd();
+
+         desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration);
+         preRateLimitedDesiredAccelerations.get(joint).set(desiredAcceleration);
+
+         RateLimitedYoVariable rateLimitedDesiredAcceleration = rateLimitedDesiredAccelerations.get(joint);
+         rateLimitedDesiredAcceleration.setMaxRate(maxJerk);
+         rateLimitedDesiredAcceleration.update(desiredAcceleration);
+
+         momentumBasedController.setOneDoFJointAcceleration(joint, rateLimitedDesiredAcceleration.getDoubleValue());
+         jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(joint, desiredAcceleration);
+      }
+
+      return jointspaceAccelerationCommand;
    }
 
    protected boolean handleFootPose(RobotSide robotSide)

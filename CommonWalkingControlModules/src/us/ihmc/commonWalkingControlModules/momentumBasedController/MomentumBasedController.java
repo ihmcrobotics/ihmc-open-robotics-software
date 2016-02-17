@@ -22,12 +22,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommandPool;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -40,7 +40,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -51,7 +50,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -146,9 +144,6 @@ public class MomentumBasedController
 
    // private final YoFrameVector groundReactionTorqueCheck;
    // private final YoFrameVector groundReactionForceCheck;
-
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> preRateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
 
    private final ArrayList<OneDoFJoint> jointsWithDesiredAcceleration = new ArrayList<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
@@ -342,8 +337,6 @@ public class MomentumBasedController
             jointsWithDesiredAcceleration.add((OneDoFJoint) joint);
             desiredAccelerationYoVariables.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
             desiredTorqueYoVariables.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "tau_d", registry));
-            rateLimitedDesiredAccelerations.put((OneDoFJoint) joint, new RateLimitedYoVariable(joint.getName() + "_rl_qdd_d", registry, 10000.0, controlDT));
-            preRateLimitedDesiredAccelerations.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "_prl_qdd_d", registry));
          }
       }
 
@@ -820,51 +813,6 @@ public class MomentumBasedController
    public void addUpdatable(Updatable updatable)
    {
       updatables.add(updatable);
-   }
-
-   public void doPDControl(OneDoFJoint[] joints, YoPDGains gains)
-   {
-      double kp = gains.getKp();
-      double kd = gains.getKd();
-      double maxAcceleration = gains.getMaximumAcceleration();
-      double maxJerk = gains.getMaximumJerk();
-      doPDControl(joints, kp, kd, maxAcceleration, maxJerk);
-   }
-
-   public void doPDControl(OneDoFJoint[] joints, double kp, double kd, double maxAcceleration, double maxJerk)
-   {
-      for (OneDoFJoint joint : joints)
-      {
-         doPDControl(joint, kp, kd, joint.getqDesired(), 0.0, maxAcceleration, maxJerk);
-      }
-   }
-
-   public void doPDControl(OneDoFJoint joint, double desiredPosition, double desiredVelocity, YoPDGains gains)
-   {
-      double kp = gains.getKp();
-      double kd = gains.getKd();
-      double maxAcceleration = gains.getMaximumAcceleration();
-      double maxJerk = gains.getMaximumJerk();
-      doPDControl(joint, kp, kd, desiredPosition, desiredVelocity, maxAcceleration, maxJerk);
-   }
-
-   public void doPDControl(OneDoFJoint joint, double kp, double kd, double desiredPosition, double desiredVelocity, double maxAcceleration, double maxJerk)
-   {
-      double desiredAcceleration = computeDesiredAcceleration(kp, kd, desiredPosition, desiredVelocity, joint);
-
-      desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration);
-      preRateLimitedDesiredAccelerations.get(joint).set(desiredAcceleration);
-
-      RateLimitedYoVariable rateLimitedDesiredAcceleration = this.rateLimitedDesiredAccelerations.get(joint);
-      rateLimitedDesiredAcceleration.setMaxRate(maxJerk);
-      rateLimitedDesiredAcceleration.update(desiredAcceleration);
-
-      setOneDoFJointAcceleration(joint, rateLimitedDesiredAcceleration.getDoubleValue());
-   }
-
-   private static double computeDesiredAcceleration(double k, double d, double qDesired, double qdDesired, OneDoFJoint joint)
-   {
-      return k * (qDesired - joint.getQ()) + d * (qdDesired - joint.getQd());
    }
 
    private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
