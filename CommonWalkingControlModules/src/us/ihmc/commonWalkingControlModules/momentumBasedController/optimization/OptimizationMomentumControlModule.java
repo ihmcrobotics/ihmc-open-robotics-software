@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.Mom
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
@@ -398,6 +399,9 @@ public class OptimizationMomentumControlModule
       case MOMENTUM_RATE:
          setDesiredRateOfChangeOfMomentum((MomentumRateCommand) inverseDynamicsCommand);
          return;
+      case EXTERNAL_WRENCH:
+         setExternalWrenchToCompensateFor((ExternalWrenchCommand) inverseDynamicsCommand);
+         return;
       case COMMAND_LIST:
          setInverseDynamicsCommandList((InverseDynamicsCommandList) inverseDynamicsCommand);
          return;
@@ -460,8 +464,10 @@ public class OptimizationMomentumControlModule
       this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateData());
    }
 
-   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
+   private void setExternalWrenchToCompensateFor(ExternalWrenchCommand externalWrenchCommand)
    {
+      RigidBody rigidBody = externalWrenchCommand.getRigidBody();
+      Wrench wrench = externalWrenchCommand.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
