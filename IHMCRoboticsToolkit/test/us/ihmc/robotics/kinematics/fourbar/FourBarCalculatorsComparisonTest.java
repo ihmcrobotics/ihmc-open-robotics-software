@@ -1,6 +1,10 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import java.util.Random;
+
+import static java.lang.Math.abs;
+import static java.lang.Math.atan2;
+import static java.lang.Math.sqrt;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -16,43 +20,42 @@ public class FourBarCalculatorsComparisonTest
 
    @DeployableTestMethod
    @Test(timeout = 300000)
-   public void testJacobianRelationForConsecutiveSideActuation()
+   public void equalOuputAnglesForRandomQuadrilatteralTest()
    {
-      Random random = new Random(58932L);
-      int numTests = 10;
-
-      double[] boundsLength = new double[] {0.1, 2.0};
-      double[] inputAngleBounds = new double[] {-0.4, 0.4};
-
-      for (int i = 0; i < numTests; i++)
+      Random rand = new Random(1986L);
+      for (int j = 0; j < 10000; j++)
       {
-         double L1 = getRandomValFromBounds(boundsLength, random);
-         double L2 = getRandomValFromBounds(boundsLength, random);
-         double L3 = getRandomValFromBounds(boundsLength, random);
-         double L4 = getRandomValFromBounds(boundsLength, random);
-         double inputAngle = getRandomValFromBounds(inputAngleBounds, random);
+         // Generate quadrilatteral
+         double e = 100 * (rand.nextDouble() + 0.001);
+         double k1 = rand.nextDouble();
+         double k2 = rand.nextDouble();
+         double d1 = e * abs(rand.nextGaussian());
+         double d2 = e * abs(rand.nextGaussian());
+         double DE = e * k1, DF = e * k2, BE = e * (1 - k1), BF = e * (1 - k2);
+         double AE = d1, CF = d2;
+         double AD = sqrt(DE * DE + AE * AE), DAE = atan2(DE, AE), ADE = atan2(AE, DE);
+         double AB = sqrt(AE * AE + BE * BE), BAE = atan2(BE, AE), ABE = atan2(AE, BE);
+         double CD = sqrt(CF * CF + DF * DF), CDF = atan2(CF, DF), DCF = atan2(DF, CF);
+         double BC = sqrt(BF * BF + CF * CF), CBF = atan2(CF, BF), BCF = atan2(BF, CF);
+         double BAD = DAE + BAE, ABC = ABE + CBF, BCD = BCF + DCF, ADC = ADE + CDF;
 
-         testCalculators(L1, L2, L3, L4, inputAngle);
+         // Test
+         testCalculators(AD, AB, BC, CD, BAD);
       }
    }
 
-   private double getRandomValFromBounds(double[] bounds, Random random)
+   private void testCalculators(double AD, double AB, double BC, double CD, double knownAngle)
    {
-      return bounds[0] + random.nextDouble() * (bounds[1] - bounds[0]);
-   }
-
-   private void testCalculators(double length_DA, double length_AB, double length_BC, double length_CD, double knownAngle)
-   {
-      // Fast runner calculations
-      FourBarCalculatorFromFastRunner fastRunnerCalculator = new FourBarCalculatorFromFastRunner(length_DA, length_AB, length_BC, length_CD);
+      // (1) Fast runner calculations
+      FourBarCalculatorFromFastRunner fastRunnerCalculator = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
       fastRunnerCalculator.solveForAngleDAB(knownAngle);
       double outputFastRunnerCalculator = fastRunnerCalculator.getAngleABC();
 
-      // Other calculations
-      FourbarLink outputLink = new FourbarLink(length_DA);
-      FourbarLink groundLink = new FourbarLink(length_AB);
-      FourbarLink inputLink = new FourbarLink(length_BC);
-      FourbarLink floatingLink = new FourbarLink(length_CD);
+      // (2) Other calculations
+      FourbarLink outputLink = new FourbarLink(AD);
+      FourbarLink groundLink = new FourbarLink(AB);
+      FourbarLink inputLink = new FourbarLink(BC);
+      FourbarLink floatingLink = new FourbarLink(CD);
 
       FourbarProperties fourBarProperties = new FourbarProperties()
       {
@@ -76,7 +79,7 @@ public class FourBarCalculatorsComparisonTest
             // TODO Auto-generated method stub
             return 0;
          }
-         
+
          @Override
          public FourbarLink getOutputLink()
          {
@@ -103,10 +106,9 @@ public class FourBarCalculatorsComparisonTest
       };
 
       FourbarCalculator otherCalculator = new FourbarCalculator(fourBarProperties);
-      double outputOtherCalculator = otherCalculator.calculateInputAngleFromOutputAngle(Math.PI - knownAngle); //TODO make sure
+      double outputOtherCalculator = otherCalculator.calculateInputAngleFromOutputAngle(Math.PI - knownAngle);
 
-      // Compare
+      // (3) Compare
       assertEquals(outputFastRunnerCalculator, outputOtherCalculator, eps);
    }
-
 }
