@@ -1,19 +1,17 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
  * All tests ignored because they are human assisted. They also might not work.
  */
 public class BodePlotConstructorTest
 {
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimpleFilter()
    {
@@ -43,9 +41,8 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testSingleFreqPhaseShift()
    {
       // int n = 1000;
@@ -74,9 +71,8 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testSecondOrderResponse()
    {
       double T = 5.0;
