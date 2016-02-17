@@ -89,7 +89,6 @@ public class UserControlModeState extends HandControlState
       for (int i = 0; i < userControlledJoints.length; i++)
       {
          OneDoFJoint joint = userControlledJoints[i];
-         momentumBasedController.setOneDoFJointAcceleration(joint, userDesiredJointAccelerations[i].getDoubleValue());
          jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, userDesiredJointAccelerations[i].getDoubleValue());
       }
    }

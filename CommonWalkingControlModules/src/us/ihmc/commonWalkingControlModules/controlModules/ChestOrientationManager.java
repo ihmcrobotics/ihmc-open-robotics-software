@@ -168,8 +168,6 @@ public class ChestOrientationManager
             }
          }
 
-         momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
-
          GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
          spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
       }

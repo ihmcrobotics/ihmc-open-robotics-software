@@ -237,7 +237,7 @@ public class SimpleStanceController implements RobotController
       momentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       
       MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
    }
 
    private void setJointAccelerationsAndWrenches()
@@ -270,7 +270,7 @@ public class SimpleStanceController implements RobotController
          taskspaceConstraintData.set(new SpatialAccelerationVector(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(), jacobian.getEndEffectorFrame()));
          
          SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskspaceConstraintData);
-         momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+         momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
       }
    }
 
@@ -296,7 +296,7 @@ public class SimpleStanceController implements RobotController
       taskspaceConstraintData.setAngularAcceleration(pelvisFrame, pelvisJacobian.getBaseFrame(), output, nullspaceMultipliers);
 
       SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(pelvisJacobian, taskspaceConstraintData, 1.0);
-      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
 
 //    DenseMatrix64F jointAcceleration = new DenseMatrix64F(3, 1);
@@ -320,7 +320,7 @@ public class SimpleStanceController implements RobotController
       DenseMatrix64F desiredAccelerationMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
       desiredAccelerationMatrix.set(0, 0, desiredAcceleration);
       JointspaceAccelerationCommand desiredJointAccelerationCommand = new JointspaceAccelerationCommand(joint, desiredAccelerationMatrix);
-      momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredJointAccelerationCommand);
    }
 
    public void initialize()

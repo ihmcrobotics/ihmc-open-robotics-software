@@ -15,6 +15,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPositionPIDGains;
@@ -29,6 +32,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -43,7 +47,10 @@ public class OnToesState extends AbstractFootControlState
    private static final boolean USE_TOEOFF_TRAJECTORY = false;
    private static final double MIN_TRAJECTORY_TIME = 0.1;
 
+   private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private final PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
+   private final JointspaceAccelerationCommand kneeJointCommand = new JointspaceAccelerationCommand();
 
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
@@ -147,6 +154,11 @@ public class OnToesState extends AbstractFootControlState
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
+
+      kneeJointCommand.addJoint(kneeJoint, Double.NaN);
+      commandList.addCommand(spatialAccelerationCommand);
+      commandList.addCommand(pointAccelerationCommand);
+      commandList.addCommand(kneeJointCommand);
    }
 
    private int createRootToFootJacobian()
@@ -234,10 +246,11 @@ public class OnToesState extends AbstractFootControlState
       desiredLinearAcceleration.add(derivativePart);
       contactPointDesiredAcceleration.setAndMatchFrame(desiredLinearAcceleration);
 
-      momentumBasedController.setDesiredPointAcceleration(rootToFootJacobianId, contactPointPosition, desiredLinearAcceleration);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(rootToFootJacobianId);
+      pointAccelerationCommand.set(jacobian, contactPointPosition, desiredLinearAcceleration);
 
       if (!USE_TOEOFF_TRAJECTORY)
-         momentumBasedController.setOneDoFJointAcceleration(kneeJoint, 0.0);
+         kneeJointCommand.setOneDoFJointDesiredAcceleration(kneeJoint, 0.0);
 
       setupSingleContactPoint();
    }
@@ -396,6 +409,6 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return spatialAccelerationCommand;
+      return commandList;
    }
 }

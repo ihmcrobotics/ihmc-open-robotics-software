@@ -65,7 +65,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final ManipulationControlModule manipulationControlModule;
    protected final FeetManager feetManager;
 
-   private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
+   private final List<OneDoFJoint> uncontrolledJoints = new ArrayList<OneDoFJoint>();
+   private final JointspaceAccelerationCommand uncontrolledJointsCommand = new JointspaceAccelerationCommand();
    protected final OneDoFJoint[] unconstrainedJoints;
    protected final OneDoFJoint[] allOneDoFjoints;
 
@@ -143,6 +144,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
          preRateLimitedDesiredAccelerations.put(joint, new DoubleYoVariable("prl_unconstrained_qdd_d_" + jointName, registry));
          rateLimitedDesiredAccelerations.put(joint, new RateLimitedYoVariable("rl_unconstrained_qdd_d_" + jointName, registry, Double.POSITIVE_INFINITY, controlDT));
       }
+
+      for (int i = 0; i < uncontrolledJoints.size(); i++)
+         uncontrolledJointsCommand.addJoint(uncontrolledJoints.get(i), 0.0);
    }
 
    protected OneDoFJoint[] findUnconstrainedJoints()
@@ -179,7 +183,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
             ScrewTools.filterJoints(handJoints, handJointsArray, OneDoFJoint.class);
             List<OneDoFJoint> handJointsList = Arrays.asList(handJointsArray);
             unconstrainedJointList.removeAll(handJointsList);
-            torqueControlJoints.addAll(handJointsList);
+            uncontrolledJoints.addAll(handJointsList);
          }
 
       }
@@ -236,8 +240,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       doCoMControl();
       doPelvisControl();
       doUnconstrainedJointControl();
-
-      setTorqueControlJointsToZeroDersiredAcceleration();
 
       momentumBasedController.doSecondaryControl();
    }
@@ -298,7 +300,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
          rateLimitedDesiredAcceleration.setMaxRate(maxJerk);
          rateLimitedDesiredAcceleration.update(desiredAcceleration);
 
-         momentumBasedController.setOneDoFJointAcceleration(joint, rateLimitedDesiredAcceleration.getDoubleValue());
          jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(joint, desiredAcceleration);
       }
 
@@ -356,17 +357,14 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       }
    }
 
+   protected JointspaceAccelerationCommand getUncontrolledJointCommand()
+   {
+      return uncontrolledJointsCommand;
+   }
+
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   protected void setTorqueControlJointsToZeroDersiredAcceleration()
-   {
-      for (int i = 0; i < torqueControlJoints.size(); i++)
-      {
-         momentumBasedController.setOneDoFJointAcceleration(torqueControlJoints.get(i), 0.0);
-      }
    }
 
    public void addUpdatables(ArrayList<Updatable> updatables)

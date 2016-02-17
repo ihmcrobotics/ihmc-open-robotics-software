@@ -266,7 +266,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
             filteredFeedForwardAcceleration.update(joint.getQddDesired());
             double desiredAcceleration = filteredFeedForwardAcceleration.getDoubleValue();
             desiredAcceleration *= feedForwardAccelerationScaleFactor.getDoubleValue();
-            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
             jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
          }
       }
@@ -293,7 +292,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
             rateLimitedAcceleration.update(desiredAcceleration);
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
-            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
             jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
          }
       }

@@ -216,7 +216,6 @@ public class FootControlHelper
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
       taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
-      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
       spatialAccelerationCommandToPack.set(rootToFootJacobian, taskspaceConstraintData);
    }
 

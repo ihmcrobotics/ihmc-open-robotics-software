@@ -237,7 +237,6 @@ public class ICPAndMomentumBasedController
 
       icpBasedLinearMomentumRateOfChangeControlModule.compute();
       icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
-      momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
       momentumRateCommand.setMomentumRateOfChangeData(momentumRateOfChangeData);
    }
 

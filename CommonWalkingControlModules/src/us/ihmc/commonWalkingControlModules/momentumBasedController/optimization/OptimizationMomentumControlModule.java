@@ -18,12 +18,14 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.Mom
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -380,7 +382,37 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredJointAcceleration(JointspaceAccelerationCommand desiredJointAccelerationCommand)
+   public void setInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
+   {
+      switch (inverseDynamicsCommand.getCommandType())
+      {
+      case TASKSPACE_MOTION:
+         setDesiredSpatialAcceleration((SpatialAccelerationCommand) inverseDynamicsCommand);
+         return;
+      case TASKSPACE_POINT_MOTION:
+         setDesiredPointAcceleration((PointAccelerationCommand) inverseDynamicsCommand);
+         return;
+      case JOINTSPACE_MOTION:
+         setDesiredJointAcceleration((JointspaceAccelerationCommand) inverseDynamicsCommand);
+         return;
+      case MOMENTUM_RATE:
+         setDesiredRateOfChangeOfMomentum((MomentumRateCommand) inverseDynamicsCommand);
+         return;
+      case COMMAND_LIST:
+         setInverseDynamicsCommandList((InverseDynamicsCommandList) inverseDynamicsCommand);
+         return;
+      default:
+         throw new RuntimeException("The command type: " + inverseDynamicsCommand.getCommandType() + " is not handled.");
+      }
+   }
+
+   private void setInverseDynamicsCommandList(InverseDynamicsCommandList inverseDynamicsCommandList)
+   {
+      for (int i = 0; i < inverseDynamicsCommandList.getNumberOfCommands(); i++)
+         setInverseDynamicsCommand(inverseDynamicsCommandList.getCommand(i));
+   }
+
+   private void setDesiredJointAcceleration(JointspaceAccelerationCommand desiredJointAccelerationCommand)
    {
       if (desiredJointAccelerationCommand.getHasWeight())
       {
@@ -392,7 +424,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredSpatialAcceleration(SpatialAccelerationCommand desiredSpatialAccelerationCommand)
+   private void setDesiredSpatialAcceleration(SpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       if (desiredSpatialAccelerationCommand.getHasWeight())
       {
@@ -404,7 +436,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredPointAcceleration(PointAccelerationCommand desiredPointAccelerationCommand)
+   private void setDesiredPointAcceleration(PointAccelerationCommand desiredPointAccelerationCommand)
    {
       GeometricJacobian rootToEndEffectorJacobian = desiredPointAccelerationCommand.getRootToEndEffectorJacobian();
       FramePoint bodyFixedPoint = desiredPointAccelerationCommand.getContactPoint();
@@ -423,7 +455,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void setDesiredRateOfChangeOfMomentum(MomentumRateCommand desiredRateOfChangeOfMomentumCommand)
+   private void setDesiredRateOfChangeOfMomentum(MomentumRateCommand desiredRateOfChangeOfMomentumCommand)
    {
       this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateData());
    }
