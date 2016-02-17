@@ -53,7 +53,7 @@ public class QuadrupedSwingTrajectoryGenerator
       this.dt = dt;
       this.robotQuadrant = robotQuadrant;
       String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-      registry = new YoVariableRegistry(prefix + "MiniBeastSwingTrajectoryGenerator");
+      registry = new YoVariableRegistry(prefix + "QuadrupedSwingTrajectoryGenerator");
       swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       
