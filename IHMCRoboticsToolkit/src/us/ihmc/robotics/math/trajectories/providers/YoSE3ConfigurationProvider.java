@@ -33,7 +33,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }

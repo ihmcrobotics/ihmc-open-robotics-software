@@ -161,7 +161,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
    private void setBall(TwoWaypointPositionTrajectoryGenerator trajectoryGenerator, int tick)
    {
       FramePoint position = new FramePoint();
-      trajectoryGenerator.get(position);
+      trajectoryGenerator.getPosition(position);
       trajectoryBagOfBalls.setBall(position, YoAppearance.Black(), tick);
    }
 

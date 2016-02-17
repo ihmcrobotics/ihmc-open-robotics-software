@@ -297,7 +297,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -317,7 +317,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    @Override
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

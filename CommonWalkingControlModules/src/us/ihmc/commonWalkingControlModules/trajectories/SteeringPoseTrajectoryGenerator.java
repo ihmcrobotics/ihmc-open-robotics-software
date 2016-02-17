@@ -521,7 +521,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       return steeringWheelFrame;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -561,7 +561,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

@@ -31,7 +31,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setIncludingFrame(referenceFrame, trajectories[0].getValue(), trajectories[1].getValue(), trajectories[2].getValue());
    }
@@ -52,7 +52,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    @Override
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }
@@ -131,7 +131,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    public void initialize()
    {
       FramePoint positionToPack = new FramePoint(ReferenceFrame.getWorldFrame());
-      currentPelvisPosition.get(positionToPack);
+      currentPelvisPosition.getPosition(positionToPack);
       positionToPack.changeFrame( ReferenceFrame.getWorldFrame() );
       
       trajectories[0].setInitialCondition(positionToPack.getX(), 0.0);

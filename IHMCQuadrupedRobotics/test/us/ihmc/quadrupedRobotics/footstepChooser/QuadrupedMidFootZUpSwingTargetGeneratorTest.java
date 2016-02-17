@@ -550,7 +550,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
          FramePoint swingLegPosition = new FramePoint();
          cartesianTrajectoryGenerator.compute(simulateDT);
-         cartesianTrajectoryGenerator.get(swingLegPosition);
+         cartesianTrajectoryGenerator.getPosition(swingLegPosition);
 
          yoFootPositions.get(robotQuadrant).set(swingLegPosition);
       }

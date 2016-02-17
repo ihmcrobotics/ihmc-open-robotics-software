@@ -66,7 +66,7 @@ public class YoPositionProviderTest
       provider.set(result);
       
       FramePoint positionToPack = new FramePoint();
-      provider.get(positionToPack);
+      provider.getPosition(positionToPack);
       
       assertSame(referenceFrame, positionToPack.getReferenceFrame());
       assertEquals(5.0, positionToPack.getX(), EPSILON);

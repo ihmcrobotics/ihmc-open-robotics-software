@@ -73,7 +73,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
    {
       if (getPreviousState() == this)
       {
-         positionTrajectoryGenerator.get(desiredPosition);
+         positionTrajectoryGenerator.getPosition(desiredPosition);
          orientationTrajectoryGenerator.getOrientation(desiredOrientation);
          initialFootPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
       }
@@ -123,7 +123,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
       if (isPerformingTouchdown.getBooleanValue())
          return;
 
-      positionTrajectoryGenerator.get(desiredPosition);
+      positionTrajectoryGenerator.getPosition(desiredPosition);
       currentDesiredFootPosition.set(desiredPosition);
       touchdownInitialTimeProvider.setValue(getTimeInCurrentState());
       positionTrajectoryForDisturbanceRecovery.initialize();

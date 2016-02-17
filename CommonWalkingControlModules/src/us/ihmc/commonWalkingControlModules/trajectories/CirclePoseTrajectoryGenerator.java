@@ -539,7 +539,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       return circleFrame;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -579,7 +579,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

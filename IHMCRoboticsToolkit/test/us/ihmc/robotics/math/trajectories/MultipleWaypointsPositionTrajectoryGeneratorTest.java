@@ -59,7 +59,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       {
          double timeAtWaypoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
          simpleTrajectory.compute(timeAtWaypoint);
-         simpleTrajectory.get(waypointPosition);
+         simpleTrajectory.getPosition(waypointPosition);
          simpleTrajectory.packVelocity(waypointVelocity);
          multipleWaypointTrajectory.appendWaypoint(timeAtWaypoint, waypointPosition, waypointVelocity);
       }

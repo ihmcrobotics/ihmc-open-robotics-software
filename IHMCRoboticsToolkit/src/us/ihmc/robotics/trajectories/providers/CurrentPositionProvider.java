@@ -12,7 +12,7 @@ public class CurrentPositionProvider implements PositionProvider
       this.referenceFrame = referenceFrame;
    }
 
-   public void get(FramePoint framePointToPack)
+   public void getPosition(FramePoint framePointToPack)
    {
       framePointToPack.setToZero(referenceFrame);
    }

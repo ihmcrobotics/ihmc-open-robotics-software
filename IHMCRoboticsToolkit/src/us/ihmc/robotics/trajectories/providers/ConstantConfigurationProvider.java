@@ -24,7 +24,7 @@ public class ConstantConfigurationProvider implements SE3ConfigurationProvider
       this.configuration = new FramePose(framePose);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       configuration.getPositionIncludingFrame(positionToPack);
    }

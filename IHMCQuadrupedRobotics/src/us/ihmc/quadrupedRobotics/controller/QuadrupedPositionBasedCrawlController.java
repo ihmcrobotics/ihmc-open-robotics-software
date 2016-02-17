@@ -911,7 +911,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
-         comTrajectoryGenerator.get(desiredCoMFramePosition);
+         comTrajectoryGenerator.getPosition(desiredCoMFramePosition);
          comTrajectoryGenerator.packVelocity(desiredCoMVelocity);
          desiredCoMFramePosition.setZ(desiredCoMPose.getPosition().getZ());
          

@@ -63,10 +63,10 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
       return currentTrajectoryIsLast && currentTrajectoryIsDone;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       PositionTrajectoryGenerator currentGenerator = positionTrajectoryGenerators.get(positionTrajectoryGeneratorIndex.getIntegerValue());
-      currentGenerator.get(positionToPack);
+      currentGenerator.getPosition(positionToPack);
    }
 
    public void packVelocity(FrameVector velocityToPack)

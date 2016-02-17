@@ -65,9 +65,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
-      doubleSupportCapturePointTrajectory.get(positionToPack);
+      doubleSupportCapturePointTrajectory.getPosition(positionToPack);
    }
 
    public void get(YoFramePoint positionToPack)

@@ -45,7 +45,7 @@ public class CirclePositionTrajectoryGeneratorTest
       FrameVector acceleration = new FrameVector();
 
       circleTrajectory.compute(tInitial);
-      circleTrajectory.get(position);
+      circleTrajectory.getPosition(position);
       circleTrajectory.packVelocity(velocity);
       circleTrajectory.packAcceleration(acceleration);
 
@@ -53,7 +53,7 @@ public class CirclePositionTrajectoryGeneratorTest
       FrameVector velocity2 = new FrameVector();
 
       circleTrajectory.compute(tFinal);
-      circleTrajectory.get(position2);
+      circleTrajectory.getPosition(position2);
       circleTrajectory.packVelocity(velocity2);
 
       FrameVector numericallyDifferentiatedVelocity = numericallyDifferentiate(deltaT, position, position2);
@@ -84,14 +84,14 @@ public class CirclePositionTrajectoryGeneratorTest
       FrameVector zero = new FrameVector(referenceFrame);
 
       circleTrajectory.compute(0.0);
-      circleTrajectory.get(position);
+      circleTrajectory.getPosition(position);
       circleTrajectory.packVelocity(velocity);
 
       FramePointTest.assertFramePointEquals(offset, position, 1e-12);
       FrameVectorTest.assertFrameVectorEquals(zero, velocity, 1e-12);
 
       circleTrajectory.compute(trajectoryTime);
-      circleTrajectory.get(position);
+      circleTrajectory.getPosition(position);
       circleTrajectory.packVelocity(velocity);
       circleTrajectory.packAcceleration(acceleration);
 

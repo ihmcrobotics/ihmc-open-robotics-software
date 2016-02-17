@@ -239,7 +239,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       newFootstepPose.setZ(newFootstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
       finalConfigurationProvider.setPose(newFootstepPose);
-      initialConfigurationProvider.get(oldFootstepPosition);
+      initialConfigurationProvider.getPosition(oldFootstepPosition);
       orientationTrajectoryGenerator.setFinalOrientation(newFootstepPose);
       orientationTrajectoryGenerator.setFinalVelocityToZero();
 

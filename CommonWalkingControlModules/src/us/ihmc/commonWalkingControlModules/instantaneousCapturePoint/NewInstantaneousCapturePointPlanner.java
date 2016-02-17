@@ -243,7 +243,7 @@ public class NewInstantaneousCapturePointPlanner
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.get(tmpFramePoint1);
+         doubleSupportCapturePointTrajectory.getPosition(tmpFramePoint1);
          desiredCapturePointPosition.set(tmpFramePoint1);
       }
    }

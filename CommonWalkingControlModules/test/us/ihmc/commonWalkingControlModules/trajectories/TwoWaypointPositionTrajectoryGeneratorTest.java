@@ -78,8 +78,8 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		trajectory.compute(0.0);
 		FramePoint actual = new FramePoint(worldFrame);
 		FramePoint expected = new FramePoint(worldFrame);
-		initialPositionProvider.get(expected);
-		trajectory.get(actual);
+		initialPositionProvider.getPosition(expected);
+		trajectory.getPosition(actual);
 		assertEquals(actual.getX(), expected.getX(), 1e-7);
 		assertEquals(actual.getY(), expected.getY(), 1e-7);
 		assertEquals(actual.getZ(), expected.getZ(), 1e-7);
@@ -94,8 +94,8 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		assertEquals(actualVel.getZ(), expectedVel.getZ(), 1e-7);
 		
 		trajectory.compute(0.8);
-		finalPositionProvider.get(expected);
-		trajectory.get(actual);
+		finalPositionProvider.getPosition(expected);
+		trajectory.getPosition(actual);
 		assertEquals(actual.getX(), expected.getX(), 1e-7);
 		assertEquals(actual.getY(), expected.getY(), 1e-7);
 		assertEquals(actual.getZ(), expected.getZ(), 1e-7);

@@ -49,7 +49,7 @@ public class ValveConfigurationProvider implements SE3ConfigurationProvider
       handPose.getOrientationIncludingFrame(orientationToPack);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       FramePose handPose = getHandPose();
       handPose.getPositionIncludingFrame(positionToPack);

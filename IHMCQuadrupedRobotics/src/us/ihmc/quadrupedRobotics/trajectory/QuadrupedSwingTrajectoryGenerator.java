@@ -119,7 +119,7 @@ public class QuadrupedSwingTrajectoryGenerator
       else
       {
          cartesianTrajectoryGenerator.compute(dt);
-         cartesianTrajectoryGenerator.get(desiredEndEffectorPosition);
+         cartesianTrajectoryGenerator.getPosition(desiredEndEffectorPosition);
          framePointToPack.setIncludingFrame(desiredEndEffectorPosition);
          updateBagOfBalls(desiredEndEffectorPosition);
       }

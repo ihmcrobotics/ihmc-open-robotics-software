@@ -14,7 +14,7 @@ public class YoPositionProvider implements PositionProvider
       this.framePoint = yoFramePoint;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       framePoint.getFrameTupleIncludingFrame(positionToPack);
    }

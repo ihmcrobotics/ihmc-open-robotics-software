@@ -70,8 +70,8 @@ public class PushRecoveryTrajectoryGeneratorTest
       trajectory.compute(0.0);
       FramePoint actual = new FramePoint(worldFrame);
       FramePoint expected = new FramePoint(worldFrame);
-      initialPositionProvider.get(expected);
-      trajectory.get(actual);
+      initialPositionProvider.getPosition(expected);
+      trajectory.getPosition(actual);
       assertEquals(actual.getX(), expected.getX(), 1e-7);
       assertEquals(actual.getY(), expected.getY(), 1e-7);
       assertEquals(actual.getZ(), expected.getZ(), 1e-7);
@@ -85,8 +85,8 @@ public class PushRecoveryTrajectoryGeneratorTest
       assertEquals(actualVel.getZ(), expectedVel.getZ(), 1e-7);
 
       trajectory.compute(0.8);
-      finalPositionProvider.get(expected);
-      trajectory.get(actual);
+      finalPositionProvider.getPosition(expected);
+      trajectory.getPosition(actual);
       assertEquals(actual.getX(), expected.getX(), 1e-7);
       assertEquals(actual.getY(), expected.getY(), 1e-7);
       assertEquals(actual.getZ(), expected.getZ(), 1e-7);
@@ -101,7 +101,7 @@ public class PushRecoveryTrajectoryGeneratorTest
 
       FramePoint intermediatePosition = new FramePoint();
       FrameVector intermediateVelocity = new FrameVector();
-      trajectory.get(intermediatePosition);
+      trajectory.getPosition(intermediatePosition);
       trajectory.packVelocity(intermediateVelocity);
 
       PositionProvider intermediatePositionProvider = new ConstantPositionProvider(intermediatePosition);
@@ -117,8 +117,8 @@ public class PushRecoveryTrajectoryGeneratorTest
       pushRecoveryTrajectoryGenerator.initialize();
       pushRecoveryTrajectoryGenerator.compute(0.4);
 
-      intermediatePositionProvider.get(expected);
-      pushRecoveryTrajectoryGenerator.get(actual);
+      intermediatePositionProvider.getPosition(expected);
+      pushRecoveryTrajectoryGenerator.getPosition(actual);
       assertEquals(actual.getX(), expected.getX(), 1e-7);
       assertEquals(actual.getY(), expected.getY(), 1e-7);
 
@@ -129,8 +129,8 @@ public class PushRecoveryTrajectoryGeneratorTest
 
       pushRecoveryTrajectoryGenerator.compute(0.8);
 
-      finalPositionProvider.get(expected);
-      pushRecoveryTrajectoryGenerator.get(actual);
+      finalPositionProvider.getPosition(expected);
+      pushRecoveryTrajectoryGenerator.getPosition(actual);
       assertEquals(actual.getX(), expected.getX(), 1e-7);
       assertEquals(actual.getY(), expected.getY(), 1e-7);
    }

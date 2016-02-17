@@ -86,7 +86,7 @@ public class ConstantPositionTrajectoryGeneratorTest
       generator = new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry);
       FramePoint positionToPack = new FramePoint();
 
-      generator.get(positionToPack);
+      generator.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
    }
@@ -133,11 +133,11 @@ public class ConstantPositionTrajectoryGeneratorTest
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry);
-      generator.get(positionToPack);
+      generator.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      generator.get(positionToPack);
+      generator.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
