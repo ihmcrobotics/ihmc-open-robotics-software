@@ -365,7 +365,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       // YoVariables
       yoBodyYawRateInput = new DoubleYoVariable("bodyYawRateInput", registry);
       yoBodyVelocityInput = new YoFrameVector("bodyVelocityInput", comFrame, registry);
-      yoBodyOrientationInput = new YoFrameOrientation("bodyOrientationInput", supportFrame, registry);
+      yoBodyOrientationInput = new YoFrameOrientation("bodyOrientationInput", worldFrame, registry);
       yoComHeightInput = new DoubleYoVariable("comHeightInput", registry);
       yoSolePositionSetpoint = new QuadrantDependentList<>();
       yoSoleLinearVelocitySetpoint = new QuadrantDependentList<>();
@@ -529,7 +529,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       // compute body torques
       bodyYawRateIntegral += bodyYawRateInput * controlDT;
       bodyOrientationSetpoint.changeFrame(bodyOrientationInput.getReferenceFrame());
-      bodyOrientationSetpoint.setYawPitchRoll(bodyOrientationInput.getYaw() + bodyYawRateIntegral, bodyOrientationInput.getPitch(), bodyOrientationInput.getRoll());
+      bodyOrientationSetpoint.setYawPitchRoll(bodyYawRateIntegral, bodyOrientationInput.getPitch(), bodyOrientationInput.getRoll());
       bodyOrientationSetpoint.changeFrame(bodyFrame);
       bodyAngularVelocitySetpoint.setToZero(bodyFrame);
       bodyAngularVelocityEstimate.changeFrame(bodyFrame);
