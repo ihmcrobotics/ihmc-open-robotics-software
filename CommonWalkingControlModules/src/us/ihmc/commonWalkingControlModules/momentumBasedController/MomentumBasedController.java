@@ -493,11 +493,6 @@ public class MomentumBasedController
       }
    }
 
-   public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
-   {
-      optimizationMomentumControlModule.setExternalWrenchToCompensateFor(rigidBody, wrench);
-   }
-
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doPrioritaryControl()
    {
