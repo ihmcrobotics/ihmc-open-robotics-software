@@ -60,7 +60,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 
 
          traj.compute(startIntegrationTime - dt);
-         traj.get(orientationFromIntegration);
+         traj.getOrientation(orientationFromIntegration);
          traj.packAngularVelocity(angularVelocityFromIntegration);
 
          for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)

@@ -384,7 +384,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          {
             chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
             FrameOrientation previousDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
-            chestOrientationTrajectoryGenerator.get(previousDesiredChestOrientation);
+            chestOrientationTrajectoryGenerator.getOrientation(previousDesiredChestOrientation);
             initialDesiredChestOrientation.setOrientation(previousDesiredChestOrientation);
 
             FrameOrientation desiredChestOrientation = chestOrientationProvider.getDesiredChestOrientation();
@@ -400,7 +400,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FrameOrientation desiredOrientation = new FrameOrientation(chestPositionControlFrame);
       FrameVector desiredAngularVelocity = new FrameVector(chestPositionControlFrame);
       FrameVector desiredAngularAcceleration = new FrameVector(chestPositionControlFrame);
-      chestOrientationTrajectoryGenerator.get(desiredOrientation);
+      chestOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
       chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
       chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
 

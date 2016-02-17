@@ -52,7 +52,7 @@ public class YoSE3ConfigurationProviderTest
    {
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, registry);
       FrameOrientation orientationToPack = new FrameOrientation();
-      provider.get(orientationToPack);
+      provider.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 

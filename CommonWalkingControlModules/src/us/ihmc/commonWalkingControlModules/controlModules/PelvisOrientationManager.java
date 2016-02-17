@@ -218,7 +218,7 @@ public class PelvisOrientationManager
          {
             initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
             offsetTrajectoryTime.set(pelvisPoseProvider.getTrajectoryTime());
-            activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+            activeOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
             initialPelvisOrientationOffset.set(tempOrientation);
             finalPelvisOrientationOffset.set(0.0, 0.0, 0.0);
             pelvisOrientationOffsetTrajectoryGenerator.initialize();
@@ -229,7 +229,7 @@ public class PelvisOrientationManager
          {
             initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
             offsetTrajectoryTime.set(pelvisPoseProvider.getTrajectoryTime());
-            activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+            activeOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
             initialPelvisOrientationOffset.set(tempOrientation);
             FrameOrientation pelvisOrientationProvided = pelvisPoseProvider.getDesiredPelvisOrientation(desiredPelvisFrame);
             
@@ -252,7 +252,7 @@ public class PelvisOrientationManager
             double totalTime = trajectoryData.getTimeAtWaypoints()[ lastIndex ];
             
             offsetTrajectoryTime.set( totalTime );
-            activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+            activeOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
             initialPelvisOrientationOffset.set(tempOrientation);         
 
             FrameOrientation pelvisOrientationProvided = new FrameOrientation( ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex] );

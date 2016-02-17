@@ -401,7 +401,7 @@ public class ToroidManipulationStateMachine
          this.robotSide = robotSide;
       }
 
-      public void get(FrameOrientation orientationToPack)
+      public void getOrientation(FrameOrientation orientationToPack)
       {
          FramePose framePose = getFramePose();
          framePose.getOrientationIncludingFrame(orientationToPack);

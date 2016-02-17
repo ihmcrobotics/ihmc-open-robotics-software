@@ -362,7 +362,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -386,7 +386,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }

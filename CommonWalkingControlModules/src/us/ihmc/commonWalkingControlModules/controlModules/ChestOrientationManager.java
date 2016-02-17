@@ -123,7 +123,7 @@ public class ChestOrientationManager
          if (isTrajectoryDone)
             activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
       }
@@ -181,7 +181,7 @@ public class ChestOrientationManager
 
          simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
          desiredOrientation.setToZero(pelvisZUpFrame);
          simpleOrientationTrajectoryGenerator.setFinalOrientation(desiredOrientation);
@@ -197,7 +197,7 @@ public class ChestOrientationManager
 
          simpleOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
          activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setFinalOrientation(chestOrientationProvider.getDesiredChestOrientation());
          simpleOrientationTrajectoryGenerator.setTrajectoryTime(chestOrientationProvider.getTrajectoryTime());
@@ -212,7 +212,7 @@ public class ChestOrientationManager
 
          simpleOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
          activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
          
          WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();

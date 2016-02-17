@@ -47,9 +47,9 @@ public class ProviderBasedConstantOrientationTrajectoryGenerator implements Orie
       return time.getDoubleValue() > finalTime.getDoubleValue();
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
-      orientationProvider.get(orientationToPack);
+      orientationProvider.getOrientation(orientationToPack);
       orientationToPack.changeFrame(referenceFrame);
    }
 
@@ -65,7 +65,7 @@ public class ProviderBasedConstantOrientationTrajectoryGenerator implements Orie
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }

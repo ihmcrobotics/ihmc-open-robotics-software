@@ -142,9 +142,9 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
       positionTrajectoryGenerator.packAcceleration(accelerationToPack);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
-      orientationTrajectoryGenerator.get(orientationToPack);
+      orientationTrajectoryGenerator.getOrientation(orientationToPack);
    }
 
    public void packAngularVelocity(FrameVector angularVelocityToPack)
@@ -166,7 +166,7 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }
@@ -177,7 +177,7 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
       framePoseToPack.setPosition(tempPosition);
       
-      orientationTrajectoryGenerator.get(tempOrientation);
+      orientationTrajectoryGenerator.getOrientation(tempOrientation);
       framePoseToPack.setOrientation(tempOrientation);
    }
 

@@ -160,7 +160,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       packAcceleration(accelerationToPack);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -177,7 +177,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }

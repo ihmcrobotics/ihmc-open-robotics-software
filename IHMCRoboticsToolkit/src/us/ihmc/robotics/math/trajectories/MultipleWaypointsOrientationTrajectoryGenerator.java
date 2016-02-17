@@ -453,7 +453,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    }
 
    @Override
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -473,7 +473,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    @Override
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }
