@@ -6,10 +6,10 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
@@ -21,15 +21,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * This trajectory generator aims at interpolating between two orientations q0 and qf for given angular velocities at the limits w0 and wf.
  * The method used here differs from the trajectory generator implemented in {@link VelocityConstrainedOrientationTrajectoryGenerator}.
  * It seems that the approach used here is a better fit for interpolating between waypoints.
- * 
+ *
  * I basically implemented the method called Hermite Quaternion Curve that is presented in the following paper:
  * <p> <a href="http://azrael.digipen.edu/MAT351/papers/Kim2.pdf"> Paper on quaternion interpolation (PDF link 1)</a> </p>
  * <p> <a href="http://graphics.cs.cmu.edu/nsp/course/15-464/Fall05/papers/kimKimShin.pdf"> Paper on quaternion interpolation (PDF link 2)</a> </p>
  * <p> <a href="https://www.researchgate.net/publication/2388093_A_General_Construction_Scheme_for_Unit_Quaternion_Curves_with_Simple_High_Order_Derivatives"> Paper on quaternion interpolation (ResearchGate link)</a> </p>
- * 
+ *
  * Watch out for the typo in equation 9 when reading the paper though. The beta on the right hand side of the equation should have for subscripts {j,n} instead of {i,n}.
- * 
- * @author Sylvain 
+ * Also the statement that arbitrary high velocities can be assigned is false. Both endpoint velocities after scaling with the trajectory time have a maximum magnitude of 6 pi.
+ *
+ * @author Sylvain
  */
 public class HermiteCurveBasedOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
@@ -37,14 +38,12 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable trajectoryTime;
    private final DoubleYoVariable trajectoryTimeScale;
+   private final IntegerYoVariable piInteger;
 
-   private final DoubleYoVariable[] beziers;
-   private final DoubleYoVariable[] bezierDerivatives;
    private final DoubleYoVariable[] cumulativeBeziers;
-   private final DoubleYoVariable[] cumulativeBezierDerivatives;
 
    private final YoFrameQuaternion[] controlQuaternions;
-   private final YoFrameVector[] controlAngularVelocities;   
+   private final YoFrameVector[] controlAngularVelocities;
 
    private final YoFrameQuaternion initialOrientation;
    private final YoFrameVector initialAngularVelocity;
@@ -62,36 +61,32 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    /**
     * Does not need to match the dt at which the trajectory will be updated.
     */
-   private final double dtForFiniteDifference = 1.0e-3; // Weird jerkiness at 1.0e-4
+   private final double dtForFiniteDifference = 1.0e-4;
 
    public HermiteCurveBasedOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry);
    }
 
-   public HermiteCurveBasedOrientationTrajectoryGenerator(String name, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public HermiteCurveBasedOrientationTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
+         YoVariableRegistry parentRegistry)
    {
       super(allowMultipleFrames, referenceFrame);
 
-      registry = new YoVariableRegistry(name);
-      trajectoryTime = new DoubleYoVariable(name + "TrajectoryTime", registry);
-      trajectoryTimeScale = new DoubleYoVariable(name + "TrajectoryTimeScale", registry);
-      currentTime = new DoubleYoVariable(name + "Time", registry);
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
+      trajectoryTimeScale = new DoubleYoVariable(namePrefix + "TrajectoryTimeScale", registry);
+      piInteger = new IntegerYoVariable(namePrefix + "PiInteger", registry);
+      currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
       trajectoryFrame = referenceFrame;
 
-      beziers = new DoubleYoVariable[4];
-      bezierDerivatives = new DoubleYoVariable[4];
       cumulativeBeziers = new DoubleYoVariable[4];
-      cumulativeBezierDerivatives = new DoubleYoVariable[4];
       controlQuaternions = new YoFrameQuaternion[4];
       controlAngularVelocities = new YoFrameVector[4];
 
       for (int i = 1; i <= 3; i++)
       {
-         beziers[i] = new DoubleYoVariable(name + "Bezier" + i, registry);
-         bezierDerivatives[i] = new DoubleYoVariable(name + "BezierDerivative" + i, registry);
-         cumulativeBeziers[i] = new DoubleYoVariable(name + "CumulativeBezier" + i, registry);
-         cumulativeBezierDerivatives[i] = new DoubleYoVariable(name + "CumulativeBezierDerivative" + i, registry);
+         cumulativeBeziers[i] = new DoubleYoVariable(namePrefix + "CumulativeBezier" + i, registry);
       }
 
       String initialOrientationName = "InitialOrientation";
@@ -106,14 +101,21 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       if (allowMultipleFrames)
       {
-         YoFrameQuaternionInMultipleFrames initialOrientation = new YoFrameQuaternionInMultipleFrames(name + initialOrientationName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames initialAngularVelocity = new YoFrameVectorInMultipleFrames(name + initialAngularVelocityName, registry, trajectoryFrame);
-         YoFrameQuaternionInMultipleFrames finalOrientation = new YoFrameQuaternionInMultipleFrames(name + finalOrientationName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames finalAngularVelocity = new YoFrameVectorInMultipleFrames(name + finalAngularVelocityName, registry, trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames initialOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + initialOrientationName, registry,
+               trajectoryFrame);
+         YoFrameVectorInMultipleFrames initialAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + initialAngularVelocityName, registry,
+               trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames finalOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + finalOrientationName, registry,
+               trajectoryFrame);
+         YoFrameVectorInMultipleFrames finalAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + finalAngularVelocityName, registry,
+               trajectoryFrame);
 
-         YoFrameQuaternionInMultipleFrames currentOrientation = new YoFrameQuaternionInMultipleFrames(name + currentOrientationName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames currentAngularVelocity = new YoFrameVectorInMultipleFrames(name + currentAngularVelocityName, registry, trajectoryFrame);
-         YoFrameVectorInMultipleFrames currentAngularAcceleration = new YoFrameVectorInMultipleFrames(name + currentAngularAccelerationName, registry, trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames currentOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + currentOrientationName, registry,
+               trajectoryFrame);
+         YoFrameVectorInMultipleFrames currentAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + currentAngularVelocityName, registry,
+               trajectoryFrame);
+         YoFrameVectorInMultipleFrames currentAngularAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + currentAngularAccelerationName, registry,
+               trajectoryFrame);
 
          registerMultipleFramesHolders(initialOrientation, initialAngularVelocity);
          registerMultipleFramesHolders(finalOrientation, finalAngularVelocity);
@@ -127,36 +129,38 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
          this.currentAngularVelocity = currentAngularVelocity;
          this.currentAngularAcceleration = currentAngularAcceleration;
 
-         for (int i = 0; i <=3; i++)
+         for (int i = 0; i <= 3; i++)
          {
-            YoFrameQuaternionInMultipleFrames controlQuaternion = new YoFrameQuaternionInMultipleFrames(name + controlQuaternionName + i, registry, trajectoryFrame);
+            YoFrameQuaternionInMultipleFrames controlQuaternion = new YoFrameQuaternionInMultipleFrames(namePrefix + controlQuaternionName + i, registry,
+                  trajectoryFrame);
             registerMultipleFramesHolders(controlQuaternion);
             controlQuaternions[i] = controlQuaternion;
          }
 
          for (int i = 1; i <= 3; i++)
          {
-            YoFrameVectorInMultipleFrames controlAngularVelocity = new YoFrameVectorInMultipleFrames(name + controlAngularVelocityName + i, registry, trajectoryFrame);
+            YoFrameVectorInMultipleFrames controlAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + controlAngularVelocityName + i, registry,
+                  trajectoryFrame);
             registerMultipleFramesHolders(controlAngularVelocity);
             controlAngularVelocities[i] = controlAngularVelocity;
          }
       }
       else
       {
-         initialOrientation = new YoFrameQuaternion(name + initialOrientationName, trajectoryFrame, registry);
-         initialAngularVelocity = new YoFrameVector(name + initialAngularVelocityName, trajectoryFrame, registry);
-         finalOrientation = new YoFrameQuaternion(name + finalOrientationName, trajectoryFrame, registry);
-         finalAngularVelocity = new YoFrameVector(name + finalAngularVelocityName, trajectoryFrame, registry);
+         initialOrientation = new YoFrameQuaternion(namePrefix + initialOrientationName, trajectoryFrame, registry);
+         initialAngularVelocity = new YoFrameVector(namePrefix + initialAngularVelocityName, trajectoryFrame, registry);
+         finalOrientation = new YoFrameQuaternion(namePrefix + finalOrientationName, trajectoryFrame, registry);
+         finalAngularVelocity = new YoFrameVector(namePrefix + finalAngularVelocityName, trajectoryFrame, registry);
 
-         currentOrientation = new YoFrameQuaternion(name + currentOrientationName, trajectoryFrame, registry);
-         currentAngularVelocity = new YoFrameVector(name + currentAngularVelocityName, trajectoryFrame, registry);
-         currentAngularAcceleration = new YoFrameVector(name + currentAngularAccelerationName, trajectoryFrame, registry);
+         currentOrientation = new YoFrameQuaternion(namePrefix + currentOrientationName, trajectoryFrame, registry);
+         currentAngularVelocity = new YoFrameVector(namePrefix + currentAngularVelocityName, trajectoryFrame, registry);
+         currentAngularAcceleration = new YoFrameVector(namePrefix + currentAngularAccelerationName, trajectoryFrame, registry);
 
-         for (int i = 0; i <=3; i++)
-            controlQuaternions[i] = new YoFrameQuaternion(name + controlQuaternionName + i, trajectoryFrame, registry);
+         for (int i = 0; i <= 3; i++)
+            controlQuaternions[i] = new YoFrameQuaternion(namePrefix + controlQuaternionName + i, trajectoryFrame, registry);
 
          for (int i = 1; i <= 3; i++)
-            controlAngularVelocities[i] = new YoFrameVector(name + controlAngularVelocityName + i, trajectoryFrame, registry);
+            controlAngularVelocities[i] = new YoFrameVector(namePrefix + controlAngularVelocityName + i, trajectoryFrame, registry);
       }
 
       parentRegistry.addChild(registry);
@@ -235,6 +239,16 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       finalAngularVelocity.setToZero();
    }
 
+   /**
+    * Sets an Integer n to add n/2 full revolutions to the trajectory.
+    *
+    */
+   public void setPiInteger(int piInteger)
+   {
+      this.piInteger.set(piInteger);
+      updateControlQuaternions();
+   }
+
    public void setInitialConditions(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
    {
       setInitialOrientation(initialOrientation);
@@ -281,23 +295,26 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       finalAngularVelocity.set(finalYoFrameSO3Waypoint.getAngularVelocity());
    }
 
-   @Override
-   public void initialize()
+   /**
+    * Before Initializing the isSolvable() method should be called to confirm that the limit conditions are within the bounds
+    */
+   @Override public void initialize()
    {
+      piInteger.set(0);
       currentTime.set(0.0);
       trajectoryTimeScale.set(1.0 / trajectoryTime.getDoubleValue());
 
       if (initialOrientation.dot(finalOrientation) < 0.0)
          finalOrientation.negate();
 
-      updateControlQuaternions();      
+      updateControlQuaternions();
 
       currentOrientation.set(initialOrientation);
       currentAngularVelocity.set(initialAngularVelocity);
       currentAngularAcceleration.setToZero();
    }
 
-   private final Quat4d[] tempControlQuaternions = new Quat4d[]{new Quat4d(), new Quat4d(), new Quat4d(), new Quat4d()};
+   private final Quat4d[] tempControlQuaternions = new Quat4d[] {new Quat4d(), new Quat4d(), new Quat4d(), new Quat4d()};
    private final Quat4d tempQuatForControlQuats = new Quat4d();
 
    private void updateControlQuaternions()
@@ -307,28 +324,40 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       initialOrientation.get(tempControlQuaternions[1]);
       initialAngularVelocity.get(tempAngularVelocity);
+
       quaternionCalculus.invertTransform(tempControlQuaternions[0], tempAngularVelocity);
-      tempAngularVelocity.scale(1.0 / 3.0 / trajectoryTimeScale.getDoubleValue());
-      RotationTools.convertRotationVectorToQuaternion(tempAngularVelocity, tempQuatForControlQuats);
+      tempAngularVelocity.scale(trajectoryTime.getDoubleValue());
+      tempAngularVelocity.scale(1 / 3.0);
+      quaternionCalculus.exp(tempAngularVelocity, tempQuatForControlQuats);
+
       tempControlQuaternions[1].mul(tempQuatForControlQuats);
 
       finalOrientation.get(tempControlQuaternions[2]);
       finalAngularVelocity.get(tempAngularVelocity);
+
       quaternionCalculus.invertTransform(tempControlQuaternions[3], tempAngularVelocity);
-      tempAngularVelocity.scale(1.0 / 3.0 / trajectoryTimeScale.getDoubleValue());
+      tempAngularVelocity.scale(trajectoryTime.getDoubleValue());
+      tempAngularVelocity.scale(1 / 3.0);
       tempAngularVelocity.negate();
-      RotationTools.convertRotationVectorToQuaternion(tempAngularVelocity, tempQuatForControlQuats);
+      quaternionCalculus.exp(tempAngularVelocity, tempQuatForControlQuats);
       tempControlQuaternions[2].mul(tempQuatForControlQuats);
 
       for (int i = 1; i <= 3; i++)
       {
-         quaternionCalculus.inverseMultiply(tempControlQuaternions[i-1], tempControlQuaternions[i], tempQuatForControlQuats);
+         quaternionCalculus.inverseMultiply(tempControlQuaternions[i - 1], tempControlQuaternions[i], tempQuatForControlQuats);
          quaternionCalculus.log(tempQuatForControlQuats, tempAngularVelocity);
          controlAngularVelocities[i].set(tempAngularVelocity);
       }
 
+      tempAngularVelocity.set(controlAngularVelocities[2].getVector3dCopy());
+      tempAngularVelocity.normalize();
+      tempAngularVelocity.scale(piInteger.getIntegerValue() * Math.PI);
+      controlAngularVelocities[2].add(tempAngularVelocity);
+
       for (int i = 0; i <= 3; i++)
+      {
          controlQuaternions[i].set(tempControlQuaternions[i]);
+      }
    }
 
    private final Vector3d tempAngularVelocity = new Vector3d();
@@ -339,10 +368,10 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final Quat4d qInterpolatedNext = new Quat4d();
 
    private final Quat4d qDot = new Quat4d();
+   private final Quat4d qDDotOld = new Quat4d();
    private final Quat4d qDDot = new Quat4d();
 
-   @Override
-   public void compute(double time)
+   @Override public void compute(double time)
    {
       this.currentTime.set(time);
 
@@ -353,7 +382,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
          currentAngularAcceleration.setToZero();
          return;
       }
-      else if (currentTime.getDoubleValue() < 0.0)
+      else if (currentTime.getDoubleValue() <= 0.0)
       {
          currentOrientation.set(initialOrientation);
          currentAngularVelocity.set(initialAngularVelocity);
@@ -370,14 +399,18 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       interpolateOrientation(time, qInterpolated);
 
       quaternionCalculus.computeQDotByFiniteDifferenceCentral(qInterpolatedPrevious, qInterpolatedNext, dtForFiniteDifference, qDot);
+
+      // This method of calculating qDDot will occasionally result in jerky behavior due to very small local minima/maxima in the quaternions
       quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qInterpolatedPrevious, qInterpolated, qInterpolatedNext, dtForFiniteDifference, qDDot);
 
-      quaternionCalculus.computeAngularVelocity(qInterpolated, qDot, tempAngularVelocity);
+      quaternionCalculus.computeAngularVelocityInWorldFrame(qInterpolated, qDot, tempAngularVelocity);
       quaternionCalculus.computeAngularAcceleration(qInterpolated, qDot, qDDot, tempAngularAcceleration);
 
       currentOrientation.set(qInterpolated);
       currentAngularVelocity.set(tempAngularVelocity);
       currentAngularAcceleration.set(tempAngularAcceleration);
+
+      qDDotOld.set(qDDot);
    }
 
    private final Quat4d tempQuatForInterpolation = new Quat4d();
@@ -397,31 +430,17 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
    /**
     * I use the developed equations to compute the Bezier basis functions. It should be faster.
-    * @param time
+    *
     */
    private void updateBezierCoefficients(double time)
    {
       time *= trajectoryTimeScale.getDoubleValue();
       double timeSquare = time * time;
       double timeCube = timeSquare * time;
-      beziers[1].set(3.0 * MathTools.square(1.0 - time) * time);
-      beziers[2].set(3.0 * (timeSquare - timeCube));
-      beziers[3].set(timeCube);
 
-      bezierDerivatives[1].set(3.0 * (1.0 - 4.0 * time - 3.0 * timeSquare));
-      bezierDerivatives[2].set(3.0 * (2.0 * time - 3.0 * timeSquare));
-      bezierDerivatives[3].set(3.0 * timeSquare);
-
-      for (int i = 1; i <= 3; i++)
-      {
-         cumulativeBeziers[i].set(0.0);
-         cumulativeBezierDerivatives[i].set(0.0);
-         for (int j = i; j <= 3; j++)
-         {
-            cumulativeBeziers[i].add(beziers[j].getDoubleValue());
-            cumulativeBezierDerivatives[i].add(bezierDerivatives[j].getDoubleValue());
-         }
-      }
+      cumulativeBeziers[1].set(1 - MathTools.powWithInteger(1 - time, 3));
+      cumulativeBeziers[2].set(3.0 * timeSquare - 2 * timeCube);
+      cumulativeBeziers[3].set(timeCube);
    }
 
    private void computeBezierQuaternionCurveTerm(int i, Quat4d resultToPack)
@@ -432,40 +451,48 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       quaternionCalculus.exp(tempAngularVelocity, resultToPack);
    }
 
-   @Override
-   public boolean isDone()
+   public boolean isSolvable(double trajectoryTime, Vector3d omegaA, Vector3d omegaB)
+   {
+      omegaA.scale(trajectoryTime / 3);
+      boolean omegaALength = omegaA.length() < 2 * Math.PI;
+
+      omegaB.scale(trajectoryTime / 3);
+      boolean omegaBLength = (omegaB.length() < 2 * Math.PI);
+
+      omegaB.scale(-1);
+      boolean opposite = omegaA.epsilonEquals(omegaB, 1e-2);
+
+      return omegaALength && omegaBLength && !opposite;
+   }
+
+   @Override public boolean isDone()
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   @Override
-   public void get(FrameOrientation orientationToPack)
+   @Override public void get(FrameOrientation orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   @Override
-   public void packAngularVelocity(FrameVector velocityToPack)
+   @Override public void packAngularVelocity(FrameVector velocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   @Override
-   public void packAngularAcceleration(FrameVector accelerationToPack)
+   @Override public void packAngularAcceleration(FrameVector accelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   @Override
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   @Override public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       get(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }
 
-   @Override
-   public String toString()
+   @Override public String toString()
    {
       String ret = "";
 

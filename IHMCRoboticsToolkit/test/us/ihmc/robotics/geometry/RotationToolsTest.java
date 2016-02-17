@@ -1142,7 +1142,7 @@ public class RotationToolsTest
             RotationTools.integrateAngularVelocity(expectedAngularVelocity, t, integrationResultCurrent);
             RotationTools.integrateAngularVelocity(expectedAngularVelocity, t + dt, integrationResultNext);
             quaternionCalculus.computeQDotByFiniteDifferenceCentral(integrationResultPrevious, integrationResultNext, dt, qDot);
-            quaternionCalculus.computeAngularVelocity(integrationResultCurrent, qDot, actualAngularVelocity);
+            quaternionCalculus.computeAngularVelocityInWorldFrame(integrationResultCurrent, qDot, actualAngularVelocity);
 
             assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-7));
          }
