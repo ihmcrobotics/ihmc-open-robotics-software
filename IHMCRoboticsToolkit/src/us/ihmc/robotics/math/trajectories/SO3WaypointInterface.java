@@ -6,8 +6,6 @@ import javax.vecmath.Vector3d;
 public interface SO3WaypointInterface
 {
    public abstract double getTime();
-
-   public abstract Quat4d getOrientation();
-
-   public abstract Vector3d getAngularVelocity();
+   public abstract void getOrientation(Quat4d orientationToPack);
+   public abstract void getAngularVelocity(Vector3d angularVelocityToPack);
 }

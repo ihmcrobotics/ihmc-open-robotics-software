@@ -41,6 +41,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.io.printing.PrintToolsTest.class,
    us.ihmc.tools.io.StreamGobblerTest.class,
    us.ihmc.tools.lists.PairListTest.class,
+   us.ihmc.tools.maps.CircularLongMapTest.class,
    us.ihmc.tools.processManagement.ProcessSpawnerTest.class,
    us.ihmc.tools.processManagement.ProcessToolsTest.class,
    us.ihmc.tools.reflect.RecursiveObjectComparerTest.class,

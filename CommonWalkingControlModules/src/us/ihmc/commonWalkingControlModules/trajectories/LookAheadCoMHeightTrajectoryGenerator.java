@@ -60,7 +60,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
-   private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isOffsetHeightTrajectoryStopped", registry);
+   private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isPelvisOffsetHeightTrajectoryStopped", registry);
 
    private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
 
@@ -75,7 +75,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider(
          "offsetHeightAboveGroundTrajectoryTimeProvider", registry);
    private final MultipleWaypointsTrajectoryGenerator waypointOffsetHeightAboveGroundTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(
-         "wayointOffsetHeightAboveGroundTrajectory", 15, registry);
+         "pelvisHeightOffset", 15, registry);
    private final CubicPolynomialTrajectoryGenerator offsetHeightAboveGroundTrajectory = new CubicPolynomialTrajectoryGenerator(
          "offsetHeightAboveGroundTrajectory", offsetHeightAboveGroundInitialPositionProvider, offsetHeightAboveGroundFinalPositionProvider,
          offsetHeightAboveGroundTrajectoryTimeProvider, registry);
@@ -764,6 +764,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private final FramePoint height = new FramePoint();
    private final FramePoint desiredPosition = new FramePoint();
+   private final FrameVector desiredVelocity = new FrameVector();
    private final double[] splineOutput = new double[3];
    private final double[] partialDerivativesWithRespectToS = new double[2];
 
@@ -870,16 +871,19 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       {
          SE3WaypointMessage waypoint = pelvisTrajectoryMessage.getWaypoint(i);
          double time = waypoint.getTime();
-         double z = waypoint.getPosition().getZ();
-         double zDot = waypoint.getLinearVelocity().getZ();
+         desiredPosition.setToZero(worldFrame);
+         desiredVelocity.changeFrame(worldFrame);
+
+         waypoint.getPosition(desiredPosition.getPoint());
+         waypoint.getLinearVelocity(desiredVelocity.getVector());
 
          // TODO (Sylvain) Check if that's the right way to do it
-         desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, z);
          desiredPosition.changeFrame(frameOfLastFoostep);
-
+         desiredVelocity.changeFrame(frameOfLastFoostep);
          double zOffset = desiredPosition.getZ() - splineOutput[0];
+         double zDotOffset = desiredVelocity.getZ();
 
-         waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(time, zOffset, zDot);
+         waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(time, zOffset, zDotOffset);
       }
 
       waypointOffsetHeightAboveGroundTrajectoryGenerator.initialize();

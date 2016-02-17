@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -20,7 +20,7 @@ import us.ihmc.robotics.random.RandomTools;
  * Date: 2/18/13
  */
 @ClassDocumentation("This message gives the desired pelvis pose of the robot in world coordinates.")
-public class PelvisPosePacket extends IHMCRosApiPacket<PelvisPosePacket> implements TransformableDataObject<PelvisPosePacket>, VisualizablePacket
+public class PelvisPosePacket extends Packet<PelvisPosePacket> implements TransformableDataObject<PelvisPosePacket>, VisualizablePacket
 {
    /** Desired pelvis orientation. Set it to {@code null} to NOT control it. */
    @FieldDocumentation("orientation can be set to null to NOT control it.")

@@ -11,7 +11,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -22,27 +22,58 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in\n"
-                                  + "world frame")
-public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
+@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.")
+public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
+   public enum FootstepOrigin implements DocumentedEnum<FootstepOrigin>
+   {
+      @Deprecated AT_ANKLE_FRAME, AT_SOLE_FRAME;
+
+      @Override
+      public String getDocumentation(FootstepOrigin var)
+      {
+         switch (var)
+         {
+         case AT_ANKLE_FRAME:
+            return "The location of the footstep refers to the location of the ankle frame."
+                  + " The ankle frame is fixed in the foot, centered at the last ankle joint."
+                  + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+                  + " This option is for backward compatibility only and will be gone in an upcoming release."
+                  + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.";
+         case AT_SOLE_FRAME:
+            return "The location of the footstep refers to the location of the sole frame."
+                  + " The sole frame is fixed in the foot, centered at the center of the sole."
+                  + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+                  + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.";
+
+         default:
+            return "No documentation available.";
+         }
+      }
+
+      @Override
+      public FootstepOrigin[] getDocumentedValues()
+      {
+         return values();
+      }
+   }
+
+   @FieldDocumentation("Specifies whether the given location is the location of the ankle or the sole.")
+   public FootstepOrigin origin;
    @FieldDocumentation("Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
    @FieldDocumentation("Specifies the position of the footstep. It is expressed in world frame.")
    public Point3d location;
    @FieldDocumentation("Specifies the orientation of the footstep. It is expressed in world frame.")
    public Quat4d orientation;
-   
+
    @FieldDocumentation("predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
-                                     + "the world. A value of null will default to using the entire foot. Contact points should be specified\n"
-                                     + "in foot sole frame, where the origin is at the center of the foot. Order of the points does not matter.\n"
-                                     + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n"
-                                     + "predicted_contact_points:\n"
-                                     + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n"
-                                     + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
-                                     + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n"
-                                     + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
+         + "the world. A value of null or an empty list will default to using the entire foot. Contact points  are expressed in sole frame. This ordering does not matter.\n"
+         + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
+         + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
+         + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2d> predictedContactPoints;
 
    @FieldDocumentation("This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
@@ -52,9 +83,12 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
          + "Recommended values are between 0.1 (default) and 0.25.\n")
    public double swingHeight = 0;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public FootstepDataMessage()
    {
-      // Must have null constructor for efficient serialization.
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation)
@@ -62,17 +96,20 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
       this(robotSide, location, orientation, null);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints){
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints)
+   {
       this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
+
    public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, TrajectoryType trajectoryType, double swingHeight)
    {
       this(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
+   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints,
+         TrajectoryType trajectoryType, double swingHeight)
    {
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = robotSide;
       this.location = location;
       this.orientation = orientation;
@@ -86,15 +123,20 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
 
    public FootstepDataMessage(FootstepDataMessage footstepData)
    {
+      this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
       this.location = new Point3d(footstepData.location);
       this.orientation = new Quat4d(footstepData.orientation);
       RotationTools.checkQuaternionNormalized(this.orientation);
-      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty()){
+      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
+      {
          this.predictedContactPoints = null;
-      }else{
+      }
+      else
+      {
          this.predictedContactPoints = new ArrayList<>();
-         for (Point2d contactPoint : footstepData.predictedContactPoints){
+         for (Point2d contactPoint : footstepData.predictedContactPoints)
+         {
             this.predictedContactPoints.add(new Point2d(contactPoint));
          }
       }
@@ -102,11 +144,14 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
       this.swingHeight = footstepData.swingHeight;
    }
 
-   public FootstepDataMessage clone(){
+   public FootstepDataMessage clone()
+   {
       return new FootstepDataMessage(this);
    }
 
-   public FootstepDataMessage(Footstep footstep){
+   public FootstepDataMessage(Footstep footstep)
+   {
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
       location = new Point3d();
       orientation = new Quat4d();
@@ -114,35 +159,39 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
       footstep.getOrientationInWorldFrame(orientation);
 
       List<Point2d> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null){
+      if (footstepContactPoints != null)
+      {
          if (predictedContactPoints == null)
          {
             predictedContactPoints = new ArrayList<>();
-         }else{
+         }
+         else
+         {
             predictedContactPoints.clear();
          }
-         for (Point2d contactPoint: footstepContactPoints){
-               predictedContactPoints.add((Point2d)contactPoint.clone());
+         for (Point2d contactPoint : footstepContactPoints)
+         {
+            predictedContactPoints.add((Point2d) contactPoint.clone());
          }
-      }else{
+      }
+      else
+      {
          predictedContactPoints = null;
       }
       trajectoryType = footstep.trajectoryType;
       swingHeight = footstep.swingHeight;
    }
 
-   public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
+   public FootstepOrigin getOrigin()
    {
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         throw new RuntimeException("Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
-      this.predictedContactPoints = predictedContactPoints;
+      return origin;
    }
-   
+
    public ArrayList<Point2d> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
-   
+
    public Point3d getLocation()
    {
       return location;
@@ -151,11 +200,6 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
    public void getLocation(Point3d locationToPack)
    {
       locationToPack.set(location);
-   }
-
-   public void setLocation(Point3d location)
-   {
-      this.location.set(location);
    }
 
    public Quat4d getOrientation()
@@ -168,21 +212,30 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
       orientationToPack.set(this.orientation);
    }
 
-   public void setOrientation(Quat4d orientation)
-   {
-      this.orientation.set(orientation);
-      RotationTools.checkQuaternionNormalized(this.orientation);
-   }
-
    public RobotSide getRobotSide()
    {
       return robotSide;
    }
 
-
    public double getSwingHeight()
    {
       return swingHeight;
+   }
+
+   public void setOrigin(FootstepOrigin origin)
+   {
+      this.origin = origin;
+   }
+
+   public void setLocation(Point3d location)
+   {
+      this.location.set(location);
+   }
+
+   public void setOrientation(Quat4d orientation)
+   {
+      this.orientation.set(orientation);
+      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public void setSwingHeight(double swingHeight)
@@ -190,7 +243,14 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
       this.swingHeight = swingHeight;
       if (trajectoryType == TrajectoryType.DEFAULT)
          trajectoryType = TrajectoryType.BASIC;
+   }
 
+   public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
+   {
+      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
+         throw new RuntimeException(
+               "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
+      this.predictedContactPoints = predictedContactPoints;
    }
 
    public TrajectoryType getTrajectoryType()
@@ -212,7 +272,7 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
       ret = location.toString();
       ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
       ret += "Predicted Contact Points: ";
-      if(predictedContactPoints != null)
+      if (predictedContactPoints != null)
       {
          ret += "size = " + predictedContactPoints.size() + "\n";
       }
@@ -236,23 +296,27 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
          temp.negate(orientation);
          orientationEquals = temp.epsilonEquals(footstepData.orientation, epsilon);
       }
-      
+
       boolean contactPointsEqual = true;
-      
-      if ((this.predictedContactPoints == null) && (footstepData.predictedContactPoints != null)) contactPointsEqual = false;
-      else if ((this.predictedContactPoints != null) && (footstepData.predictedContactPoints == null)) contactPointsEqual = false;
+
+      if ((this.predictedContactPoints == null) && (footstepData.predictedContactPoints != null))
+         contactPointsEqual = false;
+      else if ((this.predictedContactPoints != null) && (footstepData.predictedContactPoints == null))
+         contactPointsEqual = false;
       else if (this.predictedContactPoints != null)
       {
          int size = predictedContactPoints.size();
-         if (size != footstepData.predictedContactPoints.size()) contactPointsEqual = false;
-         else 
+         if (size != footstepData.predictedContactPoints.size())
+            contactPointsEqual = false;
+         else
          {
-            for (int i=0; i<size; i++)
+            for (int i = 0; i < size; i++)
             {
                Point2d pointOne = predictedContactPoints.get(i);
                Point2d pointTwo = footstepData.predictedContactPoints.get(i);
-               
-               if (!(pointOne.distanceSquared(pointTwo) < 1e-7)) contactPointsEqual = false;
+
+               if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
+                  contactPointsEqual = false;
             }
          }
       }
@@ -276,17 +340,18 @@ public class FootstepDataMessage extends IHMCRosApiPacket<FootstepDataMessage> i
    {
       TrajectoryType[] trajectoryTypes = TrajectoryType.values();
       int randomOrdinal = random.nextInt(trajectoryTypes.length);
-      
-      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;;
+
+      origin = FootstepOrigin.AT_ANKLE_FRAME;
+      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
       this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
       this.orientation = RandomTools.generateRandomQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
-      if(numberOfPredictedContactPoints == 0)
+      if (numberOfPredictedContactPoints == 0)
          predictedContactPoints = null;
       else
       {
          this.predictedContactPoints = new ArrayList<>();
-         for(int i = 0; i < numberOfPredictedContactPoints; i++)
+         for (int i = 0; i < numberOfPredictedContactPoints; i++)
          {
             predictedContactPoints.add(new Point2d(random.nextDouble(), random.nextDouble()));
          }

@@ -17,6 +17,8 @@ public class ArmTrajectoryMessageSubscriber implements PacketConsumer<ArmTraject
    public ArmTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
+
+      globalDataProducer.attachListener(ArmTrajectoryMessage.class, this);
    }
 
    public boolean isNewTrajectoryMessageAvailable(RobotSide robotSide)

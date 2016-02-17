@@ -6,6 +6,6 @@ import javax.vecmath.Vector3d;
 public interface EuclideanWaypointInterface
 {
    public abstract double getTime();
-   public abstract Point3d getPosition();
-   public abstract Vector3d getLinearVelocity();
+   public abstract void getPosition(Point3d positionToPack);
+   public abstract void getLinearVelocity(Vector3d linearVelocityToPack);
 }

@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
                                   + "and orientation in world coordinates. This message is not intended to specify footsteps\n"
                                   + "as the controller will use a straight-line trajectory when moving the foot from its\n"
                                   + "current to desired location/orientation")
-public class FootPosePacket extends IHMCRosApiPacket<FootPosePacket> implements TransformableDataObject<FootPosePacket>, VisualizablePacket
+public class FootPosePacket extends Packet<FootPosePacket> implements TransformableDataObject<FootPosePacket>, VisualizablePacket
 {
 
    public RobotSide robotSide;

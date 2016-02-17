@@ -2,14 +2,16 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
 @ClassDocumentation("This message commands the controller to start loading an end effector that was unloaded to support the robot weight. "
       + "The only application at the moment is making a foot loadbearing."
-      + "When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support.")
-public class EndEffectorLoadBearingMessage extends IHMCRosApiPacket<EndEffectorLoadBearingMessage>
+      + "When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
+public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffectorLoadBearingMessage>
 {
    public enum EndEffector implements DocumentedEnum<EndEffector>
    {
@@ -58,12 +60,24 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiPacket<EndEffectorL
          + " When the option for another end-effector will be available, the corresponding enum value for that end-effector will be added.")
    public EndEffector endEffector;
 
+   /**
+    * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    */
    public EndEffectorLoadBearingMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * Create a message to request one end-effector to switch to load bearing.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param robotSide refers to the side of the end-effector if necessary.
+    * @param endEffector refers to the end-effector that will switch to load bearing.
+    */
    public EndEffectorLoadBearingMessage(RobotSide robotSide, EndEffector endEffector)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.endEffector = endEffector;
    }
@@ -89,4 +103,9 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiPacket<EndEffectorL
       return true;
    }
 
+   @Override
+   public String toString()
+   {
+      return "End effector load bearing: end-effector = " + endEffector + ", robotSide = " + robotSide;
+   }
 }

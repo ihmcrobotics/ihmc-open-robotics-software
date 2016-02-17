@@ -140,9 +140,9 @@ public class PelvisOrientationManager
       pelvisOrientationOffsetTrajectoryGenerator.initialize();
       activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
 
-      boolean allowMultipleFrames = false;
-      waypointOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisWaypointsOffset", 15, allowMultipleFrames,
-            desiredPelvisFrame, registry);
+      boolean allowMultipleFrames = true;
+      waypointOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", 15, allowMultipleFrames, desiredPelvisFrame, registry);
+      waypointOrientationOffsetTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
       parentRegistry.addChild(registry);
    }

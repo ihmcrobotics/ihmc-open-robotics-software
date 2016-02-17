@@ -93,9 +93,14 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    public void set(FrameOrientation frameOrientation)
    {
+      set(frameOrientation, true);
+   }
+
+   public void set(FrameOrientation frameOrientation, boolean notifyListeners)
+   {
       checkReferenceFrameMatch(frameOrientation);
       this.frameOrientation.setIncludingFrame(frameOrientation);
-      getYoValuesFromFrameOrientation();
+      getYoValuesFromFrameOrientation(notifyListeners);
    }
 
    public void set(YoFrameQuaternion yoFrameQuaternion)
@@ -145,6 +150,18 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    {
       putYoValuesIntoFrameOrientation();
       frameOrientationToPack.setIncludingFrame(frameOrientation);
+   }
+
+   public Quat4d getQuaternionCopy()
+   {
+      putYoValuesIntoFrameOrientation();
+      return frameOrientation.getQuaternionCopy();
+   }
+
+   public FrameOrientation getFrameOrientationCopy()
+   {
+      putYoValuesIntoFrameOrientation();
+      return new FrameOrientation(frameOrientation);
    }
 
    public DoubleYoVariable getYoQx()
@@ -249,10 +266,15 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    private void getYoValuesFromFrameOrientation()
    {
-      qx.set(frameOrientation.getQx());
-      qy.set(frameOrientation.getQy());
-      qz.set(frameOrientation.getQz());
-      qs.set(frameOrientation.getQs());
+      getYoValuesFromFrameOrientation(true);
+   }
+
+   private void getYoValuesFromFrameOrientation(boolean notifyListeners)
+   {
+      qx.set(frameOrientation.getQx(), notifyListeners);
+      qy.set(frameOrientation.getQy(), notifyListeners);
+      qz.set(frameOrientation.getQz(), notifyListeners);
+      qs.set(frameOrientation.getQs(), notifyListeners);
    }
 
    public void setToNaN()
@@ -261,6 +283,12 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       qy.set(Double.NaN);
       qz.set(Double.NaN);
       qs.set(Double.NaN);
+   }
+
+   public void setToZero()
+   {
+      frameOrientation.setToZero(getReferenceFrame());
+      getYoValuesFromFrameOrientation();
    }
 
    public boolean containsNaN()
@@ -302,5 +330,11 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    public String getNameSuffix()
    {
       return nameSuffix;
+   }
+
+   public boolean epsilonEquals(YoFrameQuaternion other, double epsilon)
+   {
+      putYoValuesIntoFrameOrientation();
+      return frameOrientation.epsilonEquals(other.frameOrientation, epsilon);
    }
 }

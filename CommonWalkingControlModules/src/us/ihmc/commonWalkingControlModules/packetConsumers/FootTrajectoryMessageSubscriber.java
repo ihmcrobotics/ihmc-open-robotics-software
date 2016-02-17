@@ -17,6 +17,16 @@ public class FootTrajectoryMessageSubscriber implements PacketConsumer<FootTraje
    public FootTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
+
+      globalDataProducer.attachListener(FootTrajectoryMessage.class, this);
+   }
+
+   public boolean isNewTrajectoryMessageAvailable()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         if (latestMessageReferences.get(robotSide).get() != null)
+            return true;
+      return false;
    }
 
    public boolean isNewTrajectoryMessageAvailable(RobotSide robotSide)

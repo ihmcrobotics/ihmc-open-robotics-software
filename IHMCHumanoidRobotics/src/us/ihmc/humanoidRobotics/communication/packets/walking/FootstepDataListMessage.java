@@ -9,7 +9,8 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -18,9 +19,9 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("This message commands the controller to execute a list of footsteps. See FootstepDataMessage\n"
-                                  + "for information about defining a footstep.")
-public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
+@ClassDocumentation("This message commands the controller to execute a list of footsteps. See FootstepDataMessage for information about defining a footstep."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
+public class FootstepDataListMessage extends IHMCRosApiMessage<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
    @FieldDocumentation("Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
@@ -30,13 +31,25 @@ public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMe
    @FieldDocumentation("transferTime is the time spent in double-support between steps")
    public double transferTime = 0.0;
 
+   /**
+    * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    */
    public FootstepDataListMessage()
    {
-      // Must have null constructor for efficient serialization
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * 
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param footstepDataList
+    * @param swingTime
+    * @param transferTime
+    */
    public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double swingTime, double transferTime)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       if(footstepDataList != null)
       {
          this.footstepDataList = footstepDataList;
@@ -46,8 +59,15 @@ public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMe
    }
 
 
+   /**
+    * 
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param swingTime
+    * @param transferTime
+    */
    public FootstepDataListMessage(double swingTime, double transferTime)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.swingTime = swingTime;
       this.transferTime = transferTime;
    }
@@ -154,7 +174,7 @@ public class FootstepDataListMessage extends IHMCRosApiPacket<FootstepDataListMe
 
    public FootstepDataListMessage(Random random)
    {
-
+      setUniqueId(1L);
       int footstepListSize = random.nextInt(20);
       for (int i = 0; i < footstepListSize; i++)
       {

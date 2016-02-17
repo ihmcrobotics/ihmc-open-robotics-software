@@ -12,6 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased.RootJointOrientationCorrectorHelperTest.class,
+   us.ihmc.quadrupedRobotics.stateEstimator.kinematicsBased.RootJointPoseCorrectorHelperTest.class,
    us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygonTest.class
 })
 

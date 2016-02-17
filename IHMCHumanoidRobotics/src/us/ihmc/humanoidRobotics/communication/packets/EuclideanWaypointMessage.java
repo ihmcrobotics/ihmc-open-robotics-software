@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.math.trajectories.EuclideanWaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the translational information for one waypoint (position & linear velocity). "
       + "Feel free to look at SO3Waypoint (rotational) and SE3Waypoint (rotational AND translational)")
-public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypointMessage> implements EuclideanWaypointInterface, TransformableDataObject<EuclideanWaypointMessage>
+public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypointMessage> implements EuclideanWaypointInterface, TransformableDataObject<EuclideanWaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -23,6 +23,9 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
    @FieldDocumentation("Define the desired 3D linear velocity to be reached at this waypoint. It is expressed in world frame.")
    public Vector3d linearVelocity;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public EuclideanWaypointMessage()
    {
    }
@@ -55,9 +58,9 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
    }
 
    @Override
-   public Point3d getPosition()
+   public void getPosition(Point3d positionToPack)
    {
-      return position;
+      positionToPack.set(position);
    }
 
    public void setPosition(Point3d position)
@@ -66,9 +69,9 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
    }
 
    @Override
-   public Vector3d getLinearVelocity()
+   public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      return linearVelocity;
+      linearVelocityToPack.set(linearVelocity);
    }
 
    public void setLinearVelocity(Vector3d linearVelocity)
@@ -117,5 +120,11 @@ public class EuclideanWaypointMessage extends IHMCRosApiPacket<EuclideanWaypoint
          transformedWaypointMessage.linearVelocity = null;
 
       return transformedWaypointMessage;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Euclidean waypoint: time = " + time + ", position = " + position + ", linear velocity = " + linearVelocity;
    }
 }

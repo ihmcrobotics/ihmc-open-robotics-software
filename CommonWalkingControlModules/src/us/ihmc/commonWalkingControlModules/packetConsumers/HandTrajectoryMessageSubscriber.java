@@ -17,6 +17,8 @@ public class HandTrajectoryMessageSubscriber implements PacketConsumer<HandTraje
    public HandTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
+
+      globalDataProducer.attachListener(HandTrajectoryMessage.class, this);
    }
 
    public boolean isNewTrajectoryMessageAvailable(RobotSide robotSide)

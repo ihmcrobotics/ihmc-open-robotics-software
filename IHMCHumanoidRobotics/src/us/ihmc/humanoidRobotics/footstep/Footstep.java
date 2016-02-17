@@ -288,25 +288,29 @@ public class Footstep
       ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
 
+   private RigidBodyTransform transformFromAnkleToWorld;
+
    public void setSolePose(RigidBodyTransform transform)
    {
-      RigidBodyTransform transformFromAnkleToWorld = new RigidBodyTransform();
+      if (transformFromAnkleToWorld == null)
+         transformFromAnkleToWorld = new RigidBodyTransform();
       transformFromAnkleToWorld.multiply(transform, transformFromAnkleToSoleFrame);
 
       this.ankleReferenceFrame.setPoseAndUpdate(transformFromAnkleToWorld);
    }
 
+   private RigidBodyTransform transformFromSoleToWorld;
+
    public void setSolePose(FramePose newSolePoseInWorldFrame)
    {
       newSolePoseInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      RigidBodyTransform transformFromSoleToWorld = new RigidBodyTransform();
+      if (transformFromSoleToWorld == null)
+         transformFromSoleToWorld = new RigidBodyTransform();
+
       newSolePoseInWorldFrame.getPose(transformFromSoleToWorld);
 
-      RigidBodyTransform transformFromAnkleToWorld = new RigidBodyTransform();
-      transformFromAnkleToWorld.multiply(transformFromSoleToWorld, transformFromAnkleToSoleFrame);
-
-      this.ankleReferenceFrame.setPoseAndUpdate(transformFromAnkleToWorld);
+      setSolePose(transformFromSoleToWorld);
    }
 
    public void setPositionChangeOnlyXY(FramePoint2d position2d)

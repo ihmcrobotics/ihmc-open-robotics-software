@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedCenterOfMassVerificationController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedDoNothingController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedJointInitializer;
@@ -71,6 +72,14 @@ public class QuadrupedControllerStateMachineBuilder
                   legIkCalc, dataProducer, commonControllerParameters.getRobotTimestamp(),
                   commonControllerParameters.getParentRegistry(), commonControllerParameters.getGraphicsListRegistry(),
                   commonControllerParameters.getGraphicsListRegistryForDetachedOverhead()));
+   }
+   
+   public void addQuadrupedCenterOfMassVerificationController(QuadrupedLegInverseKinematicsCalculator legIkCalc)
+   {
+      controllers
+      .add(new QuadrupedCenterOfMassVerificationController(commonControllerParameters.getControlDt(), robotParameters,
+            commonControllerParameters.getFullRobotModel(), legIkCalc, commonControllerParameters.getRobotTimestamp(),
+            commonControllerParameters.getParentRegistry(), commonControllerParameters.getGraphicsListRegistry()));
    }
 
    public void addVirtualModelBasedStandController(QuadrupedVirtualModelController virtualModelController)
