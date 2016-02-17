@@ -209,7 +209,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    private void setUpperBodyWrench()
    {
       Wrench upperBodyWrench = new Wrench();
-      fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
+      fullRobotModel.getRootJoint().getWrench(upperBodyWrench);
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setDesiredUpperBodyWrench(upperBodyWrench);

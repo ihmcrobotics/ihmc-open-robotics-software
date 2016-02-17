@@ -313,7 +313,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		currentTangentialVelocity.set(endEffectorVelocityInWorld.length());
 		
 
-		wristSensor.packWrench(wristSensorWrench);
+		wristSensor.getWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw,
 				fxFiltered, fyFiltered, fzFiltered, massHandandDrill.getDoubleValue(), SENSOR_NOISE, randomNumberGenerator, currentTimeInState.getDoubleValue());
 
@@ -400,7 +400,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		
 		
 
-		wristSensor.packWrench(wristSensorWrench);
+		wristSensor.getWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered,
 				fzFiltered, massHandandDrill.getDoubleValue(), false, randomNumberGenerator, 0.0);
 		CutForceControlHelper.getTangentForce(forceVectorInWorld, currentTangentialForce, tangentTrajectoryVectorInWorld,

@@ -1922,7 +1922,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          pelvisPosition.setToZero(referenceFrames.getPelvisFrame());
          pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ();
-         twistCalculator.packTwistOfBody(currentPelvisTwist, fullRobotModel.getPelvis());
+         twistCalculator.getTwistOfBody(currentPelvisTwist, fullRobotModel.getPelvis());
          currentPelvisTwist.changeFrame(worldFrame);
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }

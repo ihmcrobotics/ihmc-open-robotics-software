@@ -132,7 +132,7 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
             if ((xMin <= x) && (xMax >= x))
             {
                LinkedHashMap<Integer, Double> row = new LinkedHashMap<Integer, Double>(rows.get(x));
-               packAllPointsInRow(yMin, yMax, points, x, row);
+               getAllPointsInRow(yMin, yMax, points, x, row);
             }
          }
       }
@@ -147,13 +147,13 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
             if (rows.containsKey(x))
             {
                HashMap<Integer, Double> row = rows.get(x);
-               packAllPointsInRow(yMin, yMax, points, x, row);
+               getAllPointsInRow(yMin, yMax, points, x, row);
             }
          }
       }
    }
 
-   private void packAllPointsInRow(int yMin, int yMax, ArrayList<Point3d> points, int x, HashMap<Integer, Double> row)
+   private void getAllPointsInRow(int yMin, int yMax, ArrayList<Point3d> points, int x, HashMap<Integer, Double> row)
    {
       if (row.values().size() < (yMax - yMin+1))
       {

@@ -165,7 +165,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
       try
       {
-         twistCalculator.packTwistOfBody(tempTwist, stationaryPointLink);
+         twistCalculator.getTwistOfBody(tempTwist, stationaryPointLink);
       }
       catch(Exception e)
       {
@@ -175,7 +175,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       ReferenceFrame referenceFrame = referenceFrameNameMap.getFrameByName(pointVelocityMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
       tempFramePoint.setIncludingFrame(referenceFrame, pointVelocityMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
       tempFramePoint.changeFrame(tempTwist.getBaseFrame());
-      tempTwist.packLinearVelocityOfPointFixedInBodyFrame(stationaryPointVelocityToPack, tempFramePoint);
+      tempTwist.getLinearVelocityOfPointFixedInBodyFrame(stationaryPointVelocityToPack, tempFramePoint);
    }
 
 }

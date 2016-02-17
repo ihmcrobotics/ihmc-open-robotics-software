@@ -245,7 +245,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
    private void setUpperBodyWrench()
    {
       Wrench upperBodyWrench = new Wrench();
-      fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
+      fullRobotModel.getRootJoint().getWrench(upperBodyWrench);
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setDesiredUpperBodyWrench(upperBodyWrench);

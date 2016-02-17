@@ -773,7 +773,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 	   
 	   desiredRootJointPosition.setIncludingFrame(desiredCoM.getFrameTuple());
 	   desiredRootJointPosition.sub(vectorToSubtractHolder);
-      feedForwardRootJoint.packTranslation(linearVelocityHolder);
+      feedForwardRootJoint.getTranslation(linearVelocityHolder);
 	   feedForwardRootJoint.setPosition(desiredRootJointPosition.getPoint());
 	   linearVelocityHolder.sub(desiredRootJointPosition.getPoint(), linearVelocityHolder);
 	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocityHolder);

@@ -141,14 +141,14 @@ public class CenterOfMassImuBasedRotationalStateUpdater
    private void updateRootJointTwistAngularPart()
    {
       // T_{rootBody}^{rootBody, measurementLink}
-      twistCalculator.packRelativeTwist(twistRootJointFrameRelativeToMeasurementLink, measurementLink, rootJoint.getSuccessor());
+      twistCalculator.getRelativeTwist(twistRootJointFrameRelativeToMeasurementLink, measurementLink, rootJoint.getSuccessor());
       // T_{rootBody}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.changeFrame(rootJointFrame);
       // T_{rootJointFrame}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.changeBodyFrameNoRelativeTwist(rootJointFrame);
       
       // omega_{rootJointFrame}^{rootJointFrame, measurementLink}
-      twistRootJointFrameRelativeToMeasurementLink.packAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
+      twistRootJointFrameRelativeToMeasurementLink.getAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
 
       // omega_{measurementLink}^{measurementFrame, world}
       imuProcessedOutput.getAngularVelocityMeasurement(angularVocityMeasurement);

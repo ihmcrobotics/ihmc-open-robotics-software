@@ -132,7 +132,7 @@ public class TouchdownState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
 
-      momentumBasedController.getTwistCalculator().packRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
+      momentumBasedController.getTwistCalculator().getRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
       footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
 
       double footPitch = 0.0, footPitchd = 0.0, footPitchdd = 0.0;
@@ -186,7 +186,7 @@ public class TouchdownState extends AbstractFootControlState
 
          contactPointPosition.changeFrame(footTwist.getBaseFrame());
          footTwist.changeFrame(footTwist.getBaseFrame());
-         footTwist.packLinearVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
+         footTwist.getLinearVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
          contactPointPosition.changeFrame(rootBody.getBodyFixedFrame());
 
          proportionalPart.changeFrame(rootBody.getBodyFixedFrame());

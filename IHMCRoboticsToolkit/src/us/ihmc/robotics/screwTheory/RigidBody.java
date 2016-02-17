@@ -89,7 +89,7 @@ public class RigidBody
       return name;
    }
 
-   public void packCoMOffset(FramePoint comOffsetToPack)
+   public void getCoMOffset(FramePoint comOffsetToPack)
    {
       comOffsetToPack.setIncludingFrame(comOffset);
    }

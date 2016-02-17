@@ -211,9 +211,9 @@ public class ScrewTestTools
       sixDoFJoint.getJointTwist(twist);
 
       Matrix3d rotation = new Matrix3d();
-      sixDoFJoint.packRotation(rotation);
+      sixDoFJoint.getRotation(rotation);
       Vector3d position = new Vector3d();
-      sixDoFJoint.packTranslation(position);
+      sixDoFJoint.getTranslation(position);
 
       integrate(rotation, position, dt, twist);
 
@@ -225,13 +225,13 @@ public class ScrewTestTools
    {
       twist.changeFrame(twist.getBodyFrame());
       Vector3d dPosition = new Vector3d();
-      twist.packLinearPart(dPosition);    // velocity in body frame
+      twist.getLinearPart(dPosition);    // velocity in body frame
       rotationToPack.transform(dPosition);    // velocity in base frame
       dPosition.scale(dt);    // translation in base frame
       positionToPack.add(dPosition);
 
       Vector3d axis = new Vector3d();
-      twist.packAngularPart(axis);
+      twist.getAngularPart(axis);
       axis.scale(dt);
       double angle = axis.length();
       if (angle > 0.0)

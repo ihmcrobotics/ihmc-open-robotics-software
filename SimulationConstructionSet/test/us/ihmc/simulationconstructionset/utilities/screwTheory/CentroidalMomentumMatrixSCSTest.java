@@ -142,7 +142,7 @@ public class CentroidalMomentumMatrixSCSTest
       InverseDynamicsJoint[] jointList = ScrewTools.computeSubtreeJoints(elevator);
 
       DenseMatrix64F jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
-      ScrewTools.packJointVelocitiesMatrix(jointList, jointVelocities);
+      ScrewTools.getJointVelocitiesMatrix(jointList, jointVelocities);
 
       DenseMatrix64F comMomentumMatrix = MatrixTools.mult(mat, jointVelocities);
 

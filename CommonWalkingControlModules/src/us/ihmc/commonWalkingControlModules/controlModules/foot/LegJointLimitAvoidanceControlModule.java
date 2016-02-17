@@ -173,7 +173,7 @@ public class LegJointLimitAvoidanceControlModule
       Twist rootJointTist = new Twist();
       robotModel.getRootJoint().getJointTwist(rootJointTist);
       FrameVector linearRootJointVelocity = new FrameVector();
-      rootJointTist.packLinearPart(linearRootJointVelocity);
+      rootJointTist.getLinearPart(linearRootJointVelocity);
 
       linearRootJointVelocity.scale(0.004);
 

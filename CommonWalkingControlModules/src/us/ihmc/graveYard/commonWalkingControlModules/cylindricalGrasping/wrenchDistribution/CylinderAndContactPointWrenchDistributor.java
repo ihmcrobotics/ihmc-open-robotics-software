@@ -95,7 +95,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       List<PlaneContactState> planes = input.getContactStates();
       List<CylindricalContactState> cylinders = input.getCylindricalContactStates();
 
-      input.getDesiredNetSpatialForceVector().packMatrix(desiredNetEnvironmentReactionWrench);
+      input.getDesiredNetSpatialForceVector().getMatrix(desiredNetEnvironmentReactionWrench);
 
       setupOptimizerInput(planes, cylinders, desiredNetEnvironmentReactionWrench, endEffectors, optimizerInput, wPhi, wRho, Cmatrix);
 
@@ -133,7 +133,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
          FramePoint2d centerOfPressure = new FramePoint2d(centerOfMassFrame);    // frame will be overwritten
          double normalTorque = copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, wrenches.get(j), plane.getPlaneFrame());
          FrameVector force = new FrameVector(centerOfMassFrame);
-         wrenches.get(j).packLinearPart(force);
+         wrenches.get(j).getLinearPart(force);
          output.set(plane, force, centerOfPressure, normalTorque);
          j++;
       }

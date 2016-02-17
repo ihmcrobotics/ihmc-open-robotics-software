@@ -171,7 +171,7 @@ public class OnToesState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
 
-      twistCalculator.packRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
+      twistCalculator.getRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
       footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
 
       toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
@@ -214,7 +214,7 @@ public class OnToesState extends AbstractFootControlState
 
       contactPointPosition.changeFrame(footTwist.getBaseFrame());
       footTwist.changeFrame(footTwist.getBaseFrame());
-      footTwist.packLinearVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
+      footTwist.getLinearVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
       contactPointPosition.changeFrame(rootBody.getBodyFixedFrame());
 
       proportionalPart.changeFrame(rootBody.getBodyFixedFrame());
@@ -317,7 +317,7 @@ public class OnToesState extends AbstractFootControlState
 
       if (toeOffTrajectoryTime.getDoubleValue() > MIN_TRAJECTORY_TIME) // Returns false if the trajectory time is NaN
       {
-         twistCalculator.packRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
+         twistCalculator.getRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
          footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
 
          toeOffInitialAngle.set(desiredOrientation.getPitch());

@@ -75,7 +75,7 @@ public class RigidBodySpatialAccelerationControlModule
    public void doPositionControl(FramePose desiredEndEffectorPose, Twist desiredEndEffectorTwist,
          SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration, RigidBody base)
    {
-      twistCalculator.packRelativeTwist(currentTwist, base, endEffector);
+      twistCalculator.getRelativeTwist(currentTwist, base, endEffector);
       currentTwist.changeBodyFrameNoRelativeTwist(endEffectorFrame);
       currentTwist.changeFrame(endEffectorFrame);
 
@@ -129,7 +129,7 @@ public class RigidBodySpatialAccelerationControlModule
       angularAcceleration.changeFrame(endEffectorFrame);
 
       linearAccelerationOfOrigin.changeFrame(endEffectorFrame);
-      twistCalculator.packRelativeTwist(twistOfEndEffectorWithRespectToElevator, base, endEffector);
+      twistCalculator.getRelativeTwist(twistOfEndEffectorWithRespectToElevator, base, endEffector);
       twistOfEndEffectorWithRespectToElevator.changeBodyFrameNoRelativeTwist(endEffectorFrame);
 
       toPack.setBasedOnOriginAcceleration(endEffectorFrame, base.getBodyFixedFrame(), endEffectorFrame, angularAcceleration, linearAccelerationOfOrigin,
@@ -203,7 +203,7 @@ public class RigidBodySpatialAccelerationControlModule
    
    public void getEndeffectorVelocity(FrameVector vectorToPack)
    {
-      currentTwist.packBodyOriginLinearPartInBaseFrame(vectorToPack);
+      currentTwist.getBodyOriginLinearPartInBaseFrame(vectorToPack);
    }
    
    public void getEndeffectorPosition(FramePoint pointToPack)

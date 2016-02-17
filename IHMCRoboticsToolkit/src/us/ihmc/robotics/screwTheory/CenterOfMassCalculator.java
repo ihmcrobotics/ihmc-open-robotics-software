@@ -42,7 +42,7 @@ public class CenterOfMassCalculator
 
       for (RigidBody rigidBody : rigidBodies)
       {
-         rigidBody.packCoMOffset(tempPoint);
+         rigidBody.getCoMOffset(tempPoint);
          double mass = rigidBody.getInertia().getMass();
          tempPoint.changeFrame(desiredFrame);
          tempPoint.scale(mass);

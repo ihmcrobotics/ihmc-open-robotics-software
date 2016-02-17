@@ -329,12 +329,12 @@ public class DrivingFootControlModule
 
    private void updateCurrentVelocity()
    {
-      twistCalculator.packRelativeTwist(currentTwist, elevator, foot);
-      currentTwist.packAngularPart(currentAngularVelocity);
+      twistCalculator.getRelativeTwist(currentTwist, elevator, foot);
+      currentTwist.getAngularPart(currentAngularVelocity);
       currentTwist.changeFrame(elevator.getBodyFixedFrame());
       toePointInBase.setIncludingFrame(toePoint);
       toePointInBase.changeFrame(elevator.getBodyFixedFrame());
-      currentTwist.packLinearVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
+      currentTwist.getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
    }
 
    private static FramePoint getCenterToePoint(ContactablePlaneBody foot)

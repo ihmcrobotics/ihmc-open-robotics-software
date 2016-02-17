@@ -54,9 +54,9 @@ public class RigidBodyPositionControlModule
    public void doPositionControl(FrameVector outputToPack, FramePoint desiredPosition, FrameVector desiredLinearVelocityOfOrigin, FrameVector desiredLinearAccelerationOfOrigin, RigidBody base)
    {
       // using twists is a bit overkill; optimize if needed.
-      twistCalculator.packRelativeTwist(endEffectorTwist, base, endEffector);
+      twistCalculator.getRelativeTwist(endEffectorTwist, base, endEffector);
       currentLinearVelocity.setToZero(endEffectorTwist.getExpressedInFrame());
-      endEffectorTwist.packLinearPart(currentLinearVelocity.getVector());
+      endEffectorTwist.getLinearPart(currentLinearVelocity.getVector());
 
       euclideanPositionController.compute(outputToPack, desiredPosition, desiredLinearVelocityOfOrigin, currentLinearVelocity, desiredLinearAccelerationOfOrigin);
    }

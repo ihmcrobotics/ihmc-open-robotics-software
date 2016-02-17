@@ -178,7 +178,7 @@ public class MomentumOptimizerOldTest
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, 0.0);
       inverseDynamicsCalculator.compute();
       Wrench rootJointWrench = new Wrench();
-      rootJoint.packWrench(rootJointWrench);
+      rootJoint.getWrench(rootJointWrench);
       rootJointWrench.changeFrame(referenceFrame);
 
       JUnitTools.assertTuple3dEquals(desiredAngularCentroidalMomentumRate.getVector(), rootJointWrench.getAngularPartCopy(), epsilonInverseDynamics);

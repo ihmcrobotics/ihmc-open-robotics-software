@@ -113,9 +113,9 @@ public class GeometricJacobianTest
 
       // rotate components of twistFromBodyManipulatorJacobian to base frame and compare to hand calculations again
       Vector3d omegaInBaseFrame = new Vector3d();
-      twistFromBodyManipulatorJacobian.packAngularVelocityInBaseFrame(omegaInBaseFrame);
+      twistFromBodyManipulatorJacobian.getAngularVelocityInBaseFrame(omegaInBaseFrame);
       Vector3d vInBaseFrame = new Vector3d();
-      twistFromBodyManipulatorJacobian.packBodyOriginLinearPartInBaseFrame(vInBaseFrame);
+      twistFromBodyManipulatorJacobian.getBodyOriginLinearPartInBaseFrame(vInBaseFrame);
 
       Vector3d omegaInBaseFrameByHand = new Vector3d(-q2d, 0.0, 0.0);
       Vector3d vInBaseFrameByHand = new Vector3d(0.0, -q1d + Math.cos(q2) * q3 * q2d + Math.sin(q2) * q3d, -Math.sin(q2) * q3 * q2d + Math.cos(q2) * q3d);

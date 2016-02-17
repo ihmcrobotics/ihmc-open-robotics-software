@@ -138,7 +138,7 @@ public class ChestOrientationManager
             SpatialAccelerationVector spatialAcceleration = taskspaceConstraintData.getSpatialAcceleration();
             if (spatialAcceleration.getExpressedInFrame() != null) // That happens when there is no joint to control.
             {
-               spatialAcceleration.packAngularPart(controlledAngularAcceleration);
+               spatialAcceleration.getAngularPart(controlledAngularAcceleration);
                yoControlledAngularAcceleration.set(controlledAngularAcceleration);
             }
          }

@@ -85,7 +85,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
       this.robotTime[currentSample] = TimeTools.nanoSecondstoSeconds(timestamp);
       this.totalWork[currentSample] = totalWorkVariable.getDoubleValue();
       
-      fullRobotModel.getRootJoint().packTranslation(position);
+      fullRobotModel.getRootJoint().getTranslation(position);
       this.xPosition[currentSample] = position.getX();
       this.yPosition[currentSample] = position.getY();
       this.zPosition[currentSample] = position.getZ();

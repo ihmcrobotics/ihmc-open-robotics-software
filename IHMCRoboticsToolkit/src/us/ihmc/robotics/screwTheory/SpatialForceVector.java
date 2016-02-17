@@ -354,7 +354,7 @@ public class SpatialForceVector
     * Packs a matrix
     * @param matrix
     */
-   public void packMatrix(DenseMatrix64F matrix)
+   public void getMatrix(DenseMatrix64F matrix)
    {
       MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
@@ -366,7 +366,7 @@ public class SpatialForceVector
       matrix.set(5, 0, linearPart.z);
    }
    
-   public void packMatrixColumn(DenseMatrix64F matrix, int column)
+   public void getMatrixColumn(DenseMatrix64F matrix, int column)
    {
       MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIfInRange(matrix.getNumCols(), column+1, Integer.MAX_VALUE);
@@ -385,7 +385,7 @@ public class SpatialForceVector
    public DenseMatrix64F toDenseMatrix()
    {
       DenseMatrix64F matrix = new DenseMatrix64F(SIZE, 1);
-      packMatrix(matrix);
+      getMatrix(matrix);
 
       return matrix;
    }
@@ -393,7 +393,7 @@ public class SpatialForceVector
    /**
     * Packs an existing Vector3d with the angular part
     */
-   public void packAngularPart(Vector3d vectorToPack)
+   public void getAngularPart(Vector3d vectorToPack)
    {
       vectorToPack.set(this.angularPart);
    }
@@ -402,7 +402,7 @@ public class SpatialForceVector
     * Packs an existing FrameVector with the angular part. 
     * The FrameVector must be in the same frame as the expressedInFrame
     */
-   public void packAngularPart(FrameVector vectorToPack)
+   public void getAngularPart(FrameVector vectorToPack)
    {
       this.getExpressedInFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
       vectorToPack.set(this.angularPart);
@@ -411,7 +411,7 @@ public class SpatialForceVector
    /**
     * Packs an existing FrameVector with the angular part. 
     */
-   public void packAngularPartIncludingFrame(FrameVector vectorToPack)
+   public void getAngularPartIncludingFrame(FrameVector vectorToPack)
    {
       vectorToPack.setIncludingFrame(getExpressedInFrame(), this.angularPart);
    }
@@ -419,7 +419,7 @@ public class SpatialForceVector
    /**
     * Packs an existing Vector3d with the linear part
     */
-   public void packLinearPart(Vector3d vectorToPack)
+   public void getLinearPart(Vector3d vectorToPack)
    {
       vectorToPack.set(this.linearPart);
    }
@@ -428,7 +428,7 @@ public class SpatialForceVector
     * Packs an existing FrameVector with the linear part. 
     * The FrameVector must be in the same frame as the expressedInFrame
     */
-   public void packLinearPart(FrameVector vectorToPack)
+   public void getLinearPart(FrameVector vectorToPack)
    {
       this.getExpressedInFrame().checkReferenceFrameMatch(vectorToPack.getReferenceFrame());
       vectorToPack.set(this.linearPart);
@@ -437,7 +437,7 @@ public class SpatialForceVector
    /**
     * Packs an existing FrameVector with the linear part. 
     */
-   public void packLinearPartIncludingFrame(FrameVector vectorToPack)
+   public void getLinearPartIncludingFrame(FrameVector vectorToPack)
    {
       vectorToPack.setIncludingFrame(getExpressedInFrame(), linearPart);
    }
@@ -523,7 +523,7 @@ public class SpatialForceVector
       setToZero();
    }
 
-   public void packMatrix(double[] matrix)
+   public void getMatrix(double[] matrix)
    {
       matrix[0] = angularPart.x;
       matrix[1] = angularPart.y;

@@ -94,7 +94,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
             tempForceVector.setUsingArm(plane.getPlaneFrame(), tempLinearPart, tempArm);
             tempForceVector.changeFrame(plane.getFrameAfterParentJoint());
 
-            tempForceVector.packMatrix(rhoQ[rhoPosition]);
+            tempForceVector.getMatrix(rhoQ[rhoPosition]);
          }
       }
 
@@ -140,7 +140,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
             tempForceVector.setUsingArm(tempFramePoint.getReferenceFrame(), tempLinearPart, tempArm);
             tempForceVector.changeFrame(endEffectorFrame);
 
-            tempForceVector.packMatrix(rhoQ[rhoPosition]);
+            tempForceVector.getMatrix(rhoQ[rhoPosition]);
          }
       }
 

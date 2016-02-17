@@ -47,7 +47,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
    {
       getTwistOfAnkleWithRespectToIMU(bodyTwist, robotSide);
       tempLinearPart.setToZero(bodyTwist.getExpressedInFrame());
-      bodyTwist.packLinearPart(tempLinearPart.getVector());
+      bodyTwist.getLinearPart(tempLinearPart.getVector());
 
       getAngularVelocityOfAnkleZUpWithRespectToIMU(tempAngularPart, robotSide);
       bodyTwist.set(footZUpFrame, bodyTwist.getBaseFrame(), bodyTwist.getExpressedInFrame(), tempLinearPart.getVector(), tempAngularPart.getVector());
@@ -55,7 +55,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
       bodyTwist.invert();
       bodyTwist.changeFrame(imuJoint.getFrameAfterJoint());
       bodyLinearVelocity.setToZero(bodyTwist.getExpressedInFrame());
-      bodyTwist.packLinearPart(bodyLinearVelocity.getVector());
+      bodyTwist.getLinearPart(bodyLinearVelocity.getVector());
       bodyLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
@@ -91,7 +91,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
 
       imuJoint.getJointTwist(jointTwist);
       angularVelocityToPack.setToZero(jointTwist.getExpressedInFrame());
-      jointTwist.packAngularPart(angularVelocityToPack.getVector());    // angular velocity of IMU w.r.t world == IMU w.r.t ankle ZUp by assumption, in IMU frame
+      jointTwist.getAngularPart(angularVelocityToPack.getVector());    // angular velocity of IMU w.r.t world == IMU w.r.t ankle ZUp by assumption, in IMU frame
       angularVelocityToPack.changeFrame(footFrame);    // angular velocity of IMU w.r.t. ankle ZUp, in foot frame
       angularVelocityToPack.scale(-1.0);    // angular velocity of ankle ZUp w.r.t. IMU, in foot frame
    }
