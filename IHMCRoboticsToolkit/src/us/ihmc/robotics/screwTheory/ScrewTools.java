@@ -315,7 +315,7 @@ public class ScrewTools
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
          int endIndex = startIndex + joint.getDegreesOfFreedom() - 1;
-         joint.packTauMatrix(tempMatrix);
+         joint.getTauMatrix(tempMatrix);
 
          MatrixTools.setMatrixBlock(ret, startIndex, 0, tempMatrix, 0, 0, joint.getDegreesOfFreedom(), 1, 1.0);
 
@@ -592,7 +592,7 @@ public class ScrewTools
       for (InverseDynamicsJoint joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
-         joint.packVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
+         joint.getVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
          rowStart += dof;
       }
    }
@@ -603,7 +603,7 @@ public class ScrewTools
       for (InverseDynamicsJoint joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
-         joint.packVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
+         joint.getVelocityMatrix(jointVelocitiesMatrixToPack, rowStart);
          rowStart += dof;
       }
    }
@@ -614,7 +614,7 @@ public class ScrewTools
       for (InverseDynamicsJoint joint : joints)
       {
          int dof = joint.getDegreesOfFreedom();
-         joint.packDesiredAccelerationMatrix(desiredJointAccelerationsMatrixToPack, rowStart);
+         joint.getDesiredAccelerationMatrix(desiredJointAccelerationsMatrixToPack, rowStart);
          rowStart += dof;
       }
    }
@@ -657,7 +657,7 @@ public class ScrewTools
       int rowStart = 0;
       for (InverseDynamicsJoint joint : joints)
       {
-         joint.packConfigurationMatrix(jointPositionsToPack, rowStart);
+         joint.getConfigurationMatrix(jointPositionsToPack, rowStart);
          rowStart += joint.getDegreesOfFreedom();
          if (joint instanceof SixDoFJoint || joint instanceof SphericalJoint)
             rowStart++; // Because of stupid quaternions

@@ -49,12 +49,12 @@ public class DesiredJointAccelerationCalculatorOld
          InverseDynamicsJoint joint = jacobian.getJointsInOrder()[i];
          if (currentBody == joint.getPredecessor())
          {
-            joint.packPredecessorTwist(jointTwist);
+            joint.getPredecessorTwist(jointTwist);
             currentBody = joint.getSuccessor();
          }
          else
          {
-            joint.packSuccessorTwist(jointTwist);
+            joint.getSuccessorTwist(jointTwist);
             currentBody = joint.getPredecessor();            
          }
 

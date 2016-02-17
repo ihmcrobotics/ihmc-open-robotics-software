@@ -119,7 +119,7 @@ public class CentroidalMomentumMatrixSCSTest
          sixDoFJoint.setPosition(position);
          sixDoFJoint.setRotation(rotation);
          Twist jointTwist = new Twist();
-         sixDoFJoint.packJointTwist(jointTwist);
+         sixDoFJoint.getJointTwist(jointTwist);
          jointTwist.setAngularPart(angularVelocity);
          jointTwist.setLinearPart(linearVelocityInBody);
          sixDoFJoint.setJointTwist(jointTwist);

@@ -70,7 +70,7 @@ public class TwistCalculator
       RigidBody successor = joint.getSuccessor();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-      joint.packSuccessorTwist(tempTwist);
+      joint.getSuccessorTwist(tempTwist);
 
       Twist successorTwist = twists.get(successor);
       successorTwist.set(twists.get(predecessor));

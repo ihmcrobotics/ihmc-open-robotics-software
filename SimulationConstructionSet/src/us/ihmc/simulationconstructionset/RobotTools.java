@@ -119,7 +119,7 @@ public class RobotTools
          if (scsFloatingJoint != null)
          {
             ReferenceFrame rootBodyFrame = idFloatingJoint.getFrameAfterJoint();
-            idFloatingJoint.packJointTwist(rootJointTwist);
+            idFloatingJoint.getJointTwist(rootJointTwist);
             rootJointTwist.packLinearPart(linearVelocity);
             rootJointTwist.packAngularPart(angularVelocity);
             linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());

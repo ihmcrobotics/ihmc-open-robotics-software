@@ -13,29 +13,29 @@ public abstract interface InverseDynamicsJoint extends CommonJoint
 
    public abstract ReferenceFrame getFrameAfterJoint();
 
-   public abstract void packJointTwist(Twist twistToPack);
+   public abstract void getJointTwist(Twist twistToPack);
 
-   public abstract void packSuccessorTwist(Twist twistToPack);
+   public abstract void getSuccessorTwist(Twist twistToPack);
 
-   public abstract void packPredecessorTwist(Twist twistToPack);
+   public abstract void getPredecessorTwist(Twist twistToPack);
 
-   public abstract void packJointAcceleration(SpatialAccelerationVector accelerationToPack);
+   public abstract void getJointAcceleration(SpatialAccelerationVector accelerationToPack);
 
-   public abstract void packSuccessorAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void packDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getDesiredJointAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void packDesiredSuccessorAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getDesiredSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void packDesiredPredecessorAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getDesiredPredecessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart);
+   public abstract void getConfigurationMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
-   public abstract void packTauMatrix(DenseMatrix64F matrix);
+   public abstract void getTauMatrix(DenseMatrix64F matrixToPack);
 
-   public abstract void packVelocityMatrix(DenseMatrix64F matrix, int rowStart);
+   public abstract void getVelocityMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
-   public abstract void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart);
+   public abstract void getDesiredAccelerationMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
    public abstract void setDesiredAccelerationToZero();
 

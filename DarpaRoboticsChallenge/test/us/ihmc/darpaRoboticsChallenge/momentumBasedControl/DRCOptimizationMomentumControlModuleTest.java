@@ -155,7 +155,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
          for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
          {
             DenseMatrix64F vdDesired = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
-            inverseDynamicsJoint.packDesiredAccelerationMatrix(vdDesired, 0);
+            inverseDynamicsJoint.getDesiredAccelerationMatrix(vdDesired, 0);
             assertTrue(MatrixFeatures.isConstantVal(vdDesired, 0.0, 1e-5));
          }
 

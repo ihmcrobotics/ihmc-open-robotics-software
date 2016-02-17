@@ -204,7 +204,7 @@ public class TaskSpaceConstraintResolver
 
             DenseMatrix64F vdot = new DenseMatrix64F(unconstrainedJointOnPath.getDegreesOfFreedom(), 1);
             DenseMatrix64F phiJ = phiJMapForJacobian.get(unconstrainedJointOnPath);
-            unconstrainedJointOnPath.packDesiredAccelerationMatrix(vdot, 0);
+            unconstrainedJointOnPath.getDesiredAccelerationMatrix(vdot, 0);
             CommonOps.multAdd(-1.0, phiJ, vdot, vdotTaskSpace);
          }
 

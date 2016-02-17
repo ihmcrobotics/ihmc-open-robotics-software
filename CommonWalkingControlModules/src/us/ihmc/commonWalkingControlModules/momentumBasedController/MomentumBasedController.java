@@ -1023,7 +1023,7 @@ public class MomentumBasedController
 
       // Root Joint Accelerations
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
-      rootJoint.packDesiredJointAcceleration(rootJointDesiredAcceleration);
+      rootJoint.getDesiredJointAcceleration(rootJointDesiredAcceleration);
 
       rootJointDesiredAcceleration.packAngularPart(rootJointDesiredAngularAcceleration);
       rootJointDesiredAcceleration.packLinearPart(rootJointDesiredLinearAcceleration);
@@ -1031,7 +1031,7 @@ public class MomentumBasedController
       yoRootJointDesiredAngularAcceleration.set(rootJointDesiredAngularAcceleration);
       yoRootJointDesiredLinearAcceleration.set(rootJointDesiredLinearAcceleration);
 
-      rootJoint.packJointTwist(rootJointTwist);
+      rootJoint.getJointTwist(rootJointTwist);
       rootJointDesiredAcceleration.getLinearAccelerationFromOriginAcceleration(rootJointTwist, rootJointLinearAccelerationInWorld);
       rootJointLinearAccelerationInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       yoRootJointDesiredLinearAccelerationWorld.set(rootJointLinearAccelerationInWorld);

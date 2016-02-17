@@ -208,7 +208,7 @@ public class ScrewTestTools
    public static void integrateVelocities(SixDoFJoint sixDoFJoint, double dt)
    {
       Twist twist = new Twist();
-      sixDoFJoint.packJointTwist(twist);
+      sixDoFJoint.getJointTwist(twist);
 
       Matrix3d rotation = new Matrix3d();
       sixDoFJoint.packRotation(rotation);
@@ -260,7 +260,7 @@ public class ScrewTestTools
    public static void setRandomVelocity(SixDoFJoint rootJoint, Random random)
    {
       Twist jointTwist = new Twist();
-      rootJoint.packJointTwist(jointTwist);
+      rootJoint.getJointTwist(jointTwist);
       jointTwist.setAngularPart(RandomTools.generateRandomVector(random));
       jointTwist.setLinearPart(RandomTools.generateRandomVector(random));
       rootJoint.setJointTwist(jointTwist);
@@ -269,7 +269,7 @@ public class ScrewTestTools
    public static void setRandomAcceleration(SixDoFJoint rootJoint, Random random)
    {
       SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector();
-      rootJoint.packJointAcceleration(jointAcceleration);
+      rootJoint.getJointAcceleration(jointAcceleration);
       jointAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       jointAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
       rootJoint.setAcceleration(jointAcceleration);
@@ -278,7 +278,7 @@ public class ScrewTestTools
    public static void copyDesiredAccelerationToActual(SixDoFJoint rootJoint)
    {
       SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
-      rootJoint.packDesiredJointAcceleration(rootJointAcceleration);
+      rootJoint.getDesiredJointAcceleration(rootJointAcceleration);
       rootJoint.setAcceleration(rootJointAcceleration);
    }
 
@@ -293,11 +293,11 @@ public class ScrewTestTools
    public static void integrateAccelerations(SixDoFJoint rootJoint, double dt)
    {
       SpatialAccelerationVector deltaTwist = new SpatialAccelerationVector();
-      rootJoint.packJointAcceleration(deltaTwist);
+      rootJoint.getJointAcceleration(deltaTwist);
       deltaTwist.scale(dt);
 
       Twist rootJointTwist = new Twist();
-      rootJoint.packJointTwist(rootJointTwist);
+      rootJoint.getJointTwist(rootJointTwist);
       rootJointTwist.angularPart.add(deltaTwist.angularPart);
       rootJointTwist.linearPart.add(deltaTwist.linearPart);
       rootJoint.setJointTwist(rootJointTwist);
