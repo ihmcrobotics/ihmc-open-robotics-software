@@ -8,10 +8,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
  * @author twan
@@ -83,8 +83,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 	/**
 	 * Not working, but probably not critical right now. Get this to work some day TODO
 	 */
-	@Ignore
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout = 525)
    public void testFullyConstrained()
    {	   

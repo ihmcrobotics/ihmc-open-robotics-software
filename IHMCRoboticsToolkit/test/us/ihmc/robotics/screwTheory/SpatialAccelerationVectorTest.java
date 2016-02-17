@@ -1,9 +1,15 @@
 package us.ihmc.robotics.screwTheory;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Ignore;
 import org.junit.Test;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
@@ -12,11 +18,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
@@ -93,9 +95,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    }
 
    // TODO: Figure out this test and get it to pass if it should.
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testAccelerationOfPointFixedInBodyFrameAlternative()
    {
