@@ -1405,7 +1405,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             break;
             
          case TTR:
-            tripleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfPolygon(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
+            tripleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
             break;
             
          case TROTLINE_MIDPOINT:
@@ -1632,11 +1632,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          commonSupportPolygon.set(commonTriangle);
          double radius = subCircleRadius.getDoubleValue();
          boolean hasEnoughSides = commonSupportPolygon.size() >= 3;
+         boolean requestedRadiusLargerThanInCircle = true;
          if(useSubCircleForBodyShiftTarget.getBooleanValue() && hasEnoughSides)
          {
-            commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(upcomingSwingLeg, radius, comTargetToPack);
+            requestedRadiusLargerThanInCircle = 
+                  !commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(upcomingSwingLeg, radius, comTargetToPack);
          }
-         else if(hasEnoughSides)
+         if(hasEnoughSides && requestedRadiusLargerThanInCircle)
          {
             radius = commonSupportPolygon.getInCircle2d(circleCenter3d);
             comTargetToPack.set(circleCenter3d.getX(), circleCenter3d.getY());
