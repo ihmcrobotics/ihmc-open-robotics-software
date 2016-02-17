@@ -12,10 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.convexOptimization.experimental.ExperimentalSOCPSolverUsingJOptimizerTest.class,
-   us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class,
-   us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverTest.class,
-   us.ihmc.convexOptimization.randomSearch.RandomSearchConvexOptimizationAdapterTest.class
+   us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class
 })
 
 public class ConvexOptimizationAdapterAFastTestSuite

@@ -3,10 +3,10 @@ package us.ihmc.convexOptimization.quadraticProgram;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class SimpleActiveSetQPSolverTest
 {
@@ -154,9 +154,8 @@ public class SimpleActiveSetQPSolverTest
       assertTrue(Double.isNaN(solution[1]));
    }
 
-   @Ignore // Fails when conflicting constraints are active... Need to fix this case.
-
-	@DeployableTestMethod
+   // Fails when conflicting constraints are active... Need to fix this case.
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testConflictingInequalityAndEqualityConstraintsIfActive()
    {
