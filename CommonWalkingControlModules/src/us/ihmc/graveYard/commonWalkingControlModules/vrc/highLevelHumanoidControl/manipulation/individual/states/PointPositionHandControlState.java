@@ -137,7 +137,7 @@ public class PointPositionHandControlState extends State<HandControlState>
    public FramePoint getDesiredPosition()
    {
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
-      positionTrajectoryGenerator.get(desiredPosition);
+      positionTrajectoryGenerator.getPosition(desiredPosition);
       return desiredPosition;
    }
 

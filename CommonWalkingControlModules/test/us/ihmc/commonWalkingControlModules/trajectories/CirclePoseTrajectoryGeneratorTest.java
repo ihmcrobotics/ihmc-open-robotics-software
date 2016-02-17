@@ -121,7 +121,7 @@ public class CirclePoseTrajectoryGeneratorTest
    {
       trajectoryGenerator.compute(0.0);
       FramePoint currentPosition = new FramePoint();
-      trajectoryGenerator.get(currentPosition);
+      trajectoryGenerator.getPosition(currentPosition);
       currentPosition.getX();
    }
 
@@ -142,7 +142,7 @@ public class CirclePoseTrajectoryGeneratorTest
    {
       FramePoint positionToPack = new FramePoint();
 
-      trajectoryGenerator.get(positionToPack);
+      trajectoryGenerator.getPosition(positionToPack);
 
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
    }
@@ -229,11 +229,11 @@ public class CirclePoseTrajectoryGeneratorTest
       FramePoint positionToPack = new FramePoint(worldFrame);
       positionToPack.setIncludingFrame(worldFrame, 4.4, 3.3, 1.4);
 
-      trajectoryGenerator.get(positionToPack);
+      trajectoryGenerator.getPosition(positionToPack);
 
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
 
-      trajectoryGenerator.get(positionToPack);
+      trajectoryGenerator.getPosition(positionToPack);
 
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
 
@@ -271,11 +271,11 @@ public class CirclePoseTrajectoryGeneratorTest
       FramePoint positionToPack = new FramePoint(worldFrame);
       positionToPack.setIncludingFrame(worldFrame, 4.4, 3.3, 1.4);
 
-      trajectoryGenerator.get(positionToPack);
+      trajectoryGenerator.getPosition(positionToPack);
 
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
 
-      trajectoryGenerator.get(positionToPack);
+      trajectoryGenerator.getPosition(positionToPack);
 
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
 
@@ -320,7 +320,7 @@ public class CirclePoseTrajectoryGeneratorTest
       FrameOrientationTest.assertFrameOrientationEquals(initialOrientation, orientation, 1e-12);
 
       FramePoint initialPosition = new FramePoint(frame);
-      trajectoryGenerator.get(initialPosition);
+      trajectoryGenerator.getPosition(initialPosition);
 
       FramePoint newPosition = new FramePoint(frame);
 
@@ -333,7 +333,7 @@ public class CirclePoseTrajectoryGeneratorTest
          double t = i * (tMax / nTests);
          trajectoryGenerator.compute(t);
 
-         trajectoryGenerator.get(newPosition);
+         trajectoryGenerator.getPosition(newPosition);
          trajectoryGenerator.getOrientation(orientation);
 
          AxisAngle4d difference = FrameOrientationTest.computeDifferenceAxisAngle(initialOrientation, orientation);
@@ -357,7 +357,7 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.packVelocity(v);
 
       FramePoint r = new FramePoint(frame);
-      trajectoryGenerator.get(r);
+      trajectoryGenerator.getPosition(r);
 
       FrameVector vCheck = new FrameVector(frame);
       vCheck.cross(omega, r);

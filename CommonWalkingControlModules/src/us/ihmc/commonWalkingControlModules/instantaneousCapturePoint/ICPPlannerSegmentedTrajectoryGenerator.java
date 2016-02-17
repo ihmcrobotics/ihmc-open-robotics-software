@@ -271,7 +271,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       spline.initialize();
       spline.compute(timeInSecondSegment);
 
-      spline.get(desiredICPOutput);
+      spline.getPosition(desiredICPOutput);
       spline.packVelocity(desiredICPVelocityOutput);
    }
 
@@ -334,7 +334,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setIncludingFrame(desiredICPOutput);
    }
@@ -369,7 +369,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    @Override
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

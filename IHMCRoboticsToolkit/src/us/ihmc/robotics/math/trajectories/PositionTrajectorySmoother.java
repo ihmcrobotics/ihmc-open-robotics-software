@@ -175,7 +175,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       return isTrajectoryInputDone && isSmoothingDone;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       yoSmoothedPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -192,7 +192,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

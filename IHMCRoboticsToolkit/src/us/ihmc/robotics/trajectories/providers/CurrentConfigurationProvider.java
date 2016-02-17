@@ -13,7 +13,7 @@ public class CurrentConfigurationProvider implements SE3ConfigurationProvider
       this.endEffectorFrame = endEffectorFrame;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setToZero(endEffectorFrame);
    }

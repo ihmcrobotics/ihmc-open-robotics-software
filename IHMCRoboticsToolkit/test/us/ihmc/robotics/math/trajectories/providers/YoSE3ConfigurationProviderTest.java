@@ -57,7 +57,7 @@ public class YoSE3ConfigurationProviderTest
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 
       FramePoint framePointToPack = new FramePoint();
-      provider.get(framePointToPack);
+      provider.getPosition(framePointToPack);
 
       assertEquals(referenceFrame, framePointToPack.getReferenceFrame());
    }

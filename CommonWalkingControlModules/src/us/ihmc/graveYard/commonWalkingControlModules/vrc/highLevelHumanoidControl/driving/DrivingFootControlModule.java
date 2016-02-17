@@ -391,7 +391,7 @@ public class DrivingFootControlModule
       public void doTransitionOutOfAction()
       {
          FramePoint currentDesired = new FramePoint();
-         positionTrajectoryGenerator.get(currentDesired);
+         positionTrajectoryGenerator.getPosition(currentDesired);
          currentDesired.changeFrame(initialToePointPosition.getReferenceFrame());
          initialToePointPosition.set(currentDesired);
       }

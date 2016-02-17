@@ -101,7 +101,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       timeIntoStep.set(swingTime.getDoubleValue() - swingTimeRemainingProvider.getValue());
 
       
-      positionSources[0].get(tempPosition);
+      positionSources[0].getPosition(tempPosition);
       tempPosition.changeFrame(desiredPosition.getReferenceFrame());
       double x0 = tempPosition.getX();
       double y0 = tempPosition.getY();
@@ -111,7 +111,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       double xd0 = tempVector.getX();
       double yd0 = tempVector.getY();
       
-      positionSources[1].get(tempPosition);
+      positionSources[1].getPosition(tempPosition);
       tempPosition.changeFrame(desiredPosition.getReferenceFrame());
       double xFinal = tempPosition.getX();
       double yFinal = tempPosition.getY();
@@ -169,7 +169,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       xPolynomial.compute(time);
       yPolynomial.compute(time);
 
-      nominalTrajectoryGenerator.get(nominalTrajectoryPosition);
+      nominalTrajectoryGenerator.getPosition(nominalTrajectoryPosition);
       nominalTrajectoryGenerator.packVelocity(nominalTrajectoryVelocity);
       nominalTrajectoryGenerator.packAcceleration(nominalTrajectoryAcceleration);
 
@@ -178,7 +178,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       desiredPosition.setZ(nominalTrajectoryPosition.getZ());
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -201,7 +201,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

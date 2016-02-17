@@ -23,8 +23,8 @@ public class ComposableSE3ConfigurationProvider implements SE3ConfigurationProvi
       orientationProvider.getOrientation(orientationToPack);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
-      positionProvider.get(positionToPack);
+      positionProvider.getPosition(positionToPack);
    }
 }

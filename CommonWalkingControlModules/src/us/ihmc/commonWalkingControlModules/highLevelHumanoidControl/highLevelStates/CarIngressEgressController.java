@@ -312,7 +312,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime.getDoubleValue();
             pelvisPositionTrajectoryGenerator.compute(time);
 
-            pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
+            pelvisPositionTrajectoryGenerator.getPosition(desiredPelvisWaypointPosition);
             desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
             pelvisPositionTrajectoryGenerator.clear();
             pelvisPositionTrajectoryGenerator.appendWaypoint(0.0, desiredPelvisWaypointPosition, desiredPelvisWaypointLinearVelocity);
@@ -329,7 +329,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime.getDoubleValue();
             pelvisPositionTrajectoryGenerator.compute(time);
 
-            pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
+            pelvisPositionTrajectoryGenerator.getPosition(desiredPelvisWaypointPosition);
             desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
             
             WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = pelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();

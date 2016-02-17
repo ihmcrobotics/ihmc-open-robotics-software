@@ -109,7 +109,7 @@ public class PositionTrajectorySmootherTest
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);
       FramePoint positionToPack = new FramePoint();
 
-      smoother.get(positionToPack);
+      smoother.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
    }
@@ -156,11 +156,11 @@ public class PositionTrajectorySmootherTest
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);
-      smoother.get(positionToPack);
+      smoother.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      smoother.get(positionToPack);
+      smoother.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 

@@ -138,7 +138,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       return true;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -155,7 +155,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

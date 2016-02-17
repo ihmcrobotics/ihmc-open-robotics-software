@@ -34,9 +34,9 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
       return positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
-      positionTrajectoryGenerator.get(positionToPack);
+      positionTrajectoryGenerator.getPosition(positionToPack);
    }
 
    public void packVelocity(FrameVector velocityToPack)
@@ -79,7 +79,7 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
    
    public void getPose(FramePose framePoseToPack)
    {
-      positionTrajectoryGenerator.get(tempPosition);
+      positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
       framePoseToPack.setPosition(tempPosition);
 

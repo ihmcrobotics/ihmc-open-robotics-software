@@ -81,7 +81,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       return this.groundClearance.getDoubleValue();
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
 
@@ -124,10 +124,10 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       double middleOfTrajectoryParameter = 0.5;
 
       FramePoint initialPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-      initialPositionProvider.get(initialPosition);
+      initialPositionProvider.getPosition(initialPosition);
 
       FramePoint finalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-      finalPositionProvider.get(finalPosition);
+      finalPositionProvider.getPosition(finalPosition);
       
       initialPosition.changeFrame(parabolicTrajectoryGenerator.getReferenceFrame());
       finalPosition.changeFrame(parabolicTrajectoryGenerator.getReferenceFrame());
@@ -145,7 +145,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

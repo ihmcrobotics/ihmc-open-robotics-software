@@ -146,7 +146,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       return stepTime.getDoubleValue();
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -173,10 +173,10 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       FramePoint finalDesiredPosition = new FramePoint(referenceFrame);
       FrameVector finalDesiredVelocity = new FrameVector(referenceFrame);
 
-      initialPositionSource.get(initialPosition);
+      initialPositionSource.getPosition(initialPosition);
       initialVelocitySource.get(initialVelocity);
       initialAccelerationSource.get(initialAcceleration);
-      finalDesiredPositionSource.get(finalDesiredPosition);
+      finalDesiredPositionSource.getPosition(finalDesiredPosition);
       finalDesiredVelocitySource.get(finalDesiredVelocity);
 
       initialPosition.changeFrame(referenceFrame);
@@ -239,7 +239,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
+      getPosition(positionToPack);
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }

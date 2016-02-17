@@ -221,7 +221,7 @@ public class PelvisICPBasedTranslationManager
       {
          double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
          activeTrajectoryGenerator.compute(deltaTime);
-         activeTrajectoryGenerator.get(tempPosition);
+         activeTrajectoryGenerator.getPosition(tempPosition);
          //System.out.println(tempPosition);
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
