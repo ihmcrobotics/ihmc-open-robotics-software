@@ -1059,6 +1059,9 @@ public class QuadrupedSupportPolygon implements Serializable
       // verify exactly two legs epsilon match
       if (getNumberOfEqualFootsteps(polygonToCompare) != 2)
          throw new UndefinedOperationException("There must be exactly two similar foosteps not " + getNumberOfEqualFootsteps(polygonToCompare));
+      // verify swing legs are not diagonals quadrants
+      if (getFirstNonSupportingQuadrant() == polygonToCompare.getFirstNonSupportingQuadrant().getDiagonalOppositeQuadrant())
+         throw new UndefinedOperationException("Swing quadrants must not be diagonal opposites.");
 
       // return null if swing legs are not same side *** Assumes regular gait ***
       RobotQuadrant thisSwingLeg = getFirstNonSupportingQuadrant();
@@ -1392,12 +1395,14 @@ public class QuadrupedSupportPolygon implements Serializable
    /**
     * Gets the center point of a circle of radius in the corner of a triangle.
     * 
+    * This polygon must have size of 3 or 4.
+    * 
     * @param cornerToPutCircle
     * @param radius
     * @param centerToPack
     * @return
     */
-   public boolean getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
+   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
    {
       if (containsFootstep(cornerToPutCircle))
       {
@@ -1434,8 +1439,6 @@ public class QuadrupedSupportPolygon implements Serializable
 
          tempCorner.add(bisectorVector);
          centerToPack.set(tempCorner);
-
-         return true;
       }
       else
       {
