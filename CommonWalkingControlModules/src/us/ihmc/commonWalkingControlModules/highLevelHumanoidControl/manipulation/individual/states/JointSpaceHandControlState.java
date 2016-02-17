@@ -120,7 +120,7 @@ public class JointSpaceHandControlState extends HandControlState
             if (!setDesiredJointAccelerations.getBooleanValue())
                feedforwardAcceleration = 0.0;
             momentumBasedController.setOneDoFJointAcceleration(joint, feedforwardAcceleration);
-            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, feedforwardAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(joint, feedforwardAcceleration);
          }
          else
          {
@@ -137,7 +137,7 @@ public class JointSpaceHandControlState extends HandControlState
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
             momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration + feedforwardAcceleration);
-            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration + feedforwardAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(joint, desiredAcceleration + feedforwardAcceleration);
          }
       }
    }

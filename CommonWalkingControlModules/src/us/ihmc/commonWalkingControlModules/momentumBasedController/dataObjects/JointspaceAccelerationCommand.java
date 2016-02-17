@@ -1,8 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Queue;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
@@ -17,10 +21,13 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
 
    private final int initialCapacity = 15;
    private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
+   private final Queue<MutableInt> unusedIntegers = new ArrayDeque<>(initialCapacity);
+   private final LinkedHashMap<InverseDynamicsJoint, MutableInt> jointToJointIndexMap = new LinkedHashMap<>(initialCapacity);
    private final DenseMatrixArrayList desiredAccelerations = new DenseMatrixArrayList(initialCapacity);
 
    public JointspaceAccelerationCommand()
    {
+      initializeUnusedIntegers();
       clear();
    }
 
@@ -31,15 +38,24 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
 
    public JointspaceAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration, double weight)
    {
+      initializeUnusedIntegers();
       clear();
       addJoint(joint, desiredAcceleration);
       this.hasWeight = weight != Double.POSITIVE_INFINITY;
       this.weight = weight;
    }
 
+   private void initializeUnusedIntegers()
+   {
+      for (int i = 0; i < initialCapacity; i++)
+         unusedIntegers.add(new MutableInt(-1));
+   }
+
    public void clear()
    {
-      joints.clear();
+      while (!joints.isEmpty())
+         unusedIntegers.add(jointToJointIndexMap.remove(joints.remove(joints.size() - 1)));
+
       desiredAccelerations.clear();
       hasWeight = false;
       weight = Double.POSITIVE_INFINITY;
@@ -51,6 +67,8 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
       DenseMatrix64F jointDesiredAcceleration = desiredAccelerations.add();
       jointDesiredAcceleration.reshape(1, 1);
       jointDesiredAcceleration.set(0, 0, desiredAcceleration);
+
+      updateIndexMap(joint, joints.size() - 1);
    }
 
    public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
@@ -58,6 +76,22 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
       checkConsistency(joint, desiredAcceleration);
       joints.add(joint);
       desiredAccelerations.add().set(desiredAcceleration);
+
+      updateIndexMap(joint, joints.size() - 1);
+   }
+
+   private void updateIndexMap(InverseDynamicsJoint joint, int jointIndex)
+   {
+      if (unusedIntegers.isEmpty())
+      {
+         jointToJointIndexMap.put(joint, new MutableInt(joints.size() - 1));
+      }
+      else
+      {
+         MutableInt jointMutableIndex = unusedIntegers.remove();
+         jointMutableIndex.setValue(jointIndex);
+         jointToJointIndexMap.put(joint, jointMutableIndex);
+      }
    }
 
    public void setOneDoFJointDesiredAcceleration(int jointIndex, double desiredAcceleration)
@@ -67,10 +101,23 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
       desiredAccelerations.get(jointIndex).set(0, 0, desiredAcceleration);
    }
 
+   public void setOneDoFJointDesiredAcceleration(OneDoFJoint joint, double desiredAcceleration)
+   {
+      int jointIndex = jointToJointIndexMap.get(joint).intValue();
+      desiredAccelerations.get(jointIndex).reshape(1, 1);
+      desiredAccelerations.get(jointIndex).set(0, 0, desiredAcceleration);
+   }
+
    public void setDesiredAcceleration(int jointIndex, DenseMatrix64F desiredAcceleration)
    {
       checkConsistency(joints.get(jointIndex), desiredAcceleration);
       desiredAccelerations.get(jointIndex).set(desiredAcceleration);
+   }
+
+   public void setDesiredAcceleration(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
+   {
+      int jointIndex = jointToJointIndexMap.get(joint).intValue();
+      setDesiredAcceleration(jointIndex, desiredAcceleration);
    }
 
    private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
