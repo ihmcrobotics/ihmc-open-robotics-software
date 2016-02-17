@@ -11,6 +11,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -29,8 +30,7 @@ import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
@@ -47,7 +47,7 @@ public class FootControlModule
 
    private static final double coefficientOfFriction = 0.8;
 
-   private final StateMachine<ConstraintType> stateMachine;
+   private final GenericStateMachine<ConstraintType, AbstractFootControlState> stateMachine;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
    private final MomentumBasedController momentumBasedController;
@@ -99,7 +99,7 @@ public class FootControlModule
 
       // set up states and state machine
       DoubleYoVariable time = momentumBasedController.getYoTime();
-      stateMachine = new StateMachine<ConstraintType>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
+      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
       setupContactStatesMap();
 
       YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -186,7 +186,7 @@ public class FootControlModule
          }
       }, footStateTransitionAction));
 
-      for (State<ConstraintType> state : states)
+      for (AbstractFootControlState state : states)
       {
          stateMachine.addState(state);
       }
@@ -414,5 +414,10 @@ public class FootControlModule
    public void registerDesiredContactPointForToeOff(FramePoint2d desiredContactPoint)
    {
       onToesState.setDesiredToeOffContactPoint(desiredContactPoint);
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return stateMachine.getCurrentState().getInverseDynamicsCommand();
    }
 }

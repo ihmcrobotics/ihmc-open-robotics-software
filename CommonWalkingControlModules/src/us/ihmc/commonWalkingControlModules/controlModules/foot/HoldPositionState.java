@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -22,6 +23,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class HoldPositionState extends AbstractFootControlState
 {
    private static final boolean CONTROL_WRT_PELVIS = false;
+
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private static final double EPSILON = 0.010;
 
@@ -119,7 +122,7 @@ public class HoldPositionState extends AbstractFootControlState
             desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
-      footControlHelper.submitTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration, spatialAccelerationCommand);
    }
 
    /**
@@ -173,5 +176,11 @@ public class HoldPositionState extends AbstractFootControlState
       desiredOrientationCopy.set(desiredAxisAngle);
       desiredOrientationCopy.changeFrame(worldFrame);
       desiredOrientation.set(desiredOrientationCopy);
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }
