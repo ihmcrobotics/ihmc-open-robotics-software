@@ -43,7 +43,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 44.4, targets = TestPlanTarget.InDevelopment)
+   @DeployableTestMethod(estimatedDuration = 44.4, targets = TestPlanTarget.Flaky)
    @Test(timeout = 220000)
    public void testRandomState() throws SimulationExceededMaximumTimeException
    {
