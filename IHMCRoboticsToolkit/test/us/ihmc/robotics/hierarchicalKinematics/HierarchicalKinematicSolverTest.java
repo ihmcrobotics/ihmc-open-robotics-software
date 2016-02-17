@@ -1,18 +1,20 @@
 package us.ihmc.robotics.hierarchicalKinematics;
 
-import org.ejml.data.DenseMatrix64F;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.robotics.dataStructures.Vector64F;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import java.util.ArrayList;
 
-import static org.junit.Assert.fail;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.robotics.dataStructures.Vector64F;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class HierarchicalKinematicSolverTest {
 
@@ -97,8 +99,8 @@ public class HierarchicalKinematicSolverTest {
 
    }
 
-	@DeployableTestMethod
-	@Ignore //This test hangs bamboo, we need to figure out why? see http://bamboo.ihmc.us/browse/RC-ALL2-IHMCUTILITIES-51/log
+   // This test hangs bamboo, we need to figure out why? see http://bamboo.ihmc.us/browse/RC-ALL2-IHMCUTILITIES-51/log
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void test() {
 

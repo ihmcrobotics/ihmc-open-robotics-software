@@ -14,7 +14,6 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -91,8 +90,7 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofCV can't find checker board
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 5000)
    public void testImage3() throws IOException
    {
