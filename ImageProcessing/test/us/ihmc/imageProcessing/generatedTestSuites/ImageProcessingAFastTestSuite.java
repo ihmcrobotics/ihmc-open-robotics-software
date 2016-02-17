@@ -14,11 +14,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.imageProcessing.segmentation.FitNoisyGaussian2DTest.class,
    us.ihmc.imageProcessing.segmentation.Gaussian2D_F64Test.class,
-   us.ihmc.imageProcessing.segmentation.Gaussian3D_F64Test.class,
-   us.ihmc.imageProcessing.segmentation.GaussianColorClassifierTest.class,
    us.ihmc.imageProcessing.segmentation.LabeledPixelCodecTest.class,
-   us.ihmc.imageProcessing.sfm.EstimateGroundPlaneFromFeaturesTest.class,
-   us.ihmc.imageProcessing.sfm.ImageToGroundMapTest.class
+   us.ihmc.imageProcessing.sfm.EstimateGroundPlaneFromFeaturesTest.class
 })
 
 public class ImageProcessingAFastTestSuite
