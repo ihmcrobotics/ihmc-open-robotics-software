@@ -188,6 +188,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
    private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
+   private final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
+
 
    private final DoubleYoVariable distanceInside = new DoubleYoVariable("distanceInside", registry);
    private final BooleanYoVariable possibleTipOnFrontSwingLeg = new BooleanYoVariable("possibleTipOnFrontSwingLeg", registry);
@@ -1856,6 +1858,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
          swingTrajectoryGenerator.computeSwing(framePointToPack);
+         
+         swingTimeRemaining.set(swingTrajectoryGenerator.getTimeRemaining());
       }
    }
    

@@ -124,6 +124,18 @@ public class QuadrupedSwingTrajectoryGenerator
          updateBagOfBalls(desiredEndEffectorPosition);
       }
    }
+   
+   public double getTimeRemaining()
+   {
+      if (USE_NEW_SWING_GENERATOR)
+      {
+         return swingTimeDoubleProvider.getValue() - timeInStep.getDoubleValue();
+      }
+      else
+      {
+         return cartesianTrajectoryGenerator.getTimeRemaining();
+      }
+   }
 
    private void updateBagOfBalls(FramePoint desiredEndEffectorPosition)
    {
