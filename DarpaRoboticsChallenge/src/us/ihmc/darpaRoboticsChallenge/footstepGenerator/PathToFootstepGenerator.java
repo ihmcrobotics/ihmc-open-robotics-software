@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTrajectoryHeightCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
@@ -95,7 +96,7 @@ public class PathToFootstepGenerator
       ArrayList<Footstep> footsteps = new ArrayList<>();
       for (FootstepDataMessage footstepData : generatedFootsteps)
       {
-         Footstep footstep = FootstepTools.generateFootstepFromFootstepDataSole(footstepData, contactableFeet.get(footstepData.getRobotSide()));
+         Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, contactableFeet.get(footstepData.getRobotSide()));
          footsteps.add(footstep);
       }
 
@@ -215,6 +216,8 @@ public class PathToFootstepGenerator
                currentFootstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
             }
             currentFootstep.setSwingHeight(swingHeight);
+
+            currentFootstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          }
 
          stepValid = validityMetric.footstepValid(initialSwingFoot, stanceFoot, currentFootstep);
@@ -270,6 +273,7 @@ public class PathToFootstepGenerator
 
          if (stepValid)
          {
+            currentFootstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
             // footstep fine, add footstep
             footstepList.add(currentFootstep);
             lastFeet.put(currentFootstep.getRobotSide(), currentFootstep);

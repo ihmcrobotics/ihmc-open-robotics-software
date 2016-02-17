@@ -25,6 +25,8 @@ public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<E
 
       for (EndEffector endEffector : EndEffector.values)
          latestMessageReferencePerEndEffector.put(endEffector, new AtomicInteger(-1));
+
+      globalDataProducer.attachListener(EndEffectorLoadBearingMessage.class, this);
    }
 
    public boolean pollMessage(EndEffector endEffector)

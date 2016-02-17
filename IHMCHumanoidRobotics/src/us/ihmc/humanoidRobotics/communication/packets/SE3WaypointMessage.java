@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -15,7 +15,7 @@ import us.ihmc.robotics.math.trajectories.SE3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one waypoint. "
       + "Feel free to look at EuclideanWaypoint (translational) and SO3Waypoint (rotational)")
-public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> implements SE3WaypointInterface, TransformableDataObject<SE3WaypointMessage>
+public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> implements SE3WaypointInterface, TransformableDataObject<SE3WaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -28,6 +28,9 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
    @FieldDocumentation("Define the desired 3D angular velocity to be reached at this waypoint. It is expressed in world frame.")
    public Vector3d angularVelocity;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public SE3WaypointMessage()
    {
    }
@@ -66,9 +69,9 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
    }
 
    @Override
-   public Point3d getPosition()
+   public void getPosition(Point3d positionToPack)
    {
-      return position;
+      positionToPack.set(position);
    }
 
    public void setPosition(Point3d position)
@@ -77,9 +80,9 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
    }
 
    @Override
-   public Quat4d getOrientation()
+   public void getOrientation(Quat4d orientationToPack)
    {
-      return orientation;
+      orientationToPack.set(orientation);
    }
 
    public void setOrientation(Quat4d orientation)
@@ -88,9 +91,9 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
    }
 
    @Override
-   public Vector3d getLinearVelocity()
+   public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      return linearVelocity;
+      linearVelocityToPack.set(linearVelocity);
    }
 
    public void setLinearVelocity(Vector3d linearVelocity)
@@ -99,9 +102,9 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
    }
 
    @Override
-   public Vector3d getAngularVelocity()
+   public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
-      return angularVelocity;
+      angularVelocityToPack.set(angularVelocity);
    }
 
    public void setAngularVelocity(Vector3d angularVelocity)
@@ -174,5 +177,11 @@ public class SE3WaypointMessage extends IHMCRosApiPacket<SE3WaypointMessage> imp
          transformedWaypointMessage.angularVelocity = null;
 
       return transformedWaypointMessage;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "SE3 waypoint: time = " + time + ", position = " + position + ", orientation = " + orientation + ", linear velocity = " + linearVelocity + ", angular velocity = " + angularVelocity;
    }
 }

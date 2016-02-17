@@ -227,6 +227,11 @@ public class FrameOrientation extends ReferenceFrameHolder
       quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
    }
 
+   public boolean containsNaN()
+   {
+      return Double.isNaN(quaternion.x) || Double.isNaN(quaternion.y) || Double.isNaN(quaternion.z) || Double.isNaN(quaternion.w);
+   }
+
    @Override
    public ReferenceFrame getReferenceFrame()
    {
@@ -452,6 +457,11 @@ public class FrameOrientation extends ReferenceFrameHolder
       boolean quaternionsAreEqual = RotationTools.quaternionEpsilonEquals(quaternion, frameOrientation.quaternion, epsilon);
 
       return referenceFramesMatch && quaternionsAreEqual;
+   }
+
+   public boolean epsilonEquals(Quat4d quaternion, double epsilon)
+   {
+      return RotationTools.quaternionEpsilonEquals(this.quaternion, quaternion, epsilon);
    }
 
    public void checkQuaternionIsUnitMagnitude()

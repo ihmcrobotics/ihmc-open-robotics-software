@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.Waypoint1DInterface;
 
 @ClassDocumentation("This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D waypoints look at EuclideanWaypointMessage (translational), SO3WaypointMessage (rotational), and SE3WaypointMessage (translational AND rotational).")
-public class Waypoint1DMessage extends IHMCRosApiPacket<Waypoint1DMessage> implements Waypoint1DInterface
+public class Waypoint1DMessage extends IHMCRosApiMessage<Waypoint1DMessage> implements Waypoint1DInterface
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -17,6 +17,9 @@ public class Waypoint1DMessage extends IHMCRosApiPacket<Waypoint1DMessage> imple
    @FieldDocumentation("Define the desired 1D velocity to be reached at this waypoint.")
    public double velocity;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public Waypoint1DMessage()
    {
    }
@@ -79,5 +82,11 @@ public class Waypoint1DMessage extends IHMCRosApiPacket<Waypoint1DMessage> imple
          return false;
 
       return true;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "SE3 waypoint: time = " + time + ", position = " + position + ", velocity = " + velocity;
    }
 }

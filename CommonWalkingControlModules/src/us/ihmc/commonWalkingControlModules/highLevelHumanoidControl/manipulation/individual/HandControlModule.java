@@ -18,9 +18,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandForcefeedbackControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TrajectoryBasedTaskspaceHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.UserControlModeState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
@@ -30,9 +30,12 @@ import us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePoseTraj
 import us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -99,7 +102,7 @@ public class HandControlModule
 
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> quinticPolynomialTrajectoryGenerators;
    private final Map<OneDoFJoint, OneDoFJointWayPointTrajectoryGenerator> waypointsPolynomialTrajectoryGenerators;
-   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> wholeBodyWaypointsPolynomialTrajectoryGenerators;
+   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> waypointJointTrajectoryGenerators;
 
    private final EnumYoVariable<HandTrajectoryType> activeTrajectory;
 
@@ -127,7 +130,7 @@ public class HandControlModule
    private final TrajectoryBasedTaskspaceHandControlState taskSpacePositionControlState;
    private final JointSpaceHandControlState jointSpaceHandControlState;
    private final LoadBearingHandControlState loadBearingControlState;
-   private final TaskspaceToJointspaceHandForcefeedbackControlState taskspaceToJointspaceHandForcefeedbackControlState;
+   private final UserControlModeState userControlModeState;
 
    private final EnumYoVariable<HandControlState> requestedState;
    private final OneDoFJoint[] oneDoFJoints;
@@ -155,8 +158,9 @@ public class HandControlModule
    private final ReferenceFrame handControlFrame;
    private final PoseReferenceFrame optionalHandControlFrame;
 
-   public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters, YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains,
-         ControlStatusProducer controlStatusProducer, HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
+   public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
+         YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains, ControlStatusProducer controlStatusProducer,
+         HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry;
       boolean visualize;
@@ -233,7 +237,8 @@ public class HandControlModule
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         OneDoFJointQuinticTrajectoryGenerator trajectoryGenerator = new OneDoFJointQuinticTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory", oneDoFJoint, trajectoryTimeProvider, registry);
+         OneDoFJointQuinticTrajectoryGenerator trajectoryGenerator = new OneDoFJointQuinticTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory",
+               oneDoFJoint, trajectoryTimeProvider, registry);
          quinticPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
          areJointsEnabled.put(oneDoFJoint, new BooleanYoVariable(namePrefix + oneDoFJoint.getName() + "IsEnabled", registry));
       }
@@ -242,16 +247,17 @@ public class HandControlModule
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         OneDoFJointWayPointTrajectoryGenerator trajectoryGenerator = new OneDoFJointWayPointTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory", oneDoFJoint, trajectoryTimeProvider, 15, registry);
+         OneDoFJointWayPointTrajectoryGenerator trajectoryGenerator = new OneDoFJointWayPointTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory",
+               oneDoFJoint, trajectoryTimeProvider, 15, registry);
          waypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
       }
 
-      wholeBodyWaypointsPolynomialTrajectoryGenerators = new LinkedHashMap<>();
+      waypointJointTrajectoryGenerators = new LinkedHashMap<>();
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
          MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(oneDoFJoint.getName(), 15, registry);
-         wholeBodyWaypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
+         waypointJointTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
@@ -269,56 +275,58 @@ public class HandControlModule
       if (USE_VELOCITYCONSTRAINED_INSTEADOF_STRAIGHTLINE)
       {
          straightLinePoseTrajectoryGenerator = null;
-         velocityConstrainedPoseTrajectoryGenerator = new VelocityConstrainedPoseTrajectoryGenerator(name + "VelocityConstrained", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+         velocityConstrainedPoseTrajectoryGenerator = new VelocityConstrainedPoseTrajectoryGenerator(name + "VelocityConstrained", true, worldFrame, registry,
+               visualize, yoGraphicsListRegistry);
       }
       else
       {
-         straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+         straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
+               yoGraphicsListRegistry);
          velocityConstrainedPoseTrajectoryGenerator = null;
       }
 
       finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, yoGraphicsListRegistry);
-      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize,
+            yoGraphicsListRegistry);
       leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
 
-      circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, registry, yoGraphicsListRegistry);
+      circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, registry,
+            yoGraphicsListRegistry);
 
-      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", 15, true, worldFrame, registry);
-      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, true, worldFrame, registry);
-      wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator, waypointOrientationTrajectoryGenerator);
+      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix + "Hand", 15, true, worldFrame, registry);
+      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix + "Hand", 15, true, worldFrame, registry);
+      wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator,
+            waypointOrientationTrajectoryGenerator);
       waypointPositionTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
 
       doPositionControl = armControlParameters.doLowLevelPositionControl();
       String stateNamePrefix = namePrefix + "Hand";
       jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
-      if (momentumBasedController.getWristForceSensors() != null)
-      {
-         taskspaceToJointspaceHandForcefeedbackControlState = new TaskspaceToJointspaceHandForcefeedbackControlState(stateNamePrefix, HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL, robotSide, momentumBasedController, jacobianId, chest, hand,
-               doPositionControl, jointspaceGains, registry);
-      }
-      else
-      {
-         taskspaceToJointspaceHandForcefeedbackControlState = null;
-      }
 
       if (doPositionControl)
       {
          // TODO Not implemented for position control.
          loadBearingControlState = null;
-         taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(stateNamePrefix, robotSide, momentumBasedController, chest, hand, registry);
+         userControlModeState = null;
+         taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(stateNamePrefix, robotSide,
+               momentumBasedController, chest, hand, registry);
       }
       else
       {
-         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController, fullRobotModel.getElevator(), hand, jacobianId, registry);
+         userControlModeState = new UserControlModeState(stateNamePrefix, robotSide, oneDoFJoints, momentumBasedController, registry);
+         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
+               fullRobotModel.getElevator(), hand, jacobianId, registry);
 
          if (armControlParameters.useInverseKinematicsTaskspaceControl())
          {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(stateNamePrefix, robotSide, momentumBasedController, chest, hand, jointspaceGains, registry);
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(stateNamePrefix, robotSide,
+                  momentumBasedController, chest, hand, jointspaceGains, registry);
          }
          else
          {
-            taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, registry);
+            taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlState.TASK_SPACE_POSITION,
+                  momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, registry);
          }
       }
 
@@ -346,30 +354,23 @@ public class HandControlModule
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
 
-      if (taskspaceToJointspaceHandForcefeedbackControlState != null)
-      {
-         addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskspaceToJointspaceHandForcefeedbackControlState);
-         addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskspaceToJointspaceHandForcefeedbackControlState);
-         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskSpacePositionControlState);
-         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, jointSpaceHandControlState);
-         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskspaceToJointspaceHandForcefeedbackControlState);
-         stateMachine.addState(taskspaceToJointspaceHandForcefeedbackControlState);
-      }
-
       if (!doPositionControl)
       {
          addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, loadBearingControlState);
          addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
+
          addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
          addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
-         if (taskspaceToJointspaceHandForcefeedbackControlState != null)
-         {
-            addRequestedStateTransition(requestedState, false, loadBearingControlState, taskspaceToJointspaceHandForcefeedbackControlState);
-            addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, loadBearingControlState);
-         }
+
+         addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, userControlModeState);
+         addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, userControlModeState);
+
+         addRequestedStateTransition(requestedState, false, userControlModeState, taskSpacePositionControlState);
+         addRequestedStateTransition(requestedState, false, userControlModeState, jointSpaceHandControlState);
 
          setupTransitionToSupport(taskSpacePositionControlState);
          stateMachine.addState(loadBearingControlState);
+         stateMachine.addState(userControlModeState);
       }
 
       stateMachine.attachStateChangedListener(stateChangedlistener);
@@ -394,7 +395,8 @@ public class HandControlModule
             handSpatialAccelerationControlModule.setGains(taskspaceLoadBearingGains);
          }
       };
-      StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition, swingToSupportAction);
+      StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition,
+            swingToSupportAction);
       fromState.addStateTransition(swingToSupportTransition);
    }
 
@@ -426,6 +428,11 @@ public class HandControlModule
          areAllArmJointEnabled.set(true);
       }
 
+      if (stateMachine.getCurrentStateEnum() == HandControlState.USER_CONTROL_MODE && userControlModeState.isAbortUserControlModeRequested())
+      {
+         holdPositionInJointSpace();
+      }
+
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
@@ -453,7 +460,6 @@ public class HandControlModule
    {
       boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_POSITION;
       isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.JOINT_SPACE;
-      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL;
 
       if ((handPoseStatusProducer != null) && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
       {
@@ -479,7 +485,8 @@ public class HandControlModule
       executeTaskSpaceTrajectory(poseTrajectory, selectionMatrix, Double.NaN, Double.NaN);
    }
 
-   public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix, double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
+   public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix,
+         double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
    {
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
       taskSpacePositionControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, percentOfTrajectoryWithOrientationBeingControlled, trajectoryTime);
@@ -505,29 +512,6 @@ public class HandControlModule
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
    }
 
-   public void executeForceControlledTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld)
-   {
-      if (taskspaceToJointspaceHandForcefeedbackControlState == null)
-         return;
-
-      handSpatialAccelerationControlModule.setGains(taskspaceGains);
-      taskspaceToJointspaceHandForcefeedbackControlState.initialize(rotationAxisOriginInWorld, rotationAxisInWorld);
-      taskspaceToJointspaceHandForcefeedbackControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, Double.NaN, Double.NaN);
-      taskspaceToJointspaceHandForcefeedbackControlState.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
-      taskspaceToJointspaceHandForcefeedbackControlState.setSelectionMatrix(selectionMatrix);
-      requestedState.set(taskspaceToJointspaceHandForcefeedbackControlState.getStateEnum());
-      stateMachine.checkTransitionConditions();
-      isExecutingHandStep.set(false);
-
-      handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
-
-      if (handPoseStatusProducer != null)
-      {
-         handPoseStatusProducer.sendStartedStatus(robotSide);
-      }
-      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
-   }
-
    public void handleHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
       if (handTrajectoryMessage.getRobotSide() != robotSide)
@@ -538,7 +522,7 @@ public class HandControlModule
 
       BaseForControl base = handTrajectoryMessage.getBase();
       SE3WaypointInterface[] taskspaceWaypoints = handTrajectoryMessage.getWaypoints();
-      
+
       waypointPositionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
 
@@ -573,8 +557,8 @@ public class HandControlModule
          throw new RuntimeException("The base: " + base + " is not handled.");
       }
 
-      waypointOrientationTrajectoryGenerator.initialize();
       waypointPositionTrajectoryGenerator.initialize();
+      waypointOrientationTrajectoryGenerator.initialize();
 
       executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
@@ -584,22 +568,49 @@ public class HandControlModule
       if (!checkArmTrajectoryMessage(armTrajectoryMessage))
          return;
 
-      for (int jointIndex = 0; jointIndex < armTrajectoryMessage.getNumberOfJoints(); jointIndex++)
+      int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJoint joint = oneDoFJoints[jointIndex];
-         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(joint);
+         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = waypointJointTrajectoryGenerators.get(joint);
          trajectoryGenerator.clear();
 
          if (armTrajectoryMessage.getJointTrajectoryWaypoint(jointIndex, 0).getTime() > 1.0e-5)
          {
-            appendFirstWaypointToWaypointJointspaceTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators, false);
+            appendFirstWaypointToWaypointJointspaceTrajectories(joint, trajectoryGenerator, false);
          }
 
-         trajectoryGenerator.appendWaypoints(armTrajectoryMessage.getJointTrajectory(jointIndex));
+         Trajectory1DMessage jointTrajectory = armTrajectoryMessage.getJointTrajectory(jointIndex);
+         trajectoryGenerator.appendWaypoints(jointTrajectory);
          trajectoryGenerator.initialize();
       }
 
-      executeJointspaceTrajectory(wholeBodyWaypointsPolynomialTrajectoryGenerators);
+      executeJointspaceTrajectory(waypointJointTrajectoryGenerators);
+   }
+
+   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   {
+      if (!checkArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage))
+         return;
+
+      if (userControlModeState == null)
+         return;
+
+      switch (armDesiredAccelerationsMessage.getArmControlMode())
+      {
+      case IHMC_CONTROL_MODE:
+         if (stateMachine.getCurrentStateEnum() == HandControlState.USER_CONTROL_MODE)
+            holdPositionInJointSpace();
+         return;
+      case USER_CONTROL_MODE:
+         userControlModeState.handleArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage);
+         requestedState.set(userControlModeState.getStateEnum());
+         stateMachine.checkTransitionConditions();
+         return;
+      default:
+         throw new RuntimeException("Unknown ArmControlMode: " + armDesiredAccelerationsMessage.getArmControlMode());
+      }
    }
 
    private boolean checkArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
@@ -628,28 +639,38 @@ public class HandControlModule
       return true;
    }
 
-   private void appendFirstWaypointToWaypointJointspaceTrajectories(Map<OneDoFJoint, ? extends MultipleWaypointsTrajectoryGenerator> trajectoryGenrators, boolean appendCurrent)
+   private boolean checkArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
    {
+      if (armDesiredAccelerationsMessage.getRobotSide() != robotSide)
+      {
+         PrintTools.warn(this, "Received a " + ArmDesiredAccelerationsMessage.class.getSimpleName() + " for the wrong side.");
+         return false;
+      }
+
+      if (armDesiredAccelerationsMessage.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE && armDesiredAccelerationsMessage.getNumberOfJoints() != oneDoFJoints.length)
+         return false;
+
+      return true;
+   }
+
+   private void appendFirstWaypointToWaypointJointspaceTrajectories(OneDoFJoint joint, MultipleWaypointsTrajectoryGenerator trajectoryGenrator,
+         boolean appendCurrent)
+   {
+      double initialPosition;
+      double initialVelocity;
+
       if (!appendCurrent && stateMachine.getCurrentState() == jointSpaceHandControlState)
       {
-         for (int i = 0; i < oneDoFJoints.length; i++)
-         {
-            OneDoFJoint joint = oneDoFJoints[i];
-            double initialPosition = qDesireds.get(joint).getDoubleValue();
-            double initialVelocity = qdDesireds.get(joint).getDoubleValue();
-            trajectoryGenrators.get(joint).appendWaypoint(0.0, initialPosition, initialVelocity);
-         }
+         initialPosition = qDesireds.get(joint).getDoubleValue();
+         initialVelocity = qdDesireds.get(joint).getDoubleValue();
       }
       else
       {
-         for (int i = 0; i < oneDoFJoints.length; i++)
-         {
-            OneDoFJoint joint = oneDoFJoints[i];
-            double initialPosition = joint.getQ();
-            double initialVelocity = joint.getQd();
-            trajectoryGenrators.get(joint).appendWaypoint(0.0, initialPosition, initialVelocity);
-         }
+         initialPosition = joint.getQ();
+         initialVelocity = joint.getQd();
       }
+
+      trajectoryGenrator.appendWaypoint(0.0, initialPosition, initialVelocity);
    }
 
    private final FramePoint tempPosition = new FramePoint();
@@ -713,7 +734,8 @@ public class HandControlModule
    private final FramePoint rotationAxisOrigin = new FramePoint();
    private final FrameVector rotationAxis = new FrameVector();
 
-   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time)
+   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis,
+         double graspOffsetFromControlFrame, double time)
    {
       optionalHandControlFrame.setX(graspOffsetFromControlFrame);
       optionalHandControlFrame.update();
@@ -748,35 +770,8 @@ public class HandControlModule
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
    }
 
-   public void moveInCircleForceControl(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time, Vector3d forceConstraintVector,
-         double desiredTangentialForce)
-   {
-      if (taskspaceToJointspaceHandForcefeedbackControlState == null)
-      {
-         PrintTools.error(this, "The hand force control controller was not setup. Ignoring the command.");
-         return;
-      }
-
-      optionalHandControlFrame.setX(graspOffsetFromControlFrame);
-      optionalHandControlFrame.update();
-
-      trajectoryTimeProvider.set(time);
-
-      rotationAxisOrigin.setIncludingFrame(worldFrame, rotationAxisOriginInWorld);
-      rotationAxis.setIncludingFrame(worldFrame, rotationAxisInWorld);
-
-      circularPoseTrajectoryGenerator.setControlledFrame(optionalHandControlFrame);
-
-      circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
-      circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOrigin, rotationAxis);
-      FramePose desiredFramePose = computeDesiredFramePose(worldFrame, optionalHandControlFrame, HandTrajectoryType.CIRCULAR);
-      circularPoseTrajectoryGenerator.setInitialPose(desiredFramePose);
-
-      executeForceControlledTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix, rotationAxisOriginInWorld, rotationAxisInWorld);
-      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
-   }
-
-   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, boolean[] controlledOrientationAxes, double percentOfTrajectoryWithOrientationBeingControlled, double swingClearance)
+   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, boolean[] controlledOrientationAxes,
+         double percentOfTrajectoryWithOrientationBeingControlled, double swingClearance)
    {
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
@@ -832,7 +827,8 @@ public class HandControlModule
    private final FrameVector initialDirection = new FrameVector();
    private final FrameVector finalDirection = new FrameVector();
 
-   public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone, double holdPositionDuration)
+   public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time,
+         ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone, double holdPositionDuration)
    {
       if (doPositionControl)
       {
@@ -880,7 +876,8 @@ public class HandControlModule
       executeTaskSpaceTrajectory(initialClearancePoseTrajectoryGenerator);
    }
 
-   private void moveAwayObjectTowardsOtherObject(FramePose finalDesiredPose, FrameVector initialDirection, FrameVector finalDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
+   private void moveAwayObjectTowardsOtherObject(FramePose finalDesiredPose, FrameVector initialDirection, FrameVector finalDirection, double clearance,
+         double time, ReferenceFrame trajectoryFrame)
    {
       FramePose pose = computeDesiredFramePose(trajectoryFrame, HandTrajectoryType.STRAIGHT_LINE);
       leadInOutPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
@@ -1117,12 +1114,14 @@ public class HandControlModule
       return robotSide;
    }
 
-   public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce, Vector3d desiredTorque, double forceDeadzone, double torqueDeadzone)
+   public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce,
+         Vector3d desiredTorque, double forceDeadzone, double torqueDeadzone)
    {
       if (taskSpacePositionControlState instanceof TaskspaceToJointspaceHandPositionControlState)
       {
          TaskspaceToJointspaceHandPositionControlState taskspaceToJointspaceHandPositionControlState = (TaskspaceToJointspaceHandPositionControlState) taskSpacePositionControlState;
-         taskspaceToJointspaceHandPositionControlState.setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce, desiredTorque, forceDeadzone, torqueDeadzone);
+         taskspaceToJointspaceHandPositionControlState.setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce,
+               desiredTorque, forceDeadzone, torqueDeadzone);
       }
    }
 }

@@ -15,6 +15,8 @@ public class HeadTrajectoryMessageSubscriber implements PacketConsumer<HeadTraje
    public HeadTrajectoryMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
+
+      globalDataProducer.attachListener(HeadTrajectoryMessage.class, this);
    }
 
    public boolean isNewTrajectoryMessageAvailable()

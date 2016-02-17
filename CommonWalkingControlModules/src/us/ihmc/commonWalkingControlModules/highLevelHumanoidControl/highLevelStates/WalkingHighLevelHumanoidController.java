@@ -165,6 +165,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final UpcomingFootstepList upcomingFootstepList;
    private final FootPoseProvider footPoseProvider;
+   private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
    private final EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber;
    private final DesiredFootStateProvider desiredFootStateProvider;
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
@@ -349,6 +350,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
+      footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
       desiredFootStateProvider = variousWalkingProviders.getDesiredFootStateProvider();
       endEffectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       pelvisTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisTrajectoryMessageSubscriber();
@@ -875,7 +877,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             updateICPPlannerTimesAndOmega0();
             capturePointPlannerAdapter.clear();
-            if (footPoseProvider != null && footPoseProvider.checkForNewPose() != null)
+            boolean hasNewFootPose = footPoseProvider != null && footPoseProvider.checkForNewPose() != null;
+            boolean hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber != null && footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+            if (hasNewFootPose || hasNewFootTrajectoryMessage)
             {
                capturePointPlannerAdapter.setSingleSupportTime(Double.POSITIVE_INFINITY);
                capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
@@ -995,7 +999,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (transferToSideToUseInFootstepData == null)
             transferToSideToUseInFootstepData = lastPlantedLeg.getEnumValue();
 
-         if (footPoseProvider.checkForNewPose() == null && !centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
+         boolean hasFootTrajectoryMessage = footTrajectoryMessageSubscriber != null && footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable();
+         if (footPoseProvider.checkForNewPose() == null && !hasFootTrajectoryMessage && !centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
          {
             boolean inInitialize = true;
             TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(
@@ -1028,7 +1033,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (transferToSide == null)
             pelvisOrientationManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
          // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
-         else if (footPoseProvider.checkForNewPose() != null)
+         else if (footPoseProvider.checkForNewPose() != null || hasFootTrajectoryMessage)
             pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
          // Transfer for taking the first step, need to ensure a safe pelvis orientation
          else if (upcomingFootstepList.hasNextFootsteps() && isPreviousStateDoubleSupport)
@@ -1135,6 +1140,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
                }
             }
+            else if (pelvisTrajectoryMessageSubscriber != null && pelvisTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
+            {
+                  PelvisTrajectoryMessage pelvisTrajectoryMessage = pelvisTrajectoryMessageSubscriber.pollMessage();
+                  pelvisOrientationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+                  pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+                  centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+            }
          }
          else if (pushRecoveryModule.isEnabled())
          {
@@ -1185,6 +1197,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pelvisICPBasedTranslationManager.clearProvider();
             pelvisOrientationManager.clearProvider();
             footPoseProvider.clear();
+            if (footTrajectoryMessageSubscriber != null)
+               footTrajectoryMessageSubscriber.clearMessagesInQueue();
          }
 
          desiredICP.set(desiredICPLocal);
@@ -1525,15 +1539,24 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getValue();
          boolean hasNewFootPose = footPoseProvider != null && footPoseProvider.checkForNewPose(transferToSide.getOppositeSide());
 
-         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
          boolean hasNewFootTrajectoryMessage;
-         if (hasNewFootPose && footTrajectoryMessageSubscriber != null)
-            hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+         if (footTrajectoryMessageSubscriber != null)
+         {
+            if (hasNewFootPose)
+            {
+               hasNewFootTrajectoryMessage = false;
+               footTrajectoryMessageSubscriber.clearMessagesInQueue();
+            }
+            else
+            {
+               hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+            }
+         }
          else
          {
             hasNewFootTrajectoryMessage = false;
-            footTrajectoryMessageSubscriber.clearMessagesInQueue();
          }
+
          boolean transferringToThisRobotSide = hasNewFootPose || hasNewFootTrajectoryMessage;
 
          if (transferringToThisRobotSide && doubleSupportTimeHasPassed)
@@ -1692,18 +1715,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             hasNewFootLoadBearingRequest = endEffectorLoadBearingMessageSubscriber != null && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide);
          }
          
-         if (hasNewFootLoadBearingRequest)
+         if (isInFlamingoStance.getBooleanValue() && hasNewFootLoadBearingRequest)
          {
-            if (isInFlamingoStance.getBooleanValue())
-            {
-               initiateFootLoadingProcedure(swingSide);
-            }
-            
-            if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
-            {
-               loadFoot.set(false);
-               return true;
-            }
+            initiateFootLoadingProcedure(swingSide);
+         }
+
+         if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
+         {
+            loadFoot.set(false);
+            return true;
          }
 
          return hasMinimumTimePassed.getBooleanValue() && footSwitchActivated;
@@ -1756,7 +1776,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean isSupportLegNull = supportLeg.getEnumValue() == null;
          boolean noMoreFootstepsForThisSide = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull || !isNextFootstepForThisSide;
          boolean noMoreFootPoses = footPoseProvider == null || !footPoseProvider.checkForNewPose(robotSide.getOppositeSide());
-         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootPoses && (isSupportLegNull || super.checkCondition()) && isNotExploringFoothold;
+         boolean noMoreFootTrajectoryMessages = footTrajectoryMessageSubscriber == null || !footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide.getOppositeSide());
+         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootPoses && noMoreFootTrajectoryMessages && (isSupportLegNull || super.checkCondition()) && isNotExploringFoothold;
          return readyToStopWalking;
       }
    }

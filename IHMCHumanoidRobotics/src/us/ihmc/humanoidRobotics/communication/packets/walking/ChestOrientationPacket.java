@@ -10,7 +10,7 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
@@ -24,7 +24,7 @@ import us.ihmc.robotics.random.RandomTools;
  * Date: 2/18/13
  */
 @ClassDocumentation("This message sets the orientation of the robot's chest in world coordinates.")
-public class ChestOrientationPacket extends IHMCRosApiPacket<ChestOrientationPacket> implements TransformableDataObject<ChestOrientationPacket>, VisualizablePacket
+public class ChestOrientationPacket extends Packet<ChestOrientationPacket> implements TransformableDataObject<ChestOrientationPacket>, VisualizablePacket
 {
    public Quat4d orientation;
    @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired pose")

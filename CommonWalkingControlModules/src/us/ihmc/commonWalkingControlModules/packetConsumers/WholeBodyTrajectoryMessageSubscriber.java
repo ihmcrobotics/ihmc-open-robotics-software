@@ -34,7 +34,7 @@ public class WholeBodyTrajectoryMessageSubscriber implements PacketConsumer<Whol
    @Override
    public void receivedPacket(WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
    {
-      if (PacketValidityChecker.validatePacket(wholeBodyTrajectoryMessage) != null)
+      if (PacketValidityChecker.validatePacket(wholeBodyTrajectoryMessage, true) != null)
          return;
       if (!wholeBodyTrajectoryMessage.checkRobotSideConsistency())
       {

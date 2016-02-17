@@ -27,7 +27,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       double dt = 1.0e-5;
-      double trajectoryTime = 2.0;
+      double trajectoryTime = 3.0;
       double startIntegrationTime = 1.0;
       double endIntegrationTime = 2.0;
 
@@ -56,6 +56,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
          traj.initialize();
+
 
          traj.compute(startIntegrationTime - dt);
          traj.get(orientationFromIntegration);
@@ -86,11 +87,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      //      Random random = new Random(5165165161L);
-      Random random = new Random(4566561L);
-
+      Random random = new Random(5165165161L);
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
-      double trajectoryTime = 3.0;
+      double trajectoryTime = 5.0;
       traj.setTrajectoryTime(trajectoryTime);
 
       for (int i = 0; i < 10000; i++)
@@ -110,7 +109,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          FrameVector currentAngularVelocity = new FrameVector();
          FrameVector currentAngularAcceleration = new FrameVector();
 
-         double dt = 1.0e-9;
+         double dt = 1.0e-8;
          traj.compute(0.0 + dt);
          traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
@@ -196,7 +195,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
-      double trajectoryTime = 2.0;
+      double trajectoryTime = 10.0;
 
       double maxVelocityRecorded = 0.0;
       double maxAccelerationRecorded = 0.0;

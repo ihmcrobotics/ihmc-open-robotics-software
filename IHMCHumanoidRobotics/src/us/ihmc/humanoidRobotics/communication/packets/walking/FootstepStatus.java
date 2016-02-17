@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
@@ -18,7 +18,7 @@ import us.ihmc.tools.DocumentedEnum;
  */
 @ClassDocumentation("This message gives the status of the current footstep from the controller as well as the position\n"
                                   + "and orientation of the footstep in world cooredinates. ")
-public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
+public class FootstepStatus extends Packet<FootstepStatus>
 {
    public enum Status implements DocumentedEnum<Status>
    {
