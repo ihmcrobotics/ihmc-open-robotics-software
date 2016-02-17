@@ -671,7 +671,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
    private final Quat4d temp = new Quat4d();
    
-   public void get(FramePose framePoseToPack)
+   public void getPose(FramePose framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
       framePoseToPack.setPosition(currentPosition.getFrameTuple());

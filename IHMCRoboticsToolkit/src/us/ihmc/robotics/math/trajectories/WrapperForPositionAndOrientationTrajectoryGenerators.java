@@ -77,7 +77,7 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
    private final FramePoint tempPosition = new FramePoint();
    private final FrameOrientation tempOrientation = new FrameOrientation();
    
-   public void get(FramePose framePoseToPack)
+   public void getPose(FramePose framePoseToPack)
    {
       positionTrajectoryGenerator.get(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());

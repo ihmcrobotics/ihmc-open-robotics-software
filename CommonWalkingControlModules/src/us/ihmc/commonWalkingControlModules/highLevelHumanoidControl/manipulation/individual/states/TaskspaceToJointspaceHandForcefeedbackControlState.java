@@ -357,7 +357,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		 */
 		scaledTimeVariable.add(dtControl * timeParameterScaleFactor.getDoubleValue());
 		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue());
-		poseTrajectoryGenerator.get(desiredPose);
+		poseTrajectoryGenerator.getPose(desiredPose);
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
 
 		desiredVelocity.scale(timeParameterScaleFactor.getDoubleValue());
@@ -411,7 +411,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		
 		
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
-		poseTrajectoryGenerator.get(desiredPose);
+		poseTrajectoryGenerator.getPose(desiredPose);
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
 		poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
