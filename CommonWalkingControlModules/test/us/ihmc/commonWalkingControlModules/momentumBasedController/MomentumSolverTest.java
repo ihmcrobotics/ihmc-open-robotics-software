@@ -43,6 +43,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -422,10 +423,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-3);
    }
 
-
-   @Ignore    // Not working yet. We need to revisit momentum solving, add cases like this, clean it up, optimize it, and make it pretty
-
-	@DeployableTestMethod
+   // Not working yet. We need to revisit momentum solving, add cases like this, clean it up, optimize it, and make it pretty
+	@DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout=300000)
    public void testTwoInternalOverlappingSpatialAccelerations()
    {

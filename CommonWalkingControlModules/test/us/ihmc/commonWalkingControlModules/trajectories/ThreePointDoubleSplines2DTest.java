@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class ThreePointDoubleSplines2DTest
 {
@@ -191,10 +192,7 @@ public class ThreePointDoubleSplines2DTest
       assertFlatAndAtHeight(zHeight, zSlopeAndSecondDerivative);
    }
    
-   
-   @Ignore // Not passing!
-
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout=300000)
    public void testAFewQueries()
    {
