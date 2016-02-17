@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * <p>Title: YoVariableHolderImplementation</p>
@@ -141,9 +142,10 @@ public class YoVariableHolderImplementation implements YoVariableHolder
          {
             if (foundVariable != null)
             {
-               System.err.println("Called getVariable with " + fullname + ". That is insufficient name information to distinguish a unique variable! "
+               PrintTools.error(YoVariableHolderImplementation.this, "Called getVariable with " + fullname + ". That is insufficient name information to distinguish a unique variable! "
                                   + "Please include more of the name space! Already found " + foundVariable.getFullNameWithNameSpace()
                                   + ". Looking for variable " + yoVariable.getFullNameWithNameSpace());
+               // new Throwable().printStackTrace(); // Use to find callers.
             }
             else
                foundVariable = yoVariable;
