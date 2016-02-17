@@ -6,6 +6,7 @@ import net.java.games.input.Component;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.io.printing.PrintTools;
 
@@ -44,6 +45,23 @@ public class JoystickToYoVariableMapper
          if (yoVariable != null)
          {
             eventListeners.add(new BooleanYoVariableJoystickEventListener(yoVariable, component, toggle, flip));
+         }
+         else
+         {
+            PrintTools.warn(this, "Variable " + variableName + " could not be found!");
+         }
+      }
+   }
+   
+   @SuppressWarnings("unchecked")
+   public <T extends Enum<T>> void mapEnumYoVariableToComponent(Component component, String variableName, T enumToSwitchTo)
+   {
+      if (component != null)
+      {
+         EnumYoVariable<T> yoVariable = (EnumYoVariable<T>) yoVariableHolder.getVariable(variableName);
+         if (yoVariable != null)
+         {
+            eventListeners.add(new EnumYoVariableJoystickEventListener<T>(yoVariable, component, enumToSwitchTo));
          }
          else
          {
