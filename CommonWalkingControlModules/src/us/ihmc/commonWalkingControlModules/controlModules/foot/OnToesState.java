@@ -198,7 +198,7 @@ public class OnToesState extends AbstractFootControlState
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration,
             desiredAngularAcceleration, rootBody);
-      accelerationControlModule.packAcceleration(footAcceleration);
+      accelerationControlModule.getAcceleration(footAcceleration);
 
       DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
       // Need to control the whole orientation of the foot as only one contact point is position controlled.

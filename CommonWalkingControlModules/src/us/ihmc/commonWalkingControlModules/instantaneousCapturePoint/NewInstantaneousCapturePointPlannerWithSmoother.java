@@ -343,7 +343,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       }
    }
 
-   public void packDesiredCapturePointPositionVelocityAndAcceleration(FramePoint desiredCapturePointPositionToPack,
+   public void getDesiredCapturePointPositionVelocityAndAcceleration(FramePoint desiredCapturePointPositionToPack,
          FrameVector desiredCapturePointVelocityToPack, FrameVector desiredCapturePointAccelerationToPack, double time)
    {
       computeTimeInCurrentState(time);
@@ -361,7 +361,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       desiredCapturePointAccelerationToPack.set(tmpFrameVector2);
    }
 
-   public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
          double time)
    {
       computeTimeInCurrentState(time);
@@ -376,7 +376,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       desiredCapturePointVelocityToPack.set(tmpFrameVector1);
    }
 
-   protected void packDesiredCapturePointPositionAndVelocity(YoFramePoint desiredCapturePointPositionToPack, YoFrameVector desiredCapturePointVelocityToPack,
+   protected void getDesiredCapturePointPositionAndVelocity(YoFramePoint desiredCapturePointPositionToPack, YoFrameVector desiredCapturePointVelocityToPack,
          double time)
    {
       computeTimeInCurrentState(time);
@@ -391,7 +391,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       desiredCapturePointVelocityToPack.set(desiredCapturePointVelocity);
    }
 
-   public void packDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
    {
       computeDesiredCentroidalMomentumPivot();
 

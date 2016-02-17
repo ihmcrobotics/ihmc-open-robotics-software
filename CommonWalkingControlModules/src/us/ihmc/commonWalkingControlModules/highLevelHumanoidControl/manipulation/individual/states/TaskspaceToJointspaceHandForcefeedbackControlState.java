@@ -371,9 +371,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		desiredAngularVelocity.changeFrame(controlFrame);
 
 		taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
-		taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 
 	}
 
@@ -426,9 +426,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		desiredAngularAcceleration.changeFrame(controlFrame);
 
 		taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
-		taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 	}
 
 

@@ -195,7 +195,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-      accelerationControlModule.packAcceleration(footAcceleration);
+      accelerationControlModule.getAcceleration(footAcceleration);
 
       footControlHelper.submitTaskspaceConstraint(gimpedJacobianId, footAcceleration);
       double qDesired;

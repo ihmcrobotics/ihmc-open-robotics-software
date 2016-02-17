@@ -179,13 +179,13 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    }
 
    
-   public void packQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
+   public void getQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
       spatialForceVector.set(referenceFrame, rhoQ[i]);
    }
 
    
-   public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
+   public void getQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
    }
 

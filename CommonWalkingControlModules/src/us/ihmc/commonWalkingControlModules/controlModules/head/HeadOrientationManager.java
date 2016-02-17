@@ -136,7 +136,7 @@ public class HeadOrientationManager
          orientationTrajectoryGenerator.getOrientation(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
          headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
-         headOrientationControlModule.packDesiredFrameOrientation(desiredOrientation);
+         headOrientationControlModule.getDesiredFrameOrientation(desiredOrientation);
          desiredOrientation.changeFrame(headOrientationExpressedInFrame);
          finalOrientationProvider.setOrientation(desiredOrientation);
          headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());

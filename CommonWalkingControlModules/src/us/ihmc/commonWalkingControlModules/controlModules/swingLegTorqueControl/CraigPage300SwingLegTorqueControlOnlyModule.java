@@ -173,7 +173,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
        * by the low level side!
        *  
        */
-      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(1.0, legTorquesToPackForSwingLeg, jointPositions, jointVelocities);
+      legJointPositionControlModules.get(swingSide).getTorquesForLegJointsPositionControl(1.0, legTorquesToPackForSwingLeg, jointPositions, jointVelocities);
       
       
       

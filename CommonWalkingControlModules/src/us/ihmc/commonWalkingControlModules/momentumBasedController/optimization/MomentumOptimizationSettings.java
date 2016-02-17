@@ -93,7 +93,7 @@ public class MomentumOptimizationSettings
       return wRhoPlane;
    }
 
-   public void packDampedLeastSquaresFactorMatrix(DenseMatrix64F dampedLeastSquaresFactorMatrixToPack)
+   public void getDampedLeastSquaresFactorMatrix(DenseMatrix64F dampedLeastSquaresFactorMatrixToPack)
    {
       CommonOps.setIdentity(dampedLeastSquaresFactorMatrixToPack);
       CommonOps.scale(lambda.getDoubleValue(), dampedLeastSquaresFactorMatrixToPack);

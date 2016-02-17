@@ -122,7 +122,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
 
       // Desired velocities
       DesiredJointVelocityCalculator desiredJointVelocityCalculator = desiredJointVelocityCalculators.get(swingSide);
-      desiredJointVelocityCalculator.packDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
+      desiredJointVelocityCalculator.getDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
 
       // set body acceleration
       if (useBodyAcceleration)
@@ -152,7 +152,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
 //      }
 
       // control
-      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg,
+      legJointPositionControlModules.get(swingSide).getTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg,
                                          desiredLegJointPositions.get(swingSide), desiredLegJointVelocities.get(swingSide));
 
       inverseDynamicsCalculators.get(swingSide).compute();

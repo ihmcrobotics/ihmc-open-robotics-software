@@ -71,7 +71,7 @@ public class EndEffectorOutput
       this.wrenchOrigin.set(tempFramePoint);
    }
 
-   public void packExternallyActingSpatialForceVector(SpatialForceVector vectorToPack)
+   public void getExternallyActingSpatialForceVector(SpatialForceVector vectorToPack)
    {
       vectorToPack.set(resultingExternalForceVector);
    }

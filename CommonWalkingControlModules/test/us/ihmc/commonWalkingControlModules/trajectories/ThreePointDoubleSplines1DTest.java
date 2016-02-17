@@ -126,7 +126,7 @@ public class ThreePointDoubleSplines1DTest
       double secondDerivativeAtTwo = 0.9;
       double secondDerivativeAtThree = 1.7;
       
-      packSpline(spline, xAtOne, xAtTwo, xAtThree, heightAtOne, heightAtTwo, heightAtThree, slopeAtOne, slopeAtTwo, slopeAtThree, secondDerivativeAtOne,
+      getSpline(spline, xAtOne, xAtTwo, xAtThree, heightAtOne, heightAtTwo, heightAtThree, slopeAtOne, slopeAtTwo, slopeAtThree, secondDerivativeAtOne,
             secondDerivativeAtTwo, secondDerivativeAtThree);
       
       double queryPoint = xAtOne;
@@ -190,10 +190,10 @@ public class ThreePointDoubleSplines1DTest
       double secondDerivativeAtTwo = 0.9;
       double secondDerivativeAtThree = 1.7;
       
-      packSpline(spline1, xAtOne, xAtTwo, xAtThree, heightAtOne, heightAtTwo, heightAtThree, slopeAtOne, slopeAtTwo, slopeAtThree, secondDerivativeAtOne,
+      getSpline(spline1, xAtOne, xAtTwo, xAtThree, heightAtOne, heightAtTwo, heightAtThree, slopeAtOne, slopeAtTwo, slopeAtThree, secondDerivativeAtOne,
             secondDerivativeAtTwo, secondDerivativeAtThree);
       
-      packSpline(spline2, xAtTwo, xAtThree, xAtOne, heightAtTwo, heightAtThree, heightAtOne, slopeAtTwo, slopeAtThree, slopeAtOne, 
+      getSpline(spline2, xAtTwo, xAtThree, xAtOne, heightAtTwo, heightAtThree, heightAtOne, slopeAtTwo, slopeAtThree, slopeAtOne, 
             secondDerivativeAtTwo, secondDerivativeAtThree, secondDerivativeAtOne);
       
       double queryPoint = 0.7;
@@ -214,7 +214,7 @@ public class ThreePointDoubleSplines1DTest
    }
 
 
-   private void packSpline(ThreePointDoubleSplines1D spline, double xAtOne, double xAtTwo, double xAtThree, double heightAtOne, double heightAtTwo,
+   private void getSpline(ThreePointDoubleSplines1D spline, double xAtOne, double xAtTwo, double xAtThree, double heightAtOne, double heightAtTwo,
          double heightAtThree, double slopeAtOne, double slopeAtTwo, double slopeAtThree, double secondDerivativeAtOne, double secondDerivativeAtTwo,
          double secondDerivativeAtThree)
    {

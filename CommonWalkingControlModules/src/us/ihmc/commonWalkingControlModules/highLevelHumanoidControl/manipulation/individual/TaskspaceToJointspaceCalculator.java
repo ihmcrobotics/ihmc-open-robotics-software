@@ -735,17 +735,17 @@ public class TaskspaceToJointspaceCalculator
       desiredJointVelocitiesToPack.set(desiredJointVelocities);
    }
 
-   public void packDesiredJointAnglesIntoOneDoFJoints(OneDoFJoint[] joints)
+   public void getDesiredJointAnglesIntoOneDoFJoints(OneDoFJoint[] joints)
    {
       ScrewTools.setDesiredJointPositions(joints, desiredJointAngles);
    }
 
-   public void packDesiredJointVelocitiesIntoOneDoFJoints(OneDoFJoint[] joints)
+   public void getDesiredJointVelocitiesIntoOneDoFJoints(OneDoFJoint[] joints)
    {
       ScrewTools.setDesiredJointVelocities(joints, desiredJointVelocities);
    }
 
-   public void packDesiredJointAccelerationsIntoOneDoFJoints(OneDoFJoint[] joints)
+   public void getDesiredJointAccelerationsIntoOneDoFJoints(OneDoFJoint[] joints)
    {
       ScrewTools.setDesiredAccelerations(joints, desiredJointAccelerations);
    }

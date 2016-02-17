@@ -184,7 +184,7 @@ public class CylinderAndPlaneContactMatrixCalculator
                SpatialForceVector currentBasisVector = qRhoVectors[iRho];
 
                setRhoMin(iRho, 0, model.getRhoMin(iRhoModel));
-               model.packQRhoBodyFrame(iRhoModel, currentBasisVector, endEffector.getReferenceFrame());
+               model.getQRhoBodyFrame(iRhoModel, currentBasisVector, endEffector.getReferenceFrame());
 
                currentBasisVector.changeFrame(centerOfMassFrame);
                setQRho(iRho, currentBasisVector);
@@ -200,7 +200,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
                setPhiMin(iPhi, 0, model.getPhiMin(iPhiModel));
                setPhiMax(iPhi, 0, model.getPhiMax(iPhiModel));
-               model.packQPhiBodyFrame(iPhiModel, currentBasisVector, endEffector.getReferenceFrame());
+               model.getQPhiBodyFrame(iPhiModel, currentBasisVector, endEffector.getReferenceFrame());
 
                currentBasisVector.changeFrame(centerOfMassFrame);
                setQPhi(iPhi, currentBasisVector);

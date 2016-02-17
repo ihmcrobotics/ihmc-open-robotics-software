@@ -116,17 +116,17 @@ public class NewGeometricVirtualToePointCalculator implements VirtualToePointCal
       FrameLineSegment2d connectingEdge1 = bipedSupportPolygons.getConnectingEdge1();
       FrameLineSegment2d connectingEdge2 = bipedSupportPolygons.getConnectingEdge2();
 
-      packVirtualToePoints(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2, upcomingSupportSide);
+      getVirtualToePoints(virtualToePoints, copDesired, footPolygonsInMidFeetZUp, supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2, upcomingSupportSide);
    }
 
 
    public void getVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d copDesired, FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges, RobotSide upcomingSupportSide)
    {
       SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<FrameConvexPolygon2d>(supportPolygonAndEdges.getOriginalPolygon1(), supportPolygonAndEdges.getOriginalPolygon2());
-      packVirtualToePoints(virtualToePoints, copDesired, footPolygons, supportPolygonAndEdges.getFrameConvexPolygon2d(), supportPolygonAndEdges.getConnectingEdge1(), supportPolygonAndEdges.getConnectingEdge2(), upcomingSupportSide);
+      getVirtualToePoints(virtualToePoints, copDesired, footPolygons, supportPolygonAndEdges.getFrameConvexPolygon2d(), supportPolygonAndEdges.getConnectingEdge1(), supportPolygonAndEdges.getConnectingEdge2(), upcomingSupportSide);
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints,
+   public void getVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints,
          FramePoint2d copDesired, SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, FrameConvexPolygon2d supportPolygonInMidFeetZUp,
          FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2, RobotSide upcomingSupportSide)
    {

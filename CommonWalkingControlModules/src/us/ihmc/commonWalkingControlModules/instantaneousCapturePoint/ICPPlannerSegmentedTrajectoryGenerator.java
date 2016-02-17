@@ -355,7 +355,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       velocityToPack.setIncludingFrame(desiredICPVelocityOutput);
    }
 
-   public void packVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector velocityToPack)
    {
       velocityToPack.set(desiredICPVelocityOutput);
    }

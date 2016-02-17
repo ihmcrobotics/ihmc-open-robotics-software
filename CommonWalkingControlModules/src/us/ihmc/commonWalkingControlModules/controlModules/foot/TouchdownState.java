@@ -158,7 +158,7 @@ public class TouchdownState extends AbstractFootControlState
 
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-      accelerationControlModule.packAcceleration(footAcceleration);
+      accelerationControlModule.getAcceleration(footAcceleration);
 
       edgeToRotateAbout.getFrameVector(axisOfRotation2d);
       axisOfRotation.setXYIncludingFrame(axisOfRotation2d);
