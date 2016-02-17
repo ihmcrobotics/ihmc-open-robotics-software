@@ -252,7 +252,6 @@ public class HeadOrientationControlModule
       controlledSpatialAcceleration.set(headFrame, elevator.getBodyFixedFrame(), headFrame, controlledLinearAcceleration, controlledAngularAcceleration);
 
       taskspaceConstraintData.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
-      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
       GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
       spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
    }

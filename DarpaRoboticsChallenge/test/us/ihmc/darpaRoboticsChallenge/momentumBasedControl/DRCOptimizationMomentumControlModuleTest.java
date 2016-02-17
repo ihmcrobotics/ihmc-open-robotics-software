@@ -139,7 +139,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
             
             
             JointspaceAccelerationCommand desiredJointAccelerationCommand = new JointspaceAccelerationCommand(inverseDynamicsJoint, vdDesired);
-            momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
+            momentumControlModule.setInverseDynamicsCommand(desiredJointAccelerationCommand);
          }
 
          MomentumModuleSolution momentumModuleSolution;
@@ -298,7 +298,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, orientationSelectionMatrix);
       
       SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(rootJointJacobian, pelvisTaskspaceConstraintData);
-      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
       taskspaceConstraintDataMap.put(rootJointJacobian, pelvisTaskspaceConstraintData);
    }
 
@@ -315,7 +315,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
          taskspaceConstraintData.set(spatialAcceleration);
          
          SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskspaceConstraintData);
-         momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+         momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
          taskspaceConstraintDataMap.put(jacobian, taskspaceConstraintData);
       }
    }

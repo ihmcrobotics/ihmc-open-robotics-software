@@ -71,7 +71,6 @@ public class RootJointAngularAccelerationControlModule
       computeDesiredRootJointAngularAcceleration(orientationTrajectoryData, rootJointAngularAcceleration);
       taskspaceConstraintData.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration,
             rootJointNullspaceMultipliers);
-      momentumBasedController.setDesiredSpatialAcceleration(rootJacobianId, taskspaceConstraintData);
       GeometricJacobian jacobian = momentumBasedController.getJacobian(rootJacobianId);
       spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
 

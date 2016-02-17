@@ -155,7 +155,6 @@ public class LoadBearingHandControlState extends HandControlState
    private void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
    {
       taskspaceConstraintData.set(handAcceleration);
-      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
       GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
       spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
    }

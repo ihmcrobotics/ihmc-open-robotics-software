@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -1784,9 +1785,22 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doChestControl();
       doCapturePointBasedControl();
       doPelvisControl();
-      doUnconstrainedJointControl();
+      JointspaceAccelerationCommand unconstrainedJointCommand = doUnconstrainedJointControl();
 
-      setTorqueControlJointsToZeroDersiredAcceleration();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         momentumBasedController.submitInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
+         momentumBasedController.submitInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
+      }
+
+      momentumBasedController.submitInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
+      momentumBasedController.submitInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
+      momentumBasedController.submitInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
+
+      momentumBasedController.submitInverseDynamicsCommand(getUncontrolledJointCommand());
+      momentumBasedController.submitInverseDynamicsCommand(unconstrainedJointCommand);
+
+      momentumBasedController.submitInverseDynamicsCommand(icpAndMomentumBasedController.getInverseDynamicsCommand());
 
       momentumBasedController.doSecondaryControl();
 

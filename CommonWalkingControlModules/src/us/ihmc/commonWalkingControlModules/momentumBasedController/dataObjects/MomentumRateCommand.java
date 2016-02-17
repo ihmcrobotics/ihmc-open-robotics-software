@@ -6,15 +6,18 @@ public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateComm
 
    public MomentumRateCommand()
    {
+      super(InverseDynamicsCommandType.MOMENTUM_RATE);
    }
 
    public MomentumRateCommand(MomentumRateData momentumRateOfChangeData)
    {
+      this();
       this.momentumRateData = momentumRateOfChangeData;
    }
 
    public MomentumRateCommand(MomentumRateCommand momentumRateCommand)
    {
+      this();
       set(momentumRateCommand);
    }
 

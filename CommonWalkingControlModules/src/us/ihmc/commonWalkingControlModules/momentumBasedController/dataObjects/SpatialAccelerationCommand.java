@@ -19,12 +19,14 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
 
    public SpatialAccelerationCommand()
    {
+      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
       this.hasWeight = false;
       this.weight = Double.POSITIVE_INFINITY;
    }
 
    public SpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
+      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
       this.jacobian = jacobian;
       this.hasWeight = false;
       this.weight = Double.POSITIVE_INFINITY;
@@ -38,6 +40,7 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
 
    public SpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
    {
+      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
       this.jacobian = jacobian;
       this.hasWeight = true;
       this.weight = weight;
@@ -51,6 +54,7 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
 
    public SpatialAccelerationCommand(SpatialAccelerationCommand spatialAccelerationCommand)
    {
+      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
       this.jacobian = spatialAccelerationCommand.jacobian;
       this.hasWeight = spatialAccelerationCommand.hasWeight;
       this.weight = spatialAccelerationCommand.weight;

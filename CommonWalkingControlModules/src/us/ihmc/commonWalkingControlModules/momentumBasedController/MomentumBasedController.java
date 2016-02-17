@@ -21,14 +21,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommandPool;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
@@ -818,33 +814,6 @@ public class MomentumBasedController
    private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
    private final Map<OneDoFJoint, JointspaceAccelerationCommand> tempDesiredJointAccelerationCommands = new LinkedHashMap<>();
 
-   public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
-   {
-      DenseMatrix64F jointAcceleration = tempJointAcceleration.get(joint);
-      if (jointAcceleration == null)
-      {
-         jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
-         tempJointAcceleration.put(joint, jointAcceleration);
-      }
-
-      jointAcceleration.set(0, 0, desiredAcceleration);
-
-      JointspaceAccelerationCommand desiredJointAccelerationCommand = tempDesiredJointAccelerationCommands.get(joint);
-
-      if (desiredJointAccelerationCommand == null)
-      {
-         desiredJointAccelerationCommand = new JointspaceAccelerationCommand(joint, jointAcceleration);
-         tempDesiredJointAccelerationCommands.put(joint, desiredJointAccelerationCommand);
-      }
-      else
-      {
-         desiredJointAccelerationCommand.clear();
-         desiredJointAccelerationCommand.addJoint(joint, jointAcceleration);
-      }
-
-      optimizationMomentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
-   }
-
    private final SpatialAccelerationVector rootJointDesiredAcceleration = new SpatialAccelerationVector();
    private final FrameVector rootJointDesiredAngularAcceleration = new FrameVector();
    private final FrameVector rootJointDesiredLinearAcceleration = new FrameVector();
@@ -1101,42 +1070,9 @@ public class MomentumBasedController
       return centerOfMassFrame;
    }
 
-   public void setDesiredSpatialAcceleration(int jacobianId, TaskspaceConstraintData taskspaceConstraintData)
+   public void submitInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
    {
-      GeometricJacobian jacobian = getJacobian(jacobianId);
-      setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
-   }
-
-   public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
-   {
-      SpatialAccelerationCommand desiredSpatialAccelerationCommand = desiredSpatialAccelerationCommandPool
-            .getUnusedDesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
-      optimizationMomentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
-   }
-
-   public void setDesiredPointAcceleration(int rootToEndEffectorJacobianId, FramePoint contactPoint, FrameVector desiredAcceleration)
-   {
-      GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
-
-      PointAccelerationCommand desiredPointAccelerationCommand = new PointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
-            desiredAcceleration);
-      optimizationMomentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
-   }
-
-   public void setDesiredPointAcceleration(int rootToEndEffectorJacobianId, FramePoint contactPoint, FrameVector desiredAcceleration,
-         DenseMatrix64F selectionMatrix)
-   {
-      GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
-
-      PointAccelerationCommand desiredPointAccelerationCommand = new PointAccelerationCommand(rootToEndEffectorJacobian, contactPoint,
-            desiredAcceleration, selectionMatrix);
-      optimizationMomentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
-   }
-
-   public void setDesiredRateOfChangeOfMomentum(MomentumRateData momentumRateOfChangeData)
-   {
-      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      optimizationMomentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      optimizationMomentumControlModule.setInverseDynamicsCommand(inverseDynamicsCommand);
    }
 
    public ReferenceFrame getPelvisZUpFrame()

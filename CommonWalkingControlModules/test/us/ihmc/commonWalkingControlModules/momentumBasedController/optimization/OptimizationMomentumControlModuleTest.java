@@ -108,7 +108,7 @@ public class OptimizationMomentumControlModuleTest
       momentumRateOfChangeData.set(momentumRateOfChangeIn);
 
       MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
       InverseDynamicsJoint[] revoluteJointsArray = revoluteJoints.toArray(new InverseDynamicsJoint[revoluteJoints.size()]);
@@ -161,7 +161,7 @@ public class OptimizationMomentumControlModuleTest
       momentumRateOfChangeData.set(momentumRateOfChangeIn);
 
       MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
@@ -174,7 +174,7 @@ public class OptimizationMomentumControlModuleTest
       taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
 
       SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskSpaceConstraintData); // , 10.0);
-      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution;
       try
@@ -234,7 +234,7 @@ public class OptimizationMomentumControlModuleTest
       momentumRateOfChangeData.set(momentumRateOfChangeIn);
 
       MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
@@ -244,7 +244,7 @@ public class OptimizationMomentumControlModuleTest
       FrameVector desiredPointAcceleration = new FrameVector(base.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
 
       PointAccelerationCommand desiredPointAccelerationCommand = new PointAccelerationCommand(jacobian, bodyFixedPoint, desiredPointAcceleration);
-      momentumControlModule.setDesiredPointAcceleration(desiredPointAccelerationCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredPointAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution;
       try
@@ -326,7 +326,7 @@ public class OptimizationMomentumControlModuleTest
          momentumRateOfChangeData.set(desiredRateOfChangeOfMomentum);
 
          MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-         momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+         momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
 
          MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
 
@@ -372,7 +372,7 @@ public class OptimizationMomentumControlModuleTest
       momentumRateOfChangeData.set(momentumRateOfChangeIn);
 
       MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
@@ -385,7 +385,7 @@ public class OptimizationMomentumControlModuleTest
       taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
 
       SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskSpaceConstraintData); // , 10.0);
-      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
       Map<RevoluteJoint, Double> desiredJointAccelerations = new HashMap<RevoluteJoint, Double>();
       desiredJointAccelerations.put(randomFloatingChain.getRevoluteJoints().get(3), random.nextDouble());
@@ -398,7 +398,7 @@ public class OptimizationMomentumControlModuleTest
          double weight = 1.0;
 
          JointspaceAccelerationCommand desiredJointAccelerationCommand = new JointspaceAccelerationCommand(revoluteJoint, desiredJointAcceleration, weight);
-         momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
+         momentumControlModule.setInverseDynamicsCommand(desiredJointAccelerationCommand);
       }
 
       MomentumModuleSolution momentumModuleSolution;
@@ -474,7 +474,7 @@ public class OptimizationMomentumControlModuleTest
       momentumRateOfChangeData.set(desiredMomentumRate);
 
       MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
 
       RigidBody base = rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
@@ -493,7 +493,7 @@ public class OptimizationMomentumControlModuleTest
       taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultipliers);
 
       SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskspaceConstraintData);
-      momentumControlModule.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
+      momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
 
@@ -562,7 +562,7 @@ public class OptimizationMomentumControlModuleTest
          RandomMatrices.setRandom(jointAcceleration, random);
 
          JointspaceAccelerationCommand desiredJointAccelerationCommand = new JointspaceAccelerationCommand(joint, jointAcceleration);
-         momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
+         momentumControlModule.setInverseDynamicsCommand(desiredJointAccelerationCommand);
          CommonOps.insert(jointAcceleration, desiredJointAccelerations, index, 0);
          index += joint.getDegreesOfFreedom();
       }

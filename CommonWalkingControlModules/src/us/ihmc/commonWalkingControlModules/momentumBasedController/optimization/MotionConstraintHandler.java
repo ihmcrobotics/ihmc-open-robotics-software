@@ -101,35 +101,6 @@ public class MotionConstraintHandler
       motionConstraintIndex = 0;
    }
 
-   private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
-
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
-         DenseMatrix64F selectionMatrix, double weight)
-   {
-      pointJacobian.set(jacobian, bodyFixedPoint);
-      pointJacobian.compute();
-      desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
-
-      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
-
-      jBlockCompact.reshape(selectionMatrix.getNumRows(), pointJacobianMatrix.getNumCols());
-
-      DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
-      compactBlockToFullBlock(jacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
-
-      pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
-      pPointVelocity.scale(-1.0);
-      pPointVelocity.add(desiredAccelerationWithRespectToBase);
-      DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(tempPPointMatrixVelocity, pPointVelocity.getVector(), 0, 0);
-      CommonOps.mult(selectionMatrix, tempPPointMatrixVelocity, pBlock);
-
-      MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
-      weightBlock.setValue(weight);
-
-      motionConstraintIndex++;
-   }
-
    private final DenseMatrix64F tempBaseToEndEffectorJacobianMatrix = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempJacobianMatrix = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempMatrixUTranspose = new DenseMatrix64F(1, 1);
@@ -349,6 +320,36 @@ public class MotionConstraintHandler
             motionConstraintIndex++;
          }
       }
+   }
+
+   private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
+
+   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
+         DenseMatrix64F selectionMatrix, double weight)
+   {
+      pointJacobian.set(jacobian, bodyFixedPoint);
+      pointJacobian.compute();
+      desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
+
+      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
+
+      jBlockCompact.reshape(selectionMatrix.getNumRows(), pointJacobianMatrix.getNumCols());
+      CommonOps.mult(selectionMatrix, pointJacobianMatrix, jBlockCompact);
+
+      DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, jBlockCompact.getNumRows(), nDegreesOfFreedom);
+      compactBlockToFullBlock(jacobian.getJointsInOrder(), jBlockCompact, jFullBlock);
+
+      pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
+      pPointVelocity.scale(-1.0);
+      pPointVelocity.add(desiredAccelerationWithRespectToBase);
+      DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
+      MatrixTools.setDenseMatrixFromTuple3d(tempPPointMatrixVelocity, pPointVelocity.getVector(), 0, 0);
+      CommonOps.mult(selectionMatrix, tempPPointMatrixVelocity, pBlock);
+
+      MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+      weightBlock.setValue(weight);
+
+      motionConstraintIndex++;
    }
 
    public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,

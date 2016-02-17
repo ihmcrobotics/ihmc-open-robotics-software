@@ -27,6 +27,7 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
 
    public JointspaceAccelerationCommand()
    {
+      super(InverseDynamicsCommandType.JOINTSPACE_MOTION);
       initializeUnusedIntegers();
       clear();
    }
@@ -38,8 +39,7 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
 
    public JointspaceAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration, double weight)
    {
-      initializeUnusedIntegers();
-      clear();
+      this();
       addJoint(joint, desiredAcceleration);
       this.hasWeight = weight != Double.POSITIVE_INFINITY;
       this.weight = weight;

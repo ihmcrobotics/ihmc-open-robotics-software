@@ -131,7 +131,6 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
    {
       taskspaceConstraintData.set(handAcceleration);
-      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
       GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
       spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
    }
