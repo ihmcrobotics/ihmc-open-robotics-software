@@ -153,7 +153,7 @@ public class CirclePoseTrajectoryGeneratorTest
    {
       FrameOrientation orientationToPack = new FrameOrientation();
 
-      trajectoryGenerator.get(orientationToPack);
+      trajectoryGenerator.getOrientation(orientationToPack);
 
       assertEquals(worldFrame, orientationToPack.getReferenceFrame());
    }
@@ -312,10 +312,10 @@ public class CirclePoseTrajectoryGeneratorTest
       FrameOrientation orientation = new FrameOrientation(frame);
 
       trajectoryGenerator.compute(0.0);
-      trajectoryGenerator.get(orientation);
+      trajectoryGenerator.getOrientation(orientation);
 
       FrameOrientation initialOrientation = new FrameOrientation(frame);
-      initialOrientationProvider.get(initialOrientation);
+      initialOrientationProvider.getOrientation(initialOrientation);
 
       FrameOrientationTest.assertFrameOrientationEquals(initialOrientation, orientation, 1e-12);
 
@@ -334,7 +334,7 @@ public class CirclePoseTrajectoryGeneratorTest
          trajectoryGenerator.compute(t);
 
          trajectoryGenerator.get(newPosition);
-         trajectoryGenerator.get(orientation);
+         trajectoryGenerator.getOrientation(orientation);
 
          AxisAngle4d difference = FrameOrientationTest.computeDifferenceAxisAngle(initialOrientation, orientation);
          Matrix3d rotationMatrix = new Matrix3d();

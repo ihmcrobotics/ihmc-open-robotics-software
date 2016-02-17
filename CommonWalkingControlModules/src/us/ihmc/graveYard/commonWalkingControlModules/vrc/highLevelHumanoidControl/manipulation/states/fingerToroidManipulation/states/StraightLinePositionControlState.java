@@ -56,7 +56,7 @@ public class StraightLinePositionControlState extends State<FingerToroidManipula
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         finalConfigurationProviders.get(robotSide).get(orientation);
+         finalConfigurationProviders.get(robotSide).getOrientation(orientation);
          orientation.changeFrame(trajectoryFrame);
 
          finalConfigurationProviders.get(robotSide).get(position);

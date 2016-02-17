@@ -87,7 +87,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    private void updateInitialOrientation()
    {
-      initialOrientationProvider.get(tempInitialOrientation);      
+      initialOrientationProvider.getOrientation(tempInitialOrientation);      
       tempInitialOrientation.changeFrame(initialOrientation.getReferenceFrame());
       initialOrientation.set(tempInitialOrientation);
       initialOrientation.checkQuaternionIsUnitMagnitude();
@@ -95,7 +95,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    private void updateFinalOrientation()
    {
-      finalOrientationProvider.get(tempFinalOrientation);
+      finalOrientationProvider.getOrientation(tempFinalOrientation);
       tempFinalOrientation.changeFrame(finalOrientation.getReferenceFrame());
       finalOrientation.set(tempFinalOrientation);
       finalOrientation.checkQuaternionIsUnitMagnitude();
@@ -123,7 +123,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -140,7 +140,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }

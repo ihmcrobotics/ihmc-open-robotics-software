@@ -117,7 +117,7 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
       generator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
       FrameOrientation orientationToPack = new FrameOrientation();
 
-      generator.get(orientationToPack);
+      generator.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
@@ -241,11 +241,11 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
       orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
-      generator.get(orientationToPack);
+      generator.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 
-      generator.get(orientationToPack);
+      generator.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 

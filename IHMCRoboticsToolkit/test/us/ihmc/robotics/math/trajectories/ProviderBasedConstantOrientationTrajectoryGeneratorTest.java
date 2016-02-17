@@ -100,7 +100,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       provider = new ProviderBasedConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame, orientationProvider, finalTime, createRegistry());
       FrameOrientation orientationToPack = new FrameOrientation();
 
-      provider.get(orientationToPack);
+      provider.getOrientation(orientationToPack);
       
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
@@ -148,11 +148,11 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
 
       provider = new ProviderBasedConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame, orientationProvider, finalTime,
             createRegistry());
-      provider.get(orientationToPack);
+      provider.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 
-      provider.get(orientationToPack);
+      provider.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
          

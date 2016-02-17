@@ -74,7 +74,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
       if (getPreviousState() == this)
       {
          positionTrajectoryGenerator.get(desiredPosition);
-         orientationTrajectoryGenerator.get(desiredOrientation);
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
          initialFootPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
       }
       else

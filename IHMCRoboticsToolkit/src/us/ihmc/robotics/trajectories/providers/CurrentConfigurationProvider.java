@@ -18,7 +18,7 @@ public class CurrentConfigurationProvider implements SE3ConfigurationProvider
       positionToPack.setToZero(endEffectorFrame);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       orientationToPack.setToZero(endEffectorFrame);
    }

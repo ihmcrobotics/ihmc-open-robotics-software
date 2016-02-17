@@ -179,7 +179,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
       FrameOrientation orientationToPack = new FrameOrientation();
-      generator.get(orientationToPack);
+      generator.getOrientation(orientationToPack);
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
 
@@ -296,11 +296,11 @@ public class ConstantPoseTrajectoryGeneratorTest
       FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
       orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
-      generator.get(orientationToPack);
+      generator.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 
-      generator.get(orientationToPack);
+      generator.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 

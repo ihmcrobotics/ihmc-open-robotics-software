@@ -43,7 +43,7 @@ public class ValveConfigurationProvider implements SE3ConfigurationProvider
       this.extraRadius = extraRadius;
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       FramePose handPose = getHandPose();
       handPose.getOrientationIncludingFrame(orientationToPack);

@@ -37,7 +37,7 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
    {
       time.set(0.0);
       FrameOrientation orientationToPack = new FrameOrientation(ReferenceFrame.getWorldFrame());
-      orientationProvider.get(orientationToPack);
+      orientationProvider.getOrientation(orientationToPack);
       orientationToPack.changeFrame(orientation.getReferenceFrame());
       orientation.set(orientationToPack);
    }
@@ -52,7 +52,7 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
       return time.getDoubleValue() > finalTime.getDoubleValue();
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -69,7 +69,7 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }

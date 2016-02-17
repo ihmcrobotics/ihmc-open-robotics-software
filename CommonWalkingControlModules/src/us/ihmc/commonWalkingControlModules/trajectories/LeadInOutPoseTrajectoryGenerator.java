@@ -145,9 +145,9 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       positionTrajectoryGenerator.packAcceleration(accelerationToPack);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
-      orientationTrajectoryGenerator.get(orientationToPack);
+      orientationTrajectoryGenerator.getOrientation(orientationToPack);
    }
 
    public void packAngularVelocity(FrameVector angularVelocityToPack)
@@ -169,7 +169,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
+      getOrientation(orientationToPack);
       packAngularVelocity(angularVelocityToPack);
       packAngularAcceleration(angularAccelerationToPack);
    }
@@ -180,7 +180,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
       framePoseToPack.setPosition(tempPosition);
 
-      orientationTrajectoryGenerator.get(tempOrientation);
+      orientationTrajectoryGenerator.getOrientation(tempOrientation);
       framePoseToPack.setOrientation(tempOrientation);
    }
    

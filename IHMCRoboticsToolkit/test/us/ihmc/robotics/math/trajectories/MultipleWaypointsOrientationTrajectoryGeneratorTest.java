@@ -51,7 +51,7 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       {
          double timeAtWaypoint = numberOfWaypoints == 1 ? trajectoryTime / 2.0 : i * trajectoryTime / (numberOfWaypoints - 1.0);
          simpleTraj.compute(timeAtWaypoint);
-         simpleTraj.get(waypointOrientation);
+         simpleTraj.getOrientation(waypointOrientation);
          simpleTraj.packAngularVelocity(waypointAngularVelocity);
          multipleWaypointTrajectory.appendWaypoint(timeAtWaypoint, waypointOrientation, waypointAngularVelocity);
       }

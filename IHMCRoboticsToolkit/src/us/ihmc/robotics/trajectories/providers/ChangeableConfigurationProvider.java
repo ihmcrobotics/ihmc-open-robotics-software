@@ -32,7 +32,7 @@ public class ChangeableConfigurationProvider implements SE3ConfigurationProvider
       configuration.getPositionIncludingFrame(positionToPack);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       configuration.getOrientationIncludingFrame(orientationToPack);
    }
