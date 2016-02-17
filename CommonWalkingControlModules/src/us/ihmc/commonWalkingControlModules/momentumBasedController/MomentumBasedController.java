@@ -8,8 +8,6 @@ import java.util.Map;
 
 import javax.vecmath.Point2d;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
@@ -22,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommandPool;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
@@ -98,8 +95,7 @@ public class MomentumBasedController
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
-   private final SideDependentList<ContactablePlaneBody> feet, hands, thighs;
-   private final ContactablePlaneBody pelvis, pelvisBack;
+   private final SideDependentList<ContactablePlaneBody> feet, hands;
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
@@ -213,9 +209,8 @@ public class MomentumBasedController
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
-         SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
-         SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
-         ArrayList<Updatable> updatables, ArmControllerParameters armControllerParameters, WalkingControllerParameters walkingControllerParameters,
+         SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
+         ArmControllerParameters armControllerParameters, WalkingControllerParameters walkingControllerParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -238,10 +233,7 @@ public class MomentumBasedController
 
       // Initialize the contactable bodies
       this.feet = feet;
-      this.hands = handsWithFingersBentBack;
-      this.thighs = thighs;
-      this.pelvis = pelvis;
-      this.pelvisBack = pelvisBack;
+      this.hands = hands;
 
       RigidBody elevator = fullRobotModel.getElevator();
 
@@ -295,21 +287,10 @@ public class MomentumBasedController
          this.contactablePlaneBodyList.addAll(feet.values()); // leftSole and rightSole
       }
 
-      if (handsWithFingersBentBack != null)
+      if (hands != null)
       {
-         this.contactablePlaneBodyList.addAll(handsWithFingersBentBack.values());
+         this.contactablePlaneBodyList.addAll(hands.values());
       }
-
-      if (thighs != null)
-      {
-         this.contactablePlaneBodyList.addAll(thighs.values());
-      }
-
-      if (pelvis != null)
-         this.contactablePlaneBodyList.add(pelvis);
-
-      if (pelvisBack != null)
-         this.contactablePlaneBodyList.add(pelvisBack);
 
       for (ContactablePlaneBody contactablePlaneBody : this.contactablePlaneBodyList)
       {
@@ -352,8 +333,8 @@ public class MomentumBasedController
          wrenchVisualizer = null;
       }
 
-      optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
-            gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, yoGraphicsListRegistry, registry);
+      optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), gravityZ,
+            momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, yoGraphicsListRegistry, registry);
 
       if (DO_PASSIVE_KNEE_CONTROL)
       {
@@ -806,9 +787,6 @@ public class MomentumBasedController
       updatables.add(updatable);
    }
 
-   private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
-   private final Map<OneDoFJoint, JointspaceAccelerationCommand> tempDesiredJointAccelerationCommands = new LinkedHashMap<>();
-
    private final SpatialAccelerationVector rootJointDesiredAcceleration = new SpatialAccelerationVector();
    private final FrameVector rootJointDesiredAngularAcceleration = new FrameVector();
    private final FrameVector rootJointDesiredLinearAcceleration = new FrameVector();
@@ -1141,21 +1119,6 @@ public class MomentumBasedController
    public SideDependentList<ContactablePlaneBody> getContactableHands()
    {
       return hands;
-   }
-
-   public SideDependentList<ContactablePlaneBody> getContactablePlaneThighs()
-   {
-      return thighs;
-   }
-
-   public ContactablePlaneBody getContactablePelvis()
-   {
-      return pelvis;
-   }
-
-   public ContactablePlaneBody getContactablePelvisBack()
-   {
-      return pelvisBack;
    }
 
    public void getContactPoints(ContactablePlaneBody contactablePlaneBody, List<FramePoint> contactPointListToPack)

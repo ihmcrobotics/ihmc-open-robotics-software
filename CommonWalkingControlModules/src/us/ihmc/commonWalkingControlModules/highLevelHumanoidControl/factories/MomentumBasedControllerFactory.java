@@ -158,9 +158,6 @@ public class MomentumBasedControllerFactory
       // Setup the different ContactablePlaneBodies ///////////////////////////////////////////////
 
       RigidBody rootBody = fullRobotModel.getRootJoint().getSuccessor();
-      SideDependentList<ContactablePlaneBody> thighs = contactableBodiesFactory.createThighContactableBodies(rootBody);
-      ContactablePlaneBody pelvisContactablePlaneBody = contactableBodiesFactory.createPelvisContactableBody(fullRobotModel.getPelvis());
-      ContactablePlaneBody pelvisBackContactablePlaneBody = contactableBodiesFactory.createPelvisBackContactableBody(fullRobotModel.getPelvis());
       SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,14 +196,16 @@ public class MomentumBasedControllerFactory
             registry);
       centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
 
-      ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, feet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
-      instantaneousCapturePointPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
+      ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, feet, capturePointPlannerParameters,
+            registry, yoGraphicsListRegistry);
+      instantaneousCapturePointPlanner
+            .setMinimumSingleSupportTimeForDisturbanceRecovery(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors, yoTime,
-            gravityZ, twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT, updatables,
-            armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
+            gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, armControllerParameters, walkingControllerParameters,
+            yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
 
