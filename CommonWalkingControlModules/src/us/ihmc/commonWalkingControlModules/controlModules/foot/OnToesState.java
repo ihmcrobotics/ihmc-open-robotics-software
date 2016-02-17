@@ -207,7 +207,6 @@ public class OnToesState extends AbstractFootControlState
       DenseMatrix64F selectionMatrix = footControlHelper.getSelectionMatrix();
       // Need to control the whole orientation of the foot as only one contact point is position controlled.
       selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
-      footControlHelper.updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment();
 
       // Just to make sure we're not trying to do singularity escape
       // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)

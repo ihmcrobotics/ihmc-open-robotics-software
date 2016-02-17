@@ -7,7 +7,6 @@ import javax.vecmath.Point2d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
@@ -28,7 +27,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
@@ -79,15 +77,6 @@ public class FootControlHelper
 
    private final DenseMatrix64F selectionMatrix;
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-
-   private final BooleanYoVariable isFootRollUncontrollable;
-
-   private final FrameVector hipYawAxis = new FrameVector();
-   private final FrameVector ankleRollAxis = new FrameVector();
-
-   private final DoubleYoVariable ankleRollAndHipYawAlignmentFactor;
-   private final DoubleYoVariable ankleRollAndHipYawAlignmentTreshold;
-   private final FrameMatrix3D angularSelectionMatrix = new FrameMatrix3D();
 
    // For hold position and fully constrained states.
    private final FrameTuple2dArrayList<FramePoint2d> defaultContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
@@ -147,10 +136,6 @@ public class FootControlHelper
       jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
       nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
       singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
-      isFootRollUncontrollable = new BooleanYoVariable(namePrefix + "IsFootRollUncontrollable", registry);
-      ankleRollAndHipYawAlignmentFactor = new DoubleYoVariable(namePrefix + "AkleRollAndHipYawAlignmentFactor", registry);
-      ankleRollAndHipYawAlignmentTreshold = new DoubleYoVariable(namePrefix + "AkleRollAndHipYawAlignmentThreshold", registry);
-      ankleRollAndHipYawAlignmentTreshold.set(0.9);
 
       minJacobianDeterminantForSingularityEscape = new DoubleYoVariable("minJacobianDeterminantForSingularityEscape", registry);
       minJacobianDeterminantForSingularityEscape.set(0.025);
@@ -199,10 +184,8 @@ public class FootControlHelper
    {
       jacobianDeterminant.set(jacobian.det());
       jacobianDeterminantInRange.set(Math.abs(jacobianDeterminant.getDoubleValue()) < minJacobianDeterminantForSingularityEscape.getDoubleValue());
-      computeJointsAlignmentFactor();
 
-      if (jacobianDeterminantInRange.getBooleanValue()
-            && ankleRollAndHipYawAlignmentFactor.getDoubleValue() < ankleRollAndHipYawAlignmentTreshold.getDoubleValue())
+      if (jacobianDeterminantInRange.getBooleanValue())
       {
          nullspaceMultipliers.reshape(1, 1);
          if (doSingularityEscape.getBooleanValue())
@@ -222,16 +205,6 @@ public class FootControlHelper
       }
    }
 
-   private void computeJointsAlignmentFactor()
-   {
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getJointAxis(hipYawAxis);
-      fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL).getJointAxis(ankleRollAxis);
-
-      ankleRollAxis.changeFrame(hipYawAxis.getReferenceFrame());
-      ankleRollAndHipYawAlignmentFactor.set(Math.abs(ankleRollAxis.dot(hipYawAxis)));
-   }
-
    public void submitTaskspaceConstraint(SpatialAccelerationVector footAcceleration, SpatialAccelerationCommand spatialAccelerationCommandToPack)
    {
       submitTaskspaceConstraint(jacobianId, footAcceleration, spatialAccelerationCommandToPack);
@@ -245,30 +218,6 @@ public class FootControlHelper
       taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
       spatialAccelerationCommandToPack.set(rootToFootJacobian, taskspaceConstraintData);
-   }
-
-   public void updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment()
-   {
-      if (ankleRollAndHipYawAlignmentFactor.getDoubleValue() > ankleRollAndHipYawAlignmentTreshold.getDoubleValue())
-      {
-         isFootRollUncontrollable.set(true);
-         ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
-         ReferenceFrame jacobianFrame = jacobian.getJacobianFrame();
-         angularSelectionMatrix.setToIdentity(footFrame);
-         double s22 = 10.0 * (1.0 - ankleRollAndHipYawAlignmentFactor.getDoubleValue());
-         angularSelectionMatrix.setM22(s22);
-         angularSelectionMatrix.changeFrame(jacobianFrame);
-         angularSelectionMatrix.getDenseMatrix(selectionMatrix, 0, 0);
-         OneDoFJoint ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
-         momentumBasedController.doPDControl(ankleRollJoint, 1.0, 0.0, 0.0, 0.0, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-      }
-      else
-      {
-         isFootRollUncontrollable.set(false);
-         selectionMatrix.set(0, 0, 1.0);
-         selectionMatrix.set(1, 1, 1.0);
-         selectionMatrix.set(2, 2, 1.0);
-      }
    }
 
    public RobotSide getRobotSide()
