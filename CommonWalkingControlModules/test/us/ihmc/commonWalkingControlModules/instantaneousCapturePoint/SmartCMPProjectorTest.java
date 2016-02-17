@@ -17,6 +17,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -424,9 +425,7 @@ public class SmartCMPProjectorTest
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
    
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Manual)
 	@Test(timeout=300000)
    public void testTroublesomeTenWithViz()
    {
@@ -456,7 +455,7 @@ public class SmartCMPProjectorTest
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
 
-      ThreadTools.sleepForever();
+      // ThreadTools.sleepForever();
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)

@@ -504,7 +504,6 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		assertEquals(finalPosition.getY(), icpPosition.getY(), 1e-4);
 	}
 
-	@Ignore
 	public void VisualizePlanner()
 	{
 		boolean cancelPlan = false;
