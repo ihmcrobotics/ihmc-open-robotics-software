@@ -60,11 +60,6 @@ public class CenterOfMassCalculator
 
    public void getCenterOfMass(FramePoint centerOfMassToPack)
    {
-      centerOfMassToPack.setIncludingFrame(centerOfMass);
-   }
-
-   public void packCenterOfMass(FramePoint centerOfMassToPack)
-   {
       centerOfMassToPack.setIncludingFrame(this.centerOfMass);
    }
 

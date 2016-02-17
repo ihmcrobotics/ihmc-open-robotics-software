@@ -144,7 +144,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
 
          centerOfMassJacobian.compute();
          FrameVector comVelocity = new FrameVector(referenceFrame);
-         centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
+         centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
          double xd = comVelocity.getX();
          orbitalEnergy.set(computeOrbitalEnergy(heightSplineInFootFrame, x, xd, gravityZ));
       }
@@ -192,7 +192,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
 
       centerOfMassJacobian.compute();
       FrameVector comVelocity = new FrameVector(referenceFrame);
-      centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
+      centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
       comVelocity.changeFrame(referenceFrame);
       double xd = comVelocity.getX();
 

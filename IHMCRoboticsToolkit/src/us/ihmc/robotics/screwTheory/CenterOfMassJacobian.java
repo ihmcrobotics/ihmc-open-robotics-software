@@ -178,13 +178,13 @@ public class CenterOfMassJacobian
       return jacobianMatrix;
    }
 
-   public void packCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
    {
       ScrewTools.packJointVelocitiesMatrix(joints, tempJointVelocitiesMatrix);
-      packCenterOfMassVelocity(centerOfMassVelocityToPack, tempJointVelocitiesMatrix);
+      getCenterOfMassVelocity(centerOfMassVelocityToPack, tempJointVelocitiesMatrix);
    }
 
-   private void packCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack, DenseMatrix64F jointVelocities)
+   private void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack, DenseMatrix64F jointVelocities)
    {
       CommonOps.mult(jacobianMatrix, jointVelocities, centerOfMassVelocityMatrix);
       centerOfMassVelocityToPack.setIncludingFrame(rootFrame, centerOfMassVelocityMatrix.get(0, 0), centerOfMassVelocityMatrix.get(1, 0),

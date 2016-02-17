@@ -24,7 +24,7 @@ public class CenterOfMassAccelerationCalculator
       this.base = base;
    }
    
-   public void packCoMAcceleration(FrameVector comAccelerationToPack)
+   public void getCoMAcceleration(FrameVector comAccelerationToPack)
    {
       boolean firstIteration = true;
       double totalMass = 0.0;

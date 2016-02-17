@@ -53,7 +53,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       RigidBodyInertia inertia = floating.getInertiaCopy();
       inertia.changeFrame(ReferenceFrame.getWorldFrame());
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(sixDoFJoint.getDegreesOfFreedom(), sixDoFJoint.getDegreesOfFreedom());
-      inertia.packMatrix(inertiaMatrix);
+      inertia.getMatrix(inertiaMatrix);
 
       JUnitTools.assertMatrixEquals(inertiaMatrix, massMatrix, 1e-5);
    }

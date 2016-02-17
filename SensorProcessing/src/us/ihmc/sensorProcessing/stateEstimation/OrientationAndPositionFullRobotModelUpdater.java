@@ -186,12 +186,12 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       // \dot{r}^{root}
       centerOfMassJacobianBody.compute();
       tempComVelocityBody.setToZero(rootJointFrame);
-      centerOfMassJacobianBody.packCenterOfMassVelocity(tempComVelocityBody);
+      centerOfMassJacobianBody.getCenterOfMassVelocity(tempComVelocityBody);
       tempComVelocityBody.changeFrame(rootJointFrame);
 
       // \tilde{\omega} r^{root}
       tempComBody.setToZero(rootJointFrame);
-      centerOfMassCalculator.packCenterOfMass(tempComBody);
+      centerOfMassCalculator.getCenterOfMass(tempComBody);
       tempComBody.changeFrame(rootJointFrame);
       tempCrossPart.setToZero(rootJointFrame);
       tempCrossPart.cross(rootJointAngularVelocity, tempComBody);
@@ -225,7 +225,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       rootJointAccelerationToPack.sub(tempCrossPart);
 
       // -\ddot{r}^{p}
-      centerOfMassAccelerationCalculator.packCoMAcceleration(tempComAccelerationBody);
+      centerOfMassAccelerationCalculator.getCoMAcceleration(tempComAccelerationBody);
       tempComAccelerationBody.changeFrame(rootJointFrame);
       rootJointAccelerationToPack.sub(tempComAccelerationBody);
    }
@@ -273,7 +273,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
    {
       // r^{estimation}
       tempCenterOfMassBody.setToZero(estimationFrame);
-      centerOfMassCalculator.packCenterOfMass(tempCenterOfMassBody);
+      centerOfMassCalculator.getCenterOfMass(tempCenterOfMassBody);
       tempCenterOfMassBody.changeFrame(estimationFrame);
 
       // R_{estimation}^{w}

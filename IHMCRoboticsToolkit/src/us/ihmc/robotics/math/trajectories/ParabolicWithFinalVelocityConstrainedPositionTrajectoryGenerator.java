@@ -194,12 +194,12 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector velocityToPack)
    {
       velocityToPack.set(currentVelocity);
    }
 
-   public void packVelocity(Vector3d velocityToPack)
+   public void getVelocity(Vector3d velocityToPack)
    {
       currentVelocity.get(velocityToPack);
    }
@@ -210,7 +210,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void packAcceleration(Vector3d accelerationToPack)
+   public void getAcceleration(Vector3d accelerationToPack)
    {
       currentAcceleration.get(accelerationToPack);
    }
@@ -223,7 +223,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       getAcceleration(accelerationToPack);
    }
 
-   public void packLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
    {
       positionToPack.set(currentPosition);
       velocityToPack.set(currentVelocity);

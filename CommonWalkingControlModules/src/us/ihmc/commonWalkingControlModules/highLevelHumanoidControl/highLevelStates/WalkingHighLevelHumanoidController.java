@@ -1092,7 +1092,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             feetManager.requestMoveStraight(swingSide, footPoseProvider.getDesiredFootPose(swingSide), footPoseProvider.getTrajectoryTime());
 
          RobotSide supportSide = swingSide.getOppositeSide();
-         transferToFootstep.packFramePoint2d(transferToFootstepLocation);
+         transferToFootstep.getFramePoint2d(transferToFootstepLocation);
 
          boolean icpErrorIsTooLarge = capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
@@ -1824,7 +1824,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
       
-      desiredICPVelocity.packFrameVector2d(desiredICPVelocityAsFrameVector);
+      desiredICPVelocity.getFrameVector2d(desiredICPVelocityAsFrameVector);
       controlledCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector));
 
       doFootControl();
@@ -1910,7 +1910,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivatives, centerOfMassHeightInputData);
 
       comPosition.setToZero(referenceFrames.getCenterOfMassFrame());
-      centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
+      centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);
 

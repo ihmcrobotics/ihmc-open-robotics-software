@@ -236,7 +236,7 @@ public class CentroidalMomentumRateTermCalculator
          tempPTilde.mul(tempMatrix3d);
          set3By3MatrixBlock(tempAdjoint, 0, 3, tempPTilde);
          
-         rigidBodies[i].getInertia().packMatrix(tempInertiaMatrix);
+         rigidBodies[i].getInertia().getMatrix(tempInertiaMatrix);
          CommonOps.mult(tempAdjoint, tempInertiaMatrix, denseAdjTimesI[i]);
       }
    }
