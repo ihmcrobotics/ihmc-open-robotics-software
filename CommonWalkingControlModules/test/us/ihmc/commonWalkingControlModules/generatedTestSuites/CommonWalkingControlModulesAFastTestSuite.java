@@ -17,8 +17,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolverTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorLogisticParametersTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolverTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootPosePacketTransformerTest.class,
