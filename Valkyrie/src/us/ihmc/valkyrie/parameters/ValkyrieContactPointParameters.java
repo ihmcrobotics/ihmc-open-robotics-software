@@ -1,11 +1,8 @@
 package us.ihmc.valkyrie.parameters;
 
-import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footChamferX;
-import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footChamferY;
 import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footLength;
 import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footWidth;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,20 +14,15 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerWithGRFPenalizedSmootherNative;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -42,16 +34,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
    private final SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
-   private final SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<>();
-   private final SideDependentList<RigidBodyTransform> thighContactPointTransforms = new SideDependentList<>();
-   private final List<Point2d> chestBackContactPoints = new ArrayList<Point2d>();
-   private final RigidBodyTransform chestBackContactPointTransform = new RigidBodyTransform();
-   private final List<Point2d> pelvisBackContactPoints = new ArrayList<Point2d>();
-   private final RigidBodyTransform pelvisBackContactPointTransform = new RigidBodyTransform();
-   private final List<Point2d> pelvisContactPoints = new ArrayList<Point2d>();
-   private final RigidBodyTransform pelvisContactPointTransform = new RigidBodyTransform();
 
-   private final boolean CHAMFER_FEET_CORNERS = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES;
    private final DRCRobotJointMap jointMap;
    
    private boolean useSoftGroundContactParameters = false;
@@ -67,25 +50,10 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
          ArrayList<ImmutablePair<String, Point2d>> footGCs = new ArrayList<>();
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
          
-         if (CHAMFER_FEET_CORNERS)
-         {
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0 - footChamferX, -footWidth / 2.0)));
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0 - footChamferX, footWidth / 2.0)));
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0 + footChamferX, -footWidth / 2.0)));
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0 + footChamferX, footWidth / 2.0)));
-
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0  + footChamferY)));
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0  - footChamferY)));
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0  + footChamferY)));
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0  - footChamferY)));
-         }
-         else
-         {
         	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0)));
              footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0)));
              footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
              footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
-         }
          
          for (ImmutablePair<String, Point2d> footGC : footGCs)
          {
@@ -204,12 +172,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
       {
          for (int ix = 1; ix <= nContactPointsX; ix++)
          {
-            double alpha = (ix - 1.0) / (nContactPointsX - 1.0);
             double footWidthAtCurrentX = footWidth;
-            if (CHAMFER_FEET_CORNERS)
-            {
-            	footWidthAtCurrentX -= alpha * footChamferY;
-            }
             double dy = footWidthAtCurrentX / (nContactPointsY - 1.0);
             double yOffset = footWidthAtCurrentX / 2.0;
 
@@ -233,59 +196,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
    private void setupContactableBodiesFactory(DRCRobotJointMap jointMap)
    {
 	  if(footGroundContactPoints.size()>0) contactableBodiesFactory.addFootContactParameters(footGroundContactPoints);
-      if(chestBackContactPoints.size()>0) contactableBodiesFactory.addChestBackContactParameters(chestBackContactPoints, chestBackContactPointTransform);
       if(handContactPoints.size()>0) contactableBodiesFactory.addHandContactParameters(jointMap.getNameOfJointBeforeHands(), handContactPoints, handContactPointTransforms);
-      if(pelvisBackContactPoints.size()>0) contactableBodiesFactory.addPelvisBackContactParameters(pelvisBackContactPoints, pelvisBackContactPointTransform);
-      if(pelvisContactPoints.size()>0) contactableBodiesFactory.addPelvisContactParameters(pelvisContactPoints, pelvisContactPointTransform);
-      if(thighContactPoints.size()>0) contactableBodiesFactory.addThighContactParameters(jointMap.getNameOfJointBeforeThighs(), thighContactPoints, thighContactPointTransforms);
-   }
-
-   @Override
-   public RigidBodyTransform getPelvisContactPointTransform()
-   {
-      return pelvisContactPointTransform;
-   }
-
-   @Override
-   public List<Point2d> getPelvisContactPoints()
-   {
-      return pelvisContactPoints;
-   }
-
-   @Override
-   public RigidBodyTransform getPelvisBackContactPointTransform()
-   {
-      return pelvisBackContactPointTransform;
-   }
-
-   @Override
-   public List<Point2d> getPelvisBackContactPoints()
-   {
-      return pelvisBackContactPoints;
-   }
-
-   @Override
-   public RigidBodyTransform getChestBackContactPointTransform()
-   {
-      return chestBackContactPointTransform;
-   }
-
-   @Override
-   public List<Point2d> getChestBackContactPoints()
-   {
-      return chestBackContactPoints;
-   }
-
-   @Override
-   public SideDependentList<RigidBodyTransform> getThighContactPointTransforms()
-   {
-      return thighContactPointTransforms;
-   }
-
-   @Override
-   public SideDependentList<List<Point2d>> getThighContactPoints()
-   {
-      return thighContactPoints;
    }
 
    @Override
