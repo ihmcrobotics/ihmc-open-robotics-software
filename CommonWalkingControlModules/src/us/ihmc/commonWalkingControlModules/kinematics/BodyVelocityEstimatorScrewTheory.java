@@ -59,7 +59,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
       bodyLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   public void packBodyVelocity(FrameVector bodyVelocityToPack)
+   public void getBodyVelocity(FrameVector bodyVelocityToPack)
    {
       bodyVelocityToPack.setIncludingFrame(this.bodyLinearVelocity);
    }
@@ -96,7 +96,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
       angularVelocityToPack.scale(-1.0);    // angular velocity of ankle ZUp w.r.t. IMU, in foot frame
    }
 
-   public void packCovariance(Tuple3d covarianceToPack)
+   public void getCovariance(Tuple3d covarianceToPack)
    {
       // TODO: also use angular velocity of foot with respect to ground. Create FootAngularVelocityCalculator; do only once
       double covariance = this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;
