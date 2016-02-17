@@ -22,6 +22,9 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
  */
 public class QuadrupedXGaitFootstepPlanner
 {
+   /**
+    * The number of footsteps to generate for each foot. The total number of steps in a plan is 4 times this number.
+    */
    private static final int FOOTSTEP_QUEUE_SIZE = 15;
 
    private static final RobotQuadrant[] FOOTSTEP_ORDER = new RobotQuadrant[] { RobotQuadrant.HIND_LEFT,
@@ -42,14 +45,28 @@ public class QuadrupedXGaitFootstepPlanner
     */
    private double phaseShift = 90.0;
 
+   /**
+    * The distance between same-side legs during stance.
+    */
    private double stanceLength = 1.1;
+
+   /**
+    * The distance between same-end legs during stance.
+    */
    private double stanceWidth = 0.5;
 
+   /**
+    * The forward distance at which a footstep is placed from the previous step.
+    */
    private double strideLength = 0.3;
+
+   /**
+    * The sideways distance at which a footstep is placed from the previous step.
+    */
    private double strideWidth = 0.0;
 
    // TODO: Compute conversion of arbitrary yaw rate units to rad/s.
-   private double yawRate = 0.1;
+   private double yawRate = 0.05;
 
    private final QuadrupedReferenceFrames referenceFrames;
    private final BagOfBalls footstepVisualization;
@@ -76,12 +93,24 @@ public class QuadrupedXGaitFootstepPlanner
             .createRainbowBag(FOOTSTEP_QUEUE_SIZE * 4, 0.03, "footsteps", registry, graphicsListRegistry);
    }
 
-   public void plan(PreallocatedQueue<QuadrupedTimedStep> steps, double startTime)
+   /**
+    * Clear the provided queue and fill it with a new plan.
+    *
+    * @param steps              the queue to fill
+    * @param startTime          the desired start time of the first footstep
+    * @param needInitialization whether or not initialization steps need to be added to the beginning of the queue. If
+    *                           planning from a cold start in which feet are in arbitrary positions, pass {@code true}.
+    *                           Otherwise, if feet are already following a plan and this is just an incremental replan,
+    *                           pass {@code false}.
+    */
+   public void plan(PreallocatedQueue<QuadrupedTimedStep> steps, double startTime, boolean needInitialization)
    {
       pool.evict();
 
+      footstepVisualization.reset();
+
       // Add the initialization steps.
-      double initializationPeriod = addInitializationSteps(startTime);
+      double initializationPeriod = needInitialization ? addInitializationSteps(startTime) : 0.0;
 
       // Fill the queue with steps.
       final double gaitPeriod = 2.0 * swingDuration + 2.0 * endPairSupportDuration;
@@ -177,17 +206,20 @@ public class QuadrupedXGaitFootstepPlanner
     */
    private QuadrupedTimedStep addStepFromPrevious(double startTime, RobotQuadrant quadrant)
    {
-      QuadrupedTimedStep previous = queues.get(quadrant).getTail();
+      FramePoint previousStepGoalPosition = getPreviousFootstepPosition(quadrant);
 
       // Start with the new step positioned at the previous step for this quadrant.
       QuadrupedTimedStep step = addZeroStep(startTime, quadrant);
-      step.getGoalPosition().setIncludingFrame(previous.getGoalPosition());
+      FramePoint stepGoalPosition = step.getGoalPosition();
+      stepGoalPosition.setIncludingFrame(previousStepGoalPosition);
+      stepGoalPosition.changeFrame(referenceFrames.getWorldFrame());
+      stepGoalPosition.setZ(0.0);
 
       // Compute the support polygon for the previous group of four footsteps.
       QuadrupedSupportPolygon polygon = new QuadrupedSupportPolygon();
       for (RobotQuadrant q : RobotQuadrant.values)
       {
-         polygon.setFootstep(q, queues.get(q).getTail().getGoalPosition());
+         polygon.setFootstep(q, getPreviousFootstepPosition(q));
       }
       polygon.changeFrame(referenceFrames.getWorldFrame());
 
@@ -231,6 +263,28 @@ public class QuadrupedXGaitFootstepPlanner
       return step;
    }
 
+   /**
+    * Gets the previous in-quadrant footstep's target position. If there are no previous steps, then gets the current
+    * sole position estimate.
+    */
+   private FramePoint getPreviousFootstepPosition(RobotQuadrant quadrant)
+   {
+      if (queues.get(quadrant).size() > 0)
+      {
+         return queues.get(quadrant).getTail().getGoalPosition();
+      }
+
+      FramePoint solePositionEstimate = pool.lease(FramePoint.class);
+      solePositionEstimate.setToZero(referenceFrames.getFootFrame(quadrant));
+
+      return solePositionEstimate;
+   }
+
+   /**
+    * Drain the four quadrant footstep queues into the main queue ordered by start time.
+    *
+    * @param steps the output queue
+    */
    private void mergeFootstepQueues(PreallocatedQueue<QuadrupedTimedStep> steps)
    {
       while (true)
