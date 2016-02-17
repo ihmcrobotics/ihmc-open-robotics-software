@@ -2,10 +2,20 @@ package us.ihmc.aware.planning;
 
 import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.aware.util.QuadrupedTimedStep;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * A footstep planner capable of planning pace, amble, and trot gaits.
@@ -38,7 +48,11 @@ public class QuadrupedXGaitFootstepPlanner
    private double strideLength = 0.3;
    private double strideWidth = 0.0;
 
+   // TODO: Compute conversion of arbitrary yaw rate units to rad/s.
+   private double yawRate = 0.1;
+
    private final QuadrupedReferenceFrames referenceFrames;
+   private final BagOfBalls footstepVisualization;
 
    /**
     * Maintain four footstep queues -- one for each quadrant. This way, they can be merge-sorted in order of start time
@@ -46,7 +60,10 @@ public class QuadrupedXGaitFootstepPlanner
     */
    private final QuadrantDependentList<PreallocatedQueue<QuadrupedTimedStep>> queues = new QuadrantDependentList<>();
 
-   public QuadrupedXGaitFootstepPlanner(QuadrupedReferenceFrames referenceFrames)
+   private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
+
+   public QuadrupedXGaitFootstepPlanner(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry,
+         QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames = referenceFrames;
 
@@ -54,10 +71,15 @@ public class QuadrupedXGaitFootstepPlanner
       {
          queues.set(quadrant, new PreallocatedQueue<>(QuadrupedTimedStep.class, FOOTSTEP_QUEUE_SIZE));
       }
+
+      this.footstepVisualization = BagOfBalls
+            .createRainbowBag(FOOTSTEP_QUEUE_SIZE * 4, 0.03, "footsteps", registry, graphicsListRegistry);
    }
 
    public void plan(PreallocatedQueue<QuadrupedTimedStep> steps, double startTime)
    {
+      pool.evict();
+
       // Add the initialization steps.
       double initializationPeriod = addInitializationSteps(startTime);
 
@@ -66,6 +88,20 @@ public class QuadrupedXGaitFootstepPlanner
       for (int i = 0; i < FOOTSTEP_QUEUE_SIZE - 4; i++)
       {
          addFourSteps(initializationPeriod + startTime + i * gaitPeriod);
+      }
+
+      // Draw the footstep visualization.
+      footstepVisualization.setVisible(true);
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         for (int i = 0; i < queues.get(quadrant).size(); i++)
+         {
+            QuadrupedTimedStep step = queues.get(quadrant).get(i);
+
+            step.getGoalPosition().changeFrame(referenceFrames.getWorldFrame());
+            footstepVisualization
+                  .setBallLoop(step.getGoalPosition(), YoAppearance.getStandardRoyGBivRainbow()[quadrant.ordinal()]);
+         }
       }
 
       // Clear the queue to make room for our plan.
@@ -112,7 +148,7 @@ public class QuadrupedXGaitFootstepPlanner
          stepIndex++;
       }
 
-      return stepIndex * (swingDuration + endPairSupportDuration);
+      return 4 * (swingDuration + endPairSupportDuration);
    }
 
    private void addFourSteps(double startTime)
@@ -123,14 +159,15 @@ public class QuadrupedXGaitFootstepPlanner
       // Compute the time these steps should be delayed to meet the desired phase shift.
       double phaseShiftDt = endPairPeriod * phaseShift / 360.0;
 
-      addStepsForEndPair(startTime, RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT);
-      addStepsForEndPair(startTime + phaseShiftDt, RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT);
+      addStepsForEndPair(startTime, RobotEnd.HIND);
+      addStepsForEndPair(startTime + phaseShiftDt, RobotEnd.FRONT);
    }
 
-   private void addStepsForEndPair(double startTime, RobotQuadrant left, RobotQuadrant right)
+   private void addStepsForEndPair(double startTime, RobotEnd end)
    {
-      addStepFromPrevious(startTime, left);
-      addStepFromPrevious(startTime + swingDuration + endPairSupportDuration, right);
+      addStepFromPrevious(startTime, RobotQuadrant.getQuadrant(end, RobotSide.LEFT));
+      addStepFromPrevious(startTime + swingDuration + endPairSupportDuration,
+            RobotQuadrant.getQuadrant(end, RobotSide.RIGHT));
    }
 
    /**
@@ -142,11 +179,33 @@ public class QuadrupedXGaitFootstepPlanner
    {
       QuadrupedTimedStep previous = queues.get(quadrant).getTail();
 
+      // Start with the new step positioned at the previous step for this quadrant.
       QuadrupedTimedStep step = addZeroStep(startTime, quadrant);
-
       step.getGoalPosition().setIncludingFrame(previous.getGoalPosition());
-      step.getGoalPosition().changeFrame(referenceFrames.getBodyZUpFrame());
-      step.getGoalPosition().add(strideLength, strideWidth, 0.0);
+
+      // Compute the support polygon for the previous group of four footsteps.
+      QuadrupedSupportPolygon polygon = new QuadrupedSupportPolygon();
+      for (RobotQuadrant q : RobotQuadrant.values)
+      {
+         polygon.setFootstep(q, queues.get(q).getTail().getGoalPosition());
+      }
+      polygon.changeFrame(referenceFrames.getWorldFrame());
+
+      // From the previous support polygon, yaw the next support polygon by the desired turn rate.
+      double nominalYaw = polygon.getNominalYaw();
+      polygon.yawAboutCentroid(yawRate);
+
+      // Compute the stride vector and rotate it to the new yaw angle.
+      FrameVector stride = pool.lease(FrameVector.class);
+      stride.setToZero(referenceFrames.getWorldFrame());
+      stride.add(strideLength, strideWidth, 0.0);
+
+      RigidBodyTransform tf = pool.lease(RigidBodyTransform.class);
+      tf.rotZ(nominalYaw);
+      stride.applyTransform(tf);
+
+      step.setGoalPosition(polygon.getFootstep(quadrant));
+      step.getGoalPosition().add(stride);
 
       return step;
    }
@@ -208,6 +267,11 @@ public class QuadrupedXGaitFootstepPlanner
 
          queues.get(smallestQuadrant).dequeue();
       }
+   }
+
+   public void setVisible(boolean visible)
+   {
+      footstepVisualization.setVisible(visible);
    }
 
    public double getSwingDuration()
@@ -273,6 +337,16 @@ public class QuadrupedXGaitFootstepPlanner
    public double getStrideWidth()
    {
       return strideWidth;
+   }
+
+   public double getYawRate()
+   {
+      return yawRate;
+   }
+
+   public void setYawRate(double yawRate)
+   {
+      this.yawRate = yawRate;
    }
 
    public void setStrideWidth(double strideWidth)
