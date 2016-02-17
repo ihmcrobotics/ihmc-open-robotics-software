@@ -6,11 +6,11 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class RotatableRampTerrainObjectTest
 {
@@ -133,8 +133,8 @@ public class RotatableRampTerrainObjectTest
       testHeightAtRampForAnyRamp(pointsOnRamp90PassingHeightCornerCases, ramp90);      
    }
 
-	@DeployableTestMethod
-	@Test(timeout=300000) @Ignore
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@Test(timeout=300000)
    public void HeightAtRamp90EdgeCasesFailDueToNumericalErrorTest()
    {
       testHeightAtRampForAnyRamp(pointsOnRamp90withNumericalRotationError, ramp90);
