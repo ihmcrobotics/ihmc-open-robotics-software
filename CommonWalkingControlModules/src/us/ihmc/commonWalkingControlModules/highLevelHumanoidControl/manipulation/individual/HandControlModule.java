@@ -15,6 +15,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
@@ -22,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TrajectoryBasedTaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.UserControlModeState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.CirclePoseTrajectoryGenerator;
@@ -71,9 +73,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
-import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
@@ -94,7 +96,7 @@ public class HandControlModule
 
    private final YoVariableRegistry registry;
 
-   private final StateMachine<HandControlMode> stateMachine;
+   private final GenericStateMachine<HandControlMode, HandControlState> stateMachine;
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator;
    private final FrameMatrix3D selectionFrameMatrix = new FrameMatrix3D();
@@ -261,7 +263,7 @@ public class HandControlModule
       }
 
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
-      stateMachine = new StateMachine<HandControlMode>(name, name + "SwitchTime", HandControlMode.class, yoTime, registry);
+      stateMachine = new GenericStateMachine<>(name, name + "SwitchTime", HandControlMode.class, yoTime, registry);
 
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(name, twistCalculator, hand, handControlFrame, controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
@@ -843,7 +845,6 @@ public class HandControlModule
 
       moveTowardsObject(finalDesiredPose, finalDirection, clearance, time, trajectoryFrame);
       loadBearingControlState.setContactNormalVector(surfaceNormal);
-      loadBearingControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
       taskSpacePositionControlState.setHoldPositionDuration(holdPositionDuration);
       isExecutingHandStep.set(goToSupportWhenDone);
    }
@@ -962,7 +963,6 @@ public class HandControlModule
          return;
       }
       requestedState.set(loadBearingControlState.getStateEnum());
-      loadBearingControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
    }
 
    public void moveUsingQuinticSplines(Map<OneDoFJoint, Double> desiredJointPositions, double time)
@@ -1114,6 +1114,11 @@ public class HandControlModule
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return stateMachine.getCurrentState().getInverseDynamicsCommand();
    }
 
    public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce,

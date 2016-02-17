@@ -12,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -32,9 +34,17 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.tools.FormattingTools;
 
 public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
 {
+   private final String name;
+   private final YoVariableRegistry registry;
+
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+   private final MomentumBasedController momentumBasedController;
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private PoseTrajectoryGenerator poseTrajectoryGenerator;
@@ -49,6 +59,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
    private TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator;
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
@@ -97,7 +108,16 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private TaskspaceToJointspaceHandPositionControlState(String namePrefix, RobotSide robotSide, MomentumBasedController momentumBasedController,
          RigidBody base, RigidBody endEffector, boolean doPositionControl, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, HandControlMode.TASK_SPACE_POSITION, momentumBasedController, -1, base, endEffector, parentRegistry);
+      super(HandControlMode.TASK_SPACE_POSITION);
+
+      name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
+      registry = new YoVariableRegistry(name);
+
+      taskspaceConstraintData.set(base, endEffector);
+
+      this.momentumBasedController = momentumBasedController;
+
+      parentRegistry.addChild(registry);
 
       yoTime = momentumBasedController.getYoTime();
 
@@ -130,10 +150,13 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
 
+      
+
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
          doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
+         jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
       }
 
       if (doPositionControl)
@@ -244,6 +267,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
             double desiredAcceleration = filteredFeedForwardAcceleration.getDoubleValue();
             desiredAcceleration *= feedForwardAccelerationScaleFactor.getDoubleValue();
             momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
          }
       }
       else
@@ -270,6 +294,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
             momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
          }
       }
    }
@@ -462,11 +487,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    }
 
    @Override
-   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
-   {
-   }
-
-   @Override
    public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
    {
       if (handCompliantControlHelper != null)
@@ -474,6 +494,11 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          this.taskspaceToJointspaceCalculator = taskspaceToJointspaceCalculator;
          handCompliantControlHelper.setCompliantControlFrame(this.taskspaceToJointspaceCalculator.getControlFrame());
       }
+   }
+
+   @Override
+   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
+   {
    }
 
    public void setCompliantControlFrame(ReferenceFrame compliantControlFrame)
@@ -537,5 +562,18 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    public void resetCompliantControl()
    {
       handCompliantControlHelper.reset();
+   }
+
+   @Override
+   public JointspaceAccelerationCommand getInverseDynamicsCommand()
+   {
+      return jointspaceAccelerationCommand;
+   }
+
+   @Override
+   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
+      this.selectionMatrix.set(selectionMatrix);
    }
 }

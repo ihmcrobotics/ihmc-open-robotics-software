@@ -8,9 +8,9 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 
-public class PointAccelerationCommand extends InverseDynamicsCommand
+public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccelerationCommand>
 {
-   private final GeometricJacobian rootToEndEffectorJacobian;
+   private GeometricJacobian rootToEndEffectorJacobian;
    private final FramePoint contactPoint;
    private final FrameVector desiredAcceleration;
    private final DenseMatrix64F selectionMatrix;
@@ -29,12 +29,12 @@ public class PointAccelerationCommand extends InverseDynamicsCommand
       this(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
    }
 
-   public PointAccelerationCommand(PointAccelerationCommand desiredPointAccelerationCommand)
+   public PointAccelerationCommand(PointAccelerationCommand pointAccelerationCommand)
    {
-      this.rootToEndEffectorJacobian = desiredPointAccelerationCommand.rootToEndEffectorJacobian;
-      this.contactPoint = desiredPointAccelerationCommand.contactPoint;
-      this.desiredAcceleration = desiredPointAccelerationCommand.desiredAcceleration;
-      this.selectionMatrix = desiredPointAccelerationCommand.selectionMatrix;
+      this.rootToEndEffectorJacobian = pointAccelerationCommand.rootToEndEffectorJacobian;
+      this.contactPoint = pointAccelerationCommand.contactPoint;
+      this.desiredAcceleration = pointAccelerationCommand.desiredAcceleration;
+      this.selectionMatrix = pointAccelerationCommand.selectionMatrix;
    }
 
    public GeometricJacobian getRootToEndEffectorJacobian()
@@ -79,5 +79,14 @@ public class PointAccelerationCommand extends InverseDynamicsCommand
       }
 
       CommonOps.mult(jacobianMatrix, jointAccelerations, achievedSpatialAcceleration);
+   }
+
+   @Override
+   public void set(PointAccelerationCommand other)
+   {
+      this.rootToEndEffectorJacobian = other.rootToEndEffectorJacobian;
+      this.contactPoint.setIncludingFrame(other.contactPoint);
+      this.desiredAcceleration.setIncludingFrame(other.desiredAcceleration);
+      this.selectionMatrix.set(other.selectionMatrix);
    }
 }

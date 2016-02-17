@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -13,18 +15,29 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.tools.FormattingTools;
 
 /**
  * @author twan
  *         Date: 5/30/13
  */
-public class LoadBearingHandControlState extends TaskspaceHandControlState
+public class LoadBearingHandControlState extends HandControlState
 {
-   protected final DoubleYoVariable coefficientOfFriction;
-   protected final SpatialAccelerationVector handAcceleration;
+   private final String name;
+   private final YoVariableRegistry registry;
+   private final int jacobianId;
+
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private final MomentumBasedController momentumBasedController;
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+
+   private final DoubleYoVariable coefficientOfFriction;
+   private final SpatialAccelerationVector handAcceleration;
 
    private final FrameVector contactNormal;
 
@@ -34,15 +47,21 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
    private final ReferenceFrame elevatorFrame;
 
    private final FramePose desiredPose = new FramePose();
-   private final Twist desiredTwist = new Twist();
-   private final SpatialAccelerationVector desiredAcceleration = new SpatialAccelerationVector();
-
-   private RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule;
 
    public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
          RigidBody elevator, RigidBody endEffector, int jacobianId, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, momentumBasedController, jacobianId, elevator, endEffector, parentRegistry);
+      super(stateEnum);
+
+      name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
+      registry = new YoVariableRegistry(name);
+
+      taskspaceConstraintData.set(elevator, endEffector);
+
+      this.momentumBasedController = momentumBasedController;
+      this.jacobianId = jacobianId;
+
+      parentRegistry.addChild(registry);
 
       coefficientOfFriction = new DoubleYoVariable(name + "CoefficientOfFriction", registry);
       handAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
@@ -66,17 +85,6 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
          handControlFrame = null;
          contactNormal = null;
       }
-   }
-
-   @Override
-   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
-   {
-      this.handRigidBodySpatialAccelerationControlModule = handRigidBodySpatialAccelerationControlModule;
-   }
-
-   @Override
-   public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
-   {
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -105,13 +113,7 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
    @Override
    public void doAction()
    {
-      desiredTwist.setToZero(handControlFrame, elevatorFrame, handControlFrame);
-      desiredAcceleration.setToZero(handControlFrame, elevatorFrame, handControlFrame);
-      handRigidBodySpatialAccelerationControlModule.doPositionControl(desiredPose, desiredTwist, desiredAcceleration, getBase());
-      handRigidBodySpatialAccelerationControlModule.packAcceleration(handAcceleration);
-      handAcceleration.changeBodyFrameNoRelativeAcceleration(handFrame);
-      handAcceleration.changeFrameNoRelativeMotion(handFrame);
-
+      handAcceleration.setToZero(handFrame, elevatorFrame, handFrame);
       submitDesiredAcceleration(handAcceleration);
    }
 
@@ -148,5 +150,25 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
    public boolean isDone()
    {
       return true;
+   }
+
+   private void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
+   {
+      taskspaceConstraintData.set(handAcceleration);
+      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
+      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
+   }
+
+   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
+      this.selectionMatrix.set(selectionMatrix);
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }
