@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -82,9 +83,9 @@ public class GeometricVirtualToePointCalculatorTest
       copDesired = new FramePoint2d(ReferenceFrame.getWorldFrame(), 2.0, 0.49);
       expectedVirtualToePoints = new double[][] { { 0.5, 0.3 }, { 0.5, -0.3 } };
    }
-
-   
-   @Ignore 
+	
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.InDevelopment)
+   @Test(timeout = 30000)
    public void testFeetOverlapping()
    {
       //TODO: Fix so that works for overlapping feet. Doesn't right now because combining polygons only works for disjoint polygons.
