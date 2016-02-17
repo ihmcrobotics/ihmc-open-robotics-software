@@ -108,18 +108,7 @@ public class FeetManager
          footstep.setZ(newHeight);
       }
 
-      walkOnTheEdgesManager.updateEdgeTouchdownStatus(upcomingSwingSide.getOppositeSide(), footstep);
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-
-      if (walkOnTheEdgesManager.willLandOnHeel())
-      {
-         walkOnTheEdgesManager.modifyFootstepForEdgeTouchdown(footstep, footControlModule.getHeelTouchdownInitialAngle());
-      }
-      else if (walkOnTheEdgesManager.willLandOnToes())
-      {
-         walkOnTheEdgesManager.modifyFootstepForEdgeTouchdown(footstep, footControlModule.getToeTouchdownInitialAngle());
-      }
-
       footControlModule.setFootstep(footstep);
       setContactStateForSwing(upcomingSwingSide);
    }
@@ -144,11 +133,6 @@ public class FeetManager
          footControlModule.resetCurrentState();
       else
          setContactStateForMoveViaWaypoints(robotSide);
-   }
-
-   public boolean isInEdgeTouchdownState(RobotSide robotSide)
-   {
-      return footControlModules.get(robotSide).isInEdgeTouchdownState();
    }
 
    public ConstraintType getCurrentConstraintType(RobotSide robotSide)
@@ -239,17 +223,8 @@ public class FeetManager
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (!isInEdgeTouchdownState(robotSide))
                setFlatFootContactState(robotSide);
          }
-      }
-      else if (willLandOnToes())
-      {
-         setTouchdownOnToesContactState(transferToSide);
-      }
-      else if (willLandOnHeel())
-      {
-         setTouchdownOnHeelContactState(transferToSide);
       }
       else
       {
@@ -267,14 +242,13 @@ public class FeetManager
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if ((isInEdgeTouchdownState(robotSide) && isEdgeTouchDownDone(robotSide)) || (getCurrentConstraintType(robotSide) == ConstraintType.TOES))
+            if (getCurrentConstraintType(robotSide) == ConstraintType.TOES)
                setFlatFootContactState(robotSide);
          }
       }
       else
       {
-         if ((isInEdgeTouchdownState(transferToSide) && isEdgeTouchDownDone(transferToSide))
-               || (getCurrentConstraintType(transferToSide) == ConstraintType.TOES))
+         if (getCurrentConstraintType(transferToSide) == ConstraintType.TOES)
             setFlatFootContactState(transferToSide);
       }
    }
@@ -295,18 +269,6 @@ public class FeetManager
       }
 
       footControlModule.setContactState(ConstraintType.TOES, footNormalContactVector);
-   }
-
-   private void setTouchdownOnHeelContactState(RobotSide robotSide)
-   {
-      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
-      footControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, footNormalContactVector);
-   }
-
-   public void setTouchdownOnToesContactState(RobotSide robotSide)
-   {
-      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
-      footControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, footNormalContactVector);
    }
 
    public void setFlatFootContactState(RobotSide robotSide)
@@ -343,11 +305,6 @@ public class FeetManager
       return walkOnTheEdgesManager;
    }
 
-   public boolean isEdgeTouchDownDone(RobotSide robotSide)
-   {
-      return walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide);
-   }
-
    public boolean willDoToeOff(Footstep nextFootstep, RobotSide transferToSide)
    {
       return walkOnTheEdgesManager.willDoToeOff(nextFootstep, transferToSide);
@@ -373,34 +330,9 @@ public class FeetManager
       footControlModules.get(robotSide).registerDesiredContactPointForToeOff(desiredContactPoint);
    }
 
-   public boolean willLandOnToes()
-   {
-      return walkOnTheEdgesManager.willLandOnToes();
-   }
-
-   public boolean willLandOnHeel()
-   {
-      return walkOnTheEdgesManager.willLandOnHeel();
-   }
-
    public void reset()
    {
       walkOnTheEdgesManager.reset();
-   }
-
-   public void updateEdgeTouchdownStatus(RobotSide supportLeg, Footstep nextFootstep)
-   {
-      walkOnTheEdgesManager.updateEdgeTouchdownStatus(supportLeg, nextFootstep);
-   }
-
-   public double getHeelTouchdownInitialAngle(RobotSide robotSide)
-   {
-      return footControlModules.get(robotSide).getHeelTouchdownInitialAngle();
-   }
-
-   public double getToeTouchdownInitialAngle(RobotSide robotSide)
-   {
-      return footControlModules.get(robotSide).getToeTouchdownInitialAngle();
    }
 
    public boolean doToeOffIfPossible()

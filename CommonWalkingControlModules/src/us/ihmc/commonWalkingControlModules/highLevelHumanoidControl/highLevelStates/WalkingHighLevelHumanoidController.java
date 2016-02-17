@@ -32,8 +32,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.HeelSwitch;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.ToeSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -1534,9 +1532,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (stayInTransferWalkingState.getBooleanValue())
             return false;
 
-         if (!feetManager.isEdgeTouchDownDone(robotSide))
-            return false;
-
          boolean icpTrajectoryIsDone = icpTrajectoryHasBeenInitialized.getBooleanValue() && instantaneousCapturePointPlanner.isDone(yoTime.getDoubleValue());
 
          if (!icpTrajectoryIsDone)
@@ -1593,8 +1588,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private class DoneWithSingleSupportCondition implements StateTransitionCondition
    {
-      private boolean footSwitchActivated;
-
       public DoneWithSingleSupportCondition()
       {
       }
@@ -1615,33 +1608,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             {
                timeThatICPPlannerFinished.set(yoTime.getDoubleValue());
             }
-         }
-
-         FootSwitchInterface footSwitch = footSwitches.get(swingSide);
-
-         if (feetManager.willLandOnToes())
-         {
-            if (!(footSwitch instanceof ToeSwitch))
-            {
-               throw new RuntimeException("toe touchdown should not be used if Robot is not using a ToeSwitch.");
-            }
-
-            ToeSwitch toeSwitch = (ToeSwitch) footSwitch;
-            footSwitchActivated = toeSwitch.hasToeHitGround();
-         }
-         else if (feetManager.willLandOnHeel())
-         {
-            if (!(footSwitch instanceof HeelSwitch))
-            {
-               throw new RuntimeException("landOnHeels should not be set to true if Robot is not using a HeelSwitch.");
-            }
-
-            HeelSwitch heelSwitch = (HeelSwitch) footSwitch;
-            footSwitchActivated = heelSwitch.hasHeelHitGround();
-         }
-         else
-         {
-            footSwitchActivated = footSwitch.hasFootHitGround();
          }
 
          boolean finishSingleSupportWhenICPPlannerIsDone = walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone();// || pushRecoveryModule.isRecovering();
@@ -1672,7 +1638,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return true;
          }
 
-         return hasMinimumTimePassed.getBooleanValue() && footSwitchActivated;
+         return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
       }
 
       private boolean hasMinimumTimePassed()

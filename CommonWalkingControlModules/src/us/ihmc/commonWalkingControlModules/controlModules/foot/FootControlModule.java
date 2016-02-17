@@ -42,7 +42,7 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, HOLD_POSITION, HEEL_TOUCHDOWN, TOES_TOUCHDOWN, TOES, SWING, MOVE_STRAIGHT, MOVE_VIA_WAYPOINTS
+      FULL, HOLD_POSITION, TOES, SWING, MOVE_STRAIGHT, MOVE_VIA_WAYPOINTS
    }
 
    private static final double coefficientOfFriction = 0.8;
@@ -60,8 +60,6 @@ public class FootControlModule
    private final SwingState swingState;
    private final MoveStraightState moveStraightState;
    private final MoveViaWaypointsState moveViaWaypointsState;
-   private final TouchdownState touchdownOnToesState;
-   private final TouchdownState touchdownOnHeelState;
    private final OnToesState onToesState;
    private final FullyConstrainedState supportState;
 
@@ -111,13 +109,6 @@ public class FootControlModule
       touchdownAccelerationProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration()));
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
-      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, edgeTouchdownFootControlGains,
-            registry);
-      states.add(touchdownOnToesState);
-
-      touchdownOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, footControlHelper, touchdownVelocityProvider, edgeTouchdownFootControlGains,
-            registry);
-      states.add(touchdownOnHeelState);
 
       onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
       states.add(onToesState);
@@ -153,9 +144,7 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
       contactStatesMap.put(ConstraintType.HOLD_POSITION, trues);
-      contactStatesMap.put(ConstraintType.HEEL_TOUCHDOWN, getOnEdgeContactPointStates(contactableFoot, ConstraintType.HEEL_TOUCHDOWN));
       contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
-      contactStatesMap.put(ConstraintType.TOES_TOUCHDOWN, contactStatesMap.get(ConstraintType.TOES));
    }
 
    private void setupStateMachine(List<AbstractFootControlState> states)
@@ -323,16 +312,9 @@ public class FootControlModule
       return getCurrentConstraintType() == ConstraintType.TOES;
    }
 
-   public boolean isInEdgeTouchdownState()
-   {
-      return getCurrentConstraintType() == ConstraintType.HEEL_TOUCHDOWN || getCurrentConstraintType() == ConstraintType.TOES_TOUCHDOWN;
-   }
-
    private boolean[] getOnEdgeContactPointStates(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
       FrameVector direction = new FrameVector(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
-      if (constraintType == ConstraintType.HEEL_TOUCHDOWN)
-         direction.scale(-1.0);
 
       int[] indexOfPointsInContact = DesiredFootstepCalculatorTools.findMaximumPointIndexesInDirection(contactableBody.getContactPointsCopy(), direction, 2);
 
@@ -407,16 +389,6 @@ public class FootControlModule
    {
       boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
       moveViaWaypointsState.handleFootTrajectoryMessage(footTrajectoryMessage, initializeToCurrent);
-   }
-
-   public double getHeelTouchdownInitialAngle()
-   {
-      return touchdownOnHeelState.getTouchdownInitialPitchAngle();
-   }
-
-   public double getToeTouchdownInitialAngle()
-   {
-      return touchdownOnToesState.getTouchdownInitialPitchAngle();
    }
 
    public void setPredictedToeOffDuration(double predictedToeOffDuration)
