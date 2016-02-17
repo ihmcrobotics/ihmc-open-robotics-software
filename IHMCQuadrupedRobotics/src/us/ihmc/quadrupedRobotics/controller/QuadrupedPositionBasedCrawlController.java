@@ -187,6 +187,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
 
    private final DoubleYoVariable distanceInside = new DoubleYoVariable("distanceInside", registry);
+   private final BooleanYoVariable possibleTipOnFrontSwingLeg = new BooleanYoVariable("possibleTipOnFrontSwingLeg", registry);
+   private final DoubleYoVariable approximateTimeUntilCrossTrotLine = new DoubleYoVariable("approximateTimeUntilCrossTrotLine", registry);
 
 
    private final QuadrantDependentList<ReferenceFrame> legAttachmentFrames = new QuadrantDependentList<>();
@@ -1802,6 +1804,25 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          finalSwingTarget.set(swingTarget);
          
          initializeSwingTrajectory(swingQuadrant, yoDesiredFootPosition.getFrameTuple(), swingTarget, swingDuration.getDoubleValue());
+
+         //check if there will be a risk of crossing trot line before finishing front leg swimg
+         if (swingQuadrant.isQuadrantInFront())
+         {
+            threeFootSupportPolygon.set(fourFootSupportPolygon);
+            threeFootSupportPolygon.removeFootstep(swingQuadrant); centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+            double currentDistanceInside = threeFootSupportPolygon.distanceInside2d(centerOfMassFramePoint);
+            if (desiredVelocity.length() > 0.1e-3)
+            {
+               approximateTimeUntilCrossTrotLine.set(currentDistanceInside / desiredVelocity.length());
+               if (approximateTimeUntilCrossTrotLine.getDoubleValue() < swingDuration.getDoubleValue())
+                  possibleTipOnFrontSwingLeg.set(true);
+               else
+                  possibleTipOnFrontSwingLeg.set(false);
+
+            }
+            else
+               possibleTipOnFrontSwingLeg.set(false);
+         }
       }
 
       @Override
