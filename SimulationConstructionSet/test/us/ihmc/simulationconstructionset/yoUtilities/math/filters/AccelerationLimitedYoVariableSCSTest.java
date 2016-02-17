@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -19,6 +18,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class AccelerationLimitedYoVariableSCSTest
@@ -533,9 +533,7 @@ public class AccelerationLimitedYoVariableSCSTest
       assertEquals(maxAcceleration, processed.getMaximumAcceleration(), EPSILON);
    }
 
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDump()
    {
