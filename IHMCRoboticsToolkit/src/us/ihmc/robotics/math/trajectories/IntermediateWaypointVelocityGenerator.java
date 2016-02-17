@@ -9,6 +9,7 @@ import java.util.ArrayList;
 /**
  * This velocity generator will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough those way points.
  * It is based on the paper "Curvature-continuous 3D Path-planning Using QPMI Method" which can be found at http://cdn.intechopen.com/pdfs-wm/48591.pdf
+ * Assuming the first and the last way point of a path have a velocity of 0, all way points in between are inserted in this velocity generator.
  *
  * @author Olger
  */
