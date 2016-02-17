@@ -10,12 +10,32 @@ import us.ihmc.tools.MemoryTools;
  */
 public class FourBarCalculatorsComparisonTest
 {
+//   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
+   
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
    
+//   @After
+//   public void destroySimulationAndRecycleMemory()
+//   {
+//      if (simulationTestingParameters.getKeepSCSUp())
+//      {
+//         ThreadTools.sleepForever();
+//      }
+//
+//      if (blockingSimulationRunner != null)
+//      {
+//         blockingSimulationRunner.destroySimulation();
+//         blockingSimulationRunner = null;
+//      }
+//
+//      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+//   }
+//
+//   private BlockingSimulationRunner blockingSimulationRunner;
   
 }
