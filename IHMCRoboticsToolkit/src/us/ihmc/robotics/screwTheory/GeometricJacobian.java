@@ -97,7 +97,7 @@ public class GeometricJacobian
     * angular velocity part of the twist is the angular velocity of end effector frame, with respect to base frame, rotated to end effector frame
     * linear velocity part of the twist is the linear velocity of end effector frame, with respect to base frame, rotated to end effector frame
     */
-   public void packTwist(Twist twistToPack, DenseMatrix64F jointVelocities)
+   public void getTwist(Twist twistToPack, DenseMatrix64F jointVelocities)
    {
       CommonOps.mult(jacobian, jointVelocities, tempMatrix);
       twistToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);

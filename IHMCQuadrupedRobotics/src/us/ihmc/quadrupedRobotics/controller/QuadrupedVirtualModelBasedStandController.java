@@ -278,7 +278,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
 
       // compute center of mass velocity
       FrameVector comVelocity = pool.lease(FrameVector.class);
-      comJacobian.packCenterOfMassVelocity(comVelocity);
+      comJacobian.getCenterOfMassVelocity(comVelocity);
       comVelocity.changeFrame(yoComVelocityEstimate.getReferenceFrame());
       yoComVelocityEstimate.set(comVelocity);
 

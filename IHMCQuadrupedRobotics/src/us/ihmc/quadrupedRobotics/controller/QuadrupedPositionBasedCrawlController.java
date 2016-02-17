@@ -821,7 +821,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       feedForwardCoMPosition.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
       feedForwardCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardCenterOfMassJacobian.compute();
-      feedForwardCenterOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
+      feedForwardCenterOfMassJacobian.getCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardCenterOfMassVelocity.set(tempFrameVector);
 
@@ -837,7 +837,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       tempCoMPosition.setIncludingFrame(comFrame, 0.0, 0.0, 0.0);
       tempCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassJacobian.compute();
-      centerOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
+      centerOfMassJacobian.getCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassVelocity.set(tempFrameVector);
 
@@ -912,7 +912,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
          comTrajectoryGenerator.getPosition(desiredCoMFramePosition);
-         comTrajectoryGenerator.packVelocity(desiredCoMVelocity);
+         comTrajectoryGenerator.getVelocity(desiredCoMVelocity);
          desiredCoMFramePosition.setZ(desiredCoMPose.getPosition().getZ());
          
          desiredCoMPose.setPosition(desiredCoMFramePosition);

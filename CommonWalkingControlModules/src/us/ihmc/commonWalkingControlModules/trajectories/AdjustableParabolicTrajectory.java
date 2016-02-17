@@ -118,9 +118,9 @@ public class AdjustableParabolicTrajectory extends ParabolicCartesianTrajectoryG
          for (int i = 0; i < numberOfStepsToVisualize; i++)
          {
             compute((getFinalTime() / numberOfStepsToVisualize) * i);
-            packPosition(tempPoint);
-            packVelocity(zeroAccelerationVector);
-            packAcceleration(zeroAccelerationVector);
+            getPosition(tempPoint);
+            getVelocity(zeroAccelerationVector);
+            getAcceleration(zeroAccelerationVector);
             AppearanceDefinition appearance;
 
             if (adjustmentMode)

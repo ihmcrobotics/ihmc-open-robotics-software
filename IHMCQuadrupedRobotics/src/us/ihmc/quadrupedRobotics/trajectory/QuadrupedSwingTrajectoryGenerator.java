@@ -112,7 +112,7 @@ public class QuadrupedSwingTrajectoryGenerator
          alphaOut.set(alphaToAlphaFunction.getAlphaPrime(alphaIn.getDoubleValue()));
          alphaTimeInStep.set(swingTimeDoubleProvider.getValue() * alphaOut.getDoubleValue());
          parabolicCartesianTrajectoryGenerator.compute(alphaTimeInStep.getDoubleValue());  //computeNextTick(framePointToPack, dt);
-         parabolicCartesianTrajectoryGenerator.packPosition(framePointToPack);
+         parabolicCartesianTrajectoryGenerator.getPosition(framePointToPack);
          timeInStep.set(timeInStep.getDoubleValue() + dt);
          updateBagOfBalls(framePointToPack);
       }

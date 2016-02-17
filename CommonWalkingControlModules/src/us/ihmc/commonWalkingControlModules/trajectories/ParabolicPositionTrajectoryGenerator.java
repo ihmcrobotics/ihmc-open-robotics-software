@@ -87,14 +87,14 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
 
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
 
-      parabolicTrajectoryGenerator.packPosition(positionToPack, parameter);
+      parabolicTrajectoryGenerator.getPosition(positionToPack, parameter);
    }
 
    public void getVelocity(FrameVector velocityToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
-      parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
+      parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
       velocityToPack.setIncludingFrame(tempVector);
       velocityToPack.scale(minimumJerkTrajectory.getVelocity());
    }
@@ -103,9 +103,9 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
-      parabolicTrajectoryGenerator.packAcceleration(accelerationToPack);
+      parabolicTrajectoryGenerator.getAcceleration(accelerationToPack);
       accelerationToPack.scale(minimumJerkTrajectory.getVelocity() * minimumJerkTrajectory.getVelocity());
-      parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
+      parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
       tempVector.scale(minimumJerkTrajectory.getAcceleration());
       accelerationToPack.add(tempVector);
    }

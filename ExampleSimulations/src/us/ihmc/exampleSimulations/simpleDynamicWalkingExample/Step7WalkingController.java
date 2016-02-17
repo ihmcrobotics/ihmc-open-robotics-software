@@ -451,11 +451,11 @@ public class Step7WalkingController implements RobotController
 
          else
          {
-            swingTrajectory.packVelocity(desiredVelocity);
+            swingTrajectory.getVelocity(desiredVelocity);
          }
 
          // 1) proportional control
-         swingTrajectory.packPosition(desiredPosition);
+         swingTrajectory.getPosition(desiredPosition);
          desiredPosition.add(0.0, 0.0, nTicksSinceTrajectoryIsDone * finalDesiredVelocity.getZ() * deltaT);
 //         System.out.println(desiredPosition);
          yodesiredPositionSwingFoot.setAndMatchFrame(desiredPosition);

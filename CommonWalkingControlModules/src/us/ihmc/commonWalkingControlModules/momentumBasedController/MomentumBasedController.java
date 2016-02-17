@@ -1351,7 +1351,7 @@ public class MomentumBasedController
 
    public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
    {
-      centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocityToPack);
+      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityToPack);
    }
 
    public void getAdmissibleDesiredGroundReactionWrench(SpatialForceVector admissibleDesiredGroundReactionWrenchToPack)
