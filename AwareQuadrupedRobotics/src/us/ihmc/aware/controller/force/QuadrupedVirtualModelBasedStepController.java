@@ -420,7 +420,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       artifactList = new ArtifactList(getClass().getSimpleName() + "Artifacts");
       registerGraphics();
 
-      this.footstepPlanner = new QuadrupedXGaitFootstepPlanner(referenceFrames);
+      this.footstepPlanner = new QuadrupedXGaitFootstepPlanner(registry, yoGraphicsListRegistry, referenceFrames);
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
