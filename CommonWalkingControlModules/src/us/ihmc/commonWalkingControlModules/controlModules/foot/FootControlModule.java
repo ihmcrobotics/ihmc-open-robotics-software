@@ -37,8 +37,6 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class FootControlModule
 {
-   private static final boolean USE_HEURISTIC_SWING_STATE = false;
-
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
 
@@ -59,7 +57,7 @@ public class FootControlModule
    private final BooleanYoVariable doFancyOnToesControl;
 
    private final HoldPositionState holdPositionState;
-   private final SwingStateInterface swingState;
+   private final SwingState swingState;
    private final MoveStraightState moveStraightState;
    private final MoveViaWaypointsState moveViaWaypointsState;
    private final TouchdownState touchdownOnToesState;
@@ -130,19 +128,9 @@ public class FootControlModule
       holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(holdPositionState);
 
-      if (USE_HEURISTIC_SWING_STATE)
-      {
-         HeuristicSwingState swingState = new HeuristicSwingState(footControlHelper, swingTimeProvider, swingFootControlGains, registry);
-         states.add(swingState);
-         this.swingState = swingState;
-      }
-      else
-      {
-         SwingState swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, touchdownAccelerationProvider,
-               swingFootControlGains, registry);
-         states.add(swingState);
-         this.swingState = swingState;
-      }
+      swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, touchdownAccelerationProvider,
+            swingFootControlGains, registry);
+      states.add(swingState);
 
       moveStraightState = new MoveStraightState(footControlHelper, swingFootControlGains, registry);
       states.add(moveStraightState);

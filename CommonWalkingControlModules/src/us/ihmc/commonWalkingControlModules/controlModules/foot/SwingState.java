@@ -37,7 +37,7 @@ import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class SwingState extends AbstractUnconstrainedState implements SwingStateInterface
+public class SwingState extends AbstractUnconstrainedState
 {
 
    private final boolean visualizeSwingTrajectory = true;
@@ -153,14 +153,12 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       return pushRecoveryPositionTrajectoryGenerator;
    }
 
-   @Override
    public void setInitialDesireds(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
    {
       hasInitialAngularConfigurationBeenProvided.set(true);
       orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
    }
 
-   @Override
    protected void initializeTrajectory()
    {
       if (!hasInitialAngularConfigurationBeenProvided.getBooleanValue())
@@ -179,7 +177,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       replanTrajectory.set(false);
    }
 
-   @Override
    protected void computeAndPackTrajectory()
    {
       if (replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
@@ -230,7 +227,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final FramePose newFootstepPose = new FramePose();
    private final FramePoint oldFootstepPosition = new FramePoint();
 
-   @Override
    public void setFootstep(Footstep footstep)
    {
       footstep.getPose(newFootstepPose);
@@ -262,7 +258,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       }
    }
 
-   @Override
    public void replanTrajectory(Footstep newFootstep)
    {
       setFootstep(newFootstep);
@@ -273,7 +268,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       this.replanTrajectory.set(true);
    }
 
-   @Override
    public void requestSwingSpeedUp(double speedUpFactor)
    {
       if (isSwingSpeedUpEnabled.getBooleanValue())
