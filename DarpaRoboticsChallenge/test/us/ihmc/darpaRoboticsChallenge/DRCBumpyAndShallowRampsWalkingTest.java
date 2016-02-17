@@ -10,7 +10,6 @@ import java.util.Random;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
@@ -36,6 +35,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
@@ -162,9 +162,8 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       createVideo(scs);
    }
 
-	@Ignore
 	// This has never worked. Would be nice if we can get it to work.")
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

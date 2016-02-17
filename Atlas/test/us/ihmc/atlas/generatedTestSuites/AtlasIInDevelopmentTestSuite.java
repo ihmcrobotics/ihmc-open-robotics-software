@@ -14,6 +14,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
 })
 
 public class AtlasIInDevelopmentTestSuite

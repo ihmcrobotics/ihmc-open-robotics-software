@@ -65,8 +65,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
    public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel fullRobotModel, SDFRobot sdfRobot);
    
-// @Ignore
-// @QuarantinedTest("150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...")
+   // 150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...
 	@DeployableTestMethod(estimatedDuration = 39.1)
    @Test(timeout = 200000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException

@@ -12,7 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampFootstepSnapperTest.class
 })
 
 public class AtlasHFastTestSuite

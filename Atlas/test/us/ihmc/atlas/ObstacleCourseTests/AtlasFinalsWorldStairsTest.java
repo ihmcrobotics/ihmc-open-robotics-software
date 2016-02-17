@@ -11,7 +11,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -38,9 +37,6 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
-/**
- * Created by agrabertilton on 4/15/15.
- */
 @DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})
 public class AtlasFinalsWorldStairsTest
 {
@@ -71,7 +67,6 @@ public class AtlasFinalsWorldStairsTest
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
 
 	@DeployableTestMethod(estimatedDuration = 135.0)
    @Test(timeout = 680000)
@@ -120,8 +115,7 @@ public class AtlasFinalsWorldStairsTest
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 30.4)
+   @DeployableTestMethod(estimatedDuration = 120.0)
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

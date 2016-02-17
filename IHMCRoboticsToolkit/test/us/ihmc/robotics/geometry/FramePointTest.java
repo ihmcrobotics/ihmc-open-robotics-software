@@ -1,25 +1,26 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Ignore;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
  * <p>Title: </p>
@@ -474,9 +475,8 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-   @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
-
-	@DeployableTestMethod
+   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testConstructors()
    {

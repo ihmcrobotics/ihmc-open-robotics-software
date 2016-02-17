@@ -76,6 +76,13 @@ public class WalkOnTheEdgesManager
          SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<FootControlModule> footEndEffectorControlModules,
          YoVariableRegistry parentRegistry)
    {
+      this(momentumBasedController.getFullRobotModel(), walkingControllerParameters, feet, createFootContactStates(momentumBasedController), footEndEffectorControlModules, parentRegistry);
+   }
+
+   public WalkOnTheEdgesManager(FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
+         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<YoPlaneContactState> footContactStates,
+         SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
+   {
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeOffIfPossibleInSingleSupport.set(walkingControllerParameters.doToeOffIfPossibleInSingleSupport());
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
@@ -83,7 +90,7 @@ public class WalkOnTheEdgesManager
 
       this.walkingControllerParameters = walkingControllerParameters;
 
-      this.fullRobotModel = momentumBasedController.getFullRobotModel();
+      this.fullRobotModel = fullRobotModel;
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
 
@@ -105,13 +112,19 @@ public class WalkOnTheEdgesManager
          footDefaultPolygons.put(robotSide, new FrameConvexPolygon2d(feet.get(robotSide).getContactPoints2d()));
       }
 
-      footContactStates = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footContactStates.put(robotSide, momentumBasedController.getContactState(feet.get(robotSide)));
-      }
+      this.footContactStates = footContactStates;
 
       parentRegistry.addChild(registry);
+   }
+
+   private static SideDependentList<YoPlaneContactState> createFootContactStates(MomentumBasedController momentumBasedController)
+   {
+      SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footContactStates.put(robotSide, momentumBasedController.getContactState(momentumBasedController.getContactableFeet().get(robotSide)));
+      }
+      return footContactStates;
    }
 
    public void updateToeOffStatus(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
@@ -134,7 +147,7 @@ public class WalkOnTheEdgesManager
       }
 
       RobotSide leadingLeg = trailingLeg.getOppositeSide();
-      if (footContactStates.get(leadingLeg).getTotalNumberOfContactPoints() > 0)
+      if (footContactStates != null && footContactStates.get(leadingLeg).getTotalNumberOfContactPoints() > 0)
       {
          footContactStates.get(leadingLeg).getContactFramePointsInContact(contactStatePoints);
          leadingFootSupportPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(worldFrame, contactStatePoints);
@@ -196,7 +209,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      if (checkRearLegJacobianDeterminant.getBooleanValue())
+      if (footEndEffectorControlModules != null && checkRearLegJacobianDeterminant.getBooleanValue())
       {
          FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
          doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
