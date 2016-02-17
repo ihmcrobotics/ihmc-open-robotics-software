@@ -184,7 +184,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final Quat4d temp = new Quat4d();
    
-   public void get(FramePose framePoseToPack)
+   public void getPose(FramePose framePoseToPack)
    {
       framePoseToPack.changeFrame(position.getReferenceFrame());
       framePoseToPack.setPosition(position.getFrameTuple());

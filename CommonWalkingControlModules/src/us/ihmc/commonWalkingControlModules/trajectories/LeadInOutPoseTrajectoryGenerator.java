@@ -174,7 +174,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       packAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void get(FramePose framePoseToPack)
+   public void getPose(FramePose framePoseToPack)
    {
       positionTrajectoryGenerator.get(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());

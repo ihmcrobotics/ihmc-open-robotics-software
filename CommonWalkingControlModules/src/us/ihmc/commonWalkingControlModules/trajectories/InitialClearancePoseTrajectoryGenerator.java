@@ -171,7 +171,7 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       packAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void get(FramePose framePoseToPack)
+   public void getPose(FramePose framePoseToPack)
    {
       positionTrajectoryGenerator.get(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
