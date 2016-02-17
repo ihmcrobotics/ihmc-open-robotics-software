@@ -1,6 +1,9 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -15,7 +18,6 @@ import java.util.ArrayList;
  */
 public class IntermediateWaypointVelocityGenerator
 {
-
    private final ArrayList<double[]> parametersX;
    private final ArrayList<double[]> parametersY;
    private final ArrayList<double[]> parametersZ;
@@ -126,4 +128,5 @@ public class IntermediateWaypointVelocityGenerator
       System.out.println("final check");
       System.out.println(xDot);
    }
+
 }
