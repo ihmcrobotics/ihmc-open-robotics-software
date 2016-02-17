@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -10,6 +11,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 public class FullyConstrainedState extends AbstractFootControlState
 {
    private final FrameVector fullyConstrainedNormalContactVector;
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private final FramePoint2d cop = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
@@ -55,6 +57,12 @@ public class FullyConstrainedState extends AbstractFootControlState
 
       footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
 
-      footControlHelper.submitTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration, spatialAccelerationCommand);
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }

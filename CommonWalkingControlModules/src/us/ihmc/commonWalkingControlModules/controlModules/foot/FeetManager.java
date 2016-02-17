@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -385,5 +386,10 @@ public class FeetManager
    public void requestSwingSpeedUp(RobotSide robotSide, double speedUpFactor)
    {
       footControlModules.get(robotSide).requestSwingSpeedUp(speedUpFactor);
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getInverseDynamicsCommand();
    }
 }

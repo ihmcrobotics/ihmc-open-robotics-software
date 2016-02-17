@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -58,6 +59,7 @@ public class FootControlHelper
 
    private final int jacobianId;
    private final GeometricJacobian jacobian;
+   private final GeometricJacobian rootToFootJacobian;
    private final EnumYoVariable<ConstraintType> requestedState;
    private final FrameVector fullyConstrainedNormalContactVector;
    private final BooleanYoVariable isDesiredCoPOnEdge;
@@ -128,6 +130,10 @@ public class FootControlHelper
       jacobianId = momentumBasedController.getOrCreateGeometricJacobian(legJoints, foot.getBodyFixedFrame());
       jacobian = momentumBasedController.getJacobian(jacobianId);
 
+      rootBody = twistCalculator.getRootBody();
+      int rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, foot, foot.getBodyFixedFrame());
+      rootToFootJacobian = momentumBasedController.getJacobian(rootToFootJacobianId);
+
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
 
       isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
@@ -154,7 +160,6 @@ public class FootControlHelper
 
       selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
-      rootBody = twistCalculator.getRootBody();
       taskspaceConstraintData.set(rootBody, contactableFoot.getRigidBody());
 
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -227,18 +232,19 @@ public class FootControlHelper
       ankleRollAndHipYawAlignmentFactor.set(Math.abs(ankleRollAxis.dot(hipYawAxis)));
    }
 
-   public void submitTaskspaceConstraint(SpatialAccelerationVector footAcceleration)
+   public void submitTaskspaceConstraint(SpatialAccelerationVector footAcceleration, SpatialAccelerationCommand spatialAccelerationCommandToPack)
    {
-      submitTaskspaceConstraint(jacobianId, footAcceleration);
+      submitTaskspaceConstraint(jacobianId, footAcceleration, spatialAccelerationCommandToPack);
    }
 
-   public void submitTaskspaceConstraint(int jacobianId, SpatialAccelerationVector footAcceleration)
+   public void submitTaskspaceConstraint(int jacobianId, SpatialAccelerationVector footAcceleration, SpatialAccelerationCommand spatialAccelerationCommandToPack)
    {
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
       taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+      spatialAccelerationCommandToPack.set(rootToFootJacobian, taskspaceConstraintData);
    }
 
    public void updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment()

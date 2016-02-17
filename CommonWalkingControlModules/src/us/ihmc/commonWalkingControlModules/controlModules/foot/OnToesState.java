@@ -14,6 +14,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPositionPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -40,6 +42,8 @@ public class OnToesState extends AbstractFootControlState
 {
    private static final boolean USE_TOEOFF_TRAJECTORY = false;
    private static final double MIN_TRAJECTORY_TIME = 0.1;
+
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
@@ -208,7 +212,7 @@ public class OnToesState extends AbstractFootControlState
       // Just to make sure we're not trying to do singularity escape
       // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
       footControlHelper.resetNullspaceMultipliers();
-      footControlHelper.submitTaskspaceConstraint(footAcceleration);
+      footControlHelper.submitTaskspaceConstraint(footAcceleration, spatialAccelerationCommand);
 
       contactPointPosition.setIncludingFrame(toeOffContactPoint.getReferenceFrame(), toeOffContactPoint.getX(), toeOffContactPoint.getY(), 0.0);
 
@@ -388,5 +392,11 @@ public class OnToesState extends AbstractFootControlState
    {
       toeOffContactPoint.checkReferenceFrameMatch(contactableFoot.getSoleFrame());
       userDefinedContactPoint.setIncludingFrame(toeOffContactPoint);
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }
