@@ -138,7 +138,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
          {
             SpatialForceVector vectorToPack = new SpatialForceVector();
             output.getExternallyActingSpatialForceVector(vectorToPack);
-            vectorToPack.packMatrix(forcesToPack);
+            vectorToPack.getMatrix(forcesToPack);
             sumOfForces[i] += forcesToPack[i];
          }
       }

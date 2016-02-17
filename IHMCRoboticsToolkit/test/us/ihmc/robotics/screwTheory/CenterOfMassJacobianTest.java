@@ -127,7 +127,7 @@ public class CenterOfMassJacobianTest
                                          ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), elevator.getBodyFixedFrame());
 
       Matrix3d rotation = new Matrix3d();
-      sixDoFJoint.packRotation(rotation);
+      sixDoFJoint.getRotation(rotation);
 
       JUnitTools.assertTuple3dEquals(velocityNumerical.getVectorCopy(), velocityFromJacobian.getVectorCopy(), 4e-5);
    }
@@ -174,7 +174,7 @@ public class CenterOfMassJacobianTest
       Twist rootJointTwist = new Twist();
       rootJoint.getJointTwist(rootJointTwist);
       FrameVector rootJointLinearVelocity = new FrameVector(rootJointFrame);
-      rootJointTwist.packLinearPart(rootJointLinearVelocity);
+      rootJointTwist.getLinearPart(rootJointLinearVelocity);
       
       CenterOfMassJacobian jacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator), ScrewTools.computeSubtreeJoints(body0), elevator.getBodyFixedFrame());
       jacobianBody.compute();
@@ -189,7 +189,7 @@ public class CenterOfMassJacobianTest
       comVelocityWorld.changeFrame(rootJointFrame);
       
       FrameVector angularVelocityBody = new FrameVector(rootJointFrame);
-      rootJointTwist.packAngularPart(angularVelocityBody);
+      rootJointTwist.getAngularPart(angularVelocityBody);
 
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
       centerOfMassCalculator.compute();

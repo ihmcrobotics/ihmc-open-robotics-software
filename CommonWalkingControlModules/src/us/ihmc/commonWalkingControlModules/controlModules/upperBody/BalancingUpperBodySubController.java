@@ -868,7 +868,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		robotCoMPosition.set(processedSensors.getCenterOfMassPositionInFrame(ReferenceFrame.getWorldFrame()));
 
 		FramePoint chestCoM = chestCoMPosition.getFramePointCopy();
-		this.chest.packCoMOffset(chestCoM);
+		this.chest.getCoMOffset(chestCoM);
 		chestCoM.changeFrame(chestCoMPosition.getReferenceFrame());
 		chestCoMPosition.set(chestCoM);
 

@@ -167,13 +167,13 @@ public class MomentumSolver2 implements MomentumSolverInterface
       desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
       convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
       convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
-      convectiveTerm.packMatrix(convectiveTermMatrix, 0);
+      convectiveTerm.getMatrix(convectiveTermMatrix, 0);
 
       JBlock.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, baseToEndEffectorJacobian.getJacobianMatrix(), JBlock);
 
       pBlock.reshape(selectionMatrix.getNumRows(), 1);
-      taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+      taskSpaceAcceleration.getMatrix(taskSpaceAccelerationMatrix, 0);
       CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, pBlock);
       CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, pBlock);
 
@@ -208,7 +208,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
             controlDT);
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
-      ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
+      ScrewTools.getJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotV);
    }
 
@@ -225,7 +225,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
       beta1.reshape(N.getNumCols(), 1);
 
       CommonOps.setIdentity(N);
-      momentumRateOfChange.packMatrix(beta1);
+      momentumRateOfChange.getMatrix(beta1);
 
       solve(T, alpha1, N, beta1);
    }

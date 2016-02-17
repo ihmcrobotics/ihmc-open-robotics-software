@@ -1537,7 +1537,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
          DenseMatrix64F matrix = new DenseMatrix64F(numRows, numCols);
          //      System.out.println(matrix.toString()); //before
-         frametuple.packMatrix(matrix, startRow);
+         frametuple.getInMatrixColumn(matrix, startRow);
          //      System.out.println(matrix.toString()); //after
 
          for(int i = startRow; i < startRow + 3; i++)

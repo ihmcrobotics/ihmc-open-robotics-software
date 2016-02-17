@@ -165,8 +165,8 @@ public class CenterOfMassKinematicBasedLinearStateCalculator
          Twist footTwistInWorld = footTwistsInWorld.get(robotquadrant);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(robotquadrant);
 
-         twistCalculator.packTwistOfBody(footTwistInWorld, shinRigidBodies.get(robotquadrant));
-         footTwistInWorld.packLinearPart(tempFrameVector);
+         twistCalculator.getTwistOfBody(footTwistInWorld, shinRigidBodies.get(robotquadrant));
+         footTwistInWorld.getLinearPart(tempFrameVector);
 
          tempFrameVector.changeFrame(worldFrame);
          footVelocityInWorld.set(tempFrameVector);

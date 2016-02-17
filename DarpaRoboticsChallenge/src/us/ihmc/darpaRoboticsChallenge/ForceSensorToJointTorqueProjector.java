@@ -70,7 +70,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
    @Override
    public void doControl()
    {
-      forceSensorData.packWrench(tempWrench);
+      forceSensorData.getWrench(tempWrench);
       for(int i = 0; i < yoTorqueInJoints.size(); i++)
       {
          ImmutablePair<FrameVector, DoubleYoVariable> pair = yoTorqueInJoints.get(i);
@@ -79,7 +79,7 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
 
          tempWrench.changeFrame(jointAxis.getReferenceFrame());
          tempFrameVector.setToZero(tempWrench.getExpressedInFrame());
-         tempWrench.packAngularPart(tempFrameVector);
+         tempWrench.getAngularPart(tempFrameVector);
          torqueAboutJointAxis.set(-tempFrameVector.dot(jointAxis));
       }
 

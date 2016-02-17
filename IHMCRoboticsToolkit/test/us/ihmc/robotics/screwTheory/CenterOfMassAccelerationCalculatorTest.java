@@ -48,7 +48,7 @@ public class CenterOfMassAccelerationCalculatorTest
       elevator.updateFramesRecursively();
 
       Matrix3d rotationMatrix = new Matrix3d();
-      sixDoFJoint.packRotation(rotationMatrix);
+      sixDoFJoint.getRotation(rotationMatrix);
 
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();

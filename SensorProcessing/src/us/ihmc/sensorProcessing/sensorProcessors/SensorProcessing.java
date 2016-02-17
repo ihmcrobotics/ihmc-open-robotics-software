@@ -391,8 +391,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
          inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
-         tempWrench.packLinearPartIncludingFrame(tempForce); 
-         tempWrench.packAngularPartIncludingFrame(tempTorque); 
+         tempWrench.getLinearPartIncludingFrame(tempForce); 
+         tempWrench.getAngularPartIncludingFrame(tempTorque); 
          inputForces.get(forceSensorDefinition).set(tempForce);
          inputTorques.get(forceSensorDefinition).set(tempTorque);
          

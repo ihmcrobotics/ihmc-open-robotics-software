@@ -128,8 +128,8 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       }
       
       Twist footTwist = footTwistCalculator.computeFootTwist();
-      footTwist.packAngularPart(tempAngularPart);
-      footTwist.packBodyOriginLinearPartInBaseFrame(tempLinearPart);
+      footTwist.getAngularPart(tempAngularPart);
+      footTwist.getBodyOriginLinearPartInBaseFrame(tempLinearPart);
       
       footAngularVelocityMagnitude.set(tempAngularPart.length());
       footLinearVelocityMagnitude.set(tempLinearPart.length());

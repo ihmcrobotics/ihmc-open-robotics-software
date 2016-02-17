@@ -238,12 +238,12 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.tau = tau;
    }
 
-   public void packUnitJointTwist(Twist twistToPack)
+   public void getUnitJointTwist(Twist twistToPack)
    {
       twistToPack.set(unitJointTwist);
    }
 
-   public void packUnitJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getUnitJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(unitJointAcceleration);
    }

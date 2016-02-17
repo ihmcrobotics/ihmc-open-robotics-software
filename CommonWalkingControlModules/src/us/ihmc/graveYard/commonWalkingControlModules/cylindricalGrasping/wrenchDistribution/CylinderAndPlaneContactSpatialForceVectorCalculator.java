@@ -356,13 +356,13 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       graphicYoDoubles[q][i][Y].set(localPoint.getY());
       graphicYoDoubles[q][i][Z].set(localPoint.getZ());
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
-      currentBasisVector.packAngularPart(tempVector);
+      currentBasisVector.getAngularPart(tempVector);
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
       graphicYoDoubles[q][i][xx].set(tempVector.getX());
       graphicYoDoubles[q][i][yy].set(tempVector.getY());
       graphicYoDoubles[q][i][zz].set(tempVector.getZ());
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
-      currentBasisVector.packLinearPart(tempVector);
+      currentBasisVector.getLinearPart(tempVector);
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
       graphicYoDoubles[q][i][x].set(tempVector.getX());
       graphicYoDoubles[q][i][y].set(tempVector.getY());

@@ -156,7 +156,7 @@ public class CenterOfMassJacobian
          FramePoint curChildCoMScaledByMass = comScaledByMassMap.get(rigidBody);
          
          curChildCoMScaledByMass.setToZero(rootFrame);
-         rigidBody.packCoMOffset(curChildCoMScaledByMass);
+         rigidBody.getCoMOffset(curChildCoMScaledByMass);
          curChildCoMScaledByMass.changeFrame(rootFrame);
          double massToScale = (rigidBodyList.contains(rigidBody) ? rigidBody.getInertia().getMass() : 0.0);
          curChildCoMScaledByMass.scale(massToScale);
@@ -180,7 +180,7 @@ public class CenterOfMassJacobian
 
    public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
    {
-      ScrewTools.packJointVelocitiesMatrix(joints, tempJointVelocitiesMatrix);
+      ScrewTools.getJointVelocitiesMatrix(joints, tempJointVelocitiesMatrix);
       getCenterOfMassVelocity(centerOfMassVelocityToPack, tempJointVelocitiesMatrix);
    }
 

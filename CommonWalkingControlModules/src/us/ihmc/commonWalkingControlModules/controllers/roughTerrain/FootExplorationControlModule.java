@@ -1337,9 +1337,9 @@ public class FootExplorationControlModule
    {
       for (RobotSide side : RobotSide.values)
       {
-         momentumBasedController.getTwistCalculator().packTwistOfBody(tmpTwist, momentumBasedController.getFullRobotModel().getFoot(side));
+         momentumBasedController.getTwistCalculator().getTwistOfBody(tmpTwist, momentumBasedController.getFullRobotModel().getFoot(side));
          tmpTwist.changeFrame(ReferenceFrame.getWorldFrame());
-         tmpTwist.packAngularPart(tmpVector);
+         tmpTwist.getAngularPart(tmpVector);
          footAngularRate.get(side).set(tmpVector.length());
       }
    }

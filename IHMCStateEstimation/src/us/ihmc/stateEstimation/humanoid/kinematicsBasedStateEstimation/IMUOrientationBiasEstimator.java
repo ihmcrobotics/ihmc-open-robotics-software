@@ -80,7 +80,7 @@ public class IMUOrientationBiasEstimator
          estimatedOrientationBiasFiltered.set(estimatedQuaternionBias);
          
          estimatedOrientationBiasFiltered.getMatrix3d(biasRotation);
-         rootJoint.packRotation(rootJointRotation);
+         rootJoint.getRotation(rootJointRotation);
          rootJointRotation.mul(biasRotation, rootJointRotation);
          
          estimatedRootJointQuaternionUnbiased.set(rootJointRotation);

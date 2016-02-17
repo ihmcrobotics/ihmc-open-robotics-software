@@ -132,12 +132,12 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       tempEstimationLinkAngularVelocity.setIncludingFrame(angularVelocityPort.getData());
 
       // T_{root}^{root, estimation}
-      twistCalculator.packRelativeTwist(tempRootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
+      twistCalculator.getRelativeTwist(tempRootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
       tempRootToEstimationTwist.changeFrame(rootJoint.getFrameAfterJoint());
 
       // omega_{root}^{root, estimation}
       tempRootToEstimationAngularVelocity.setToZero(rootJoint.getFrameAfterJoint());
-      tempRootToEstimationTwist.packAngularPart(tempRootToEstimationAngularVelocity);
+      tempRootToEstimationTwist.getAngularPart(tempRootToEstimationAngularVelocity);
 
       // omega_{estimation}^{root, world}
       tempEstimationLinkAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
@@ -154,9 +154,9 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       tempCrossTerm.cross(tempRootToEstimationAngularVelocity, tempEstimationLinkAngularVelocity);
 
       // \omega_{root}^{root, estimation}
-      spatialAccelerationCalculator.packRelativeAcceleration(tempRootToEstimationAcceleration, estimationLink, rootJoint.getSuccessor());
+      spatialAccelerationCalculator.getRelativeAcceleration(tempRootToEstimationAcceleration, estimationLink, rootJoint.getSuccessor());
       tempRootToEstimationAcceleration.changeFrameNoRelativeMotion(rootJoint.getFrameAfterJoint());
-      tempRootToEstimationAcceleration.packAngularPart(tempRootToEstimationAngularAcceleration);
+      tempRootToEstimationAcceleration.getAngularPart(tempRootToEstimationAngularAcceleration);
       tempRootToEstimationAngularAcceleration.changeFrame(estimationFrame);
 
       rootJointAngularAccelerationToPack.setIncludingFrame(angularAccelerationPort.getData());

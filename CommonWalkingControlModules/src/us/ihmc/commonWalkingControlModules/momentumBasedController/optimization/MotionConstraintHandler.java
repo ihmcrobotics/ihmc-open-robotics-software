@@ -240,7 +240,7 @@ public class MotionConstraintHandler
          convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);
          convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
          convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
-         convectiveTerm.packMatrix(convectiveTermMatrix, 0);
+         convectiveTerm.getMatrix(convectiveTermMatrix, 0);
          
          jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
 
@@ -269,7 +269,7 @@ public class MotionConstraintHandler
             tempMatrixCTransposeJ.reshape(tempMatrixCTranspose.getNumRows(), tempBaseToEndEffectorJacobianMatrix.getNumCols());
             CommonOps.mult(tempMatrixCTranspose, tempBaseToEndEffectorJacobianMatrix, tempMatrixCTransposeJ);
             
-            taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+            taskSpaceAcceleration.getMatrix(taskSpaceAccelerationMatrix, 0);
             
             tempPVector.reshape(selectionMatrix.getNumRows(), 1);
             CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, tempPVector);
@@ -349,7 +349,7 @@ public class MotionConstraintHandler
             CommonOps.mult(selectionMatrix, tempBaseToEndEffectorJacobianMatrix, jBlockCompact);
             
             DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
-            taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+            taskSpaceAcceleration.getMatrix(taskSpaceAccelerationMatrix, 0);
             CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, pBlock);
             CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, pBlock);
             
@@ -392,7 +392,7 @@ public class MotionConstraintHandler
          convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);
          convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
          convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
-         convectiveTerm.packMatrix(convectiveTermMatrix, 0);
+         convectiveTerm.getMatrix(convectiveTermMatrix, 0);
 
          jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
 
@@ -431,7 +431,7 @@ public class MotionConstraintHandler
 //         if (jMatrixToPack != null) jMatrixToPack.setReshape(jFullBlock);
          
          DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
-         taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+         taskSpaceAcceleration.getMatrix(taskSpaceAccelerationMatrix, 0);
          CommonOps.mult(selectionMatrix, taskSpaceAccelerationMatrix, pBlock);
          CommonOps.multAdd(-1.0, selectionMatrix, convectiveTermMatrix, pBlock);
 

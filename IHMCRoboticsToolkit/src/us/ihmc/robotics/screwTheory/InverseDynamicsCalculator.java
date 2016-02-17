@@ -119,10 +119,10 @@ public class InverseDynamicsCalculator
       {
          RigidBody body = allBodiesExceptRoot.get(bodyIndex);
          Wrench netWrench = netWrenches.get(body);
-         twistCalculator.packTwistOfBody(tempTwist, body);
+         twistCalculator.getTwistOfBody(tempTwist, body);
          if (!doVelocityTerms)
             tempTwist.setToZero();
-         spatialAccelerationCalculator.packAccelerationOfBody(tempAcceleration, body);
+         spatialAccelerationCalculator.getAccelerationOfBody(tempAcceleration, body);
          body.getInertia().computeDynamicWrenchInBodyCoordinates(netWrench, tempAcceleration, tempTwist);
       }
    }

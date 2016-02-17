@@ -177,7 +177,7 @@ public class PlaneContactWrenchMatrixCalculator
         		 {
         			 computeBasisVector(planeContactState, contactPoint, k);
 
-        			 currentBasisVector.packMatrixColumn(qRho, iRho);
+        			 currentBasisVector.getMatrixColumn(qRho, iRho);
         			 rhoMin.set(iRho, 0, rhoMinScalar.getDoubleValue());
         			 wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue());
         			 wRhoSmootherMatrix.set(iRho, iRho, wRhoSmoother.getDoubleValue());
