@@ -1,21 +1,22 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
+
+import org.junit.Test;
+
+import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class LeastSquaresZPlaneFitterTest
 {
@@ -153,9 +154,8 @@ public class LeastSquaresZPlaneFitterTest
       return true;
    }
 
-   @Ignore("Straight up and down fails with LeastSquaresZPlaneFitter since it assumes equation Ax + By + z + C = 0")
-
-	@DeployableTestMethod
+   // Straight up and down fails with LeastSquaresZPlaneFitter since it assumes equation Ax + By + z + C = 0
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testStraightUpAndDownPlane()
    {
