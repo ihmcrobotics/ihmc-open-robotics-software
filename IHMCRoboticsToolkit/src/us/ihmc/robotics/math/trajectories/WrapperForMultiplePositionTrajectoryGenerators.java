@@ -69,22 +69,22 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
       currentGenerator.getPosition(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       PositionTrajectoryGenerator currentGenerator = positionTrajectoryGenerators.get(positionTrajectoryGeneratorIndex.getIntegerValue());
-      currentGenerator.packVelocity(velocityToPack);
+      currentGenerator.getVelocity(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       PositionTrajectoryGenerator currentGenerator = positionTrajectoryGenerators.get(positionTrajectoryGeneratorIndex.getIntegerValue());
-      currentGenerator.packAcceleration(accelerationToPack);
+      currentGenerator.getAcceleration(accelerationToPack);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       PositionTrajectoryGenerator currentGenerator = positionTrajectoryGenerators.get(positionTrajectoryGeneratorIndex.getIntegerValue());
-      currentGenerator.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      currentGenerator.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
    public void showVisualization()

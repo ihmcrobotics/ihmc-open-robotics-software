@@ -48,7 +48,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
-      packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
    public void updateFinalDesiredPosition(FramePoint finalDesiredPosition)
@@ -90,7 +90,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       parabolicTrajectoryGenerator.packPosition(positionToPack, parameter);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
@@ -99,7 +99,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       velocityToPack.scale(minimumJerkTrajectory.getVelocity());
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
@@ -143,11 +143,11 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       minimumJerkTrajectory.computeTrajectory(time);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override

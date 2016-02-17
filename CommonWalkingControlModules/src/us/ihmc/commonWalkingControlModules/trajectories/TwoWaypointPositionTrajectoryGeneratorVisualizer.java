@@ -168,7 +168,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
    private void setCartesianSpeed(TwoWaypointPositionTrajectoryGenerator trajectoryGenerator)
    {
       FrameVector velocity = new FrameVector();
-      trajectoryGenerator.packVelocity(velocity);
+      trajectoryGenerator.getVelocity(velocity);
       cartesianSpeed.set(velocity.length());
    }
 

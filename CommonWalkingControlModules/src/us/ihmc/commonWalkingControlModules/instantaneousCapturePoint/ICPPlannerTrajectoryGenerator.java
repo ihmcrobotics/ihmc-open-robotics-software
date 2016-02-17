@@ -76,9 +76,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
-      doubleSupportCapturePointTrajectory.packVelocity(velocityToPack);
+      doubleSupportCapturePointTrajectory.getVelocity(velocityToPack);
    }
 
    public void packVelocity(YoFrameVector velocityToPack)
@@ -87,15 +87,15 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
-      doubleSupportCapturePointTrajectory.packAcceleration(accelerationToPack);
+      doubleSupportCapturePointTrajectory.getAcceleration(accelerationToPack);
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      doubleSupportCapturePointTrajectory.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
    public void packLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)

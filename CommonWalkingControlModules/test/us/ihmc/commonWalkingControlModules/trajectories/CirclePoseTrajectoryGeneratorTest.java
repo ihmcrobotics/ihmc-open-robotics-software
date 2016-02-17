@@ -166,7 +166,7 @@ public class CirclePoseTrajectoryGeneratorTest
 
       assertFalse(worldFrame.equals(velocityToPack.getReferenceFrame()));
 
-      trajectoryGenerator.packVelocity(velocityToPack);
+      trajectoryGenerator.getVelocity(velocityToPack);
 
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
@@ -182,7 +182,7 @@ public class CirclePoseTrajectoryGeneratorTest
 
       assertFalse(worldFrame.equals(accelerationToPack.getReferenceFrame()));
 
-      trajectoryGenerator.packAcceleration(accelerationToPack);
+      trajectoryGenerator.getAcceleration(accelerationToPack);
 
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
@@ -198,7 +198,7 @@ public class CirclePoseTrajectoryGeneratorTest
 
       assertFalse(worldFrame.equals(angularVelocityToPack.getReferenceFrame()));
 
-      trajectoryGenerator.packVelocity(angularVelocityToPack);
+      trajectoryGenerator.getVelocity(angularVelocityToPack);
 
       assertEquals(0.0, angularVelocityToPack.getX(), EPSILON);
       assertEquals(0.0, angularVelocityToPack.getY(), EPSILON);
@@ -214,7 +214,7 @@ public class CirclePoseTrajectoryGeneratorTest
 
       assertFalse(worldFrame.equals(angularAccelerationToPack.getReferenceFrame()));
 
-      trajectoryGenerator.packAcceleration(angularAccelerationToPack);
+      trajectoryGenerator.getAcceleration(angularAccelerationToPack);
 
       assertEquals(0.0, angularAccelerationToPack.getX(), EPSILON);
       assertEquals(0.0, angularAccelerationToPack.getY(), EPSILON);
@@ -246,7 +246,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertFalse(worldFrame.equals(accelerationToPack.getReferenceFrame()));
       assertFalse(ReferenceFrame.getWorldFrame().equals(accelerationToPack.getReferenceFrame()));
 
-      trajectoryGenerator.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      trajectoryGenerator.getLinearData(positionToPack, velocityToPack, accelerationToPack);
 
       assertEquals(0.0, positionToPack.getX(), EPSILON);
       assertEquals(0.0, positionToPack.getY(), EPSILON);
@@ -288,7 +288,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertFalse(worldFrame.equals(angularAccelerationToPack.getReferenceFrame()));
       assertFalse(ReferenceFrame.getWorldFrame().equals(angularAccelerationToPack.getReferenceFrame()));
 
-      trajectoryGenerator.packLinearData(positionToPack, angularVelocityToPack, angularAccelerationToPack);
+      trajectoryGenerator.getLinearData(positionToPack, angularVelocityToPack, angularAccelerationToPack);
 
       assertEquals(0.0, positionToPack.getX(), EPSILON);
       assertEquals(0.0, positionToPack.getY(), EPSILON);
@@ -354,7 +354,7 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.packAngularVelocity(omega);
 
       FrameVector v = new FrameVector(frame);
-      trajectoryGenerator.packVelocity(v);
+      trajectoryGenerator.getVelocity(v);
 
       FramePoint r = new FramePoint(frame);
       trajectoryGenerator.getPosition(r);

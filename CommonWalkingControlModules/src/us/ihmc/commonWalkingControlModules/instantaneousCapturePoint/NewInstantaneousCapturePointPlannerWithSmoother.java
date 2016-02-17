@@ -304,7 +304,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.packVelocity(tmpFrameVector1);
+         doubleSupportCapturePointTrajectory.getVelocity(tmpFrameVector1);
       }
       desiredCapturePointVelocity.set(tmpFrameVector1);
    }
@@ -322,7 +322,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.packAcceleration(tmpFrameVector1);
+         doubleSupportCapturePointTrajectory.getAcceleration(tmpFrameVector1);
       }
       desiredCapturePointAcceleration.set(tmpFrameVector1);
    }

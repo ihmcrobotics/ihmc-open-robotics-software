@@ -85,7 +85,7 @@ public class PointPositionHandControlState extends State<HandControlState>
 
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
 
-      positionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
       pointAcceleration.setToZero(positionController.getBodyFrame());
 
       positionController.compute(pointAcceleration, desiredPosition, desiredVelocity, currentVelocity, desiredAcceleration);

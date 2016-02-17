@@ -205,13 +205,13 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       {
          positionTrajectoryGenerator.compute(time);
 
-         positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+         positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
       else
       {
          pushRecoveryPositionTrajectoryGenerator.compute(time);
 
-         pushRecoveryPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+         pushRecoveryPositionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
 
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());

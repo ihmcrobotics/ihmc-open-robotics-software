@@ -285,7 +285,7 @@ public class DrivingFootControlModule
    private void doToePositionControl()
    {
       positionTrajectoryGenerator.compute(time.getDoubleValue() - trajectoryInitializationTime.getDoubleValue());
-      positionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, feedForward);
+      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForward);
 
       FrameVector output = new FrameVector(toePointFrame);
       toePointPositionController.compute(output, desiredPosition, desiredVelocity, currentVelocity, feedForward);

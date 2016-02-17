@@ -37,24 +37,24 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    }
 
    @Override
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       velocityToPack.setIncludingFrame(referenceFrame, trajectories[0].getVelocity(), trajectories[1].getVelocity(), trajectories[2].getVelocity());
    }
 
    @Override
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(referenceFrame, trajectories[0].getAcceleration(), trajectories[1].getAcceleration(),
             trajectories[2].getAcceleration());
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    public void clear()
