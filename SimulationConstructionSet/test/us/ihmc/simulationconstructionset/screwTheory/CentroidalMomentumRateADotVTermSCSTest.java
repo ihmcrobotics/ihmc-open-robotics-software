@@ -84,8 +84,6 @@ public class CentroidalMomentumRateADotVTermSCSTest
       assertADotV(random, joints, elevator, robot, numberOfJoints);
    }
 
-//   @Ignore
-
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void floatingChainTest() throws UnreasonableAccelerationException
