@@ -3,12 +3,15 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -23,7 +26,8 @@ public class RootJointAngularAccelerationControlModule
    private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
 
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-   private MomentumBasedController momentumBasedController;
+   private final MomentumBasedController momentumBasedController;
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private final int rootJacobianId;
    private final RigidBody rootPredecessor;
@@ -68,6 +72,8 @@ public class RootJointAngularAccelerationControlModule
       taskspaceConstraintData.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration,
             rootJointNullspaceMultipliers);
       momentumBasedController.setDesiredSpatialAcceleration(rootJacobianId, taskspaceConstraintData);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(rootJacobianId);
+      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
 
       rootJointAngularAcceleration.changeFrame(this.controlledPelvisAngularAcceleration.getReferenceFrame());
       this.controlledPelvisAngularAcceleration.set(rootJointAngularAcceleration);
@@ -77,8 +83,6 @@ public class RootJointAngularAccelerationControlModule
    {
       // empty
    }
-
-   private final FrameVector tempFrameVector = new FrameVector();
 
    private void computeDesiredRootJointAngularAcceleration(OrientationTrajectoryData orientationTrajectoryData, FrameVector vectorToPack)
    {
@@ -101,6 +105,10 @@ public class RootJointAngularAccelerationControlModule
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       rootJointOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
 
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }
