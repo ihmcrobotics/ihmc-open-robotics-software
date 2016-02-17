@@ -285,7 +285,7 @@ public class IMUDriftCompensator
       rootJointYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(rootJointYawPitchRoll[0]);
       rootJointYawAngleCorrected.set(rootJointYawPitchRoll[0]);
 
-      rootJoint.packJointTwist(rootJointTwist);
+      rootJoint.getJointTwist(rootJointTwist);
       rootJointTwist.packAngularPart(rootJointAngularVelocity);
       rootJointAngularVelocity.changeFrame(worldFrame);
       rootJointYawRateCorrected.set(rootJointAngularVelocity.getZ() - imuDriftYawRateFiltered.getDoubleValue());
@@ -304,7 +304,7 @@ public class IMUDriftCompensator
       rootJoint.setRotation(rootJointYawPitchRoll[0], rootJointYawPitchRoll[1], rootJointYawPitchRoll[2]);
       rootJoint.getFrameAfterJoint().update();
       
-      rootJoint.packJointTwist(rootJointTwist);
+      rootJoint.getJointTwist(rootJointTwist);
       rootJointTwist.packAngularPart(rootJointAngularVelocity);
       rootJointAngularVelocity.changeFrame(worldFrame);
       rootJointYawRateCorrected.set(rootJointAngularVelocity.getZ() - imuDriftYawRateFiltered.getDoubleValue());

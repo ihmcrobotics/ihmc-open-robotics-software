@@ -43,13 +43,13 @@ public class ToroidControlModule
    public void get(SpatialAccelerationVector desiredSpatialAcceleration)
    {
       OneDoFJoint joint = toroidUpdater.getToroidJoint();
-      joint.packDesiredJointAcceleration(desiredSpatialAcceleration);
+      joint.getDesiredJointAcceleration(desiredSpatialAcceleration);
    }
 
    public void get(SpatialForceVector feedForwardWrench)
    {
       OneDoFJoint joint = toroidUpdater.getToroidJoint();
-      joint.packJointTwist(jointTwist);
+      joint.getJointTwist(jointTwist);
       jointTwist.packAngularPart(tempAngularPart);
       jointTwist.packLinearPart(tempLinearPart);
       feedForwardWrench.set(jointTwist.getExpressedInFrame(), tempLinearPart, tempAngularPart);

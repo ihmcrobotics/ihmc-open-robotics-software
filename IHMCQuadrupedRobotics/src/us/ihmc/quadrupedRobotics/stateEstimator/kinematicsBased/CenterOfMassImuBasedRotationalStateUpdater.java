@@ -164,7 +164,7 @@ public class CenterOfMassImuBasedRotationalStateUpdater
       angularVelocityMeasurementLinkRelativeToWorld.changeFrame(worldFrame);
       measurementFrameAngularVelocityInWorld.set(angularVelocityMeasurementLinkRelativeToWorld);
 
-      rootJoint.packJointTwist(twistRootBodyRelativeToWorld);
+      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       twistCalculator.compute();
