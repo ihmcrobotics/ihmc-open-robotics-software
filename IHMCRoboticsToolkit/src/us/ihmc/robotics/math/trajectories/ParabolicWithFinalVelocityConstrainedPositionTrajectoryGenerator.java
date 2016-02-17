@@ -160,6 +160,11 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
          currentAcceleration.set(0.0, 0.0, 0.0);
       }
    }
+   
+   public double getTimeRemaining()
+   {
+      return trajectoryTime.getDoubleValue() - currentTime.getDoubleValue(); 
+   }
 
    @Override
    public boolean isDone()
