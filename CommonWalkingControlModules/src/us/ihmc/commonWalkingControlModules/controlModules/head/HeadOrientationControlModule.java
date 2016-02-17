@@ -6,6 +6,8 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -43,6 +45,8 @@ public class HeadOrientationControlModule
    private final OriginAndPointFrame pointTrackingFrame;
    private final YoGraphicReferenceFrame pointTrackingFrameFiz;
    private final FramePoint positionToPointAt = new FramePoint();
+
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private enum HeadTrackingMode
    {
@@ -249,6 +253,8 @@ public class HeadOrientationControlModule
 
       taskspaceConstraintData.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
+      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
    }
 
    private void saveDoAccelerationIntegration()
@@ -342,5 +348,10 @@ public class HeadOrientationControlModule
    {
       this.headTrackingMode.set(HeadTrackingMode.POINT);
       this.pointToTrack.set(point);
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }

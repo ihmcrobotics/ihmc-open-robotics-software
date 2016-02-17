@@ -1836,7 +1836,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          keepCMPInsideSupportPolygon = false;
 
       finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
-      icpAndMomentumBasedController.computeAndSubmitDesiredRateOfChangeOfMomentum(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
+      icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
    }
 
    @Override

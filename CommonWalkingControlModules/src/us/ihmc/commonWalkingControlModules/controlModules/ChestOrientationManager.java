@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
@@ -19,6 +21,7 @@ import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectory
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -31,6 +34,7 @@ public class ChestOrientationManager
 
    private final YoVariableRegistry registry;
    private final ChestOrientationControlModule chestOrientationControlModule;
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final MomentumBasedController momentumBasedController;
    private int jacobianId = -1;
 
@@ -165,6 +169,9 @@ public class ChestOrientationManager
          }
 
          momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+
+         GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
+         spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
       }
    }
 
@@ -321,5 +328,10 @@ public class ChestOrientationManager
    public void turnOff()
    {
       setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }

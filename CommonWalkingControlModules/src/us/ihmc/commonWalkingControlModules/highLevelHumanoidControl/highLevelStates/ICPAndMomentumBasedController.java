@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.calculators.Omega0CalculatorInterface
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -44,6 +46,8 @@ public class ICPAndMomentumBasedController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
    private final MomentumBasedController momentumBasedController;
@@ -212,7 +216,7 @@ public class ICPAndMomentumBasedController
       omega0.set(omega0Calculator.computeOmega0(cops, admissibleGroundReactionWrench));
    }
 
-   public void computeAndSubmitDesiredRateOfChangeOfMomentum(FramePoint2d finalDesiredCapturePoint2d, boolean keepCMPInsideSupportPolygon)
+   public void compute(FramePoint2d finalDesiredCapturePoint2d, boolean keepCMPInsideSupportPolygon)
    {
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
@@ -234,6 +238,7 @@ public class ICPAndMomentumBasedController
       icpBasedLinearMomentumRateOfChangeControlModule.compute();
       icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
       momentumBasedController.setDesiredRateOfChangeOfMomentum(momentumRateOfChangeData);
+      momentumRateCommand.setMomentumRateOfChangeData(momentumRateOfChangeData);
    }
 
    public EnumYoVariable<RobotSide> getYoSupportLeg()
@@ -279,5 +284,10 @@ public class ICPAndMomentumBasedController
    public SideDependentList<? extends ContactablePlaneBody> getBipedFeet()
    {
       return contactableFeet;
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return momentumRateCommand;
    }
 }
