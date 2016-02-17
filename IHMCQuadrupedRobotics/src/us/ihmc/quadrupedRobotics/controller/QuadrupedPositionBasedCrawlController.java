@@ -5,6 +5,8 @@ import java.awt.Color;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import com.sun.prism.image.CompoundTexture;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -867,6 +869,14 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation.getFrameTuple());
       }
    }
+   
+   private void computeCurrentSupportPolygonAndDistanceInside(RobotQuadrant swingQuadrant)
+   {
+      currentSupportPolygon.set(fourFootSupportPolygon);
+      if (swingQuadrant != null) currentSupportPolygon.removeFootstep(swingQuadrant); 
+      centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));   
+   }
 
    private void updateGraphics()
    {
@@ -1260,9 +1270,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             shiftCoMToSafeStartingPosition();
          }
 
-         currentSupportPolygon.set(fourFootSupportPolygon);
-         centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));
+         computeCurrentSupportPolygonAndDistanceInside(null);     
       }
 
       /**
@@ -1637,7 +1645,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          boolean requestedRadiusLargerThanInCircle = true;
          if(useSubCircleForBodyShiftTarget.getBooleanValue() && hasEnoughSides)
          {
-            requestedRadiusLargerThanInCircle =
+            requestedRadiusLargerThanInCircle = 
                   !commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(upcomingSwingLeg, radius, comTargetToPack);
          }
          if(hasEnoughSides && requestedRadiusLargerThanInCircle)
@@ -1772,7 +1780,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private final FramePoint currentDesiredInTrajectory = new FramePoint();
       private final FrameVector speedMatchVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       private final DoubleYoVariable speedMatchScalar = new DoubleYoVariable("speedMatchScalar", registry);
-      private final QuadrupedSupportPolygon threeFootSupportPolygon = new QuadrupedSupportPolygon();
 
       public TripleSupportState(CrawlGateWalkingState stateEnum)
       {
@@ -1791,13 +1798,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
          desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
 
-         currentSupportPolygon.set(fourFootSupportPolygon);
-         currentSupportPolygon.removeFootstep(swingQuadrant); centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));
-
-         threeFootSupportPolygon.set(fourFootSupportPolygon);
-         threeFootSupportPolygon.removeFootstep(swingQuadrant); centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         distanceInside.set(threeFootSupportPolygon.distanceInside2d(centerOfMassFramePoint));
+         computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
       }
 
       @Override
@@ -1816,12 +1817,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          //check if there will be a risk of crossing trot line before finishing front leg swimg
          if (swingQuadrant.isQuadrantInFront())
          {
-            threeFootSupportPolygon.set(fourFootSupportPolygon);
-            threeFootSupportPolygon.removeFootstep(swingQuadrant); centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-            double currentDistanceInside = threeFootSupportPolygon.distanceInside2d(centerOfMassFramePoint);
+            computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
+            
             if (desiredVelocity.length() > 0.1e-3)
             {
-               approximateTimeUntilCrossTrotLine.set(currentDistanceInside / desiredVelocity.length());
+               approximateTimeUntilCrossTrotLine.set(distanceInside.getDoubleValue() / desiredVelocity.length());
                if (approximateTimeUntilCrossTrotLine.getDoubleValue() < swingDuration.getDoubleValue())
                   possibleTipOnFrontSwingLeg.set(true);
                else
@@ -1832,6 +1832,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
                possibleTipOnFrontSwingLeg.set(false);
          }
       }
+      
 
       @Override
       public void doTransitionOutOfAction()
@@ -1857,6 +1858,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          swingTrajectoryGenerator.computeSwing(framePointToPack);
       }
    }
+   
+   
 
    public YoVariableRegistry getYoVariableRegistry()
    {
