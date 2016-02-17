@@ -154,7 +154,7 @@ public class GeometricVirtualToePointCalculatorTest
       VirtualToePointCalculator virtualToePointCalculator = createVirtualToePointCalculator(debugViz, removeDebugVizEachTime);
 
       SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>();
-      virtualToePointCalculator.packVirtualToePoints(virtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
+      virtualToePointCalculator.getVirtualToePoints(virtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
 
       assertVirtualToePointsAreEqual(expectedVirtualToePoints, virtualToePoints);
       assertVirtualToePointsAreInsideFeet(supportPolygonAndEdges, virtualToePoints);
@@ -184,7 +184,7 @@ public class GeometricVirtualToePointCalculatorTest
 
       FramePoint2d copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, supportPolygonAndEdges,
             distanceOffEdge);
-      virtualToePointCalculator.packVirtualToePoints(originalVirtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
+      virtualToePointCalculator.getVirtualToePoints(originalVirtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
 
       do
       {
@@ -202,7 +202,7 @@ public class GeometricVirtualToePointCalculatorTest
             copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, newSupportPolygonAndEdges,
                   distanceOffEdge);
 
-            virtualToePointCalculator.packVirtualToePoints(newVirtualToePoints, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
+            virtualToePointCalculator.getVirtualToePoints(newVirtualToePoints, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
 
             boolean pointsAreClose = verifyVirtualToePointsAreClose(virtualToePoints, newVirtualToePoints, vtpJumpPerTickMaxAllowed);
 
@@ -215,11 +215,11 @@ public class GeometricVirtualToePointCalculatorTest
 
                copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, supportPolygonAndEdges,
                      distanceOffEdge);
-               virtualToePointCalculatorToShowProblem.packVirtualToePoints(virtualToePointsToShowProblemOne, copDesired, supportPolygonAndEdges, upcomingSupportSide);
+               virtualToePointCalculatorToShowProblem.getVirtualToePoints(virtualToePointsToShowProblemOne, copDesired, supportPolygonAndEdges, upcomingSupportSide);
 
                copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, newSupportPolygonAndEdges,
                      distanceOffEdge);
-               virtualToePointCalculatorToShowProblem.packVirtualToePoints(virtualToePointsToShowProblemTwo, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
+               virtualToePointCalculatorToShowProblem.getVirtualToePoints(virtualToePointsToShowProblemTwo, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
 
                System.out.println("Error in testing sensitivity to foot rotation!");
                System.err.println("alpha = " + alpha);
@@ -261,7 +261,7 @@ public class GeometricVirtualToePointCalculatorTest
 
       FramePoint2d copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, supportPolygonAndEdges,
             distanceOffEdge);
-      virtualToePointCalculator.packVirtualToePoints(originalVirtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
+      virtualToePointCalculator.getVirtualToePoints(originalVirtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
 
       do
       {
@@ -279,7 +279,7 @@ public class GeometricVirtualToePointCalculatorTest
             copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, newSupportPolygonAndEdges,
                   distanceOffEdge);
 
-            virtualToePointCalculator.packVirtualToePoints(newVirtualToePoints, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
+            virtualToePointCalculator.getVirtualToePoints(newVirtualToePoints, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
 
             boolean pointsAreClose = verifyVirtualToePointsAreClose(virtualToePoints, newVirtualToePoints, vtpJumpPerTickMaxAllowed);
 
@@ -292,11 +292,11 @@ public class GeometricVirtualToePointCalculatorTest
 
                copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, supportPolygonAndEdges,
                      distanceOffEdge);
-               virtualToePointCalculatorToShowProblem.packVirtualToePoints(virtualToePointsToShowProblemOne, copDesired, supportPolygonAndEdges, upcomingSupportSide);
+               virtualToePointCalculatorToShowProblem.getVirtualToePoints(virtualToePointsToShowProblemOne, copDesired, supportPolygonAndEdges, upcomingSupportSide);
 
                copDesired = GeometricVirtualToePointCalculator.projectCoPIntoPolygonAndMoveItOffConnectingEdge(originalCopDesired, newSupportPolygonAndEdges,
                      distanceOffEdge);
-               virtualToePointCalculatorToShowProblem.packVirtualToePoints(virtualToePointsToShowProblemTwo, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
+               virtualToePointCalculatorToShowProblem.getVirtualToePoints(virtualToePointsToShowProblemTwo, copDesired, newSupportPolygonAndEdges, upcomingSupportSide);
 
                System.out.println("Error in testing sensitivity to foot rotation!");
                System.err.println("rotationAngle = " + rotationAngle);
@@ -333,7 +333,7 @@ public class GeometricVirtualToePointCalculatorTest
       double distanceOfCopPath = copDesiredStart.distance(copDesiredEnd);
 
       FramePoint2d copDesired = new FramePoint2d(copDesiredStart);
-      virtualToePointCalculator.packVirtualToePoints(originalVirtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
+      virtualToePointCalculator.getVirtualToePoints(originalVirtualToePoints, copDesired, supportPolygonAndEdges, upcomingSupportSide);
 
       do
       {
@@ -353,7 +353,7 @@ public class GeometricVirtualToePointCalculatorTest
 
             SideDependentList<FramePoint2d> newVirtualToePoints = new SideDependentList<FramePoint2d>();
 
-            virtualToePointCalculator.packVirtualToePoints(newVirtualToePoints, newCopDesired, supportPolygonAndEdges, upcomingSupportSide);
+            virtualToePointCalculator.getVirtualToePoints(newVirtualToePoints, newCopDesired, supportPolygonAndEdges, upcomingSupportSide);
 
             double epsilon = 0.02;
             boolean pointsAreClose = verifyVirtualToePointsAreClose(virtualToePoints, newVirtualToePoints, epsilon);
@@ -367,8 +367,8 @@ public class GeometricVirtualToePointCalculatorTest
                SideDependentList<FramePoint2d> virtualToePointsToShowProblemOne = new SideDependentList<FramePoint2d>();
                SideDependentList<FramePoint2d> virtualToePointsToShowProblemTwo = new SideDependentList<FramePoint2d>();
 
-               virtualToePointCalculatorToShowProblem.packVirtualToePoints(virtualToePointsToShowProblemOne, copDesired, supportPolygonAndEdges, upcomingSupportSide);
-               virtualToePointCalculatorToShowProblem.packVirtualToePoints(virtualToePointsToShowProblemTwo, newCopDesired, supportPolygonAndEdges, upcomingSupportSide);
+               virtualToePointCalculatorToShowProblem.getVirtualToePoints(virtualToePointsToShowProblemOne, copDesired, supportPolygonAndEdges, upcomingSupportSide);
+               virtualToePointCalculatorToShowProblem.getVirtualToePoints(virtualToePointsToShowProblemTwo, newCopDesired, supportPolygonAndEdges, upcomingSupportSide);
 
                System.out.println("Error in testing sensitivity to CoP translation!");
                System.out.println("pointsAreClose = " + pointsAreClose + ", okIfInsideFoot = " + okIfInsideFoot);

@@ -387,7 +387,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       this.desiredCoP.set(desiredCenterOfPressure);
    }
 
-   public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
+   public void getDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
    {      
       double x = desiredCoP.getX();
       double y = desiredCoP.getY();

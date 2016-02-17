@@ -93,7 +93,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       bodyPositionThroughStanceLeg.add(tempBodyPositionVector);
    }
 
-   public void packBodyPosition(FramePoint bodyPositionToPack)
+   public void getBodyPosition(FramePoint bodyPositionToPack)
    {
       bodyPositionThroughStanceLeg.getFrameTuple(bodyPositionToPack);
    }
@@ -113,7 +113,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       filteredAnklePositionFix.update();
    }
 
-   public void packCovariance(Tuple3d covarianceToPack)
+   public void getCovariance(Tuple3d covarianceToPack)
    {
       covarianceToPack.set(currentCovariance.getDoubleValue(), currentCovariance.getDoubleValue(), currentCovariance.getDoubleValue());
    }
