@@ -1063,6 +1063,15 @@ public class QuadrupedSupportPolygonTest
       poly.setFootstep(RobotQuadrant.FRONT_RIGHT, new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 1.0, 0.0));
       final FramePoint2d centerToPack = new FramePoint2d();
       poly.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_LEFT, 0.309015, centerToPack);
+      Vector2d expected = new Vector2d(0.5, 0.309);
+      assertTrue("not correct expected: " + expected + " actual: " + centerToPack, centerToPack.epsilonEquals(expected, 1e-3));
+      boolean success = poly.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant.HIND_LEFT, 0.309015, centerToPack);
+      assertTrue("not correct expected: " + expected + " actual: " + centerToPack, centerToPack.epsilonEquals(expected, 1e-3));
+      assertTrue("success should be true", success);
+      // test put larger radius in
+      success = poly.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant.HIND_LEFT, 0.5, centerToPack);
+      assertFalse("success should be false", success);
+      // test put non-existent quadrant in
       JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
@@ -1071,8 +1080,27 @@ public class QuadrupedSupportPolygonTest
             poly.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.FRONT_LEFT, 0.5, centerToPack);
          }
       });
-      Vector2d expected = new Vector2d(0.5, 0.309);
-      assertTrue("not correct expected: " + expected + " actual: " + centerToPack, centerToPack.epsilonEquals(expected, 1e-3));
+      poly.setFootstep(RobotQuadrant.FRONT_LEFT, new FramePoint());
+      // test put 4-sided in triangle method
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant.FRONT_LEFT, 0.309015, centerToPack);
+         }
+      });
+      // test size 2 quadrants
+      poly.removeFootstep(RobotQuadrant.FRONT_LEFT);
+      poly.removeFootstep(RobotQuadrant.HIND_RIGHT);
+      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            poly.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_LEFT, 0.5, centerToPack);
+         }
+      });
       
       QuadrupedSupportPolygon simple = createSimplePolygon();
       simple.getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant.HIND_LEFT, 0.5, centerToPack);
