@@ -319,32 +319,35 @@ public class MotionConstraintHandler
       }
    }
 
-   public void setDesiredJointAcceleration(JointspaceAccelerationCommand desiredJointAccelerationCommand)
+   public void setDesiredJointAcceleration(JointspaceAccelerationCommand jointspaceAccelerationCommand)
    {
-      InverseDynamicsJoint joint = desiredJointAccelerationCommand.getJoint();
-      DenseMatrix64F jointAcceleration = desiredJointAccelerationCommand.getDesiredAcceleration();
-      double weight = desiredJointAccelerationCommand.getWeight();
-
-      MathTools.checkIfEqual(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
-      int[] columnsForJoint = this.columnsForJoints.get(joint);
-
-      if (columnsForJoint != null) // don't do anything for joints that are not in the list
+      for (int jointIndex = 0; jointIndex < jointspaceAccelerationCommand.getNumberOfJoints(); jointIndex++)
       {
-         DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, jointAcceleration.getNumRows(), nDegreesOfFreedom);
-         jBlock.zero();
+         InverseDynamicsJoint joint = jointspaceAccelerationCommand.getJoint(jointIndex);
+         DenseMatrix64F jointAcceleration = jointspaceAccelerationCommand.getDesiredAcceleration(jointIndex);
+         double weight = jointspaceAccelerationCommand.getWeight();
 
-         for (int i = 0; i < jointAcceleration.getNumRows(); i++)
+         MathTools.checkIfEqual(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
+         int[] columnsForJoint = this.columnsForJoints.get(joint);
+
+         if (columnsForJoint != null) // don't do anything for joints that are not in the list
          {
-            jBlock.set(i, columnsForJoint[i], 1.0);
+            DenseMatrix64F jBlock = getMatrixFromList(jList, motionConstraintIndex, jointAcceleration.getNumRows(), nDegreesOfFreedom);
+            jBlock.zero();
+
+            for (int i = 0; i < jointAcceleration.getNumRows(); i++)
+            {
+               jBlock.set(i, columnsForJoint[i], 1.0);
+            }
+
+            DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, jointAcceleration.getNumRows(), 1);
+            pBlock.set(jointAcceleration);
+
+            MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
+            weightBlock.setValue(weight);
+
+            motionConstraintIndex++;
          }
-
-         DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, jointAcceleration.getNumRows(), 1);
-         pBlock.set(jointAcceleration);
-
-         MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
-         weightBlock.setValue(weight);
-
-         motionConstraintIndex++;
       }
    }
 

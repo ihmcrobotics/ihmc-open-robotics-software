@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -19,13 +20,13 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.State;
 
-public class JointSpaceHandControlState extends State<HandControlMode>
+public class JointSpaceHandControlState extends HandControlState
 {
    private final OneDoFJoint[] oneDoFJoints;
    private Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
 
@@ -93,6 +94,7 @@ public class JointSpaceHandControlState extends State<HandControlMode>
       {
          OneDoFJoint joint = oneDoFJoints[i];
          doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
+         jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
       }
 
       parentRegistry.addChild(registry);
@@ -118,6 +120,7 @@ public class JointSpaceHandControlState extends State<HandControlMode>
             if (!setDesiredJointAccelerations.getBooleanValue())
                feedforwardAcceleration = 0.0;
             momentumBasedController.setOneDoFJointAcceleration(joint, feedforwardAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, feedforwardAcceleration);
          }
          else
          {
@@ -134,6 +137,7 @@ public class JointSpaceHandControlState extends State<HandControlMode>
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
             momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration + feedforwardAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration + feedforwardAcceleration);
          }
       }
    }
@@ -208,5 +212,11 @@ public class JointSpaceHandControlState extends State<HandControlMode>
    public void setTrajectories(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
    {
       this.trajectories = trajectories;
+   }
+
+   @Override
+   public JointspaceAccelerationCommand getInverseDynamicsCommand()
+   {
+      return jointspaceAccelerationCommand;
    }
 }

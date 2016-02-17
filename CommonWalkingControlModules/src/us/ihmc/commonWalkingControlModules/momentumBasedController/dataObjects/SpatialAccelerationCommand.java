@@ -6,7 +6,7 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
-public class SpatialAccelerationCommand extends InverseDynamicsCommand
+public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAccelerationCommand>
 {
    private boolean hasWeight;
    private double weight;
@@ -143,5 +143,19 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand
    {
       String ret = getClass().getSimpleName() + ": GeometricJacobian = " + jacobian.getShortInfo() + ", spatialAcceleration = " + spatialAcceleration;
       return ret;
+   }
+
+   @Override
+   public void set(SpatialAccelerationCommand other)
+   {
+      this.jacobian = other.jacobian;
+      this.hasWeight = other.hasWeight;
+      this.weight = other.weight;
+
+      spatialAcceleration.set(other.getSpatialAcceleration());
+      nullspaceMultipliers.set(other.getNullspaceMultipliers());
+      selectionMatrix.set(other.getSelectionMatrix());
+      base = other.getBase();
+      endEffector = other.getEndEffector();
    }
 }

@@ -2,15 +2,15 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachines.State;
 
-public class UserControlModeState extends State<HandControlMode>
+public class UserControlModeState extends HandControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
@@ -22,6 +22,7 @@ public class UserControlModeState extends State<HandControlMode>
    private final BooleanYoVariable abortUserControlMode;
    private final DoubleYoVariable yoTime;
    private final MomentumBasedController momentumBasedController;
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    public UserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController,
          YoVariableRegistry parentRegistry)
@@ -38,6 +39,7 @@ public class UserControlModeState extends State<HandControlMode>
       {
          String jointName = userControlledJoints[i].getName();
          userDesiredJointAccelerations[i] = new DoubleYoVariable("qdd_d_user_" + jointName, registry);
+         jointspaceAccelerationCommand.addJoint(userControlledJoints[i], Double.NaN);
       }
 
       timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfsLastUserMesage", registry);
@@ -88,6 +90,7 @@ public class UserControlModeState extends State<HandControlMode>
       {
          OneDoFJoint joint = userControlledJoints[i];
          momentumBasedController.setOneDoFJointAcceleration(joint, userDesiredJointAccelerations[i].getDoubleValue());
+         jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, userDesiredJointAccelerations[i].getDoubleValue());
       }
    }
 
@@ -100,5 +103,11 @@ public class UserControlModeState extends State<HandControlMode>
    public void doTransitionOutOfAction()
    {
       abortUserControlMode.set(false);
+   }
+
+   @Override
+   public JointspaceAccelerationCommand getInverseDynamicsCommand()
+   {
+      return jointspaceAccelerationCommand;
    }
 }

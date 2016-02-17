@@ -890,7 +890,8 @@ public class MomentumBasedController
       }
       else
       {
-         desiredJointAccelerationCommand.setDesiredAcceleration(jointAcceleration);
+         desiredJointAccelerationCommand.clear();
+         desiredJointAccelerationCommand.addJoint(joint, jointAcceleration);
       }
 
       optimizationMomentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);

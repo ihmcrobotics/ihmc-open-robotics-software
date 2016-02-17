@@ -1,9 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -13,11 +17,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.FormattingTools;
 
 /**
  * @author twan
@@ -27,6 +34,17 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
+
+   private final String name;
+   private final YoVariableRegistry registry;
+   private final int jacobianId;
+
+   private final RigidBody base;
+
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private final MomentumBasedController momentumBasedController;
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    // viz stuff:
    private final YoGraphicReferenceFrame dynamicGraphicReferenceFrame;
@@ -51,7 +69,18 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
          RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, parentRegistry);
+      super(stateEnum);
+
+      name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
+      registry = new YoVariableRegistry(name);
+
+      taskspaceConstraintData.set(base, endEffector);
+
+      this.momentumBasedController = momentumBasedController;
+      this.jacobianId = jacobianId;
+      this.base = base;
+
+      parentRegistry.addChild(registry);
 
       desiredPositionFrame = new PoseReferenceFrame(name + "DesiredFrame", worldFrame);
 
@@ -86,8 +115,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
       poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
-      handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
-            desiredAngularAcceleration, getBase());
+      handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration, desiredAngularAcceleration, base);
 
       handSpatialAccelerationControlModule.packAcceleration(handAcceleration);
 
@@ -98,6 +126,14 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       updateVisualizers();
 
       submitDesiredAcceleration(handAcceleration);
+   }
+
+   private void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
+   {
+      taskspaceConstraintData.set(handAcceleration);
+      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
+      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
    }
 
    @Override
@@ -156,7 +192,6 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    @Override
    public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator)
    {
-      taskspaceConstraintData.set(getBase(), getEndEffector());
       this.poseTrajectoryGenerator = poseTrajectoryGenerator;
    }
 
@@ -172,6 +207,13 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    }
 
    @Override
+   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
+      this.selectionMatrix.set(selectionMatrix);
+   }
+
+   @Override
    public ReferenceFrame getReferenceFrame()
    {
       return desiredPose.getReferenceFrame();
@@ -181,5 +223,11 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    public FramePose getDesiredPose()
    {
       return desiredPose;
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 }

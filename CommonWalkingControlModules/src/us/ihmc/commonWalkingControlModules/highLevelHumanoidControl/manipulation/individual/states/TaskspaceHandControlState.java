@@ -6,15 +6,16 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.tools.FormattingTools;
 
-public abstract class TaskspaceHandControlState extends State<HandControlMode>
+public abstract class TaskspaceHandControlState extends HandControlState
 {
    protected final String name;
    protected final YoVariableRegistry registry;
@@ -24,6 +25,7 @@ public abstract class TaskspaceHandControlState extends State<HandControlMode>
    private RigidBody endEffector;
 
    protected final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    protected final MomentumBasedController momentumBasedController;
    protected final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
@@ -71,6 +73,8 @@ public abstract class TaskspaceHandControlState extends State<HandControlMode>
    {
       taskspaceConstraintData.set(handAcceleration);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
+      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
    }
 
    public abstract void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule);
@@ -81,6 +85,12 @@ public abstract class TaskspaceHandControlState extends State<HandControlMode>
    {
       this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
       this.selectionMatrix.set(selectionMatrix);
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
    }
 
    @Override

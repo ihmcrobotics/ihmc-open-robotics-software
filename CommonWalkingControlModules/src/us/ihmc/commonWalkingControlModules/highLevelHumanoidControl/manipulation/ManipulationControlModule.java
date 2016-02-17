@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
@@ -450,5 +451,10 @@ public class ManipulationControlModule
    public double getHandSwingClearanceForHandsteps()
    {
       return handSwingClearance.getDoubleValue();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
+   {
+      return handControlModules.get(robotSide).getInverseDynamicsCommand();
    }
 }

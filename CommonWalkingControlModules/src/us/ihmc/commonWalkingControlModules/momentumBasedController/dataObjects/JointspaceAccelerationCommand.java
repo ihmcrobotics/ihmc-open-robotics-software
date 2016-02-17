@@ -1,37 +1,81 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class JointspaceAccelerationCommand extends InverseDynamicsCommand
+public class JointspaceAccelerationCommand extends InverseDynamicsCommand<JointspaceAccelerationCommand>
 {
-   private final boolean hasWeight;
-   private final double weight;
+   private boolean hasWeight;
+   private double weight;
 
-   private final InverseDynamicsJoint joint;
-   private final DenseMatrix64F desiredAcceleration;
+   private final int initialCapacity = 15;
+   private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
+   private final DenseMatrixArrayList desiredAccelerations = new DenseMatrixArrayList(initialCapacity);
+
+   public JointspaceAccelerationCommand()
+   {
+      clear();
+   }
 
    public JointspaceAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
    {
-      this.joint = joint;
-      this.desiredAcceleration = new DenseMatrix64F(desiredAcceleration);
-      this.hasWeight = false;
-      this.weight = Double.POSITIVE_INFINITY;
+      this(joint, desiredAcceleration, Double.POSITIVE_INFINITY);
    }
 
    public JointspaceAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration, double weight)
    {
-      this.joint = joint;
-      this.desiredAcceleration = new DenseMatrix64F(desiredAcceleration);
-      this.hasWeight = true;
+      clear();
+      addJoint(joint, desiredAcceleration);
+      this.hasWeight = weight != Double.POSITIVE_INFINITY;
       this.weight = weight;
    }
 
-   public void setDesiredAcceleration(DenseMatrix64F desiredAcceleration)
+   public void clear()
    {
-      this.desiredAcceleration.reshape(desiredAcceleration.numRows, desiredAcceleration.numCols);
-      this.desiredAcceleration.set(desiredAcceleration);
+      joints.clear();
+      desiredAccelerations.clear();
+      hasWeight = false;
+      weight = Double.POSITIVE_INFINITY;
+   }
+
+   public void addJoint(OneDoFJoint joint, double desiredAcceleration)
+   {
+      joints.add(joint);
+      DenseMatrix64F jointDesiredAcceleration = desiredAccelerations.add();
+      jointDesiredAcceleration.reshape(1, 1);
+      jointDesiredAcceleration.set(0, 0, desiredAcceleration);
+   }
+
+   public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
+   {
+      checkConsistency(joint, desiredAcceleration);
+      joints.add(joint);
+      desiredAccelerations.add().set(desiredAcceleration);
+   }
+
+   public void setOneDoFJointDesiredAcceleration(int jointIndex, double desiredAcceleration)
+   {
+      MathTools.checkIfEqual(joints.get(jointIndex).getDegreesOfFreedom(), 1);
+      desiredAccelerations.get(jointIndex).reshape(1, 1);
+      desiredAccelerations.get(jointIndex).set(0, 0, desiredAcceleration);
+   }
+
+   public void setDesiredAcceleration(int jointIndex, DenseMatrix64F desiredAcceleration)
+   {
+      checkConsistency(joints.get(jointIndex), desiredAcceleration);
+      desiredAccelerations.get(jointIndex).set(desiredAcceleration);
+   }
+
+   private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
+   {
+      MathTools.checkIfEqual(joint.getDegreesOfFreedom(), desiredAcceleration.getNumRows());
    }
 
    public boolean getHasWeight()
@@ -44,19 +88,53 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand
       return weight;
    }
 
-   public InverseDynamicsJoint getJoint()
+   public int getNumberOfJoints()
    {
-      return joint;
+      return joints.size();
    }
 
-   public DenseMatrix64F getDesiredAcceleration()
+   public List<InverseDynamicsJoint> getJoints()
    {
-      return desiredAcceleration;
+      return joints;
+   }
+
+   public InverseDynamicsJoint getJoint(int jointIndex)
+   {
+      return joints.get(jointIndex);
+   }
+
+   public DenseMatrix64F getDesiredAcceleration(int jointIndex)
+   {
+      return desiredAccelerations.get(jointIndex);
+   }
+
+   public DenseMatrixArrayList getDesiredAccelerations()
+   {
+      return desiredAccelerations;
    }
 
    public String toString()
    {
-      return "OneDoFJointAccelerationCommand: " + joint.getName();
+      String ret = getClass().getSimpleName() + ": ";
+      for (int i = 0; i < joints.size(); i++)
+      {
+         ret += joints.get(i).getName();
+         if (i < joints.size() - 1)
+            ret += ", ";
+         else
+            ret += ".";
+      }
+      return ret;
    }
 
+   @Override
+   public void set(JointspaceAccelerationCommand other)
+   {
+      joints.clear();
+      for (int i = 0; i < other.getNumberOfJoints(); i++)
+         joints.add(other.joints.get(i));
+      desiredAccelerations.set(other.desiredAccelerations);
+      hasWeight = other.hasWeight;
+      weight = other.weight;
+   }
 }

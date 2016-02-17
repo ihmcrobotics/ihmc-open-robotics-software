@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
-public class MomentumRateCommand extends InverseDynamicsCommand
+public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateCommand>
 {
    private MomentumRateData momentumRateData;
 
@@ -9,9 +9,9 @@ public class MomentumRateCommand extends InverseDynamicsCommand
       this.momentumRateData = momentumRateOfChangeData;
    }
 
-   public MomentumRateCommand(MomentumRateCommand desiredRateOfChangeOfMomentumCommand)
+   public MomentumRateCommand(MomentumRateCommand momentumRateCommand)
    {
-      this.momentumRateData = desiredRateOfChangeOfMomentumCommand.momentumRateData;
+      this.momentumRateData = momentumRateCommand.momentumRateData;
    }
 
    public MomentumRateData getMomentumRateData()
@@ -27,5 +27,11 @@ public class MomentumRateCommand extends InverseDynamicsCommand
    public void setMomentumRateOfChangeData(MomentumRateData momentumRateOfChangeData)
    {
       this.momentumRateData = momentumRateOfChangeData;
+   }
+
+   @Override
+   public void set(MomentumRateCommand other)
+   {
+      this.momentumRateData = other.momentumRateData;
    }
 }
