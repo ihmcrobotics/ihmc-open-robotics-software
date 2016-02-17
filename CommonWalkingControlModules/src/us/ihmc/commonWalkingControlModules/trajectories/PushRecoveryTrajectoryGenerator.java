@@ -131,7 +131,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
       nominalTrajectoryGenerator.compute(time);
 
-      nominalTrajectoryGenerator.packLinearData(nominalTrajectoryPosition, nominalTrajectoryVelocity, nominalTrajectoryAcceleration);
+      nominalTrajectoryGenerator.getLinearData(nominalTrajectoryPosition, nominalTrajectoryVelocity, nominalTrajectoryAcceleration);
 
       xPolynomial.compute(time);
       yPolynomial.compute(time);
@@ -170,8 +170,8 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       yPolynomial.compute(time);
 
       nominalTrajectoryGenerator.getPosition(nominalTrajectoryPosition);
-      nominalTrajectoryGenerator.packVelocity(nominalTrajectoryVelocity);
-      nominalTrajectoryGenerator.packAcceleration(nominalTrajectoryAcceleration);
+      nominalTrajectoryGenerator.getVelocity(nominalTrajectoryVelocity);
+      nominalTrajectoryGenerator.getAcceleration(nominalTrajectoryAcceleration);
 
       desiredPosition.setX(xPolynomial.getPosition());
       desiredPosition.setY(yPolynomial.getPosition());
@@ -183,12 +183,12 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -199,11 +199,11 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       return timeIntoStep.getDoubleValue() >= swingTime.getDoubleValue();
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override

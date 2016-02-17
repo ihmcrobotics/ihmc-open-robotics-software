@@ -100,7 +100,7 @@ public class ConstantPositionTrajectoryGeneratorTest
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
 
-      generator.packVelocity(velocityToPack);
+      generator.getVelocity(velocityToPack);
 
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
@@ -117,7 +117,7 @@ public class ConstantPositionTrajectoryGeneratorTest
 
       assertFalse(referenceFrame.equals(angularAccelerationToPack.getReferenceFrame()));
 
-      generator.packAcceleration(angularAccelerationToPack);
+      generator.getAcceleration(angularAccelerationToPack);
 
       assertEquals(0.0, angularAccelerationToPack.getX(), EPSILON);
       assertEquals(0.0, angularAccelerationToPack.getY(), EPSILON);
@@ -150,7 +150,7 @@ public class ConstantPositionTrajectoryGeneratorTest
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
       assertTrue(ReferenceFrame.getWorldFrame().equals(accelerationToPack.getReferenceFrame()));
 
-      generator.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      generator.getLinearData(positionToPack, velocityToPack, accelerationToPack);
 
       assertEquals(0.0, positionToPack.getX(), EPSILON);
       assertEquals(0.0, positionToPack.getY(), EPSILON);

@@ -119,7 +119,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
          positionTrajectoryGenerators.get(robotSide).compute(getTimeInCurrentState());
          orientationTrajectoryGenerators.get(robotSide).compute(getTimeInCurrentState());
 
-         positionTrajectoryGenerators.get(robotSide).packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+         positionTrajectoryGenerators.get(robotSide).getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
          orientationTrajectoryGenerators.get(robotSide).packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
 

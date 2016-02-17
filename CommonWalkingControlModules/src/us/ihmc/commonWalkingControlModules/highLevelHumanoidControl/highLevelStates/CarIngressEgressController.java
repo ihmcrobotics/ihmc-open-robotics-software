@@ -350,7 +350,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FrameVector desiredVelocity = new FrameVector(pelvisPositionControlFrame);
       FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
 
-      pelvisPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
+      pelvisPositionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
 
       FrameVector pelvisLinearAcceleration = new FrameVector();
       pelvisController.doPositionControl(pelvisLinearAcceleration, desiredPosition, desiredVelocity, desiredPelvisAcceleration, fullRobotModel.getElevator());

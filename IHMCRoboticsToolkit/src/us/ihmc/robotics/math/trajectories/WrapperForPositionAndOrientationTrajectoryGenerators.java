@@ -39,19 +39,19 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
       positionTrajectoryGenerator.getPosition(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
-      positionTrajectoryGenerator.packVelocity(velocityToPack);
+      positionTrajectoryGenerator.getVelocity(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
-      positionTrajectoryGenerator.packAcceleration(accelerationToPack);
+      positionTrajectoryGenerator.getAcceleration(accelerationToPack);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      positionTrajectoryGenerator.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      positionTrajectoryGenerator.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
    public void getOrientation(FrameOrientation orientationToPack)

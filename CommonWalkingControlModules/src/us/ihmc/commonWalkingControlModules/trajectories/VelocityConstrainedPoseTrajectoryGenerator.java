@@ -630,12 +630,12 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -655,11 +655,11 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)

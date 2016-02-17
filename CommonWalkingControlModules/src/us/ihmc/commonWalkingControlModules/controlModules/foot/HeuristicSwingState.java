@@ -189,7 +189,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
 
-      positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
