@@ -117,7 +117,7 @@ public class QuaternionCalculusTest
       {
          traj.compute(time);
          traj.getOrientation(orientation);
-         traj.packAngularVelocity(expectedAngularVelocity);
+         traj.getAngularVelocity(expectedAngularVelocity);
          orientation.getQuaternion(q);
          traj.compute(time - dtForFD);
          traj.getOrientation(orientation);
@@ -164,7 +164,7 @@ public class QuaternionCalculusTest
       {
          traj.compute(time);
          traj.getOrientation(orientation);
-         traj.packAngularAcceleration(expectedAngularAcceleration);
+         traj.getAngularAcceleration(expectedAngularAcceleration);
          orientation.getQuaternion(q);
          traj.compute(time - dtForFD);
          traj.getOrientation(orientation);

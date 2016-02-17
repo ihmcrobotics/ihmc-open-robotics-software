@@ -59,19 +59,19 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
       orientationTrajectoryGenerator.getOrientation(orientationToPack);
    }
    
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
-      orientationTrajectoryGenerator.packAngularVelocity(angularVelocityToPack);
+      orientationTrajectoryGenerator.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
-      orientationTrajectoryGenerator.packAngularAcceleration(angularAccelerationToPack);
+      orientationTrajectoryGenerator.getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      orientationTrajectoryGenerator.packAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
+      orientationTrajectoryGenerator.getAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
    }
    
    private final FramePoint tempPosition = new FramePoint();

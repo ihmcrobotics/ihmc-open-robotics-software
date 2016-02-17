@@ -132,9 +132,9 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          trajToCompare.compute(t);
 
          trajToTest.getLinearData(position2, velocity2, acceleration2);
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
          trajToCompare.getLinearData(position1, velocity1, acceleration1);
-         trajToCompare.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         trajToCompare.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
          assertTrue(position1.epsilonEquals(position2, EPSILON));
          assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
@@ -209,15 +209,15 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          t1 = t3 - 2.0 * FDdt;
          trajToTest.compute(t1);
          trajToTest.getLinearData(position1, velocity1, acceleration1);
-         trajToTest.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         trajToTest.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
          trajToTest.compute(t2);
          trajToTest.getLinearData(position2, velocity2, acceleration2);
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          trajToTest.compute(t3);
          trajToTest.getLinearData(position3, velocity3, acceleration3);
-         trajToTest.packAngularData(orientation3, angularVelocity3, angularAcceleration3);
+         trajToTest.getAngularData(orientation3, angularVelocity3, angularAcceleration3);
 
          // Linear Part
          finiteDiffVel.set(calculateFiniteDdt(position1, position3, FDdt));
@@ -319,15 +319,15 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          t1 = t3 - 2.0 * FDdt;
          trajToTest.compute(t1);
          trajToTest.getLinearData(position1, velocity1, acceleration1);
-         trajToTest.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         trajToTest.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
          trajToTest.compute(t2);
          trajToTest.getLinearData(position2, velocity2, acceleration2);
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          trajToTest.compute(t3);
          trajToTest.getLinearData(position3, velocity3, acceleration3);
-         trajToTest.packAngularData(orientation3, angularVelocity3, angularAcceleration3);
+         trajToTest.getAngularData(orientation3, angularVelocity3, angularAcceleration3);
 
          // Linear Part
          finiteDiffVel.set(calculateFiniteDdt(position1, position3, FDdt));
@@ -417,7 +417,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector angularAcceleration2 = new FrameVector();
 
       trajToTest.getLinearData(position2, velocity2, acceleration2);
-      trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+      trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
       assertTrue(position1.epsilonEquals(position2, EPSILON));
       assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));

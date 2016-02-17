@@ -104,7 +104,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
          positionTrajectoryForDisturbanceRecovery.compute(getTimeInCurrentState());
 
          positionTrajectoryForDisturbanceRecovery.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+         orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
          desiredAngularVelocity.setToZero();
          desiredAngularAcceleration.setToZero();
       }
@@ -114,7 +114,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
          orientationTrajectoryGenerator.compute(getTimeInCurrentState());
          
          positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+         orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       }
    }
 

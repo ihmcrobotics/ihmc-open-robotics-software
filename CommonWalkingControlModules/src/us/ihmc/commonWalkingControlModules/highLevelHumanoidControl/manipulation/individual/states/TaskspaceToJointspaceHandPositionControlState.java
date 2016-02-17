@@ -214,7 +214,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       poseTrajectoryGenerator.getPose(desiredPose);
       poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-      poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       ReferenceFrame controlFrame = taskspaceToJointspaceCalculator.getControlFrame();
       desiredVelocity.changeFrame(controlFrame);

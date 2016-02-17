@@ -401,8 +401,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FrameVector desiredAngularVelocity = new FrameVector(chestPositionControlFrame);
       FrameVector desiredAngularAcceleration = new FrameVector(chestPositionControlFrame);
       chestOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-      chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
-      chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
+      chestOrientationTrajectoryGenerator.getAngularVelocity(desiredAngularVelocity);
+      chestOrientationTrajectoryGenerator.getAngularAcceleration(desiredAngularAcceleration);
 
       chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 

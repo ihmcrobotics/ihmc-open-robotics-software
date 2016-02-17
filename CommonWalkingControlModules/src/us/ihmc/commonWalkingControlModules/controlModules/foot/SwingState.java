@@ -215,7 +215,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       }
 
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
-      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
       {

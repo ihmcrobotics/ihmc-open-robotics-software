@@ -140,23 +140,23 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    }
 
    @Override
-   public void packAngularVelocity(FrameVector velocityToPack)
+   public void getAngularVelocity(FrameVector velocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void packAngularAcceleration(FrameVector accelerationToPack)
+   public void getAngularAcceleration(FrameVector accelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 
    @Override

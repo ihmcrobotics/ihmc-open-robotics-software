@@ -114,7 +114,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       
       assertFalse(referenceFrame.equals(angularVelocityToPack.getReferenceFrame()));
       
-      provider.packAngularVelocity(angularVelocityToPack);
+      provider.getAngularVelocity(angularVelocityToPack);
       
      assertEquals(0.0, angularVelocityToPack.getX(), EPSILON);
      assertEquals(0.0, angularVelocityToPack.getY(), EPSILON);
@@ -131,7 +131,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       
       assertFalse(referenceFrame.equals(angularAccelerationToPack.getReferenceFrame()));
       
-      provider.packAngularAcceleration(angularAccelerationToPack);
+      provider.getAngularAcceleration(angularAccelerationToPack);
       
       assertEquals(0.0, angularAccelerationToPack.getX(), EPSILON);
       assertEquals(0.0, angularAccelerationToPack.getY(), EPSILON);
@@ -165,7 +165,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       assertFalse(referenceFrame.equals(angularAccelerationToPack.getReferenceFrame()));
       assertTrue(ReferenceFrame.getWorldFrame().equals(angularAccelerationToPack.getReferenceFrame()));
       
-      provider.packAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
+      provider.getAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
       
       assertEquals(0.0, orientationToPack.getYaw(), EPSILON);
       assertEquals(0.0, orientationToPack.getPitch(), EPSILON);

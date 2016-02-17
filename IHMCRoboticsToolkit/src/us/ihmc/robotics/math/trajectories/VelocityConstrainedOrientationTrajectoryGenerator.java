@@ -327,22 +327,22 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
    }
 
    @Override
-   public void packAngularVelocity(FrameVector velocityToPack)
+   public void getAngularVelocity(FrameVector velocityToPack)
    {
       desiredAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void packAngularAcceleration(FrameVector accelerationToPack)
+   public void getAngularAcceleration(FrameVector accelerationToPack)
    {
       desiredAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 }

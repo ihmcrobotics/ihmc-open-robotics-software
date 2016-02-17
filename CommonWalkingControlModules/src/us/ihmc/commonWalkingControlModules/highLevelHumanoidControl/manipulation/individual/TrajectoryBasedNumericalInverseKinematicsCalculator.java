@@ -270,7 +270,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       orientationTrajectoryGenerator.compute(time);
 
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       yoDesiredTrajectoryPose.setAndMatchFrame(desiredPosition, desiredOrientation);
 

@@ -90,12 +90,12 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() * 0.5);
 
       FrameVector velocityToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
-      trajectoryGenerator.packAngularVelocity(velocityToPack);
+      trajectoryGenerator.getAngularVelocity(velocityToPack);
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
       assertTrue(velocityToPack.getZ() != 0.0);
       FrameVector accelerationToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
-      trajectoryGenerator.packAngularAcceleration(accelerationToPack);
+      trajectoryGenerator.getAngularAcceleration(accelerationToPack);
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
 //      assertTrue(accelerationToPack.getZ() != 0.0); // Not the case anymore as we've switched to cubic spline
@@ -103,12 +103,12 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() + 1.0);
 
       velocityToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
-      trajectoryGenerator.packAngularVelocity(velocityToPack);
+      trajectoryGenerator.getAngularVelocity(velocityToPack);
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
       assertEquals(0.0, velocityToPack.getZ(), EPSILON);
       accelerationToPack = new FrameVector(worldFrame, 1.1, 2.2, 3.3);
-      trajectoryGenerator.packAngularAcceleration(accelerationToPack);
+      trajectoryGenerator.getAngularAcceleration(accelerationToPack);
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
       assertEquals(0.0, accelerationToPack.getZ(), EPSILON);
@@ -351,7 +351,7 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.compute(random.nextDouble());
 
       FrameVector omega = new FrameVector(frame);
-      trajectoryGenerator.packAngularVelocity(omega);
+      trajectoryGenerator.getAngularVelocity(omega);
 
       FrameVector v = new FrameVector(frame);
       trajectoryGenerator.getVelocity(v);
