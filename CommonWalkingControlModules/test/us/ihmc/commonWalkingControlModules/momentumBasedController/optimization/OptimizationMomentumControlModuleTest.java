@@ -168,6 +168,7 @@ public class OptimizationMomentumControlModuleTest
       endEffectorSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       endEffectorSpatialAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
       desiredSpatialAccelerationCommand.set(endEffectorSpatialAcceleration);
+      desiredSpatialAccelerationCommand.set(base, endEffector);
 
       momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
@@ -375,6 +376,7 @@ public class OptimizationMomentumControlModuleTest
       endEffectorSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       endEffectorSpatialAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
       desiredSpatialAccelerationCommand.set(endEffectorSpatialAcceleration);
+      desiredSpatialAccelerationCommand.set(elevator, endEffector);
 
       momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
@@ -481,6 +483,7 @@ public class OptimizationMomentumControlModuleTest
 
       SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian);
       desiredSpatialAccelerationCommand.set(taskSpaceAcceleration, nullspaceMultipliers);
+      desiredSpatialAccelerationCommand.set(elevator, endEffector);
 
       momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
