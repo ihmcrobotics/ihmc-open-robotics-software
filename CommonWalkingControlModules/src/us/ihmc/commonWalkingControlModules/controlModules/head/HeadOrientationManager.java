@@ -146,7 +146,7 @@ public class HeadOrientationManager
             activeTrajectoryGenerator.compute(deltaTime);
             isTrackingOrientation.set(!activeTrajectoryGenerator.isDone());
          }
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          headOrientationControlModule.setOrientationToTrack(desiredOrientation);
       }
 
@@ -169,7 +169,7 @@ public class HeadOrientationManager
 
       if (message.getWaypoint(0).getTime() > 1.0e-5)
       {
-         activeTrajectoryGenerator.get(tempOrientation);
+         activeTrajectoryGenerator.getOrientation(tempOrientation);
          tempOrientation.changeFrame(worldFrame);
          tempAngularVelocity.setToZero(worldFrame);
 
@@ -191,7 +191,7 @@ public class HeadOrientationManager
 
       if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
       {
-         simpleOrientationTrajectoryGenerator.get(desiredOrientation);
+         simpleOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
          FrameOrientation desiredHeadOrientation = desiredHeadOrientationProvider.getDesiredHeadOrientation();
          desiredHeadOrientation.changeFrame(chestFrame);
@@ -205,10 +205,10 @@ public class HeadOrientationManager
       }
       else if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
       {
-         simpleOrientationTrajectoryGenerator.get(desiredOrientation);
+         simpleOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
          headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
-         headOrientationControlModule.packDesiredFrameOrientation(desiredOrientation);
+         headOrientationControlModule.getDesiredFrameOrientation(desiredOrientation);
          desiredOrientation.changeFrame(chestFrame);
          finalOrientationProvider.setOrientation(desiredOrientation);
          headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());

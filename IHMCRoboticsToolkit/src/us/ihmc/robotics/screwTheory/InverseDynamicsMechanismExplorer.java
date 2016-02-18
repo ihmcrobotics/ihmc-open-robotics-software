@@ -72,7 +72,7 @@ public class InverseDynamicsMechanismExplorer
    private void printPinJointInformation(RevoluteJoint revoluteJoint, StringBuffer buffer)
    {
       Twist twist = new Twist();
-      revoluteJoint.packUnitJointTwist(twist);
+      revoluteJoint.getUnitJointTwist(twist);
       Vector3d jointAxis = twist.getAngularPart();
       buffer.append("Joint axis = " + jointAxis + "\n");
       buffer.append("Joint is a Pin Joint.\n");
@@ -82,7 +82,7 @@ public class InverseDynamicsMechanismExplorer
    private void printSliderJointInformation(PrismaticJoint prismaticJoint, StringBuffer buffer)
    {
       Twist twist = new Twist();
-      prismaticJoint.packUnitJointTwist(twist);
+      prismaticJoint.getUnitJointTwist(twist);
       Vector3d jointAxis = twist.getLinearPart();
       buffer.append("Joint axis = " + jointAxis + "\n");
       buffer.append("Joint is a Slider Joint.\n");

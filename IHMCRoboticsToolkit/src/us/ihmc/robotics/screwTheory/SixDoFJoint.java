@@ -39,44 +39,44 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       return afterJointFrame;
    }
    
-   public void packJointTwist(Twist twistToPack)
+   public void getJointTwist(Twist twistToPack)
    {
       twistToPack.set(jointTwist);
    }
    
-   public void packJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAcceleration);
    }
    
-   public void packDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAccelerationDesired);
    }
    
-   public void packTauMatrix(DenseMatrix64F matrix)
+   public void getTauMatrix(DenseMatrix64F matrix)
    {
-      successorWrench.packMatrix(matrix);
+      successorWrench.getMatrix(matrix);
    }
    
-   public void packVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      jointTwist.packMatrix(matrix, rowStart);
+      jointTwist.getMatrix(matrix, rowStart);
    }
    
    public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
-      jointTwist.packAngularPart(angularVelocityToPack);
+      jointTwist.getAngularPart(angularVelocityToPack);
    }
    
    public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      jointTwist.packLinearPart(linearVelocityToPack);
+      jointTwist.getLinearPart(linearVelocityToPack);
    }
    
-   public void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      jointAccelerationDesired.packMatrix(matrix, rowStart);
+      jointAccelerationDesired.getMatrix(matrix, rowStart);
    }
    
    public void setDesiredAccelerationToZero()
@@ -183,27 +183,27 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.successorWrench.checkAndSet(jointWrench);
    }
 
-   public void packRotation(Quat4d rotationToPack)
+   public void getRotation(Quat4d rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void packRotation(Matrix3d rotationToPack)
+   public void getRotation(Matrix3d rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void packRotation(double[] yawPitchRoll)
+   public void getRotation(double[] yawPitchRoll)
    {
       RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
-   public void packTranslation(Vector3d vectorToPack)
+   public void getTranslation(Vector3d vectorToPack)
    {
       vectorToPack.set(jointTranslation);
    }
 
-   public void packWrench(Wrench wrenchToPack)
+   public void getWrench(Wrench wrenchToPack)
    {
       wrenchToPack.set(successorWrench);
    }
@@ -256,7 +256,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       // empty
    }
    
-   public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
       MatrixTools.insertQuat4dIntoEJMLVector(matrix, jointRotation, rowStart);

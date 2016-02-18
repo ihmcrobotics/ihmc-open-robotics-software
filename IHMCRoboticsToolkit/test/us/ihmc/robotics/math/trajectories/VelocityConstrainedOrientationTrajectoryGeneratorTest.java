@@ -15,12 +15,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = true;
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 2.0)
+   @Test(timeout = 10000)
    public void testDerivativesConsistency() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -58,13 +60,13 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 
 
          traj.compute(startIntegrationTime - dt);
-         traj.get(orientationFromIntegration);
-         traj.packAngularVelocity(angularVelocityFromIntegration);
+         traj.getOrientation(orientationFromIntegration);
+         traj.getAngularVelocity(angularVelocityFromIntegration);
 
          for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
          {
             traj.compute(time);
-            traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
             currentAngularVelocity.get(angularVelocityVector);
             RotationTools.integrateAngularVelocity(angularVelocityVector, dt, integratedAngularVelocity);
@@ -82,7 +84,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 2000)
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -110,7 +113,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 
          double dt = 1.0e-8;
          traj.compute(0.0 + dt);
-         traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+         traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
          double epsilon = 5.0e-5;
          double accelerationEpsilon = 5.0e-4;
@@ -128,7 +131,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
          assertTrue(goodInitialAngularAcceleration);
 
          traj.compute(trajectoryTime - dt);
-         traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+         traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
          assertTrue(finalOrientation.epsilonEquals(currentOrientation, epsilon));
          assertTrue(finalAngularVelocity.epsilonEquals(currentAngularVelocity, epsilon));
@@ -142,7 +145,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.6)
+   @Test(timeout = 2000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -186,13 +190,13 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
          double maxJerk = 60.0;
 
          traj.compute(0.0);
-         traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+         traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
 
          double dt = 1.0e-2;
          for (double time = dt; time <= trajectoryTime; time += dt)
          {
             traj.compute(time);
-            traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
             currentOrientation.getQuaternion(currentQuaternion);
             previousOrientation.getQuaternion(previousQuaternion);
@@ -231,7 +235,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
             }
             assertTrue(jerkLow);
 
-            traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+            traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
          }
       }
 
@@ -243,7 +247,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.4)
+   @Test(timeout = 2000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -287,13 +292,13 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
          double maxJerk = 100000.0;
 
          traj.compute(0.0);
-         traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+         traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
 
          double dt = 1.0e-2;
          for (double time = dt; time <= trajectoryTime; time += dt)
          {
             traj.compute(time);
-            traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
             currentOrientation.getQuaternion(currentQuaternion);
             previousOrientation.getQuaternion(previousQuaternion);
@@ -333,7 +338,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
             }
             assertTrue(jerkLow);
 
-            traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+            traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
          }
       }
 

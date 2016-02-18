@@ -556,8 +556,8 @@ public class DoubleSupportFootCenterToToeICPComputer
    {
       doubleSupportPolynomialTrajectory.compute(timeInState);
       doubleSupportPolynomialTrajectory.get(icpPositionToPack);
-      doubleSupportPolynomialTrajectory.packVelocity(icpVelocityToPack);
-      doubleSupportPolynomialTrajectory.packAcceleration(icpAccelToPack);
+      doubleSupportPolynomialTrajectory.getVelocity(icpVelocityToPack);
+      doubleSupportPolynomialTrajectory.getAcceleration(icpAccelToPack);
 
       tempVector.set(icpVelocityToPack);
       tempVector.scale(-1.0 / omega0.getDoubleValue());

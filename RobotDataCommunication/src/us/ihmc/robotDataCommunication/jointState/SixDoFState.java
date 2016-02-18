@@ -32,10 +32,10 @@ public class SixDoFState extends JointState<FloatingJoint>
       joint.setRotation(rotationMatrix);
       joint.setPosition(translation);
 
-      twist.packAngularPart(tempVector);
+      twist.getAngularPart(tempVector);
       joint.setAngularVelocityInBody(tempVector);
       
-      twist.packLinearPart(tempVector);
+      twist.getLinearPart(tempVector);
       joint.setVelocity(tempVector);
    }
 
@@ -50,7 +50,7 @@ public class SixDoFState extends JointState<FloatingJoint>
       array[5] = translation.y;
       array[6] = translation.z;
 
-      twist.packArray(array, 7);
+      twist.getArray(array, 7);
    }
 
    public void update(LongBuffer buffer)

@@ -53,7 +53,7 @@ public class QuadrupedSwingTrajectoryGenerator
       this.dt = dt;
       this.robotQuadrant = robotQuadrant;
       String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-      registry = new YoVariableRegistry(prefix + "MiniBeastSwingTrajectoryGenerator");
+      registry = new YoVariableRegistry(prefix + "QuadrupedSwingTrajectoryGenerator");
       swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       
@@ -112,16 +112,28 @@ public class QuadrupedSwingTrajectoryGenerator
          alphaOut.set(alphaToAlphaFunction.getAlphaPrime(alphaIn.getDoubleValue()));
          alphaTimeInStep.set(swingTimeDoubleProvider.getValue() * alphaOut.getDoubleValue());
          parabolicCartesianTrajectoryGenerator.compute(alphaTimeInStep.getDoubleValue());  //computeNextTick(framePointToPack, dt);
-         parabolicCartesianTrajectoryGenerator.packPosition(framePointToPack);
+         parabolicCartesianTrajectoryGenerator.getPosition(framePointToPack);
          timeInStep.set(timeInStep.getDoubleValue() + dt);
          updateBagOfBalls(framePointToPack);
       }
       else
       {
          cartesianTrajectoryGenerator.compute(dt);
-         cartesianTrajectoryGenerator.get(desiredEndEffectorPosition);
+         cartesianTrajectoryGenerator.getPosition(desiredEndEffectorPosition);
          framePointToPack.setIncludingFrame(desiredEndEffectorPosition);
          updateBagOfBalls(desiredEndEffectorPosition);
+      }
+   }
+   
+   public double getTimeRemaining()
+   {
+      if (USE_NEW_SWING_GENERATOR)
+      {
+         return swingTimeDoubleProvider.getValue() - timeInStep.getDoubleValue();
+      }
+      else
+      {
+         return cartesianTrajectoryGenerator.getTimeRemaining();
       }
    }
 

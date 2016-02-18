@@ -72,8 +72,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          }
          else
          {
-            positionTrajectoryGenerator.get(tempPosition);
-            orientationTrajectoryGenerator.get(tempOrientation);
+            positionTrajectoryGenerator.getPosition(tempPosition);
+            orientationTrajectoryGenerator.getOrientation(tempOrientation);
          }
 
          tempLinearVelocity.setToZero(worldFrame);
@@ -111,15 +111,15 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       {
          positionTrajectoryForDisturbanceRecovery.compute(getTimeInCurrentState());
 
-         positionTrajectoryForDisturbanceRecovery.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+         positionTrajectoryForDisturbanceRecovery.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+         orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
          desiredAngularVelocity.setToZero();
          desiredAngularAcceleration.setToZero();
       }
       else if (isTrajectoryStopped.getBooleanValue())
       {
-         positionTrajectoryGenerator.get(desiredPosition);
-         orientationTrajectoryGenerator.get(desiredOrientation);
+         positionTrajectoryGenerator.getPosition(desiredPosition);
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
          desiredLinearVelocity.setToZero();
          desiredAngularVelocity.setToZero();
          desiredLinearAcceleration.setToZero();
@@ -130,8 +130,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          positionTrajectoryGenerator.compute(getTimeInCurrentState());
          orientationTrajectoryGenerator.compute(getTimeInCurrentState());
          
-         positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+         positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+         orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       }
    }
 
@@ -140,7 +140,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       if (isPerformingTouchdown.getBooleanValue())
          return;
 
-      positionTrajectoryGenerator.get(desiredPosition);
+      positionTrajectoryGenerator.getPosition(desiredPosition);
       currentDesiredFootPosition.set(desiredPosition);
       touchdownInitialTimeProvider.setValue(getTimeInCurrentState());
       positionTrajectoryForDisturbanceRecovery.initialize();

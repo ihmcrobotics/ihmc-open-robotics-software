@@ -117,9 +117,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
          originalOrientation.compute(t);
          trajToTest.compute(t);
 
-         originalOrientation.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
          assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
@@ -154,7 +154,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       FrameVector angularVelocity2 = new FrameVector();
       FrameVector angularAcceleration2 = new FrameVector();
 
-      trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+      trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
       assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
       assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
@@ -188,7 +188,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       FrameVector angularVelocity2 = new FrameVector();
       FrameVector angularAcceleration2 = new FrameVector();
 
-      trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+      trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
       assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
       assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
@@ -233,9 +233,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
          originalOrientation.compute(t);
          trajToTest.compute(t);
 
-         originalOrientation.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
          assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
@@ -266,9 +266,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
          originalOrientation.compute(t);
          trajToTest.compute(t);
 
-         originalOrientation.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
          assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));

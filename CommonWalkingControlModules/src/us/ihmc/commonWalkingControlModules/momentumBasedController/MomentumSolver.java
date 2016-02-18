@@ -238,7 +238,7 @@ public class MomentumSolver implements MomentumSolverInterface
       beta1.reshape(N.getNumCols(), 1);
 
       CommonOps.setIdentity(N);
-      momentumRateOfChange.packMatrix(beta1);
+      momentumRateOfChange.getMatrix(beta1);
 
       solve(T, alpha1, N, beta1);
    }
@@ -267,7 +267,7 @@ public class MomentumSolver implements MomentumSolverInterface
 
    private void initializeB(DenseMatrix64F b, DenseMatrix64F centroidalMomentumMatrixDerivative, InverseDynamicsJoint[] jointsInOrder)
    {
-      ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
+      ScrewTools.getJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, b);
       CommonOps.changeSign(b);
    }

@@ -694,7 +694,7 @@ public class HandControlModule
       double trajectoryTimeOfEachPose = totalTrajectoryTime / numberOfPoses;
       double elapsedTimeSinceTrajectoryStart = 0.0;
 
-      currentHandPosition.get(tempPosition);
+      currentHandPosition.getPosition(tempPosition);
       tempLinearVelocity.setToZero();
       waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
 

@@ -34,8 +34,8 @@ public class CenterOfPressureResolver
       wrenchResolvedOnPlane.set(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
       
-      wrenchResolvedOnPlane.packAngularPart(torqueAtZeroInPlaneFrame);
-      wrenchResolvedOnPlane.packLinearPart(forceInPlaneFrame);
+      wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);
+      wrenchResolvedOnPlane.getLinearPart(forceInPlaneFrame);
             
       double fz = forceInPlaneFrame.getZ();
       
@@ -66,8 +66,8 @@ public class CenterOfPressureResolver
       wrenchResolvedOnPlane.set(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
       
-      wrenchResolvedOnPlane.packAngularPart(torqueAtZeroInPlaneFrame);
-      wrenchResolvedOnPlane.packLinearPart(forceInPlaneFrame);
+      wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);
+      wrenchResolvedOnPlane.getLinearPart(forceInPlaneFrame);
             
       double fz = forceInPlaneFrame.getZ();
       

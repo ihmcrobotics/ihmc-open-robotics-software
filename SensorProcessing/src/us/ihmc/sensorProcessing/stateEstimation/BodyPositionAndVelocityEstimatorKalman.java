@@ -105,9 +105,9 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
          bodyPositionEstimatorVicon.estimateBodyPosition();
 
          FramePoint bodyPosition = new FramePoint(world);
-         bodyPositionEstimatorVicon.packBodyPosition(bodyPosition);
+         bodyPositionEstimatorVicon.getBodyPosition(bodyPosition);
 
-         bodyPositionEstimatorVicon.packCovariance(covariance.getVector());
+         bodyPositionEstimatorVicon.getCovariance(covariance.getVector());
       }
 
       for (Direction direction : Direction.values())
@@ -184,7 +184,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
       for (BodyPositionEstimator bodyPositionEstimator : bodyPositionEstimatorIndices.keySet())
       {
          bodyPositionEstimator.estimateBodyPosition();
-         bodyPositionEstimator.packBodyPosition(tempEstimatedPosition);
+         bodyPositionEstimator.getBodyPosition(tempEstimatedPosition);
          tempEstimatedPosition.checkReferenceFrameMatch(world);
          int index = bodyPositionEstimatorIndices.get(bodyPositionEstimator);
          for (Direction direction : Direction.values())
@@ -199,7 +199,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
       for (BodyVelocityEstimator bodyVelocityEstimator : bodyVelocityEstimatorIndices.keySet())
       {
          bodyVelocityEstimator.estimateBodyVelocity();
-         bodyVelocityEstimator.packBodyVelocity(tempEstimatedVelocity);
+         bodyVelocityEstimator.getBodyVelocity(tempEstimatedVelocity);
          tempEstimatedVelocity.checkReferenceFrameMatch(world);
          int index = bodyVelocityEstimatorIndices.get(bodyVelocityEstimator);
          for (Direction direction : Direction.values())
@@ -229,7 +229,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    {
       for (BodyPositionEstimator bodyPositionEstimator : bodyPositionEstimatorIndices.keySet())
       {
-         bodyPositionEstimator.packCovariance(covariance);
+         bodyPositionEstimator.getCovariance(covariance);
          int index = bodyPositionEstimatorIndices.get(bodyPositionEstimator);
          measurementCovariances.get(Direction.X).set(index, index, covariance.getX());
          measurementCovariances.get(Direction.Y).set(index, index, covariance.getY());
@@ -238,7 +238,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
       for (BodyVelocityEstimator bodyVelocityEstimator : bodyVelocityEstimatorIndices.keySet())
       {
-         bodyVelocityEstimator.packCovariance(covariance);
+         bodyVelocityEstimator.getCovariance(covariance);
          int index = bodyVelocityEstimatorIndices.get(bodyVelocityEstimator);
          measurementCovariances.get(Direction.X).set(index, index, covariance.getX());
          measurementCovariances.get(Direction.Y).set(index, index, covariance.getY());

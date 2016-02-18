@@ -296,7 +296,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
 
       // C
-      momentumOptimizationSettings.packDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
+      momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
 
       // Lambda
       DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace());

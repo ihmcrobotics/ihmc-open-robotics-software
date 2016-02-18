@@ -97,7 +97,7 @@ public class CentroidalMomentumHandler
 
    public void compute()
    {
-      ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
+      ScrewTools.getJointVelocitiesMatrix(jointsInOrder, v);
       
       if(USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX)
       {

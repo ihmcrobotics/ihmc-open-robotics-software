@@ -59,13 +59,13 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 
 
          traj.compute(startIntegrationTime - dt);
-         traj.get(orientationFromIntegration);
-         traj.packAngularVelocity(angularVelocityFromIntegration);
+         traj.getOrientation(orientationFromIntegration);
+         traj.getAngularVelocity(angularVelocityFromIntegration);
 
          for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
          {
             traj.compute(time);
-            traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
             currentAngularVelocity.get(angularVelocityVector);
             RotationTools.integrateAngularVelocity(angularVelocityVector, dt, integratedAngularVelocity);
@@ -111,7 +111,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 
          double dt = 1.0e-8;
          traj.compute(0.0 + dt);
-         traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+         traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
          double orientationEpsilon = 5.0e-4;
          double velocityEpsilon = 5.0e-4;
@@ -140,7 +140,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          //                  assertTrue(goodInitialAngularAcceleration);
 
          traj.compute(trajectoryTime - dt);
-         traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+         traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
          boolean goodFinalOrientation = finalOrientation.epsilonEquals(currentOrientation, orientationEpsilon);
 
@@ -239,13 +239,13 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          double maxJerk = 60.0;
 
          traj.compute(0.0);
-         traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+         traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
 
          double dt = 1.0e-2;
          for (double time = dt; time <= trajectoryTime; time += dt)
          {
             traj.compute(time);
-            traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
             currentOrientation.getQuaternion(currentQuaternion);
             previousOrientation.getQuaternion(previousQuaternion);
@@ -284,7 +284,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             }
             //            assertTrue(jerkLow);
 
-            traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+            traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
          }
       }
 
@@ -347,13 +347,13 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          double maxJerk = 100000.0;
 
          traj.compute(0.0);
-         traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+         traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
 
          double dt = 1.0e-2;
          for (double time = dt; time <= trajectoryTime; time += dt)
          {
             traj.compute(time);
-            traj.packAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
             currentOrientation.getQuaternion(currentQuaternion);
             previousOrientation.getQuaternion(previousQuaternion);
@@ -393,7 +393,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             }
             assertTrue(jerkLow);
 
-            traj.packAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
+            traj.getAngularData(previousOrientation, previousAngularVelocity, previousAngularAcceleration);
          }
       }
 

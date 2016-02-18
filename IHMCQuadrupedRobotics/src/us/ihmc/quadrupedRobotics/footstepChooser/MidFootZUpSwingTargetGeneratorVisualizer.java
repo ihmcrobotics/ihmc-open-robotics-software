@@ -237,7 +237,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
          FramePoint swingLegPosition = new FramePoint();
          cartesianTrajectoryGenerator.compute(simulateDT);
-         cartesianTrajectoryGenerator.get(swingLegPosition);
+         cartesianTrajectoryGenerator.getPosition(swingLegPosition);
 
          yoFootPositions.get(robotQuadrant).set(swingLegPosition);
       }

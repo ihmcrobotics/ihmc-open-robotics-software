@@ -12,23 +12,21 @@ import java.util.concurrent.TimeUnit;
 
 import javax.vecmath.Vector3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanTarget;
+import com.esotericsoftware.minlog.Log;
+
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
-
-import com.esotericsoftware.minlog.Log;
 
 @DeployableTestClass(targets = {TestPlanTarget.Flaky})
 public class KryoObjectCommunicatorTest
 {
 
-   @Ignore("This test causes problems on Linux due to a bug in the way Java does its epoll wrapper")
-
-	@DeployableTestMethod
+   // This test causes problems on Linux due to a bug in the way Java does its epoll wrapper
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testAutomaticReconnect() throws IOException, InterruptedException
    {

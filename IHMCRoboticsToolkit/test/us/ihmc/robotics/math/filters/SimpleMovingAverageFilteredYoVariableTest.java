@@ -10,10 +10,12 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SimpleMovingAverageFilteredYoVariableTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 500)
    public void testWithFixedSizeDoubleArrays() throws Exception
    {
       for (int i = 0; i < 100; i++)

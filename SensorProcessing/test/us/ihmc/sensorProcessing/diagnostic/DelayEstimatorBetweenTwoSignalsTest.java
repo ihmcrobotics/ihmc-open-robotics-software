@@ -16,7 +16,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DelayEstimatorBetweenTwoSignalsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testPerfectSignal() throws Exception
    {
@@ -38,6 +38,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DelayedDoubleYoVariable delayedSignal = new DelayedDoubleYoVariable("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, delayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
       delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)
@@ -57,7 +58,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testWithShiftedSignal() throws Exception
    {
@@ -80,6 +81,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DoubleYoVariable shiftedDelayedSignal = new DoubleYoVariable("shiftedDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, shiftedDelayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
       delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)
@@ -100,7 +102,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testNoisySignal() throws Exception
    {
@@ -117,6 +119,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DoubleYoVariable noisyDelayedSignal = new DoubleYoVariable("noisyDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, noisyDelayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
       delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)

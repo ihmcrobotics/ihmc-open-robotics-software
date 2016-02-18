@@ -29,6 +29,7 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.dataStructures.AbstractHeightMapTest;
@@ -848,10 +849,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-
-
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testOnALineOfPoints()
    {
@@ -870,8 +868,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       ThreadTools.sleepForever();
    }
 
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testOnSomeSlopes()
    {
@@ -893,8 +890,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 //    ThreadTools.sleepForever();
    }
 
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testOnSomeStairCases()
    {
@@ -920,8 +916,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       ThreadTools.sleepForever();
    }
 
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testUsingStairGroundProfile()
    {

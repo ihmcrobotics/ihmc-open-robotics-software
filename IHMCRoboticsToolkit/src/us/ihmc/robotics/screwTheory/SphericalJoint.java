@@ -36,39 +36,39 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       return afterJointFrame;
    }
 
-   public void packJointTwist(Twist twistToPack)
+   public void getJointTwist(Twist twistToPack)
    {
       twistToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
       twistToPack.setAngularPart(jointAngularVelocity.getVector());
    }
 
-   public void packJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
       accelerationToPack.setAngularPart(jointAngularAcceleration.getVector());
    }
 
-   public void packDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
+   public void getDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
    {
       jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
       jointAcceleration.setAngularPart(jointAngularAccelerationDesired.getVector());
    }
 
-   public void packTauMatrix(DenseMatrix64F matrix)
+   public void getTauMatrix(DenseMatrix64F matrix)
    {
       matrix.set(0, 0, jointTorque.getX());
       matrix.set(1, 0, jointTorque.getY());
       matrix.set(2, 0, jointTorque.getZ());
    }
 
-   public void packVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart + 0, 0, jointAngularVelocity.getX());
       matrix.set(rowStart + 1, 0, jointAngularVelocity.getY());
       matrix.set(rowStart + 2, 0, jointAngularVelocity.getZ());
    }
 
-   public void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart + 0, 0, jointAngularAccelerationDesired.getX());
       matrix.set(rowStart + 1, 0, jointAngularAccelerationDesired.getY());
@@ -154,22 +154,22 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       this.jointTorque.set(jointTorque);
    }
 
-   public void packRotation(Quat4d rotationToPack)
+   public void getRotation(Quat4d rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void packRotation(Matrix3d rotationToPack)
+   public void getRotation(Matrix3d rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void packRotation(double[] yawPitchRoll)
+   public void getRotation(double[] yawPitchRoll)
    {
       RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
-   public void packJointTorque(FrameVector jointTorqueToPack)
+   public void getJointTorque(FrameVector jointTorqueToPack)
    {
       jointTorqueToPack.setIncludingFrame(jointTorque);
    }
@@ -218,7 +218,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       this.motionSubspace.compute();
    }
 
-   public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       MatrixTools.insertQuat4dIntoEJMLVector(matrix, jointRotation, rowStart);
    }

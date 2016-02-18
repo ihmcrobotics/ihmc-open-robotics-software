@@ -23,6 +23,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
@@ -312,13 +313,11 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-
 // PASS 
 	/**
 	 * Failing but don't want to remove the rest from Bamboo
 	 */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 5.0)
+   @DeployableTestMethod(estimatedDuration = 5.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 20000)
    public void testBothHandsIn3PModeManual()
    {
@@ -346,7 +345,6 @@ public abstract class WholeBodyIkSolverTest
       scs.setInPoint();
       scs.cropBuffer();
    }
-
 
    // May FAIL
 	@DeployableTestMethod(estimatedDuration = 9.4)
@@ -410,9 +408,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 200000)
    public void testLeftHandIn3PModeRegression()
    {
@@ -449,9 +445,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 200000)
    public void testRightHandIn3PModeRegression()
    {
@@ -486,10 +480,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-
-
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 200000)
    public void testBothHandsIn3PModeRegression()
    {
@@ -523,9 +514,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 200000)
    public void testBothtHandsIn3P2RModeRegression()
    {
@@ -559,8 +548,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 200000)
    public void testBothHandsIn3P3RModeRegression()
    {
@@ -588,8 +576,7 @@ public abstract class WholeBodyIkSolverTest
       wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
    }
 
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 200000)
    public void testWorkingSpaceFor5DoF()
    {

@@ -143,7 +143,7 @@ public class ChestOrientationManager
          if (isTrajectoryDone)
             activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
 
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
       }
@@ -158,7 +158,7 @@ public class ChestOrientationManager
             SpatialAccelerationVector spatialAcceleration = taskspaceConstraintData.getSpatialAcceleration();
             if (spatialAcceleration.getExpressedInFrame() != null) // That happens when there is no joint to control.
             {
-               spatialAcceleration.packAngularPart(controlledAngularAcceleration);
+               spatialAcceleration.getAngularPart(controlledAngularAcceleration);
                yoControlledAngularAcceleration.set(controlledAngularAcceleration);
             }
          }
@@ -190,7 +190,7 @@ public class ChestOrientationManager
       if (message.getWaypoint(0).getTime() > 1.0e-5)
       {
          activeTrajectoryGenerator.changeFrame(worldFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          tempAngularVelocity.setToZero(worldFrame);
 
          waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, tempAngularVelocity);
@@ -242,7 +242,7 @@ public class ChestOrientationManager
 
          simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
          desiredOrientation.setToZero(pelvisZUpFrame);
          simpleOrientationTrajectoryGenerator.setFinalOrientation(desiredOrientation);
@@ -259,7 +259,7 @@ public class ChestOrientationManager
 
          simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
+         activeTrajectoryGenerator.getOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
          FrameOrientation desiredChestOrientation = chestOrientationProvider.getDesiredChestOrientation();
          desiredChestOrientation.changeFrame(pelvisZUpFrame);

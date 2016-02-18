@@ -15,7 +15,7 @@ public class ConstantOrientationProvider implements OrientationProvider
       this.orientation = new FrameOrientation(orientation);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       orientationToPack.setIncludingFrame(orientation);
    }

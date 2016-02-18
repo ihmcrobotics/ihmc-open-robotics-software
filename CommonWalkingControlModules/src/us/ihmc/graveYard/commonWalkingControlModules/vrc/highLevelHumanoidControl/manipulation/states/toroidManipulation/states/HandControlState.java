@@ -119,8 +119,8 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
          positionTrajectoryGenerators.get(robotSide).compute(getTimeInCurrentState());
          orientationTrajectoryGenerators.get(robotSide).compute(getTimeInCurrentState());
 
-         positionTrajectoryGenerators.get(robotSide).packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-         orientationTrajectoryGenerators.get(robotSide).packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+         positionTrajectoryGenerators.get(robotSide).getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+         orientationTrajectoryGenerators.get(robotSide).getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
 
          RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule = handSpatialAccelerationControlModules.get(robotSide);
@@ -128,7 +128,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
                  desiredAcceleration, desiredAngularAcceleration, base);
 
          SpatialAccelerationVector handAcceleration = handAccelerations.get(robotSide);
-         handSpatialAccelerationControlModule.packAcceleration(handAcceleration);
+         handSpatialAccelerationControlModule.getAcceleration(handAcceleration);
 
          ReferenceFrame handFrame = handSpatialAccelerationControlModule.getEndEffector().getBodyFixedFrame();
          handAcceleration.changeBodyFrameNoRelativeAcceleration(handFrame);

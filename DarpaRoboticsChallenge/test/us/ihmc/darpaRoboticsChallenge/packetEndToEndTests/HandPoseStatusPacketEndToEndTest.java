@@ -83,23 +83,23 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
    }
 
 
-   private HandPosePacket createRandomHandPosePacket()
+   private HandPosePacket createRandomHandPosePacket(Random random)
    {
 
-      RobotSide robotSide = RobotSide.generateRandomRobotSide(new Random());
-      Point3d position = RandomTools.generateRandomPoint(new Random(), 0.1, -0.2, -0.3, 0.5, 0.2, 0.3);
-      Quat4d orientation = RandomTools.generateRandomQuaternion(new Random(), Math.PI / 4);
+      RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
+      Point3d position = RandomTools.generateRandomPoint(random, 0.1, -0.2, -0.3, 0.5, 0.2, 0.3);
+      Quat4d orientation = RandomTools.generateRandomQuaternion(random, Math.PI / 4);
 
       HandPosePacket handPosePacket = new HandPosePacket(robotSide, Frame.CHEST, position, orientation, 2.0);
       handPosePacket.setDestination(PacketDestination.CONTROLLER);
       return handPosePacket;
    }
 
-   private HandPosePacket createRandomHandPosePacketWithRobotSide(RobotSide robotSide)
+   private HandPosePacket createRandomHandPosePacketWithRobotSide(Random random, RobotSide robotSide)
    {
 
-      Point3d position = RandomTools.generateRandomPoint(new Random(), 0.1, -0.3, 0.7, 0.5, 0.3, 1.3);
-      Quat4d orientation = RandomTools.generateRandomQuaternion(new Random(), Math.PI / 4);
+      Point3d position = RandomTools.generateRandomPoint(random, 0.1, -0.3, 0.7, 0.5, 0.3, 1.3);
+      Quat4d orientation = RandomTools.generateRandomQuaternion(random, Math.PI / 4);
 
       HandPosePacket handPosePacket = new HandPosePacket(robotSide, Frame.CHEST, position, orientation, 2.0);
       handPosePacket.setDestination(PacketDestination.CONTROLLER);
@@ -112,6 +112,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
    {
       BambooTools.reportTestStartedMessage();
       
+      Random random = new Random(1778L);
     
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation, simulationTestingParameters, getRobotModel());
@@ -135,7 +136,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
          }
       });
 
-      HandPosePacket outgoingHandPosePacket = createRandomHandPosePacket();
+      HandPosePacket outgoingHandPosePacket = createRandomHandPosePacket(random);
 
       testHelper.simulateAndBlockAndCatchExceptions(1.1);
       hasSimulationBeenInitialized = true;
@@ -153,6 +154,8 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
    public void testPauseDuringSingleSendAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
+
+      Random random = new Random(1234L);
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
@@ -189,7 +192,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       Vector3d desiredTranslation = new Vector3d(startTranslation);
       desiredTranslation.add(new Vector3d(0.3,0.3,0.8));
       
-      HandPosePacket outgoingHandPosePacket = createRandomHandPosePacket();
+      HandPosePacket outgoingHandPosePacket = createRandomHandPosePacket(random);
       outgoingHandPosePacket.referenceFrame = Frame.WORLD;
       outgoingHandPosePacket.position.x = desiredTranslation.getX();
       outgoingHandPosePacket.position.y = desiredTranslation.getY();
@@ -229,6 +232,9 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
    public void testWhenTwoHandPosesAreSentInARow() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
+      
+      Random random = new Random(1567L);
+
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
 
@@ -252,8 +258,8 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
 
       RobotSide robotSide = RobotSide.generateRandomRobotSide(new Random());
 
-      final HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(robotSide);
-      final HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(robotSide);
+      final HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(random, robotSide);
+      final HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(random, robotSide);
 
       testHelper.simulateAndBlockAndCatchExceptions(1.1);
       hasSimulationBeenInitialized = true;
@@ -283,6 +289,9 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
    public void testEachArmReceiveOneHandPoseAtTheSameTime() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
+      
+      Random random = new Random(1234L);
+
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
 
@@ -315,8 +324,8 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
          }
       });
 
-      final HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(RobotSide.LEFT);
-      final HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(RobotSide.RIGHT);
+      final HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(random, RobotSide.LEFT);
+      final HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(random, RobotSide.RIGHT);
 
       testHelper.simulateAndBlockAndCatchExceptions(2.1);
       hasSimulationBeenInitialized = true;

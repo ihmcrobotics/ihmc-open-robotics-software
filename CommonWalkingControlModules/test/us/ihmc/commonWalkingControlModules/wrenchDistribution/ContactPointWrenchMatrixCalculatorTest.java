@@ -119,7 +119,7 @@ public class ContactPointWrenchMatrixCalculatorTest
       }
 
       DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      totalWrench.packMatrix(totalWrenchMatrix);
+      totalWrench.getMatrix(totalWrenchMatrix);
 
       EjmlUnitTests.assertEquals(totalWrenchFromQ, totalWrenchMatrix, 1e-12);
    }

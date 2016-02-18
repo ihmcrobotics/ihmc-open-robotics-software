@@ -94,7 +94,7 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
 
 
       // control
-      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg,
+      legJointPositionControlModules.get(swingSide).getTorquesForLegJointsPositionControl(percentScaling, legTorquesToPackForSwingLeg,
                                          desiredLegJointPositions.get(swingSide), desiredLegJointVelocities.get(swingSide));
 
       inverseDynamicsCalculators.get(swingSide).compute();
@@ -136,7 +136,7 @@ public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueCo
    private void setUpperBodyWrench()
    {
       Wrench upperBodyWrench = new Wrench();
-      fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
+      fullRobotModel.getRootJoint().getWrench(upperBodyWrench);
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setDesiredUpperBodyWrench(upperBodyWrench);

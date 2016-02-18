@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.12'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
 }
 
 
@@ -16,6 +16,12 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 
 
 repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+   mavenLocal()
+   jcenter()
+   mavenCentral()
+}
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
@@ -34,7 +40,6 @@ dependencies {
 	compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.1.0-SNAPSHOT'
 	compile group: 'io.netty', name: 'netty', version: '3.9.0.Final' //'3.5.8.Final'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
-	compile group: 'com.jroller.santhosh', name: 'JResizable', version: '1.0'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
 	compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160212'

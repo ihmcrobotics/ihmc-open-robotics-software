@@ -37,13 +37,13 @@ public class YoParabolicTrajectoryGeneratorTest
       double delta = 1e-10;
       FramePoint positionToPack = new FramePoint(referenceFrame);
 
-      trajectoryGenerator.packPosition(positionToPack, 0.0);
+      trajectoryGenerator.getPosition(positionToPack, 0.0);
       JUnitTools.assertTuple3dEquals(initialPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
 
-      trajectoryGenerator.packPosition(positionToPack, intermediateParameter);
+      trajectoryGenerator.getPosition(positionToPack, intermediateParameter);
       JUnitTools.assertTuple3dEquals(intermediatePosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
 
-      trajectoryGenerator.packPosition(positionToPack, 1.0);
+      trajectoryGenerator.getPosition(positionToPack, 1.0);
       JUnitTools.assertTuple3dEquals(finalPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
    }
 
@@ -98,7 +98,7 @@ public class YoParabolicTrajectoryGeneratorTest
       }
 
       FramePoint positionToPack = new FramePoint(referenceFrame);
-      trajectoryGenerator.packPosition(positionToPack, 1.1);
+      trajectoryGenerator.getPosition(positionToPack, 1.1);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -124,7 +124,7 @@ public class YoParabolicTrajectoryGeneratorTest
       for (int i = 0; i < n; i++)
       {
          double parameter = i / (double) n;
-         trajectoryGenerator.packPosition(positionToPack, parameter);
+         trajectoryGenerator.getPosition(positionToPack, parameter);
          double difference = intermediatePosition.getZ() - positionToPack.getZ();
          if (difference < smallestDifference)
             smallestDifference = difference;
@@ -158,15 +158,15 @@ public class YoParabolicTrajectoryGeneratorTest
          double dt = 1e-9;
          double parameter = random.nextDouble();
 
-         trajectoryGenerator.packPosition(position1, parameter);
-         trajectoryGenerator.packPosition(position2, parameter + dt);
+         trajectoryGenerator.getPosition(position1, parameter);
+         trajectoryGenerator.getPosition(position2, parameter + dt);
 
          FrameVector numericalVelocity = new FrameVector(position2);
          numericalVelocity.sub(position1);
          numericalVelocity.scale(1.0 / dt);
 
          FrameVector velocityFromTrajectoryGenerator = new FrameVector(referenceFrame);
-         trajectoryGenerator.packVelocity(velocityFromTrajectoryGenerator, parameter);
+         trajectoryGenerator.getVelocity(velocityFromTrajectoryGenerator, parameter);
 
          double delta = 1e-4;
          JUnitTools.assertTuple3dEquals(numericalVelocity.getVectorCopy(), velocityFromTrajectoryGenerator.getVectorCopy(), delta);
@@ -188,13 +188,13 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.initialize(initialPosition, initialVelocity, finalPosition);
 
       FramePoint initialPositionBack = new FramePoint(referenceFrame);
-      trajectoryGenerator.packPosition(initialPositionBack, 0.0);
+      trajectoryGenerator.getPosition(initialPositionBack, 0.0);
 
       FrameVector initialVelocityBack = new FrameVector(referenceFrame);
-      trajectoryGenerator.packVelocity(initialVelocityBack, 0.0);
+      trajectoryGenerator.getVelocity(initialVelocityBack, 0.0);
 
       FramePoint finalPositionBack = new FramePoint(referenceFrame);
-      trajectoryGenerator.packPosition(finalPositionBack, 1.0);
+      trajectoryGenerator.getPosition(finalPositionBack, 1.0);
 
       double delta = 0.0;
       JUnitTools.assertTuple3dEquals(initialPosition.getPoint(), initialPositionBack.getPoint(), delta);

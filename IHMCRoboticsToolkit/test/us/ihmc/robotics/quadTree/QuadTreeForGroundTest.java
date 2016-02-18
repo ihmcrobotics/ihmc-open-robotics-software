@@ -1,26 +1,26 @@
 package us.ihmc.robotics.quadTree;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Point3d;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+
+import org.junit.Test;
+
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
+
 public class QuadTreeForGroundTest
 {
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 30000)
    public void testGetAllPoints()
    {
