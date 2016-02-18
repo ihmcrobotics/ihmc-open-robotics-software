@@ -1,22 +1,24 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
+
+import org.junit.Test;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class Line2dTest
 {
@@ -601,9 +603,8 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testContainsEpsilon()
    {
       double epsilon = 1e-1;
@@ -843,27 +844,24 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testDistanceLine2d()
    {
       // TODO Write actual test cases, then write the code. Requires definitions.
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testDistanceLineSegment2d()
    {
       // TODO Write actual test cases, then write the code. Requires definitions.
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testDistanceConvexPolygon2d()
    {
       // TODO Write actual test cases, then write the code. Requires definitions.
@@ -1337,9 +1335,8 @@ public class Line2dTest
       assertEquals("pure translation failed", vector.y, line.normalizedVector.y, delta);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000,expected = RuntimeException.class)
-   @Ignore
    public void testApplyTransformTranslationException()
    {
       Random random = new Random(1776L);

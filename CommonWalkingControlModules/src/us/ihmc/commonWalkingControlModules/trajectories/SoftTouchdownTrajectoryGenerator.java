@@ -101,7 +101,7 @@ public class SoftTouchdownTrajectoryGenerator
 	   t0 = startTime.getDoubleValue();
 	   timeIntoTouchdown.set(0.0);
 	      
-	   initialPositionSource.get(p0);
+	   initialPositionSource.getPosition(p0);
 	   p0.changeFrame(referenceFrame);
 	   
 	   velocitySource.get(pd0);

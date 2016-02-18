@@ -1,27 +1,28 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.OrientationFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.OrientationFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 //import us.ihmc.robotics.MathTools;
 //import MatrixTools;
@@ -864,9 +865,8 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       framePoint.interpolate(point1, point2, weightedAverage);
    }
 
-   @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
-
-	@DeployableTestMethod
+   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public final void testFramePoint()
    {
@@ -876,9 +876,8 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       createFrameTuple(referenceFrame);
    }
 
-   @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
-
-	@DeployableTestMethod
+   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public final void testFramePoint1()
    {
@@ -889,9 +888,8 @@ public abstract class FrameTupleTest<T extends Tuple3d>
       createFrameTuple(referenceFrame, point);
    }
 
-   @Ignore("Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain")
-
-	@DeployableTestMethod
+   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public final void testFramePoint2()
    {
@@ -1539,7 +1537,7 @@ public abstract class FrameTupleTest<T extends Tuple3d>
 
          DenseMatrix64F matrix = new DenseMatrix64F(numRows, numCols);
          //      System.out.println(matrix.toString()); //before
-         frametuple.packMatrix(matrix, startRow);
+         frametuple.getInMatrixColumn(matrix, startRow);
          //      System.out.println(matrix.toString()); //after
 
          for(int i = startRow; i < startRow + 3; i++)

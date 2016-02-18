@@ -50,8 +50,8 @@ public class ToroidControlModule
    {
       OneDoFJoint joint = toroidUpdater.getToroidJoint();
       joint.getJointTwist(jointTwist);
-      jointTwist.packAngularPart(tempAngularPart);
-      jointTwist.packLinearPart(tempLinearPart);
+      jointTwist.getAngularPart(tempAngularPart);
+      jointTwist.getLinearPart(tempLinearPart);
       feedForwardWrench.set(jointTwist.getExpressedInFrame(), tempLinearPart, tempAngularPart);
       feedForwardWrench.scale(toroidUpdater.getDamping());
    }

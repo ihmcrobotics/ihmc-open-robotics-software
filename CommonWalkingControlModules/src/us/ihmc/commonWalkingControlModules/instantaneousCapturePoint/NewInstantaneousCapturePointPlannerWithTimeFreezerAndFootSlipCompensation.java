@@ -89,10 +89,10 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
-   public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
          double time, FramePoint currentCapturePointPosition, FramePoint transferToFoot)
    {
-      super.packDesiredCapturePointPositionAndVelocity(tmpCapturePointPosition, tmpCapturePointVelocity, getTimeWithDelay(time));
+      super.getDesiredCapturePointPositionAndVelocity(tmpCapturePointPosition, tmpCapturePointVelocity, getTimeWithDelay(time));
       
       if (doFootSlipCompensation.getBooleanValue() && isDoubleSupport.getBooleanValue() && currentTransferToSide.getEnumValue() != null)
       {

@@ -13,13 +13,13 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class RotationToolsTest
 {
@@ -1129,8 +1129,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d.
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug()
    {
@@ -1148,8 +1147,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug()
    {
@@ -1167,8 +1165,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug2()
    {
@@ -1186,8 +1183,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug2()
    {

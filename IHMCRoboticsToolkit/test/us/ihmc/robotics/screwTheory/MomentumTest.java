@@ -37,7 +37,7 @@ public class MomentumTest
       Twist twist = new Twist(frame, world, world, linearVelocity, angularVelocity);
 
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
-      inertia.packMatrix(inertiaMatrix);
+      inertia.getMatrix(inertiaMatrix);
       DenseMatrix64F twistMatrix = twist.toMatrix();
       DenseMatrix64F expensive = new DenseMatrix64F(inertiaMatrix.getNumRows(), twistMatrix.getNumCols());
       CommonOps.mult(inertiaMatrix, twistMatrix, expensive);

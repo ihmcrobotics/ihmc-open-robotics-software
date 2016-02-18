@@ -93,7 +93,7 @@ public class TaskSpaceConstraintResolver
       phiJMap.put(jacobian, phiJMapForCurrentConstraint);
 
       // taskSpaceAcceleration
-      taskSpaceAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+      taskSpaceAcceleration.getMatrix(taskSpaceAccelerationMatrix, 0);
 
       // J
       jacobian.changeFrame(taskSpaceAcceleration.getExpressedInFrame());
@@ -116,7 +116,7 @@ public class TaskSpaceConstraintResolver
       desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
       convectiveTerm.getBodyFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getBodyFrame());
       convectiveTerm.getExpressedInFrame().checkReferenceFrameMatch(taskSpaceAcceleration.getExpressedInFrame());
-      convectiveTerm.packMatrix(convectiveTermMatrix, 0);
+      convectiveTerm.getMatrix(convectiveTermMatrix, 0);
 
       sJInverse.reshape(sJ.getNumCols(), sJ.getNumCols());
       DenseMatrix64F phiC = new DenseMatrix64F(sJInverse.getNumRows(), 1);    // TODO: garbage
@@ -226,14 +226,14 @@ public class TaskSpaceConstraintResolver
 
       // convectiveTerm
       desiredJointAccelerationCalculator.computeJacobianDerivativeTerm(convectiveTerm);
-      convectiveTerm.packMatrix(convectiveTermMatrix, 0);
+      convectiveTerm.getMatrix(convectiveTermMatrix, 0);
 
       // sJ
       sJ.reshape(selectionMatrix.getNumRows(), jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
 
       // taskSpaceAcceleration
-      spatialAcceleration.packMatrix(taskSpaceAccelerationMatrix, 0);
+      spatialAcceleration.getMatrix(taskSpaceAccelerationMatrix, 0);
 
       // c
       cTaskSpace.reshape(selectionMatrix.getNumRows(), 1);

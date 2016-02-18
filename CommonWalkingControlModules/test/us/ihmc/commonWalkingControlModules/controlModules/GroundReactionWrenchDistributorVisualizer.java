@@ -190,10 +190,10 @@ public class GroundReactionWrenchDistributorVisualizer
                                                               desiredBodyWrench.getExpressedInFrame(), contactStates);
 
          FrameVector temp = new FrameVector();
-         achievedWrenchOnCenterOfMass.packLinearPart(temp);
+         achievedWrenchOnCenterOfMass.getLinearPart(temp);
          temp.changeFrame(worldFrame);
          achievedForceWorld.set(temp);
-         achievedWrenchOnCenterOfMass.packAngularPart(temp);
+         achievedWrenchOnCenterOfMass.getAngularPart(temp);
          temp.changeFrame(worldFrame);
          achievedMomentWorld.set(temp);
 

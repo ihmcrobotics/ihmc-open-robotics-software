@@ -1,16 +1,17 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import Jama.Matrix;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Test;
+
+import Jama.Matrix;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class MatrixStatisticsTest
 {
@@ -372,17 +373,15 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testGetRowNumber()
    {
       fail("Not yet implemented");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
-   @Ignore
    public void testGetColumnNumber()
    {
       fail("Not yet implemented");

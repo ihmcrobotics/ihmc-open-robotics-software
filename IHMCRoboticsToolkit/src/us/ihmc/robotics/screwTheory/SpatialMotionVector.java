@@ -359,7 +359,7 @@ public abstract class SpatialMotionVector
    public DenseMatrix64F toMatrix()
    {
       DenseMatrix64F matrix = new DenseMatrix64F(SIZE, 1);
-      packMatrix(matrix, 0);
+      getMatrix(matrix, 0);
       return matrix;
    }
    
@@ -368,7 +368,7 @@ public abstract class SpatialMotionVector
     * @param matrix matrix to pack
     */
    
-   public void packMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart + 0, 0, angularPart.x);
       matrix.set(rowStart + 1, 0, angularPart.y);
@@ -379,7 +379,7 @@ public abstract class SpatialMotionVector
       matrix.set(rowStart + 5, 0, linearPart.z);
    }
    
-   public void packArray(double[] array, int offset)
+   public void getArray(double[] array, int offset)
    {
       array[offset + 0] =  angularPart.x;
       array[offset + 1] =  angularPart.y;
@@ -392,7 +392,7 @@ public abstract class SpatialMotionVector
    /**
     * Packs an existing Vector3d with the angular velocity part
     */
-   public void packAngularPart(Vector3d vectorToPack)
+   public void getAngularPart(Vector3d vectorToPack)
    {
       vectorToPack.set(this.angularPart);
    }
@@ -400,7 +400,7 @@ public abstract class SpatialMotionVector
    /**
     * Packs an existing Vector3d with the linear velocity part
     */
-   public void packLinearPart(Vector3d vectorToPack)
+   public void getLinearPart(Vector3d vectorToPack)
    {
       vectorToPack.set(this.linearPart);
    }
@@ -438,7 +438,7 @@ public abstract class SpatialMotionVector
    /**
     * Packs an existing FrameVector with the angular velocity part
     */
-   public void packAngularPart(FrameVector vectorToPack)
+   public void getAngularPart(FrameVector vectorToPack)
    {
       vectorToPack.setIncludingFrame(expressedInFrame, this.angularPart);
    }
@@ -446,7 +446,7 @@ public abstract class SpatialMotionVector
    /**
     * Packs an existing FrameVector with the linear velocity part
     */
-   public void packLinearPart(FrameVector vectorToPack)
+   public void getLinearPart(FrameVector vectorToPack)
    {
       vectorToPack.setIncludingFrame(expressedInFrame, this.linearPart);
    }

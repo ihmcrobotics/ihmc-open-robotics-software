@@ -12,7 +12,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
@@ -52,6 +51,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
@@ -88,8 +88,8 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Ignore("Invoked manually to test memory & thread leaks")
-   @DeployableTestMethod(estimatedDuration = 50.0)
+   // Invoked manually to test memory & thread leaks
+   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Manual)
    @Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
    {

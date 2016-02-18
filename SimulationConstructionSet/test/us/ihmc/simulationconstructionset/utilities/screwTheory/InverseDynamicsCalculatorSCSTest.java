@@ -124,7 +124,7 @@ public class InverseDynamicsCalculatorSCSTest
       inverseDynamicsCalculator.compute();
 
       Wrench outputWrench = new Wrench(null, null);
-      rootInverseDynamicsJoint.packWrench(outputWrench);
+      rootInverseDynamicsJoint.getWrench(outputWrench);
       
       outputWrench.changeBodyFrameAttachedToSameBody(forceApplicationFrame);
       outputWrench.changeFrame(forceApplicationFrame);

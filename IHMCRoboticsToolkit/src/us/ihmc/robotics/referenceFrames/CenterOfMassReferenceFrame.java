@@ -32,7 +32,7 @@ public class CenterOfMassReferenceFrame extends ReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       centerOfMassCalculator.compute();
-      centerOfMassCalculator.packCenterOfMass(centerOfMass);
+      centerOfMassCalculator.getCenterOfMass(centerOfMass);
       centerOfMassVector3d.set(centerOfMass.getPoint());
       transformToParent.setIdentity();
       transformToParent.setTranslation(centerOfMassVector3d);

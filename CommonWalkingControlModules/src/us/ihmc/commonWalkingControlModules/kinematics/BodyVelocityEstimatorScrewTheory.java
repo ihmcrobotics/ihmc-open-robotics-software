@@ -45,28 +45,28 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
 
    public void estimateBodyVelocity()
    {
-      packTwistOfAnkleWithRespectToIMU(bodyTwist, robotSide);
+      getTwistOfAnkleWithRespectToIMU(bodyTwist, robotSide);
       tempLinearPart.setToZero(bodyTwist.getExpressedInFrame());
-      bodyTwist.packLinearPart(tempLinearPart.getVector());
+      bodyTwist.getLinearPart(tempLinearPart.getVector());
 
-      packAngularVelocityOfAnkleZUpWithRespectToIMU(tempAngularPart, robotSide);
+      getAngularVelocityOfAnkleZUpWithRespectToIMU(tempAngularPart, robotSide);
       bodyTwist.set(footZUpFrame, bodyTwist.getBaseFrame(), bodyTwist.getExpressedInFrame(), tempLinearPart.getVector(), tempAngularPart.getVector());
 
       bodyTwist.invert();
       bodyTwist.changeFrame(imuJoint.getFrameAfterJoint());
       bodyLinearVelocity.setToZero(bodyTwist.getExpressedInFrame());
-      bodyTwist.packLinearPart(bodyLinearVelocity.getVector());
+      bodyTwist.getLinearPart(bodyLinearVelocity.getVector());
       bodyLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   public void packBodyVelocity(FrameVector bodyVelocityToPack)
+   public void getBodyVelocity(FrameVector bodyVelocityToPack)
    {
       bodyVelocityToPack.setIncludingFrame(this.bodyLinearVelocity);
    }
 
    private final Twist jointTwist = new Twist();
 
-   private void packTwistOfAnkleWithRespectToIMU(Twist twistToPack, RobotSide robotSide)
+   private void getTwistOfAnkleWithRespectToIMU(Twist twistToPack, RobotSide robotSide)
    {
       RigidBody currentBody = foot;
       ReferenceFrame footFrame = foot.getParentJoint().getFrameAfterJoint();
@@ -85,18 +85,18 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
       twistToPack.changeBaseFrameNoRelativeTwist(imuJoint.getFrameAfterJoint());
    }
 
-   private void packAngularVelocityOfAnkleZUpWithRespectToIMU(FrameVector angularVelocityToPack, RobotSide robotSide)
+   private void getAngularVelocityOfAnkleZUpWithRespectToIMU(FrameVector angularVelocityToPack, RobotSide robotSide)
    {
       ReferenceFrame footFrame = foot.getParentJoint().getFrameAfterJoint();
 
       imuJoint.getJointTwist(jointTwist);
       angularVelocityToPack.setToZero(jointTwist.getExpressedInFrame());
-      jointTwist.packAngularPart(angularVelocityToPack.getVector());    // angular velocity of IMU w.r.t world == IMU w.r.t ankle ZUp by assumption, in IMU frame
+      jointTwist.getAngularPart(angularVelocityToPack.getVector());    // angular velocity of IMU w.r.t world == IMU w.r.t ankle ZUp by assumption, in IMU frame
       angularVelocityToPack.changeFrame(footFrame);    // angular velocity of IMU w.r.t. ankle ZUp, in foot frame
       angularVelocityToPack.scale(-1.0);    // angular velocity of ankle ZUp w.r.t. IMU, in foot frame
    }
 
-   public void packCovariance(Tuple3d covarianceToPack)
+   public void getCovariance(Tuple3d covarianceToPack)
    {
       // TODO: also use angular velocity of foot with respect to ground. Create FootAngularVelocityCalculator; do only once
       double covariance = this.legToTrustForVelocity.isLegTrustedForVelocity(robotSide) ? defaultCovariance.getDoubleValue() : Double.POSITIVE_INFINITY;

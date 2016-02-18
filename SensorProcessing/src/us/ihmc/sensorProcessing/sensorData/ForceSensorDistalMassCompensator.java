@@ -137,7 +137,7 @@ public class ForceSensorDistalMassCompensator
 
    public void update(ForceSensorData forceSensorData)
    {
-      forceSensorData.packWrench(sensorWrench);
+      forceSensorData.getWrench(sensorWrench);
       update(sensorWrench);
    }
 

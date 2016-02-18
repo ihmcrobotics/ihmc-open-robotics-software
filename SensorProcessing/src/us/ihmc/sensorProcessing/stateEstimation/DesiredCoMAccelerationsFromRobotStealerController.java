@@ -94,17 +94,17 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    {
       FramePoint com = new FramePoint();
       perfectCenterOfMassCalculator.compute();
-      perfectCenterOfMassCalculator.packCenterOfMass(com);
+      perfectCenterOfMassCalculator.getCenterOfMass(com);
       perfectCoM.set(com);
 
       FrameVector comd = new FrameVector();
       perfectCenterOfMassJacobian.compute();
-      perfectCenterOfMassJacobian.packCenterOfMassVelocity(comd);
+      perfectCenterOfMassJacobian.getCenterOfMassVelocity(comd);
       comd.changeFrame(ReferenceFrame.getWorldFrame());
       perfectCoMd.set(comd);
 
       FrameVector comdd = new FrameVector();
-      perfectCenterOfMassAccelerationCalculator.packCoMAcceleration(comdd);
+      perfectCenterOfMassAccelerationCalculator.getCoMAcceleration(comdd);
       comdd.changeFrame(ReferenceFrame.getWorldFrame());
       perfectCoMdd.set(comdd);
    }
@@ -128,7 +128,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
       public void run()
       {
-         centerOfMassAccelerationCalculator.packCoMAcceleration(comAccelerationFrameVector);
+         centerOfMassAccelerationCalculator.getCoMAcceleration(comAccelerationFrameVector);
          comAccelerationFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
          comAccelerationFrameVector.get(comAcceleration);
 

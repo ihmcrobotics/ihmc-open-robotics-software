@@ -154,22 +154,22 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       this.jointTorque.set(jointTorque);
    }
 
-   public void packRotation(Quat4d rotationToPack)
+   public void getRotation(Quat4d rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void packRotation(Matrix3d rotationToPack)
+   public void getRotation(Matrix3d rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void packRotation(double[] yawPitchRoll)
+   public void getRotation(double[] yawPitchRoll)
    {
       RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
-   public void packJointTorque(FrameVector jointTorqueToPack)
+   public void getJointTorque(FrameVector jointTorqueToPack)
    {
       jointTorqueToPack.setIncludingFrame(jointTorque);
    }

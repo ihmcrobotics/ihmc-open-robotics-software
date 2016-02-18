@@ -140,7 +140,7 @@ public class BalanceSupportControlModule
       couplingRegistry.setDesiredCoP(desiredCoP);
 
       // compute VTPs and leg strengths
-      virtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, couplingRegistry.getUpcomingSupportLeg());
+      virtualToePointCalculator.getVirtualToePoints(virtualToePoints, bipedSupportPolygons, desiredCoP, couplingRegistry.getUpcomingSupportLeg());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -149,7 +149,7 @@ public class BalanceSupportControlModule
          virtualToePointsInWorld.get(robotSide).set(virtualToePoint);
       }
 
-      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, desiredCoP);
+      legStrengthCalculator.getLegStrengths(legStrengths, virtualToePoints, desiredCoP);
 
       // compute desired torques on the pelvis using PelvisOrientationControlModule.
       FrameVector torqueOnPelvisInPelvisFrame = pelvisOrientationControlModule.computePelvisTorque(null, desiredPelvisOrientation);

@@ -73,7 +73,7 @@ public class SwingFullLegJacobian
     * @param anklePitchTwistInAnklePitchFrame
     * @return corresponding joint velocities
     */
-   public void packJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame, double alpha)
+   public void getJointVelocitiesGivenTwist(LegJointVelocities legJointVelocitiesToPack, Twist anklePitchTwistInAnklePitchFrame, double alpha)
    {
       jacobianSolver.setAlpha(alpha);
       jacobianSolver.setJacobian(geometricJacobian.getJacobianMatrix());
@@ -88,7 +88,7 @@ public class SwingFullLegJacobian
    /**
     * Packs a LegTorques object with the torques corresponding to the given wrench on the foot.
     */
-   public void packLegTorques(LegTorques legTorquesToPack, Wrench wrenchOnFootInFootFrame)
+   public void getLegTorques(LegTorques legTorquesToPack, Wrench wrenchOnFootInFootFrame)
    {
       // check that the LegTorques object we're packing has the correct RobotSide.
       if (this.robotSide != legTorquesToPack.getRobotSide())

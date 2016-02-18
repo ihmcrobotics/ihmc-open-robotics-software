@@ -165,7 +165,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
 
       // Desired velocities
       DesiredJointVelocityCalculator desiredJointVelocityCalculator = desiredJointVelocityCalculators.get(swingSide);
-      desiredJointVelocityCalculator.packDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
+      desiredJointVelocityCalculator.getDesiredJointVelocities(desiredLegJointVelocities.get(swingSide), desiredTwistOfSwingFootWithRespectToWorld, dampedLeastSquaresAlpha.getDoubleValue());
 
       // set body acceleration
       if (useBodyAcceleration)
@@ -310,7 +310,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    private void setUpperBodyWrench()
    {
       Wrench upperBodyWrench = new Wrench();
-      fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
+      fullRobotModel.getRootJoint().getWrench(upperBodyWrench);
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setDesiredUpperBodyWrench(upperBodyWrench);

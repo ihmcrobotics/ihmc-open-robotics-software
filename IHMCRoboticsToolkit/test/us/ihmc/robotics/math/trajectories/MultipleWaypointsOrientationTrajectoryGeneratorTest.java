@@ -51,8 +51,8 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       {
          double timeAtWaypoint = numberOfWaypoints == 1 ? trajectoryTime / 2.0 : i * trajectoryTime / (numberOfWaypoints - 1.0);
          simpleTraj.compute(timeAtWaypoint);
-         simpleTraj.get(waypointOrientation);
-         simpleTraj.packAngularVelocity(waypointAngularVelocity);
+         simpleTraj.getOrientation(waypointOrientation);
+         simpleTraj.getAngularVelocity(waypointAngularVelocity);
          multipleWaypointTrajectory.appendWaypoint(timeAtWaypoint, waypointOrientation, waypointAngularVelocity);
       }
       
@@ -70,10 +70,10 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       for (double t = 0.0; t <= trajectoryTime; t += dt)
       {
          multipleWaypointTrajectory.compute(t);
-         multipleWaypointTrajectory.packAngularData(orientationToPackMultiple, angularVelocityToPackMultiple, angularAccelerationToPackMultiple);
+         multipleWaypointTrajectory.getAngularData(orientationToPackMultiple, angularVelocityToPackMultiple, angularAccelerationToPackMultiple);
          
          simpleTraj.compute(t);
-         simpleTraj.packAngularData(orientationToPackSimple, angularVelocityToPackSimple, angularAccelerationToPackSimple);
+         simpleTraj.getAngularData(orientationToPackSimple, angularVelocityToPackSimple, angularAccelerationToPackSimple);
          
          boolean orientationsEqual = orientationToPackMultiple.epsilonEquals(orientationToPackSimple, EPSILON);
          assertTrue(orientationsEqual);

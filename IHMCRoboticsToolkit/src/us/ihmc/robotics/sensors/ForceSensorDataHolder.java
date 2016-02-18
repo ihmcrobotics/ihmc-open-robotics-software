@@ -74,7 +74,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
           }
           else
           {
-             otherForceSensorData.packWrench(tempWrench);
+             otherForceSensorData.getWrench(tempWrench);
              forceSensors.get(forceSensorDefinition).setWrench(tempWrench);
           }
       }
@@ -93,7 +93,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
    @Override
    public void getForceSensorValue(ForceSensorDefinition key, Wrench wrenchToPack)
    {
-      forceSensors.get(key).packWrench(wrenchToPack);
+      forceSensors.get(key).getWrench(wrenchToPack);
    }
 
    public void calculateChecksum(GenericCRC32 checksum)

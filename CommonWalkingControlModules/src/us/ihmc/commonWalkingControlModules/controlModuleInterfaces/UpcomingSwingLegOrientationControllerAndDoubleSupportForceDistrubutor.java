@@ -73,7 +73,7 @@ public class UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubut
       
    }
    
-   public void packForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesInPelvisFrameToPack,
+   public void getForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesInPelvisFrameToPack,
          double zForceInPelvisFrameTotal, FrameVector torqueInPelvisFrameTotal, SideDependentList<Double> legStrengths,
          SideDependentList<FramePoint2d> virtualToePoints)
    {

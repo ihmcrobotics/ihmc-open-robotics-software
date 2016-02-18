@@ -329,7 +329,7 @@ public class WholeBodyTrajectory
          packet.pelvisWorldPosition[w].set( temp );
 
          Twist twistToPack = new Twist();
-         twistCalculator.packTwistOfBody(twistToPack, currentRobotModel.getElevator() );
+         twistCalculator.getTwistOfBody(twistToPack, currentRobotModel.getElevator() );
 
          packet.pelvisLinearVelocity[w].set(  twistToPack.getLinearPartCopy()  );
          packet.pelvisAngularVelocity[w].set( twistToPack.getAngularPartCopy() );
@@ -338,7 +338,7 @@ public class WholeBodyTrajectory
          RigidBodyTransform worldToChest =  currentRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame();
          worldToChest.get( packet.chestWorldOrientation[w] );
 
-         twistCalculator.packTwistOfBody(twistToPack, currentRobotModel.getChest() );
+         twistCalculator.getTwistOfBody(twistToPack, currentRobotModel.getChest() );
          packet.chestAngularVelocity[w].set(  twistToPack.getAngularPartCopy() );
       }
       

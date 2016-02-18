@@ -76,7 +76,7 @@ public class AxisAnglePelvisOrientationControlModule implements PelvisOrientatio
    {
       Twist twistOfPelvisWithRespectToWorld = processedSensors.getTwistOfPelvisWithRespectToWorld();
       twistOfPelvisWithRespectToWorld.changeFrame(bodyFrame);
-      twistOfPelvisWithRespectToWorld.packAngularPart(pelvisAngularVelocity);
+      twistOfPelvisWithRespectToWorld.getAngularPart(pelvisAngularVelocity);
      
 
       FrameVector ret = new FrameVector(bodyFrame);

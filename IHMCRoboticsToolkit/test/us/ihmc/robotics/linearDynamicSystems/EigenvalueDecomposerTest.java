@@ -1,14 +1,15 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import Jama.Matrix;
-import org.junit.Ignore;
-import org.junit.Test;
-import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import Jama.Matrix;
+import us.ihmc.robotics.dataStructures.ComplexNumber;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class EigenvalueDecomposerTest
 {
@@ -207,9 +208,7 @@ public class EigenvalueDecomposerTest
       verifyDecomposition(matrixA, eigenvalueDecomposer);
    }
    
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testMCSExample()
    {

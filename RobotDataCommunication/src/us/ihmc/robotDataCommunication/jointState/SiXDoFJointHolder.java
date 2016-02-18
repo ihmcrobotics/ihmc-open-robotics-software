@@ -32,8 +32,8 @@ public class SiXDoFJointHolder implements JointHolder
 
    public void get(double[] buffer, int offset)
    {
-      inverseDynamicsJoint.packRotation(rotation);
-      inverseDynamicsJoint.packTranslation(translation);
+      inverseDynamicsJoint.getRotation(rotation);
+      inverseDynamicsJoint.getTranslation(translation);
       inverseDynamicsJoint.getJointTwist(twist);
       
       buffer[offset + 0]  = rotation.w;
@@ -45,6 +45,6 @@ public class SiXDoFJointHolder implements JointHolder
       buffer[offset + 5]  = translation.y;
       buffer[offset + 6]  = translation.z;
       
-      twist.packArray(buffer, offset + 7);
+      twist.getArray(buffer, offset + 7);
    }
 }

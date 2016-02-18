@@ -31,30 +31,30 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setIncludingFrame(referenceFrame, trajectories[0].getValue(), trajectories[1].getValue(), trajectories[2].getValue());
    }
 
    @Override
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       velocityToPack.setIncludingFrame(referenceFrame, trajectories[0].getVelocity(), trajectories[1].getVelocity(), trajectories[2].getVelocity());
    }
 
    @Override
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(referenceFrame, trajectories[0].getAcceleration(), trajectories[1].getAcceleration(),
             trajectories[2].getAcceleration());
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    public void clear()
@@ -131,7 +131,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
    public void initialize()
    {
       FramePoint positionToPack = new FramePoint(ReferenceFrame.getWorldFrame());
-      currentPelvisPosition.get(positionToPack);
+      currentPelvisPosition.getPosition(positionToPack);
       positionToPack.changeFrame( ReferenceFrame.getWorldFrame() );
       
       trajectories[0].setInitialCondition(positionToPack.getX(), 0.0);

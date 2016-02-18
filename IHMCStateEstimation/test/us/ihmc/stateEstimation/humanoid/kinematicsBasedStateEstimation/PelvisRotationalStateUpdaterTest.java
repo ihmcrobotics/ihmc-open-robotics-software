@@ -129,7 +129,7 @@ public class PelvisRotationalStateUpdaterTest
 
       setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
       
-      rootJoint.packRotation(rotationExpected);
+      rootJoint.getRotation(rotationExpected);
       rootJoint.getJointTwist(twistExpected);
       
       // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
@@ -140,7 +140,7 @@ public class PelvisRotationalStateUpdaterTest
       jointAndIMUSensorDataSource.initialize();
       pelvisRotationalStateUpdater.initialize();
 
-      rootJoint.packRotation(rotationEstimated);
+      rootJoint.getRotation(rotationEstimated);
       rootJoint.getJointTwist(twistEstimated);
       
       JUnitTools.assertQuaternionsEqualUsingDifference(rotationExpected, rotationEstimated, EPS);
@@ -150,7 +150,7 @@ public class PelvisRotationalStateUpdaterTest
       {
          setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
          
-         rootJoint.packRotation(rotationExpected);
+         rootJoint.getRotation(rotationExpected);
          rootJoint.getJointTwist(twistExpected);
          
          // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
@@ -161,7 +161,7 @@ public class PelvisRotationalStateUpdaterTest
          jointAndIMUSensorDataSource.startComputation(0, 0, -1);
          pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
 
-         rootJoint.packRotation(rotationEstimated);
+         rootJoint.getRotation(rotationEstimated);
          rootJoint.getJointTwist(twistEstimated);
          
          JUnitTools.assertQuaternionsEqualUsingDifference(rotationExpected, rotationEstimated, EPS);
@@ -195,7 +195,7 @@ public class PelvisRotationalStateUpdaterTest
          IMUDefinition imuDefinition = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(i);
          RigidBody measurementLink = imuDefinition.getRigidBody();
          Twist twistIMU = new Twist();
-         inverseDynamicsStructure.getTwistCalculator().packTwistOfBody(twistIMU, measurementLink);
+         inverseDynamicsStructure.getTwistCalculator().getTwistOfBody(twistIMU, measurementLink);
          twistIMU.changeFrame(imuSensors.get(i).getMeasurementFrame());
          twistIMU.changeBodyFrameNoRelativeTwist(imuSensors.get(i).getMeasurementFrame());
          

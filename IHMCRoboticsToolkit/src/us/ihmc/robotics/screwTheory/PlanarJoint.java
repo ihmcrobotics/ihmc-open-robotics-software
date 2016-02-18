@@ -203,7 +203,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qRot;
    }
 
-   public void packTranslation(FrameVector2d vectorToPack)
+   public void getTranslation(FrameVector2d vectorToPack)
    {
       vectorToPack.setIncludingFrame(qTrans);
    }
@@ -213,7 +213,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qdRot;
    }
 
-   public void packTranslationalVelocity(FrameVector2d vectorToPack)
+   public void getTranslationalVelocity(FrameVector2d vectorToPack)
    {
       vectorToPack.set(qdTrans);
    }
@@ -223,7 +223,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qddRot;
    }
 
-   public void packTranslationalAcceleration(FrameVector2d vectorToPack)
+   public void getTranslationalAcceleration(FrameVector2d vectorToPack)
    {
       vectorToPack.set(qddTrans);
    }
@@ -233,7 +233,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qddRotDesired;
    }
 
-   public void packDesiredTranslationalAcceleration(FrameVector2d vectorToPack)
+   public void getDesiredTranslationalAcceleration(FrameVector2d vectorToPack)
    {
       vectorToPack.set(qddTransDesired);
    }
@@ -243,7 +243,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return tauRot;
    }
 
-   public void packTauTranslation(FrameVector2d vectorToPack)
+   public void getTauTranslation(FrameVector2d vectorToPack)
    {
       vectorToPack.set(tauTrans);
    }

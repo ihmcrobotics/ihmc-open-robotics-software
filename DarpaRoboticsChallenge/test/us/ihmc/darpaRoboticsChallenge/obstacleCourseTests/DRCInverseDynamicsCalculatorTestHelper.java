@@ -154,7 +154,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame bodyFixedFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
 
       Wrench rootJointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
-      rootJoint.packWrench(rootJointWrench);
+      rootJoint.getWrench(rootJointWrench);
 
       FrameVector rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
       FrameVector rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
@@ -282,7 +282,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
       Wrench rootJointWrench = new Wrench(rootJoint.getFrameAfterJoint(), rootJoint.getFrameAfterJoint());
-      rootJoint.packWrench(rootJointWrench);
+      rootJoint.getWrench(rootJointWrench);
 
       FrameVector rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
       FrameVector rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
@@ -578,7 +578,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       floatingJoint.setAngularVelocityInBody(rootJointTwist.getAngularPartCopy());
 
       FrameVector linearVelocityInWorld = new FrameVector();
-      rootJointTwist.packLinearPart(linearVelocityInWorld);
+      rootJointTwist.getLinearPart(linearVelocityInWorld);
 
       linearVelocityInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       floatingJoint.setVelocity(linearVelocityInWorld.getVectorCopy());

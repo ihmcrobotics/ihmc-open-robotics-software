@@ -332,20 +332,20 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
 
       SixDoFJoint rootJoint = estimatorFullRobotModel.getRootJoint();
 
-      rootJoint.packTranslation(translation);
+      rootJoint.getTranslation(translation);
       estimatedRootJointPosition.set(translation);
 
-      rootJoint.packRotation(orientation);
+      rootJoint.getRotation(orientation);
       estimatedRootJointQuaternion.set(orientation);
       estimatedRootJointOrientation.set(orientation);
       
       rootJoint.getJointTwist(twist);
 
-      twist.packLinearPart(linearFrameVelocity);
+      twist.getLinearPart(linearFrameVelocity);
       linearFrameVelocity.changeFrame(worldFrame);
       estimatedRootJointLinearVelocity.set(linearFrameVelocity);
       
-      twist.packAngularPart(angularFrameVelocity);
+      twist.getAngularPart(angularFrameVelocity);
       angularFrameVelocity.changeFrame(worldFrame);
       estimatedRootJointAngularVelocity.set(angularFrameVelocity);
       

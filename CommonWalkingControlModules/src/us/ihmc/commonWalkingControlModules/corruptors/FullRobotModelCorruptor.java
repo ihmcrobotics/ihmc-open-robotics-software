@@ -175,7 +175,7 @@ public class FullRobotModelCorruptor
       variableChangedListeners.add(massVariableChangedListener);
       
       FramePoint originalCoMOffset = new FramePoint();
-      rigidBody.packCoMOffset(originalCoMOffset);
+      rigidBody.getCoMOffset(originalCoMOffset);
       final YoFramePoint rigidBodyCoMOffset = new YoFramePoint(name + "CoMOffset", originalCoMOffset.getReferenceFrame(), registry);
       rigidBodyCoMOffset.set(originalCoMOffset);
       

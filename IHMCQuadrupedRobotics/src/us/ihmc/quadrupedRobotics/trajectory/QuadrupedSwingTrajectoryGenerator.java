@@ -112,16 +112,28 @@ public class QuadrupedSwingTrajectoryGenerator
          alphaOut.set(alphaToAlphaFunction.getAlphaPrime(alphaIn.getDoubleValue()));
          alphaTimeInStep.set(swingTimeDoubleProvider.getValue() * alphaOut.getDoubleValue());
          parabolicCartesianTrajectoryGenerator.compute(alphaTimeInStep.getDoubleValue());  //computeNextTick(framePointToPack, dt);
-         parabolicCartesianTrajectoryGenerator.packPosition(framePointToPack);
+         parabolicCartesianTrajectoryGenerator.getPosition(framePointToPack);
          timeInStep.set(timeInStep.getDoubleValue() + dt);
          updateBagOfBalls(framePointToPack);
       }
       else
       {
          cartesianTrajectoryGenerator.compute(dt);
-         cartesianTrajectoryGenerator.get(desiredEndEffectorPosition);
+         cartesianTrajectoryGenerator.getPosition(desiredEndEffectorPosition);
          framePointToPack.setIncludingFrame(desiredEndEffectorPosition);
          updateBagOfBalls(desiredEndEffectorPosition);
+      }
+   }
+   
+   public double getTimeRemaining()
+   {
+      if (USE_NEW_SWING_GENERATOR)
+      {
+         return swingTimeDoubleProvider.getValue() - timeInStep.getDoubleValue();
+      }
+      else
+      {
+         return cartesianTrajectoryGenerator.getTimeRemaining();
       }
    }
 

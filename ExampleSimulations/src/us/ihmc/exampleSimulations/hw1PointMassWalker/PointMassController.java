@@ -373,11 +373,11 @@ public class PointMassController implements RobotController
          
          else
          {
-            swingTrajectory.packVelocity(desiredVelocity);      
+            swingTrajectory.getVelocity(desiredVelocity);      
          }
          
          // 1) proportional control
-         swingTrajectory.packPosition(desiredPosition);
+         swingTrajectory.getPosition(desiredPosition);
          desiredPosition.add(0.0, 0.0, nTicksSinceTrajectoryIsDone * finalDesiredVelocity.getZ() * controlDT);  
          yodesiredPositionSwingFoot.setAndMatchFrame(desiredPosition); 
          desiredPosition.changeFrame(swingSoleFrame);      

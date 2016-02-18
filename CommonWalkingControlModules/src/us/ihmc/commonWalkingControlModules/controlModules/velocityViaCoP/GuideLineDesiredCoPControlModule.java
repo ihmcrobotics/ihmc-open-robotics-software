@@ -155,7 +155,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       capturePointCenterOfPressureControlModule.controlSingleSupport(supportLeg, bipedSupportPolygons, capturePointInAnkleZUp, desiredVelocity, guideLine,
             desiredCapturePoint, centerOfMassPosition, actualCenterOfMassVelocityInSupportFootFrame); // , percentToFarEdgeOfFoot); // calculates capture points
 
-      capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
+      capturePointCenterOfPressureControlModule.getDesiredCenterOfPressure(desiredCenterOfPressure);
       FramePoint2d desiredCoP2d = desiredCenterOfPressure.toFramePoint2d();
 
       AlphaFilteredYoFramePoint2d filteredDesiredCoPSingleSupport = filteredDesiredCoPsSingleSupport.get(supportLeg);
@@ -190,7 +190,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
 
       capturePointCenterOfPressureControlModule.controlDoubleSupport(bipedSupportPolygons, currentCapturePoint, desiredCapturePoint, centerOfMassPosition,
             desiredVelocity, currentBodyVelocity);
-      capturePointCenterOfPressureControlModule.packDesiredCenterOfPressure(desiredCenterOfPressure);
+      capturePointCenterOfPressureControlModule.getDesiredCenterOfPressure(desiredCenterOfPressure);
 
       FramePoint2d desiredCoP2d = new FramePoint2d(desiredCenterOfPressure.getReferenceFrame(), desiredCenterOfPressure.getX(), desiredCenterOfPressure.getY());
 

@@ -78,12 +78,12 @@ public class TwistCalculator
       successorTwist.add(tempTwist);
    }
 
-   public void packTwistOfBody(Twist twistToPack, RigidBody rigidBody)
+   public void getTwistOfBody(Twist twistToPack, RigidBody rigidBody)
    {
       twistToPack.set(twists.get(rigidBody));
    }
 
-   public void packRelativeTwist(Twist twistToPack, RigidBody base, RigidBody body)
+   public void getRelativeTwist(Twist twistToPack, RigidBody base, RigidBody body)
    {
       twistToPack.set(twists.get(body));
       tempTwist.set(twists.get(base));

@@ -187,8 +187,8 @@ public class FootRotationCalculator
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
       footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
 
-      twistCalculator.packTwistOfBody(bodyTwist, rotatingBody.getRigidBody());
-      bodyTwist.packAngularPart(angularVelocity);
+      twistCalculator.getTwistOfBody(bodyTwist, rotatingBody.getRigidBody());
+      bodyTwist.getAngularPart(angularVelocity);
 
       angularVelocity.changeFrame(soleFrame);
       angularVelocity.setZ(0.0);

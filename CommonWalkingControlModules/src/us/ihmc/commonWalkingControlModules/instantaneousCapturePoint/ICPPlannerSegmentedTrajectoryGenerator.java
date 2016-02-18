@@ -271,8 +271,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       spline.initialize();
       spline.compute(timeInSecondSegment);
 
-      spline.get(desiredICPOutput);
-      spline.packVelocity(desiredICPVelocityOutput);
+      spline.getPosition(desiredICPOutput);
+      spline.getVelocity(desiredICPVelocityOutput);
    }
 
    private void computeThirdSegment(double timeInThirdSegment)
@@ -334,7 +334,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setIncludingFrame(desiredICPOutput);
    }
@@ -350,28 +350,28 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       velocityToPack.setIncludingFrame(desiredICPVelocityOutput);
    }
 
-   public void packVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector velocityToPack)
    {
       velocityToPack.set(desiredICPVelocityOutput);
    }
 
    @Override
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       accelerationToPack.setToZero(trajectoryFrame);
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override

@@ -255,7 +255,7 @@ public class PelvisLinearStateUpdater
       imuDriftCompensator.initialize();
       
       centerOfMassCalculator.compute();
-      centerOfMassCalculator.packCenterOfMass(tempPosition);
+      centerOfMassCalculator.getCenterOfMass(tempPosition);
       if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
       {
          RigidBody foot = feet.get(0);
@@ -523,13 +523,13 @@ public class PelvisLinearStateUpdater
    private void updateCoMState()
    {
       centerOfMassCalculator.compute();
-      centerOfMassCalculator.packCenterOfMass(centerOfMassPosition);
+      centerOfMassCalculator.getCenterOfMass(centerOfMassPosition);
       centerOfMassPosition.changeFrame(worldFrame);
       yoCenterOfMassPosition.set(centerOfMassPosition);
       
       centerOfMassJacobianWorld.compute();
       centerOfMassVelocity.setToZero(ReferenceFrame.getWorldFrame());
-      centerOfMassJacobianWorld.packCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassJacobianWorld.getCenterOfMassVelocity(centerOfMassVelocity);
       centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       yoCenterOfMassVelocity.set(centerOfMassVelocity);
    }

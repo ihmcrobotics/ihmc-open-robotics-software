@@ -444,7 +444,7 @@ public class ScrewTools
 
             if (i > 0)
             {
-               predecessorOriginal.packCoMOffset(comOffset);
+               predecessorOriginal.getCoMOffset(comOffset);
                Matrix3d predecessorMassMomentOfInertiaPartCopy = predecessorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
                double predecessorMass = predecessorOriginal.getInertia().getMass();
                predecessorCopy = ScrewTools.addRigidBody(predecessorNameOriginal + suffix, cloned[i - 1], predecessorMassMomentOfInertiaPartCopy, predecessorMass, predecessorCoMOffsetCopy);
@@ -484,7 +484,7 @@ public class ScrewTools
             throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
          }
 
-         successorOriginal.packCoMOffset(comOffset);
+         successorOriginal.getCoMOffset(comOffset);
          String successorNameOriginal = successorOriginal.getName();
          Matrix3d successorMassMomentOfInertiaPartCopy = successorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
          double successorMass = successorOriginal.getInertia().getMass();
@@ -521,7 +521,7 @@ public class ScrewTools
 
             if (i > 0)
             {
-               predecessorOriginal.packCoMOffset(comOffset);
+               predecessorOriginal.getCoMOffset(comOffset);
                Matrix3d predecessorMassMomentOfInertiaPartCopy = predecessorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
                double predecessorMass = predecessorOriginal.getInertia().getMass();
                predecessorCopy = ScrewTools.addRigidBody(predecessorNameOriginal + suffix, cloned[i - 1], predecessorMassMomentOfInertiaPartCopy, predecessorMass, predecessorCoMOffsetCopy);
@@ -544,7 +544,7 @@ public class ScrewTools
             throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
          }
 
-         successorOriginal.packCoMOffset(comOffset);
+         successorOriginal.getCoMOffset(comOffset);
          String successorNameOriginal = successorOriginal.getName();
          Matrix3d successorMassMomentOfInertiaPartCopy = successorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
          double successorMass = successorOriginal.getInertia().getMass();
@@ -586,7 +586,7 @@ public class ScrewTools
       return ret;
    }
 
-   public static void packJointVelocitiesMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F jointVelocitiesMatrixToPack)
+   public static void getJointVelocitiesMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F jointVelocitiesMatrixToPack)
    {
       int rowStart = 0;
       for (InverseDynamicsJoint joint : joints)
@@ -597,7 +597,7 @@ public class ScrewTools
       }
    }
 
-   public static void packJointVelocitiesMatrix(Iterable<? extends InverseDynamicsJoint> joints, DenseMatrix64F jointVelocitiesMatrixToPack)
+   public static void getJointVelocitiesMatrix(Iterable<? extends InverseDynamicsJoint> joints, DenseMatrix64F jointVelocitiesMatrixToPack)
    {
       int rowStart = 0;
       for (InverseDynamicsJoint joint : joints)
@@ -608,7 +608,7 @@ public class ScrewTools
       }
    }
 
-   public static void packDesiredJointAccelerationsMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
+   public static void getDesiredJointAccelerationsMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
    {
       int rowStart = 0;
       for (InverseDynamicsJoint joint : joints)
