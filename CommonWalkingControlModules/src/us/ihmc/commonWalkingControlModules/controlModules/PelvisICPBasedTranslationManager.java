@@ -211,7 +211,7 @@ public class PelvisICPBasedTranslationManager
             double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
             activeTrajectoryGenerator.compute(deltaTime);
          }
-         activeTrajectoryGenerator.get(tempPosition);
+         activeTrajectoryGenerator.getPosition(tempPosition);
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
    }
@@ -224,7 +224,7 @@ public class PelvisICPBasedTranslationManager
 
       if (message.getWaypoint(0).getTime() > 1.0e-5)
       {
-         activeTrajectoryGenerator.get(tempPosition);
+         activeTrajectoryGenerator.getPosition(tempPosition);
          tempPosition.changeFrame(worldFrame);
          tempVelocity.setToZero(worldFrame);
 

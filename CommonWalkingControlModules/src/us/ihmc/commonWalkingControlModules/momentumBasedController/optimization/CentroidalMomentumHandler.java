@@ -81,7 +81,7 @@ public class CentroidalMomentumHandler
 
    public void compute()
    {
-      ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
+      ScrewTools.getJointVelocitiesMatrix(jointsInOrder, v);
 
       centroidalMomentumRateTermCalculator.compute();
       adotV.set(centroidalMomentumRateTermCalculator.getADotVTerm());

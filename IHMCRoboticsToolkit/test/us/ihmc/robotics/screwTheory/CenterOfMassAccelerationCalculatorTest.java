@@ -48,12 +48,12 @@ public class CenterOfMassAccelerationCalculatorTest
       elevator.updateFramesRecursively();
 
       Matrix3d rotationMatrix = new Matrix3d();
-      sixDoFJoint.packRotation(rotationMatrix);
+      sixDoFJoint.getRotation(rotationMatrix);
 
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-      comAccelerationCalculator.packCoMAcceleration(comAcceleration);
+      comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
       Vector3d expected = jointAcceleration.getLinearPartCopy();
       rotationMatrix.transform(expected);
@@ -97,7 +97,7 @@ public class CenterOfMassAccelerationCalculatorTest
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-      comAccelerationCalculator.packCoMAcceleration(comAcceleration);
+      comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
       JUnitTools.assertTuple3dEquals(new Vector3d(), comAcceleration.getVectorCopy(), 1e-5);
    }
@@ -134,7 +134,7 @@ public class CenterOfMassAccelerationCalculatorTest
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-      comAccelerationCalculator.packCoMAcceleration(comAcceleration);
+      comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
       assertEquals(length * qd * qd, comAcceleration.length(), 1e-5);
    }
@@ -165,7 +165,7 @@ public class CenterOfMassAccelerationCalculatorTest
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-      comAccelerationCalculator.packCoMAcceleration(comAcceleration);
+      comAccelerationCalculator.getCoMAcceleration(comAcceleration);
    }
 
    private Vector3d getRandomVector(Random random)

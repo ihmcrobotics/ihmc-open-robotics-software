@@ -102,18 +102,18 @@ public class SpatialAccelerationCalculator
       RigidBody predecessor = joint.getPredecessor();
       RigidBody successor = joint.getSuccessor();
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-      joint.packPredecessorTwist(tempJointTwist);
+      joint.getPredecessorTwist(tempJointTwist);
       if (!doVelocityTerms)
          tempJointTwist.setToZero();
 
       if (useDesireds)
-         joint.packDesiredSuccessorAcceleration(tempJointAcceleration);
+         joint.getDesiredSuccessorAcceleration(tempJointAcceleration);
       else
-         joint.packSuccessorAcceleration(tempJointAcceleration);
+         joint.getSuccessorAcceleration(tempJointAcceleration);
       if (!doAccelerationTerms)
          tempJointAcceleration.setToZero();
       
-      twistCalculator.packTwistOfBody(tempTwistFromWorld, predecessor);
+      twistCalculator.getTwistOfBody(tempTwistFromWorld, predecessor);
       if (!doVelocityTerms)
          tempTwistFromWorld.setToZero();
       SpatialAccelerationVector successorAcceleration = accelerations.get(successor);
@@ -122,7 +122,7 @@ public class SpatialAccelerationCalculator
       successorAcceleration.add(tempJointAcceleration);
    }
 
-   public void packAccelerationOfBody(SpatialAccelerationVector spatialAccelerationToPack, RigidBody rigidBody)
+   public void getAccelerationOfBody(SpatialAccelerationVector spatialAccelerationToPack, RigidBody rigidBody)
    {
       spatialAccelerationToPack.set(accelerations.get(rigidBody));
    }
@@ -130,40 +130,40 @@ public class SpatialAccelerationCalculator
    private final Twist twistOfCurrentWithRespectToNew = new Twist();
    private final Twist twistOfBodyWithRespectToBase = new Twist();
    private final SpatialAccelerationVector baseAcceleration = new SpatialAccelerationVector();
-   public void packRelativeAcceleration(final SpatialAccelerationVector endEffectorAcceleration, RigidBody base, RigidBody body)
+   public void getRelativeAcceleration(final SpatialAccelerationVector endEffectorAcceleration, RigidBody base, RigidBody body)
    {
-      twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, body, base);
+      twistCalculator.getRelativeTwist(twistOfCurrentWithRespectToNew, body, base);
       twistOfCurrentWithRespectToNew.changeFrame(base.getBodyFixedFrame());
       
-      twistCalculator.packTwistOfBody(twistOfBodyWithRespectToBase, base);
+      twistCalculator.getTwistOfBody(twistOfBodyWithRespectToBase, base);
 
-      packAccelerationOfBody(baseAcceleration, base);
-      packAccelerationOfBody(endEffectorAcceleration, body);
+      getAccelerationOfBody(baseAcceleration, base);
+      getAccelerationOfBody(endEffectorAcceleration, body);
       
       baseAcceleration.changeFrame(endEffectorAcceleration.getExpressedInFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
       endEffectorAcceleration.sub(baseAcceleration);
    }
    
    private final SpatialAccelerationVector endEffectorAcceleration = new SpatialAccelerationVector();
-   public void packLinearAccelerationOfBodyFixedPoint(FrameVector linearAccelerationToPack, RigidBody base, RigidBody body, FramePoint bodyFixedPoint)
+   public void getLinearAccelerationOfBodyFixedPoint(FrameVector linearAccelerationToPack, RigidBody base, RigidBody body, FramePoint bodyFixedPoint)
    {
-      twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, base, body);
-      twistCalculator.packTwistOfBody(twistOfBodyWithRespectToBase, body);
+      twistCalculator.getRelativeTwist(twistOfCurrentWithRespectToNew, base, body);
+      twistCalculator.getTwistOfBody(twistOfBodyWithRespectToBase, body);
 
-      packAccelerationOfBody(baseAcceleration, base);
-      packAccelerationOfBody(endEffectorAcceleration, body);
+      getAccelerationOfBody(baseAcceleration, base);
+      getAccelerationOfBody(endEffectorAcceleration, body);
       
       endEffectorAcceleration.changeFrame(baseAcceleration.getBodyFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
       endEffectorAcceleration.sub(baseAcceleration);
       bodyFixedPoint.changeFrame(endEffectorAcceleration.getExpressedInFrame());
 
       twistOfCurrentWithRespectToNew.changeFrame(endEffectorAcceleration.getExpressedInFrame());
-      endEffectorAcceleration.packAccelerationOfPointFixedInBodyFrame(twistOfCurrentWithRespectToNew, bodyFixedPoint, linearAccelerationToPack);
+      endEffectorAcceleration.getAccelerationOfPointFixedInBodyFrame(twistOfCurrentWithRespectToNew, bodyFixedPoint, linearAccelerationToPack);
    }
    
-   public void packLinearAccelerationOfBodyFixedPoint(FrameVector linearAccelerationToPack, RigidBody body, FramePoint bodyFixedPoint)
+   public void getLinearAccelerationOfBodyFixedPoint(FrameVector linearAccelerationToPack, RigidBody body, FramePoint bodyFixedPoint)
    {
-      packLinearAccelerationOfBodyFixedPoint(linearAccelerationToPack, getRootBody(), body, bodyFixedPoint);
+      getLinearAccelerationOfBodyFixedPoint(linearAccelerationToPack, getRootBody(), body, bodyFixedPoint);
    }
    
    public RigidBody getRootBody()

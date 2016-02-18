@@ -6,9 +6,9 @@ import us.ihmc.robotics.geometry.FrameVector;
 
 public interface BodyVelocityEstimator
 {
-   public abstract void packBodyVelocity(FrameVector bodyVelocityToPack);
+   public abstract void getBodyVelocity(FrameVector bodyVelocityToPack);
 
-   public abstract void packCovariance(Tuple3d covarianceToPack);
+   public abstract void getCovariance(Tuple3d covarianceToPack);
 
    public abstract void estimateBodyVelocity();
 }

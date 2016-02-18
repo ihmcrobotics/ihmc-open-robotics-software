@@ -102,7 +102,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       startTime.set(startTimeProvider.getValue());
       timeIntoTouchdown.set(0.0);
 
-      initialPositionSource.get(p0);
+      initialPositionSource.getPosition(p0);
       p0.changeFrame(referenceFrame);
 
       velocitySource.get(pd0);
@@ -117,26 +117,26 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       return false;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override

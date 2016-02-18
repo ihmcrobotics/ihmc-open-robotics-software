@@ -61,10 +61,10 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
-   public void packDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack,
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack,
          FramePoint2d currentCapturePointPosition, double time)
    {
-      super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
+      super.getDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
 
       if (doTimeFreezing.getBooleanValue())
       {

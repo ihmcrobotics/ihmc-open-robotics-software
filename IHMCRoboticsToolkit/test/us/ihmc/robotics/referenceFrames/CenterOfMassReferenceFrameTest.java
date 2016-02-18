@@ -56,7 +56,7 @@ public class CenterOfMassReferenceFrameTest
       CenterOfMassCalculator comCalculator = new CenterOfMassCalculator(elevator, elevator.getBodyFixedFrame());
       comCalculator.compute();
       FramePoint centerOfMass = new FramePoint(elevator.getBodyFixedFrame());
-      comCalculator.packCenterOfMass(centerOfMass);
+      comCalculator.getCenterOfMass(centerOfMass);
 
       FramePoint centerOfMassFromFrame = new FramePoint(centerOfMassReferenceFrame);
       centerOfMassFromFrame.changeFrame(elevator.getBodyFixedFrame());

@@ -62,15 +62,15 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
       // T, Td
-      twistCalculator.packRelativeTwist(twistOfMeasurementLink, elevator, measurementLink);
-      spatialAccelerationCalculator.packRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
+      twistCalculator.getRelativeTwist(twistOfMeasurementLink, elevator, measurementLink);
+      spatialAccelerationCalculator.getRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
       spatialAccelerationOfMeasurementLink.changeFrame(elevatorFrame, twistOfMeasurementLink, twistOfMeasurementLink);
       twistOfMeasurementLink.changeFrame(elevatorFrame);
 
       // \tilde{\omega}, \tilde{v}
-      twistOfMeasurementLink.packAngularPart(omega);
+      twistOfMeasurementLink.getAngularPart(omega);
       MatrixTools.toTildeForm(omegaTilde, omega);
-      twistOfMeasurementLink.packLinearPart(v);
+      twistOfMeasurementLink.getLinearPart(v);
       MatrixTools.toTildeForm(vTilde, v);
 
       // \tilde{p}
@@ -79,7 +79,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       MatrixTools.toTildeForm(pTilde, p.getPoint());
 
       // \tilde{\omegad}
-      spatialAccelerationOfMeasurementLink.packAngularPart(omegad);
+      spatialAccelerationOfMeasurementLink.getAngularPart(omegad);
       MatrixTools.toTildeForm(omegadTilde, omegad);
 
       // rotation matrix

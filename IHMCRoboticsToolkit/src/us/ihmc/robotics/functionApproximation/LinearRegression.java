@@ -144,7 +144,7 @@ public class LinearRegression
       return betaVector;
    }
 
-   public void packCoefficientVector(double[] coefficientVector)
+   public void getCoefficientVector(double[] coefficientVector)
    {
       verifySolved();
  

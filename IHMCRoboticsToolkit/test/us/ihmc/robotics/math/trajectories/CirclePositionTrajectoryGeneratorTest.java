@@ -45,16 +45,16 @@ public class CirclePositionTrajectoryGeneratorTest
       FrameVector acceleration = new FrameVector();
 
       circleTrajectory.compute(tInitial);
-      circleTrajectory.get(position);
-      circleTrajectory.packVelocity(velocity);
-      circleTrajectory.packAcceleration(acceleration);
+      circleTrajectory.getPosition(position);
+      circleTrajectory.getVelocity(velocity);
+      circleTrajectory.getAcceleration(acceleration);
 
       FramePoint position2 = new FramePoint();
       FrameVector velocity2 = new FrameVector();
 
       circleTrajectory.compute(tFinal);
-      circleTrajectory.get(position2);
-      circleTrajectory.packVelocity(velocity2);
+      circleTrajectory.getPosition(position2);
+      circleTrajectory.getVelocity(velocity2);
 
       FrameVector numericallyDifferentiatedVelocity = numericallyDifferentiate(deltaT, position, position2);
       FrameVectorTest.assertFrameVectorEquals(velocity, numericallyDifferentiatedVelocity, 1e-5);
@@ -84,16 +84,16 @@ public class CirclePositionTrajectoryGeneratorTest
       FrameVector zero = new FrameVector(referenceFrame);
 
       circleTrajectory.compute(0.0);
-      circleTrajectory.get(position);
-      circleTrajectory.packVelocity(velocity);
+      circleTrajectory.getPosition(position);
+      circleTrajectory.getVelocity(velocity);
 
       FramePointTest.assertFramePointEquals(offset, position, 1e-12);
       FrameVectorTest.assertFrameVectorEquals(zero, velocity, 1e-12);
 
       circleTrajectory.compute(trajectoryTime);
-      circleTrajectory.get(position);
-      circleTrajectory.packVelocity(velocity);
-      circleTrajectory.packAcceleration(acceleration);
+      circleTrajectory.getPosition(position);
+      circleTrajectory.getVelocity(velocity);
+      circleTrajectory.getAcceleration(acceleration);
 
       FramePointTest.assertFramePointEquals(offset, position, 1e-12);
       FrameVectorTest.assertFrameVectorEquals(zero, velocity, 1e-12);

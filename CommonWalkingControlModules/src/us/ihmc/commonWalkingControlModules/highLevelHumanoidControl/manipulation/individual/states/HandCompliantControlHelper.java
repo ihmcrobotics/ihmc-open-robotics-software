@@ -218,8 +218,8 @@ public class HandCompliantControlHelper
    {
       momentumBasedController.getWristMeasuredWrenchHandWeightCancelled(measuredWrench, robotSide);
 
-      measuredWrench.packLinearPartIncludingFrame(tempForceVector);
-      measuredWrench.packAngularPartIncludingFrame(tempTorqueVector);
+      measuredWrench.getLinearPartIncludingFrame(tempForceVector);
+      measuredWrench.getAngularPartIncludingFrame(tempTorqueVector);
 
       deadzoneMeasuredForce.update(tempForceVector);
       deadzoneMeasuredTorque.update(tempTorqueVector);
@@ -234,8 +234,8 @@ public class HandCompliantControlHelper
       measuredWrench.setAngularPart(tempTorqueVector);
       measuredWrench.changeFrame(controlFrame);
 
-      measuredWrench.packLinearPartIncludingFrame(measuredForceToPack);
-      measuredWrench.packAngularPartIncludingFrame(measuredTorqueToPack);
+      measuredWrench.getLinearPartIncludingFrame(measuredForceToPack);
+      measuredWrench.getAngularPartIncludingFrame(measuredTorqueToPack);
    }
 
    private void clipToVectorMagnitude(double maximumMagnitude, FrameVector frameVectorToClip)

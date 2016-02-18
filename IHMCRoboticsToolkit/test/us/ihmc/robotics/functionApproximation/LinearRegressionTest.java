@@ -39,7 +39,7 @@ public class LinearRegressionTest
       double runTimeInMilliseconds = solveAndReturnRuntimeInMilliseconds(linearRegression);
 
       double[] coefficientArray = new double[3];
-      linearRegression.packCoefficientVector(coefficientArray);
+      linearRegression.getCoefficientVector(coefficientArray);
       printResults(linearRegression, runTimeInMilliseconds, coefficientArray);
 
       double epsilon = 0.1;
@@ -86,7 +86,7 @@ public class LinearRegressionTest
       double runTimeInMilliseconds = solveAndReturnRuntimeInMilliseconds(linearRegression);
 
       double[] coefficientArray = new double[6];
-      linearRegression.packCoefficientVector(coefficientArray);
+      linearRegression.getCoefficientVector(coefficientArray);
       printResults(linearRegression, runTimeInMilliseconds, coefficientArray);
 
       double epsilon = 0.1;
@@ -134,7 +134,7 @@ public class LinearRegressionTest
       double runTimeInMilliseconds = solveAndReturnRuntimeInMilliseconds(linearRegression);
 
       double[] coefficientArray = new double[6];
-      linearRegression.packCoefficientVector(coefficientArray);
+      linearRegression.getCoefficientVector(coefficientArray);
       printResults(linearRegression, runTimeInMilliseconds, coefficientArray);
 
       double epsilon = 1e-10;
@@ -204,7 +204,7 @@ public class LinearRegressionTest
       double[] coefficientVector = new double[1];
 
       LinearRegression linearRegression = new LinearRegression(inputs, outputs);
-      linearRegression.packCoefficientVector(coefficientVector);
+      linearRegression.getCoefficientVector(coefficientVector);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)

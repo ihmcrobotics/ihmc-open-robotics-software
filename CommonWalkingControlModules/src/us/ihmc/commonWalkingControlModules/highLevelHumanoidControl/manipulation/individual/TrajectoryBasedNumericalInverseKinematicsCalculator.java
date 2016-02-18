@@ -202,7 +202,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       transformTwistToEndEffectorFrame();
 
       // Calculate desired joint velocities
-      desiredTwist.packMatrix(twistMatrix, 0);
+      desiredTwist.getMatrix(twistMatrix, 0);
       inverseJacobianSolver.solveUsingDampedLeastSquares(twistMatrix, ikJacobian.getJacobianMatrix(), lambdaLeastSquares);
       inverseKinematicsStep.set(inverseJacobianSolver.getJointspaceVelocity());
 
@@ -245,7 +245,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
       if (trajectoryFrame == worldFrame && twistCalculator != null)
       {
-         twistCalculator.packTwistOfBody(baseTwist, base);
+         twistCalculator.getTwistOfBody(baseTwist, base);
          baseTwist.changeFrame(desiredTwist.getExpressedInFrame());
          desiredTwist.sub(baseTwist);
       }
@@ -259,7 +259,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    {
       desiredTwist.set(frameToControlPoseOf, trajectoryFrame, baseFrameForIK, desiredVelocity.getVector(), desiredAngularVelocity.getVector());
       transformTwistToEndEffectorFrame();
-      desiredTwist.packMatrix(twistMatrix, 0);
+      desiredTwist.getMatrix(twistMatrix, 0);
       inverseJacobianSolver.solveUsingDampedLeastSquares(twistMatrix, ikJacobian.getJacobianMatrix(), lambdaLeastSquares);
       desiredAngularVelocities.set(inverseJacobianSolver.getJointspaceVelocity());
    }
@@ -270,8 +270,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       positionTrajectoryGenerator.compute(time);
       orientationTrajectoryGenerator.compute(time);
 
-      positionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+      orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       yoDesiredTrajectoryPose.setAndMatchFrame(desiredPosition, desiredOrientation);
 

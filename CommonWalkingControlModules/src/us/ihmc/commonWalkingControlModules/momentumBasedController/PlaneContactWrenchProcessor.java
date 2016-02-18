@@ -95,7 +95,7 @@ public class PlaneContactWrenchProcessor
 
          if (wrench != null)
          {
-            wrench.packLinearPartIncludingFrame(tempForce);
+            wrench.getLinearPartIncludingFrame(tempForce);
 
             double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getSoleFrame());
 

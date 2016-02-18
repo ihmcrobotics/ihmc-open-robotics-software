@@ -282,15 +282,15 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private void readSensorData(Wrench footWrenchToPack)
    {
-      forceSensorData.packWrench(footWrenchToPack);
+      forceSensorData.getWrench(footWrenchToPack);
 
       // First in measurement frame for all the frames...
       footForce.setToZero(footWrenchToPack.getExpressedInFrame());
-      footWrenchToPack.packLinearPart(footForce);
+      footWrenchToPack.getLinearPart(footForce);
       yoFootForce.set(footForce);
 
       footTorque.setToZero(footWrenchToPack.getExpressedInFrame());
-      footWrenchToPack.packAngularPart(footTorque);
+      footWrenchToPack.getAngularPart(footTorque);
       yoFootTorque.set(footTorque);
 
       // magnitude of force part is independent of frame
@@ -301,9 +301,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       footWrenchInBodyFixedFrame.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
 
       footForce.setToZero(footWrenchInBodyFixedFrame.getExpressedInFrame());
-      footWrenchInBodyFixedFrame.packLinearPart(footForce);
+      footWrenchInBodyFixedFrame.getLinearPart(footForce);
       footTorque.setToZero(footWrenchInBodyFixedFrame.getExpressedInFrame());
-      footWrenchInBodyFixedFrame.packAngularPart(footTorque);
+      footWrenchInBodyFixedFrame.getAngularPart(footTorque);
 
       footForce.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
       yoFootForceInFoot.set(footForce);

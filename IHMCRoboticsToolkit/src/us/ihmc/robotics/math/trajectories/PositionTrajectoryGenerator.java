@@ -6,11 +6,11 @@ import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
 public interface PositionTrajectoryGenerator extends TrajectoryGenerator, PositionProvider
 {
-   public abstract void packVelocity(FrameVector velocityToPack);
+   public abstract void getVelocity(FrameVector velocityToPack);
 
-   public abstract void packAcceleration(FrameVector accelerationToPack);
+   public abstract void getAcceleration(FrameVector accelerationToPack);
 
-   public abstract void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack);
+   public abstract void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack);
 
    public abstract void showVisualization();
 

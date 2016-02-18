@@ -109,7 +109,7 @@ public class PositionTrajectorySmootherTest
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);
       FramePoint positionToPack = new FramePoint();
 
-      smoother.get(positionToPack);
+      smoother.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
    }
@@ -123,7 +123,7 @@ public class PositionTrajectorySmootherTest
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
 
-      smoother.packVelocity(velocityToPack);
+      smoother.getVelocity(velocityToPack);
 
       assertEquals(0.0, velocityToPack.getX(), EPSILON);
       assertEquals(0.0, velocityToPack.getY(), EPSILON);
@@ -140,7 +140,7 @@ public class PositionTrajectorySmootherTest
 
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
 
-      smoother.packAcceleration(accelerationToPack);
+      smoother.getAcceleration(accelerationToPack);
 
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
@@ -156,11 +156,11 @@ public class PositionTrajectorySmootherTest
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       smoother = new PositionTrajectorySmoother(namePrefix, positionTrajectoryInput, dt, parentRegistry);
-      smoother.get(positionToPack);
+      smoother.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      smoother.get(positionToPack);
+      smoother.getPosition(positionToPack);
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
@@ -173,7 +173,7 @@ public class PositionTrajectorySmootherTest
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
       assertTrue(ReferenceFrame.getWorldFrame().equals(accelerationToPack.getReferenceFrame()));
 
-      smoother.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      smoother.getLinearData(positionToPack, velocityToPack, accelerationToPack);
 
       assertEquals(0.0, positionToPack.getX(), EPSILON);
       assertEquals(0.0, positionToPack.getY(), EPSILON);

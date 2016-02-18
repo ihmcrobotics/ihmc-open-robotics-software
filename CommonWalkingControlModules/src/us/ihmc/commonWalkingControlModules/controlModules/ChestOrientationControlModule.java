@@ -47,20 +47,20 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    }
 
    @Override
-   protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
+   protected void getDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
       orientationToPack.setToZero(desiredQuaternion.getReferenceFrame());
       desiredQuaternion.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
    @Override
-   protected void packDesiredAngularVelocity(FrameVector angularVelocityToPack)
+   protected void getDesiredAngularVelocity(FrameVector angularVelocityToPack)
    {
       desiredAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }
 
    @Override
-   protected void packDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
+   protected void getDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
    {
       feedForwardAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }

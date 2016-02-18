@@ -69,16 +69,16 @@ public class SE3PIDController
       spatialAccelerationToPack.setToZero(bodyFrame, feedForwardAcceleration.getBaseFrame(), bodyFrame);
 
       desiredPose.getOrientationIncludingFrame(desiredOrientation);
-      desiredTwist.packAngularPart(desiredAngularVelocity);
-      feedForwardAcceleration.packAngularPart(feedForwardAngularAcceleration);
-      currentTwist.packAngularPart(currentAngularVelocity);
+      desiredTwist.getAngularPart(desiredAngularVelocity);
+      feedForwardAcceleration.getAngularPart(feedForwardAngularAcceleration);
+      currentTwist.getAngularPart(currentAngularVelocity);
       orientationController.compute(angularAccelerationFromOrientationController, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
       spatialAccelerationToPack.setAngularPart(angularAccelerationFromOrientationController.getVector());
 
       desiredPose.getPositionIncludingFrame(desiredPosition);
-      desiredTwist.packLinearPart(desiredVelocity);
-      feedForwardAcceleration.packLinearPart(feedForwardLinearAcceleration);
-      currentTwist.packLinearPart(currentVelocity);
+      desiredTwist.getLinearPart(desiredVelocity);
+      feedForwardAcceleration.getLinearPart(feedForwardLinearAcceleration);
+      currentTwist.getLinearPart(currentVelocity);
       positionController.compute(accelerationFromPositionController, desiredPosition, desiredVelocity, currentVelocity, feedForwardLinearAcceleration);
       spatialAccelerationToPack.setLinearPart(accelerationFromPositionController.getVector());
    }
