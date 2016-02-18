@@ -750,13 +750,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmTrajectoryInitialized = false;
 
       footstepPlanner.plan(stepQueue, robotTimestamp.getDoubleValue() + 2.0, false);
-
-      for (int i = 0; i < getStepQueueSize(); i++)
-      {
-         QuadrupedTimedStep step = stepQueue.get(i);
-         System.out.println("Step " + step.getRobotQuadrant() +
-               " @ " + step.getTimeInterval().getStartTime() + " for " + step.getTimeInterval().getDuration());
-      }
    }
 
    @Override public void onExit()
