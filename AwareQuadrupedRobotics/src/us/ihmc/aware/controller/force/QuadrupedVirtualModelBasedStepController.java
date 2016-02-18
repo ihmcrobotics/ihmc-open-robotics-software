@@ -749,7 +749,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmVelocitySetpoint.setToZero();
       dcmTrajectoryInitialized = false;
 
-      footstepPlanner.plan(stepQueue, robotTimestamp.getDoubleValue() + 2.0);
+      footstepPlanner.plan(stepQueue, robotTimestamp.getDoubleValue() + 2.0, false);
 
       for (int i = 0; i < getStepQueueSize(); i++)
       {

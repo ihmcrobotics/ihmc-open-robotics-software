@@ -554,14 +554,14 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          {
             contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
             virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-//          virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
-//          virtualModelController.setSoleVirtualForceVisible(robotQuadrant, false);
+            virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
+            virtualModelController.setSoleVirtualForceVisible(robotQuadrant, false);
          }
          else
          {
             virtualModelController.setSoleVirtualForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-//          virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
-//          virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
+            virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
+            virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
          }
       }
       virtualModelController.compute(jointLimits, virtualModelControllerSettings);
@@ -748,6 +748,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       footholdPosition.setIncludingFrame(cmpPosition);
       footholdPosition.changeFrame(worldFrame);
       footholdPosition.add(xOffset, yOffset, 0.0);
+      footholdPosition.setZ(solePositionEstimate.get(robotQuadrant).getZ());
    }
 
    private class QuadSupportState implements StateMachineState<TrotEvent>
@@ -920,9 +921,15 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          {
             RobotQuadrant swingQuadrant = swingQuadrants[i];
 
-            // compute sole position setpoint
+            // compute nominal sole position setpoint
             swingFootTrajectory.get(swingQuadrant).computeTrajectory(currentTime - initialTime);
             swingFootTrajectory.get(swingQuadrant).getPosition(solePositionSetpoint.get(swingQuadrant));
+
+            // shift the swing foot trajectory in the direction of the dcm tracking error
+            dcmPositionEstimate.changeFrame(solePositionSetpoint.get(swingQuadrant).getReferenceFrame());
+            dcmPositionSetpoint.changeFrame(solePositionSetpoint.get(swingQuadrant).getReferenceFrame());
+            solePositionSetpoint.get(swingQuadrant).add(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
+            solePositionSetpoint.get(swingQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
 
             // compute sole force setpoint
             soleForceSetpoint.get(swingQuadrant).setToZero();
