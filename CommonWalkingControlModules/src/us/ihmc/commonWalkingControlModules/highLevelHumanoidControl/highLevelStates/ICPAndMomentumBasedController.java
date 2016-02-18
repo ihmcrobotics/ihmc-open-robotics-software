@@ -16,8 +16,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLin
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -45,8 +43,6 @@ public class ICPAndMomentumBasedController
    private static final boolean USE_CONSTANT_OMEGA0 = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
@@ -83,8 +79,6 @@ public class ICPAndMomentumBasedController
 
    private final ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule;
 
-   private final MomentumRateData momentumRateOfChangeData;
-
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, double omega0,
          ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule, BipedSupportPolygons bipedSupportPolygons,
          CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, YoVariableRegistry parentRegistry)
@@ -101,8 +95,6 @@ public class ICPAndMomentumBasedController
       double gravityZ = momentumBasedController.getGravityZ();
       centerOfMassFrame = momentumBasedController.getCenterOfMassFrame();
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
-
-      momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
 
       if (USE_CONSTANT_OMEGA0)
       {
@@ -236,8 +228,6 @@ public class ICPAndMomentumBasedController
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(controlledCoMHeightAcceleration.getDoubleValue());
 
       icpBasedLinearMomentumRateOfChangeControlModule.compute();
-      icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateOfChange(momentumRateOfChangeData);
-      momentumRateCommand.setMomentumRateOfChangeData(momentumRateOfChangeData);
    }
 
    public EnumYoVariable<RobotSide> getYoSupportLeg()
@@ -287,6 +277,6 @@ public class ICPAndMomentumBasedController
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return momentumRateCommand;
+      return icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
 }

@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVX
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
@@ -100,14 +99,13 @@ public class OptimizationMomentumControlModuleTest
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
             controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values());
 
-      MomentumRateData momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
       double totalMass = TotalMassCalculator.computeSubTreeMass(randomFloatingChain.getElevator());
       SpatialForceVector momentumRateOfChangeIn = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
             momentumOptimizationSettings.getRhoMinScalar());
-      momentumRateOfChangeData.set(momentumRateOfChangeIn);
+      MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+      momentumRateCommand.set(momentumRateOfChangeIn);
 
-      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
       InverseDynamicsJoint[] revoluteJointsArray = revoluteJoints.toArray(new InverseDynamicsJoint[revoluteJoints.size()]);
@@ -152,15 +150,14 @@ public class OptimizationMomentumControlModuleTest
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
             controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values());
 
-      MomentumRateData momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
+      MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
       RigidBody elevator = randomFloatingChain.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       SpatialForceVector momentumRateOfChangeIn = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
             0.0);
-      momentumRateOfChangeData.set(momentumRateOfChangeIn);
+      momentumRateCommand.set(momentumRateOfChangeIn);
 
-      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
@@ -224,15 +221,14 @@ public class OptimizationMomentumControlModuleTest
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
             controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values());
 
-      MomentumRateData momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
       RigidBody elevator = randomFloatingChain.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       SpatialForceVector momentumRateOfChangeIn = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
             0.0);
-      momentumRateOfChangeData.set(momentumRateOfChangeIn);
+      MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+      momentumRateCommand.set(momentumRateOfChangeIn);
 
-      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
@@ -320,11 +316,10 @@ public class OptimizationMomentumControlModuleTest
 
          SpatialForceVector desiredRateOfChangeOfMomentum = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ,
                random, rhoMin);
-         MomentumRateData momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
-         momentumRateOfChangeData.set(desiredRateOfChangeOfMomentum);
+         MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+         momentumRateCommand.set(desiredRateOfChangeOfMomentum);
 
-         MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-         momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
+         momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
          MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
 
@@ -362,15 +357,14 @@ public class OptimizationMomentumControlModuleTest
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
             controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values());
 
-      MomentumRateData momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
+      MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
       RigidBody elevator = randomFloatingChain.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       SpatialForceVector momentumRateOfChangeIn = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
             0.0);
-      momentumRateOfChangeData.set(momentumRateOfChangeIn);
+      momentumRateCommand.set(momentumRateOfChangeIn);
 
-      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
@@ -467,11 +461,10 @@ public class OptimizationMomentumControlModuleTest
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       SpatialForceVector desiredMomentumRate = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random, 0.0);
-      MomentumRateData momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
-      momentumRateOfChangeData.set(desiredMomentumRate);
+      MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+      momentumRateCommand.set(desiredMomentumRate);
 
-      MomentumRateCommand desiredRateOfChangeOfMomentumCommand = new MomentumRateCommand(momentumRateOfChangeData);
-      momentumControlModule.setInverseDynamicsCommand(desiredRateOfChangeOfMomentumCommand);
+      momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
