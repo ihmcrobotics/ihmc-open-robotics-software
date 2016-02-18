@@ -80,7 +80,7 @@ public class HeadOrientationControlModule
    private final DenseMatrix64F selectionMatrix;
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
-   private final int jacobianId;
+   private final long jacobianId;
 
    private final OneDoFJoint[] headOrientationControlJoints;
    private final NumericalInverseKinematicsCalculator numericalInverseKinematicsCalculator;

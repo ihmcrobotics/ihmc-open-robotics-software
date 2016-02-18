@@ -456,7 +456,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    private RigidBody baseForChestOrientationControl;
-   private int jacobianForChestOrientationControlId;
+   private long jacobianForChestOrientationControlId;
 
    private void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoint
@@ -11,8 +12,12 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    protected final ReferenceFrame beforeJointFrame;
    protected GeometricJacobian motionSubspace;
 
+   private final long nameBasedHashCode;
+
    public AbstractInverseDynamicsJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
    {
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, predecessor);
+
       this.name = name;
       this.predecessor = predecessor;
       this.beforeJointFrame = beforeJointFrame;
@@ -141,5 +146,11 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    public String toString()
    {
       return getClass().getSimpleName() + " " + getName();
+   }
+
+   @Override
+   public long nameBasedHashCode()
+   {
+      return nameBasedHashCode;
    }
 }

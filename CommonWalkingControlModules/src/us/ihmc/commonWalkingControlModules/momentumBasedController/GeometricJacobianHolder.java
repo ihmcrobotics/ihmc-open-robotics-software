@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -17,6 +20,9 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
  */
 public class GeometricJacobianHolder
 {
+   public static final long NULL_JACOBIAN_ID = NameBasedHashCodeTools.NULL_HASHCODE;
+
+   private final Map<Long, GeometricJacobian> nameBasedHashCodeToJacobianMap = new HashMap<>();
    private final List<GeometricJacobian> geometricJacobians = new ArrayList<GeometricJacobian>();
    private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
 
@@ -36,7 +42,7 @@ public class GeometricJacobianHolder
     * @param jacobianFrame
     * @return
     */
-   public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
+   public long getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
    {
       int numberOfJoints = ScrewTools.createJointPath(temporaryToStoreJointPath, ancestor, descendant);
       return getOrCreateGeometricJacobian(temporaryToStoreJointPath, numberOfJoints, jacobianFrame);
@@ -50,55 +56,37 @@ public class GeometricJacobianHolder
     * @param jacobianFrame
     * @return
     */
-   public int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
+   public long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
       return getOrCreateGeometricJacobian(joints, joints.length, jacobianFrame);
    }
 
-   private int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, int numberOfJointsToConsider, ReferenceFrame jacobianFrame)
+   private long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, int numberOfJointsToConsider, ReferenceFrame jacobianFrame)
    {
       if (joints == null || numberOfJointsToConsider == 0)
-         return -1;
+         return NULL_JACOBIAN_ID;
+      
+      // The mapping assumes the frame do not change.
+      // On top of that, this class makes the different modules use the same instances of each Jacobian, so it would not be good if one module changes the frame of a Jacobian shared with another module. 
+      boolean allowChangeFrame = false;
 
-      for (int i = 0; i < geometricJacobians.size(); i++)
-      {
-         GeometricJacobian jacobian = geometricJacobians.get(i);
-         InverseDynamicsJoint[] existingJacobianJoints = jacobian.getJointsInOrder();
-         boolean sameNumberOfJoints = numberOfJointsToConsider == existingJacobianJoints.length;
-         boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
+      long jacobianId = ScrewTools.computeGeometricJacobianNameBasedHashCode(joints, 0, numberOfJointsToConsider - 1, jacobianFrame, allowChangeFrame);
+      GeometricJacobian jacobian = getJacobian(jacobianId);
 
-         if (sameNumberOfJoints && areExpressedFrameTheSame)
-         {
-            boolean allJointsAreTheSame = true;
-            // The joint arrays are considered to be in the same order
-            for (int j = 0; j < existingJacobianJoints.length; j++)
-            {
-               boolean jointsAreTheSame = joints[j] == existingJacobianJoints[j];
-               if (!jointsAreTheSame)
-               {
-                  allJointsAreTheSame = false;
-                  break;
-               }
-            }
-            if (allJointsAreTheSame)
-               return i;
-         }
-      }
-      GeometricJacobian newJacobian;
       if (joints.length == numberOfJointsToConsider)
       {
-         newJacobian = new GeometricJacobian(joints, jacobianFrame);
+         jacobian = new GeometricJacobian(joints, jacobianFrame, allowChangeFrame);
       }
       else
       {
          InverseDynamicsJoint[] jointsForNewJacobian = new InverseDynamicsJoint[numberOfJointsToConsider];
          System.arraycopy(joints, 0, jointsForNewJacobian, 0, numberOfJointsToConsider);
-         newJacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame);
+         jacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame, allowChangeFrame);
       }
-      newJacobian.compute(); // Compute in case you need it right away
-      int jacobianId = geometricJacobians.size();
-      geometricJacobians.add(newJacobian);
-      return jacobianId;
+      jacobian.compute(); // Compute in case you need it right away
+      geometricJacobians.add(jacobian);
+      nameBasedHashCodeToJacobianMap.put(jacobian.nameBasedHashCode(), jacobian);
+      return jacobian.nameBasedHashCode();
    }
 
    /**
@@ -106,10 +94,11 @@ public class GeometricJacobianHolder
     * @param jacobianId
     * @return
     */
-   public GeometricJacobian getJacobian(int jacobianId)
+   public GeometricJacobian getJacobian(long jacobianId)
    {
-      if (jacobianId >= geometricJacobians.size() || jacobianId < 0)
+      if (jacobianId == NULL_JACOBIAN_ID)
          return null;
-      return geometricJacobians.get(jacobianId);
+      else
+         return nameBasedHashCodeToJacobianMap.get(jacobianId);
    }
 }

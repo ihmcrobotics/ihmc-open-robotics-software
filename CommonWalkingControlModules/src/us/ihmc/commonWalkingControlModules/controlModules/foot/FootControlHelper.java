@@ -54,7 +54,7 @@ public class FootControlHelper
    private final WalkingControllerParameters walkingControllerParameters;
    private final PartialFootholdControlModule partialFootholdControlModule;
 
-   private final int jacobianId;
+   private final long jacobianId;
    private final GeometricJacobian jacobian;
    private final GeometricJacobian rootToFootJacobian;
    private final EnumYoVariable<ConstraintType> requestedState;
@@ -118,7 +118,7 @@ public class FootControlHelper
       jacobian = momentumBasedController.getJacobian(jacobianId);
 
       rootBody = twistCalculator.getRootBody();
-      int rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, foot, foot.getBodyFixedFrame());
+      long rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, foot, foot.getBodyFixedFrame());
       rootToFootJacobian = momentumBasedController.getJacobian(rootToFootJacobianId);
 
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
@@ -207,7 +207,7 @@ public class FootControlHelper
       submitTaskspaceConstraint(jacobianId, footAcceleration, spatialAccelerationCommandToPack);
    }
 
-   public void submitTaskspaceConstraint(int jacobianId, SpatialAccelerationVector footAcceleration, SpatialAccelerationCommand spatialAccelerationCommandToPack)
+   public void submitTaskspaceConstraint(long jacobianId, SpatialAccelerationVector footAcceleration, SpatialAccelerationCommand spatialAccelerationCommandToPack)
    {
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
@@ -274,7 +274,7 @@ public class FootControlHelper
       return partialFootholdControlModule;
    }
 
-   public int getJacobianId()
+   public long getJacobianId()
    {
       return jacobianId;
    }

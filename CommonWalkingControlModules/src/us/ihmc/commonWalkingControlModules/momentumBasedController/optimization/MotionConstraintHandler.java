@@ -143,7 +143,7 @@ public class MotionConstraintHandler
          RigidBody base = (spatialAccelerationCommand.getBase() == null) ? getBase(taskSpaceAcceleration) : spatialAccelerationCommand.getBase();
          RigidBody endEffector = (spatialAccelerationCommand.getEndEffector() == null) ? getEndEffector(taskSpaceAcceleration) : spatialAccelerationCommand.getEndEffector();
 
-         int baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
+         long baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
          GeometricJacobian baseToEndEffectorJacobian = geometricJacobianHolder.getJacobian(baseToEndEffectorJacobianId);
          if (jacobiansHaveToBeUpdated)
             baseToEndEffectorJacobian.compute();

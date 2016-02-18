@@ -26,7 +26,7 @@ public class RootJointAngularAccelerationControlModule
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
-   private final int rootJacobianId;
+   private final long rootJacobianId;
    private final RigidBody rootPredecessor;
    private final RigidBody rootSuccessor;
 

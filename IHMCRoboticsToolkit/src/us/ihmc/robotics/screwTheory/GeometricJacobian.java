@@ -1,14 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class GeometricJacobian
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+public class GeometricJacobian implements NameBasedHashCodeHolder
 {
    /** Array of the joints to be considered by this Jacobian. */
    private final InverseDynamicsJoint[] joints;
@@ -23,14 +25,17 @@ public class GeometricJacobian
    private final Twist tempTwist = new Twist();
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Twist.SIZE, 1);
 
+   private final boolean allowChangeFrame;
+   private final long nameBasedHashCode;
+
    /**
     * Creates a new Jacobian for the open loop chain given as an ArrayList of frames
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
     * @param unitTwists an ordered list of relative joint twists.
     *       The order in which the twists are ordered will correspond to the order of the columns in the Jacobian
+    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
     */
 
-   private GeometricJacobian(LinkedHashMap<InverseDynamicsJoint, List<Twist>> unitTwists, ReferenceFrame jacobianFrame, boolean pathConnected)
+   private GeometricJacobian(LinkedHashMap<InverseDynamicsJoint, List<Twist>> unitTwists, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
    {
       this.joints = new InverseDynamicsJoint[unitTwists.size()];
       unitTwists.keySet().toArray(joints);
@@ -39,11 +44,9 @@ public class GeometricJacobian
       this.jacobianFrame = jacobianFrame;
       this.jacobian = createJacobianMatrix(this.unitTwistMap);
       this.jointPathFromBaseToEndEffector = ScrewTools.createJointPath(getBase(), getEndEffector());
-   }
+      this.allowChangeFrame = allowChangeFrame;
 
-   private GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame, boolean formsConnectedPath)
-   {
-      this(extractTwistsFromJoints(joints), jacobianFrame, formsConnectedPath);
+      nameBasedHashCode = ScrewTools.computeGeometricJacobianNameBasedHashCode(joints, jacobianFrame, allowChangeFrame);
    }
 
    public GeometricJacobian(InverseDynamicsJoint joint, List<Twist> unitTwists, ReferenceFrame jacobianFrame)
@@ -58,7 +61,12 @@ public class GeometricJacobian
 
    public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
-      this(extractTwistsFromJoints(joints), jacobianFrame, determineIfPathConnected(joints));
+      this(extractTwistsFromJoints(joints), jacobianFrame, true);
+   }
+
+   public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   {
+      this(extractTwistsFromJoints(joints), jacobianFrame, allowChangeFrame);
    }
 
    public GeometricJacobian(InverseDynamicsJoint joint, ReferenceFrame jacobianFrame)
@@ -84,6 +92,9 @@ public class GeometricJacobian
 
    public void changeFrame(ReferenceFrame jacobianFrame)
    {
+      if (!allowChangeFrame)
+         throw new RuntimeException("Cannot change the frame of this Jacobian.");
+
       this.jacobianFrame = jacobianFrame;
    }
 
@@ -260,17 +271,6 @@ public class GeometricJacobian
       return new DenseMatrix64F(SpatialMotionVector.SIZE, ScrewTools.computeDegreesOfFreedom(unitTwists.keySet()));
    }
 
-   private static boolean determineIfPathConnected(InverseDynamicsJoint[] joints)
-   {
-      for (int i = 1; i < joints.length; i++)
-      {
-         if (joints[i].getPredecessor() != joints[i - 1].getSuccessor())
-            return false;
-      }
-
-      return true;
-   }
-
    public String toString()
    {
       StringBuilder builder = new StringBuilder();
@@ -290,5 +290,11 @@ public class GeometricJacobian
    public String getShortInfo()
    {
       return "Jacobian, end effector = " + getEndEffector() + ", base = " + getBase() + ", expressed in " + getJacobianFrame();
+   }
+
+   @Override
+   public long nameBasedHashCode()
+   {
+      return nameBasedHashCode;
    }
 }

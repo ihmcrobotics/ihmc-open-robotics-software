@@ -7,6 +7,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Matrix3d;
@@ -884,5 +885,23 @@ public class ScrewTools
             externalWrench.add(externalWrenchToCompensateFor);
          }
       }
+   }
+
+   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   {
+      long jointsHashCode = NameBasedHashCodeTools.computeArrayHashCode(joints);
+      if (allowChangeFrame)
+         return NameBasedHashCodeTools.combineHashCodes(jointsHashCode, jacobianFrame);
+      else
+         return jointsHashCode;
+   }
+
+   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   {
+      long jointsHashCode = NameBasedHashCodeTools.computeSubArrayHashCode(joints, firstIndex, lastIndex);
+      if (allowChangeFrame)
+         return NameBasedHashCodeTools.combineHashCodes(jointsHashCode, jacobianFrame);
+      else
+         return jointsHashCode;
    }
 }

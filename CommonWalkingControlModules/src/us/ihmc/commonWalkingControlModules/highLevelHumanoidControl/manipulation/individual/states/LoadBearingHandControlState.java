@@ -46,7 +46,7 @@ public class LoadBearingHandControlState extends HandControlState
    private final FramePose desiredPose = new FramePose();
 
    public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
-         RigidBody elevator, RigidBody endEffector, int jacobianId, YoVariableRegistry parentRegistry)
+         RigidBody elevator, RigidBody endEffector, long jacobianId, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 

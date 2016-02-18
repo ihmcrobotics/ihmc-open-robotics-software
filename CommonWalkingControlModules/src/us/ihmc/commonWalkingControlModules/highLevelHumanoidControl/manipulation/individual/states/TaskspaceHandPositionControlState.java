@@ -62,7 +62,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
+   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, MomentumBasedController momentumBasedController, long jacobianId,
          RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);

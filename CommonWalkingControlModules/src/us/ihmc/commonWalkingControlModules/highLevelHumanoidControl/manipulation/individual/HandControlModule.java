@@ -211,7 +211,7 @@ public class HandControlModule
       hand = fullRobotModel.getHand(robotSide);
       chest = fullRobotModel.getChest();
       ReferenceFrame handFrame = hand.getBodyFixedFrame();
-      int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chest, hand, handFrame);
+      long jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chest, hand, handFrame);
 
       chestFrame = chest.getBodyFixedFrame();
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
