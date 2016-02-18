@@ -20,8 +20,6 @@ public class BenchmarkCompareFourBarCalculators
    private FourbarLink outputLink, groundLink, inputLink, floatingLink;
    private FourbarProperties fourBarProperties;
    
-   
-
    public BenchmarkCompareFourBarCalculators()
    {
       // FAST RUNNER CALCULATIONS
