@@ -44,7 +44,7 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
    public void startComputation()
    {
       imuFramePoint.setToZero(measurementFrame);
-      spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(linearAccelerationFrameVector, rigidBody, imuFramePoint);
+      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(linearAccelerationFrameVector, rigidBody, imuFramePoint);
       linearAccelerationFrameVector.changeFrame(gravitationalAcceleration.getReferenceFrame());
       linearAccelerationFrameVector.add(gravitationalAcceleration);
       linearAccelerationFrameVector.changeFrame(measurementFrame);

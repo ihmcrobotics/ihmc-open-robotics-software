@@ -95,7 +95,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       List<PlaneContactState> planes = input.getContactStates();
       List<CylindricalContactState> cylinders = input.getCylindricalContactStates();
 
-      input.getDesiredNetSpatialForceVector().packMatrix(desiredNetEnvironmentReactionWrench);
+      input.getDesiredNetSpatialForceVector().getMatrix(desiredNetEnvironmentReactionWrench);
 
       setupOptimizerInput(planes, cylinders, desiredNetEnvironmentReactionWrench, endEffectors, optimizerInput, wPhi, wRho, Cmatrix);
 
@@ -129,11 +129,11 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       int j = 0;
       for (PlaneContactState plane : planes)
       {
-         endEffectorOutputs.get(j).packExternallyActingSpatialForceVector(wrenches.get(j));
+         endEffectorOutputs.get(j).getExternallyActingSpatialForceVector(wrenches.get(j));
          FramePoint2d centerOfPressure = new FramePoint2d(centerOfMassFrame);    // frame will be overwritten
          double normalTorque = copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, wrenches.get(j), plane.getPlaneFrame());
          FrameVector force = new FrameVector(centerOfMassFrame);
-         wrenches.get(j).packLinearPart(force);
+         wrenches.get(j).getLinearPart(force);
          output.set(plane, force, centerOfPressure, normalTorque);
          j++;
       }
@@ -144,7 +144,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
          output.setWrench(cylinder, wrenches.get(j));
          if (numCalls % 100 == 0)
             printIfDebug("cylinder " + j + " wrench is " + wrenches.get(j).toString());
-         endEffectorOutputs.get(j).packExternallyActingSpatialForceVector(wrenches.get(j));    // packs using super class SpatialForceVector
+         endEffectorOutputs.get(j).getExternallyActingSpatialForceVector(wrenches.get(j));    // packs using super class SpatialForceVector
          j++;
       }
 

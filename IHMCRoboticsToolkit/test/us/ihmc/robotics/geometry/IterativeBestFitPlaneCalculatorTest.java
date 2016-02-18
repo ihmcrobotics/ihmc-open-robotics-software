@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class IterativeBestFitPlaneCalculatorTest
 {
@@ -111,8 +111,7 @@ public class IterativeBestFitPlaneCalculatorTest
 	/**
 	 * Not sure if this ever worked. The nearly degenerate cases are tough. Someone needs to look into it deeper.
 	 */
-	@Ignore
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout = 503)
    public void testNearlyDegenerate1Case()
    {

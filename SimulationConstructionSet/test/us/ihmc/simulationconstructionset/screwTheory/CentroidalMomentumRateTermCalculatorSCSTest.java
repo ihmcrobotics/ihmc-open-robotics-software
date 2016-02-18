@@ -149,7 +149,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          centerOfMassFrame.update();
          
          robot.packIdJoints(idJoints);
-         ScrewTools.packJointVelocitiesMatrix(idJoints, v);
+         ScrewTools.getJointVelocitiesMatrix(idJoints, v);
 
          centroidalMomentumRateTermCalculator.compute();
          aDotVAnalytical.set(centroidalMomentumRateTermCalculator.getADotVTerm());

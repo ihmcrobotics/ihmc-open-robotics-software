@@ -210,9 +210,9 @@ public class HeadOrientationControlModule
          disablePositionControl();
       }
 
-      packDesiredFrameOrientation(desiredOrientation);
-      packDesiredAngularVelocity(desiredAngularVelocity);
-      packDesiredAngularAccelerationFeedForward(desiredAngularAcceleration);
+      getDesiredFrameOrientation(desiredOrientation);
+      getDesiredAngularVelocity(desiredAngularVelocity);
+      getDesiredAngularAccelerationFeedForward(desiredAngularAcceleration);
 
       if (doPositionControl.getBooleanValue())
          computeJointsDesiredOrientationAndAngularVelocity();
@@ -278,7 +278,7 @@ public class HeadOrientationControlModule
       }
    }
 
-   protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
+   protected void getDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
       pointToTrack.getFrameTupleIncludingFrame(positionToPointAt);
       headPosition.setToZero(headFrame);
@@ -319,12 +319,12 @@ public class HeadOrientationControlModule
       rollLimit.set(headOrientationControllerParameters.getHeadRollLimit());
    }
 
-   protected void packDesiredAngularVelocity(FrameVector angularVelocityToPack)
+   protected void getDesiredAngularVelocity(FrameVector angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(worldFrame);
    }
 
-   protected void packDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
+   protected void getDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
    {
       angularAccelerationToPack.setToZero(worldFrame);
    }

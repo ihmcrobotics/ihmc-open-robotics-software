@@ -59,11 +59,11 @@ public class EndEffectorOutput
       this.resultingWrench.set(spatialForceVector);
       this.resultingWrench.changeFrame(endEffectorFrame);
       tempFrameVector.changeFrame(endEffectorFrame);
-      this.resultingWrench.packLinearPart(tempFrameVector);
+      this.resultingWrench.getLinearPart(tempFrameVector);
       tempFrameVector.changeFrame(endEffectorFrame.getRootFrame());
       this.wrenchLinear.set(tempFrameVector);
       tempFrameVector.changeFrame(endEffectorFrame);
-      this.resultingWrench.packAngularPart(tempFrameVector);
+      this.resultingWrench.getAngularPart(tempFrameVector);
       tempFrameVector.changeFrame(endEffectorFrame.getRootFrame());
       this.wrenchAngular.set(tempFrameVector);
       this.tempFramePoint.setToZero(endEffectorFrame);
@@ -71,7 +71,7 @@ public class EndEffectorOutput
       this.wrenchOrigin.set(tempFramePoint);
    }
 
-   public void packExternallyActingSpatialForceVector(SpatialForceVector vectorToPack)
+   public void getExternallyActingSpatialForceVector(SpatialForceVector vectorToPack)
    {
       vectorToPack.set(resultingExternalForceVector);
    }

@@ -92,7 +92,7 @@ public class RotateToroidState<T extends Enum<T>> extends ToroidManipulationStat
          RigidBody hand = hands.get(robotSide);
          RigidBody rootBody = ScrewTools.getRootBody(hand);
          SpatialAccelerationVector handSpatialAcceleration = handAccelerations.get(robotSide);
-         packHandAccelerationGivenToolAcceleration(handSpatialAcceleration, toroidSpatialAcceleration, robotSide);
+         getHandAccelerationGivenToolAcceleration(handSpatialAcceleration, toroidSpatialAcceleration, robotSide);
          handSpatialAcceleration.changeBaseFrameNoRelativeAcceleration(rootBody.getBodyFixedFrame());
 
          Wrench wrench = handWrenches.get(robotSide);
@@ -102,7 +102,7 @@ public class RotateToroidState<T extends Enum<T>> extends ToroidManipulationStat
       }
    }
 
-   private void packHandAccelerationGivenToolAcceleration(SpatialAccelerationVector handAccelerationToPack, SpatialAccelerationVector toolAcceleration,
+   private void getHandAccelerationGivenToolAcceleration(SpatialAccelerationVector handAccelerationToPack, SpatialAccelerationVector toolAcceleration,
          RobotSide robotSide)
    {
       ReferenceFrame endEffectorFrame = hands.get(robotSide).getBodyFixedFrame();//handPositionControlFrames.get(robotSide);

@@ -30,12 +30,12 @@ public class PointJacobianConvectiveTermCalculator
       bodyFixedPoint.setIncludingFrame(pointJacobian.getPoint());
       bodyFixedPoint.changeFrame(jacobian.getBaseFrame());
 
-      twistCalculator.packRelativeTwist(twist, jacobian.getBase(), jacobian.getEndEffector());
+      twistCalculator.getRelativeTwist(twist, jacobian.getBase(), jacobian.getEndEffector());
       convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, convectiveTerm);
       convectiveTerm.changeFrame(jacobian.getBaseFrame(), twist, twist);
 
       twist.changeFrame(jacobian.getBaseFrame());
-      convectiveTerm.packAccelerationOfPointFixedInBodyFrame(twist, bodyFixedPoint, pPointVelocity);
+      convectiveTerm.getAccelerationOfPointFixedInBodyFrame(twist, bodyFixedPoint, pPointVelocity);
 
 //      bodyFixedPointVelocity.setToZero(jacobian.getBaseFrame());
 //      twist.packVelocityOfPointFixedInBodyFrame(bodyFixedPointVelocity, bodyFixedPoint);

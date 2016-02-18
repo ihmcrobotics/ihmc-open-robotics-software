@@ -128,7 +128,7 @@ public class PelvisRotationalStateUpdater
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);
 
       // Set the rootJoint twist to zero.
-      rootJoint.packJointTwist(twistRootBodyRelativeToWorld);
+      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setToZero();
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
 
@@ -188,14 +188,14 @@ public class PelvisRotationalStateUpdater
    private void updateRootJointTwistAngularPart()
    {
       // T_{rootBody}^{rootBody, measurementLink}
-      twistCalculator.packRelativeTwist(twistRootJointFrameRelativeToMeasurementLink, measurementLink, rootJoint.getSuccessor());
+      twistCalculator.getRelativeTwist(twistRootJointFrameRelativeToMeasurementLink, measurementLink, rootJoint.getSuccessor());
       // T_{rootBody}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.changeFrame(rootJointFrame);
       // T_{rootJointFrame}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.changeBodyFrameNoRelativeTwist(rootJointFrame);
       
       // omega_{rootJointFrame}^{rootJointFrame, measurementLink}
-      twistRootJointFrameRelativeToMeasurementLink.packAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
+      twistRootJointFrameRelativeToMeasurementLink.getAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
 
       // omega_{measurementLink}^{measurementFrame, world}
       imuProcessedOutput.getAngularVelocityMeasurement(angularVocityMeasurement);
@@ -211,7 +211,7 @@ public class PelvisRotationalStateUpdater
       angularVelocityMeasurementLinkRelativeToWorld.changeFrame(worldFrame);
       measurementFrameAngularVelocityInWorld.set(angularVelocityMeasurementLinkRelativeToWorld);
 
-      rootJoint.packJointTwist(twistRootBodyRelativeToWorld);
+      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
       twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       twistCalculator.compute();

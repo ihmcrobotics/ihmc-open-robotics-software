@@ -155,7 +155,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
          for (InverseDynamicsJoint inverseDynamicsJoint : jointsToOptimizeFor)
          {
             DenseMatrix64F vdDesired = new DenseMatrix64F(inverseDynamicsJoint.getDegreesOfFreedom(), 1);
-            inverseDynamicsJoint.packDesiredAccelerationMatrix(vdDesired, 0);
+            inverseDynamicsJoint.getDesiredAccelerationMatrix(vdDesired, 0);
             assertTrue(MatrixFeatures.isConstantVal(vdDesired, 0.0, 1e-5));
          }
 
@@ -260,7 +260,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector accelerationBack = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packRelativeAcceleration(accelerationBack, base, endEffector);
+      spatialAccelerationCalculator.getRelativeAcceleration(accelerationBack, base, endEffector);
 
       DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
       DenseMatrix64F accelerationBackSelection = computeAccelerationSelection(accelerationBack, selectionMatrix);
@@ -272,7 +272,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
    private DenseMatrix64F computeAccelerationSelection(SpatialAccelerationVector acceleration, DenseMatrix64F selectionMatrix)
    {
       DenseMatrix64F accelerationBackMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-      acceleration.packMatrix(accelerationBackMatrix, 0);
+      acceleration.getMatrix(accelerationBackMatrix, 0);
 
       DenseMatrix64F accelerationSelection = new DenseMatrix64F(selectionMatrix.getNumRows(), 1);
       CommonOps.mult(selectionMatrix, accelerationBackMatrix, accelerationSelection);

@@ -17,7 +17,7 @@ public class SettablePositionProvider implements PositionProvider
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setIncludingFrame(framePoint);
    }

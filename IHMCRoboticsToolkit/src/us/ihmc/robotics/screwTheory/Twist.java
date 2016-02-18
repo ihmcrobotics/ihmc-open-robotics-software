@@ -103,7 +103,7 @@ public class Twist extends SpatialMotionVector
     * Packs the angular velocity of the body frame with respect to the base frame, expressed in the base frame.
     * The vector is computed by simply rotating the angular velocity part of this twist to base frame.
     */
-   public void packAngularVelocityInBaseFrame(Vector3d vectorToPack)
+   public void getAngularVelocityInBaseFrame(Vector3d vectorToPack)
    {
       vectorToPack.set(angularPart);
 
@@ -121,7 +121,7 @@ public class Twist extends SpatialMotionVector
    /**
     * Packs a version of the linear velocity, rotated to the base frame.
     */
-   public void packBodyOriginLinearPartInBaseFrame(Vector3d linearVelocityAtBodyOriginToPack)
+   public void getBodyOriginLinearPartInBaseFrame(Vector3d linearVelocityAtBodyOriginToPack)
    {
       if (expressedInFrame == bodyFrame)
       {
@@ -150,17 +150,17 @@ public class Twist extends SpatialMotionVector
    /**
     * Packs a version of the linear velocity, rotated to the base frame.
     */
-   public void packBodyOriginLinearPartInBaseFrame(FrameVector linearVelocityAtBodyOriginToPack)
+   public void getBodyOriginLinearPartInBaseFrame(FrameVector linearVelocityAtBodyOriginToPack)
    {
       linearVelocityAtBodyOriginToPack.setToZero(baseFrame);
-      packBodyOriginLinearPartInBaseFrame(linearVelocityAtBodyOriginToPack.getVector());
+      getBodyOriginLinearPartInBaseFrame(linearVelocityAtBodyOriginToPack.getVector());
    }
 
    /**
     * Packs the linear velocity of a point that is fixed in bodyFrame but is expressed in baseFrame,
     * with respect to baseFrame, expressed in expressedInFrame
     */
-   public void packLinearVelocityOfPointFixedInBodyFrame(FrameVector linearVelocityToPack, FramePoint pointFixedInBodyFrame)
+   public void getLinearVelocityOfPointFixedInBodyFrame(FrameVector linearVelocityToPack, FramePoint pointFixedInBodyFrame)
    {
       baseFrame.checkReferenceFrameMatch(expressedInFrame);
       pointFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
@@ -176,7 +176,7 @@ public class Twist extends SpatialMotionVector
     * Packs the linear velocity of a point2d that is fixed in bodyFrame but is expressed in baseFrame,
     * with respect to baseFrame, expressed in expressedInFrame
     */
-   public void packLineaVelocityOfPoint2dFixedInBodyFrame(FrameVector linearVelocityToPack, FramePoint2d point2dFixedInBodyFrame)
+   public void getLineaVelocityOfPoint2dFixedInBodyFrame(FrameVector linearVelocityToPack, FramePoint2d point2dFixedInBodyFrame)
    {
       baseFrame.checkReferenceFrameMatch(expressedInFrame);
       point2dFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);

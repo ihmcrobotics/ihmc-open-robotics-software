@@ -243,7 +243,7 @@ public class NewInstantaneousCapturePointPlanner
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.get(tmpFramePoint1);
+         doubleSupportCapturePointTrajectory.getPosition(tmpFramePoint1);
          desiredCapturePointPosition.set(tmpFramePoint1);
       }
    }
@@ -261,7 +261,7 @@ public class NewInstantaneousCapturePointPlanner
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.packVelocity(tmpFrameVector1);
+         doubleSupportCapturePointTrajectory.getVelocity(tmpFrameVector1);
          desiredCapturePointVelocity.set(tmpFrameVector1);
       }
    }
@@ -279,7 +279,7 @@ public class NewInstantaneousCapturePointPlanner
       else
       {
          doubleSupportCapturePointTrajectory.compute(time);
-         doubleSupportCapturePointTrajectory.packAcceleration(tmpFrameVector1);
+         doubleSupportCapturePointTrajectory.getAcceleration(tmpFrameVector1);
          desiredCapturePointAcceleration.set(tmpFrameVector1);
       }
    }
@@ -289,7 +289,7 @@ public class NewInstantaneousCapturePointPlanner
       CapturePointTools.computeDesiredCornerPoints(capturePointCornerPoints, constantCentersOfPressure, false, stepTime, omega0);
    }
 
-   public void packDesiredCapturePointPositionVelocityAndAcceleration(FramePoint desiredCapturePointPositionToPack,
+   public void getDesiredCapturePointPositionVelocityAndAcceleration(FramePoint desiredCapturePointPositionToPack,
          FrameVector desiredCapturePointVelocityToPack, FrameVector desiredCapturePointAccelerationToPack, double time)
    {
       computeTimeInCurrentState(time);
@@ -307,7 +307,7 @@ public class NewInstantaneousCapturePointPlanner
       desiredCapturePointAccelerationToPack.set(tmpFrameVector2);
    }
 
-   public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
          double time)
    {
       computeTimeInCurrentState(time);

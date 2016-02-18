@@ -150,7 +150,7 @@ public class CenterOfMassKinematicBasedLinearStateCalculator
 
    private void updateKinematicsNewTwist()
    {
-      rootJoint.packJointTwist(tempRootBodyTwist);
+      rootJoint.getJointTwist(tempRootBodyTwist);
 
       rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(tempFrameVector);
       tempFrameVector.changeFrame(tempRootBodyTwist.getExpressedInFrame());
@@ -165,8 +165,8 @@ public class CenterOfMassKinematicBasedLinearStateCalculator
          Twist footTwistInWorld = footTwistsInWorld.get(robotquadrant);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(robotquadrant);
 
-         twistCalculator.packTwistOfBody(footTwistInWorld, shinRigidBodies.get(robotquadrant));
-         footTwistInWorld.packLinearPart(tempFrameVector);
+         twistCalculator.getTwistOfBody(footTwistInWorld, shinRigidBodies.get(robotquadrant));
+         footTwistInWorld.getLinearPart(tempFrameVector);
 
          tempFrameVector.changeFrame(worldFrame);
          footVelocityInWorld.set(tempFrameVector);

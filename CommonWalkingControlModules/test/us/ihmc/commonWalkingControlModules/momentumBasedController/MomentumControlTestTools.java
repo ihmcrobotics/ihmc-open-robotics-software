@@ -84,7 +84,7 @@ public class MomentumControlTestTools
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       Wrench wrench = new Wrench();
-      rootJoint.packWrench(wrench);
+      rootJoint.getWrench(wrench);
 
       SpatialForceVector zeroWrench = new SpatialForceVector(wrench.getExpressedInFrame());
       SpatialForceVectorTest.assertSpatialForceVectorEquals(wrench, zeroWrench, epsilon);

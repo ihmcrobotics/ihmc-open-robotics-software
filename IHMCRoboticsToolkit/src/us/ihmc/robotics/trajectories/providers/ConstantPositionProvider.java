@@ -11,7 +11,7 @@ public class ConstantPositionProvider implements PositionProvider
       this.framePoint = new FramePoint(position);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setIncludingFrame(framePoint);
    }

@@ -146,17 +146,17 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       return stepTime.getDoubleValue();
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -173,10 +173,10 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       FramePoint finalDesiredPosition = new FramePoint(referenceFrame);
       FrameVector finalDesiredVelocity = new FrameVector(referenceFrame);
 
-      initialPositionSource.get(initialPosition);
+      initialPositionSource.getPosition(initialPosition);
       initialVelocitySource.get(initialVelocity);
       initialAccelerationSource.get(initialAcceleration);
-      finalDesiredPositionSource.get(finalDesiredPosition);
+      finalDesiredPositionSource.getPosition(finalDesiredPosition);
       finalDesiredVelocitySource.get(finalDesiredVelocity);
 
       initialPosition.changeFrame(referenceFrame);
@@ -237,11 +237,11 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       timeSpline.setCubic(0.0, stepTime, 0.0, initialParameterd, 1.0, finalParameterd);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override

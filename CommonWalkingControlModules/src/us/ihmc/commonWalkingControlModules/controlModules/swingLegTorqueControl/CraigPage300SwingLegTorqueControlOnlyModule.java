@@ -173,7 +173,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
        * by the low level side!
        *  
        */
-      legJointPositionControlModules.get(swingSide).packTorquesForLegJointsPositionControl(1.0, legTorquesToPackForSwingLeg, jointPositions, jointVelocities);
+      legJointPositionControlModules.get(swingSide).getTorquesForLegJointsPositionControl(1.0, legTorquesToPackForSwingLeg, jointPositions, jointVelocities);
       
       
       
@@ -209,7 +209,7 @@ public class CraigPage300SwingLegTorqueControlOnlyModule implements SwingLegTorq
    private void setUpperBodyWrench()
    {
       Wrench upperBodyWrench = new Wrench();
-      fullRobotModel.getRootJoint().packWrench(upperBodyWrench);
+      fullRobotModel.getRootJoint().getWrench(upperBodyWrench);
       upperBodyWrench.changeBodyFrameAttachedToSameBody(referenceFrames.getPelvisFrame());
       upperBodyWrench.changeFrame(referenceFrames.getPelvisFrame());
       couplingRegistry.setDesiredUpperBodyWrench(upperBodyWrench);

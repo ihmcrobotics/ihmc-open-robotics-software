@@ -94,7 +94,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
             tempForceVector.setUsingArm(plane.getPlaneFrame(), tempLinearPart, tempArm);
             tempForceVector.changeFrame(plane.getFrameAfterParentJoint());
 
-            tempForceVector.packMatrix(rhoQ[rhoPosition]);
+            tempForceVector.getMatrix(rhoQ[rhoPosition]);
          }
       }
 
@@ -140,7 +140,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
             tempForceVector.setUsingArm(tempFramePoint.getReferenceFrame(), tempLinearPart, tempArm);
             tempForceVector.changeFrame(endEffectorFrame);
 
-            tempForceVector.packMatrix(rhoQ[rhoPosition]);
+            tempForceVector.getMatrix(rhoQ[rhoPosition]);
          }
       }
 
@@ -179,13 +179,13 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    }
 
    
-   public void packQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
+   public void getQRhoBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
       spatialForceVector.set(referenceFrame, rhoQ[i]);
    }
 
    
-   public void packQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
+   public void getQPhiBodyFrame(int i, SpatialForceVector spatialForceVector, ReferenceFrame referenceFrame)
    {
    }
 

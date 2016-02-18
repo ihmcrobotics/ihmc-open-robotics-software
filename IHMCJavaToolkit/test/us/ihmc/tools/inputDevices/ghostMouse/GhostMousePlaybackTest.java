@@ -3,11 +3,10 @@ package us.ihmc.tools.inputDevices.ghostMouse;
 
 import java.awt.AWTException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.inputDevices.ghostMouse.GhostMousePlayback;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class GhostMousePlaybackTest
 {
@@ -403,9 +402,7 @@ public class GhostMousePlaybackTest
          playback.playback();
    }
 
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLoad() throws AWTException
    {

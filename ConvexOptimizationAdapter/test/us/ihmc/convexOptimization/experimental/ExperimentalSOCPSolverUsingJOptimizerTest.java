@@ -6,21 +6,20 @@ import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class ExperimentalSOCPSolverUsingJOptimizerTest
 {
    public static final boolean VERBOSE = false;
 
-   @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
-
-	@DeployableTestMethod
+   // At time of test writing JOptimizer wasn't working for SOCPs...
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testASimpleSecondOrderConeProblem()
    {
@@ -52,9 +51,8 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
       assertEquals(Math.sqrt(18.0), solution[2], 1e-5);
    }
    
-   @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
-
-	@DeployableTestMethod
+   //At time of test writing JOptimizer wasn't working for SOCPs...
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testARotatedSecondOrderConeProblem()
    {
@@ -106,6 +104,4 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
       assertEquals(3.0, solution[1], 1e-5);
       assertEquals(Math.sqrt(18.0), solution[2], 1e-5);
    }
-
-
 }
