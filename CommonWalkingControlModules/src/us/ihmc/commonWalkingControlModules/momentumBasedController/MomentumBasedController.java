@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommandPool;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
@@ -84,8 +83,6 @@ public class MomentumBasedController
    private static final boolean VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final SpatialAccelerationCommandPool desiredSpatialAccelerationCommandPool = new SpatialAccelerationCommandPool();
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -584,7 +581,6 @@ public class MomentumBasedController
       inverseDynamicsCalculator.compute();
 
       updateYoVariables();
-      desiredSpatialAccelerationCommandPool.recycleObjectPool();
    }
 
    private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();

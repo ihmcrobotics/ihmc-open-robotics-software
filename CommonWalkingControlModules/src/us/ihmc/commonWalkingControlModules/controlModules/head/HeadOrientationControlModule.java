@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -82,7 +81,6 @@ public class HeadOrientationControlModule
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
    private final int jacobianId;
-   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
 
    private final OneDoFJoint[] headOrientationControlJoints;
    private final NumericalInverseKinematicsCalculator numericalInverseKinematicsCalculator;
@@ -110,7 +108,7 @@ public class HeadOrientationControlModule
       head = fullRobotModel.getHead();
       headFrame = head.getBodyFixedFrame();
       elevator = fullRobotModel.getElevator();
-      taskspaceConstraintData.set(elevator, head);
+      spatialAccelerationCommand.set(elevator, head);
 
       doPositionControl.set(headOrientationControllerParameters.isNeckPositionControlled());
 
@@ -251,9 +249,9 @@ public class HeadOrientationControlModule
 
       controlledSpatialAcceleration.set(headFrame, elevator.getBodyFixedFrame(), headFrame, controlledLinearAcceleration, controlledAngularAcceleration);
 
-      taskspaceConstraintData.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
       GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
-      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
+      spatialAccelerationCommand.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
+      spatialAccelerationCommand.setJacobian(jacobian);
    }
 
    private void saveDoAccelerationIntegration()

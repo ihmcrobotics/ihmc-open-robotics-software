@@ -28,12 +28,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularConta
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerWithGRFPenalizedSmootherNative;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -166,14 +165,13 @@ public class OptimizationMomentumControlModuleTest
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       jacobian.compute();
-      TaskspaceConstraintData taskSpaceConstraintData = new TaskspaceConstraintData();
+      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian); // , 10.0);
       SpatialAccelerationVector endEffectorSpatialAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(),
             endEffector.getBodyFixedFrame());
       endEffectorSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       endEffectorSpatialAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
-      taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
+      desiredSpatialAccelerationCommand.set(endEffectorSpatialAcceleration);
 
-      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskSpaceConstraintData); // , 10.0);
       momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution;
@@ -377,14 +375,13 @@ public class OptimizationMomentumControlModuleTest
       RigidBody base = elevator; // rootJoint.getSuccessor();
       GeometricJacobian jacobian = new GeometricJacobian(base, endEffector, endEffector.getBodyFixedFrame());
       jacobian.compute();
-      TaskspaceConstraintData taskSpaceConstraintData = new TaskspaceConstraintData();
+      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian); // , 10.0);
       SpatialAccelerationVector endEffectorSpatialAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(),
             endEffector.getBodyFixedFrame());
       endEffectorSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
       endEffectorSpatialAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
-      taskSpaceConstraintData.set(endEffectorSpatialAcceleration);
+      desiredSpatialAccelerationCommand.set(endEffectorSpatialAcceleration);
 
-      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskSpaceConstraintData); // , 10.0);
       momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
       Map<RevoluteJoint, Double> desiredJointAccelerations = new HashMap<RevoluteJoint, Double>();
@@ -489,10 +486,9 @@ public class OptimizationMomentumControlModuleTest
       CommonOps.fill(nullspaceMultipliers, 0.0);
       RandomMatrices.setRandom(nullspaceMultipliers, random);
 
-      TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-      taskspaceConstraintData.set(taskSpaceAcceleration, nullspaceMultipliers);
+      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian);
+      desiredSpatialAccelerationCommand.set(taskSpaceAcceleration, nullspaceMultipliers);
 
-      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskspaceConstraintData);
       momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();

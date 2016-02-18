@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -41,8 +40,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final String name;
    private final YoVariableRegistry registry;
 
-   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-   private final MomentumBasedController momentumBasedController;
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -112,10 +109,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
-
-      taskspaceConstraintData.set(base, endEffector);
-
-      this.momentumBasedController = momentumBasedController;
 
       parentRegistry.addChild(registry);
 

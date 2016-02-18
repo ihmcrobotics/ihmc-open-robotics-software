@@ -6,7 +6,6 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -29,9 +28,7 @@ public class LoadBearingHandControlState extends HandControlState
 {
    private final String name;
    private final YoVariableRegistry registry;
-   private final int jacobianId;
 
-   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final MomentumBasedController momentumBasedController;
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
@@ -56,10 +53,11 @@ public class LoadBearingHandControlState extends HandControlState
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
-      taskspaceConstraintData.set(elevator, endEffector);
+      spatialAccelerationCommand.set(elevator, endEffector);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
+      spatialAccelerationCommand.setJacobian(jacobian);
 
       this.momentumBasedController = momentumBasedController;
-      this.jacobianId = jacobianId;
 
       parentRegistry.addChild(registry);
 
@@ -154,9 +152,7 @@ public class LoadBearingHandControlState extends HandControlState
 
    private void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
    {
-      taskspaceConstraintData.set(handAcceleration);
-      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
-      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
+      spatialAccelerationCommand.set(handAcceleration);
    }
 
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)

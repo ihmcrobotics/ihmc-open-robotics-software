@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
@@ -23,6 +24,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class ICPBasedLinearMomentumRateOfChangeControlModule
 {
    private final MomentumRateData momentumRateOfChangeData;
+   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ICPProportionalController icpProportionalController;

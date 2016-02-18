@@ -1,10 +1,15 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAccelerationCommand>
 {
@@ -20,63 +25,122 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
    public SpatialAccelerationCommand()
    {
       super(InverseDynamicsCommandType.TASKSPACE_MOTION);
-      this.hasWeight = false;
-      this.weight = Double.POSITIVE_INFINITY;
+      removeWeight();
    }
 
-   public SpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   public SpatialAccelerationCommand(GeometricJacobian jacobian)
    {
-      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
-      this.jacobian = jacobian;
-      this.hasWeight = false;
-      this.weight = Double.POSITIVE_INFINITY;
-
-      spatialAcceleration.set(taskspaceConstraintData.getSpatialAcceleration());
-      nullspaceMultipliers.set(taskspaceConstraintData.getNullspaceMultipliers());
-      selectionMatrix.set(taskspaceConstraintData.getSelectionMatrix());
-      base = taskspaceConstraintData.getBase();
-      endEffector = taskspaceConstraintData.getEndEffector();
+      this();
+      setJacobian(jacobian);
    }
 
-   public SpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData, double weight)
+   public SpatialAccelerationCommand(GeometricJacobian jacobian, double weight)
    {
-      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
-      this.jacobian = jacobian;
-      this.hasWeight = true;
-      this.weight = weight;
-
-      spatialAcceleration.set(taskspaceConstraintData.getSpatialAcceleration());
-      nullspaceMultipliers.set(taskspaceConstraintData.getNullspaceMultipliers());
-      selectionMatrix.set(taskspaceConstraintData.getSelectionMatrix());
-      base = taskspaceConstraintData.getBase();
-      endEffector = taskspaceConstraintData.getEndEffector();
+      this(jacobian);
+      setWeight(weight);
    }
 
    public SpatialAccelerationCommand(SpatialAccelerationCommand spatialAccelerationCommand)
    {
-      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
-      this.jacobian = spatialAccelerationCommand.jacobian;
-      this.hasWeight = spatialAccelerationCommand.hasWeight;
-      this.weight = spatialAccelerationCommand.weight;
-
-      spatialAcceleration.set(spatialAccelerationCommand.getSpatialAcceleration());
-      nullspaceMultipliers.set(spatialAccelerationCommand.getNullspaceMultipliers());
-      selectionMatrix.set(spatialAccelerationCommand.getSelectionMatrix());
-      base = spatialAccelerationCommand.getBase();
-      endEffector = spatialAccelerationCommand.getEndEffector();
+      this();
+      set(spatialAccelerationCommand);
    }
 
-   public void set(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   public void set(RigidBody base, RigidBody endEffector)
    {
-      this.jacobian = jacobian;
-      this.hasWeight = false;
-      this.weight = Double.POSITIVE_INFINITY;
+      this.base = base;
+      this.endEffector = endEffector;
+   }
 
-      spatialAcceleration.set(taskspaceConstraintData.getSpatialAcceleration());
-      nullspaceMultipliers.set(taskspaceConstraintData.getNullspaceMultipliers());
-      selectionMatrix.set(taskspaceConstraintData.getSelectionMatrix());
-      base = taskspaceConstraintData.getBase();
-      endEffector = taskspaceConstraintData.getEndEffector();
+   public void set(SpatialAccelerationVector spatialAcceleration)
+   {
+      this.spatialAcceleration.set(spatialAcceleration);
+      nullspaceMultipliers.reshape(0, 1);
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+   }
+
+   public void set(SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers, DenseMatrix64F selectionMatrix)
+   {
+      this.spatialAcceleration.set(spatialAcceleration);
+      this.nullspaceMultipliers.set(nullspaceMultipliers);
+      this.selectionMatrix.set(selectionMatrix);
+   }
+
+   public void set(SpatialAccelerationVector spatialAcceleration, DenseMatrix64F nullspaceMultipliers)
+   {
+      this.spatialAcceleration.set(spatialAcceleration);
+      this.nullspaceMultipliers.set(nullspaceMultipliers);
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+   }
+
+   public void setAngularAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration,
+         DenseMatrix64F nullspaceMultipliers)
+   {
+      spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredAngularAcceleration.getReferenceFrame());
+      spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
+
+      this.nullspaceMultipliers.set(nullspaceMultipliers);
+
+      selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
+   }
+
+   public void setAngularAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularAcceleration)
+   {
+      spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredAngularAcceleration.getReferenceFrame());
+      spatialAcceleration.setAngularPart(desiredAngularAcceleration.getVector());
+
+      nullspaceMultipliers.reshape(0, 1);
+
+      selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
+   }
+
+   public void setLinearAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredLinearAcceleration)
+   {
+      spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredLinearAcceleration.getReferenceFrame());
+      spatialAcceleration.setLinearPart(desiredLinearAcceleration.getVector());
+      spatialAcceleration.changeFrameNoRelativeMotion(bodyFrame);
+
+      nullspaceMultipliers.reshape(0, 1);
+
+      selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 3, 1.0);
+      selectionMatrix.set(1, 4, 1.0);
+      selectionMatrix.set(2, 5, 1.0);
+   }
+
+   public void setLinearAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredLinearAcceleration, DenseMatrix64F selectionMatrix)
+   {
+      spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredLinearAcceleration.getReferenceFrame());
+      spatialAcceleration.setLinearPart(desiredLinearAcceleration.getVector());
+      spatialAcceleration.changeFrameNoRelativeMotion(bodyFrame);
+
+      nullspaceMultipliers.reshape(0, 1);
+
+      MathTools.checkIfInRange(selectionMatrix.numRows, 0, 3);
+
+      this.selectionMatrix.set(selectionMatrix);
+   }
+
+   @Override
+   public void set(SpatialAccelerationCommand other)
+   {
+      jacobian = other.jacobian;
+      hasWeight = other.hasWeight;
+      weight = other.weight;
+
+      spatialAcceleration.set(other.getSpatialAcceleration());
+      nullspaceMultipliers.set(other.getNullspaceMultipliers());
+      selectionMatrix.set(other.getSelectionMatrix());
+      base = other.getBase();
+      endEffector = other.getEndEffector();
    }
 
    public boolean getHasWeight()
@@ -127,6 +191,12 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
    public void setWeight(double weight)
    {
       this.weight = weight;
+      hasWeight = weight != Double.POSITIVE_INFINITY;
+   }
+
+   private void removeWeight()
+   {
+      setWeight(Double.POSITIVE_INFINITY);
    }
 
    public void setJacobian(GeometricJacobian jacobian)
@@ -134,32 +204,10 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       this.jacobian = jacobian;
    }
 
-   public void setTaskspaceConstraintData(TaskspaceConstraintData taskspaceConstraintData)
-   {
-      spatialAcceleration.set(taskspaceConstraintData.getSpatialAcceleration());
-      nullspaceMultipliers.set(taskspaceConstraintData.getNullspaceMultipliers());
-      selectionMatrix.set(taskspaceConstraintData.getSelectionMatrix());
-      base = taskspaceConstraintData.getBase();
-      endEffector = taskspaceConstraintData.getEndEffector();
-   }
-
+   @Override
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": GeometricJacobian = " + jacobian.getShortInfo() + ", spatialAcceleration = " + spatialAcceleration;
       return ret;
-   }
-
-   @Override
-   public void set(SpatialAccelerationCommand other)
-   {
-      this.jacobian = other.jacobian;
-      this.hasWeight = other.hasWeight;
-      this.weight = other.weight;
-
-      spatialAcceleration.set(other.getSpatialAcceleration());
-      nullspaceMultipliers.set(other.getNullspaceMultipliers());
-      selectionMatrix.set(other.getSelectionMatrix());
-      base = other.getBase();
-      endEffector = other.getEndEffector();
    }
 }

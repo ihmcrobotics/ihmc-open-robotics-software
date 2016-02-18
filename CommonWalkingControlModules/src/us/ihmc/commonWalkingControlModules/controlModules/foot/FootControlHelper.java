@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
@@ -76,7 +75,6 @@ public class FootControlHelper
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    private final DenseMatrix64F selectionMatrix;
-   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
 
    // For hold position and fully constrained states.
    private final FrameTuple2dArrayList<FramePoint2d> defaultContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
@@ -145,7 +143,6 @@ public class FootControlHelper
 
       selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
-      taskspaceConstraintData.set(rootBody, contactableFoot.getRigidBody());
 
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       isSupportFootShrinkEnabled = new BooleanYoVariable("is" + robotSide.getCamelCaseNameForMiddleOfExpression() + "SupportFootShrinkEnabled", registry);
@@ -215,8 +212,9 @@ public class FootControlHelper
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-      taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
-      spatialAccelerationCommandToPack.set(rootToFootJacobian, taskspaceConstraintData);
+      spatialAccelerationCommandToPack.setJacobian(rootToFootJacobian);
+      spatialAccelerationCommandToPack.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
+      spatialAccelerationCommandToPack.set(rootBody, contactableFoot.getRigidBody());
    }
 
    public RobotSide getRobotSide()

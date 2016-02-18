@@ -6,9 +6,10 @@ import static us.ihmc.commonWalkingControlModules.momentumBasedController.Moment
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -28,9 +29,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
@@ -227,10 +227,10 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 
          momentumControlModule.reset();
 
-         Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap = new HashMap<GeometricJacobian, TaskspaceConstraintData>();
+         List<SpatialAccelerationCommand> spatialAccelerationCommands = new ArrayList<>();
 
-         constrainFeet(elevator, feet, momentumControlModule, taskspaceConstraintDataMap);
-         constrainPelvis(random, fullRobotModel, momentumControlModule, taskspaceConstraintDataMap);
+         constrainFeet(elevator, feet, momentumControlModule, spatialAccelerationCommands);
+         constrainPelvis(random, fullRobotModel, momentumControlModule, spatialAccelerationCommands);
 
          MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
          Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
@@ -239,9 +239,9 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
                                           gravityZ, mass, centerOfMassFrame, 1e-3);
          assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
 
-         for (GeometricJacobian jacobian : taskspaceConstraintDataMap.keySet())
+         for (SpatialAccelerationCommand spatialAccelerationCommand : spatialAccelerationCommands)
          {
-            assertSpatialAccelerationCorrect(jacobian.getBase(), jacobian.getEndEffector(), taskspaceConstraintDataMap.get(jacobian));
+            assertSpatialAccelerationCorrect(spatialAccelerationCommand.getBase(), spatialAccelerationCommand.getEndEffector(), spatialAccelerationCommand);
          }
 
          assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
@@ -249,7 +249,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
    }
 
 
-   private void assertSpatialAccelerationCorrect(RigidBody base, RigidBody endEffector, TaskspaceConstraintData taskspaceConstraintData)
+   private void assertSpatialAccelerationCorrect(RigidBody base, RigidBody endEffector, SpatialAccelerationCommand spatialAccelerationCommand)
    {
       RigidBody elevator = ScrewTools.getRootBody(base);
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
@@ -262,9 +262,9 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       SpatialAccelerationVector accelerationBack = new SpatialAccelerationVector();
       spatialAccelerationCalculator.getRelativeAcceleration(accelerationBack, base, endEffector);
 
-      DenseMatrix64F selectionMatrix = taskspaceConstraintData.getSelectionMatrix();
+      DenseMatrix64F selectionMatrix = spatialAccelerationCommand.getSelectionMatrix();
       DenseMatrix64F accelerationBackSelection = computeAccelerationSelection(accelerationBack, selectionMatrix);
-      DenseMatrix64F accelerationInputSelection = computeAccelerationSelection(taskspaceConstraintData.getSpatialAcceleration(), selectionMatrix);
+      DenseMatrix64F accelerationInputSelection = computeAccelerationSelection(spatialAccelerationCommand.getSpatialAcceleration(), selectionMatrix);
 
       EjmlUnitTests.assertEquals(accelerationInputSelection, accelerationBackSelection, 1e-5);
    }
@@ -281,12 +281,12 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
    }
 
    private void constrainPelvis(Random random, SDFFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule,
-                                Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
+         List<SpatialAccelerationCommand> spatialAccelerationCommands)
    {
       RigidBody pelvis = fullRobotModel.getRootJoint().getSuccessor();
       RigidBody elevator = fullRobotModel.getElevator();
       GeometricJacobian rootJointJacobian = new GeometricJacobian(pelvis, elevator, pelvis.getBodyFixedFrame());
-      TaskspaceConstraintData pelvisTaskspaceConstraintData = new TaskspaceConstraintData();
+      SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand(rootJointJacobian);
       SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector(rootJointJacobian.getEndEffectorFrame(),
                                                                rootJointJacobian.getBaseFrame(), rootJointJacobian.getJacobianFrame());
       pelvisSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
@@ -295,28 +295,28 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DenseMatrix64F pelvisNullspaceMultipliers = new DenseMatrix64F(0, 1);
       DenseMatrix64F orientationSelectionMatrix = new DenseMatrix64F(3, Momentum.SIZE);
       CommonOps.setIdentity(orientationSelectionMatrix);
-      pelvisTaskspaceConstraintData.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, orientationSelectionMatrix);
+      spatialAccelerationCommand.set(pelvisSpatialAcceleration, pelvisNullspaceMultipliers, orientationSelectionMatrix);
+      spatialAccelerationCommand.set(elevator, pelvis);
       
-      SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(rootJointJacobian, pelvisTaskspaceConstraintData);
-      momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
-      taskspaceConstraintDataMap.put(rootJointJacobian, pelvisTaskspaceConstraintData);
+      momentumControlModule.setInverseDynamicsCommand(spatialAccelerationCommand);
+      spatialAccelerationCommands.add(spatialAccelerationCommand);
    }
 
    private void constrainFeet(RigidBody elevator, SideDependentList<ContactablePlaneBody> feet, OptimizationMomentumControlModule momentumControlModule,
-                              Map<GeometricJacobian, TaskspaceConstraintData> taskspaceConstraintDataMap)
+                              List<SpatialAccelerationCommand> spatialAccelerationCommands)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = feet.get(robotSide).getRigidBody();
          GeometricJacobian jacobian = new GeometricJacobian(elevator, foot, foot.getBodyFixedFrame());
-         TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
          SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(),
                                                             foot.getBodyFixedFrame());
-         taskspaceConstraintData.set(spatialAcceleration);
+         SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand(jacobian);
+         spatialAccelerationCommand.set(spatialAcceleration);
+         spatialAccelerationCommand.set(elevator, foot);
          
-         SpatialAccelerationCommand desiredSpatialAccelerationCommand = new SpatialAccelerationCommand(jacobian, taskspaceConstraintData);
-         momentumControlModule.setInverseDynamicsCommand(desiredSpatialAccelerationCommand);
-         taskspaceConstraintDataMap.put(jacobian, taskspaceConstraintData);
+         momentumControlModule.setInverseDynamicsCommand(spatialAccelerationCommand);
+         spatialAccelerationCommands.add(spatialAccelerationCommand);
       }
    }
 

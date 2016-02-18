@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -33,7 +33,7 @@ public abstract class DegenerateOrientationControlModule
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
 
-   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private final String namePrefix;
    private final RigidBody endEffector;
@@ -169,13 +169,14 @@ public abstract class DegenerateOrientationControlModule
       selectionMatrixComputer.computeSelectionMatrix(jacobian, selectionMatrix);
    }
 
-   public TaskspaceConstraintData getTaskspaceConstraintData()
+   public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       DenseMatrix64F selectionMatrix = selectionMatrices.get(jacobianIndex.getIntegerValue());
 
-      taskspaceConstraintData.set(bases.get(baseIndex.getIntegerValue()), endEffector);
-      taskspaceConstraintData.set(spatialAcceleration, nullspaceMultipliers, selectionMatrix);
-      return taskspaceConstraintData;
+      spatialAccelerationCommand.setJacobian(getJacobian());
+      spatialAccelerationCommand.set(bases.get(baseIndex.getIntegerValue()), endEffector);
+      spatialAccelerationCommand.set(spatialAcceleration, nullspaceMultipliers, selectionMatrix);
+      return spatialAccelerationCommand;
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
