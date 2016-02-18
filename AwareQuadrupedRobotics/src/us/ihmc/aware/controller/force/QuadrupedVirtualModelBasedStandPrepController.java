@@ -234,10 +234,10 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
          solePositionEstimates.get(quadrant).setToZero(soleFrame);
 
          Twist twist = pool.lease(Twist.class);
-         twistCalculator.packTwistOfBody(twist, footRigidBody.get(quadrant));
+         twistCalculator.getTwistOfBody(twist, footRigidBody.get(quadrant));
          twist.changeFrame(soleFrame);
 
-         twist.packLinearPart(soleLinearVelocityEstimates.get(quadrant));
+         twist.getLinearPart(soleLinearVelocityEstimates.get(quadrant));
       }
    }
 
