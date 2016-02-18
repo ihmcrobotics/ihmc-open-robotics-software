@@ -1,6 +1,7 @@
 package us.ihmc.tools.inputDevices.joystick;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
 import net.java.games.input.Controller;
@@ -66,9 +67,16 @@ public class JoystickUpdater implements Runnable
 
                synchronized (listnerConch)
                {
-                  for (JoystickEventListener listener : listeners)
+                  try
                   {
-                     listener.processEvent(event);
+                     for (JoystickEventListener listener : listeners)
+                     {
+                        listener.processEvent(event);
+                     }
+                  }
+                  catch (ConcurrentModificationException e)
+                  {
+                     // Some listeners might not be notified.
                   }
                }
 
