@@ -95,7 +95,8 @@ public class MomentumBasedController
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
-   private final SideDependentList<ContactablePlaneBody> feet, hands;
+   private final SideDependentList<? extends ContactablePlaneBody> feet;
+   private final SideDependentList<ContactablePlaneBody> hands;
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
@@ -209,7 +210,7 @@ public class MomentumBasedController
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
-         SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
+         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
          ArmControllerParameters armControllerParameters, WalkingControllerParameters walkingControllerParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
@@ -1111,7 +1112,7 @@ public class MomentumBasedController
             admissibleDesiredGroundReactionTorque.getFrameTuple());
    }
 
-   public SideDependentList<ContactablePlaneBody> getContactableFeet()
+   public SideDependentList<? extends ContactablePlaneBody> getContactableFeet()
    {
       return feet;
    }

@@ -144,7 +144,7 @@ public class MomentumBasedControllerFactory
          ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, HumanoidGlobalDataProducer dataProducer,
          InverseDynamicsJoint... jointsToIgnore)
    {
-      SideDependentList<ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
+      SideDependentList<? extends ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
       double gravityZ = Math.abs(gravity);
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
@@ -260,7 +260,7 @@ public class MomentumBasedControllerFactory
       return highLevelHumanoidControllerManager;
    }
 
-   private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
+   private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder, double totalRobotWeight,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {

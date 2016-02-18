@@ -2,219 +2,155 @@ package us.ihmc.valkyrie.parameters;
 
 import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footLength;
 import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footWidth;
+import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.soleToAnkleFrameTransforms;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFConversionsHelper;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Sphere;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieContactPointParameters extends RobotContactPointParameters
 {
-   private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
-
-   private final List<ImmutablePair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<ImmutablePair<String, Vector3d>>();
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
    private final SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
 
    private final DRCRobotJointMap jointMap;
-   
-   private boolean useSoftGroundContactParameters = false;
-   
+
    public ValkyrieContactPointParameters(DRCRobotJointMap jointMap)
    {
-	  this.jointMap = jointMap;
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
-         RigidBodyTransform ankleToSoleFrame = ValkyriePhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
+      super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
+      this.jointMap = jointMap;
 
-         ArrayList<ImmutablePair<String, Point2d>> footGCs = new ArrayList<>();
-         String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
-         
-        	 footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0)));
-             footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0)));
-             footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
-             footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
-         
-         for (ImmutablePair<String, Point2d> footGC : footGCs)
-         {
-            footGroundContactPoints.get(robotSide).add(footGC.getRight());
-
-            Point3d gcOffset = new Point3d(footGC.getRight().getX(), footGC.getRight().getY(), 0.0);
-            ankleToSoleFrame.transform(gcOffset);
-            jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(footGC.getLeft(), new Vector3d(gcOffset)));
-         }
-      }
-      
-      setupContactableBodiesFactory(jointMap);
+      createDefaultControllerFootContactPoints();
+      createDefaultSimulationFootContactPoints();
    }
-   
-   
+
    private void checkJointChildren(SDFJointHolder joint)
    {
-	   SDFLinkHolder link = joint.getChildLinkHolder();
-	   for(Collision collision : link.getCollisions())
-	   {		   
-		   if(collision.getName().contains("_heel") || collision.getName().contains("_toe") || collision.getName().contains("sim_contact") || (collision.getGeometry().getSphere()!=null && Double.parseDouble(collision.getGeometry().getSphere().getRadius())==0.0) )
-		   {
-			   System.out.println("Simulation contact '" + collision.getName()+"'");
-			   Vector3d gcOffset = new Vector3d();;
-			   SDFConversionsHelper.poseToTransform(collision.getPose()).get(gcOffset);
-			   link.getTransformFromModelReferenceFrame().transform (gcOffset);
-			   jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(joint.getName(), gcOffset));
-		   }
-		   
-		   if(collision.getName().contains("ctrl_contact"))
-		   {
-			   System.out.println("Controller contact '" + collision.getName()+"'");
-			   Vector3d gcOffset = new Vector3d();;
-			   SDFConversionsHelper.poseToTransform(collision.getPose()).get(gcOffset);
-			   link.getTransformFromModelReferenceFrame().transform (gcOffset);
-			   boolean assigned = false;
-			   
-			   for (RobotSide robotSide : RobotSide.values)
-			   {
-				   if(joint.getName().equals(jointMap.getJointBeforeFootName(robotSide)))
-				   {
-					   footGroundContactPoints.get(robotSide).add(projectOnPlane(ValkyriePhysicalProperties.getAnkleToSoleFrameTransform(robotSide), gcOffset));
-					   assigned = true;
-					   break;
-				   }
-				   else if(joint.getName().equals(jointMap.getJointBeforeHandName(robotSide)))
-				   {
-					   System.err.println("Hand contacts are not supported ("+collision.getName()+")");
-					   assigned = true;
-					   break;
-				   }
-				   else if(joint.getName().equals(jointMap.getChestName()))
-				   {
-					   System.err.println("Chest contacts are not supported ("+collision.getName()+")");
-					   assigned = true;
-					   break;
-				   }
-				   else if(joint.getName().equals(jointMap.getPelvisName()))
-				   {
-					   System.err.println("Pelvis contacts are not supported ("+collision.getName()+")");
-					   // Pelvis back has to be disnguished here
-					   assigned = true;
-					   break;
-				   }
-				   else if(joint.getName().equals(jointMap.getNameOfJointBeforeThighs().get(robotSide)))
-				   {
-					   System.err.println("Thigh contacts are not supported ("+collision.getName()+")");
-					   assigned = true;
-					   break;
-				   }				   
-			   }
-			   if(!assigned)
-			   {
-			     System.err.println("Contacts with '" + joint.getName() + "' are not supported ("+collision.getName()+")");
-			   }
-		   }
-	   }
-	   
-	   for(SDFJointHolder j : link.getChildren())
-	   {
-		   checkJointChildren(j);
-	   }
+      SDFLinkHolder link = joint.getChildLinkHolder();
+      for (Collision collision : link.getCollisions())
+      {
+         String name = collision.getName();
+         Sphere sphere = collision.getGeometry().getSphere();
+         if (name.contains("_heel") || name.contains("_toe") || name.contains("sim_contact") || (sphere != null && Double.parseDouble(sphere.getRadius()) == 0.0))
+         {
+            System.out.println("Simulation contact '" + name + "'");
+            Vector3d gcOffset = new Vector3d();
+
+            SDFConversionsHelper.poseToTransform(collision.getPose()).get(gcOffset);
+            link.getTransformFromModelReferenceFrame().transform(gcOffset);
+            addSimulationContactPoint(joint.getName(), gcOffset);
+         }
+
+         if (name.contains("ctrl_contact"))
+         {
+            System.out.println("Controller contact '" + name + "'");
+            Vector3d gcOffset = new Vector3d();
+
+            SDFConversionsHelper.poseToTransform(collision.getPose()).get(gcOffset);
+            link.getTransformFromModelReferenceFrame().transform(gcOffset);
+            boolean assigned = false;
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               if (joint.getName().equals(jointMap.getJointBeforeFootName(robotSide)))
+               {
+                  footGroundContactPoints.get(robotSide).add(projectOnPlane(ValkyriePhysicalProperties.getSoleToAnkleFrameTransform(robotSide), gcOffset));
+                  assigned = true;
+                  break;
+               }
+               else if (joint.getName().equals(jointMap.getJointBeforeHandName(robotSide)))
+               {
+                  System.err.println("Hand contacts are not supported (" + name + ")");
+                  assigned = true;
+                  break;
+               }
+               else if (joint.getName().equals(jointMap.getChestName()))
+               {
+                  System.err.println("Chest contacts are not supported (" + name + ")");
+                  assigned = true;
+                  break;
+               }
+               else if (joint.getName().equals(jointMap.getPelvisName()))
+               {
+                  System.err.println("Pelvis contacts are not supported (" + name + ")");
+                  // Pelvis back has to be disnguished here
+                  assigned = true;
+                  break;
+               }
+               else if (joint.getName().equals(jointMap.getNameOfJointBeforeThighs().get(robotSide)))
+               {
+                  System.err.println("Thigh contacts are not supported (" + name + ")");
+                  assigned = true;
+                  break;
+               }
+            }
+            if (!assigned)
+            {
+               System.err.println("Contacts with '" + joint.getName() + "' are not supported (" + name + ")");
+            }
+         }
+      }
+
+      for (SDFJointHolder child : link.getChildren())
+      {
+         checkJointChildren(child);
+      }
    }
-   
+
    private Point2d projectOnPlane(RigidBodyTransform plane, Vector3d point)
    {
-	   RigidBodyTransform planeInv = new RigidBodyTransform(plane);
-	   planeInv.invert();
-	   planeInv.transform(point);
-	   return new Point2d(point.x,point.y); 
+      RigidBodyTransform planeInv = new RigidBodyTransform(plane);
+      planeInv.invert();
+      planeInv.transform(point);
+      return new Point2d(point.x, point.y);
    }
-   
+
    public void setupContactPointsFromRobotModel(DRCRobotModel robot, boolean removeExistingContacts)
    {
-	   if(removeExistingContacts) jointNameGroundContactPointMap.clear();
-	   GeneralizedSDFRobotModel sdf = robot.getGeneralizedRobotModel();
-	   for (SDFLinkHolder link : sdf.getRootLinks())
-	   {
-		   for (SDFJointHolder joint : link.getChildren())
-		   {
-			   checkJointChildren(joint);
-		   }
-	   }
-	   setupContactableBodiesFactory(jointMap);
+      if (removeExistingContacts)
+         clearSimulationContactPoints();
+
+      GeneralizedSDFRobotModel sdf = robot.getGeneralizedRobotModel();
+      for (SDFLinkHolder link : sdf.getRootLinks())
+      {
+         for (SDFJointHolder joint : link.getChildren())
+         {
+            checkJointChildren(joint);
+         }
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (!footGroundContactPoints.get(robotSide).isEmpty())
+         {
+            clearControllerFootContactPoints();
+            setControllerFootContactPoint(robotSide, footGroundContactPoints.get(robotSide));
+         }
+      }
    }
-   
+
    public void addMoreFootContactPointsSimOnly()
    {
       int nContactPointsX = 8;
       int nContactPointsY = 3;
 
-      double dx =  footLength / (nContactPointsX - 1.0);
-      double xOffset = footLength / 2.0;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         for (int ix = 1; ix <= nContactPointsX; ix++)
-         {
-            double footWidthAtCurrentX = footWidth;
-            double dy = footWidthAtCurrentX / (nContactPointsY - 1.0);
-            double yOffset = footWidthAtCurrentX / 2.0;
-
-            for (int iy = 1; iy <= nContactPointsY; iy++)
-            {
-               if ((ix == 1 || ix == nContactPointsX) && (iy == 1 || iy == nContactPointsY)) // Avoid adding corners a second time
-                  continue;
-               double x = (ix - 1) * dx - xOffset;
-               double y = (iy - 1) * dy - yOffset;
-               Point3d gcOffset = new Point3d(x, y, 0);
-
-               //footGroundContactPoints.get(robotSide).add( new Point2d(x,y) );
-               ValkyriePhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
-               jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset))); // to SCS
-            }
-         }
-      }
-      useSoftGroundContactParameters = true;
-   }
-
-   private void setupContactableBodiesFactory(DRCRobotJointMap jointMap)
-   {
-	  if(footGroundContactPoints.size()>0) contactableBodiesFactory.addFootContactParameters(footGroundContactPoints);
-      if(handContactPoints.size()>0) contactableBodiesFactory.addHandContactParameters(jointMap.getNameOfJointBeforeHands(), handContactPoints, handContactPointTransforms);
-   }
-
-   @Override
-   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
-   {
-      return jointNameGroundContactPointMap;
-   }
-
-   @Override
-   public SideDependentList<ArrayList<Point2d>> getFootContactPoints()
-   {
-      return footGroundContactPoints;
-   }
-
-   @Override
-   public ContactableBodiesFactory getContactableBodiesFactory()
-   {
-      return contactableBodiesFactory;
+      addMoreSimulationFootContactPoints(nContactPointsX, nContactPointsY, true);
    }
 
    @Override
@@ -227,24 +163,5 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
    public SideDependentList<List<Point2d>> getHandContactPoints()
    {
       return handContactPoints;
-   }
-
-   @Override
-   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
-   {
-      if (useSoftGroundContactParameters)
-      {
-         linearGroundContactModel.setZStiffness(4000.0);
-         linearGroundContactModel.setZDamping(750.0);
-         linearGroundContactModel.setXYStiffness(50000.0);
-         linearGroundContactModel.setXYDamping(1000.0);
-      }
-      else
-      {
-	     linearGroundContactModel.setZStiffness(2000.0);      
-	     linearGroundContactModel.setZDamping(1500.0);      
-	     linearGroundContactModel.setXYStiffness(50000.0);      
-	     linearGroundContactModel.setXYDamping(2000.0);
-      }
    }
 }

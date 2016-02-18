@@ -19,12 +19,12 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    YoVariableRegistry registry;
    BooleanYoVariable hitGround, fixedOnGround;
    DoubleYoVariable switchZThreshold;
-   SideDependentList<ContactablePlaneBody> bipedFeet;
+   SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    DoubleYoVariable soleZ, ankleZ;
    RobotSide side;
    double totalRobotWeight;
 
-   public KinematicsBasedFootSwitch(String footName, SideDependentList<ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight,
+   public KinematicsBasedFootSwitch(String footName, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight,
          RobotSide side, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());

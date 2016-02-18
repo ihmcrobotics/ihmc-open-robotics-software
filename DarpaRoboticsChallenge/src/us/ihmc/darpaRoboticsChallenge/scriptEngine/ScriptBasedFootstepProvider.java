@@ -41,7 +41,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private int footstepCounter = 0;
    private int completedFootstepCount = 0;
 
-   private final SideDependentList<ContactablePlaneBody> bipedFeet;
+   private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final ScriptFileLoader scriptFileLoader;
    private boolean loadedScriptFile = false;
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
@@ -58,7 +58,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
    private final FullRobotModel fullRobotModel;
 
-   public ScriptBasedFootstepProvider(CommonHumanoidReferenceFrames referenceFrames, ScriptFileLoader scriptFileLoader, DoubleYoVariable time, SideDependentList<ContactablePlaneBody> bipedFeet,
+   public ScriptBasedFootstepProvider(CommonHumanoidReferenceFrames referenceFrames, ScriptFileLoader scriptFileLoader, DoubleYoVariable time, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry)
    {
       this.time = time;

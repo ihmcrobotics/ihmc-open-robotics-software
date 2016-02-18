@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -159,6 +161,21 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
+   public static List<Point2d> computeMaximumPointsInDirection(List<Point2d> framePoints, Vector2d searchDirection, int nPoints)
+   {
+      if (framePoints.size() < nPoints)
+         throw new RuntimeException("Not enough points");
+      List<Point2d> ret = new ArrayList<Point2d>(framePoints);
+      Collections.sort(ret, new SearchDirectionPoint2dComparator(searchDirection));
+
+      while (ret.size() > nPoints)
+      {
+         ret.remove(0);
+      }
+
+      return ret;
+   }
+
    public static int[] findMaximumPointIndexesInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
    {
       List<FramePoint> maximumPoints = computeMaximumPointsInDirection(framePoints, searchDirection, nPoints);
@@ -186,6 +203,26 @@ public class DesiredFootstepCalculatorTools
       public int compare(FramePoint o1, FramePoint o2)
       {
          differenceVector.setIncludingFrame(o1);
+         differenceVector.sub(o2);
+         double dotProduct = searchDirection.dot(differenceVector);
+
+         return Double.compare(dotProduct, 0.0);
+      }
+   }
+
+   private static class SearchDirectionPoint2dComparator implements Comparator<Point2d>
+   {
+      private final Vector2d searchDirection;
+      private final Vector2d differenceVector = new Vector2d();
+
+      public SearchDirectionPoint2dComparator(Vector2d searchDirection)
+      {
+         this.searchDirection = searchDirection;
+      }
+
+      public int compare(Point2d o1, Point2d o2)
+      {
+         differenceVector.set(o1);
          differenceVector.sub(o2);
          double dotProduct = searchDirection.dot(differenceVector);
 

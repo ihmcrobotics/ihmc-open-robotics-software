@@ -40,7 +40,7 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
       return ankleHeight;
    }
 
-   public static RigidBodyTransform getAnkleToSoleFrameTransform(RobotSide side)
+   public static RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide side)
    {
       return soleToAnkleFrameTransforms.get(side);
    }

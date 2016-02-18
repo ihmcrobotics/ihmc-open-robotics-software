@@ -36,7 +36,7 @@ public class WalkingFailureDetectionControlModule
 
    private final FramePoint2d capturePoint = new FramePoint2d();
 
-   public WalkingFailureDetectionControlModule(SideDependentList<ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
+   public WalkingFailureDetectionControlModule(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
    {
 
       for (RobotSide robotSide : RobotSide.values)

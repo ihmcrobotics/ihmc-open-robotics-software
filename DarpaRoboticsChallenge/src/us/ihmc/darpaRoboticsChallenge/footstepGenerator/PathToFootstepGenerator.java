@@ -87,7 +87,7 @@ public class PathToFootstepGenerator
       initialized = true;
    }
 
-   public ArrayList<Footstep> generateFoootStepsAlongPath(RobotSide firstStepSide, SideDependentList<ContactablePlaneBody> contactableFeet)
+   public ArrayList<Footstep> generateFoootStepsAlongPath(RobotSide firstStepSide, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
       List<FootstepDataMessage> generatedFootsteps = getStepsAlongPath(firstStepSide);
 

@@ -192,7 +192,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       double gravitationalAcceleration = -9.80;
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
       CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(estimatorFullRobotModel);
-      SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, referenceFrames);
+      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, referenceFrames);
       SideDependentList<FootSwitchInterface> footSwitches = createStateEstimatorFootSwitches(logDataProcessorHelper, bipedFeet);
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // no viz for now
       
@@ -218,7 +218,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       return stateEstimator;
    }
 
-   private SideDependentList<FootSwitchInterface> createStateEstimatorFootSwitches(final LogDataProcessorHelper logDataProcessorHelper, final SideDependentList<ContactablePlaneBody> bipedFeet)
+   private SideDependentList<FootSwitchInterface> createStateEstimatorFootSwitches(final LogDataProcessorHelper logDataProcessorHelper, final SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
       
