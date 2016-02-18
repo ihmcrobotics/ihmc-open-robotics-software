@@ -120,7 +120,7 @@ public class OptimizationMomentumControlModuleTest
       Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
 
       DenseMatrix64F jointAccelerationsBack = new DenseMatrix64F(desiredJointAccelerations.getNumRows(), 1);
-      ScrewTools.packDesiredJointAccelerationsMatrix(revoluteJointsArray, jointAccelerationsBack);
+      ScrewTools.getDesiredJointAccelerationsMatrix(revoluteJointsArray, jointAccelerationsBack);
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame, 1e-3);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
@@ -193,7 +193,7 @@ public class OptimizationMomentumControlModuleTest
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector endEffectorAccelerationBack = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packRelativeAcceleration(endEffectorAccelerationBack, base, endEffector);
+      spatialAccelerationCalculator.getRelativeAcceleration(endEffectorAccelerationBack, base, endEffector);
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(endEffectorSpatialAcceleration, endEffectorAccelerationBack, 1e-3);
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame, 1e-3);
@@ -261,18 +261,18 @@ public class OptimizationMomentumControlModuleTest
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       twistCalculator.compute();
       Twist twist = new Twist();
-      twistCalculator.packRelativeTwist(twist, base, endEffector);
+      twistCalculator.getRelativeTwist(twist, base, endEffector);
 
       SpatialAccelerationCalculator spatialAccelerationCalculator = createSpatialAccelerationCalculator(twistCalculator, elevator);
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packRelativeAcceleration(acceleration, base, endEffector);
+      spatialAccelerationCalculator.getRelativeAcceleration(acceleration, base, endEffector);
       acceleration.changeFrame(jacobian.getBaseFrame(), twist, twist);
 
       FrameVector desiredPointAccelerationBack = new FrameVector(jacobian.getBaseFrame());
       bodyFixedPoint.changeFrame(jacobian.getBaseFrame());
       twist.changeFrame(jacobian.getBaseFrame());
-      acceleration.packAccelerationOfPointFixedInBodyFrame(twist, bodyFixedPoint, desiredPointAccelerationBack);
+      acceleration.getAccelerationOfPointFixedInBodyFrame(twist, bodyFixedPoint, desiredPointAccelerationBack);
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame, 1e-3);
       SpatialForceVectorTest.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
@@ -418,7 +418,7 @@ public class OptimizationMomentumControlModuleTest
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
       SpatialAccelerationVector endEffectorAccelerationBack = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packRelativeAcceleration(endEffectorAccelerationBack, base, endEffector);
+      spatialAccelerationCalculator.getRelativeAcceleration(endEffectorAccelerationBack, base, endEffector);
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(endEffectorSpatialAcceleration, endEffectorAccelerationBack, 1e-3);
 
       for (RevoluteJoint revoluteJoint : desiredJointAccelerations.keySet())
@@ -503,7 +503,7 @@ public class OptimizationMomentumControlModuleTest
 
       InverseDynamicsJoint[] jointList = ScrewTools.computeSubtreeJoints(base);
       DenseMatrix64F vdotTaskSpace = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
-      ScrewTools.packDesiredJointAccelerationsMatrix(jointList, vdotTaskSpace);
+      ScrewTools.getDesiredJointAccelerationsMatrix(jointList, vdotTaskSpace);
       DenseMatrix64F nullspaceMultiplierCheck = new DenseMatrix64F(nullspace.getNumCols(), vdotTaskSpace.getNumCols());
       CommonOps.multTransA(nullspace, vdotTaskSpace, nullspaceMultiplierCheck);
       CommonOps.subtractEquals(nullspaceMultiplierCheck, nullspaceMultipliers);

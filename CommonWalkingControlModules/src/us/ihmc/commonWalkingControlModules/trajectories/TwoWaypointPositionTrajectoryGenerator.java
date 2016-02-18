@@ -181,17 +181,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -414,7 +414,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       FrameVector tempVelocity = new FrameVector(referenceFrame);
       for (int i = 0; i < 2; i++)
       {
-         positionSources[i].get(tempPosition);
+         positionSources[i].getPosition(tempPosition);
          velocitySources[i].get(tempVelocity);
 
          boolean setInitialVelocityToZero = setInitialSwingVelocityToZero.getBooleanValue()
@@ -431,7 +431,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       }
       if (stancePositionSource != null)
       {
-         stancePositionSource.get(tempPosition);
+         stancePositionSource.getPosition(tempPosition);
          tempPosition.changeFrame(referenceFrame);
          stancePosition.set(tempPosition);
       }
@@ -562,8 +562,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       FramePoint initialPosition = allPositions[0].getFramePointCopy();
       FramePoint finalPosition = allPositions[3].getFramePointCopy();
-      positionSources[0].get(initialPosition);
-      positionSources[1].get(finalPosition);
+      positionSources[0].getPosition(initialPosition);
+      positionSources[1].getPosition(finalPosition);
       initialPosition.changeFrame(referenceFrame);
       finalPosition.changeFrame(referenceFrame);
 
@@ -601,8 +601,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       FramePoint initialPosition = allPositions[0].getFramePointCopy();
       FramePoint finalPosition = allPositions[3].getFramePointCopy();
-      positionSources[0].get(initialPosition);
-      positionSources[1].get(finalPosition);
+      positionSources[0].getPosition(initialPosition);
+      positionSources[1].getPosition(finalPosition);
       initialPosition.changeFrame(referenceFrame);
       finalPosition.changeFrame(referenceFrame);
 
@@ -677,11 +677,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override

@@ -179,7 +179,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       FramePoint tempCoMPosition = new FramePoint(worldFrame);
       for (RigidBodyVisualizationData comData : centerOfMassData)
       {
-         comData.rigidBody.packCoMOffset(tempCoMPosition);
+         comData.rigidBody.getCoMOffset(tempCoMPosition);
          tempCoMPosition.changeFrame(worldFrame);
          tempCoMPosition.add(inertiaEllipsoidGhostOffset.getFrameVectorCopy());
 

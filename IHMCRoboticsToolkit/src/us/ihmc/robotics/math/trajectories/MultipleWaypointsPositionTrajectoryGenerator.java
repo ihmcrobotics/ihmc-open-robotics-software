@@ -224,27 +224,27 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
-      subTrajectory.get(positionToPack);
+      subTrajectory.getPosition(positionToPack);
    }
 
    @Override
-   public void packVelocity(FrameVector linearVelocityToPack)
+   public void getVelocity(FrameVector linearVelocityToPack)
    {
-      subTrajectory.packVelocity(linearVelocityToPack);
+      subTrajectory.getVelocity(linearVelocityToPack);
    }
 
    @Override
-   public void packAcceleration(FrameVector linearAccelerationToPack)
+   public void getAcceleration(FrameVector linearAccelerationToPack)
    {
-      subTrajectory.packAcceleration(linearAccelerationToPack);
+      subTrajectory.getAcceleration(linearAccelerationToPack);
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector linearVelocityToPack, FrameVector linearAccelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector linearVelocityToPack, FrameVector linearAccelerationToPack)
    {
-      subTrajectory.packLinearData(positionToPack, linearVelocityToPack, linearAccelerationToPack);
+      subTrajectory.getLinearData(positionToPack, linearVelocityToPack, linearAccelerationToPack);
    }
 
    @Override

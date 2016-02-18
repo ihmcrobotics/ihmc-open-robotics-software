@@ -126,57 +126,57 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
       positionTrajectoryGenerator.hideVisualization();
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
-      positionTrajectoryGenerator.get(positionToPack);
+      positionTrajectoryGenerator.getPosition(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
-      positionTrajectoryGenerator.packVelocity(velocityToPack);
+      positionTrajectoryGenerator.getVelocity(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
-      positionTrajectoryGenerator.packAcceleration(accelerationToPack);
+      positionTrajectoryGenerator.getAcceleration(accelerationToPack);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
-      orientationTrajectoryGenerator.get(orientationToPack);
+      orientationTrajectoryGenerator.getOrientation(orientationToPack);
    }
 
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
-      orientationTrajectoryGenerator.packAngularVelocity(angularVelocityToPack);
+      orientationTrajectoryGenerator.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
-      orientationTrajectoryGenerator.packAngularAcceleration(angularAccelerationToPack);
+      orientationTrajectoryGenerator.getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void get(FramePose framePoseToPack)
+   public void getPose(FramePose framePoseToPack)
    {
-      positionTrajectoryGenerator.get(tempPosition);
+      positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
       framePoseToPack.setPosition(tempPosition);
 
-      orientationTrajectoryGenerator.get(tempOrientation);
+      orientationTrajectoryGenerator.getOrientation(tempOrientation);
       framePoseToPack.setOrientation(tempOrientation);
    }
 

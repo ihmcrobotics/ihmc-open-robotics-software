@@ -118,7 +118,7 @@ public class FrameRamp3d extends FrameShape3d
       this.ramp3d.set(other.ramp3d);
    }
 
-   public void packFramePose(FramePose framePoseToPack)
+   public void getFramePose(FramePose framePoseToPack)
    {
       framePoseToPack.setPoseIncludingFrame(referenceFrame, ramp3d.transform);
    }

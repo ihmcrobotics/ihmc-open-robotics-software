@@ -65,9 +65,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
-      doubleSupportCapturePointTrajectory.get(positionToPack);
+      doubleSupportCapturePointTrajectory.getPosition(positionToPack);
    }
 
    public void get(YoFramePoint positionToPack)
@@ -76,31 +76,31 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    }
 
    @Override
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
-      doubleSupportCapturePointTrajectory.packVelocity(velocityToPack);
+      doubleSupportCapturePointTrajectory.getVelocity(velocityToPack);
    }
 
-   public void packVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector velocityToPack)
    {
-      doubleSupportCapturePointTrajectory.packVelocity(velocityToPack);
-   }
-
-   @Override
-   public void packAcceleration(FrameVector accelerationToPack)
-   {
-      doubleSupportCapturePointTrajectory.packAcceleration(accelerationToPack);
+      doubleSupportCapturePointTrajectory.getVelocity(velocityToPack);
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
-      doubleSupportCapturePointTrajectory.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      doubleSupportCapturePointTrajectory.getAcceleration(accelerationToPack);
    }
 
-   public void packLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   @Override
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      doubleSupportCapturePointTrajectory.packLinearData(positionToPack, velocityToPack, accelerationToPack);
+      doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
+   }
+
+   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   {
+      doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
    @Override

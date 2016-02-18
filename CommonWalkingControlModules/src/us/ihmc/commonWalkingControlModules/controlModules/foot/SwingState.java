@@ -201,17 +201,17 @@ public class SwingState extends AbstractUnconstrainedState
       {
          positionTrajectoryGenerator.compute(time);
 
-         positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+         positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
       else
       {
          pushRecoveryPositionTrajectoryGenerator.compute(time);
 
-         pushRecoveryPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+         pushRecoveryPositionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
 
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
-      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
       {
@@ -234,7 +234,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       newFootstepPose.setZ(newFootstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
       finalConfigurationProvider.setPose(newFootstepPose);
-      initialConfigurationProvider.get(oldFootstepPosition);
+      initialConfigurationProvider.getPosition(oldFootstepPosition);
       orientationTrajectoryGenerator.setFinalOrientation(newFootstepPose);
       orientationTrajectoryGenerator.setFinalVelocityToZero();
 

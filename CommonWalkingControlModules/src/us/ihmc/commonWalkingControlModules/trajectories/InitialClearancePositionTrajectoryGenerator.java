@@ -341,26 +341,26 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       showViz.set(false);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    private void checkIfMultipleFramesAllowed()

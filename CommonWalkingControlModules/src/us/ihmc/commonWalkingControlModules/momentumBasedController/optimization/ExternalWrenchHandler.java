@@ -83,7 +83,7 @@ public class ExternalWrenchHandler
          totalWrenchAlreadyApplied.add(tempWrench);
       }
 
-      totalWrenchAlreadyApplied.packMatrix(wrenchEquationRightHandSide);
+      totalWrenchAlreadyApplied.getMatrix(wrenchEquationRightHandSide);
       CommonOps.changeSign(wrenchEquationRightHandSide);
       CommonOps.addEquals(wrenchEquationRightHandSide, momentumConvectiveTerm);
       CommonOps.addEquals(wrenchEquationRightHandSide, b);

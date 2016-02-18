@@ -105,7 +105,7 @@ public class CentroidalMomentumBenchmarkTest
       centerOfMassFrame.update();
 
       robot.packIdJoints(idJoints);
-      ScrewTools.packJointVelocitiesMatrix(idJoints, v);
+      ScrewTools.getJointVelocitiesMatrix(idJoints, v);
 
       long startTime = System.nanoTime();
       for (int i = 0; i < iters; i++)

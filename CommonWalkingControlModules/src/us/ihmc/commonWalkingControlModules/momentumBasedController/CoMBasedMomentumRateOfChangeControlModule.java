@@ -38,7 +38,7 @@ public class CoMBasedMomentumRateOfChangeControlModule implements MomentumRateOf
    public void compute()
    {
       FrameVector comd = new FrameVector(centerOfMassFrame);
-      centerOfMassJacobian.packCenterOfMassVelocity(comd);
+      centerOfMassJacobian.getCenterOfMassVelocity(comd);
       FrameVector desiredCoMd = new FrameVector(centerOfMassFrame);
 
       FrameVector feedForward = new FrameVector(centerOfMassFrame);

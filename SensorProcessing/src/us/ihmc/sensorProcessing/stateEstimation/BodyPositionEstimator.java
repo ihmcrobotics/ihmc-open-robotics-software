@@ -6,9 +6,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 
 public interface BodyPositionEstimator
 {
-   public abstract void packBodyPosition(FramePoint bodyPositionToPack);
+   public abstract void getBodyPosition(FramePoint bodyPositionToPack);
    
-   public abstract void packCovariance(Tuple3d covarianceToPack);
+   public abstract void getCovariance(Tuple3d covarianceToPack);
 
    public abstract void estimateBodyPosition();
 }

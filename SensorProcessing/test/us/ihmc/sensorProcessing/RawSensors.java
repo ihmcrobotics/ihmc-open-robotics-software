@@ -102,7 +102,7 @@ public class RawSensors implements RawIMUSensorsInterface
       r_imu_compass_z.set(compass.getZ());
    }
 
-   public void packOrientation(Matrix3d orientationToPack, int imuIndex)
+   public void getOrientation(Matrix3d orientationToPack, int imuIndex)
    {
       orientationToPack.setM00(r_imu_m00.getDoubleValue());
       orientationToPack.setM01(r_imu_m01.getDoubleValue());
@@ -117,17 +117,17 @@ public class RawSensors implements RawIMUSensorsInterface
       orientationToPack.setM22(r_imu_m22.getDoubleValue());
    }
 
-   public void packAcceleration(Vector3d accelerationToPack, int imuIndex)
+   public void getAcceleration(Vector3d accelerationToPack, int imuIndex)
    {
       accelerationToPack.set(r_imu_accel_x.getDoubleValue(), r_imu_accel_y.getDoubleValue(), r_imu_accel_z.getDoubleValue());
    }
 
-   public void packAngularVelocity(Vector3d angularVelocityToPack, int imuIndex)
+   public void getAngularVelocity(Vector3d angularVelocityToPack, int imuIndex)
    {
       angularVelocityToPack.set(r_imu_gyro_x.getDoubleValue(), r_imu_gyro_y.getDoubleValue(), r_imu_gyro_z.getDoubleValue());
    }
 
-   public void packCompass(Vector3d compassToPack, int imuIndex)
+   public void getCompass(Vector3d compassToPack, int imuIndex)
    {
       compassToPack.set(r_imu_compass_x.getDoubleValue(), r_imu_compass_y.getDoubleValue(), r_imu_compass_z.getDoubleValue());
    }

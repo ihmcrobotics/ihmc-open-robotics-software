@@ -120,7 +120,7 @@ public class WrenchTest
       DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE, 1, random);
       Wrench wrench = new Wrench(frameA, frameB, matrix);
       DenseMatrix64F matrixBack = new DenseMatrix64F(Wrench.SIZE, 1);
-      wrench.packMatrix(matrixBack);
+      wrench.getMatrix(matrixBack);
       JUnitTools.assertMatrixEquals(matrix, matrixBack, 0.0);
 
       Vector3d torque = new Vector3d();
@@ -417,7 +417,7 @@ public class WrenchTest
       DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE, 1, random);
       double epsilon = 1e-12;
       assertTrue(NormOps.normP2(matrix) > epsilon);
-      wrench.packMatrix(matrix);
+      wrench.getMatrix(matrix);
       assertTrue(NormOps.normP2(matrix) == 0.0);
    }
 }

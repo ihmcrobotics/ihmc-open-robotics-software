@@ -147,7 +147,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
          centerOfMassFrame.update();
          
          robot.packIdJoints(idJoints);
-         ScrewTools.packJointVelocitiesMatrix(idJoints, v);
+         ScrewTools.getJointVelocitiesMatrix(idJoints, v);
 
          // Compute aDotV analytically
          aDotVAnalyticalCalculator.compute();

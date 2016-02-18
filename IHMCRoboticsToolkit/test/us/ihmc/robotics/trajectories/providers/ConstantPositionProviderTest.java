@@ -25,7 +25,7 @@ public class ConstantPositionProviderTest
       FramePoint positionExpected = new FramePoint(worldFrame, xyz);
       FramePoint positionActual = new FramePoint(positionExpected);
       ConstantPositionProvider constantPositionProvider = new ConstantPositionProvider(positionActual);
-      constantPositionProvider.get(positionActual);
+      constantPositionProvider.getPosition(positionActual);
       
       assertTrue(positionActual.epsilonEquals(positionExpected, EPS));
    }

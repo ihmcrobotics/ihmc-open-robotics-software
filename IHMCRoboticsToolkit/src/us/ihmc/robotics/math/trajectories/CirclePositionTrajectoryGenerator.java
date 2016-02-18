@@ -65,7 +65,7 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
       currentTime.set(0.0);
       this.trajectoryTime.set(trajectoryTimeProvider.getValue());
 
-      initialPositionProvider.get(tempFramePoint);
+      initialPositionProvider.getPosition(tempFramePoint);
 
       tempFramePoint.changeFrame(referenceFrame);
       double y = tempFramePoint.getY();
@@ -125,17 +125,17 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       positionToPack.setIncludingFrame(position);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       velocityToPack.setIncludingFrame(velocity);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(acceleration);
    }
@@ -145,11 +145,11 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
       return anglePolynomial.getPosition();
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    public void showVisualization()

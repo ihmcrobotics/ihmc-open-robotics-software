@@ -37,7 +37,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    {
       measurementFrame.checkReferenceFrameMatch(newWrench.getExpressedInFrame());
       measurementFrame.checkReferenceFrameMatch(newWrench.getBodyFrame());
-      newWrench.packMatrix(wrench);
+      newWrench.getMatrix(wrench);
    }
 
    @Override
@@ -53,19 +53,19 @@ public class ForceSensorData implements ForceSensorDataReadOnly
    }
 
    @Override
-   public void packWrench(DenseMatrix64F wrenchToPack)
+   public void getWrench(DenseMatrix64F wrenchToPack)
    {
       wrenchToPack.set(wrench);
    }
 
    @Override
-   public void packWrench(Wrench wrenchToPack)
+   public void getWrench(Wrench wrenchToPack)
    {
       wrenchToPack.changeBodyFrameAttachedToSameBody(measurementFrame);
       wrenchToPack.set(measurementFrame, wrench);
    }
 
-   @Override public void packWrench(float[] wrenchToPack)
+   @Override public void getWrench(float[] wrenchToPack)
    {
       for(int i = 0; i < Wrench.SIZE; i++)
       {

@@ -88,7 +88,7 @@ public class YoParabolicTrajectoryGenerator
       c2.sub(initialVelocity);
    }
    
-   public void packPosition(FramePoint positionToPack, double parameter)
+   public void getPosition(FramePoint positionToPack, double parameter)
    {
       double q = parameter;
       MathTools.checkIfInRange(q, 0.0, 1.0);
@@ -108,7 +108,7 @@ public class YoParabolicTrajectoryGenerator
       positionToPack.add(tempPackPosition2);
    }
 
-   public void packVelocity(FrameVector velocityToPack, double parameter)
+   public void getVelocity(FrameVector velocityToPack, double parameter)
    {      
       double q = parameter;
       MathTools.checkIfInRange(q, 0.0, 1.0);
@@ -123,7 +123,7 @@ public class YoParabolicTrajectoryGenerator
       velocityToPack.add(tempPackVelocity);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       accelerationToPack.setToZero(referenceFrame);
       

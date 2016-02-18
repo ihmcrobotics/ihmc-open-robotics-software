@@ -79,7 +79,7 @@ public class LineSegment3d
       return ret;
    }
 
-   public void packPoints(double[] aVals, double[] bVals)
+   public void getPoints(double[] aVals, double[] bVals)
    {
       pointA.get(aVals);
       pointB.get(bVals);

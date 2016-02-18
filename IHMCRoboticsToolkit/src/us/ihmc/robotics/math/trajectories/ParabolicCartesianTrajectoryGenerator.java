@@ -83,31 +83,31 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       return this.groundClearance.getDoubleValue();
    }
 
-   public void packPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
 
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
 
-      parabolicTrajectoryGenerator.packPosition(positionToPack, parameter);
+      parabolicTrajectoryGenerator.getPosition(positionToPack, parameter);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
-      parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
+      parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
       velocityToPack.setIncludingFrame(tempVector);
       velocityToPack.scale(minimumJerkTrajectory.getVelocity());
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
-      parabolicTrajectoryGenerator.packAcceleration(accelerationToPack);
+      parabolicTrajectoryGenerator.getAcceleration(accelerationToPack);
       accelerationToPack.scale(minimumJerkTrajectory.getVelocity() * minimumJerkTrajectory.getVelocity());
-      parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
+      parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
       tempVector.scale(minimumJerkTrajectory.getAcceleration());
       accelerationToPack.add(tempVector);
    }
@@ -116,16 +116,16 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
-      packPosition(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
    
    public void computeNextTick(FramePoint positionToPack, double deltaT)
    {
       timeIntoStep.add(deltaT);
       compute(timeIntoStep.getDoubleValue());
-      packPosition(positionToPack);
+      getPosition(positionToPack);
    }
 
    public void compute(double time)

@@ -22,8 +22,8 @@ public class CurrentLinearVelocityProvider implements VectorProvider
 
    public void get(FrameVector frameVectorToPack)
    {
-      twistCalculator.packTwistOfBody(twist, rigidBody);
+      twistCalculator.getTwistOfBody(twist, rigidBody);
       twist.changeFrame(referenceFrame);
-      twist.packLinearPart(frameVectorToPack);
+      twist.getLinearPart(frameVectorToPack);
    }
 }

@@ -188,6 +188,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
    private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
+   private final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
+
 
    private final DoubleYoVariable distanceInside = new DoubleYoVariable("distanceInside", registry);
    private final BooleanYoVariable possibleTipOnFrontSwingLeg = new BooleanYoVariable("possibleTipOnFrontSwingLeg", registry);
@@ -771,7 +773,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 	   
 	   desiredRootJointPosition.setIncludingFrame(desiredCoM.getFrameTuple());
 	   desiredRootJointPosition.sub(vectorToSubtractHolder);
-      feedForwardRootJoint.packTranslation(linearVelocityHolder);
+      feedForwardRootJoint.getTranslation(linearVelocityHolder);
 	   feedForwardRootJoint.setPosition(desiredRootJointPosition.getPoint());
 	   linearVelocityHolder.sub(desiredRootJointPosition.getPoint(), linearVelocityHolder);
 	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocityHolder);
@@ -819,7 +821,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       feedForwardCoMPosition.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
       feedForwardCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardCenterOfMassJacobian.compute();
-      feedForwardCenterOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
+      feedForwardCenterOfMassJacobian.getCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardCenterOfMassVelocity.set(tempFrameVector);
 
@@ -835,7 +837,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       tempCoMPosition.setIncludingFrame(comFrame, 0.0, 0.0, 0.0);
       tempCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassJacobian.compute();
-      centerOfMassJacobian.packCenterOfMassVelocity(tempFrameVector);
+      centerOfMassJacobian.getCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassVelocity.set(tempFrameVector);
 
@@ -909,8 +911,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
-         comTrajectoryGenerator.get(desiredCoMFramePosition);
-         comTrajectoryGenerator.packVelocity(desiredCoMVelocity);
+         comTrajectoryGenerator.getPosition(desiredCoMFramePosition);
+         comTrajectoryGenerator.getVelocity(desiredCoMVelocity);
          desiredCoMFramePosition.setZ(desiredCoMPose.getPosition().getZ());
          
          desiredCoMPose.setPosition(desiredCoMFramePosition);
@@ -1856,6 +1858,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
          swingTrajectoryGenerator.computeSwing(framePointToPack);
+         
+         swingTimeRemaining.set(swingTrajectoryGenerator.getTimeRemaining());
       }
    }
    

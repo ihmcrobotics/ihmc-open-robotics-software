@@ -202,10 +202,10 @@ public class SimpleStanceController implements RobotController
       SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
 
       spatialAccelerationCalculator.compute();
-      spatialAccelerationCalculator.packAccelerationOfBody(pelvisAcceleration, fullRobotModel.getPelvis());
+      spatialAccelerationCalculator.getAccelerationOfBody(pelvisAcceleration, fullRobotModel.getPelvis());
       FrameVector angularAccelerationBack = new FrameVector(pelvisAcceleration.getExpressedInFrame());
 
-      pelvisAcceleration.packAngularPart(angularAccelerationBack);
+      pelvisAcceleration.getAngularPart(angularAccelerationBack);
 
 //    angularAccelerationBack.changeFrame(desiredPelvisAngularAcceleration.getReferenceFrame());
 //    if (!desiredPelvisAngularAcceleration.epsilonEquals(angularAccelerationBack, 1e-12))
@@ -219,14 +219,14 @@ public class SimpleStanceController implements RobotController
       }
 
       Wrench wrench = new Wrench();
-      rootJoint.packWrench(wrench);
+      rootJoint.getWrench(wrench);
 
       FrameVector pelvisTorque = new FrameVector(rootJoint.getSuccessor().getBodyFixedFrame());
-      wrench.packAngularPart(pelvisTorque);
+      wrench.getAngularPart(pelvisTorque);
       desiredPelvisTorque.set(pelvisTorque);
 
       FrameVector pelvisForce = new FrameVector(rootJoint.getSuccessor().getBodyFixedFrame());
-      wrench.packLinearPart(pelvisForce);
+      wrench.getLinearPart(pelvisForce);
       desiredPelvisForce.set(pelvisForce);
 
    }
@@ -284,9 +284,9 @@ public class SimpleStanceController implements RobotController
       desiredOrientation.changeFrame(pelvisFrame);
       FrameVector desiredAngularVelocity = new FrameVector(pelvisFrame);
       Twist twist = new Twist();
-      twistCalculator.packRelativeTwist(twist, pelvisJacobian.getBase(), pelvisJacobian.getEndEffector());
+      twistCalculator.getRelativeTwist(twist, pelvisJacobian.getBase(), pelvisJacobian.getEndEffector());
       FrameVector currentAngularVelocity = new FrameVector(pelvisFrame);
-      twist.packAngularPart(currentAngularVelocity);
+      twist.getAngularPart(currentAngularVelocity);
 
       FrameVector feedForwardAngularAcceleration = new FrameVector(pelvisFrame);
       pelvisOrientationController.compute(output, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);

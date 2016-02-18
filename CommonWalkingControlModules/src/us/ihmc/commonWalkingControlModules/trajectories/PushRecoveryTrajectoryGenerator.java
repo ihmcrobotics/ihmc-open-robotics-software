@@ -100,7 +100,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       swingTime.set(swingTimeProvider.getValue());
       timeIntoStep.set(swingTime.getDoubleValue() - swingTimeRemainingProvider.getValue());
 
-      positionSources[0].get(tempPosition);
+      positionSources[0].getPosition(tempPosition);
       tempPosition.changeFrame(desiredPosition.getReferenceFrame());
       double x0 = tempPosition.getX();
       double y0 = tempPosition.getY();
@@ -110,7 +110,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       double xd0 = tempVector.getX();
       double yd0 = tempVector.getY();
 
-      positionSources[1].get(tempPosition);
+      positionSources[1].getPosition(tempPosition);
       tempPosition.changeFrame(desiredPosition.getReferenceFrame());
       double xFinal = tempPosition.getX();
       double yFinal = tempPosition.getY();
@@ -130,7 +130,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
       nominalTrajectoryGenerator.compute(time);
 
-      nominalTrajectoryGenerator.packLinearData(nominalTrajectoryPosition, nominalTrajectoryVelocity, nominalTrajectoryAcceleration);
+      nominalTrajectoryGenerator.getLinearData(nominalTrajectoryPosition, nominalTrajectoryVelocity, nominalTrajectoryAcceleration);
 
       xPolynomial.compute(time);
       yPolynomial.compute(time);
@@ -168,26 +168,26 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       xPolynomial.compute(time);
       yPolynomial.compute(time);
 
-      nominalTrajectoryGenerator.get(nominalTrajectoryPosition);
-      nominalTrajectoryGenerator.packVelocity(nominalTrajectoryVelocity);
-      nominalTrajectoryGenerator.packAcceleration(nominalTrajectoryAcceleration);
+      nominalTrajectoryGenerator.getPosition(nominalTrajectoryPosition);
+      nominalTrajectoryGenerator.getVelocity(nominalTrajectoryVelocity);
+      nominalTrajectoryGenerator.getAcceleration(nominalTrajectoryAcceleration);
 
       desiredPosition.setX(xPolynomial.getPosition());
       desiredPosition.setY(yPolynomial.getPosition());
       desiredPosition.setZ(nominalTrajectoryPosition.getZ());
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -198,11 +198,11 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       return timeIntoStep.getDoubleValue() >= swingTime.getDoubleValue();
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override
