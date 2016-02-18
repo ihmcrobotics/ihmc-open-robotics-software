@@ -5,7 +5,9 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -23,6 +25,7 @@ public class ContactableBodiesFactory
    private SideDependentList<RigidBodyTransform> handContactPointTransforms = null;
 
    private SideDependentList<? extends List<Point2d>> footContactPoints = null;
+   private SideDependentList<? extends Point2d> toeContactPoints = null;
 
    public void addHandContactParameters(SideDependentList<String> namesOfJointsBeforeHands, SideDependentList<List<Point2d>> handContactPoints,
          SideDependentList<RigidBodyTransform> handContactPointTransforms)
@@ -32,9 +35,10 @@ public class ContactableBodiesFactory
       this.handContactPointTransforms = handContactPointTransforms;
    }
 
-   public void addFootContactParameters(SideDependentList<? extends List<Point2d>> footContactPoints)
+   public void addFootContactParameters(SideDependentList<? extends List<Point2d>> footContactPoints, SideDependentList<? extends Point2d> toeContactPoints)
    {
       this.footContactPoints = footContactPoints;
+      this.toeContactPoints = toeContactPoints;
    }
 
    public SideDependentList<ContactablePlaneBody> createHandContactableBodies(RigidBody rootBody)
@@ -61,19 +65,21 @@ public class ContactableBodiesFactory
       return handContactableBodies;
    }
 
-   public SideDependentList<ContactablePlaneBody> createFootContactableBodies(FullHumanoidRobotModel fullRobotModel,
+   public SideDependentList<ContactableFoot> createFootContactableBodies(FullHumanoidRobotModel fullRobotModel,
          CommonHumanoidReferenceFrames referenceFrames)
    {
       if (footContactPoints == null)
          return null;
 
-      SideDependentList<ContactablePlaneBody> footContactableBodies = new SideDependentList<>();
+      SideDependentList<ContactableFoot> footContactableBodies = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.getSoleFrame(robotSide),
-               footContactPoints.get(robotSide));
+         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+         List<Point2d> contactPointsInSoleFrame = footContactPoints.get(robotSide);
+         Point2d toeOffContactPoint = toeContactPoints.get(robotSide);
+         ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame, toeOffContactPoint);
          footContactableBodies.put(robotSide, footContactableBody);
       }
       return footContactableBodies;

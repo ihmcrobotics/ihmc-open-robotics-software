@@ -45,7 +45,7 @@ public class LogDataProcessorHelper
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final LogDataRawSensorMap rawSensorMap;
    private final TwistCalculator twistCalculator;
-   private final SideDependentList<ContactablePlaneBody> contactableFeet;
+   private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
    private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
    private final SideDependentList<YoFramePoint2d> desiredCoPs = new SideDependentList<>();
@@ -204,7 +204,7 @@ public class LogDataProcessorHelper
       return rawSensorMap;
    }
 
-   public SideDependentList<ContactablePlaneBody> getContactableFeet()
+   public SideDependentList<? extends ContactablePlaneBody> getContactableFeet()
    {
       return contactableFeet;
    }

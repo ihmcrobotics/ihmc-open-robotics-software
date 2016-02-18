@@ -89,7 +89,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
    }
 
    public VariousWalkingProviders createVariousWalkingProviders(final DoubleYoVariable time, FullHumanoidRobotModel fullRobotModel,
-         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
+         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> feet,
          ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {

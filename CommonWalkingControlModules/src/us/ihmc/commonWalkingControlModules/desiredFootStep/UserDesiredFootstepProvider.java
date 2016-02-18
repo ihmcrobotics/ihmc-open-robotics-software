@@ -28,7 +28,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class UserDesiredFootstepProvider implements FootstepProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final SideDependentList<ContactablePlaneBody> bipedFeet;
+   private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final SideDependentList<ReferenceFrame> ankleZUpReferenceFrames;
 
    private final String namePrefix = "userStep";
@@ -52,7 +52,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
 
-   public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
+   public UserDesiredFootstepProvider(SideDependentList<? extends ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
          final WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);

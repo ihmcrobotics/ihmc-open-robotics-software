@@ -30,7 +30,7 @@ public class HighLevelHumanoidControllerFactoryHelper
 {
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
-         SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
+         SideDependentList<? extends ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
    {
       BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = new BlindWalkingToDestinationDesiredFootstepCalculator(
             referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getFootReferenceFrames(), bipedFeet, registry);
@@ -46,7 +46,7 @@ public class HighLevelHumanoidControllerFactoryHelper
    }
 
    public static ComponentBasedDesiredFootstepCalculator getDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
-         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
+         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
          ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript)
    {
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator;

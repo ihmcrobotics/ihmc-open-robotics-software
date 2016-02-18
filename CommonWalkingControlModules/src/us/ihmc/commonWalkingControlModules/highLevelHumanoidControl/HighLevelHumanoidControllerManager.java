@@ -171,7 +171,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private void reportDesiredCenterOfPressureForEstimator()
    {
-      SideDependentList<ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
+      SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
       FullHumanoidRobotModel fullHumanoidRobotModel = momentumBasedController.getFullRobotModel();
       for (RobotSide robotSide : RobotSide.values)
       {

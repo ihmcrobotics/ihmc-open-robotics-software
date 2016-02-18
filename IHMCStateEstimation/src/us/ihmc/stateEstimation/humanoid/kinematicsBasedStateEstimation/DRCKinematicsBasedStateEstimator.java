@@ -79,7 +79,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
          double gravitationalAcceleration, SideDependentList<FootSwitchInterface> footSwitches,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
-         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
+         SideDependentList<? extends ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;

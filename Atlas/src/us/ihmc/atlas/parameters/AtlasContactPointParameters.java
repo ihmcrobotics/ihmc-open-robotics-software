@@ -13,10 +13,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,12 +25,9 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasContactPointParameters extends RobotContactPointParameters
 {
-   private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
-   private final List<ImmutablePair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<ImmutablePair<String, Vector3d>>();
    private boolean handContactPointsHaveBeenCreated = false;
    private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
    private final SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<>();
-   private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
    private final DRCRobotJointMap jointMap;
    private final AtlasRobotVersion atlasVersion;
 
@@ -41,65 +35,23 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
 
    public AtlasContactPointParameters(DRCRobotJointMap jointMap, AtlasRobotVersion atlasVersion, boolean createFootContactPoints)
    {
+      super(jointMap, toeWidthForControl, footWidthForControl, footLengthForControl, AtlasPhysicalProperties.soleToAnkleFrameTransforms);
+
       this.jointMap = jointMap;
       this.atlasVersion = atlasVersion;
       if (createFootContactPoints)
-         createFootContactPoints();
-   }
-
-   public void createFootContactPoints()
-   {
-      for (RobotSide robotSide : RobotSide.values)
       {
-         //MomentumBasedControll ContactPoints
-         footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
-         footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, footWidthForControl / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, toeWidthForControl / 2.0));
-         contactableBodiesFactory.addFootContactParameters(footGroundContactPoints);
-
-         //SCS Sim contactPoints
-         int nContactPointsX = 2;
-         int nContactPointsY = 2;
-
-         double dx = 1.01 * footLengthForControl / (nContactPointsX - 1.0);
-         double xOffset = 1.01 * footLengthForControl / 2.0;
-
-         for (int ix = 1; ix <= nContactPointsX; ix++)
-         {
-            double alpha = (ix - 1.0) / (nContactPointsX - 1.0);
-            double footWidthAtCurrentX = (1.0 - alpha) * 1.01 * footWidthForControl + alpha * 1.01 * toeWidthForControl;
-            double dy = footWidthAtCurrentX / (nContactPointsY - 1.0);
-            double yOffset = footWidthAtCurrentX / 2.0;
-
-            for (int iy = 1; iy <= nContactPointsY; iy++)
-            {
-               double x = (ix - 1.0) * dx - xOffset;
-               double y = (iy - 1.0) * dy - yOffset;
-               double z = 0.0;
-
-               Point3d gcOffset = new Point3d(x, y, z);
-
-               AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
-               jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset))); // to SCS
-            }
-         }
+         createDefaultControllerFootContactPoints();
+         createDefaultSimulationFootContactPoints();
       }
    }
 
    public void createWobblyFootContactPoints(double footZWobbleForTests)
    {
+      createDefaultControllerFootContactPoints();
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         //MomentumBasedControll ContactPoints
-         footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
-         footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(-footLengthForControl / 2.0, footWidthForControl / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
-         footGroundContactPoints.get(robotSide).add(new Point2d(footLengthForControl / 2.0, toeWidthForControl / 2.0));
-         contactableBodiesFactory.addFootContactParameters(footGroundContactPoints);
-
          //SCS Sim contactPoints
          int nContactPointsX = 2;
          int nContactPointsY = 2;
@@ -128,7 +80,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
                Point3d gcOffset = new Point3d(x, y, z);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
-               jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset))); // to SCS
+               addSimulationContactPoint(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset));
             }
          }
       }
@@ -160,7 +112,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
                Point3d gcOffset = new Point3d(x, y, 0);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
-               jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset))); // to SCS
+               addSimulationContactPoint(jointMap.getJointBeforeFootName(robotSide), gcOffset);
             }
          }
       }
@@ -198,7 +150,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
 
             handContactPointTransforms.get(robotSide).transform(point3d);
-            jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHands.get(robotSide), new Vector3d(point3d)));
+            addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), point3d);
          }
       }
 
@@ -233,7 +185,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
 
             handContactPointTransforms.get(robotSide).transform(point3d);
-            jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHands.get(robotSide), new Vector3d(point3d)));
+            addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), point3d);
          }
       }
 
@@ -296,20 +248,18 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       Vector3d fingersJoint2ContactPoint2 = new Vector3d(0.0, thumbJoint2ContactPoint2.y, -thumbJoint2ContactPoint2.z);
       Vector3d fingersJoint3ContactPoint = new Vector3d(0.0, thumbJoint3ContactPoint.y, -thumbJoint3ContactPoint.z);
 
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_1_joint_1, fingersJoint1ContactPoint));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_1_joint_2, fingersJoint2ContactPoint1));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_1_joint_2, fingersJoint2ContactPoint2));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_1_joint_3, fingersJoint3ContactPoint));
-
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_2_joint_1, fingersJoint1ContactPoint));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_2_joint_2, fingersJoint2ContactPoint1));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_2_joint_2, fingersJoint2ContactPoint2));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(finger_2_joint_3, fingersJoint3ContactPoint));
-
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(thumb_joint_1, thumbJoint1ContactPoint));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(thumb_joint_2, thumbJoint2ContactPoint1));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(thumb_joint_2, thumbJoint2ContactPoint2));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(thumb_joint_3, thumbJoint3ContactPoint));
+      addSimulationContactPoint(finger_1_joint_1, fingersJoint1ContactPoint);
+      addSimulationContactPoint(finger_1_joint_2, fingersJoint2ContactPoint1);
+      addSimulationContactPoint(finger_1_joint_2, fingersJoint2ContactPoint2);
+      addSimulationContactPoint(finger_1_joint_3, fingersJoint3ContactPoint);
+      addSimulationContactPoint(finger_2_joint_1, fingersJoint1ContactPoint);
+      addSimulationContactPoint(finger_2_joint_2, fingersJoint2ContactPoint1);
+      addSimulationContactPoint(finger_2_joint_2, fingersJoint2ContactPoint2);
+      addSimulationContactPoint(finger_2_joint_3, fingersJoint3ContactPoint);
+      addSimulationContactPoint(thumb_joint_1, thumbJoint1ContactPoint);
+      addSimulationContactPoint(thumb_joint_2, thumbJoint2ContactPoint1);
+      addSimulationContactPoint(thumb_joint_2, thumbJoint2ContactPoint2);
+      addSimulationContactPoint(thumb_joint_3, thumbJoint3ContactPoint);
    }
 
    private void createRobotiqHandPalmContactPoints(RobotSide robotSide, String nameOfJointBeforeHand, boolean useHighResolutionPointGrid,
@@ -340,20 +290,20 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       Vector3d palmContactPoint6 = new Vector3d(palmContactPoint1.x, palmCenter.y, palmContactPoint5.z);
       Vector3d palmContactPoint6b = new Vector3d(palmContactPoint1.x, palmCenter.y, palmContactPoint5b.z);
 
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPointCenter));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint1));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint3));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint4));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5));
-      jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint6));
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPointCenter);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint1);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint3);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint4);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint5);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint6);
 
       if (useHighResolutionPointGrid)
       {
-         jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint1b));
-         jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint2b));
-         jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint4b));
-         jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint5b));
-         jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(nameOfJointBeforeHand, palmContactPoint6b));
+         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint1b);
+         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint2b);
+         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint4b);
+         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint5b);
+         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint6b);
       }
    }
 
@@ -370,24 +320,6 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
    }
 
    @Override
-   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
-   {
-      return jointNameGroundContactPointMap; // SCS
-   }
-
-   @Override
-   public SideDependentList<ArrayList<Point2d>> getFootContactPoints()
-   {
-      return footGroundContactPoints;
-   }
-
-   @Override
-   public ContactableBodiesFactory getContactableBodiesFactory()
-   {
-      return contactableBodiesFactory;
-   }
-
-   @Override
    public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
    {
       if (useSoftGroundContactParameters)
@@ -399,10 +331,10 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       }
       else
       {
-         linearGroundContactModel.setZStiffness(2000.0 / AtlasPhysicalProperties.scale);
-         linearGroundContactModel.setZDamping(1500.0 / AtlasPhysicalProperties.scale);
-         linearGroundContactModel.setXYStiffness(50000.0 / AtlasPhysicalProperties.scale);
-         linearGroundContactModel.setXYDamping(2000.0 / AtlasPhysicalProperties.scale);
+         linearGroundContactModel.setZStiffness(2000.0);
+         linearGroundContactModel.setZDamping(1500.0);
+         linearGroundContactModel.setXYStiffness(50000.0);
+         linearGroundContactModel.setXYDamping(2000.0);
       }
    }
 }
