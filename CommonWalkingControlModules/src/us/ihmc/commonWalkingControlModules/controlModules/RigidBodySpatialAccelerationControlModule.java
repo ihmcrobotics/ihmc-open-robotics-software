@@ -71,7 +71,7 @@ public class RigidBodySpatialAccelerationControlModule
    }
 
    private final Twist currentTwist = new Twist();
-
+   
    public void doPositionControl(FramePose desiredEndEffectorPose, Twist desiredEndEffectorTwist,
          SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration, RigidBody base)
    {
