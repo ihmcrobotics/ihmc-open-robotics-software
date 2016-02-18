@@ -11,10 +11,6 @@ import java.util.Random;
  * the one used for Beast) is faster
  */
 
-/* NOTE: the FastRunner calculator is slower. However, they are both really fast. 
- * AND the FastRunner one calculates all 3 missing angles, not just one! =) 
- */
- 
 public class BenchmarkCompareFourBarCalculators
 {
    private double startTimeFastRunnerCalculator, totalTimeFastRunnerCalculator;
