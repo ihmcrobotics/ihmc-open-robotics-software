@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -22,7 +22,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    protected final RobotSide robotSide;
    protected final RigidBody rootBody;
-   protected final ContactablePlaneBody contactableFoot;
+   protected final ContactableFoot contactableFoot;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
    protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);

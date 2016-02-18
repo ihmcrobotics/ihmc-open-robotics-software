@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
@@ -48,7 +48,7 @@ public class FootControlHelper
 
    private final RobotSide robotSide;
    private final RigidBody rootBody;
-   private final ContactablePlaneBody contactableFoot;
+   private final ContactableFoot contactableFoot;
    private final MomentumBasedController momentumBasedController;
    private final TwistCalculator twistCalculator;
    private final RigidBodySpatialAccelerationControlModule accelerationControlModule;
@@ -224,7 +224,7 @@ public class FootControlHelper
       return robotSide;
    }
 
-   public ContactablePlaneBody getContactableFoot()
+   public ContactableFoot getContactableFoot()
    {
       return contactableFoot;
    }
