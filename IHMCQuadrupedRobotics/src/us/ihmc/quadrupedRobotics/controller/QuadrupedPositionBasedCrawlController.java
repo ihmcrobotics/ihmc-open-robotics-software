@@ -5,8 +5,6 @@ import java.awt.Color;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.sun.prism.image.CompoundTexture;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
