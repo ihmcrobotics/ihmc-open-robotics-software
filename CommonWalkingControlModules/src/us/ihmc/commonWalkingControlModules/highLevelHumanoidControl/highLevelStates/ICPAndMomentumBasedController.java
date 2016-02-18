@@ -47,7 +47,7 @@ public class ICPAndMomentumBasedController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   
+
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
    private final MomentumBasedController momentumBasedController;

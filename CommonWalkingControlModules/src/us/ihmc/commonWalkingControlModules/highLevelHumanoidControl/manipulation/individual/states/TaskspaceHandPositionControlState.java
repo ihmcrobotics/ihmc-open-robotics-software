@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.TaskspaceConstraintData;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -37,13 +36,10 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
    private final String name;
    private final YoVariableRegistry registry;
-   private final int jacobianId;
 
    private final RigidBody base;
 
-   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final MomentumBasedController momentumBasedController;
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    // viz stuff:
@@ -74,10 +70,10 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
-      taskspaceConstraintData.set(base, endEffector);
+      spatialAccelerationCommand.set(base, endEffector);
+      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
+      spatialAccelerationCommand.setJacobian(jacobian);
 
-      this.momentumBasedController = momentumBasedController;
-      this.jacobianId = jacobianId;
       this.base = base;
 
       parentRegistry.addChild(registry);
@@ -124,15 +120,8 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       handAcceleration.changeFrameNoRelativeMotion(handFrame);
 
       updateVisualizers();
-
-      submitDesiredAcceleration(handAcceleration);
-   }
-
-   private void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
-   {
-      taskspaceConstraintData.set(handAcceleration);
-      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
-      spatialAccelerationCommand.set(jacobian, taskspaceConstraintData);
+      spatialAccelerationCommand.set(handAcceleration);
+   
    }
 
    @Override
