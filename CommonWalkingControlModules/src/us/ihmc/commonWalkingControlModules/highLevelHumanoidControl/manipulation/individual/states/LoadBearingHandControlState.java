@@ -109,7 +109,7 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
       desiredTwist.setToZero(handControlFrame, elevatorFrame, handControlFrame);
       desiredAcceleration.setToZero(handControlFrame, elevatorFrame, handControlFrame);
       handRigidBodySpatialAccelerationControlModule.doPositionControl(desiredPose, desiredTwist, desiredAcceleration, getBase());
-      handRigidBodySpatialAccelerationControlModule.packAcceleration(handAcceleration);
+      handRigidBodySpatialAccelerationControlModule.getAcceleration(handAcceleration);
       handAcceleration.changeBodyFrameNoRelativeAcceleration(handFrame);
       handAcceleration.changeFrameNoRelativeMotion(handFrame);
 

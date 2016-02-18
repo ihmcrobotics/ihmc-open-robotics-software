@@ -124,8 +124,6 @@ public class PolynomialTrajectoryTest
       }
    }
    
-
-  // @Ignore
    @DeployableTestMethod
    @Test(timeout = 3000)
    public void testBumpyResult() throws Exception

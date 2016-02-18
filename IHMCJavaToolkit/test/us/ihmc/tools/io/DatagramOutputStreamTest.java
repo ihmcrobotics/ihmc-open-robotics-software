@@ -7,12 +7,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.io.DatagramInputStream;
-import us.ihmc.tools.io.DatagramOutputStream;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class DatagramOutputStreamTest
 {
@@ -20,7 +18,7 @@ public class DatagramOutputStreamTest
    private static final boolean VERBOSE = false;
    
    //works half of the time.
-   @Ignore 
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    public void testDatagramOutputStreamThrowOutStalePackets() throws IOException
    {
       boolean throwOutStalePackets = true;

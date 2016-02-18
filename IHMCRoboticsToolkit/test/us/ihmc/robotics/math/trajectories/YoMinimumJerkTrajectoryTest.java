@@ -4,13 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class YoMinimumJerkTrajectoryTest
 {
@@ -113,8 +112,7 @@ public class YoMinimumJerkTrajectoryTest
       }
    }
 
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout=300000)
    public void testTimeExtension()
    {

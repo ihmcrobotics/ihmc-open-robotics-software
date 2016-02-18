@@ -5,5 +5,5 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface LegStrengthCalculator
 {
-   public abstract void packLegStrengths(SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired);
+   public abstract void getLegStrengths(SideDependentList<Double> legStrengthsToPack, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired);
 }

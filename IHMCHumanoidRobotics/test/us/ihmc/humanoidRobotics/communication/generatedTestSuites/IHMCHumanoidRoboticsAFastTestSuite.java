@@ -17,8 +17,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBufferTest.class,
    us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepGeneratorsTest.class,
    us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPathTest.class,
-   us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapperTest.class,
-   us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperTest.class
+   us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapperTest.class
 })
 
 public class IHMCHumanoidRoboticsAFastTestSuite

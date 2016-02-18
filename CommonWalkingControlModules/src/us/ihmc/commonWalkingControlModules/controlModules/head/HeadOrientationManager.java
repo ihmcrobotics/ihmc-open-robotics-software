@@ -109,7 +109,7 @@ public class HeadOrientationManager
             orientationTrajectoryGenerator.compute(deltaTime);
             isTrackingOrientation.set(!orientationTrajectoryGenerator.isDone());
          }
-         orientationTrajectoryGenerator.get(desiredOrientation);
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
          headOrientationControlModule.setOrientationToTrack(desiredOrientation);
       }
 
@@ -123,7 +123,7 @@ public class HeadOrientationManager
 
       if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
       {
-         orientationTrajectoryGenerator.get(desiredOrientation);
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
          finalOrientationProvider.setOrientation(desiredHeadOrientationProvider.getDesiredHeadOrientation());
          headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
@@ -133,10 +133,10 @@ public class HeadOrientationManager
       }
       else if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
       {
-         orientationTrajectoryGenerator.get(desiredOrientation);
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
          initialOrientationProvider.setOrientation(desiredOrientation);
          headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
-         headOrientationControlModule.packDesiredFrameOrientation(desiredOrientation);
+         headOrientationControlModule.getDesiredFrameOrientation(desiredOrientation);
          desiredOrientation.changeFrame(headOrientationExpressedInFrame);
          finalOrientationProvider.setOrientation(desiredOrientation);
          headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());

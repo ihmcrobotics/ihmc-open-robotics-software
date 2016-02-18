@@ -12,31 +12,32 @@ public class RecyclingArrayList<T>
    private static final int DEFAULT_INITIAL_SIZE = 0;
 
    private T[] elementData;
-   private final Constructor<T> constructor;
+   private final Builder<T> builder;
    protected int size = 0;
-
-   @SuppressWarnings("unchecked")
-   public RecyclingArrayList(int initialSize, Class<T> clazz)
-   {
-      elementData = (T[]) new Object[initialSize];
-      size = initialSize;
-
-      // Trying to get an empty constructor from clazz
-      try
-      {
-         constructor = clazz.getConstructor();
-      }
-      catch (NoSuchMethodException | SecurityException e)
-      {
-         throw new RuntimeException("Could not find a visible empty constructor in the class: " + clazz.getSimpleName());
-      }
-
-      fillElementDataIfNeeded();
-   }
 
    public RecyclingArrayList(Class<T> clazz)
    {
-      this(DEFAULT_INITIAL_SIZE, clazz);
+      this(DEFAULT_INITIAL_SIZE, createBuilderWithEmptyConstructor(clazz));
+   }
+
+   public RecyclingArrayList(Builder<T> builder)
+   {
+      this(DEFAULT_INITIAL_SIZE, builder);
+   }
+
+   public RecyclingArrayList(int initialSize, Class<T> clazz)
+   {
+      this(initialSize, createBuilderWithEmptyConstructor(clazz));
+   }
+
+   @SuppressWarnings("unchecked")
+   public RecyclingArrayList(int initialSize, Builder<T> builder)
+   {
+      elementData = (T[]) new Object[initialSize];
+      size = initialSize;
+      this.builder = builder;
+
+      fillElementDataIfNeeded();
    }
 
    public int size()
@@ -200,7 +201,7 @@ public class RecyclingArrayList<T>
 
       for (int i = previousArraySize; i < minCapacity; i++)
       {
-         elementData[i] = newInstance();
+         elementData[i] = builder.newInstance();
       }
    }
 
@@ -209,25 +210,8 @@ public class RecyclingArrayList<T>
       for (int i = 0; i < elementData.length; i++)
       {
          if (elementData[i] == null)
-            elementData[i] = newInstance();
+            elementData[i] = builder.newInstance();
       }
-   }
-
-   protected T newInstance()
-   {
-      T newInstance = null;
-
-      try
-      {
-         newInstance = constructor.newInstance();
-      }
-      catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-      {
-         e.printStackTrace();
-         throw new RuntimeException("Something went wrong the empty constructor implemented in the class: " + constructor.getDeclaringClass().getSimpleName());
-      }
-
-      return newInstance;
    }
 
    /**
@@ -248,6 +232,11 @@ public class RecyclingArrayList<T>
          throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
    }
 
+   public static abstract class Builder<V>
+   {
+      public abstract V newInstance();
+   }
+
    @Override
    public String toString()
    {
@@ -261,5 +250,41 @@ public class RecyclingArrayList<T>
       ret += unsafeGet(size - 1).toString();
 
       return ret;
+   }
+
+   private static <U> Builder<U> createBuilderWithEmptyConstructor(Class<U> clazz)
+   {
+      final Constructor<U> emptyConstructor;
+      // Trying to get an empty constructor from clazz
+      try
+      {
+         emptyConstructor = clazz.getConstructor();
+      }
+      catch (NoSuchMethodException | SecurityException e)
+      {
+         throw new RuntimeException("Could not find a visible empty constructor in the class: " + clazz.getSimpleName());
+      }
+
+      Builder<U> builder = new Builder<U>()
+      {
+         @Override
+         public U newInstance()
+         {
+            U newInstance = null;
+
+            try
+            {
+               newInstance = emptyConstructor.newInstance();
+            }
+            catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+            {
+               e.printStackTrace();
+               throw new RuntimeException("Something went wrong the empty constructor implemented in the class: " + emptyConstructor.getDeclaringClass().getSimpleName());
+            }
+
+            return newInstance;
+         }
+      };
+      return builder;
    }
 }

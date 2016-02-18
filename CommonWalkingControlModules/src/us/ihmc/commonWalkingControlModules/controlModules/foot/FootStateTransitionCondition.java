@@ -47,7 +47,7 @@ public class FootStateTransitionCondition implements StateTransitionCondition
       {
          nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), 1);
          DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
-         ScrewTools.packJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocities);
+         ScrewTools.getJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocities);
          double nullspaceVelocityDotProduct = VectorVectorMult.innerProd(nullspace, jointVelocities);
 
          int velocitySign = (int) Math.round(Math.signum(nullspaceVelocityDotProduct));

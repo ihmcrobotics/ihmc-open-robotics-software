@@ -121,18 +121,18 @@ public class JointConfigurationDataSenderTest
    private boolean isConfigurationEqual(SixDoFJoint sixDoFJoint1, SixDoFJoint sixDoFJoint2, double epsilon)
    {
       Matrix3d rotation1 = new Matrix3d();
-      sixDoFJoint1.packRotation(rotation1);
+      sixDoFJoint1.getRotation(rotation1);
 
       Matrix3d rotation2 = new Matrix3d();
-      sixDoFJoint2.packRotation(rotation2);
+      sixDoFJoint2.getRotation(rotation2);
       if (!rotation1.epsilonEquals(rotation2, epsilon))
          return false;
 
       Vector3d translation1 = new Vector3d();
-      sixDoFJoint1.packTranslation(translation1);
+      sixDoFJoint1.getTranslation(translation1);
 
       Vector3d translation2 = new Vector3d();
-      sixDoFJoint2.packTranslation(translation2);
+      sixDoFJoint2.getTranslation(translation2);
 
       if (!translation1.epsilonEquals(translation2, epsilon))
          return false;

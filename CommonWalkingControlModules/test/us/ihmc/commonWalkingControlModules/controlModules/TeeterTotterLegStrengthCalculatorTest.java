@@ -54,7 +54,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints.put(RobotSide.RIGHT, new FramePoint2d(world, 1.0, 1.0));
       coPDesired = new FramePoint2d(world, 0.5, 0.5);
 
-      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
+      legStrengthCalculator.getLegStrengths(legStrengths, virtualToePoints, coPDesired);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -69,7 +69,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(otherWorld, 1.0, 1.0));
       coPDesired = new FramePoint2d(world, 0.5, 0.5);
-      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
+      legStrengthCalculator.getLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.4)
@@ -79,7 +79,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 1.0, 1.0));
       coPDesired = new FramePoint2d(otherWorld, 0.5, 0.5);
-      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
+      legStrengthCalculator.getLegStrengths(legStrengths, virtualToePoints, coPDesired);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.4)
@@ -93,7 +93,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       {
          coPDesired = new FramePoint2d(virtualToePoints.get(supportSide));
 
-         legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
+         legStrengthCalculator.getLegStrengths(legStrengths, virtualToePoints, coPDesired);
          assertEquals(legStrengths.get(supportSide), 1.0, 1e-10);
          assertEquals(legStrengths.get(supportSide.getOppositeSide()), 0.0, 1e-10);
       }
@@ -106,7 +106,7 @@ public class TeeterTotterLegStrengthCalculatorTest
       virtualToePoints.put(RobotSide.LEFT, new FramePoint2d(world, 0.0, 0.0));
       virtualToePoints.put(RobotSide.RIGHT, new FramePoint2d(world, 1.0, 1.0));
       coPDesired = new FramePoint2d(world, 2.0, 2.0);
-      legStrengthCalculator.packLegStrengths(legStrengths, virtualToePoints, coPDesired);
+      legStrengthCalculator.getLegStrengths(legStrengths, virtualToePoints, coPDesired);
       assertEquals(legStrengths.get(RobotSide.RIGHT), 1.0, 1e-10);
    }
 }

@@ -39,7 +39,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
 
       sixDoFJoint.setPositionAndRotation(RigidBodyTransform.generateRandomTransform(random));
       Twist sixDoFJointTwist = new Twist();
-      sixDoFJoint.packJointTwist(sixDoFJointTwist);
+      sixDoFJoint.getJointTwist(sixDoFJointTwist);
       sixDoFJointTwist.setLinearPart(RandomTools.generateRandomVector(random));
       sixDoFJointTwist.setAngularPart(RandomTools.generateRandomVector(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
@@ -53,7 +53,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       RigidBodyInertia inertia = floating.getInertiaCopy();
       inertia.changeFrame(ReferenceFrame.getWorldFrame());
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(sixDoFJoint.getDegreesOfFreedom(), sixDoFJoint.getDegreesOfFreedom());
-      inertia.packMatrix(inertiaMatrix);
+      inertia.getMatrix(inertiaMatrix);
 
       JUnitTools.assertMatrixEquals(inertiaMatrix, massMatrix, 1e-5);
    }

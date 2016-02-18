@@ -26,7 +26,7 @@ public class TeeterTotterLegStrengthCalculator implements LegStrengthCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void packLegStrengths(SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired)
+   public void getLegStrengths(SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

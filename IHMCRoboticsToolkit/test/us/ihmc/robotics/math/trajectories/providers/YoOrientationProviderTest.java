@@ -38,7 +38,7 @@ public class YoOrientationProviderTest
    public void testConstructor_Get()
    {
       YoOrientationProvider yoOrientationProvider = new YoOrientationProvider(yoFrameOrientation);
-      yoOrientationProvider.get(frameOrientationToPack);
+      yoOrientationProvider.getOrientation(frameOrientationToPack);
       
       double[] yawPitchRollToPack = new double[3];
       yoFrameOrientation.getYawPitchRoll(yawPitchRollToPack);

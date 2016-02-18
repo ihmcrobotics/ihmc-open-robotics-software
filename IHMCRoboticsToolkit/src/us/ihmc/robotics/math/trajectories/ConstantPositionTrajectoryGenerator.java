@@ -37,7 +37,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
    {
       time.set(0.0);
       FramePoint positionToPack = new FramePoint();
-      positionProvider.get(positionToPack);
+      positionProvider.getPosition(positionToPack);
       positionToPack.changeFrame(position.getReferenceFrame());
       position.set(positionToPack);
    }
@@ -52,26 +52,26 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
       return time.getDoubleValue() > finalTime.getDoubleValue();
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       velocityToPack.setToZero(position.getReferenceFrame());
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       accelerationToPack.setToZero(position.getReferenceFrame());
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    public void showVisualization()

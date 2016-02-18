@@ -26,11 +26,11 @@ public class AverageVelocityTrajectoryTimeProvider implements  DoubleProvider
    public double getValue()
    {
       FramePoint initialPosition = new FramePoint();
-      initialPositionProvider.get(initialPosition);
+      initialPositionProvider.getPosition(initialPosition);
       initialPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePoint finalPosition = new FramePoint();
-      finalPositionProvider.get(finalPosition);
+      finalPositionProvider.getPosition(finalPosition);
       finalPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       double distance = initialPosition.distance(finalPosition);

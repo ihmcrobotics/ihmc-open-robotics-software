@@ -70,14 +70,14 @@ public class ThreeDoFAngularAccelerationCalculatorTest
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector endEffectorAcceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packAccelerationOfBody(endEffectorAcceleration, endEffector);
+      spatialAccelerationCalculator.getAccelerationOfBody(endEffectorAcceleration, endEffector);
       Twist endEffectorTwist = new Twist();
-      twistCalculator.packTwistOfBody(endEffectorTwist, endEffector);
+      twistCalculator.getTwistOfBody(endEffectorTwist, endEffector);
 
       SpatialAccelerationVector baseAcceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packAccelerationOfBody(baseAcceleration, base);
+      spatialAccelerationCalculator.getAccelerationOfBody(baseAcceleration, base);
       Twist baseTwist = new Twist();
-      twistCalculator.packTwistOfBody(baseTwist, base);
+      twistCalculator.getTwistOfBody(baseTwist, base);
 
       endEffectorTwist.changeFrame(baseAcceleration.getExpressedInFrame());
       baseTwist.changeFrame(baseAcceleration.getExpressedInFrame());
@@ -89,7 +89,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
       endEffectorAcceleration.sub(baseAcceleration);
 
       FrameVector desiredAngularAccelerationBack = new FrameVector(endEffectorAcceleration.getExpressedInFrame());
-      endEffectorAcceleration.packAngularPart(desiredAngularAccelerationBack);
+      endEffectorAcceleration.getAngularPart(desiredAngularAccelerationBack);
 
       desiredAngularAccelerationBack.changeFrame(desiredAngularAcceleration.getReferenceFrame());
       JUnitTools.assertTuple3dEquals(desiredAngularAcceleration.getVector(), desiredAngularAccelerationBack.getVector(), 1e-12);

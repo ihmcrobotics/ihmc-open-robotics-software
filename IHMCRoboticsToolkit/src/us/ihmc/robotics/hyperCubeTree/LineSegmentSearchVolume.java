@@ -17,7 +17,7 @@ public class LineSegmentSearchVolume extends HyperVolume
       pointA = new double[dim];
       pointB = new double[dim];
       scale = new double[dim]; 
-      lineSegment.packPoints(pointA,pointB);
+      lineSegment.getPoints(pointA,pointB);
       for (int i=0;i<dim;i++)
       {
          scale[i]=1.0/(pointB[i]-pointA[i]);

@@ -20,7 +20,7 @@ public class YoQuaternionProvider implements OrientationProvider
       orientation = new YoFrameQuaternion(namePrefix + "Orientation", referenceFrame, registry);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }

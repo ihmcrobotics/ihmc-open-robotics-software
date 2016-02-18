@@ -101,7 +101,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
       Twist twist = new Twist(frameC, frameD, frameA, array);
       DenseMatrix64F matrixBack = new DenseMatrix64F(Twist.SIZE, 1);
-      twist.packMatrix(matrixBack, 0);
+      twist.getMatrix(matrixBack, 0);
       double[] arrayBack = matrixBack.getData();
       assertArrayEquals(array, arrayBack, 0.0);
    }
@@ -135,10 +135,10 @@ public class TwistTest extends SpatialMotionVectorTest
       Twist twistCopy = new Twist(twist);
 
       DenseMatrix64F twistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twist.packMatrix(twistMatrix, 0);
+      twist.getMatrix(twistMatrix, 0);
 
       DenseMatrix64F twistCopyMatrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twistCopy.packMatrix(twistCopyMatrix, 0);
+      twistCopy.getMatrix(twistCopyMatrix, 0);
 
       // test that they're the same
       JUnitTools.assertMatrixEquals(twistMatrix, twistCopyMatrix, 0.0);
@@ -149,8 +149,8 @@ public class TwistTest extends SpatialMotionVectorTest
       // test that we're actually copying, not just using references
       inputMatrix = RandomMatrices.createRandom(Twist.SIZE, 1, random);
       twist.set(frameD, frameA, frameC, inputMatrix, 0);
-      twist.packMatrix(twistMatrix, 0);
-      twistCopy.packMatrix(twistCopyMatrix, 0);
+      twist.getMatrix(twistMatrix, 0);
+      twistCopy.getMatrix(twistCopyMatrix, 0);
 
       for (int i = 0; i < twistMatrix.getNumElements(); i++)
       {
@@ -374,10 +374,10 @@ public class TwistTest extends SpatialMotionVectorTest
       twist1.changeFrame(twist1.getExpressedInFrame());
 
       DenseMatrix64F twist1Matrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twist1.packMatrix(twist1Matrix, 0);
+      twist1.getMatrix(twist1Matrix, 0);
 
       DenseMatrix64F twist2Matrix = new DenseMatrix64F(Twist.SIZE, 1);
-      twist2.packMatrix(twist2Matrix, 0);
+      twist2.getMatrix(twist2Matrix, 0);
 
       // test that they're the same
       JUnitTools.assertMatrixEquals(twist1Matrix, twist2Matrix, 0.0);
@@ -416,13 +416,13 @@ public class TwistTest extends SpatialMotionVectorTest
 
       FrameVector expectedFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
       Vector3d expected = expectedFrameVector.getVector();
-      twist1.packBodyOriginLinearPartInBaseFrame(expectedFrameVector);
+      twist1.getBodyOriginLinearPartInBaseFrame(expectedFrameVector);
 
       FrameVector actual = new FrameVector(ReferenceFrame.getWorldFrame());
       twist1.changeFrame(twist1.getBaseFrame());
       FramePoint bodyFrameOrigin = new FramePoint(twist1.getBodyFrame());
       bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
-      twist1.packLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
+      twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
       JUnitTools.assertTuple3dEquals(expected, actual.getVectorCopy(), 1e-6);
    }
@@ -436,9 +436,9 @@ public class TwistTest extends SpatialMotionVectorTest
       Twist twist = new Twist(frameA, frameB, frameC, linearVelocity1, angularVelocity1);
 
       Vector3d angularVelocityInBaseFrame = new Vector3d();
-      twist.packAngularVelocityInBaseFrame(angularVelocityInBaseFrame);
+      twist.getAngularVelocityInBaseFrame(angularVelocityInBaseFrame);
       FrameVector bodyOriginLinearPart = new FrameVector();
-      twist.packBodyOriginLinearPartInBaseFrame(bodyOriginLinearPart);
+      twist.getBodyOriginLinearPartInBaseFrame(bodyOriginLinearPart);
       assertEquals(twist.getBaseFrame(), bodyOriginLinearPart.getReferenceFrame());
 
       double dt = 1e-8;
@@ -492,7 +492,7 @@ public class TwistTest extends SpatialMotionVectorTest
       pointThatShouldBeStationary.changeFrame(frameA);
 
       FrameVector velocityOfStationaryPoint = new FrameVector(frameB);
-      twist.packLinearVelocityOfPointFixedInBodyFrame(velocityOfStationaryPoint, pointThatShouldBeStationary);
+      twist.getLinearVelocityOfPointFixedInBodyFrame(velocityOfStationaryPoint, pointThatShouldBeStationary);
 
       double delta = 1e-15;
       JUnitTools.assertTuple3dEquals(new Vector3d(), velocityOfStationaryPoint.getVector(), delta);

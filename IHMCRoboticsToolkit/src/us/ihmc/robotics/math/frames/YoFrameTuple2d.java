@@ -93,13 +93,13 @@ public abstract class YoFrameTuple2d<T extends FrameTuple2d<?>> extends Referenc
       return new FramePoint2d(getFrameTuple2d());
    }
    
-   public final void packFrameVector2d(FrameVector2d frameVector2dToPack)
+   public final void getFrameVector2d(FrameVector2d frameVector2dToPack)
    {
       T frameTuple2d = getFrameTuple2d();
       frameVector2dToPack.setIncludingFrame(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
    }
    
-   public final void packFramePoint2d(FramePoint2d framePoint2dToPack)
+   public final void getFramePoint2d(FramePoint2d framePoint2dToPack)
    {
       T frameTuple2d = getFrameTuple2d();
       framePoint2dToPack.setIncludingFrame(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());

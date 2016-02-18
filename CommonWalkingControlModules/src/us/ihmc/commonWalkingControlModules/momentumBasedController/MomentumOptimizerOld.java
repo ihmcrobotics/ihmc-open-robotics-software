@@ -103,7 +103,7 @@ public abstract class MomentumOptimizerOld implements Lmdif_fcn
       this.desiredAngularCentroidalMomentumRate.set(desiredAngularCentroidalMomentumRate);
       this.desiredLinearCentroidalMomentumRate.set(desiredLinearCentroidalMomentumRate);
 
-      ScrewTools.packJointVelocitiesMatrix(jointsInOrder, jointVelocitiesMatrix);
+      ScrewTools.getJointVelocitiesMatrix(jointsInOrder, jointVelocitiesMatrix);
       centroidalMomentumMatrix.compute();
       MatrixYoVariableConversionTools.getFromYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
       MatrixTools.numericallyDifferentiate(centroidalMomentumMatrixDerivative, previousCentroidalMomentumMatrix, centroidalMomentumMatrix.getMatrix(),
@@ -144,7 +144,7 @@ public abstract class MomentumOptimizerOld implements Lmdif_fcn
    {
       updateAtStartOfFcn(x);
 
-      ScrewTools.packDesiredJointAccelerationsMatrix(jointsInOrder, jointAccelerationsMatrix);
+      ScrewTools.getDesiredJointAccelerationsMatrix(jointsInOrder, jointAccelerationsMatrix);
 
       centroidalMomentumErrorMatrix.set(0, 0, desiredAngularCentroidalMomentumRate.getX());
       centroidalMomentumErrorMatrix.set(1, 0, desiredAngularCentroidalMomentumRate.getY());

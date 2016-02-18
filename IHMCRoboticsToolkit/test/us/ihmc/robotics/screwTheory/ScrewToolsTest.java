@@ -543,7 +543,7 @@ public class ScrewToolsTest
       ScrewTools.setVelocities(jointsArray, originalVelocities); //set velocities from matrix
       DenseMatrix64F newVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.packJointVelocitiesMatrix(jointsArray, newVelocities);//pack new matrix
+      ScrewTools.getJointVelocitiesMatrix(jointsArray, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
@@ -571,7 +571,7 @@ public class ScrewToolsTest
       ScrewTools.setVelocities(jointsArray, originalVelocities); //set velocities from matrix
       DenseMatrix64F newVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.packJointVelocitiesMatrix(jointsList, newVelocities);//pack new matrix
+      ScrewTools.getJointVelocitiesMatrix(jointsList, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
@@ -594,7 +594,7 @@ public class ScrewToolsTest
       ScrewTools.setDesiredAccelerations(jointsArray, originalAccel); //set velocities from matrix
       DenseMatrix64F newAccelerations = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
 
-      ScrewTools.packDesiredJointAccelerationsMatrix(jointsArray, newAccelerations);//pack new matrix
+      ScrewTools.getDesiredJointAccelerationsMatrix(jointsArray, newAccelerations);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
          assertEquals("Should be equal velocities", originalAccel.get(i), newAccelerations.get(i), epsilon);
@@ -684,7 +684,7 @@ public class ScrewToolsTest
       ScrewTools.setDesiredAccelerations(jointsArray, jointAccelerations);
 
       DenseMatrix64F sixDoFAccel = new DenseMatrix64F(6, 1);
-      jointsArray[0].packDesiredAccelerationMatrix(sixDoFAccel, 0);
+      jointsArray[0].getDesiredAccelerationMatrix(sixDoFAccel, 0);
       for(int i = 0; i < 6; i++)
       {
          assertEquals("Should be equal accelerations", jointAccelerations.get(i), sixDoFAccel.get(i), epsilon);
@@ -716,7 +716,7 @@ public class ScrewToolsTest
       ScrewTools.setVelocities(jointsArray, jointVelocities);
 
       DenseMatrix64F sixDoFVeloc = new DenseMatrix64F(6, 1);
-      jointsArray[0].packVelocityMatrix(sixDoFVeloc, 0);
+      jointsArray[0].getVelocityMatrix(sixDoFVeloc, 0);
       for(int i = 0; i < 6; i++)
       {
          assertEquals("Should be equal velocitiess", jointVelocities.get(i), sixDoFVeloc.get(i), epsilon);

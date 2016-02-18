@@ -31,8 +31,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @Ignore
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout = 300000)
    public void testReallyReallySimpleOptimizationProblem() throws Exception
    {
@@ -59,8 +58,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testASimpleRedundantEqualityCase() throws Exception
    {
@@ -85,8 +83,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testAnotherReallySimpleOptimizationProblem() throws Exception
    {
@@ -154,8 +151,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem() throws Exception
    {
@@ -225,8 +221,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testQuadraticCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -309,8 +304,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSquaring() throws Exception
    {
@@ -386,8 +380,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {
@@ -435,5 +428,4 @@ public class SimpleJOptimizerTest
       assertEquals(3.0, solution[1], 1e-5);
       assertEquals(Math.sqrt(18.0), solution[2], 1e-5);
    }
-
 }

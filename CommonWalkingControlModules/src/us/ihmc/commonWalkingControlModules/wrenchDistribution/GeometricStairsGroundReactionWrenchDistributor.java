@@ -153,7 +153,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       // compute individual foot CoPs
       if (contactStates.size() == 2)
       {
-         virtualToePointCalculator.packVirtualToePoints(centersOfPressureInZUp, bipedSupportPolygons, centerOfPressure2d, upcomingSupportSide);
+         virtualToePointCalculator.getVirtualToePoints(centersOfPressureInZUp, bipedSupportPolygons, centerOfPressure2d, upcomingSupportSide);
       }
       
       else
@@ -182,7 +182,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       }
 
       // compute lambdas
-      legStrengthCalculator.packLegStrengths(lambdas, centersOfPressureInZUp, centerOfPressure2d);
+      legStrengthCalculator.getLegStrengths(lambdas, centersOfPressureInZUp, centerOfPressure2d);
       
       // update omega0
       double omega0 = computeOmega0(com, fZ, centersOfPressureOnSole3d);

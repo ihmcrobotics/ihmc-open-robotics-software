@@ -1,11 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -25,6 +27,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewinda
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
@@ -98,10 +101,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore
-
    // "Bamboo link: https://bamboo.ihmc.us/browse/RC-FASTLOOP-ATLASAFAST/test/case/115277833")
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 2400000)
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
@@ -151,8 +152,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
 
    // This takes a long time. Use it for debugging where the broken changes were made when the tests above fail.
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 2400000)
    public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {

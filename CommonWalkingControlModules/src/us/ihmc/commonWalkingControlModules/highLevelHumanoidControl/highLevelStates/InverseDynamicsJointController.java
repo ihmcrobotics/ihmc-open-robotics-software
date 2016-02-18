@@ -595,7 +595,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
             footWrench.setLinearPartZ(fz);
             footWrench.changeFrame(footFrame);
 
-            momentumBasedController.getCenterOfMassJacobian().packCenterOfMassVelocity(centerOfMassVelocity);
+            momentumBasedController.getCenterOfMassJacobian().getCenterOfMassVelocity(centerOfMassVelocity);
             centerOfMass.changeFrame(midFeetZUpFrame);
             centerOfMassVelocity.changeFrame(midFeetZUpFrame);
             

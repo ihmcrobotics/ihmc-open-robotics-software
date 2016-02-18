@@ -264,9 +264,9 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
 
       // compute body angular velocity
       Twist bodyTwist = pool.lease(Twist.class);
-      twistCalculator.packTwistOfBody(bodyTwist, fullRobotModel.getPelvis());
+      twistCalculator.getTwistOfBody(bodyTwist, fullRobotModel.getPelvis());
       FrameVector bodyAngularVelocity = pool.lease(FrameVector.class);
-      bodyTwist.packAngularPart(bodyAngularVelocity);
+      bodyTwist.getAngularPart(bodyAngularVelocity);
       bodyAngularVelocity.changeFrame(yoBodyAngularVelocityEstimate.getReferenceFrame());
       yoBodyAngularVelocityEstimate.set(bodyAngularVelocity);
 
@@ -278,7 +278,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
 
       // compute center of mass velocity
       FrameVector comVelocity = pool.lease(FrameVector.class);
-      comJacobian.packCenterOfMassVelocity(comVelocity);
+      comJacobian.getCenterOfMassVelocity(comVelocity);
       comVelocity.changeFrame(yoComVelocityEstimate.getReferenceFrame());
       yoComVelocityEstimate.set(comVelocity);
 

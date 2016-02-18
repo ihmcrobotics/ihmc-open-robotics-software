@@ -4,5 +4,5 @@ import us.ihmc.robotics.geometry.FramePoint;
 
 public interface PositionProvider
 {
-   public abstract void get(FramePoint positionToPack);
+   public abstract void getPosition(FramePoint positionToPack);
 }
