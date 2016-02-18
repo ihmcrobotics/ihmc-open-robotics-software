@@ -182,7 +182,7 @@ public class LidarScan
    {
       Point3d p = new Point3d(range, 0.0, 0.0);
       RigidBodyTransform transform = new RigidBodyTransform();
-      packInterpolatedTransform(index, transform);
+      getInterpolatedTransform(index, transform);
       transform.multiply(getSweepTransform(index));
       transform.transform(p);
 
@@ -193,7 +193,7 @@ public class LidarScan
    {
       Point3f p = new Point3f(range, 0.0f, 0.0f);
       RigidBodyTransform transform = new RigidBodyTransform();
-      packInterpolatedTransform(index, transform);
+      getInterpolatedTransform(index, transform);
       transform.multiply(getSweepTransform(index));
       transform.transform(p);
 
@@ -204,13 +204,13 @@ public class LidarScan
    {
       Vector3d origin = new Vector3d();
       RigidBodyTransform transform = new RigidBodyTransform();
-      packInterpolatedTransform(index, transform);
+      getInterpolatedTransform(index, transform);
       transform.get(origin);
 
       return new LineSegment3d(new Point3d(origin), getPoint(index, range));
    }
 
-   public void packInterpolatedTransform(int index, RigidBodyTransform target)
+   public void getInterpolatedTransform(int index, RigidBodyTransform target)
    {
       transformInterpolationCalculator.computeInterpolation(worldTransformStart, worldTransformEnd, target, index / (double) (params.pointsPerSweep - 1));
    }

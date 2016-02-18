@@ -41,7 +41,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return afterJointFrame;
    }
 
-   public void packJointTwist(Twist twistToPack)
+   public void getJointTwist(Twist twistToPack)
    {
       twistToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
       twistToPack.setAngularPartZ(qdRot);
@@ -49,7 +49,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       twistToPack.setLinearPartY(qdTrans.getY());
    }
 
-   public void packJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
       accelerationToPack.setAngularPartZ(qddRot);
@@ -57,7 +57,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       accelerationToPack.setLinearPartY(qddTrans.getY());
    }
 
-   public void packDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
+   public void getDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
    {
       jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
       jointAcceleration.setAngularPartZ(qddRotDesired);
@@ -65,21 +65,21 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       jointAcceleration.setLinearPartY(qddTransDesired.getY());
    }
 
-   public void packTauMatrix(DenseMatrix64F matrix)
+   public void getTauMatrix(DenseMatrix64F matrix)
    {
       matrix.set(0, 0, tauRot);
       matrix.set(1, 0, tauTrans.getX());
       matrix.set(2, 0, tauTrans.getY());
    }
 
-   public void packVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart + 0, 0, qdRot);
       matrix.set(rowStart + 1, 0, qdTrans.getX());
       matrix.set(rowStart + 2, 0, qdTrans.getY());
    }
 
-   public void packDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart + 0, 0, qddRotDesired);
       matrix.set(rowStart + 1, 0, qddTransDesired.getX());
@@ -203,7 +203,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qRot;
    }
 
-   public void packTranslation(FrameVector2d vectorToPack)
+   public void getTranslation(FrameVector2d vectorToPack)
    {
       vectorToPack.setIncludingFrame(qTrans);
    }
@@ -213,7 +213,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qdRot;
    }
 
-   public void packTranslationalVelocity(FrameVector2d vectorToPack)
+   public void getTranslationalVelocity(FrameVector2d vectorToPack)
    {
       vectorToPack.set(qdTrans);
    }
@@ -223,7 +223,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qddRot;
    }
 
-   public void packTranslationalAcceleration(FrameVector2d vectorToPack)
+   public void getTranslationalAcceleration(FrameVector2d vectorToPack)
    {
       vectorToPack.set(qddTrans);
    }
@@ -233,7 +233,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return qddRotDesired;
    }
 
-   public void packDesiredTranslationalAcceleration(FrameVector2d vectorToPack)
+   public void getDesiredTranslationalAcceleration(FrameVector2d vectorToPack)
    {
       vectorToPack.set(qddTransDesired);
    }
@@ -243,7 +243,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       return tauRot;
    }
 
-   public void packTauTranslation(FrameVector2d vectorToPack)
+   public void getTauTranslation(FrameVector2d vectorToPack)
    {
       vectorToPack.set(tauTrans);
    }
@@ -292,7 +292,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       this.motionSubspace.compute();
    }
 
-   public void packConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
+   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
       matrix.set(index++, 0, qRot);

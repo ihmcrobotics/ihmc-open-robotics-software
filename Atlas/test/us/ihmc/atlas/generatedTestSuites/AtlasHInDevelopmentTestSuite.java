@@ -12,9 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasInverseKinematicsPositionControlTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class
 })
 
 public class AtlasHInDevelopmentTestSuite

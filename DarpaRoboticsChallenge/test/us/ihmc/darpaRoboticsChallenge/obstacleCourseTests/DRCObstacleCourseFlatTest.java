@@ -55,6 +55,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
@@ -87,10 +88,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-
-   @Ignore("Invoked manually to test memory & thread leaks")
-
-	@DeployableTestMethod(estimatedDuration = 50.0)
+   // Invoked manually to test memory & thread leaks
+	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Manual)
 	@Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
    {
@@ -595,11 +594,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
-   @Ignore
-
-	@DeployableTestMethod(estimatedDuration = 50.0)
+	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -642,9 +638,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    // }
 
    
-   @Ignore("Added for fixing DRC-866. Does not work for fast walking")
-
-	@DeployableTestMethod(estimatedDuration = 50.0)
+   // Added for fixing DRC-866. Does not work for fast walking
+	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout=300000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {

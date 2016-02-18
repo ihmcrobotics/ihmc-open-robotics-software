@@ -136,11 +136,11 @@ public class StraightLinePoseTrajectoryGeneratorTest
          originalOrientation.compute(t);
          trajToTest.compute(t);
 
-         originalPosition.packLinearData(position1, velocity1, acceleration1);
-         originalOrientation.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         originalPosition.getLinearData(position1, velocity1, acceleration1);
+         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
-         trajToTest.packLinearData(position2, velocity2, acceleration2);
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getLinearData(position2, velocity2, acceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          assertTrue(position1.epsilonEquals(position2, EPSILON));
          assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
@@ -186,8 +186,8 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FrameVector angularVelocity2 = new FrameVector();
       FrameVector angularAcceleration2 = new FrameVector();
 
-      trajToTest.packLinearData(position2, velocity2, acceleration2);
-      trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+      trajToTest.getLinearData(position2, velocity2, acceleration2);
+      trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
       assertTrue(position1.epsilonEquals(position2, EPSILON));
       assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
@@ -232,8 +232,8 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FrameVector angularVelocity2 = new FrameVector();
       FrameVector angularAcceleration2 = new FrameVector();
 
-      trajToTest.packLinearData(position2, velocity2, acceleration2);
-      trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+      trajToTest.getLinearData(position2, velocity2, acceleration2);
+      trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
       assertTrue(position1.epsilonEquals(position2, EPSILON));
       assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
@@ -295,11 +295,11 @@ public class StraightLinePoseTrajectoryGeneratorTest
          originalOrientation.compute(t);
          trajToTest.compute(t);
 
-         originalPosition.packLinearData(position1, velocity1, acceleration1);
-         originalOrientation.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         originalPosition.getLinearData(position1, velocity1, acceleration1);
+         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
-         trajToTest.packLinearData(position2, velocity2, acceleration2);
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getLinearData(position2, velocity2, acceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          assertTrue(position1.epsilonEquals(position2, EPSILON));
          assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));
@@ -341,11 +341,11 @@ public class StraightLinePoseTrajectoryGeneratorTest
          originalOrientation.compute(t);
          trajToTest.compute(t);
 
-         originalPosition.packLinearData(position1, velocity1, acceleration1);
-         originalOrientation.packAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         originalPosition.getLinearData(position1, velocity1, acceleration1);
+         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
-         trajToTest.packLinearData(position2, velocity2, acceleration2);
-         trajToTest.packAngularData(orientation2, angularVelocity2, angularAcceleration2);
+         trajToTest.getLinearData(position2, velocity2, acceleration2);
+         trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
          assertTrue(position1.epsilonEquals(position2, EPSILON));
          assertTrue(velocity1.epsilonEquals(velocity2, EPSILON));

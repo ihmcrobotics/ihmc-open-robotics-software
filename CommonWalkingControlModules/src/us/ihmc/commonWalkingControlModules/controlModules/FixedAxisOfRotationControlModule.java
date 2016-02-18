@@ -97,7 +97,7 @@ public class FixedAxisOfRotationControlModule
       feedForward.setScrew(bodyFrame, baseFrame, bodyFrame, qd, qdd, 0.0, 0.0, axisOfRotation.getVector(), zero, offset.getVectorCopy(), zero);
    }
 
-   public void pack(FramePose desiredPose, Twist desiredTwist, SpatialAccelerationVector feedForward)
+   public void getDesiredPoseTwistAndFeedForward(FramePose desiredPose, Twist desiredTwist, SpatialAccelerationVector feedForward)
    {
       desiredPose.setPose(this.desiredPose);
       desiredTwist.set(this.desiredTwist);

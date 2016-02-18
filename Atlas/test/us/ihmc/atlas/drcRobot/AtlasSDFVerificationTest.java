@@ -18,7 +18,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -38,6 +37,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -74,10 +74,8 @@ public class AtlasSDFVerificationTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   
    private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
    private static final double SIM_DURATION = 5.0;
-
 
    /**
     * February 16, 2015. This passes locally, but not on Bamboo. It does some crazy file writing, but in the wrong order seemingly. Someone please fix...
@@ -86,8 +84,7 @@ public class AtlasSDFVerificationTest
     * @throws IOException
     * @throws ControllerFailureException
     */
-   @Ignore
-	@DeployableTestMethod(estimatedDuration = 10.4)
+	@DeployableTestMethod(estimatedDuration = 10.4, targets = TestPlanTarget.Exclude)
 	@Test(timeout = 41302)
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {

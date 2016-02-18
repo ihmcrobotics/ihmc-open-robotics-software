@@ -10,7 +10,6 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
@@ -18,6 +17,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class Ramp3dTest
 {
@@ -26,8 +26,7 @@ public class Ramp3dTest
 	/**
 	 * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
 	 */
-   @Ignore
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout = 502)
    public void testCommonShape3dFunctionality()
    {
@@ -208,8 +207,7 @@ public class Ramp3dTest
 	/**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 502)
    public void testIsInsideOrOnSurfaceRandomOrientations()
    {
@@ -290,8 +288,7 @@ public class Ramp3dTest
    /**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 502)
 	public void testTrickyOneThatProjectsOntoTheEdge()
 	{
@@ -336,8 +333,7 @@ public class Ramp3dTest
    /**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 502)
    public void testDistance()
    {
@@ -380,8 +376,7 @@ public class Ramp3dTest
    /**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 502)
    public void testGetClosestPointAndNormalAt()
    {

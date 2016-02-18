@@ -12,7 +12,6 @@ import javax.vecmath.Vector2d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
@@ -51,6 +50,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterface
@@ -157,8 +157,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, robotToTest.getRobotsYoVariableRegistry());
    }
 
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {

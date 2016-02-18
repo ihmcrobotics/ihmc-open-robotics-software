@@ -58,7 +58,7 @@ public class QuadrantDependentList<V>
       
       elements[robotQuadrant.ordinal()] = element;
       
-      packQuadrantArray();
+      fillQuadrantArray();
    }
    
    public V remove(RobotQuadrant robotQuadrant)
@@ -70,7 +70,7 @@ public class QuadrantDependentList<V>
       
       elements[robotQuadrant.ordinal()] = null;
       
-      packQuadrantArray();
+      fillQuadrantArray();
       
       return element;
    }
@@ -84,7 +84,7 @@ public class QuadrantDependentList<V>
       size = 0;
    }
    
-   private void packQuadrantArray()
+   private void fillQuadrantArray()
    {
       if (size == 4)
          return;

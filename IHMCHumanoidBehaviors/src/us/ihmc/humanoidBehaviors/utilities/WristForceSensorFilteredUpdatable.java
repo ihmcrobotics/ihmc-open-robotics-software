@@ -85,7 +85,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       this.forceSensorData = forceSensorDataHolder.getByName(forceSensorName);
 
       wristSensorWrench = new Wrench();
-      forceSensorData.packWrench(wristSensorWrench);
+      forceSensorData.getWrench(wristSensorWrench);
 
       this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, DT, registry);
 
@@ -195,7 +195,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private void updateSensorValuesFromRobot()
    {
-      forceSensorData.packWrench(wristSensorWrench);
+      forceSensorData.getWrench(wristSensorWrench);
       sensorMassCompensator.update(forceSensorData);
 
       FrameVector sensorForceRawInWorld = sensorMassCompensator.getSensorForceRaw(world);

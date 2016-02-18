@@ -1,12 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -21,6 +23,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
@@ -211,10 +214,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore
-
    // "Need to rerecord")
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpFlatCinderblocksScript() throws SimulationExceededMaximumTimeException
    {
@@ -243,8 +244,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     *
     *     @throws SimulationExceededMaximumTimeException
     */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 1200000)
    public void testTrialsTerrainUpSlantedCinderblocksScript() throws SimulationExceededMaximumTimeException
    {

@@ -287,7 +287,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		 * Pre-calculate velocity if scale factor was 1.0:
 		 */
 		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue() + dtControl);
-		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,
+		poseTrajectoryGenerator.getLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,
 				preScalingTrajectoryAcceleration);
 		preScalingTrajectoryVelocityDouble = preScalingTrajectoryVelocity.length();
 		
@@ -297,7 +297,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		tangentTrajectoryVectorInWorld.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
 		
 		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue() - dtControl);
-		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,preScalingTrajectoryAcceleration);
+		poseTrajectoryGenerator.getLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,preScalingTrajectoryAcceleration);
 		
 		tempVector.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
 		tangentTrajectoryVectorInWorld.sub(tempVector);
@@ -313,7 +313,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		currentTangentialVelocity.set(endEffectorVelocityInWorld.length());
 		
 
-		wristSensor.packWrench(wristSensorWrench);
+		wristSensor.getWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw,
 				fxFiltered, fyFiltered, fzFiltered, massHandandDrill.getDoubleValue(), SENSOR_NOISE, randomNumberGenerator, currentTimeInState.getDoubleValue());
 
@@ -357,12 +357,12 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		 */
 		scaledTimeVariable.add(dtControl * timeParameterScaleFactor.getDoubleValue());
 		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue());
-		poseTrajectoryGenerator.get(desiredPose);
-		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+		poseTrajectoryGenerator.getPose(desiredPose);
+		poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
 
 		desiredVelocity.scale(timeParameterScaleFactor.getDoubleValue());
 		desiredAcceleration.scale(timeParameterScaleFactor.getDoubleValue() * timeParameterScaleFactor.getDoubleValue());
-		poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+		poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 		desiredAngularVelocity.scale(timeParameterScaleFactor.getDoubleValue());
 		desiredAngularAcceleration.scale(timeParameterScaleFactor.getDoubleValue() * timeParameterScaleFactor.getDoubleValue());
 
@@ -371,9 +371,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		desiredAngularVelocity.changeFrame(controlFrame);
 
 		taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
-		taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 
 	}
 
@@ -384,14 +384,14 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		 * Calculate tangent vector from Trajectory Generator
 		 */
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue() + dtControl);
-		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,
+		poseTrajectoryGenerator.getLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,
 				preScalingTrajectoryAcceleration);
 		
 		
 		tangentTrajectoryVectorInWorld.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
 		
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue() - dtControl);
-		poseTrajectoryGenerator.packLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,preScalingTrajectoryAcceleration);
+		poseTrajectoryGenerator.getLinearData(preScalingTrajectoryPosition, preScalingTrajectoryVelocity,preScalingTrajectoryAcceleration);
 		
 		tempVector.set(preScalingTrajectoryPosition.getX(), preScalingTrajectoryPosition.getY(),preScalingTrajectoryPosition.getZ());
 		tangentTrajectoryVectorInWorld.sub(tempVector);
@@ -400,7 +400,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		
 		
 
-		wristSensor.packWrench(wristSensorWrench);
+		wristSensor.getWrench(wristSensorWrench);
 		CutForceControlHelper.wristSensorUpdate(wristSensorWrench, worldFrame, fxRaw, fyRaw, fzRaw, fxFiltered, fyFiltered,
 				fzFiltered, massHandandDrill.getDoubleValue(), false, randomNumberGenerator, 0.0);
 		CutForceControlHelper.getTangentForce(forceVectorInWorld, currentTangentialForce, tangentTrajectoryVectorInWorld,
@@ -411,9 +411,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		
 		
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
-		poseTrajectoryGenerator.get(desiredPose);
-		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-		poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+		poseTrajectoryGenerator.getPose(desiredPose);
+		poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+		poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
 		ReferenceFrame controlFrame = taskspaceToJointspaceCalculator.getControlFrame();
 
@@ -426,9 +426,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		desiredAngularAcceleration.changeFrame(controlFrame);
 
 		taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
-		taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
-		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
+		taskspaceToJointspaceCalculator.getDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 	}
 
 

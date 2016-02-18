@@ -85,7 +85,7 @@ public class PointPositionHandControlState extends State<HandControlState>
 
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
 
-      positionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
       pointAcceleration.setToZero(positionController.getBodyFrame());
 
       positionController.compute(pointAcceleration, desiredPosition, desiredVelocity, currentVelocity, desiredAcceleration);
@@ -101,9 +101,9 @@ public class PointPositionHandControlState extends State<HandControlState>
 
    private void updateCurrentVelocity(FramePoint point)
    {
-      twistCalculator.packRelativeTwist(currentTwist, base, endEffector);
+      twistCalculator.getRelativeTwist(currentTwist, base, endEffector);
       currentTwist.changeFrame(base.getBodyFixedFrame());
-      currentTwist.packLinearVelocityOfPointFixedInBodyFrame(currentVelocity, point);
+      currentTwist.getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, point);
    }
 
    @Override
@@ -137,7 +137,7 @@ public class PointPositionHandControlState extends State<HandControlState>
    public FramePoint getDesiredPosition()
    {
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
-      positionTrajectoryGenerator.get(desiredPosition);
+      positionTrajectoryGenerator.getPosition(desiredPosition);
       return desiredPosition;
    }
 

@@ -131,7 +131,7 @@ public class CenterOfMassCalibrationTool implements Updatable
          Wrench footWrench = new Wrench();
          ForceSensorDataReadOnly forceSensorData = ankleForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
-         forceSensorData.packWrench(footWrench);
+         forceSensorData.getWrench(footWrench);
          FrameVector footForce = footWrench.getLinearPartAsFrameVectorCopy();
          FrameVector footTorque = footWrench.getAngularPartAsFrameVectorCopy();
          

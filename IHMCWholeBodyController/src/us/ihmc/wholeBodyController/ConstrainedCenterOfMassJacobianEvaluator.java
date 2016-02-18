@@ -155,12 +155,12 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
       this.constrainedComJacobianConditionNumber.set(NormOps.conditionP2(constrainedCenterOfMassJacobian));
       this.constrainedComJacobianSigmaMin.set(computeSmallestSingularValue(constrainedCenterOfMassJacobian));
 
-      ScrewTools.packJointVelocitiesMatrix(allJoints, v);
+      ScrewTools.getJointVelocitiesMatrix(allJoints, v);
       CommonOps.mult(centerOfMassJacobian, v, tempCoMVelocityMatrix);
       MatrixTools.denseMatrixToVector3d(tempCoMVelocityMatrix, tempCoMVelocity, 0, 0);
       comVelocity.set(tempCoMVelocity);
 
-      ScrewTools.packJointVelocitiesMatrix(actuatedJoints, vActuated);
+      ScrewTools.getJointVelocitiesMatrix(actuatedJoints, vActuated);
 
 //    CommonOps.mult(constrainedCenterOfMassJacobian, vActuated, tempCoMVelocityMatrix);
 //    MatrixTools.denseMatrixToVector3d(tempCoMVelocityMatrix, tempCoMVelocity, 0, 0);

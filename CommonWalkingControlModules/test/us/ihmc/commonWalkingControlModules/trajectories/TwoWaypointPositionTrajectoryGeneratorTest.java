@@ -78,8 +78,8 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		trajectory.compute(0.0);
 		FramePoint actual = new FramePoint(worldFrame);
 		FramePoint expected = new FramePoint(worldFrame);
-		initialPositionProvider.get(expected);
-		trajectory.get(actual);
+		initialPositionProvider.getPosition(expected);
+		trajectory.getPosition(actual);
 		assertEquals(actual.getX(), expected.getX(), 1e-7);
 		assertEquals(actual.getY(), expected.getY(), 1e-7);
 		assertEquals(actual.getZ(), expected.getZ(), 1e-7);
@@ -87,20 +87,20 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		
 		FrameVector actualVel = new FrameVector(worldFrame);
 		FrameVector expectedVel = new FrameVector(worldFrame);
-		trajectory.packVelocity(actualVel);
+		trajectory.getVelocity(actualVel);
 		initialVelocityProvider.get(expectedVel);
 		assertEquals(actualVel.getX(), expectedVel.getX(), 1e-7);
 		assertEquals(actualVel.getY(), expectedVel.getY(), 1e-7);
 		assertEquals(actualVel.getZ(), expectedVel.getZ(), 1e-7);
 		
 		trajectory.compute(0.8);
-		finalPositionProvider.get(expected);
-		trajectory.get(actual);
+		finalPositionProvider.getPosition(expected);
+		trajectory.getPosition(actual);
 		assertEquals(actual.getX(), expected.getX(), 1e-7);
 		assertEquals(actual.getY(), expected.getY(), 1e-7);
 		assertEquals(actual.getZ(), expected.getZ(), 1e-7);
 		
-		trajectory.packVelocity(actualVel);
+		trajectory.getVelocity(actualVel);
 		finalVelocityProvider.get(expectedVel);
 		assertEquals(actualVel.getX(), expectedVel.getX(), 1e-7);
 		assertEquals(actualVel.getY(), expectedVel.getY(), 1e-7);

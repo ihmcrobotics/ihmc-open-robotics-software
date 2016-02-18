@@ -406,7 +406,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
 		singleSupportInitialICPPosition.set(singleSupportStartICP);
 
-		icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition, footLocations.get(1));
+		icpPlanner.getDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition, footLocations.get(1));
 
 		if (visualize)
 		{
@@ -433,7 +433,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 				updatePointsVis(footLocations);
 			}
 
-			icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
+			icpPlanner.getDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
 					null);
 
 			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
@@ -448,7 +448,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 			initialTime = initialTime + singleSupportDuration;
 
 			icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations,robotSide.getOppositeSide(),footLocations.get(1));
-			icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
+			icpPlanner.getDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
 					footLocations.get(1));
 
 			icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
@@ -589,9 +589,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		double time = initialTime + deltaT;
 		while (!icpPlanner.isDone(time))
 		{
-			icpPlanner.packDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition,
+			icpPlanner.getDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition,
 					footstepList.get(1));
-			icpPlanner.packDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
+			icpPlanner.getDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
 
 			actualICPPosition.set(icpPositionToPack);
 			actualICPPosition.setX(actualICPPosition.getX() + sineAmplitude * Math.sin(sineFrequency * (time - initialTime)));
@@ -651,9 +651,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		double time = initialTime + deltaT;
 		while (!icpPlanner.isDone(time))
 		{
-			icpPlanner.packDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition,
+			icpPlanner.getDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition,
 					footstepList.get(1));
-			icpPlanner.packDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
+			icpPlanner.getDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
 
 			actualICPPosition.set(icpPositionToPack);
 			actualICPPosition.setX(actualICPPosition.getX() - sineAmplitude * Math.sin(sineFrequency * (time - initialTime)));

@@ -180,7 +180,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
             OptimizerContactModel model = endEffector.getContactModel();
             for (int iRhoModel = 0; iRhoModel < model.getRhoSize(); iRhoModel++)
             {
-               packQrho(iRho, tempVectorMatrix);
+               getQrho(iRho, tempVectorMatrix);
                double rhoOfI = rho.get(iRho);
 
                for (int j = 0; j < SpatialForceVector.SIZE; j++)
@@ -206,7 +206,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
             for (int iPhiModel = 0; iPhiModel < model.getPhiSize(); iPhiModel++)
             {
-               packQphi(phiLocation, tempVectorMatrix);
+               getQphi(phiLocation, tempVectorMatrix);
                double phiOfI = phi.get(phiLocation);
 
                for (int j = 0; j < SpatialForceVector.SIZE; j++)
@@ -256,7 +256,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
                for (int iRhoModel = 0; iRhoModel < contactModel.getRhoSize(); iRhoModel++)
                {
-                  packQrho(iRho, tempVectorMatrix);
+                  getQrho(iRho, tempVectorMatrix);
                   double rhoOfI = rho.get(iRho);
                   tempSpatialVector.set(centerOfMassFrame, tempVectorMatrix);
 
@@ -271,7 +271,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
                for (int iPhiModel = 0; iPhiModel < contactModel.getPhiSize(); iPhiModel++)
                {
-                  packQphi(phiLocation, tempVectorMatrix);
+                  getQphi(phiLocation, tempVectorMatrix);
                   double phiOfI = phi.get(phiLocation);
 
                   tempSpatialVector.set(centerOfMassFrame, tempVectorMatrix);
@@ -288,7 +288,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       }
    }
 
-   public void packWRhoPenalizer(DenseMatrix64F wRhoPenalizerToPack, double wRhoMaxPenalty)
+   public void getWRhoPenalizer(DenseMatrix64F wRhoPenalizerToPack, double wRhoMaxPenalty)
    {
       CommonOps.setIdentity(wRhoPenalizerToPack);
       CommonOps.scale(wRhoMaxPenalty, wRhoPenalizerToPack);
@@ -329,7 +329,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       }
    }
 
-   public void packQphi(int i, DenseMatrix64F tempVector)
+   public void getQphi(int i, DenseMatrix64F tempVector)
    {
       for (int j = 0; j < SpatialForceVector.SIZE; j++)
       {
@@ -337,7 +337,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       }
    }
 
-   public void packQrho(int i, DenseMatrix64F tempVector)
+   public void getQrho(int i, DenseMatrix64F tempVector)
    {
       for (int j = 0; j < SpatialForceVector.SIZE; j++)
       {
@@ -345,7 +345,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       }
    }
 
-   public void packRhoMean(DenseMatrix64F rhoMeanToPack)
+   public void getRhoMean(DenseMatrix64F rhoMeanToPack)
    {
       rhoMeanToPack.set(rhoMean);
    }
@@ -356,13 +356,13 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       graphicYoDoubles[q][i][Y].set(localPoint.getY());
       graphicYoDoubles[q][i][Z].set(localPoint.getZ());
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
-      currentBasisVector.packAngularPart(tempVector);
+      currentBasisVector.getAngularPart(tempVector);
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
       graphicYoDoubles[q][i][xx].set(tempVector.getX());
       graphicYoDoubles[q][i][yy].set(tempVector.getY());
       graphicYoDoubles[q][i][zz].set(tempVector.getZ());
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
-      currentBasisVector.packLinearPart(tempVector);
+      currentBasisVector.getLinearPart(tempVector);
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
       graphicYoDoubles[q][i][x].set(tempVector.getX());
       graphicYoDoubles[q][i][y].set(tempVector.getY());

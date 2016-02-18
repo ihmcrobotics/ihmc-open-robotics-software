@@ -132,7 +132,16 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       for (GroundContactPoint groundContactPoint : allGroundContactPoints)
       {
          String groundContactPointName = groundContactPoint.getName();
+         
+         //TODO: SDF loader should figure out this first and put in an enumMap or something.
          RobotQuadrant robotQuadrant = RobotQuadrant.guessQuadrantFromName(groundContactPointName);
+         
+         if (robotQuadrant == null) 
+         {
+            System.err.println("robotQuadrant == null in SimulatedOutputWriterWithControlModeSelection.write()");
+            continue;
+         }
+         
          groundContactPoint.getForce(tempGroundForceVectors.get(robotQuadrant));
          groundForceVectors.get(robotQuadrant).set(tempGroundForceVectors.get(robotQuadrant));
          groundContactPoint.getPosition(tempGroundForceOriginPoints.get(robotQuadrant));

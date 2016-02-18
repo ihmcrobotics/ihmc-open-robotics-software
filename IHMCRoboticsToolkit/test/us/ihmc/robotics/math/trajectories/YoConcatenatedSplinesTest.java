@@ -6,17 +6,16 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.YoConcatenatedSplines;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class YoConcatenatedSplinesTest
 {
@@ -57,9 +56,7 @@ public class YoConcatenatedSplinesTest
       }
    }
    
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimpleCubicQuinticCubicTroublesome()
    {

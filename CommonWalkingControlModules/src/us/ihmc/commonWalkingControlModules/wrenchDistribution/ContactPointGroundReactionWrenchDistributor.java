@@ -95,7 +95,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
       SpatialForceVector desiredGroundReactionWrench = inputData.getDesiredNetSpatialForceVector();
 
       desiredGroundReactionWrench.changeFrame(centerOfMassFrame);
-      desiredGroundReactionWrench.packMatrix(desiredWrench);
+      desiredGroundReactionWrench.getMatrix(desiredWrench);
 
       aMatrix.zero();
       normalForceSelectorBMatrix.zero();
@@ -191,7 +191,7 @@ public class ContactPointGroundReactionWrenchDistributor implements GroundReacti
 
          // force, CoP, normal torque
          FrameVector force = new FrameVector(contactState.getPlaneFrame());
-         tempWrench.packLinearPart(force);
+         tempWrench.getLinearPart(force);
          FramePoint2d centerOfPressure = new FramePoint2d(contactState.getPlaneFrame());
          double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, tempWrench, contactState.getPlaneFrame());
 

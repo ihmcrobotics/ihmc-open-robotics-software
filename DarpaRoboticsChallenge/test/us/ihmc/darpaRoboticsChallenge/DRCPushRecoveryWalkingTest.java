@@ -4,7 +4,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
@@ -32,6 +31,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
@@ -94,8 +94,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    }
 
    // cropped to 1.5 - 6.3 seconds
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

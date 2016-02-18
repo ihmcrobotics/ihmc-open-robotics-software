@@ -45,8 +45,8 @@ public class DesiredJointAccelerationCalculator
       accelerationOfEndEffectorWithRespectToBase.getExpressedInFrame().checkReferenceFrameMatch(jacobianDerivativeTerm.getExpressedInFrame());
       jacobian.getJacobianFrame().checkReferenceFrameMatch(accelerationOfEndEffectorWithRespectToBase.getExpressedInFrame());
 
-      accelerationOfEndEffectorWithRespectToBase.packMatrix(biasedSpatialAcceleration, 0);    // unbiased at this point
-      jacobianDerivativeTerm.packMatrix(jacobianDerivativeTermMatrix, 0);
+      accelerationOfEndEffectorWithRespectToBase.getMatrix(biasedSpatialAcceleration, 0);    // unbiased at this point
+      jacobianDerivativeTerm.getMatrix(jacobianDerivativeTermMatrix, 0);
       CommonOps.subtractEquals(biasedSpatialAcceleration, jacobianDerivativeTermMatrix);
       if (!jacobianSolver.setA(jacobian.getJacobianMatrix()))
          throw new RuntimeException("jacobian cannot be solved");

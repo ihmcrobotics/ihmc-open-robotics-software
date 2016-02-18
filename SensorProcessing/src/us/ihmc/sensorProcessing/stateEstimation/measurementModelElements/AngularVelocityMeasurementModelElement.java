@@ -86,8 +86,8 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       Vector3d measuredAngularVelocityVector3d = angularVelocityMeasurementInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
       
-      twistCalculator.packRelativeTwist(tempTwist, orientationEstimationLink, measurementLink);
-      tempTwist.packAngularPart(relativeAngularVelocity);
+      twistCalculator.getRelativeTwist(tempTwist, orientationEstimationLink, measurementLink);
+      tempTwist.getAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(measurementFrame);
 
       predictedAngularVelocityMeasurementTemp.setIncludingFrame(angularVelocityStatePort.getData());

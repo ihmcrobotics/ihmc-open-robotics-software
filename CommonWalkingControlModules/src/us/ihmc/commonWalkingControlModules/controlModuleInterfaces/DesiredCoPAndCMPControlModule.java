@@ -9,6 +9,6 @@ import us.ihmc.robotics.screwTheory.Momentum;
 public interface DesiredCoPAndCMPControlModule
 {
    public abstract void compute(FramePoint2d capturePoint, RobotSide supportLeg, FramePoint2d desiredCapturePoint, FrameVector2d desiredCapturePointVelocity, FrameOrientation desiredPelvisOrientation, double omega0, Momentum momentum);
-   public abstract void packCoP(FramePoint2d cop);
-   public abstract void packCMP(FramePoint2d cmp);
+   public abstract void getCoP(FramePoint2d copToPack);
+   public abstract void getCMP(FramePoint2d cmpToPack);
 }

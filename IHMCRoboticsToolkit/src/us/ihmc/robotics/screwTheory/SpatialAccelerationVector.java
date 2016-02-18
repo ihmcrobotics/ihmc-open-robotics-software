@@ -264,7 +264,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * 
     *
     */
-   public void packAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint pointFixedInBodyFrame, FrameVector frameVectorToPack)
+   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint pointFixedInBodyFrame, FrameVector frameVectorToPack)
    {
       expressedInFrame.checkReferenceFrameMatch(baseFrame);
       pointFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);

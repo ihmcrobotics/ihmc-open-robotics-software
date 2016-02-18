@@ -44,7 +44,7 @@ public class DesiredSpatialAccelerationJPanel extends JPanel
       bodyName = desiredSpatialAccelerationVector.getBodyFrame().getName();
       baseName = desiredSpatialAccelerationVector.getBaseFrame().getName();
       
-      desiredSpatialAccelerationVector.packMatrix(desiredSpatialAcceleration, 0);
+      desiredSpatialAccelerationVector.getMatrix(desiredSpatialAcceleration, 0);
       
       desiredSpatialAcceleration2.set(desiredSpatialAccelerationCommandAndMotionConstraint.getDesiredSpatialAcceleration());
       achievedSpatialAcceleration.set(desiredSpatialAccelerationCommandAndMotionConstraint.getAchievedSpatialAcceleration());

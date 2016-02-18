@@ -470,26 +470,26 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   @Override public void get(FrameOrientation orientationToPack)
+   @Override public void getOrientation(FrameOrientation orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   @Override public void packAngularVelocity(FrameVector velocityToPack)
+   @Override public void getAngularVelocity(FrameVector velocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   @Override public void packAngularAcceleration(FrameVector accelerationToPack)
+   @Override public void getAngularAcceleration(FrameVector accelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   @Override public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   @Override public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 
    @Override public String toString()

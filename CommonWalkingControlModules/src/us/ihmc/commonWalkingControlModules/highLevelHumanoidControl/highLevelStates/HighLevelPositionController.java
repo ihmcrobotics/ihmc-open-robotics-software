@@ -332,7 +332,7 @@ public class HighLevelPositionController extends HighLevelBehavior
          spatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, zeroDesiredLinearVelocity, zeroDesiredAngularVelocity,
                zeroDesiredLinearAcceleration, zeroDesiredAngularAcceleration, baseForEveryControl);
 
-         spatialAccelerationControlModule.packAcceleration(spatialAccelerationOutput);
+         spatialAccelerationControlModule.getAcceleration(spatialAccelerationOutput);
          TaskspaceConstraintData taskspaceConstraintData = taskspaceConstraintDataMap.get(endEffector);
          taskspaceConstraintData.set(baseForEveryControl, endEffector);
          taskspaceConstraintData.set(spatialAccelerationOutput, emptyNullspaceMultipliers, selectionMatrices.get(endEffector));

@@ -1,6 +1,15 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -34,7 +43,6 @@ import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Color3f;
 
-import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -105,6 +113,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class StandardSimulationGUI implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector, EntryBoxGroupSelector, CameraSelector,
       ViewportSelectorCommandExecutor, CameraHolder, ActiveCameraHolder, ActiveCanvas3DHolder, ExtraPanelSelector, VarGroupSelector, ExitActionListenerNotifier
@@ -2429,7 +2438,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                }
                catch (RuntimeException exception)
                {
-                  System.err.println("Warning: Could not find registry " + name);
+                  PrintTools.warn(StandardSimulationGUI.this, "Warning: Could not find registry " + name);
+                  // new Throwable().printStackTrace();
                }
             }
 
