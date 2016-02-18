@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
@@ -95,7 +96,7 @@ public class MomentumBasedController
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
-   private final SideDependentList<? extends ContactablePlaneBody> feet;
+   private final SideDependentList<ContactableFoot> feet;
    private final SideDependentList<ContactablePlaneBody> hands;
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
@@ -210,7 +211,7 @@ public class MomentumBasedController
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
-         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
+         SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
          ArmControllerParameters armControllerParameters, WalkingControllerParameters walkingControllerParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
@@ -1112,7 +1113,7 @@ public class MomentumBasedController
             admissibleDesiredGroundReactionTorque.getFrameTuple());
    }
 
-   public SideDependentList<? extends ContactablePlaneBody> getContactableFeet()
+   public SideDependentList<ContactableFoot> getContactableFeet()
    {
       return feet;
    }
