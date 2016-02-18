@@ -18,7 +18,6 @@ public class JoystickUpdater implements Runnable
    
    private HashMap<String, Float> lastValues = new HashMap<String, Float>();
    private int pollIntervalMillis = 5;
-   private float deadband = 0.0f;
    private boolean connected;
    private boolean threadRunning = false;
 
@@ -58,18 +57,6 @@ public class JoystickUpdater implements Runnable
 
          while (queue.getNextEvent(event))
          {
-            if (isJoystickAxisEvent(event))
-            {
-               if (isInDeadBand(event))
-               {
-                  event.set(event.getComponent(), 0.0f, event.getNanos());
-               }
-               else
-               {
-                  event.set(event.getComponent(), scaleValue(event), event.getNanos());
-               }
-            }
-
             if (isNewValue(event))
             {
                if (DEBUG)
@@ -88,7 +75,6 @@ public class JoystickUpdater implements Runnable
                for (JoystickStatusListener listener : generalListenersList)
                {
                   listener.updateConnectivity(connected);
-
                }
             }
          }
@@ -125,30 +111,6 @@ public class JoystickUpdater implements Runnable
       lastValues.put(event.getComponent().getName(), event.getValue());
 
       return true;
-   }
-
-   private float scaleValue(Event event)
-   {
-      if (event.getValue() > 0.0f)
-      {
-         return (event.getValue() - deadband) / (1.0f - deadband);
-      }
-      else
-      {
-         return (event.getValue() + deadband) / (1.0f - deadband);
-      }
-   }
-
-   private boolean isInDeadBand(Event event)
-   {
-      return (event.getValue() < deadband) && (event.getValue() > -deadband);
-   }
-
-   private boolean isJoystickAxisEvent(Event event)
-   {
-      String name = event.getComponent().getName();
-
-      return name.equals("X Axis") || name.equals("Y Axis") || name.equals("Z Rotation");
    }
 
    public void setPollIntervalMillis(int pollIntervalMillis)
