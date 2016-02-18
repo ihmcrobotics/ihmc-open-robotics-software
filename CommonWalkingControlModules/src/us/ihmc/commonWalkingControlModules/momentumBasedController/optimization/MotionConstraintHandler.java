@@ -38,7 +38,6 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
  */
 public class MotionConstraintHandler
 {
-   private final InverseDynamicsJoint[] jointsInOrder;
    private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
    private final int nDegreesOfFreedom;
 
@@ -79,7 +78,6 @@ public class MotionConstraintHandler
       this.geometricJacobianHolder = (geometricJacobianHolder != null) ? geometricJacobianHolder : new GeometricJacobianHolder();
       jacobiansHaveToBeUpdated = geometricJacobianHolder == null;
 
-      this.jointsInOrder = jointsInOrder;
       this.nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
 
       for (InverseDynamicsJoint joint : jointsInOrder)
@@ -140,8 +138,8 @@ public class MotionConstraintHandler
 
       if (selectionMatrix.getNumRows() > 0)
       {
-         RigidBody base = (spatialAccelerationCommand.getBase() == null) ? getBase(taskSpaceAcceleration) : spatialAccelerationCommand.getBase();
-         RigidBody endEffector = (spatialAccelerationCommand.getEndEffector() == null) ? getEndEffector(taskSpaceAcceleration) : spatialAccelerationCommand.getEndEffector();
+         RigidBody base = spatialAccelerationCommand.getBase();
+         RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
 
          long baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
          GeometricJacobian baseToEndEffectorJacobian = geometricJacobianHolder.getJacobian(baseToEndEffectorJacobianId);
@@ -480,29 +478,5 @@ public class MotionConstraintHandler
       MutableDouble ret = mutableDoubleList.get(index);
 
       return ret;
-   }
-
-   private RigidBody getBase(SpatialAccelerationVector taskSpaceAcceleration)
-   {
-      for (InverseDynamicsJoint joint : jointsInOrder)
-      {
-         RigidBody predecessor = joint.getPredecessor();
-         if (predecessor.getBodyFixedFrame() == taskSpaceAcceleration.getBaseFrame())
-            return predecessor;
-      }
-
-      throw new RuntimeException("Base for " + taskSpaceAcceleration + " could not be determined");
-   }
-
-   private RigidBody getEndEffector(SpatialAccelerationVector taskSpaceAcceleration)
-   {
-      for (InverseDynamicsJoint joint : jointsInOrder)
-      {
-         RigidBody successor = joint.getSuccessor();
-         if (successor.getBodyFixedFrame() == taskSpaceAcceleration.getBodyFrame())
-            return successor;
-      }
-
-      throw new RuntimeException("End effector for " + taskSpaceAcceleration + " could not be determined");
    }
 }
