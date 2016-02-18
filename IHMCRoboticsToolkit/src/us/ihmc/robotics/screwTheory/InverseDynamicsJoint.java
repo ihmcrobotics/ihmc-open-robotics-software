@@ -3,9 +3,10 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.kinematics.CommonJoint;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract interface InverseDynamicsJoint extends CommonJoint
+public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHashCodeHolder
 {
    public static int maxDoF = 6;
 

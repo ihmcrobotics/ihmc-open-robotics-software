@@ -1147,12 +1147,12 @@ public class MomentumBasedController
       }
    }
 
-   public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
+   public long getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
    {
       return robotJacobianHolder.getOrCreateGeometricJacobian(ancestor, descendant, jacobianFrame);
    }
 
-   public int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
+   public long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
       return robotJacobianHolder.getOrCreateGeometricJacobian(joints, jacobianFrame);
    }
@@ -1162,7 +1162,7 @@ public class MomentumBasedController
     * @param jacobianId
     * @return
     */
-   public GeometricJacobian getJacobian(int jacobianId)
+   public GeometricJacobian getJacobian(long jacobianId)
    {
       return robotJacobianHolder.getJacobian(jacobianId);
    }

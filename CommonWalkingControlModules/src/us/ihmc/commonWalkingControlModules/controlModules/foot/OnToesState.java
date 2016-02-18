@@ -65,7 +65,7 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint proportionalPart = new FramePoint();
    private final FrameVector derivativePart = new FrameVector();
 
-   private final int rootToFootJacobianId;
+   private final long rootToFootJacobianId;
 
    private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
@@ -153,9 +153,9 @@ public class OnToesState extends AbstractFootControlState
       commandList.addCommand(kneeJointCommand);
    }
 
-   private int createRootToFootJacobian()
+   private long createRootToFootJacobian()
    {
-      int jacobianId;
+      long jacobianId;
       RigidBody foot = contactableFoot.getRigidBody();
       ReferenceFrame jacobianFrame = rootBody.getBodyFixedFrame();
 
