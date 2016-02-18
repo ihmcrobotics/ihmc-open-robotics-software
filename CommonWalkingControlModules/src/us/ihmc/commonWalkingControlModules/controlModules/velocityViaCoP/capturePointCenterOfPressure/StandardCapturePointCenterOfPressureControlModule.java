@@ -466,7 +466,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       kCaptureY.set(ky);
    }
 
-   public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
+   public void getDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
    {
       double x = centerOfPressureDesiredWorld.getX();
       double y = centerOfPressureDesiredWorld.getY();

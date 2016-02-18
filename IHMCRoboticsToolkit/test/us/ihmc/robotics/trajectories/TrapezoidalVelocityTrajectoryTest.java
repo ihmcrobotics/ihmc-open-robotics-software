@@ -7,10 +7,10 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class TrapezoidalVelocityTrajectoryTest
 {
@@ -395,8 +395,7 @@ public class TrapezoidalVelocityTrajectoryTest
 	/**
 	 * Never really worked yet. Some day maybe.
 	 */
-   @Ignore
-   @DeployableTestMethod
+   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void DONTtestRandomSamples()
    {

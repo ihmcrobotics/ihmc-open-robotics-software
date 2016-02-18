@@ -285,7 +285,7 @@ public class DrivingFootControlModule
    private void doToePositionControl()
    {
       positionTrajectoryGenerator.compute(time.getDoubleValue() - trajectoryInitializationTime.getDoubleValue());
-      positionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, feedForward);
+      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForward);
 
       FrameVector output = new FrameVector(toePointFrame);
       toePointPositionController.compute(output, desiredPosition, desiredVelocity, currentVelocity, feedForward);
@@ -329,12 +329,12 @@ public class DrivingFootControlModule
 
    private void updateCurrentVelocity()
    {
-      twistCalculator.packRelativeTwist(currentTwist, elevator, foot);
-      currentTwist.packAngularPart(currentAngularVelocity);
+      twistCalculator.getRelativeTwist(currentTwist, elevator, foot);
+      currentTwist.getAngularPart(currentAngularVelocity);
       currentTwist.changeFrame(elevator.getBodyFixedFrame());
       toePointInBase.setIncludingFrame(toePoint);
       toePointInBase.changeFrame(elevator.getBodyFixedFrame());
-      currentTwist.packLinearVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
+      currentTwist.getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
    }
 
    private static FramePoint getCenterToePoint(ContactablePlaneBody foot)
@@ -391,7 +391,7 @@ public class DrivingFootControlModule
       public void doTransitionOutOfAction()
       {
          FramePoint currentDesired = new FramePoint();
-         positionTrajectoryGenerator.get(currentDesired);
+         positionTrajectoryGenerator.getPosition(currentDesired);
          currentDesired.changeFrame(initialToePointPosition.getReferenceFrame());
          initialToePointPosition.set(currentDesired);
       }

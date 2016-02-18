@@ -18,13 +18,13 @@ public class ComposableSE3ConfigurationProvider implements SE3ConfigurationProvi
       this.orientationProvider = orientationProvider;
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
-      orientationProvider.get(orientationToPack);
+      orientationProvider.getOrientation(orientationToPack);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
-      positionProvider.get(positionToPack);
+      positionProvider.getPosition(positionToPack);
    }
 }

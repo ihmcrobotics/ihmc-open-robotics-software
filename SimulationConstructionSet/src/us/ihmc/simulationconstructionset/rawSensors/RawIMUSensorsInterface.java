@@ -13,11 +13,11 @@ public interface RawIMUSensorsInterface
 
    public abstract void setCompass(Vector3d compass, int imuIndex);
 
-   public abstract void packOrientation(Matrix3d orientationToPack, int imuIndex);
+   public abstract void getOrientation(Matrix3d orientationToPack, int imuIndex);
 
-   public abstract void packAcceleration(Vector3d accelerationToPack, int imuIndex);
+   public abstract void getAcceleration(Vector3d accelerationToPack, int imuIndex);
 
-   public abstract void packAngularVelocity(Vector3d angularVelocityToPack, int imuIndex);
+   public abstract void getAngularVelocity(Vector3d angularVelocityToPack, int imuIndex);
 
-   public abstract void packCompass(Vector3d compassToPack, int imuIndex);
+   public abstract void getCompass(Vector3d compassToPack, int imuIndex);
 }

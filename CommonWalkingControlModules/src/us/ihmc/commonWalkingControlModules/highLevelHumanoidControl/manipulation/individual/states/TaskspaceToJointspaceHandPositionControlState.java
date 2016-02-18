@@ -212,9 +212,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
 
-      poseTrajectoryGenerator.get(desiredPose);
-      poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-      poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      poseTrajectoryGenerator.getPose(desiredPose);
+      poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+      poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       ReferenceFrame controlFrame = taskspaceToJointspaceCalculator.getControlFrame();
       desiredVelocity.changeFrame(controlFrame);
@@ -228,9 +228,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          handCompliantControlHelper.progressivelyCancelOutCorrection(desiredPosition, desiredOrientation);
 
       taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
-      taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
-      taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
-      taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
+      taskspaceToJointspaceCalculator.getDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
+      taskspaceToJointspaceCalculator.getDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
+      taskspaceToJointspaceCalculator.getDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 
       if (doPositionControl)
       {

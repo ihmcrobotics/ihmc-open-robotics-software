@@ -85,8 +85,8 @@ public class JointConfigurationGatherer
          return;
       }
 
-      rootJoint.packTranslation(rootTranslation);
-      rootJoint.packRotation(rootOrientation);
+      rootJoint.getTranslation(rootTranslation);
+      rootJoint.getRotation(rootOrientation);
       rootJoint.getAngularVelocity(rootAngularVelocity);
       rootJoint.getLinearVelocity(rootLinearVelocity);
       rootJoint.getLinearAcceleration(rootLinearAcceleration);
@@ -103,7 +103,7 @@ public class JointConfigurationGatherer
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {
          float[] forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
-         forceSensorDataList.get(sensorNumber).packWrench(forceAndMomentVector);
+         forceSensorDataList.get(sensorNumber).getWrench(forceAndMomentVector);
       }
    }
 

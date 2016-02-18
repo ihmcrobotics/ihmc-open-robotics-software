@@ -372,7 +372,7 @@ public class NewInstantaneousCapturePointPlannerTest
 		icpPlanner.setOmega0(omega0);
 		icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations);
 
-		icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
+		icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity, initialICPAcceleration,
 				initialTime);
 
 		if (visualize)
@@ -423,7 +423,7 @@ public class NewInstantaneousCapturePointPlannerTest
 				}
 			}
 
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
 					initialICPAcceleration, initialTime);
 
 			simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
@@ -434,7 +434,7 @@ public class NewInstantaneousCapturePointPlannerTest
 			initialTime = initialTime + singleSupportDuration;
 
 			icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations);
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(initialICPPosition, initialICPVelocity,
 					initialICPAcceleration, initialTime);
 
 			if (visualize)
@@ -579,7 +579,7 @@ public class NewInstantaneousCapturePointPlannerTest
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
 		{
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
 					time);
 
 			if (visualize)
@@ -621,7 +621,7 @@ public class NewInstantaneousCapturePointPlannerTest
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + doubleSupportDuration; time = time + deltaT)
 		{
-			icpPlanner.packDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
+			icpPlanner.getDesiredCapturePointPositionVelocityAndAcceleration(icpPositionToPack, icpVelocityToPack, icpAccelerationToPack,
 					time);
 
 			if (visualize)

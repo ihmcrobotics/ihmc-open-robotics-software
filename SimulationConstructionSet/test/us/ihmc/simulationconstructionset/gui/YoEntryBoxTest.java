@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -17,9 +16,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.UI})
 public class YoEntryBoxTest
@@ -125,9 +124,8 @@ public class YoEntryBoxTest
    public final static int DELAY_TIME_FOR_TESTING_CONCURRENT_UPDATE = 1000;    // TODO: Find a way to avoid having this parameter matter. I worry about this one.
 
    // GT - these values are twice the minimum working values for Trogdor.
-   @Ignore // This test is for humans to view
-
-	@DeployableTestMethod
+   // This test is for humans to view
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testEnumDisplay() throws SimulationExceededMaximumTimeException, InterruptedException
    {

@@ -4,5 +4,5 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 
 public interface OrientationProvider
 {
-   public abstract void get(FrameOrientation orientationToPack);
+   public abstract void getOrientation(FrameOrientation orientationToPack);
 }

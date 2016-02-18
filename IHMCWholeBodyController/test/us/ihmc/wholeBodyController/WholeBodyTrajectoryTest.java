@@ -13,7 +13,6 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
@@ -38,6 +37,7 @@ import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataC
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
@@ -80,9 +80,7 @@ public abstract class WholeBodyTrajectoryTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 4.1)
+   @DeployableTestMethod(estimatedDuration = 4.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 22445)
    public void testTrajectory() throws Exception
    {
@@ -204,7 +202,6 @@ public abstract class WholeBodyTrajectoryTest
       scs.applyDataProcessingFunction(robotAllJointsDataChecker);
    }
 
-   //@Ignore
 	@DeployableTestMethod(estimatedDuration = 1.3)
    @Test(timeout = 30000)
    public void testPointToPointRight() throws Exception
@@ -321,7 +318,6 @@ public abstract class WholeBodyTrajectoryTest
       assertFalse(robotAllJointsDataChecker.hasMinValueExeededAnyJoint());
    }
 
-   //@Ignore
 	@DeployableTestMethod(estimatedDuration = 2.8)
    @Test(timeout = 30000)
    public void testPointToPointLeft() throws Exception

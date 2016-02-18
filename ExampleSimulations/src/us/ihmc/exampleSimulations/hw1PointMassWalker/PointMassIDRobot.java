@@ -266,7 +266,7 @@ public class PointMassIDRobot
       centerOfMassJacobian.compute();
       centerOfMass.setToZero(centerOfMassFrame); 
       centerOfMass.changeFrame(worldFrame); 
-      centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
       centerOfMassVelocity.changeFrame(worldFrame); //to make sure that we are actually in world frame
       centerOfMass2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMass);
       centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity); 

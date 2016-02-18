@@ -43,6 +43,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -422,10 +423,8 @@ public class MomentumSolverTest
       checkAgainstNumericalDifferentiation(rootJoint, sixDoFJoints, revoluteJoints, DT, desiredMomentumRate, 1e-3);
    }
 
-
-   @Ignore    // Not working yet. We need to revisit momentum solving, add cases like this, clean it up, optimize it, and make it pretty
-
-	@DeployableTestMethod
+   // Not working yet. We need to revisit momentum solving, add cases like this, clean it up, optimize it, and make it pretty
+	@DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout=300000)
    public void testTwoInternalOverlappingSpatialAccelerations()
    {
@@ -717,7 +716,7 @@ public class MomentumSolverTest
 
       InverseDynamicsJoint[] jointList = ScrewTools.computeSubtreeJoints(base);
       DenseMatrix64F vdotTaskSpace = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointList), 1);
-      ScrewTools.packDesiredJointAccelerationsMatrix(jointList, vdotTaskSpace);
+      ScrewTools.getDesiredJointAccelerationsMatrix(jointList, vdotTaskSpace);
       DenseMatrix64F nullspaceMultiplierCheck = new DenseMatrix64F(nullspace.getNumCols(), vdotTaskSpace.getNumCols());
       CommonOps.multTransA(nullspace, vdotTaskSpace, nullspaceMultiplierCheck);
       CommonOps.subtractEquals(nullspaceMultiplierCheck, nullspaceMultipliers);
@@ -774,14 +773,14 @@ public class MomentumSolverTest
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector checkAcceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packRelativeAcceleration(checkAcceleration, elevator, jacobian.getEndEffector());
+      spatialAccelerationCalculator.getRelativeAcceleration(checkAcceleration, elevator, jacobian.getEndEffector());
 
       Twist twistOfCurrentWithRespectToNew = new Twist();
       Twist twistOfBodyWithRespectToBase = new Twist();
-      twistCalculator.packRelativeTwist(twistOfCurrentWithRespectToNew, jacobian.getBase(), jacobian.getEndEffector());
+      twistCalculator.getRelativeTwist(twistOfCurrentWithRespectToNew, jacobian.getBase(), jacobian.getEndEffector());
       twistOfCurrentWithRespectToNew.changeBaseFrameNoRelativeTwist(rootJoint.getFrameAfterJoint());
 
-      twistCalculator.packTwistOfBody(twistOfBodyWithRespectToBase, jacobian.getEndEffector());
+      twistCalculator.getTwistOfBody(twistOfBodyWithRespectToBase, jacobian.getEndEffector());
 
 //    checkAcceleration.changeFrame(spatialAcceleration.getExpressedInFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
 
@@ -823,7 +822,7 @@ public class MomentumSolverTest
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector checkAcceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.packRelativeAcceleration(checkAcceleration, jacobian.getBase(), jacobian.getEndEffector());
+      spatialAccelerationCalculator.getRelativeAcceleration(checkAcceleration, jacobian.getBase(), jacobian.getEndEffector());
 
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(spatialAcceleration, checkAcceleration, selectionMatrix, epsilon);
    }
@@ -873,7 +872,7 @@ public class MomentumSolverTest
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, 0.0);
       inverseDynamicsCalculator.compute();
       Wrench rootJointWrench = new Wrench();
-      rootJoint.packWrench(rootJointWrench);
+      rootJoint.getWrench(rootJointWrench);
       rootJointWrench.changeFrame(referenceFrame);
 
       SpatialForceVectorTest.assertSpatialForceVectorEquals(desiredMomentumRate, rootJointWrench, epsilonInverseDynamics);

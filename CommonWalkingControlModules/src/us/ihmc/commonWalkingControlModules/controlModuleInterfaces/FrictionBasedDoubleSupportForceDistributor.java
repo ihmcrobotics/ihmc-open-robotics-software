@@ -73,7 +73,7 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
       rightYawStrength.set(rightLegWeight / totalWeight);
    }
 
-   public void packForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesInPelvisFrameToPack,
+   public void getForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesInPelvisFrameToPack,
          double zForceInPelvisFrameTotal, FrameVector torqueInPelvisFrameTotal, SideDependentList<Double> legStrengths,
          SideDependentList<FramePoint2d> virtualToePoints)
    {

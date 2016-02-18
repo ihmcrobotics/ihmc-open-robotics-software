@@ -17,7 +17,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.FooTest.class,
-   us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidualTest.class
+   us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
+   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
+   us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class,
+   us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
+   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
+   us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
+   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class
 })
 
 public class AtlasDFastTestSuite

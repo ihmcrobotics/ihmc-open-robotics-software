@@ -195,7 +195,7 @@ public class FrameBox3d extends FrameShape3d
       return builder.toString();
    }
 
-   public void packFramePose(FramePose framePoseToPack)
+   public void getFramePose(FramePose framePoseToPack)
    {
       framePoseToPack.setPoseIncludingFrame(referenceFrame, box3d.transform);
    }

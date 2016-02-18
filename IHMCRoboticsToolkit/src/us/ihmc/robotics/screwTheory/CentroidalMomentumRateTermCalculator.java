@@ -142,14 +142,14 @@ public class CentroidalMomentumRateTermCalculator
                   tempTwist.set(jointList[j].getMotionSubspace().getAllUnitTwists().get(k));
                   tempTwist.changeFrame(rigidBodies[i].getInertia().getExpressedInFrame());
                   
-                  tempTwist.packMatrix(tempSpatialMotionMatrix, 0);
+                  tempTwist.getMatrix(tempSpatialMotionMatrix, 0);
                   CommonOps.mult(denseAdjTimesI[i], tempSpatialMotionMatrix, tempMatrix);
                   tempSpatialForceVector.set(centerOfMassFrame, tempMatrix);
                   unitMomenta[column].add(tempSpatialForceVector);
                }
             }
             //pack column into the centroidal momentum matrix
-            unitMomenta[column].packMatrix(tempMatrix);
+            unitMomenta[column].getMatrix(tempMatrix);
             MatrixTools.setMatrixBlock(centroidalMomentumMatrix, 0, column, tempMatrix, 0, 0, 6, 1, 1.0);
             
             // Multiply column by joint velocity and sum to compute center of mass velocity
@@ -161,14 +161,14 @@ public class CentroidalMomentumRateTermCalculator
          }
          
          // Pack twist of body j w.r.t. elevator expressed in body j com
-         twistCalculator.packRelativeTwist(bodyTwists[j], rootBody, rigidBodies[j]);
+         twistCalculator.getRelativeTwist(bodyTwists[j], rootBody, rigidBodies[j]);
          // Change expressed in frame to center of mass frame
          bodyTwists[j].changeFrame(centerOfMassFrame);
          
          tempTwist.set(bodyTwists[j]);
          tempTwist.changeFrame(jointList[j].getSuccessor().getInertia().getExpressedInFrame());
          // Ad^{T} * I * J * v
-         tempTwist.packMatrix(tempSpatialMotionMatrix, 0);
+         tempTwist.getMatrix(tempSpatialMotionMatrix, 0);
          CommonOps.mult(denseAdjTimesI[j], tempSpatialMotionMatrix, tempMatrix);
          tempSpatialForceVector.set(centerOfMassFrame,tempMatrix);
          bodyMomenta[j].set(tempSpatialForceVector);
@@ -202,7 +202,7 @@ public class CentroidalMomentumRateTermCalculator
          tempVector.cross(bodyMomenta[i].getLinearPart(), tempTwist.getAngularPart());
          leftSide.addLinearPart(tempVector);
          //
-         leftSide.packMatrix(tempSpatialForceMatrix);
+         leftSide.getMatrix(tempSpatialForceMatrix);
          CommonOps.add(aDotV, tempSpatialForceMatrix, aDotV);
       }
    }
@@ -212,8 +212,8 @@ public class CentroidalMomentumRateTermCalculator
       // Here we calculate Jdot * v by computing the spatial acceleration with vddot = 0
       for(int j = 0; j<jointList.length; j++)
       {
-         spatialAccelerationCalculator.packAccelerationOfBody(tempSpatialAcceleration, rigidBodies[j]);
-         tempSpatialAcceleration.packMatrix(tempSpatialMotionMatrix, 0);
+         spatialAccelerationCalculator.getAccelerationOfBody(tempSpatialAcceleration, rigidBodies[j]);
+         tempSpatialAcceleration.getMatrix(tempSpatialMotionMatrix, 0);
          CommonOps.mult(denseAdjTimesI[j], tempSpatialMotionMatrix, tempMatrix);
          CommonOps.add(aDotV, tempMatrix, aDotV);
       }
@@ -236,7 +236,7 @@ public class CentroidalMomentumRateTermCalculator
          tempPTilde.mul(tempMatrix3d);
          set3By3MatrixBlock(tempAdjoint, 0, 3, tempPTilde);
          
-         rigidBodies[i].getInertia().packMatrix(tempInertiaMatrix);
+         rigidBodies[i].getInertia().getMatrix(tempInertiaMatrix);
          CommonOps.mult(tempAdjoint, tempInertiaMatrix, denseAdjTimesI[i]);
       }
    }

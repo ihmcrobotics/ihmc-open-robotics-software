@@ -41,7 +41,7 @@ public class CurrentPositionProviderTest
       provider = new CurrentPositionProvider(referenceFrame);
       FramePoint framePointToPack = new FramePoint(referenceFrame);
 
-      provider.get(framePointToPack);
+      provider.getPosition(framePointToPack);
 
       assertEquals(referenceFrame, framePointToPack.getReferenceFrame());
    }

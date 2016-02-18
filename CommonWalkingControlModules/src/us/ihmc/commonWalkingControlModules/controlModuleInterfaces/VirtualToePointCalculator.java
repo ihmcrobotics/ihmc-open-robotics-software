@@ -15,8 +15,8 @@ public interface VirtualToePointCalculator
     * @param CoPDesiredInMidFeetZUp the desired CoP to be realized by the virtual toe points and the leg strengths. Must be inside support polygon.
     * @param upcomingSupportSide upcoming leg to support on. null signifies staying in double support
     */
-   public abstract void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d coPDesired, RobotSide upcomingSupportSide);
+   public abstract void getVirtualToePoints(SideDependentList<FramePoint2d> virtualToePointsToPack, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d coPDesired, RobotSide upcomingSupportSide);
 
-   public abstract void packVirtualToePoints(SideDependentList<FramePoint2d> originalVirtualToePoints, FramePoint2d copDesired,
+   public abstract void getVirtualToePoints(SideDependentList<FramePoint2d> originalVirtualToePointsToPack, FramePoint2d copDesired,
          FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges, RobotSide upcomingSupportSide);
 }

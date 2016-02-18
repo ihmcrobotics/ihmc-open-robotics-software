@@ -1,19 +1,20 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Ignore;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Point2d;
+
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Point2d;
-import java.util.ArrayList;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class ConvexPolygonShrinkerTest
 {
@@ -154,8 +155,8 @@ public class ConvexPolygonShrinkerTest
       }
    }
    
-   @Ignore("Use manually when making sure no garbage is generated or doing timing tests.")
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   // Use manually when making sure no garbage is generated or doing timing tests.
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 30000)
    public void testMemoryGarbageGeneration()
    {

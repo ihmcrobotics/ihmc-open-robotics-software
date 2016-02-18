@@ -1025,7 +1025,7 @@ public class FootExplorationControlModule
       public void getICPPosition(FramePoint2d desiredICPPositionToPack)
       {
          compute(ICPPositionPercentage.getDoubleValue());
-         get(tempPositionToPack);
+         getPosition(tempPositionToPack);
          tempPositionToPack.changeFrame(desiredICPPositionToPack.getReferenceFrame());
          desiredICPPositionToPack.set(tempPositionToPack.getX(), tempPositionToPack.getY());
       }
@@ -1039,7 +1039,7 @@ public class FootExplorationControlModule
    private PositionProvider initialICPPositionProvider = new PositionProvider()
    {
       @Override
-      public void get(FramePoint positionToPack)
+      public void getPosition(FramePoint positionToPack)
       {
          supportFootCentroid.checkReferenceFrameMatch(worldFrame);
          positionToPack.setIncludingFrame(worldFrame, supportFootCentroid.getX(), supportFootCentroid.getY(), 0.0);
@@ -1049,7 +1049,7 @@ public class FootExplorationControlModule
    private PositionProvider finalICPPositionProvider = new PositionProvider()
    {
       @Override
-      public void get(FramePoint positionToPack)
+      public void getPosition(FramePoint positionToPack)
       {
          nextFootStepCentroid.checkReferenceFrameMatch(worldFrame);
          positionToPack.setIncludingFrame(worldFrame, nextFootStepCentroid.getX(), nextFootStepCentroid.getY(), 0.0);
@@ -1086,7 +1086,7 @@ public class FootExplorationControlModule
       public void getCoPPosition(FramePoint2d desiredCoPPositionToPack, double percentage)
       {
          compute(percentage);
-         get(tempPositionToPack);
+         getPosition(tempPositionToPack);
          desiredCoPPositionToPack.set(tempPositionToPack.getX(), tempPositionToPack.getY());
       }
 
@@ -1099,7 +1099,7 @@ public class FootExplorationControlModule
    private PositionProvider initialCoPPositionProvider = new PositionProvider()
    {
       @Override
-      public void get(FramePoint positionToPack)
+      public void getPosition(FramePoint positionToPack)
       {
          initialCoP.checkReferenceFrameMatch(CoPFrame);
          positionToPack.setIncludingFrame(worldFrame, initialCoP.getX(), initialCoP.getY(), 0.0);
@@ -1109,7 +1109,7 @@ public class FootExplorationControlModule
    private PositionProvider finalCoPPositionProvider = new PositionProvider()
    {
       @Override
-      public void get(FramePoint positionToPack)
+      public void getPosition(FramePoint positionToPack)
       {
          finalCoP.checkReferenceFrameMatch(CoPFrame);
          positionToPack.setIncludingFrame(worldFrame, finalCoP.getX(), finalCoP.getY(), 0.0);
@@ -1337,9 +1337,9 @@ public class FootExplorationControlModule
    {
       for (RobotSide side : RobotSide.values)
       {
-         momentumBasedController.getTwistCalculator().packTwistOfBody(tmpTwist, momentumBasedController.getFullRobotModel().getFoot(side));
+         momentumBasedController.getTwistCalculator().getTwistOfBody(tmpTwist, momentumBasedController.getFullRobotModel().getFoot(side));
          tmpTwist.changeFrame(ReferenceFrame.getWorldFrame());
-         tmpTwist.packAngularPart(tmpVector);
+         tmpTwist.getAngularPart(tmpVector);
          footAngularRate.get(side).set(tmpVector.length());
       }
    }

@@ -3,14 +3,13 @@ package us.ihmc.simulationconstructionset;
 import java.awt.AWTException;
 
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 @DeployableTestClass(targets = TestPlanTarget.Manual)
@@ -27,9 +26,7 @@ public class SimulationConstructionSetTest
       return false;
    }
    
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
    {
@@ -59,9 +56,7 @@ public class SimulationConstructionSetTest
 
    }
 
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetVideoGenerationUsingGUITestFixture() throws AWTException
    {

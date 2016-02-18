@@ -59,8 +59,8 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       {
          double timeAtWaypoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
          simpleTrajectory.compute(timeAtWaypoint);
-         simpleTrajectory.get(waypointPosition);
-         simpleTrajectory.packVelocity(waypointVelocity);
+         simpleTrajectory.getPosition(waypointPosition);
+         simpleTrajectory.getVelocity(waypointVelocity);
          multipleWaypointTrajectory.appendWaypoint(timeAtWaypoint, waypointPosition, waypointVelocity);
       }
       multipleWaypointTrajectory.initialize();
@@ -77,10 +77,10 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       for (double t = 0.0; t <= trajectoryTime; t += dt)
       {
          multipleWaypointTrajectory.compute(t);
-         multipleWaypointTrajectory.packLinearData(positionToPackMultiple, velocityToPackMultiple, accelerationToPackMultiple);
+         multipleWaypointTrajectory.getLinearData(positionToPackMultiple, velocityToPackMultiple, accelerationToPackMultiple);
          
          simpleTrajectory.compute(t);
-         simpleTrajectory.packLinearData(positionToPackSimple, velocityToPackSimple, accelerationToPackSimple);
+         simpleTrajectory.getLinearData(positionToPackSimple, velocityToPackSimple, accelerationToPackSimple);
     
          boolean positionEqual = positionToPackMultiple.epsilonEquals(positionToPackSimple, EPSILON);
          assertTrue(positionEqual);

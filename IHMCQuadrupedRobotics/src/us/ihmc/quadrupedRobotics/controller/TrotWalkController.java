@@ -346,7 +346,7 @@ public class TrotWalkController extends QuadrupedController
       centerOfMassPosition.set(coMPosition);
       centerOfMassPositionXYProjection.set(centerOfMassPosition.getReferenceFrame(), centerOfMassPosition.getX(), centerOfMassPosition.getY(), 0.0);
       centerOfMassJacobian.compute();
-      centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
+      centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
       comVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassVelocity.set(comVelocity);
 

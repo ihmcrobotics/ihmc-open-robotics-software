@@ -158,8 +158,8 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
       FramePoint tempFinalPosition = new FramePoint(referenceFrame);
       FrameVector tempFinalVelocity = new FrameVector(referenceFrame);
 
-      initialPositionProvider.get(tempInitialPosition);
-      finalDesiredPositionProvider.get(tempFinalPosition);
+      initialPositionProvider.getPosition(tempInitialPosition);
+      finalDesiredPositionProvider.getPosition(tempFinalPosition);
       finalDesiredVelocityProvider.get(tempFinalVelocity);
 
       tempInitialPosition.changeFrame(referenceFrame);

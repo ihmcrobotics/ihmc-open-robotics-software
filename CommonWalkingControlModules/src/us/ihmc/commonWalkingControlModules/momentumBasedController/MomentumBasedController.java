@@ -614,7 +614,7 @@ public class MomentumBasedController
       }
 
       SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
-      centroidalMomentumRateSolution.packLinearPart(centroidalMomentumRateSolutionLinearPart);
+      centroidalMomentumRateSolution.getLinearPart(centroidalMomentumRateSolutionLinearPart);
       centroidalMomentumRateSolutionLinearPart.scale(1.0 / totalMass);
       qpOutputCoMAcceleration.set(centroidalMomentumRateSolutionLinearPart);
 
@@ -642,7 +642,7 @@ public class MomentumBasedController
          if (hand != null)
          {
             Wrench handWrench = handWrenches.get(robotSide);
-            inverseDynamicsCalculator.getSpatialAccelerationCalculator().packAccelerationOfBody(tempAcceleration, hand);
+            inverseDynamicsCalculator.getSpatialAccelerationCalculator().getAccelerationOfBody(tempAcceleration, hand);
             toolRigidBodies.get(robotSide).control(tempAcceleration, handWrench);
 
             if (externalWrenches.containsKey(hand))
@@ -773,7 +773,7 @@ public class MomentumBasedController
 
          footSwitch.computeAndPackFootWrench(footWrench);
          footForceVector.setToZero(footWrench.getExpressedInFrame());
-         footWrench.packLinearPart(footForceVector);
+         footWrench.getLinearPart(footForceVector);
          footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
 
          double zForce = footForceVector.getZ();
@@ -1012,12 +1012,12 @@ public class MomentumBasedController
          RigidBody foot = fullRobotModel.getFoot(robotSide);
 
          spatialAccelerationCalculator.compute();
-         spatialAccelerationCalculator.packRelativeAcceleration(spatialAccelerationOfFoot, elevator, foot);
+         spatialAccelerationCalculator.getRelativeAcceleration(spatialAccelerationOfFoot, elevator, foot);
 
-         spatialAccelerationOfFoot.packAngularPart(footSpatialAccelerationAngularPart);
+         spatialAccelerationOfFoot.getAngularPart(footSpatialAccelerationAngularPart);
          yoFeetDesiredAngularAccelerations.get(robotSide).set(footSpatialAccelerationAngularPart);
 
-         spatialAccelerationOfFoot.packLinearPart(footSpatialAccelerationLinearPart);
+         spatialAccelerationOfFoot.getLinearPart(footSpatialAccelerationLinearPart);
          yoFeetDesiredLinearAccelerations.get(robotSide).set(footSpatialAccelerationLinearPart);
       }
 
@@ -1025,8 +1025,8 @@ public class MomentumBasedController
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
       rootJoint.getDesiredJointAcceleration(rootJointDesiredAcceleration);
 
-      rootJointDesiredAcceleration.packAngularPart(rootJointDesiredAngularAcceleration);
-      rootJointDesiredAcceleration.packLinearPart(rootJointDesiredLinearAcceleration);
+      rootJointDesiredAcceleration.getAngularPart(rootJointDesiredAngularAcceleration);
+      rootJointDesiredAcceleration.getLinearPart(rootJointDesiredLinearAcceleration);
 
       yoRootJointDesiredAngularAcceleration.set(rootJointDesiredAngularAcceleration);
       yoRootJointDesiredLinearAcceleration.set(rootJointDesiredLinearAcceleration);
@@ -1040,15 +1040,15 @@ public class MomentumBasedController
       yoRootJointDesiredAngularAccelerationWorld.set(rootJointDesiredAngularAcceleration);
 
       // Root Joint Twist
-      rootJointTwist.packAngularPart(twistOfRootJointAngularPart);
+      rootJointTwist.getAngularPart(twistOfRootJointAngularPart);
       yoRootJointAngularVelocity.set(twistOfRootJointAngularPart);
 
-      rootJointTwist.packLinearPart(twistOfRootJointLinearPart);
+      rootJointTwist.getLinearPart(twistOfRootJointLinearPart);
       twistOfRootJointLinearPart.changeFrame(ReferenceFrame.getWorldFrame());
       yoRootJointLinearVelocity.set(twistOfRootJointLinearPart);
 
       // Root Joint Residual Wrench
-      rootJoint.packWrench(residualRootJointWrench);
+      rootJoint.getWrench(residualRootJointWrench);
       residualRootJointWrench.changeFrame(referenceFrames.getCenterOfMassFrame());
       residualRootJointForce.set(residualRootJointWrench.getLinearPartX(), residualRootJointWrench.getLinearPartY(), residualRootJointWrench.getLinearPartZ());
       residualRootJointTorque.set(residualRootJointWrench.getAngularPartX(), residualRootJointWrench.getAngularPartY(),
@@ -1082,18 +1082,18 @@ public class MomentumBasedController
       {
          ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
-         wristForceSensor.packWrench(wristTempWrench);
+         wristForceSensor.getWrench(wristTempWrench);
 
-         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+         wristTempWrench.getLinearPartIncludingFrame(tempWristForce);
+         wristTempWrench.getAngularPartIncludingFrame(tempWristTorque);
 
          wristRawMeasuredForces.get(robotSide).setAndMatchFrame(tempWristForce);
          wristRawMeasuredTorques.get(robotSide).setAndMatchFrame(tempWristTorque);
 
          cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
 
-         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+         wristTempWrench.getLinearPartIncludingFrame(tempWristForce);
+         wristTempWrench.getAngularPartIncludingFrame(tempWristTorque);
 
          wristForcesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristForce);
          wristTorquesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristTorque);
@@ -1351,7 +1351,7 @@ public class MomentumBasedController
 
    public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
    {
-      centerOfMassJacobian.packCenterOfMassVelocity(centerOfMassVelocityToPack);
+      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityToPack);
    }
 
    public void getAdmissibleDesiredGroundReactionWrench(SpatialForceVector admissibleDesiredGroundReactionWrenchToPack)

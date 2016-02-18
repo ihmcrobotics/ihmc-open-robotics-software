@@ -12,7 +12,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
@@ -154,8 +153,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    //TODO
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 10.0)
+   @DeployableTestMethod(estimatedDuration = 10.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 600000)
    public void testRandomRotationErrorInterpolation()
    {
@@ -241,9 +239,9 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          assertTrue(interpolatedPose.epsilonEquals(expectedGoalPose, 1e-4));
       }
    }
-
-   @Ignore //TODO
-   @DeployableTestMethod(estimatedDuration = 10.0)
+   
+   // TODO
+   @DeployableTestMethod(estimatedDuration = 10.0, targets = TestPlanTarget.Exclude)
    @Test(timeout = 600000)
    public void testTranslationAndRotationErrorsInterpolation()
    {
@@ -403,8 +401,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @Ignore //TODO
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   //TODO
+   @DeployableTestMethod(estimatedDuration = 0.3, targets = TestPlanTarget.Exclude)
    @Test(timeout = 60000)
    public void testMaxRotationalCorrectionSpeedClip()
    {
@@ -488,8 +486,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @Ignore // TODO
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   // TODO
+   @DeployableTestMethod(estimatedDuration = 0.3, targets = TestPlanTarget.Exclude)
    @Test(timeout = 30000)
    public void testMaxCorrectionSpeedClipWorksWhenTranslationAndRotationOffsetsAreBig()
    {

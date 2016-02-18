@@ -80,7 +80,7 @@ public class MomentumOptimizationSettings
       tempMomentum.setAngularPartY(angularMomentumXYWeight.getDoubleValue());
       tempMomentum.setAngularPartZ(angularMomentumZWeight.getDoubleValue());
 
-      tempMomentum.packMatrix(momentumWeightDiagonal);
+      tempMomentum.getMatrix(momentumWeightDiagonal);
       CommonOps.diag(tempMatrix, Momentum.SIZE, momentumWeightDiagonal);
 
       CommonOps.mult(momentumSubspaceProjector, tempMatrix, C);
@@ -93,7 +93,7 @@ public class MomentumOptimizationSettings
       return wRhoPlane;
    }
 
-   public void packDampedLeastSquaresFactorMatrix(DenseMatrix64F dampedLeastSquaresFactorMatrixToPack)
+   public void getDampedLeastSquaresFactorMatrix(DenseMatrix64F dampedLeastSquaresFactorMatrixToPack)
    {
       CommonOps.setIdentity(dampedLeastSquaresFactorMatrixToPack);
       CommonOps.scale(lambda.getDoubleValue(), dampedLeastSquaresFactorMatrixToPack);

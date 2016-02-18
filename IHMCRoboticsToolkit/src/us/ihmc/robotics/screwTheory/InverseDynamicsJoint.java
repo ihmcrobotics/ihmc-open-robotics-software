@@ -21,21 +21,21 @@ public abstract interface InverseDynamicsJoint extends CommonJoint
 
    public abstract void getJointAcceleration(SpatialAccelerationVector accelerationToPack);
 
-   public abstract void getSuccessorAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void getDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getDesiredJointAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void getDesiredSuccessorAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getDesiredSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void getDesiredPredecessorAcceleration(SpatialAccelerationVector jointAcceleration);
+   public abstract void getDesiredPredecessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
-   public abstract void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart);
+   public abstract void getConfigurationMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
-   public abstract void getTauMatrix(DenseMatrix64F matrix);
+   public abstract void getTauMatrix(DenseMatrix64F matrixToPack);
 
-   public abstract void getVelocityMatrix(DenseMatrix64F matrix, int rowStart);
+   public abstract void getVelocityMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
-   public abstract void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart);
+   public abstract void getDesiredAccelerationMatrix(DenseMatrix64F matrixToPack, int rowStart);
 
    public abstract void setDesiredAccelerationToZero();
 

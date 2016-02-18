@@ -187,7 +187,7 @@ public class StanceFullLegJacobian
    /**
     * Packs a LegTorques object with the torques corresponding to the given wrench on the pelvis.
     */
-   public void packLegTorques(LegTorques legTorquesToPack, Wrench wrenchOnPelvisInPelvisFrame)
+   public void getLegTorques(LegTorques legTorquesToPack, Wrench wrenchOnPelvisInPelvisFrame)
    {
       // check that the LegTorques object we're packing has the correct RobotSide.
       if (this.robotSide != legTorquesToPack.getRobotSide())

@@ -90,9 +90,9 @@ public class SimulatedIMURawSensorReaderTest
          fullRobotModel.update(randomTransformBodyToWorld, randomLinearVelocity, randomAngularVelocity, randomLinearAcceleration, randomAngularAcceleration);
          simulatedIMURawSensorReader.read();
          
-         rawSensors.packOrientation(actualIMUOrientation, IMU_INDEX);
-         rawSensors.packAngularVelocity(actualAngularVelocity, IMU_INDEX);
-         rawSensors.packAcceleration(actualLinearAcceleration, IMU_INDEX);
+         rawSensors.getOrientation(actualIMUOrientation, IMU_INDEX);
+         rawSensors.getAngularVelocity(actualAngularVelocity, IMU_INDEX);
+         rawSensors.getAcceleration(actualLinearAcceleration, IMU_INDEX);
          
          generateExpectedOrientation();
          generateExpectedAngularVelocity();
@@ -262,7 +262,7 @@ public class SimulatedIMURawSensorReaderTest
          r_imu_compass_z = compass.getZ();
       }
 
-      public void packOrientation(Matrix3d orientationToPack, int imuIndex)
+      public void getOrientation(Matrix3d orientationToPack, int imuIndex)
       {
          orientationToPack.setM00(r_imu_m00);
          orientationToPack.setM01(r_imu_m01);
@@ -277,17 +277,17 @@ public class SimulatedIMURawSensorReaderTest
          orientationToPack.setM22(r_imu_m22);
       }
 
-      public void packAcceleration(Vector3d accelerationToPack, int imuIndex)
+      public void getAcceleration(Vector3d accelerationToPack, int imuIndex)
       {
          accelerationToPack.set(r_imu_accel_x, r_imu_accel_y, r_imu_accel_z);
       }
 
-      public void packAngularVelocity(Vector3d angularVelocityToPack, int imuIndex)
+      public void getAngularVelocity(Vector3d angularVelocityToPack, int imuIndex)
       {
          angularVelocityToPack.set(r_imu_gyro_x, r_imu_gyro_y, r_imu_gyro_z);
       }
 
-      public void packCompass(Vector3d compassToPack, int imuIndex)
+      public void getCompass(Vector3d compassToPack, int imuIndex)
       {
          compassToPack.set(r_imu_compass_x, r_imu_compass_y, r_imu_compass_z);
       }

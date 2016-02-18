@@ -5,16 +5,15 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Frame;
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.UI})
 public class SimulationConstructionSetMemoryReclamationTest
@@ -51,9 +50,8 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-   @Ignore // TODO https://jira.ihmc.us/browse/DRC-2208
-
-	@DeployableTestMethod
+   // TODO https://jira.ihmc.us/browse/DRC-2208
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobotAndVideo()
    {

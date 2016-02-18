@@ -77,7 +77,7 @@ public class GeometricJacobian
          Twist twist = unitTwistList.get(i);
          tempTwist.set(twist);
          tempTwist.changeFrame(jacobianFrame);
-         tempTwist.packMatrix(tempMatrix, 0);
+         tempTwist.getMatrix(tempMatrix, 0);
          CommonOps.extract(tempMatrix, 0, tempMatrix.getNumRows(), 0, tempMatrix.getNumCols(), jacobian, 0, column++);
       }
    }
@@ -97,7 +97,7 @@ public class GeometricJacobian
     * angular velocity part of the twist is the angular velocity of end effector frame, with respect to base frame, rotated to end effector frame
     * linear velocity part of the twist is the linear velocity of end effector frame, with respect to base frame, rotated to end effector frame
     */
-   public void packTwist(Twist twistToPack, DenseMatrix64F jointVelocities)
+   public void getTwist(Twist twistToPack, DenseMatrix64F jointVelocities)
    {
       CommonOps.mult(jacobian, jointVelocities, tempMatrix);
       twistToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
@@ -115,7 +115,7 @@ public class GeometricJacobian
       wrench.getExpressedInFrame().checkReferenceFrameMatch(this.jacobianFrame);
 
 
-      wrench.packMatrix(tempMatrix);
+      wrench.getMatrix(tempMatrix);
       DenseMatrix64F jointTorques = new DenseMatrix64F(1, jacobian.getNumCols());
       CommonOps.multTransA(tempMatrix, jacobian, jointTorques);
       CommonOps.transpose(jointTorques);
