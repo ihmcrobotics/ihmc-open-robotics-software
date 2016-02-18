@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -23,7 +22,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule
 {
-   private final MomentumRateData momentumRateOfChangeData;
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -70,7 +68,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       this.totalMass = totalMass;
       centerOfMass = new FramePoint(centerOfMassFrame);
       this.gravityZ = gravityZ;
-      momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
       parentRegistry.addChild(registry);
 
       // hide CoP since we won't be calculating it explicitly in this class
@@ -115,7 +112,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
-      momentumRateOfChangeData.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+      momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
    }
 
    public void updateCenterOfMassViz()
@@ -146,9 +143,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
-   public void getMomentumRateOfChange(MomentumRateData momentumRateOfChangeDataToPack)
+   public MomentumRateCommand getMomentumRateCommand()
    {
-      momentumRateOfChangeDataToPack.set(momentumRateOfChangeData);
+      return momentumRateCommand;
    }
 
    public void setSupportLeg(RobotSide newSupportSide)

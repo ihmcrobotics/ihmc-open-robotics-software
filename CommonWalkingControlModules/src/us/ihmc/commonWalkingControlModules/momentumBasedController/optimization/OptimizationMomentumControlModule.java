@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.I
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
@@ -97,7 +96,7 @@ public class OptimizationMomentumControlModule
    private final EnumYoVariable<QPSolverFlavor> currentQPSolver = new EnumYoVariable<>("currentQPSolver", registry, QPSolverFlavor.class);
    private final IntegerYoVariable qpSolverIteration = new IntegerYoVariable("qpSolverInteration", registry);
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
-   private final MomentumRateData momentumRateOfChangeData;
+   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final LinearSolver<DenseMatrix64F> hardMotionConstraintSolver;
 
    private final DenseMatrix64F dampedLeastSquaresFactorMatrix;
@@ -164,8 +163,6 @@ public class OptimizationMomentumControlModule
 
       dampedLeastSquaresFactorMatrix = new DenseMatrix64F(nDoF, nDoF);
 
-      this.momentumRateOfChangeData = new MomentumRateData(centerOfMassFrame);
-
       this.hardMotionConstraintSolver = new DampedLeastSquaresSolver(1, momentumOptimizationSettings.getDampedLeastSquaresFactor());
       this.equalityConstraintEnforcer = new EqualityConstraintEnforcer(hardMotionConstraintSolver);
 
@@ -180,7 +177,7 @@ public class OptimizationMomentumControlModule
 
    public void reset()
    {
-      momentumRateOfChangeData.setEmpty();
+      momentumRateCommand.setEmpty();
       primaryMotionConstraintHandler.reset();
       secondaryMotionConstraintHandler.reset();
       externalWrenchHandler.reset();
@@ -249,7 +246,7 @@ public class OptimizationMomentumControlModule
 
       // C2:  A vd = b = hd - Ad v
       DenseMatrix64F a = centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
-      DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateOfChangeData);
+      DenseMatrix64F b = centroidalMomentumHandler.getMomentumDotEquationRightHandSide(momentumRateCommand);
       bOriginal.set(b);
 
       if (useNullSpaceProjection)
@@ -282,7 +279,7 @@ public class OptimizationMomentumControlModule
       momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
 
       // Lambda
-      DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace());
+      DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateCommand.getMomentumSubspace());
 
       if (useNullSpaceProjection)
       {
@@ -459,9 +456,9 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   private void setDesiredRateOfChangeOfMomentum(MomentumRateCommand desiredRateOfChangeOfMomentumCommand)
+   private void setDesiredRateOfChangeOfMomentum(MomentumRateCommand momentumRateCommand)
    {
-      this.momentumRateOfChangeData.set(desiredRateOfChangeOfMomentumCommand.getMomentumRateData());
+      this.momentumRateCommand.set(momentumRateCommand);
    }
 
    private void setExternalWrenchToCompensateFor(ExternalWrenchCommand externalWrenchCommand)
