@@ -7,19 +7,33 @@ public class DenseMatrixArrayList extends RecyclingArrayList<DenseMatrix64F>
 
    public DenseMatrixArrayList()
    {
-      super(DenseMatrix64F.class);
+      super(createBuilder());
    }
 
    public DenseMatrixArrayList(int initialSize)
    {
-      super(initialSize, DenseMatrix64F.class);
+      super(initialSize, createBuilder());
    }
 
-   @Override
-   protected DenseMatrix64F newInstance()
+   public void set(DenseMatrixArrayList denseMatrixArrayList)
    {
-      DenseMatrix64F denseMatrix64F = new DenseMatrix64F(1);
-      denseMatrix64F.reshape(0, 0);
-      return denseMatrix64F;
+      clear();
+      for (int i = 0; i < denseMatrixArrayList.size(); i++)
+         add().set(denseMatrixArrayList.get(i));
+   }
+
+   private static Builder<DenseMatrix64F> createBuilder()
+   {
+      Builder<DenseMatrix64F> builder = new Builder<DenseMatrix64F>()
+      {
+         @Override
+         public DenseMatrix64F newInstance()
+         {
+            DenseMatrix64F denseMatrix64F = new DenseMatrix64F(1);
+            denseMatrix64F.reshape(0, 0);
+            return denseMatrix64F;
+         }
+      };
+      return builder;
    }
 }

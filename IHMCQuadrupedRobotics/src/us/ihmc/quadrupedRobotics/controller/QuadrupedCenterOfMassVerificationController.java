@@ -15,13 +15,13 @@ import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -439,7 +439,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
          framePointToPack.add(x, y, 0.0);
       }
       
-      public void setPosition(FramePoint newPosition)
+      public void setPosition(FramePoint newPosition, boolean reset)
       {
          newPosition.changeFrame(trotLineFrame);
          
@@ -448,20 +448,25 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
          
          desiredCenterOfMassLargeIncrementX.set(x);
          desiredCenterOfMassSmallIncrementX.set(0.0);
-         filteredDesiredCenterOfMassLargeIncrementX.reset();
-         filteredDesiredCenterOfMassSmallIncrementX.reset();
-         
-         filteredDesiredCenterOfMassLargeIncrementX.update();
-         filteredDesiredCenterOfMassSmallIncrementX.update();
          
          desiredCenterOfMassLargeIncrementY.set(y);
          desiredCenterOfMassSmallIncrementY.set(0.0);
-         filteredDesiredCenterOfMassLargeIncrementY.reset();
-         filteredDesiredCenterOfMassSmallIncrementY.reset();
+         
+         if (reset)
+         {
+            filteredDesiredCenterOfMassLargeIncrementX.reset();
+            filteredDesiredCenterOfMassSmallIncrementX.reset();
 
-         filteredDesiredCenterOfMassLargeIncrementY.update();
-         filteredDesiredCenterOfMassSmallIncrementY.update();
-         update();
+            filteredDesiredCenterOfMassLargeIncrementX.update();
+            filteredDesiredCenterOfMassSmallIncrementX.update();
+
+            filteredDesiredCenterOfMassLargeIncrementY.reset();
+            filteredDesiredCenterOfMassSmallIncrementY.reset();
+
+            filteredDesiredCenterOfMassLargeIncrementY.update();
+            filteredDesiredCenterOfMassSmallIncrementY.update();
+            update();
+         }
       }
    }
 
@@ -478,6 +483,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       private final HashMap<TrotPair, CenterOfMassIncrementVariableHolder> incrementHolders = new HashMap<>();
       private final double totalMass;
       private final double bodyMass;
+      private final BooleanYoVariable shiftCoMOverCenterOfFeet = new BooleanYoVariable("shiftCoMOverCenterOfFeet", registry);
 
       public MoveCenterOfMassAround()
       {
@@ -494,7 +500,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
          {
             ReferenceFrame trotLineReferenceFrame = getReferenceFrameForTrotPair(trotPair);
             CenterOfMassIncrementVariableHolder centerOfMassIncrementHolder = new CenterOfMassIncrementVariableHolder(trotPair, trotLineReferenceFrame, intialCenterOfMassReferenceFrame);
-            centerOfMassIncrementHolder.setPosition(intialCenterOfMass);
+            centerOfMassIncrementHolder.setPosition(intialCenterOfMass, true);
             incrementHolders.put(trotPair, centerOfMassIncrementHolder);
          }
       }
@@ -520,13 +526,20 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
          TrotPair currentTrotPair = frameToIncrementOver.getEnumValue();
          
          CenterOfMassIncrementVariableHolder incrementHolder = incrementHolders.get(currentTrotPair);
+         centerOfTrotLinesFramePoint.setToZero(referenceFrames.getCenterOfFourFeetFrame());
+         
+         if(shiftCoMOverCenterOfFeet.getBooleanValue())
+         {
+            centerOfTrotLinesFramePoint.changeFrame(worldFrame);
+            shiftCoMOverCenterOfFeet.set(false);
+            incrementHolder.setPosition(centerOfTrotLinesFramePoint, false);
+         }
          incrementHolder.update();
          
          incrementHolder.getPosition(shiftedCenterOfMass);
          shiftedCenterOfMass.changeFrame(worldFrame);
          desiredCenterOfMassPosition.set(shiftedCenterOfMass);
          
-         centerOfTrotLinesFramePoint.setToZero(referenceFrames.getCenterOfFourFeetFrame());
          centerOfTrotLinesFramePoint.changeFrame(rootFrame);
          rootJointToCenterOfTrotLines.set(centerOfTrotLinesFramePoint);
          
@@ -539,7 +552,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
             if(trotPairToUpdate != currentTrotPair)
             {
                CenterOfMassIncrementVariableHolder centerOfMassIncrementVariableHolder = incrementHolders.get(trotPairToUpdate);
-               centerOfMassIncrementVariableHolder.setPosition(shiftedCenterOfMass);
+               centerOfMassIncrementVariableHolder.setPosition(shiftedCenterOfMass, true);
             }
          }
       }
