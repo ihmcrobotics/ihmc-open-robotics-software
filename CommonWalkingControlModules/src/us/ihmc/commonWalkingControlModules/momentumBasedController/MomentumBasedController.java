@@ -645,16 +645,14 @@ public class MomentumBasedController
          ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
          AlphaFilteredYoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
 
-         FramePoint2d cop = planeContactWrenchProcessor.getCoP(contactablePlaneBody);
+         planeContactWrenchProcessor.getDesiredCenterOfPressure(contactablePlaneBody, copDesired);
 
-         if ((cop == null) || cop.containsNaN())
+         if (copDesired.containsNaN())
          {
             desiredTorqueForCoPControl.setToZero();
-
             return;
          }
 
-         copDesired.setIncludingFrame(cop);
          FootSwitchInterface footSwitch = footSwitches.get(robotSide);
          footSwitch.computeAndPackCoP(copActual);
 
@@ -717,15 +715,14 @@ public class MomentumBasedController
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
          ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
 
-         FramePoint2d cop = planeContactWrenchProcessor.getCoP(contactablePlaneBody);
+         planeContactWrenchProcessor.getDesiredCenterOfPressure(contactablePlaneBody, copDesired);
 
-         if ((cop == null) || cop.containsNaN())
+         if (copDesired.containsNaN())
          {
             yoCoPError.get(robotSide).setToZero();
             yoCoPErrorMagnitude.get(robotSide).set(0.0);
          }
 
-         copDesired.setIncludingFrame(cop);
          FootSwitchInterface footSwitch = footSwitches.get(robotSide);
          footSwitch.computeAndPackCoP(copActual);
 
@@ -934,9 +931,9 @@ public class MomentumBasedController
       return getName();
    }
 
-   public FramePoint2d getDesiredCoP(ContactablePlaneBody contactablePlaneBody)
+   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
    {
-      return planeContactWrenchProcessor.getCoP(contactablePlaneBody);
+      planeContactWrenchProcessor.getDesiredCenterOfPressure(contactablePlaneBody, desiredCoPToPack);
    }
 
    public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)

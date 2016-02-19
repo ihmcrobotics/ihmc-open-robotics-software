@@ -117,14 +117,16 @@ public class FootControlHelper
       CommonOps.setIdentity(selectionMatrix);
    }
 
+   private final FramePoint2d desiredCoP = new FramePoint2d();
+
    public void update()
    {
-      FramePoint2d cop = momentumBasedController.getDesiredCoP(contactableFoot);
+      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
-      if (cop == null || cop.containsNaN())
+      if (desiredCoP.containsNaN())
          isDesiredCoPOnEdge.set(false);
       else
-         isDesiredCoPOnEdge.set(!contactPolygon.isPointInside(cop, -EPSILON_POINT_ON_EDGE)); // Minus means that the check is done with a smaller polygon
+         isDesiredCoPOnEdge.set(!contactPolygon.isPointInside(desiredCoP, -EPSILON_POINT_ON_EDGE)); // Minus means that the check is done with a smaller polygon
 
       computeNullspaceMultipliers();
    }

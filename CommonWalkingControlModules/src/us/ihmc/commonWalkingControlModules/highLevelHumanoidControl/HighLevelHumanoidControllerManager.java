@@ -169,14 +169,16 @@ public class HighLevelHumanoidControllerManager implements RobotController
       reportDesiredCenterOfPressureForEstimator();
    }
 
+   private final SideDependentList<FramePoint2d> desiredFootCoPs = new SideDependentList<FramePoint2d>(new FramePoint2d(), new FramePoint2d());
+
    private void reportDesiredCenterOfPressureForEstimator()
    {
       SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
       FullHumanoidRobotModel fullHumanoidRobotModel = momentumBasedController.getFullRobotModel();
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFeet.get(robotSide));
-         centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredCoP, fullHumanoidRobotModel.getFoot(robotSide));
+         momentumBasedController.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
+         centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
       }
    }
 

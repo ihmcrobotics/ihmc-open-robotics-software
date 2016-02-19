@@ -126,12 +126,9 @@ public class PlaneContactWrenchProcessor
       }
    }
 
-   public FramePoint2d getCoP(ContactablePlaneBody contactablePlaneBody)
+   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
    {
       YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
-      FramePoint2d cop = cops.get(contactablePlaneBody);
-
-      yoCop.getFrameTuple2d(cop);
-      return cop;
+      yoCop.getFrameTuple2dIncludingFrame(desiredCoPToPack);
    }
 }
