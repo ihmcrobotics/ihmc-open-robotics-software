@@ -1,24 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.List;
-
-import javax.vecmath.Point2d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,12 +19,9 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -76,19 +64,6 @@ public class FootControlHelper
 
    private final DenseMatrix64F selectionMatrix;
 
-   // For hold position and fully constrained states.
-   private final FrameTuple2dArrayList<FramePoint2d> defaultContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
-   private final FrameTuple2dArrayList<FramePoint2d> originalContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
-   private final FrameConvexPolygon2d originalSupportFootPolygon = new FrameConvexPolygon2d();
-   private final BooleanYoVariable allowSupportFootShrink;
-   private final BooleanYoVariable isSupportFootShrinkEnabled;
-   private final DoubleYoVariable contactPointMaxX;
-   private final DoubleYoVariable alphaForFootShrink;
-   private final AlphaFilteredYoVariable footShrinkPercent;
-   private final DoubleYoVariable maxFootShrinkInPercent;
-   private final DoubleYoVariable thresholdForAnkleLimitWatcher;
-   private final BooleanYoVariable isAnkleFlexionLimitReached;
-
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
    {
@@ -98,8 +73,6 @@ public class FootControlHelper
 
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       twistCalculator = momentumBasedController.getTwistCalculator();
-
-      defaultContactPointPositions.copyFromListAndTrimSize(contactableFoot.getContactPoints2d());
 
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
@@ -142,21 +115,6 @@ public class FootControlHelper
 
       selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
-
-      String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-      isSupportFootShrinkEnabled = new BooleanYoVariable("is" + robotSide.getCamelCaseNameForMiddleOfExpression() + "SupportFootShrinkEnabled", registry);
-      allowSupportFootShrink = new BooleanYoVariable("AllowSupport" + robotSide.getCamelCaseNameForMiddleOfExpression() + "FootShrink", registry);
-      allowSupportFootShrink.set(walkingControllerParameters.allowShrinkingSingleSupportFootPolygon());
-      contactPointMaxX = new DoubleYoVariable(contactableFoot.getName() + "ContactPointMaxX", registry);
-      contactPointMaxX.set(Double.NEGATIVE_INFINITY);
-      alphaForFootShrink = new DoubleYoVariable(sidePrefix + "AlphaForFootShrink", registry);
-      alphaForFootShrink.set(0.95);
-      footShrinkPercent = new AlphaFilteredYoVariable(sidePrefix + "FootShrinkPercent", registry, alphaForFootShrink);
-      maxFootShrinkInPercent = new DoubleYoVariable(sidePrefix + "MaxFootShrinkInPercent", registry);
-      maxFootShrinkInPercent.set(1.0);
-      thresholdForAnkleLimitWatcher = new DoubleYoVariable(sidePrefix + "ThresholdInPercentForAnkleLimitWatcher", registry);
-      thresholdForAnkleLimitWatcher.set(0.08);
-      isAnkleFlexionLimitReached = new BooleanYoVariable(sidePrefix + "IsAnkleLimitReached", registry);
    }
 
    public void update()
@@ -372,104 +330,5 @@ public class FootControlHelper
    {
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
-   }
-
-   public void enableAnkleLimitAvoidanceInSupportState(boolean enable)
-   {
-      if (!allowSupportFootShrink.getBooleanValue())
-         enable = false;
-
-      isSupportFootShrinkEnabled.set(enable);
-
-      if (!enable)
-         footShrinkPercent.set(0.0);
-   }
-
-   public void saveContactPointsFromContactState()
-   {
-      momentumBasedController.getContactState(contactableFoot).getAllContactPoints(originalContactPointPositions);
-   }
-
-   public void saveContactPointsFromFootstep(Footstep footstep)
-   {
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
-      if (predictedContactPoints == null || predictedContactPoints.isEmpty())
-         originalContactPointPositions.copyFromListAndTrimSize(defaultContactPointPositions);
-      else
-         originalContactPointPositions.copyFromPoint2dListAndTrimSize(contactableFoot.getSoleFrame(), predictedContactPoints);
-   }
-
-   public void initializeParametersForSupportFootShrink(boolean resetCurrentFootShrink)
-   {
-      saveContactPointsFromContactState();
-      updateOriginalSupportPolygon(resetCurrentFootShrink);
-   }
-
-   public void updateWithPredictedContactPoints(Footstep footstep)
-   {
-      saveContactPointsFromFootstep(footstep);
-      updateOriginalSupportPolygon(false);
-   }
-
-   private void updateOriginalSupportPolygon(boolean resetCurrentFootShrink)
-   {
-      contactPointMaxX.set(Double.NEGATIVE_INFINITY);
-      for (int i = 0; i < originalContactPointPositions.size(); i++)
-      {
-         if (originalContactPointPositions.get(i).getX() > contactPointMaxX.getDoubleValue())
-            contactPointMaxX.set(originalContactPointPositions.get(i).getX());
-      }
-
-      originalSupportFootPolygon.setIncludingFrameAndUpdate(originalContactPointPositions);
-
-      if (resetCurrentFootShrink)
-      {
-         footShrinkPercent.set(0.0);
-      }
-   }
-
-   public void restoreFootContactPoints()
-   {
-      momentumBasedController.getContactState(contactableFoot).setContactFramePoints(originalContactPointPositions);
-   }
-
-   private void checkAnkleFlexionLimit()
-   {
-      OneDoFJoint oneDoFJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-      double flexionLimit = oneDoFJoint.getJointLimitLower() + thresholdForAnkleLimitWatcher.getDoubleValue();
-
-      isAnkleFlexionLimitReached.set(oneDoFJoint.getQ() < flexionLimit);
-   }
-
-   private final FramePoint2d tempFramePoint = new FramePoint2d();
-
-   public void shrinkSupportFootContactPointsToToesIfNecessary()
-   {
-      if (!allowSupportFootShrink.getBooleanValue() || !isSupportFootShrinkEnabled.getBooleanValue())
-         return;
-
-      checkAnkleFlexionLimit();
-
-      if (isAnkleFlexionLimitReached.getBooleanValue())
-         footShrinkPercent.update(1.0);
-      else
-         footShrinkPercent.update(0.0);
-
-      footShrinkPercent.set(MathTools.clipToMinMax(footShrinkPercent.getDoubleValue(), 0.0, maxFootShrinkInPercent.getDoubleValue()));
-
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-
-      double alpha = footShrinkPercent.getDoubleValue();
-
-      for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
-      {
-         YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
-         double originalContactPointX = originalContactPointPositions.get(i).getX();
-         yoContactPoint.getPosition2d(tempFramePoint);
-         tempFramePoint.setX(alpha * contactPointMaxX.getDoubleValue() + (1.0 - alpha) * originalContactPointX);
-
-         originalSupportFootPolygon.orthogonalProjection(tempFramePoint);
-         yoContactPoint.setPosition2d(tempFramePoint);
-      }
    }
 }

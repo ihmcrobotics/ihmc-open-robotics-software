@@ -361,17 +361,6 @@ public class FeetManager
       footControlModules.get(robotSide).resetCurrentState();
    }
 
-   public void enableAnkleLimitAvoidanceInSupportState(RobotSide robotSide, boolean enable)
-   {
-      footControlModules.get(robotSide).enableAnkleLimitAvoidanceInSupportState(enable);
-   }
-
-   public void enableAnkleLimitAvoidanceInSupportState(boolean enable)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-         footControlModules.get(robotSide).enableAnkleLimitAvoidanceInSupportState(enable);
-   }
-
    public boolean isLegDoingToeOffAndAtLimit(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).isLegDoingToeOffAndAtLimit();

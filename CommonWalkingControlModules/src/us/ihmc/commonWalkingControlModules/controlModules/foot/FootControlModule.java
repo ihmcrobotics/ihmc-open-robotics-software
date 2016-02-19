@@ -363,7 +363,6 @@ public class FootControlModule
          swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
       }
       swingState.setFootstep(footstep);
-      footControlHelper.updateWithPredictedContactPoints(footstep);
    }
 
    public boolean isLegDoingToeOffAndAtLimit()
@@ -394,11 +393,6 @@ public class FootControlModule
    public void setPredictedToeOffDuration(double predictedToeOffDuration)
    {
       onToesState.setPredictedToeOffDuration(predictedToeOffDuration);
-   }
-
-   public void enableAnkleLimitAvoidanceInSupportState(boolean enable)
-   {
-      footControlHelper.enableAnkleLimitAvoidanceInSupportState(enable);
    }
 
    public void resetHeightCorrectionParametersForSingularityAvoidance()
