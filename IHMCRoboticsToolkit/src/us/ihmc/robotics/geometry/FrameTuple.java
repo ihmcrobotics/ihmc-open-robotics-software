@@ -1,16 +1,18 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.io.Serializable;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
-import java.io.Serializable;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on tuples occur within the same Frame.
@@ -83,12 +85,21 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
     * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y respectively, and sets the z component to zero.
     * Changes the referenceFrame of this frameTuple to frameTuple2d.getReferenceFrame().
     * @param frameTuple2d
-    * @throws ReferenceFrameMismatchException
     */
    public void setXYIncludingFrame(FrameTuple2d<?> frameTuple2d)
    {
       this.referenceFrame = frameTuple2d.getReferenceFrame();
       setXY(frameTuple2d);
+   }
+
+   /**
+    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
+    * @param tuple2d
+    */
+   public void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2d tuple2d)
+   {
+      this.referenceFrame = referenceFrame;
+      setXY(tuple2d);
    }
 
    /**
