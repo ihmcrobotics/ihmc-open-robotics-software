@@ -10,6 +10,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedSimulation
@@ -73,7 +74,8 @@ public class QuadrupedSimulation
    {
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(sdfRobot,
             sdfRobot.getRobotsYoVariableRegistry());
-      GroundProfile3D groundProfile = new FlatGroundProfile(0.0);
+//    GroundProfile3D groundProfile = new FlatGroundProfile(0.0);
+      GroundProfile3D groundProfile = new RollingGroundProfile(0.2, 0.2, 0.0);
       groundContactModel.setGroundProfile3D(groundProfile);
       groundContactModel.setZStiffness(2500.0);
       groundContactModel.setZDamping(250.0);
