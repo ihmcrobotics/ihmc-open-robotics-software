@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -8,76 +9,79 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-public class ChestOrientationControlModule extends DegenerateOrientationControlModule
+public class ChestOrientationControlModule
 {
-   private final YoFrameQuaternion desiredQuaternion;
-   private final YoFrameVector desiredAngularVelocity;
-   private final YoFrameVector feedForwardAngularAcceleration;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final YoFrameQuaternion yoDesiredQuaternion;
+   private final YoFrameVector yoDesiredAngularVelocity;
+   private final YoFrameVector yoFeedForwardAngularAcceleration;
+   private final YoFrameOrientation yoDesiredOrientationInWorldViz;
+   private final YoFrameQuaternion yoDesiredQuaternionInWorldViz;
+
    private final RigidBody chest;
+   private final RigidBody elevator;
+   private final RigidBodyOrientationControlModule orientationControlModule;
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
-   private final YoFrameOrientation desiredOrientationInWorldViz;
-   private final YoFrameQuaternion desiredQuaternionInWorldViz;
-
-   public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody chest, TwistCalculator twistCalculator, double controlDT,
-         YoVariableRegistry parentRegistry)
+   public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody elevator, RigidBody chest, long jacobianId, TwistCalculator twistCalculator,
+         double controlDT, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      this(chestOrientationExpressedInFrame, chest, twistCalculator, controlDT, null, parentRegistry);
+      this.chest = chest;
+      this.elevator = elevator;
+      this.yoDesiredQuaternion = new YoFrameQuaternion("desiredChestOrientation", chestOrientationExpressedInFrame, registry);
+      this.yoDesiredOrientationInWorldViz = new YoFrameOrientation("desiredChestInWorld", ReferenceFrame.getWorldFrame(), registry);
+      this.yoDesiredQuaternionInWorldViz = new YoFrameQuaternion("desiredChestInWorld", ReferenceFrame.getWorldFrame(), registry);
+      this.yoDesiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", chestOrientationExpressedInFrame, registry);
+      this.yoFeedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", chestOrientationExpressedInFrame, registry);
+
+      orientationControlModule = new RigidBodyOrientationControlModule("chest", elevator, chest, twistCalculator, controlDT, gains, registry);
+
+      spatialAccelerationCommand.set(elevator, chest);
+      spatialAccelerationCommand.setJacobianId(jacobianId);
    }
 
-   public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody chest, TwistCalculator twistCalculator, double controlDT,
-         YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
-      super("chest", new RigidBody[] {}, chest, new GeometricJacobian[] {}, twistCalculator, controlDT, gains, parentRegistry);
+      desiredOrientation.changeFrame(this.yoDesiredOrientationInWorldViz.getReferenceFrame());
+      this.yoDesiredOrientationInWorldViz.set(desiredOrientation);
+      this.yoDesiredQuaternionInWorldViz.set(desiredOrientation);
 
-      this.chest = chest;
-      this.desiredQuaternion = new YoFrameQuaternion("desiredChestOrientation", chestOrientationExpressedInFrame, registry);
-      this.desiredOrientationInWorldViz = new YoFrameOrientation("desiredChestInWorld", ReferenceFrame.getWorldFrame(), registry);
-      this.desiredQuaternionInWorldViz = new YoFrameQuaternion("desiredChestInWorld", ReferenceFrame.getWorldFrame(), registry);
-      this.desiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", chestOrientationExpressedInFrame, registry);
-      this.feedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", chestOrientationExpressedInFrame, registry);
+      desiredOrientation.changeFrame(this.yoDesiredQuaternion.getReferenceFrame());
+      this.yoDesiredQuaternion.set(desiredOrientation);
+
+      desiredAngularVelocity.changeFrame(this.yoDesiredAngularVelocity.getReferenceFrame());
+      this.yoDesiredAngularVelocity.set(desiredAngularVelocity);
+
+      feedForwardAngularAcceleration.changeFrame(this.yoFeedForwardAngularAcceleration.getReferenceFrame());
+      this.yoFeedForwardAngularAcceleration.set(feedForwardAngularAcceleration);
+   }
+
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameVector controlledAngularAcceleration = new FrameVector();
+
+   public void compute()
+   {
+      yoDesiredQuaternion.getFrameOrientationIncludingFrame(desiredOrientation);
+      yoDesiredAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
+      yoFeedForwardAngularAcceleration.getFrameTupleIncludingFrame(feedForwardAngularAcceleration);
+
+      orientationControlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialAccelerationCommand.setAngularAcceleration(chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), controlledAngularAcceleration);
+   }
+
+   public SpatialAccelerationCommand getSpatialAccelerationCommand()
+   {
+      return spatialAccelerationCommand;
    }
 
    public RigidBody getChest()
    {
       return chest;
-   }
-
-   @Override
-   protected void getDesiredFrameOrientation(FrameOrientation orientationToPack)
-   {
-      orientationToPack.setToZero(desiredQuaternion.getReferenceFrame());
-      desiredQuaternion.getFrameOrientationIncludingFrame(orientationToPack);
-   }
-
-   @Override
-   protected void getDesiredAngularVelocity(FrameVector angularVelocityToPack)
-   {
-      desiredAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
-   }
-
-   @Override
-   protected void getDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
-   {
-      feedForwardAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
-   }
-
-   public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
-   {
-      desiredOrientation.changeFrame(this.desiredOrientationInWorldViz.getReferenceFrame());
-      this.desiredOrientationInWorldViz.set(desiredOrientation);
-      this.desiredQuaternionInWorldViz.set(desiredOrientation);
-
-      desiredOrientation.changeFrame(this.desiredQuaternion.getReferenceFrame());
-      this.desiredQuaternion.set(desiredOrientation);
-
-      desiredAngularVelocity.changeFrame(this.desiredAngularVelocity.getReferenceFrame());
-      this.desiredAngularVelocity.set(desiredAngularVelocity);
-
-      feedForwardAngularAcceleration.changeFrame(this.feedForwardAngularAcceleration.getReferenceFrame());
-      this.feedForwardAngularAcceleration.set(feedForwardAngularAcceleration);
    }
 }

@@ -6,7 +6,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -15,7 +14,7 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
 {
    private boolean hasWeight;
    private double weight;
-   private GeometricJacobian jacobian;
+   private long jacobianId;
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -28,15 +27,15 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       removeWeight();
    }
 
-   public SpatialAccelerationCommand(GeometricJacobian jacobian)
+   public SpatialAccelerationCommand(long jacobianId)
    {
       this();
-      setJacobian(jacobian);
+      setJacobianId(jacobianId);
    }
 
-   public SpatialAccelerationCommand(GeometricJacobian jacobian, double weight)
+   public SpatialAccelerationCommand(long jacobianId, double weight)
    {
-      this(jacobian);
+      this(jacobianId);
       setWeight(weight);
    }
 
@@ -50,6 +49,11 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
    {
       this.base = base;
       this.endEffector = endEffector;
+   }
+
+   public void setJacobianId(long jacobianId)
+   {
+      this.jacobianId = jacobianId;
    }
 
    public void set(SpatialAccelerationVector spatialAcceleration)
@@ -132,7 +136,7 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
    @Override
    public void set(SpatialAccelerationCommand other)
    {
-      jacobian = other.jacobian;
+      jacobianId = other.jacobianId;
       hasWeight = other.hasWeight;
       weight = other.weight;
 
@@ -153,9 +157,9 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       return weight;
    }
 
-   public GeometricJacobian getJacobian()
+   public long getJacobianId()
    {
-      return jacobian;
+      return jacobianId;
    }
 
    public SpatialAccelerationVector getSpatialAcceleration()
@@ -199,15 +203,10 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       setWeight(Double.POSITIVE_INFINITY);
    }
 
-   public void setJacobian(GeometricJacobian jacobian)
-   {
-      this.jacobian = jacobian;
-   }
-
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": GeometricJacobian = " + jacobian.getShortInfo() + ", spatialAcceleration = " + spatialAcceleration;
+      String ret = getClass().getSimpleName() + ": base = " + base.getName() + "endEffector = " + endEffector.getName() + ", spatialAcceleration = " + spatialAcceleration;
       return ret;
    }
 }

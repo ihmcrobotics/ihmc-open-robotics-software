@@ -5,6 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
@@ -65,7 +66,6 @@ public class HeadOrientationControlModule
    private final RigidBody elevator;
    private final ReferenceFrame baseFrame;
 
-   private final MomentumBasedController momentumBasedController;
    private final RigidBodyOrientationControlModule controlModule;
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
@@ -103,7 +103,6 @@ public class HeadOrientationControlModule
          HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.momentumBasedController = momentumBasedController;
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       head = fullRobotModel.getHead();
       headFrame = head.getBodyFixedFrame();
@@ -145,7 +144,7 @@ public class HeadOrientationControlModule
          pointTrackingFrameFiz = null;
       }
 
-      if (jacobianId != -1)
+      if (jacobianId != GeometricJacobianHolder.NULL_JACOBIAN_ID)
       {
          controlModule = new RigidBodyOrientationControlModule("head", elevator, head, twistCalculator, dt, gains, registry);
 
@@ -203,7 +202,7 @@ public class HeadOrientationControlModule
 
    public void compute()
    {
-      if (jacobianId == -1) // Nothing to control there
+      if (jacobianId == GeometricJacobianHolder.NULL_JACOBIAN_ID) // Nothing to control there
          return;
 
       if (doPositionControl.getBooleanValue())
@@ -249,9 +248,8 @@ public class HeadOrientationControlModule
 
       controlledSpatialAcceleration.set(headFrame, elevator.getBodyFixedFrame(), headFrame, controlledLinearAcceleration, controlledAngularAcceleration);
 
-      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
       spatialAccelerationCommand.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
-      spatialAccelerationCommand.setJacobian(jacobian);
+      spatialAccelerationCommand.setJacobianId(jacobianId);
    }
 
    private void saveDoAccelerationIntegration()

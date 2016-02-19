@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
@@ -69,7 +68,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -240,8 +238,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          MomentumBasedController momentumBasedController)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
-
-      setupManagers(variousWalkingManagers);
 
       hasWalkingControllerBeenInitialized.set(false);
 
@@ -455,33 +451,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       });
    }
 
-   private RigidBody baseForChestOrientationControl;
-   private long jacobianForChestOrientationControlId;
-
-   private void setupManagers(VariousWalkingManagers variousWalkingManagers)
-   {
-      baseForChestOrientationControl = fullRobotModel.getElevator();
-      ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
-      String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
-
-      if (chestOrientationManager != null)
-      {
-         jacobianForChestOrientationControlId = chestOrientationManager.createJacobian(fullRobotModel, chestOrientationControlJointNames);
-         chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControlId);
-      }
-   }
-
    public void initialize()
    {
       super.initialize();
 
       initializeContacts();
-
-      ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
-      if (chestOrientationManager != null)
-      {
-         chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControlId);
-      }
 
       pelvisICPBasedTranslationManager.disable();
 

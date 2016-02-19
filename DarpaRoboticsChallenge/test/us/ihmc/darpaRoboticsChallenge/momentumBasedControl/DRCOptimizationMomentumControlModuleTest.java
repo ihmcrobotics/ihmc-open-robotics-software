@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularConta
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
@@ -45,7 +46,6 @@ import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -212,8 +212,9 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       double gravityZ = 9.81;
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       twistCalculator.compute();
+      GeometricJacobianHolder jacobianHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, gravityZ, optimizationSettings,
-            twistCalculator, null, contactStates.values(), null, registry);
+            twistCalculator, jacobianHolder, contactStates.values(), null, registry);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -229,9 +230,10 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 
          List<SpatialAccelerationCommand> spatialAccelerationCommands = new ArrayList<>();
 
-         constrainFeet(elevator, feet, momentumControlModule, spatialAccelerationCommands);
-         constrainPelvis(random, fullRobotModel, momentumControlModule, spatialAccelerationCommands);
+         constrainFeet(elevator, feet, momentumControlModule, spatialAccelerationCommands, jacobianHolder);
+         constrainPelvis(random, fullRobotModel, momentumControlModule, spatialAccelerationCommands, jacobianHolder);
 
+         jacobianHolder.compute();
          MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
          Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
          
@@ -281,14 +283,12 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
    }
 
    private void constrainPelvis(Random random, SDFFullRobotModel fullRobotModel, OptimizationMomentumControlModule momentumControlModule,
-         List<SpatialAccelerationCommand> spatialAccelerationCommands)
+         List<SpatialAccelerationCommand> spatialAccelerationCommands, GeometricJacobianHolder jacobianHolder)
    {
       RigidBody pelvis = fullRobotModel.getRootJoint().getSuccessor();
       RigidBody elevator = fullRobotModel.getElevator();
-      GeometricJacobian rootJointJacobian = new GeometricJacobian(pelvis, elevator, pelvis.getBodyFixedFrame());
-      SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand(rootJointJacobian);
-      SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector(rootJointJacobian.getEndEffectorFrame(),
-                                                               rootJointJacobian.getBaseFrame(), rootJointJacobian.getJacobianFrame());
+      SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand(jacobianHolder.getOrCreateGeometricJacobian(elevator, pelvis, pelvis.getBodyFixedFrame()));
+      SpatialAccelerationVector pelvisSpatialAcceleration = new SpatialAccelerationVector(pelvis.getBodyFixedFrame(), elevator.getBodyFixedFrame(), pelvis.getBodyFixedFrame());
       pelvisSpatialAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
 
 //    pelvisSpatialAcceleration.setAngularPart(new Vector3d());
@@ -303,15 +303,13 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
    }
 
    private void constrainFeet(RigidBody elevator, SideDependentList<ContactablePlaneBody> feet, OptimizationMomentumControlModule momentumControlModule,
-                              List<SpatialAccelerationCommand> spatialAccelerationCommands)
+                              List<SpatialAccelerationCommand> spatialAccelerationCommands, GeometricJacobianHolder jacobianHolder)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = feet.get(robotSide).getRigidBody();
-         GeometricJacobian jacobian = new GeometricJacobian(elevator, foot, foot.getBodyFixedFrame());
-         SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(),
-                                                            foot.getBodyFixedFrame());
-         SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand(jacobian);
+         SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector(foot.getBodyFixedFrame(), elevator.getBodyFixedFrame(), foot.getBodyFixedFrame());
+         SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand(jacobianHolder.getOrCreateGeometricJacobian(elevator, foot, foot.getBodyFixedFrame()));
          spatialAccelerationCommand.set(spatialAcceleration);
          spatialAccelerationCommand.set(elevator, foot);
          

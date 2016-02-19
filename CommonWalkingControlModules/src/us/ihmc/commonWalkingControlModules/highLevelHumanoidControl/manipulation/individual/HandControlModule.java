@@ -329,7 +329,7 @@ public class HandControlModule
          else
          {
             taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlMode.TASK_SPACE_POSITION,
-                  momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, registry);
+                  jacobianId, chest, hand, yoGraphicsListRegistry, registry);
          }
       }
 

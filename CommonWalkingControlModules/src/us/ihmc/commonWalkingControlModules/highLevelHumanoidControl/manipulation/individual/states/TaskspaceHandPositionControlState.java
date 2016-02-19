@@ -5,7 +5,6 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -16,7 +15,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -62,8 +60,8 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, MomentumBasedController momentumBasedController, long jacobianId,
-         RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, long jacobianId, RigidBody base, RigidBody endEffector,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 
@@ -71,8 +69,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       registry = new YoVariableRegistry(name);
 
       spatialAccelerationCommand.set(base, endEffector);
-      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
-      spatialAccelerationCommand.setJacobian(jacobian);
+      spatialAccelerationCommand.setJacobianId(jacobianId);
 
       this.base = base;
 
@@ -111,7 +108,8 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
       poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
-      handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration, desiredAngularAcceleration, base);
+      handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
+            desiredAngularAcceleration, base);
 
       handSpatialAccelerationControlModule.getAcceleration(handAcceleration);
 
@@ -121,7 +119,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
       updateVisualizers();
       spatialAccelerationCommand.set(handAcceleration);
-   
+
    }
 
    @Override
