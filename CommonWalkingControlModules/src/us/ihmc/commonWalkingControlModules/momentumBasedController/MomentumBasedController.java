@@ -333,7 +333,7 @@ public class MomentumBasedController
       }
 
       optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), gravityZ,
-            momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, yoGraphicsListRegistry, registry);
+            momentumOptimizationSettings, twistCalculator, robotJacobianHolder, contactablePlaneBodyList, yoGraphicsListRegistry, registry);
 
       if (DO_PASSIVE_KNEE_CONTROL)
       {
@@ -696,6 +696,7 @@ public class MomentumBasedController
    }
 
    private final BooleanYoVariable enableCoPSmootherForShakies = new BooleanYoVariable("enableCoPSmootherForShakies", registry);
+   private final DoubleYoVariable currentWRhoSmootherForShakies = new DoubleYoVariable("currentWRhoSmootherForShakies", registry);
    private final BooleanYoVariable isCoPControlBad = new BooleanYoVariable("isCoPControlBad", registry);
    private final BooleanYoVariable isDesiredCoPBeingSmoothened = new BooleanYoVariable("isDesiredCoPBeingSmoothened", registry);
    private final DoubleYoVariable copSmootherErrorThreshold = new DoubleYoVariable("copSmootherErrorThreshold", registry);
@@ -705,7 +706,7 @@ public class MomentumBasedController
    private final DoubleYoVariable copSmootherControlDuration = new DoubleYoVariable("copSmootherControlDuration", registry);
    private final DoubleYoVariable copSmootherPercent = new DoubleYoVariable("copSmootherPercent", registry);
 
-   public void smoothDesiredCoPIfNeeded()
+   public double smoothDesiredCoPIfNeeded()
    {
       boolean atLeastOneFootWithBadCoPControl = false;
 
@@ -760,15 +761,17 @@ public class MomentumBasedController
          if (enableCoPSmootherForShakies.getBooleanValue())
          {
             double wRhoSmoother = percent * defaultWRhoSmoother.getDoubleValue() + (1.0 - percent) * maxWRhoSmoother.getDoubleValue();
-            optimizationMomentumControlModule.setWRhoSmoother(wRhoSmoother);
+            currentWRhoSmootherForShakies.set(wRhoSmoother);
          }
 
          if (percent >= 1.0)
          {
-            optimizationMomentumControlModule.setWRhoSmoother(defaultWRhoSmoother.getDoubleValue());
+            currentWRhoSmootherForShakies.set(defaultWRhoSmoother.getDoubleValue());
             isDesiredCoPBeingSmoothened.set(false);
          }
       }
+
+      return currentWRhoSmootherForShakies.getDoubleValue();
    }
 
    public void callUpdatables()

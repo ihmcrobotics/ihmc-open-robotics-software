@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.Collection;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -9,7 +9,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ActiveSetQPMomentumOptimizer;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CQPMomentumBasedOptimizer;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerAdapter;
@@ -24,9 +23,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.I
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -104,12 +106,12 @@ public class OptimizationMomentumControlModule
    private final int nDoF;
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double gravityZ, MomentumOptimizationSettings momentumOptimizationSettings,
-         TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder, Collection<? extends PlaneContactState> planeContactStates,
+         TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder, List<? extends ContactablePlaneBody> contactablePlaneBodies,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
       this.centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, registry);
-      this.externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, planeContactStates);
+      this.externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
       this.primaryMotionConstraintHandler = new MotionConstraintHandler("primary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
       this.secondaryMotionConstraintHandler = new MotionConstraintHandler("secondary", jointsToOptimizeFor, twistCalculator, geometricJacobianHolder, registry);
 
@@ -157,7 +159,7 @@ public class OptimizationMomentumControlModule
       double wRhoPenalizer = momentumOptimizationSettings.getPenalizerOfRhoPlaneContactRegularization();
 
       wrenchMatrixCalculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nPointsPerPlane, nSupportVectors, wRhoPlaneContacts,
-            wRhoSmoother, wRhoPenalizer, planeContactStates, registry);
+            wRhoSmoother, wRhoPenalizer, contactablePlaneBodies, registry);
 
       this.momentumOptimizationSettings = momentumOptimizationSettings;
 
@@ -211,7 +213,7 @@ public class OptimizationMomentumControlModule
       }
    }
 
-   public void checkQPSolverSwitch()
+   private void checkQPSolverSwitch()
    {
       if (currentQPSolver.getEnumValue() != requestedQPSolver.getEnumValue())
       {
@@ -399,6 +401,12 @@ public class OptimizationMomentumControlModule
       case EXTERNAL_WRENCH:
          setExternalWrenchToCompensateFor((ExternalWrenchCommand) inverseDynamicsCommand);
          return;
+      case PLANE_CONTACT_STATE:
+         setPlaneContactStateCommand((PlaneContactStateCommand) inverseDynamicsCommand);
+         return;
+      case PLANE_CONTACT_STATE_POOL:
+         setPlaneContactStateCommandPool((PlaneContactStateCommandPool) inverseDynamicsCommand);
+         return;
       case COMMAND_LIST:
          setInverseDynamicsCommandList((InverseDynamicsCommandList) inverseDynamicsCommand);
          return;
@@ -461,15 +469,20 @@ public class OptimizationMomentumControlModule
       this.momentumRateCommand.set(momentumRateCommand);
    }
 
+   private void setPlaneContactStateCommand(PlaneContactStateCommand contactStateCommand)
+   {
+      wrenchMatrixCalculator.setPlaneContactStateCommand(contactStateCommand);
+   }
+
+   private void setPlaneContactStateCommandPool(PlaneContactStateCommandPool contactStateCommandPool)
+   {
+      wrenchMatrixCalculator.setPlaneContactStateCommandPool(contactStateCommandPool);
+   }
+
    private void setExternalWrenchToCompensateFor(ExternalWrenchCommand externalWrenchCommand)
    {
       RigidBody rigidBody = externalWrenchCommand.getRigidBody();
       Wrench wrench = externalWrenchCommand.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
-   }
-
-   public void setWRhoSmoother(double wRhoSmoother)
-   {
-      wrenchMatrixCalculator.setWRhoSmoother(wRhoSmoother);
    }
 }

@@ -24,6 +24,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -31,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -120,7 +122,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       twistCalculator.compute();
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, gravityZ, optimizationSettings,
-            twistCalculator, null, contactStates.values(), null, registry);
+            twistCalculator, null, new ArrayList<>(feet.values()), null, registry);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -140,6 +142,13 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
             
             JointspaceAccelerationCommand desiredJointAccelerationCommand = new JointspaceAccelerationCommand(inverseDynamicsJoint, vdDesired);
             momentumControlModule.setInverseDynamicsCommand(desiredJointAccelerationCommand);
+         }
+
+         for (PlaneContactState planeContactState : contactStates.values())
+         {
+            PlaneContactStateCommand command = new PlaneContactStateCommand();
+            planeContactState.getPlaneContactStateCommand(command);
+            momentumControlModule.setInverseDynamicsCommand(command);
          }
 
          MomentumModuleSolution momentumModuleSolution;
@@ -214,7 +223,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       twistCalculator.compute();
       GeometricJacobianHolder jacobianHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, gravityZ, optimizationSettings,
-            twistCalculator, jacobianHolder, contactStates.values(), null, registry);
+            twistCalculator, jacobianHolder, new ArrayList<>(feet.values()), null, registry);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -233,6 +242,13 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
          constrainFeet(elevator, feet, momentumControlModule, spatialAccelerationCommands, jacobianHolder);
          constrainPelvis(random, fullRobotModel, momentumControlModule, spatialAccelerationCommands, jacobianHolder);
 
+         for (PlaneContactState planeContactState : contactStates.values())
+         {
+            PlaneContactStateCommand command = new PlaneContactStateCommand();
+            planeContactState.getPlaneContactStateCommand(command);
+            momentumControlModule.setInverseDynamicsCommand(command);
+         }
+
          jacobianHolder.compute();
          MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
          Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
@@ -245,6 +261,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
          {
             assertSpatialAccelerationCorrect(spatialAccelerationCommand.getBase(), spatialAccelerationCommand.getEndEffector(), spatialAccelerationCommand);
          }
+
 
          assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
       }

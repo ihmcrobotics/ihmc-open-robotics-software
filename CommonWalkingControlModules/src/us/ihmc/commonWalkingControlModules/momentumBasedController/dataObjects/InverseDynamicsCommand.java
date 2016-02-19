@@ -5,8 +5,8 @@ public abstract class InverseDynamicsCommand<T extends InverseDynamicsCommand<T>
    public enum InverseDynamicsCommandType
    {
       TASKSPACE_MOTION, TASKSPACE_POINT_MOTION, JOINTSPACE_MOTION, MOMENTUM_RATE,
-      EXTERNAL_WRENCH, CONTACT_STATE,
-      COMMAND_LIST
+      EXTERNAL_WRENCH, PLANE_CONTACT_STATE,
+      COMMAND_LIST, PLANE_CONTACT_STATE_POOL
    };
 
    private final InverseDynamicsCommandType commandType;
