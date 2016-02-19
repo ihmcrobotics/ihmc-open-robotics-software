@@ -30,6 +30,7 @@ public class ExternalWrenchHandler
    private final SpatialForceVector totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final List<RigidBody> rigidBodiesWithWrenchToCompensateFor = new ArrayList<>();
+   private final List<RigidBody> rigidBodiesWithExternalWrench = new ArrayList<>();
    private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final SpatialForceVector tempWrench = new SpatialForceVector();
 
@@ -113,6 +114,8 @@ public class ExternalWrenchHandler
          RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench externalWrench = externalWrenches.get(rigidBody);
          externalWrench.add(groundReactionWrenches.get(rigidBody));
+         if (!rigidBodiesWithExternalWrench.contains(rigidBody))
+            rigidBodiesWithExternalWrench.add(rigidBody);
       }
 
       for (int i = 0; i < rigidBodiesWithWrenchToCompensateFor.size(); i++)
@@ -120,11 +123,18 @@ public class ExternalWrenchHandler
          RigidBody rigidBody = rigidBodiesWithWrenchToCompensateFor.get(i);
          Wrench externalWrench = externalWrenches.get(rigidBody);
          externalWrench.add(externalWrenchesToCompensateFor.get(rigidBody));
+         if (!rigidBodiesWithExternalWrench.contains(rigidBody))
+            rigidBodiesWithExternalWrench.add(rigidBody);
       }
    }
 
-   public Map<RigidBody, Wrench> getExternalWrenches()
+   public Map<RigidBody, Wrench> getExternalWrenchMap()
    {
       return externalWrenches;
+   }
+
+   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   {
+      return rigidBodiesWithExternalWrench;
    }
 }

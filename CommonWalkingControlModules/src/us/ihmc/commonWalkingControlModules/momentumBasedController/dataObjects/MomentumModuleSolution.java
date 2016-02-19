@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -15,14 +16,16 @@ public class MomentumModuleSolution
    private final DenseMatrix64F jointAccelerations;
    private final SpatialForceVector centroidalMomentumRateSolution;
    private final Map<RigidBody, Wrench> externalWrenchSolution;
+   private final List<RigidBody> rigidBodiesWithExternalWrench;
 
    public MomentumModuleSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations,
-         SpatialForceVector centroidalMomentumRateSolution, Map<RigidBody, Wrench> externalWrenchSolution)
+         SpatialForceVector centroidalMomentumRateSolution, Map<RigidBody, Wrench> externalWrenchSolution, List<RigidBody> rigidBodiesWithExternalWrench)
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
       this.jointAccelerations = jointAccelerations;
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
       this.externalWrenchSolution = externalWrenchSolution;
+      this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
    }
 
    public SpatialForceVector getCentroidalMomentumRateSolution()
@@ -33,6 +36,11 @@ public class MomentumModuleSolution
    public Map<RigidBody, Wrench> getExternalWrenchSolution()
    {
       return externalWrenchSolution;
+   }
+
+   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   {
+      return rigidBodiesWithExternalWrench;
    }
 
    public InverseDynamicsJoint[] getJointsToOptimizeFor()

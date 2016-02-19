@@ -520,6 +520,7 @@ public class MomentumBasedController
       qpOutputCoMAcceleration.set(centroidalMomentumRateSolutionLinearPart);
 
       Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
+      List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
 
       if (userActivateFeetForce.getBooleanValue())
       {
@@ -557,8 +558,9 @@ public class MomentumBasedController
          }
       }
 
-      for (RigidBody rigidBody : externalWrenches.keySet())
+      for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
+         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
          inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenches.get(rigidBody));
       }
 
