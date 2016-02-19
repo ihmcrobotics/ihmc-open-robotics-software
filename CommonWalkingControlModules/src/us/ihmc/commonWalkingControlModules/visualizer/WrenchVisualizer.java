@@ -7,6 +7,7 @@ import java.util.Map;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -39,6 +40,12 @@ public class WrenchVisualizer
    private final FrameVector tempVector = new FrameVector();
    private final FramePoint tempPoint = new FramePoint();
    private final ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
+   
+   public static WrenchVisualizer createWrenchVisualizerWithContactableBodies(String name, List<? extends ContactableBody> contactableBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
+   {
+      return new WrenchVisualizer(name, extractRigidBodyList(contactableBodies), vizScaling, yoGraphicsListRegistry, parentRegistry);
+   }
 
    public WrenchVisualizer(String name, List<RigidBody> rigidBodies, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
@@ -115,5 +122,13 @@ public class WrenchVisualizer
             pointsOfApplication.get(rigidBody).set(Double.NaN, Double.NaN, Double.NaN);
          }
       }
+   }
+
+   private static List<RigidBody> extractRigidBodyList(List<? extends ContactableBody> contactableBodies)
+   {
+      List<RigidBody> ret = new ArrayList<>(contactableBodies.size());
+      for (int i = 0; i < contactableBodies.size(); i++)
+         ret.add(contactableBodies.get(i).getRigidBody());
+      return ret;
    }
 }

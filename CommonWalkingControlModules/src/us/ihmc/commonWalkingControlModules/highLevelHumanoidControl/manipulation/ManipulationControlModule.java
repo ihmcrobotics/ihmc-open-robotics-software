@@ -21,9 +21,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
@@ -70,9 +68,6 @@ public class ManipulationControlModule
    private final HandLoadBearingProvider handLoadBearingProvider;
    private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
 
-   private final ObjectWeightProvider objectWeightProvider;
-   private final SideDependentList<ProvidedMassMatrixToolRigidBody> toolRigidBodies;
-
    private final DoubleYoVariable handSwingClearance = new DoubleYoVariable("handSwingClearance", registry);
 
    private final DoubleYoVariable timeTransitionBeforeLoadBearing = new DoubleYoVariable("timeTransitionBeforeLoadBearing", registry);
@@ -103,9 +98,6 @@ public class ManipulationControlModule
       handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
       handComplianceControlParametersProvider = variousWalkingProviders.getHandComplianceControlParametersProvider();
-
-      objectWeightProvider = variousWalkingProviders.getObjectWeightProvider();
-      toolRigidBodies = momentumBasedController.getToolRigitBodies();
 
       handControlModules = new SideDependentList<HandControlModule>();
 
@@ -197,11 +189,6 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handControlModules.get(robotSide).doControl();
-      }
-
-      if (objectWeightProvider != null && objectWeightProvider.isNewInformationAvailable())
-      {
-         toolRigidBodies.get(objectWeightProvider.getRobotSide()).setMass(objectWeightProvider.getWeight());
       }
    }
 

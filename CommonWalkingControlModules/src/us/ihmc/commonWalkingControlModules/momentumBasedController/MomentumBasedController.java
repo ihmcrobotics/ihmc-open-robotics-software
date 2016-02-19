@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.vecmath.Point2d;
 
@@ -16,18 +14,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
-import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -52,19 +43,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.screwTheory.TotalWrenchCalculator;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -98,6 +83,7 @@ public class MomentumBasedController
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
+   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
 
    private final DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
@@ -126,9 +112,6 @@ public class MomentumBasedController
 
    private final SideDependentList<DoubleYoVariable> handsMass;
 
-   private final FrameVector centroidalMomentumRateSolutionLinearPart;
-   private final YoFrameVector qpOutputCoMAcceleration;
-
    private final YoFrameVector admissibleDesiredGroundReactionTorque;
    private final YoFrameVector admissibleDesiredGroundReactionForce;
    private final YoFramePoint2d admissibleDesiredCenterOfPressure;
@@ -140,18 +123,12 @@ public class MomentumBasedController
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredTorqueYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
-   private final InverseDynamicsCalculator inverseDynamicsCalculator;
-
-   private final OptimizationMomentumControlModule optimizationMomentumControlModule;
-
    @Deprecated
    private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true); // FIXME: not general enough; this should not be here
 
-   private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final ContactPointVisualizer contactPointVisualizer;
-   private final WrenchVisualizer wrenchVisualizer;
 
-   private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
+   private final GeometricJacobianHolder robotJacobianHolder;
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final SideDependentList<ForceSensorDataReadOnly> wristForceSensors;
@@ -173,39 +150,15 @@ public class MomentumBasedController
 
    private final InverseDynamicsJoint[] controlledJoints;
 
-   private final BooleanYoVariable userActivateFeetForce = new BooleanYoVariable("userActivateFeetForce", registry);
-   private final DoubleYoVariable userLateralFeetForce = new DoubleYoVariable("userLateralFeetForce", registry);
-   private final DoubleYoVariable userForwardFeetForce = new DoubleYoVariable("userForwardFeetForce", registry);
-   private final DoubleYoVariable userYawFeetTorque = new DoubleYoVariable("userYawFeetTorque", registry);
-   private final Wrench userAdditionalFeetWrench = new Wrench();
-
-   private final YoFrameVector residualRootJointForce;
-   private final YoFrameVector residualRootJointTorque;
-
-   private final YoFrameVector yoRootJointDesiredAngularAcceleration;
-   private final YoFrameVector yoRootJointDesiredLinearAcceleration;
-
-   private final YoFrameVector yoRootJointDesiredAngularAccelerationWorld;
-   private final YoFrameVector yoRootJointDesiredLinearAccelerationWorld;
-   private final YoFrameVector yoRootJointAngularVelocity;
-   private final YoFrameVector yoRootJointLinearVelocity;
-
-   private final SideDependentList<YoFrameVector> yoFeetDesiredLinearAccelerations;
-   private final SideDependentList<YoFrameVector> yoFeetDesiredAngularAccelerations;
-
-   private final SpatialAccelerationVector tempAcceleration = new SpatialAccelerationVector();
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
-   private final SideDependentList<ProvidedMassMatrixToolRigidBody> toolRigidBodies = new SideDependentList<>();
 
    private final AntiGravityJointTorquesVisualizer antiGravityJointTorquesVisualizer;
-
-   private final double totalMass;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
    private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
 
-   public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian,
+   public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder, CenterOfMassJacobian centerOfMassJacobian,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
          SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
@@ -214,8 +167,8 @@ public class MomentumBasedController
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      this.robotJacobianHolder = robotJacobianHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
       this.footSwitches = footSwitches;
       this.wristForceSensors = wristForceSensors;
@@ -236,8 +189,6 @@ public class MomentumBasedController
 
       RigidBody elevator = fullRobotModel.getElevator();
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
-
       if (VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES)
       {
          SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches = new SideDependentList<>();
@@ -254,12 +205,6 @@ public class MomentumBasedController
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
-      this.residualRootJointForce = new YoFrameVector("residualRootJointForce", "", centerOfMassFrame, registry);
-      this.residualRootJointTorque = new YoFrameVector("residualRootJointTorque", "", centerOfMassFrame, registry);
-
-      centroidalMomentumRateSolutionLinearPart = new FrameVector(centerOfMassFrame);
-      this.qpOutputCoMAcceleration = new YoFrameVector("qpOutputCoMAcceleration", "", centerOfMassFrame, registry);
-
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
       this.admissibleDesiredCenterOfPressure = new YoFramePoint2d("admissibleDesiredCenterOfPressure", worldFrame, registry);
@@ -270,6 +215,15 @@ public class MomentumBasedController
 
       // this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
       // this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ContactableFoot contactableFoot = feet.get(robotSide);
+         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         String namePrefix = soleFrame.getName() + "DesiredCoP";
+         YoFramePoint2d yoDesiredCenterOfPressure = new YoFramePoint2d(namePrefix, soleFrame, registry);
+         footDesiredCenterOfPressures.put(contactableFoot, yoDesiredCenterOfPressure);
+      }
 
       if (updatables != null)
       {
@@ -316,24 +270,7 @@ public class MomentumBasedController
          }
       }
 
-      this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodyList, yoGraphicsListRegistry, registry);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry, registry);
-
-         // TODO: Don't need for all of the bodies. Just the ones that might be in contact.
-         List<RigidBody> rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(fullRobotModel.getRootJoint().getSuccessor()));
-         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", rigidBodies, 1.0, yoGraphicsListRegistry, registry);
-      }
-      else
-      {
-         contactPointVisualizer = null;
-         wrenchVisualizer = null;
-      }
-
-      optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), gravityZ,
-            momentumOptimizationSettings, twistCalculator, robotJacobianHolder, contactablePlaneBodyList, registry);
+      contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry, registry);
 
       if (DO_PASSIVE_KNEE_CONTROL)
       {
@@ -380,35 +317,9 @@ public class MomentumBasedController
          RigidBody hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            toolRigidBodies.put(robotSide,
-                  new ProvidedMassMatrixToolRigidBody(robotSide, getFullRobotModel(), gravityZ, armControllerParameters, registry, yoGraphicsListRegistry));
             handWrenches.put(robotSide, new Wrench());
          }
       }
-
-      yoRootJointDesiredAngularAcceleration = new YoFrameVector("rootJointDesiredAngularAcceleration", fullRobotModel.getRootJoint().getFrameAfterJoint(),
-            registry);
-      yoRootJointDesiredLinearAcceleration = new YoFrameVector("rootJointDesiredLinearAcceleration", fullRobotModel.getRootJoint().getFrameAfterJoint(),
-            registry);
-
-      yoRootJointDesiredAngularAccelerationWorld = new YoFrameVector("rootJointDesiredAngularAccelerationWorld", ReferenceFrame.getWorldFrame(), registry);
-      yoRootJointDesiredLinearAccelerationWorld = new YoFrameVector("rootJointDesiredLinearAccelerationWorld", ReferenceFrame.getWorldFrame(), registry);
-
-      yoRootJointAngularVelocity = new YoFrameVector("rootJointAngularVelocity", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
-      yoRootJointLinearVelocity = new YoFrameVector("rootJointLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
-
-      YoFrameVector leftFootDesiredLinearAcceleration = new YoFrameVector("leftFootDesiredLinearAcceleration",
-            fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame(), registry);
-      YoFrameVector leftFootDesiredAngularAcceleration = new YoFrameVector("leftFootDesiredAngularAcceleration",
-            fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame(), registry);
-
-      YoFrameVector rightFootDesiredLinearAcceleration = new YoFrameVector("rightFootDesiredLinearAcceleration",
-            fullRobotModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame(), registry);
-      YoFrameVector rightFootDesiredAngularAcceleration = new YoFrameVector("rightFootDesiredAngularAcceleration",
-            fullRobotModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame(), registry);
-
-      yoFeetDesiredLinearAccelerations = new SideDependentList<YoFrameVector>(leftFootDesiredLinearAcceleration, rightFootDesiredLinearAcceleration);
-      yoFeetDesiredAngularAccelerations = new SideDependentList<YoFrameVector>(leftFootDesiredAngularAcceleration, rightFootDesiredAngularAcceleration);
 
       if (wristForceSensors == null)
       {
@@ -462,7 +373,7 @@ public class MomentumBasedController
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
-      this.inverseDynamicsCalculator.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
+      throw new RuntimeException("Sylvain was there.");
    }
 
    public void getFeetContactStates(ArrayList<PlaneContactState> feetContactStatesToPack)
@@ -480,14 +391,8 @@ public class MomentumBasedController
 
       callUpdatables();
 
-      inverseDynamicsCalculator.reset();
-      optimizationMomentumControlModule.reset();
-
       readWristSensorData();
    }
-
-   private final Wrench admissibleGroundReactionWrench = new Wrench();
-   private final TotalWrenchCalculator totalWrenchCalculator = new TotalWrenchCalculator();
 
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
@@ -498,100 +403,6 @@ public class MomentumBasedController
       if (contactPointVisualizer != null)
          contactPointVisualizer.update();
 
-      MomentumModuleSolution momentumModuleSolution;
-
-      try
-      {
-         momentumModuleSolution = optimizationMomentumControlModule.compute();
-      }
-      catch (MomentumControlModuleException momentumControlModuleException)
-      {
-         // Don't crash and burn. Instead do the best you can with what you have.
-         // Or maybe just use the previous ticks solution.
-         // Need to test these.
-         momentumModuleSolution = momentumControlModuleException.getMomentumModuleSolution();
-
-         // throw new RuntimeException(momentumControlModuleException);
-      }
-
-      SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
-      centroidalMomentumRateSolution.getLinearPart(centroidalMomentumRateSolutionLinearPart);
-      centroidalMomentumRateSolutionLinearPart.scale(1.0 / totalMass);
-      qpOutputCoMAcceleration.set(centroidalMomentumRateSolutionLinearPart);
-
-      Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
-      List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
-
-      if (userActivateFeetForce.getBooleanValue())
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            RigidBody foot = fullRobotModel.getFoot(robotSide);
-            userAdditionalFeetWrench.setToZero(foot.getBodyFixedFrame(), referenceFrames.getMidFeetZUpFrame());
-            userAdditionalFeetWrench.setLinearPartX(robotSide.negateIfRightSide(userForwardFeetForce.getDoubleValue()));
-            userAdditionalFeetWrench.setLinearPartY(robotSide.negateIfRightSide(userLateralFeetForce.getDoubleValue()));
-            userAdditionalFeetWrench.setAngularPartZ(robotSide.negateIfRightSide(userYawFeetTorque.getDoubleValue()));
-
-            Wrench externalWrench = externalWrenches.get(foot);
-            userAdditionalFeetWrench.changeFrame(externalWrench.getExpressedInFrame());
-            externalWrench.add(userAdditionalFeetWrench);
-         }
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         if (hand != null)
-         {
-            Wrench handWrench = handWrenches.get(robotSide);
-            inverseDynamicsCalculator.getSpatialAccelerationCalculator().getAccelerationOfBody(tempAcceleration, hand);
-            toolRigidBodies.get(robotSide).control(tempAcceleration, handWrench);
-
-            if (externalWrenches.containsKey(hand))
-            {
-               externalWrenches.get(hand).add(handWrench);
-            }
-            else
-            {
-               externalWrenches.put(hand, handWrench);
-            }
-         }
-      }
-
-      for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
-      {
-         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
-         inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenches.get(rigidBody));
-      }
-
-      planeContactWrenchProcessor.compute(externalWrenches);
-      if (wrenchVisualizer != null)
-         wrenchVisualizer.visualize(externalWrenches);
-
-      totalWrenchCalculator.computeTotalWrench(admissibleGroundReactionWrench, externalWrenches.values(), centerOfMassFrame);
-      admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartX(), admissibleGroundReactionWrench.getAngularPartY(),
-            admissibleGroundReactionWrench.getAngularPartZ());
-      admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartX(), admissibleGroundReactionWrench.getLinearPartY(),
-            admissibleGroundReactionWrench.getLinearPartZ());
-
-      computeDesiredCenterOfPressure();
-
-      // SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
-      // groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
-      // groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
-
-      inverseDynamicsCalculator.compute();
-
-      updateYoVariables();
-   }
-
-   private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
-   private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
-
-   private void computeDesiredCenterOfPressure()
-   {
-      centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(desiredCenterOfPressure, admissibleGroundReactionWrench, worldFrame);
-      admissibleDesiredCenterOfPressure.set(desiredCenterOfPressure);
    }
 
    // FIXME GET RID OF THAT HACK!!!
@@ -637,15 +448,14 @@ public class MomentumBasedController
    private final Wrench footWrench = new Wrench();
    private final FrameVector footForceVector = new FrameVector();
 
-   public final void doProportionalControlOnCoP()
+   public final void doProportionalControlOnCoP(SideDependentList<FramePoint2d> desiredCoPs)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
          ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
          AlphaFilteredYoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
-
-         planeContactWrenchProcessor.getDesiredCenterOfPressure(contactablePlaneBody, copDesired);
+         copDesired.setIncludingFrame(desiredCoPs.get(robotSide));
 
          if (copDesired.containsNaN())
          {
@@ -706,7 +516,7 @@ public class MomentumBasedController
    private final DoubleYoVariable copSmootherControlDuration = new DoubleYoVariable("copSmootherControlDuration", registry);
    private final DoubleYoVariable copSmootherPercent = new DoubleYoVariable("copSmootherPercent", registry);
 
-   public double smoothDesiredCoPIfNeeded()
+   public double smoothDesiredCoPIfNeeded(SideDependentList<FramePoint2d> desiredCoPs)
    {
       boolean atLeastOneFootWithBadCoPControl = false;
 
@@ -715,7 +525,7 @@ public class MomentumBasedController
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
          ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
 
-         planeContactWrenchProcessor.getDesiredCenterOfPressure(contactablePlaneBody, copDesired);
+         copDesired.setIncludingFrame(desiredCoPs.get(robotSide));
 
          if (copDesired.containsNaN())
          {
@@ -787,92 +597,10 @@ public class MomentumBasedController
       updatables.add(updatable);
    }
 
-   private final SpatialAccelerationVector rootJointDesiredAcceleration = new SpatialAccelerationVector();
-   private final FrameVector rootJointDesiredAngularAcceleration = new FrameVector();
-   private final FrameVector rootJointDesiredLinearAcceleration = new FrameVector();
-   private final FrameVector rootJointLinearAccelerationInWorld = new FrameVector();
-
-   private final Twist rootJointTwist = new Twist();
-   private final FrameVector twistOfRootJointAngularPart = new FrameVector();
-   private final FrameVector twistOfRootJointLinearPart = new FrameVector();
-
-   private final Wrench residualRootJointWrench = new Wrench();
-
-   private final SpatialAccelerationVector spatialAccelerationOfFoot = new SpatialAccelerationVector();
-   private final FrameVector footSpatialAccelerationAngularPart = new FrameVector();
-   private final FrameVector footSpatialAccelerationLinearPart = new FrameVector();
-
-   private void updateYoVariables()
-   {
-      // TODO: Make a visualizer that gets attached rather than having it in this class.
-
-      RigidBody elevator = fullRobotModel.getElevator();
-      SpatialAccelerationCalculator spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
-
-      // Foot Accelerations
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-
-         spatialAccelerationCalculator.compute();
-         spatialAccelerationCalculator.getRelativeAcceleration(spatialAccelerationOfFoot, elevator, foot);
-
-         spatialAccelerationOfFoot.getAngularPart(footSpatialAccelerationAngularPart);
-         yoFeetDesiredAngularAccelerations.get(robotSide).set(footSpatialAccelerationAngularPart);
-
-         spatialAccelerationOfFoot.getLinearPart(footSpatialAccelerationLinearPart);
-         yoFeetDesiredLinearAccelerations.get(robotSide).set(footSpatialAccelerationLinearPart);
-      }
-
-      // Root Joint Accelerations
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
-      rootJoint.getDesiredJointAcceleration(rootJointDesiredAcceleration);
-
-      rootJointDesiredAcceleration.getAngularPart(rootJointDesiredAngularAcceleration);
-      rootJointDesiredAcceleration.getLinearPart(rootJointDesiredLinearAcceleration);
-
-      yoRootJointDesiredAngularAcceleration.set(rootJointDesiredAngularAcceleration);
-      yoRootJointDesiredLinearAcceleration.set(rootJointDesiredLinearAcceleration);
-
-      rootJoint.getJointTwist(rootJointTwist);
-      rootJointDesiredAcceleration.getLinearAccelerationFromOriginAcceleration(rootJointTwist, rootJointLinearAccelerationInWorld);
-      rootJointLinearAccelerationInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-      yoRootJointDesiredLinearAccelerationWorld.set(rootJointLinearAccelerationInWorld);
-
-      rootJointDesiredAngularAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
-      yoRootJointDesiredAngularAccelerationWorld.set(rootJointDesiredAngularAcceleration);
-
-      // Root Joint Twist
-      rootJointTwist.getAngularPart(twistOfRootJointAngularPart);
-      yoRootJointAngularVelocity.set(twistOfRootJointAngularPart);
-
-      rootJointTwist.getLinearPart(twistOfRootJointLinearPart);
-      twistOfRootJointLinearPart.changeFrame(ReferenceFrame.getWorldFrame());
-      yoRootJointLinearVelocity.set(twistOfRootJointLinearPart);
-
-      // Root Joint Residual Wrench
-      rootJoint.getWrench(residualRootJointWrench);
-      residualRootJointWrench.changeFrame(referenceFrames.getCenterOfMassFrame());
-      residualRootJointForce.set(residualRootJointWrench.getLinearPartX(), residualRootJointWrench.getLinearPartY(), residualRootJointWrench.getLinearPartZ());
-      residualRootJointTorque.set(residualRootJointWrench.getAngularPartX(), residualRootJointWrench.getAngularPartY(),
-            residualRootJointWrench.getAngularPartZ());
-
-      // Desired torques and accelerations of oneDoFJoints
-      for (int i = 0; i < jointsWithDesiredAcceleration.size(); i++)
-      {
-         OneDoFJoint joint = jointsWithDesiredAcceleration.get(i);
-         desiredTorqueYoVariables.get(joint).set(joint.getTau());
-         desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
-      }
-   }
-
    public void initialize()
    {
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state
       // where the feet are all jacked up. For example, after falling and getting back up.
-      inverseDynamicsCalculator.compute();
-      optimizationMomentumControlModule.initialize();
-      planeContactWrenchProcessor.initialize();
       callUpdatables();
    }
 
@@ -931,9 +659,16 @@ public class MomentumBasedController
       return getName();
    }
 
+   public void setDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoP)
+   {
+      YoFramePoint2d cop = footDesiredCenterOfPressures.get(contactablePlaneBody);
+      if (cop != null)
+         cop.set(desiredCoP);
+   }
+
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
    {
-      planeContactWrenchProcessor.getDesiredCenterOfPressure(contactablePlaneBody, desiredCoPToPack);
+      footDesiredCenterOfPressures.get(contactablePlaneBody).getFrameTuple2dIncludingFrame(desiredCoPToPack);
    }
 
    public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)
@@ -1043,11 +778,6 @@ public class MomentumBasedController
       return centerOfMassFrame;
    }
 
-   public void submitInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
-   {
-      optimizationMomentumControlModule.setInverseDynamicsCommand(inverseDynamicsCommand);
-   }
-
    public ReferenceFrame getPelvisZUpFrame()
    {
       return referenceFrames.getPelvisZUpFrame();
@@ -1089,11 +819,6 @@ public class MomentumBasedController
       return twistCalculator;
    }
 
-   public InverseDynamicsCalculator getInverseDynamicsCalculator()
-   {
-      return inverseDynamicsCalculator;
-   }
-
    public CenterOfMassJacobian getCenterOfMassJacobian()
    {
       return centerOfMassJacobian;
@@ -1129,11 +854,6 @@ public class MomentumBasedController
    public YoPlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)
    {
       return yoPlaneContactStates.get(contactablePlaneBody);
-   }
-
-   public List<? extends PlaneContactState> getPlaneContactStates()
-   {
-      return yoPlaneContactStateList;
    }
 
    public List<ContactablePlaneBody> getContactablePlaneBodyList()
@@ -1244,11 +964,6 @@ public class MomentumBasedController
       {
          robotMotionStatusChangedListeners.get(i).robotMotionStatusHasChanged(newStatus, yoTime.getDoubleValue());
       }
-   }
-
-   public SideDependentList<ProvidedMassMatrixToolRigidBody> getToolRigitBodies()
-   {
-      return toolRigidBodies;
    }
 
    public void getWristRawMeasuredWrench(Wrench wrenchToPack, RobotSide robotSide)

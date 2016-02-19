@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommandPool;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.WholeBodyInverseDynamicsControlCore;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -234,13 +235,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
-   public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
+   private final WholeBodyInverseDynamicsControlCore wholeBodyInverseDynamicsControlCore;
+
+   public WalkingHighLevelHumanoidController(WholeBodyInverseDynamicsControlCore wholeBodyInverseDynamicsControlCore,
+         VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
          ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
          MomentumBasedController momentumBasedController)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
+
+      this.wholeBodyInverseDynamicsControlCore = wholeBodyInverseDynamicsControlCore;
 
       hasWalkingControllerBeenInitialized.set(false);
 
@@ -460,6 +466,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       initializeContacts();
 
+      wholeBodyInverseDynamicsControlCore.initialize();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         wholeBodyInverseDynamicsControlCore.getDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+      }
+
       pelvisICPBasedTranslationManager.disable();
 
       double stepTime = swingTimeCalculationProvider.getValue() + transferTimeCalculationProvider.getValue();
@@ -593,8 +607,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          ecmpLocal.setToZero(worldFrame);
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
 
-         instantaneousCapturePointPlanner.getDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, capturePoint2d, yoTime.getDoubleValue());
-         CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(), ecmpLocal);
+         instantaneousCapturePointPlanner.getDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, capturePoint2d,
+               yoTime.getDoubleValue());
+         CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(),
+               ecmpLocal);
 
          if (transferToSide != null)
          {
@@ -1031,8 +1047,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
 
-         instantaneousCapturePointPlanner.getDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, capturePoint2d, yoTime.getDoubleValue());
-         CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(), ecmpLocal);
+         instantaneousCapturePointPlanner.getDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, capturePoint2d,
+               yoTime.getDoubleValue());
+         CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICPLocal, desiredICPVelocityLocal, icpAndMomentumBasedController.getOmega0(),
+               ecmpLocal);
 
          if (isInFlamingoStance.getBooleanValue())
          {
@@ -1711,6 +1729,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
 
+   private final SideDependentList<FramePoint2d> footDesiredCoPs = new SideDependentList<FramePoint2d>(new FramePoint2d(), new FramePoint2d());
    private final PlaneContactStateCommandPool planeContactStateCommandPool = new PlaneContactStateCommandPool();
 
    public void doMotionControl()
@@ -1735,6 +1754,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       momentumBasedController.doPrioritaryControl();
+      wholeBodyInverseDynamicsControlCore.reset();
       super.callUpdatables();
 
       icpAndMomentumBasedController.update();
@@ -1756,32 +1776,40 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       JointspaceAccelerationCommand unconstrainedJointCommand = doUnconstrainedJointControl();
 
       planeContactStateCommandPool.clear();
-      double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded();
+      double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded(footDesiredCoPs);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         momentumBasedController.submitInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
-         momentumBasedController.submitInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
+         wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
+         wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
          YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.createCommand();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          planeContactStateCommand.setWRhoSmoother(wRhoSmoother);
       }
 
-      momentumBasedController.submitInverseDynamicsCommand(planeContactStateCommandPool);
-      momentumBasedController.submitInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
-      momentumBasedController.submitInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
-      momentumBasedController.submitInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
+      wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(planeContactStateCommandPool);
+      wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
+      wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
+      wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
 
-      momentumBasedController.submitInverseDynamicsCommand(getUncontrolledJointCommand());
-      momentumBasedController.submitInverseDynamicsCommand(unconstrainedJointCommand);
+      wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(getUncontrolledJointCommand());
+      wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(unconstrainedJointCommand);
 
-      momentumBasedController.submitInverseDynamicsCommand(icpAndMomentumBasedController.getInverseDynamicsCommand());
+      wholeBodyInverseDynamicsControlCore.submitInverseDynamicsCommand(icpAndMomentumBasedController.getInverseDynamicsCommand());
+
+      wholeBodyInverseDynamicsControlCore.compute();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         wholeBodyInverseDynamicsControlCore.getDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+      }
 
       momentumBasedController.doSecondaryControl();
 
       momentumBasedController.doPassiveKneeControl();
-      momentumBasedController.doProportionalControlOnCoP();
+      momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
    }
 
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
