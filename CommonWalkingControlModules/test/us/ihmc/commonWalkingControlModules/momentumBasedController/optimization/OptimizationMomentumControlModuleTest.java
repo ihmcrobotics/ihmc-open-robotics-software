@@ -7,7 +7,6 @@ import static us.ihmc.commonWalkingControlModules.momentumBasedController.Moment
 import static us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlTestTools.assertWrenchesSumUpToMomentumDot;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJaco
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
@@ -96,10 +96,14 @@ public class OptimizationMomentumControlModuleTest
       LinkedHashMap<ContactablePlaneBody, PlaneContactState> contactStates = new LinkedHashMap<ContactablePlaneBody, PlaneContactState>();
       double coefficientOfFriction = 1.0;
       addContactState(coefficientOfFriction, randomFloatingChain.getLeafBody(), contactStates);
+      
+      PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
+      for (PlaneContactState contactState : contactStates.values())
+         contactState.getPlaneContactStateCommand(pool.createCommand());
 
       GeometricJacobianHolder geometricJacobiandHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), geometricJacobiandHolder);
+            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates, geometricJacobiandHolder);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(randomFloatingChain.getElevator());
       SpatialForceVector momentumRateOfChangeIn = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random,
@@ -107,6 +111,7 @@ public class OptimizationMomentumControlModuleTest
       MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
       momentumRateCommand.set(momentumRateOfChangeIn);
 
+      momentumControlModule.setInverseDynamicsCommand(pool);
       momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
@@ -149,9 +154,13 @@ public class OptimizationMomentumControlModuleTest
       double coefficientOfFriction = 1000.0;
       addContactState(coefficientOfFriction, endEffector, contactStates);
 
+      PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
+      for (PlaneContactState contactState : contactStates.values())
+         contactState.getPlaneContactStateCommand(pool.createCommand());
+
       GeometricJacobianHolder geometricJacobiandHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), geometricJacobiandHolder);
+            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates, geometricJacobiandHolder);
 
       MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -160,6 +169,7 @@ public class OptimizationMomentumControlModuleTest
             0.0);
       momentumRateCommand.set(momentumRateOfChangeIn);
 
+      momentumControlModule.setInverseDynamicsCommand(pool);
       momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
@@ -222,9 +232,13 @@ public class OptimizationMomentumControlModuleTest
       double coefficientOfFriction = 1000.0;
       addContactState(coefficientOfFriction, endEffector, contactStates);
 
+      PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
+      for (PlaneContactState contactState : contactStates.values())
+         contactState.getPlaneContactStateCommand(pool.createCommand());
+
       GeometricJacobianHolder geometricJacobiandHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), geometricJacobiandHolder);
+            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates, geometricJacobiandHolder);
 
       RigidBody elevator = randomFloatingChain.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
@@ -233,6 +247,7 @@ public class OptimizationMomentumControlModuleTest
       MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
       momentumRateCommand.set(momentumRateOfChangeIn);
 
+      momentumControlModule.setInverseDynamicsCommand(pool);
       momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
@@ -281,7 +296,7 @@ public class OptimizationMomentumControlModuleTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test//(timeout = 30000)
    public void testSingleRigidBody() throws NoConvergenceException
    {
       Random random = new Random(125152L);
@@ -301,7 +316,7 @@ public class OptimizationMomentumControlModuleTest
 
       GeometricJacobianHolder geometricJacobiandHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, new ArrayList<RevoluteJoint>(), controlDT,
-            centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), geometricJacobiandHolder);
+            centerOfMassFrame, momentumOptimizationSettings, contactStates, geometricJacobiandHolder);
       double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(elevator));
       double rhoMin = momentumOptimizationSettings.getRhoMinScalar();
 
@@ -325,6 +340,11 @@ public class OptimizationMomentumControlModuleTest
          MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
          momentumRateCommand.set(desiredRateOfChangeOfMomentum);
 
+      PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
+      for (PlaneContactState contactState : contactStates.values())
+         contactState.getPlaneContactStateCommand(pool.createCommand());
+
+         momentumControlModule.setInverseDynamicsCommand(pool);
          momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
          MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
@@ -360,9 +380,13 @@ public class OptimizationMomentumControlModuleTest
       double coefficientOfFriction = 1000.0;
       addContactState(coefficientOfFriction, endEffector, contactStates);
 
+      PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
+      for (PlaneContactState contactState : contactStates.values())
+         contactState.getPlaneContactStateCommand(pool.createCommand());
+
       GeometricJacobianHolder geometricJacobiandHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, randomFloatingChain.getRevoluteJoints(),
-            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), geometricJacobiandHolder);
+            controlDT, centerOfMassFrame, momentumOptimizationSettings, contactStates, geometricJacobiandHolder);
 
       MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
       RigidBody elevator = randomFloatingChain.getElevator();
@@ -371,6 +395,7 @@ public class OptimizationMomentumControlModuleTest
             0.0);
       momentumRateCommand.set(momentumRateOfChangeIn);
 
+      momentumControlModule.setInverseDynamicsCommand(pool);
       momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = elevator; // rootJoint.getSuccessor();
@@ -463,15 +488,20 @@ public class OptimizationMomentumControlModuleTest
       double coefficientOfFriction = 1000.0;
       addContactState(coefficientOfFriction, endEffector, contactStates);
 
+      PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
+      for (PlaneContactState contactState : contactStates.values())
+         contactState.getPlaneContactStateCommand(pool.createCommand());
+
       GeometricJacobianHolder geometricJacobiandHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = createAndInitializeMomentumControlModule(rootJoint, revoluteJoints, controlDT,
-            centerOfMassFrame, momentumOptimizationSettings, contactStates.values(), geometricJacobiandHolder);
+            centerOfMassFrame, momentumOptimizationSettings, contactStates, geometricJacobiandHolder);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       SpatialForceVector desiredMomentumRate = generateRandomFeasibleMomentumRateOfChange(centerOfMassFrame, contactStates, totalMass, gravityZ, random, 0.0);
       MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
       momentumRateCommand.set(desiredMomentumRate);
 
+      momentumControlModule.setInverseDynamicsCommand(pool);
       momentumControlModule.setInverseDynamicsCommand(momentumRateCommand);
 
       RigidBody base = rootJoint.getSuccessor();
@@ -519,14 +549,14 @@ public class OptimizationMomentumControlModuleTest
 
    private OptimizationMomentumControlModule createAndInitializeMomentumControlModule(SixDoFJoint rootJoint, List<RevoluteJoint> revoluteJoints, double dt,
          ReferenceFrame centerOfMassFrame, MomentumOptimizationSettings momentumOptimizationSettings,
-         Collection<? extends PlaneContactState> planeContactStates, GeometricJacobianHolder geometricJacobiandHolder)
+         Map<? extends ContactablePlaneBody, ? extends PlaneContactState> planeContactStates, GeometricJacobianHolder geometricJacobiandHolder)
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getPredecessor());
 
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, gravityZ, momentumOptimizationSettings,
-            twistCalculator, geometricJacobiandHolder, planeContactStates, null, registry);
+            twistCalculator, geometricJacobiandHolder, new ArrayList<>(planeContactStates.keySet()), null, registry);
 
       momentumControlModule.initialize();
 

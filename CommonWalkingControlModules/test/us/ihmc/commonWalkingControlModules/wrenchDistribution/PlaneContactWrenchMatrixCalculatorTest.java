@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -17,9 +18,12 @@ import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommandPool;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -55,6 +59,7 @@ public class PlaneContactWrenchMatrixCalculatorTest
          centerOfMassFrame.update();
 
          List<RigidBody> bodies = new ArrayList<RigidBody>();
+         List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
          bodies.add(randomFloatingChain.getRevoluteJoints().get(2).getSuccessor());
          bodies.add(randomFloatingChain.getRevoluteJoints().get(4).getSuccessor());
 
@@ -65,21 +70,31 @@ public class PlaneContactWrenchMatrixCalculatorTest
 
          int nContactPoints = 4;
          int contactNumber = 0;
+         
+         PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
 
          for (RigidBody body : bodies)
          {
             ReferenceFrame planeFrame = body.getBodyFixedFrame();
 
             List<FramePoint2d> contactPoints = new ArrayList<FramePoint2d>();
+            List<Point2d> contactPoint2ds = new ArrayList<Point2d>();
+            
             for (int i = 0; i < nContactPoints; i++)
             {
                FramePoint2d contactPoint = new FramePoint2d(planeFrame, random.nextDouble(), random.nextDouble());
                contactPoints.add(contactPoint);
+               Point2d cp2d = new Point2d();
+               contactPoint.get(cp2d);
+               contactPoint2ds.add(cp2d);
             }
 
             YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, body, planeFrame, contactPoints, coefficientOfFriction,
                   registry);
             contactStates.put(body, contactState);
+            contactState.getPlaneContactStateCommand(pool.createCommand());
+            
+            contactablePlaneBodies.add(new ListOfPointsContactablePlaneBody(body, planeFrame, contactPoint2ds));
          }
 
          int nSupportVectorsPerContactPoint = 4;
@@ -88,8 +103,8 @@ public class PlaneContactWrenchMatrixCalculatorTest
          double wRhoSmoother = 0.0;
          double wRhoPenalizer = 0.0;
          PlaneContactWrenchMatrixCalculator calculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nContactPoints,
-               nSupportVectorsPerContactPoint, wRho, wRhoSmoother, wRhoPenalizer, contactStates.values(), registry);
-
+               nSupportVectorsPerContactPoint, wRho, wRhoSmoother, wRhoPenalizer, contactablePlaneBodies, registry);
+         calculator.setPlaneContactStateCommandPool(pool);
          calculator.computeMatrices();
          DenseMatrix64F q = calculator.getQRho();
 

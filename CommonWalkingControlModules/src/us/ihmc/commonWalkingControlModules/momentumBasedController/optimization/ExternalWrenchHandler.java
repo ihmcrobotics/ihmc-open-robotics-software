@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -29,35 +28,35 @@ public class ExternalWrenchHandler
    private final DenseMatrix64F wrenchEquationRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
    private final Map<RigidBody, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBody, Wrench>();
    private final SpatialForceVector totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
-   private final List<? extends PlaneContactState> planeContactStates;
+   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final List<RigidBody> rigidBodiesWithWrenchToCompensateFor = new ArrayList<>();
    private final Map<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final SpatialForceVector tempWrench = new SpatialForceVector();
 
    public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, InverseDynamicsJoint rootJoint,
-         Collection<? extends PlaneContactState> planeContactStates)
+         List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.planeContactStates = new ArrayList<PlaneContactState>(planeContactStates);
+      this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame);
       double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
       gravitationalWrench.setLinearPartZ(-gravityZ * totalMass);
       totalWrenchAlreadyApplied = new SpatialForceVector(centerOfMassFrame);
 
-      for (int i = 0; i < planeContactStates.size(); i++)
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = this.planeContactStates.get(i).getRigidBody();
+         RigidBody rigidBody = this.contactablePlaneBodies.get(i).getRigidBody();
          externalWrenches.put(rigidBody, new Wrench(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame()));
       }
    }
 
    public void reset()
    {
-      for (int i = 0; i < planeContactStates.size(); i++)
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = planeContactStates.get(i).getRigidBody();
+         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          externalWrenches.get(rigidBody).setToZero(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame());
       }
 
@@ -109,9 +108,9 @@ public class ExternalWrenchHandler
 
    public void computeExternalWrenches(Map<RigidBody, Wrench> groundReactionWrenches)
    {
-      for (int i = 0; i < planeContactStates.size(); i++)
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
-         RigidBody rigidBody = planeContactStates.get(i).getRigidBody();
+         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench externalWrench = externalWrenches.get(rigidBody);
          externalWrench.add(groundReactionWrenches.get(rigidBody));
       }

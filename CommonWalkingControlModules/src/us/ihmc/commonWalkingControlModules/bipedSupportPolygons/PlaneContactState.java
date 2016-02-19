@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommand;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -35,4 +36,8 @@ public interface PlaneContactState
    public abstract int getTotalNumberOfContactPoints();
 
    public abstract List<? extends ContactPointInterface> getContactPoints();
+
+   public abstract void updateFromPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommand);
+
+   public abstract void getPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommandToPack);
 }

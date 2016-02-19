@@ -10,9 +10,11 @@ import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -25,6 +27,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerW
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -1708,6 +1712,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
 
+   private final PlaneContactStateCommandPool planeContactStateCommandPool = new PlaneContactStateCommandPool();
+
    public void doMotionControl()
    {
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
@@ -1750,12 +1756,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doPelvisControl();
       JointspaceAccelerationCommand unconstrainedJointCommand = doUnconstrainedJointControl();
 
+      planeContactStateCommandPool.clear();
+      double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          momentumBasedController.submitInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
          momentumBasedController.submitInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
+         YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
+         PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.createCommand();
+         contactState.getPlaneContactStateCommand(planeContactStateCommand);
+         planeContactStateCommand.setWRhoSmoother(wRhoSmoother);
       }
 
+      momentumBasedController.submitInverseDynamicsCommand(planeContactStateCommandPool);
       momentumBasedController.submitInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
       momentumBasedController.submitInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
       momentumBasedController.submitInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
@@ -1769,7 +1783,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       momentumBasedController.doPassiveKneeControl();
       momentumBasedController.doProportionalControlOnCoP();
-      momentumBasedController.smoothDesiredCoPIfNeeded();
    }
 
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();

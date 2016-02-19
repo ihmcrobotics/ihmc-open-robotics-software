@@ -11,18 +11,25 @@ import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class ContactStateCommand extends InverseDynamicsCommand<ContactStateCommand>
+public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContactStateCommand>
 {
    private RigidBody rigidBody;
+   private long id = -1L;
    private double coefficientOfFriction = Double.NaN;
+   private double wRhoSmoother = 0.0;
    private final int initialSize = 8;
    private final FrameTupleArrayList<FramePoint> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
    private final FrameVector contactNormal = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
-   public ContactStateCommand()
+   public PlaneContactStateCommand()
    {
-      super(InverseDynamicsCommandType.CONTACT_STATE);
+      super(InverseDynamicsCommandType.PLANE_CONTACT_STATE);
       clearContactPoints();
+   }
+
+   public void setId(long id)
+   {
+      this.id = id;
    }
 
    public void setContactingRigidBody(RigidBody rigidBody)
@@ -35,6 +42,11 @@ public class ContactStateCommand extends InverseDynamicsCommand<ContactStateComm
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
+   public void setWRhoSmoother(double wRhoSmoother)
+   {
+      this.wRhoSmoother = wRhoSmoother;
+   }
+
    public void clearContactPoints()
    {
       contactPoints.clear();
@@ -45,7 +57,7 @@ public class ContactStateCommand extends InverseDynamicsCommand<ContactStateComm
       contactPoints.add().setIncludingFrame(newPointInContact);
    }
 
-   public void addDesiredPointInContact(FramePoint2d newPointInContact)
+   public void addPointInContact(FramePoint2d newPointInContact)
    {
       contactPoints.add().setXYIncludingFrame(newPointInContact);
    }
@@ -67,6 +79,16 @@ public class ContactStateCommand extends InverseDynamicsCommand<ContactStateComm
       this.contactNormal.setIncludingFrame(contactNormal);
    }
 
+   public long getId()
+   {
+      return id;
+   }
+
+   public boolean isEmpty()
+   {
+      return contactPoints.isEmpty();
+   }
+
    public int getNumberOfContactPoints()
    {
       return contactPoints.size();
@@ -75,6 +97,11 @@ public class ContactStateCommand extends InverseDynamicsCommand<ContactStateComm
    public double getCoefficientOfFriction()
    {
       return coefficientOfFriction;
+   }
+
+   public RigidBody getContactingRigidBody()
+   {
+      return rigidBody;
    }
 
    public void getContactPoint(int index, FramePoint contactPointToPack)
@@ -87,12 +114,24 @@ public class ContactStateCommand extends InverseDynamicsCommand<ContactStateComm
       contactNormalToPack.setIncludingFrame(contactNormal);
    }
 
+   public double getWRhoSmoother()
+   {
+      return wRhoSmoother;
+   }
+
    @Override
-   public void set(ContactStateCommand other)
+   public void set(PlaneContactStateCommand other)
    {
       rigidBody = other.rigidBody;
       coefficientOfFriction = other.coefficientOfFriction;
       contactPoints.copyFromListAndTrimSize(other.contactPoints);
       contactNormal.setIncludingFrame(other.contactNormal);
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": contacting rigid body = " + rigidBody + ", number of contact points = " + getNumberOfContactPoints();
+      return ret;
    }
 }
