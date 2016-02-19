@@ -333,7 +333,7 @@ public class MomentumBasedController
       }
 
       optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(), gravityZ,
-            momentumOptimizationSettings, twistCalculator, robotJacobianHolder, contactablePlaneBodyList, yoGraphicsListRegistry, registry);
+            momentumOptimizationSettings, twistCalculator, robotJacobianHolder, contactablePlaneBodyList, registry);
 
       if (DO_PASSIVE_KNEE_CONTROL)
       {

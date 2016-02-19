@@ -122,7 +122,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       twistCalculator.compute();
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, gravityZ, optimizationSettings,
-            twistCalculator, null, new ArrayList<>(feet.values()), null, registry);
+            twistCalculator, null, new ArrayList<>(feet.values()), registry);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
@@ -223,7 +223,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       twistCalculator.compute();
       GeometricJacobianHolder jacobianHolder = new GeometricJacobianHolder();
       OptimizationMomentumControlModule momentumControlModule = new OptimizationMomentumControlModule(rootJoint, centerOfMassFrame, gravityZ, optimizationSettings,
-            twistCalculator, jacobianHolder, new ArrayList<>(feet.values()), null, registry);
+            twistCalculator, jacobianHolder, new ArrayList<>(feet.values()), registry);
       momentumControlModule.initialize();
 
       double mass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
