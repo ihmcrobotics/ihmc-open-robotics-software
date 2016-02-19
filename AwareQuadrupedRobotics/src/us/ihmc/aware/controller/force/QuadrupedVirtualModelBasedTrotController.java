@@ -84,6 +84,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final static String DOUBLE_SUPPORT_DURATION = "doubleSupportDuration";
    private final static String STANCE_WIDTH_NOMINAL = "stanceWidthNominal";
    private final static String STANCE_LENGTH_NOMINAL = "stanceLengthNominal";
+   private final static String CONTACT_PRESSURE_THRESHOLD = "contactPressureThreshold";
 
    // utilities
    private final QuadrupedJointLimits jointLimits;
@@ -223,18 +224,18 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedTrotController.class);
-      params.setDefault(JOINT_DAMPING, 1);
+      params.setDefault(JOINT_DAMPING, 2);
       params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 5000);
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 750);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 100000, 100000, 100000);
+      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 50000, 50000, 100000);
       params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 500, 500, 500);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 0);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.05);
-      params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.075);
+      params.setDefault(DCM_PROPORTIONAL_GAINS, 1.0, 1.0, 0);
       params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(COM_HEIGHT_PROPORTIONAL_GAIN, 5000);
@@ -244,9 +245,10 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 0.95);
       params.setDefault(COM_HEIGHT_NOMINAL, 0.60);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
-      params.setDefault(DOUBLE_SUPPORT_DURATION, 0.35);
-      params.setDefault(STANCE_WIDTH_NOMINAL, 0.5);
+      params.setDefault(DOUBLE_SUPPORT_DURATION, 0.33);
+      params.setDefault(STANCE_WIDTH_NOMINAL, 0.4);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
+      params.setDefault(CONTACT_PRESSURE_THRESHOLD, 75);
 
       // utilities
       jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
@@ -521,15 +523,12 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    private void updateSetpoints()
    {
-      double currentTime = robotTimestamp.getDoubleValue();
-
       // compute com forces and swing foot forces
       trotStateMachine.process();
 
       // compute body torques
-      bodyYawRateIntegral += bodyYawRateInput * controlDT;
       bodyOrientationSetpoint.changeFrame(bodyOrientationInput.getReferenceFrame());
-      bodyOrientationSetpoint.setYawPitchRoll(bodyYawRateIntegral, bodyOrientationInput.getPitch(), bodyOrientationInput.getRoll());
+      bodyOrientationSetpoint.setYawPitchRoll(bodyYawRateIntegral, bodyOrientationInput.getPitch() + supportPolygonEstimate.getNominalPitch(), bodyOrientationInput.getRoll());
       bodyOrientationSetpoint.changeFrame(bodyFrame);
       bodyAngularVelocitySetpoint.setToZero(bodyFrame);
       bodyAngularVelocityEstimate.changeFrame(bodyFrame);
@@ -632,8 +631,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       virtualModelController.setVisible(false);
 
       // initialize desired values (provider inputs)
-      yoBodyYawRateInput.set(0.0);
-      yoBodyVelocityInput.set(0.0, 0.0, 0.0);
       yoBodyOrientationInput.setYawPitchRoll(0.0, 0.0, 0.0);
       yoComHeightInput.set(params.get(COM_HEIGHT_NOMINAL));
 
@@ -683,6 +680,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       updateEstimates();
       dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
       dcmVelocitySetpoint.setToZero();
+      bodyOrientationEstimate.changeFrame(worldFrame);
       bodyYawRateIntegral = bodyOrientationEstimate.getYaw();
    }
 
@@ -707,11 +705,11 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private void computeNominalCmpPositionAtEoS(FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
    {
       bodyVelocityInput.changeFrame(worldFrame);
-      double aStride = bodyYawRateIntegral + bodyYawRateInput * params.get(DOUBLE_SUPPORT_DURATION);
+      double bodyYaw = bodyYawRateIntegral + bodyYawRateInput * params.get(DOUBLE_SUPPORT_DURATION);
       double xStride = bodyVelocityInput.getX() * params.get(DOUBLE_SUPPORT_DURATION);
       double yStride = bodyVelocityInput.getY() * params.get(DOUBLE_SUPPORT_DURATION);
-      double xOffset = Math.cos(aStride) * xStride - Math.sin(aStride) * yStride;
-      double yOffset = Math.sin(aStride) * xStride + Math.cos(aStride) * yStride;
+      double xOffset = Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
+      double yOffset = Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       nominalCmpPositionAtEoS.setIncludingFrame(nominalCmpPositionAtSoS);
       nominalCmpPositionAtEoS.changeFrame(worldFrame);
       nominalCmpPositionAtEoS.add(xOffset, yOffset, 0.0);
@@ -742,15 +740,27 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    private void computeFootholdPosition(RobotQuadrant robotQuadrant, FramePoint cmpPosition, double bodyYaw, FramePoint footholdPosition)
    {
+      double xOffset, yOffset;
+
+      // compute foothold position based on the nominal stance and desired cmp
       solePositionEstimate.get(robotQuadrant).changeFrame(worldFrame);
       double xStance = robotQuadrant.getEnd().negateIfHindEnd(params.get(STANCE_LENGTH_NOMINAL) / 2);
       double yStance = robotQuadrant.getSide().negateIfRightSide(params.get(STANCE_WIDTH_NOMINAL) / 2);
-      double xOffset = Math.cos(bodyYaw) * xStance - Math.sin(bodyYaw) * yStance;
-      double yOffset = Math.sin(bodyYaw) * xStance + Math.cos(bodyYaw) * yStance;
+      xOffset = Math.cos(bodyYaw) * xStance - Math.sin(bodyYaw) * yStance;
+      yOffset = Math.sin(bodyYaw) * xStance + Math.cos(bodyYaw) * yStance;
       footholdPosition.setIncludingFrame(cmpPosition);
       footholdPosition.changeFrame(worldFrame);
       footholdPosition.add(xOffset, yOffset, 0.0);
+
+      // compute foothold height based on estimated ground slope
+      solePositionEstimate.get(robotQuadrant).changeFrame(worldFrame);
+      double xStride = footholdPosition.getX() - solePositionEstimate.get(robotQuadrant).getX();
+      double yStride = footholdPosition.getY() - solePositionEstimate.get(robotQuadrant).getY();
+      xOffset = Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
+      yOffset = Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       footholdPosition.setZ(solePositionEstimate.get(robotQuadrant).getZ());
+      footholdPosition.add(0, 0, -xOffset * Math.tan(supportPolygonEstimate.getNominalPitch()));
+      footholdPosition.add(0, 0, yOffset * Math.tan(supportPolygonEstimate.getNominalRoll()));
    }
 
    private class QuadSupportState implements StateMachineState<TrotEvent>
@@ -861,6 +871,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
          // compute desired dcm trajectory
          dcmPositionEstimate.changeFrame(worldFrame);
+         dcmTrajectory.setComHeight(Math.max(comHeightSetpoint, 0.001));
          dcmTrajectory.initializeTrajectory(initialTime, cmpPositionAtSoSNominal, dcmPositionEstimate);
          dcmTrajectory.computeTrajectory(initialTime + params.get(DOUBLE_SUPPORT_DURATION));
          dcmTrajectory.getPosition(dcmPositionAtEoS);
@@ -901,6 +912,9 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       @Override public TrotEvent process()
       {
          double currentTime = robotTimestamp.getDoubleValue();
+
+         // integrate body yaw rate
+         bodyYawRateIntegral += bodyYawRateInput * controlDT;
 
          // compute dcm setpoint
          dcmTrajectory.computeTrajectory(currentTime);
@@ -947,6 +961,21 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             swingPositionController.get(swingQuadrant)
                   .compute(soleForceSetpoint.get(swingQuadrant), solePositionSetpoint.get(swingQuadrant), soleLinearVelocitySetpoint.get(swingQuadrant),
                         soleLinearVelocityEstimate.get(swingQuadrant), soleForceFeedforwardSetpoint.get(swingQuadrant));
+
+            // limit sole force setpoint if contact pressure threshold is exceeded
+            soleForceSetpoint.get(swingQuadrant).changeFrame(comFrame);
+            double fx = soleForceSetpoint.get(swingQuadrant).getX();
+            double fy = soleForceSetpoint.get(swingQuadrant).getY();
+            double fz = soleForceSetpoint.get(swingQuadrant).getZ();
+            if (fz < -params.get(CONTACT_PRESSURE_THRESHOLD))
+            {
+               double mu = 0.7;
+               soleForceSetpoint.get(swingQuadrant).setX(Math.min(fx, mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
+               soleForceSetpoint.get(swingQuadrant).setX(Math.max(fx,-mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
+               soleForceSetpoint.get(swingQuadrant).setY(Math.min(fy, mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
+               soleForceSetpoint.get(swingQuadrant).setY(Math.max(fy,-mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
+               soleForceSetpoint.get(swingQuadrant).setZ(-params.get(CONTACT_PRESSURE_THRESHOLD));
+            }
          }
 
          // trigger touch down event
