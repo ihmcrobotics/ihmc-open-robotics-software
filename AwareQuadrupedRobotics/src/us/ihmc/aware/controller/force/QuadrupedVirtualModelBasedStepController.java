@@ -521,10 +521,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // compute sole poses and twists
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         twistCalculator.packTwistOfBody(twistStorage, footRigidBody.get(robotQuadrant));
+         twistCalculator.getTwistOfBody(twistStorage, footRigidBody.get(robotQuadrant));
          twistStorage.changeFrame(soleFrame.get(robotQuadrant));
-         twistStorage.packAngularPart(soleAngularVelocityEstimate.get(robotQuadrant));
-         twistStorage.packLinearPart(soleLinearVelocityEstimate.get(robotQuadrant));
+         twistStorage.getAngularPart(soleAngularVelocityEstimate.get(robotQuadrant));
+         twistStorage.getLinearPart(soleLinearVelocityEstimate.get(robotQuadrant));
          soleOrientationEstimate.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
          solePositionEstimate.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
       }
@@ -544,16 +544,16 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
 
       // compute body pose and twist
-      twistCalculator.packTwistOfBody(twistStorage, fullRobotModel.getPelvis());
+      twistCalculator.getTwistOfBody(twistStorage, fullRobotModel.getPelvis());
       twistStorage.changeFrame(bodyFrame);
-      twistStorage.packAngularPart(bodyAngularVelocityEstimate);
-      twistStorage.packLinearPart(bodyLinearVelocityEstimate);
+      twistStorage.getAngularPart(bodyAngularVelocityEstimate);
+      twistStorage.getLinearPart(bodyLinearVelocityEstimate);
       bodyOrientationEstimate.setToZero(bodyFrame);
       bodyPositionEstimate.setToZero(bodyFrame);
 
       // compute center of mass position and velocity
       comPositionEstimate.setToZero(comFrame);
-      comJacobian.packCenterOfMassVelocity(comVelocityEstimate);
+      comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
 
       // compute divergent component of motion and instantaneous capture point
       comPositionEstimate.changeFrame(worldFrame);
@@ -750,13 +750,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmTrajectoryInitialized = false;
 
       footstepPlanner.plan(stepQueue, robotTimestamp.getDoubleValue() + 2.0, false);
-
-      for (int i = 0; i < getStepQueueSize(); i++)
-      {
-         QuadrupedTimedStep step = stepQueue.get(i);
-         System.out.println("Step " + step.getRobotQuadrant() +
-               " @ " + step.getTimeInterval().getStartTime() + " for " + step.getTimeInterval().getDuration());
-      }
    }
 
    @Override public void onExit()
