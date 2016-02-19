@@ -26,19 +26,19 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
  */
 public class PlaneContactWrenchProcessor
 {
-   private final List<ContactablePlaneBody> contactablePlaneBodies;
+   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> normalTorques = new LinkedHashMap<>();
-   private final LinkedHashMap<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<>();
-   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<>();
-   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, DoubleYoVariable> normalTorques = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<>();
 
    private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint2d> yoCops = new LinkedHashMap<>();
 
-   public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.contactablePlaneBodies = contactablePlaneBodies;
