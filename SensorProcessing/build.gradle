@@ -17,6 +17,12 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
+	maven {
+		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+	}
+}
+
+repositories {
    mavenLocal()
    jcenter()
    mavenCentral()
