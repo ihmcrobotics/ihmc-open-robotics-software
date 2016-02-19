@@ -88,17 +88,12 @@ public class HoldPositionState extends AbstractFootControlState
       desiredAngularAcceleration.setToZero(worldFrame);
 
       footControlHelper.setGains(gains);
-
-      ConstraintType previousStateEnum = getPreviousState().getStateEnum();
-      boolean resetCurrentFootShrink = previousStateEnum != ConstraintType.FULL && previousStateEnum != ConstraintType.HOLD_POSITION;
-      footControlHelper.initializeParametersForSupportFootShrink(resetCurrentFootShrink);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      footControlHelper.restoreFootContactPoints();
    }
 
    @Override
@@ -113,8 +108,6 @@ public class HoldPositionState extends AbstractFootControlState
       partialFootholdControlModule.applyShrunkPolygon(contactState);
 
       footControlHelper.setGains(gains);
-
-      footControlHelper.shrinkSupportFootContactPointsToToesIfNecessary();
 
       RigidBody baseForControl = CONTROL_WRT_PELVIS ? pelvisBody : rootBody;
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();

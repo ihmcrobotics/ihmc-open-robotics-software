@@ -339,7 +339,6 @@ public class OnToesState extends AbstractFootControlState
       }
 
       setOnToesFreeMotionGains();
-      footControlHelper.saveContactPointsFromContactState();
    }
 
    @Override
@@ -360,7 +359,6 @@ public class OnToesState extends AbstractFootControlState
 
       // TODO: kind of a hack
       footControlHelper.resetSelectionMatrix();
-      footControlHelper.restoreFootContactPoints();
    }
 
    private void setOnToesFreeMotionGains()

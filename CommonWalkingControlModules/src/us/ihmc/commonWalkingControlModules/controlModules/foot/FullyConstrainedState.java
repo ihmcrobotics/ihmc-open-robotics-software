@@ -32,16 +32,12 @@ public class FullyConstrainedState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
       momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
-      ConstraintType previousStateEnum = getPreviousState().getStateEnum();
-      boolean resetCurrentFootShrink = previousStateEnum != ConstraintType.FULL && previousStateEnum != ConstraintType.HOLD_POSITION;
-      footControlHelper.initializeParametersForSupportFootShrink(resetCurrentFootShrink);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      footControlHelper.restoreFootContactPoints();
    }
 
    @Override
@@ -52,8 +48,6 @@ public class FullyConstrainedState extends AbstractFootControlState
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
       partialFootholdControlModule.applyShrunkPolygon(contactState);
-
-      footControlHelper.shrinkSupportFootContactPointsToToesIfNecessary();
 
       footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
 

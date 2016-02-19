@@ -2,7 +2,13 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 public abstract class InverseDynamicsCommand<T extends InverseDynamicsCommand<T>>
 {
-   public enum InverseDynamicsCommandType {TASKSPACE_MOTION, TASKSPACE_POINT_MOTION, JOINTSPACE_MOTION, MOMENTUM_RATE, COMMAND_LIST, EXTERNAL_WRENCH};
+   public enum InverseDynamicsCommandType
+   {
+      TASKSPACE_MOTION, TASKSPACE_POINT_MOTION, JOINTSPACE_MOTION, MOMENTUM_RATE,
+      EXTERNAL_WRENCH, CONTACT_STATE,
+      COMMAND_LIST
+   };
+
    private final InverseDynamicsCommandType commandType;
 
    public InverseDynamicsCommand(InverseDynamicsCommandType commandType)
