@@ -24,7 +24,6 @@ public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContac
    public PlaneContactStateCommand()
    {
       super(InverseDynamicsCommandType.PLANE_CONTACT_STATE);
-      clearContactPoints();
    }
 
    public void setId(long id)

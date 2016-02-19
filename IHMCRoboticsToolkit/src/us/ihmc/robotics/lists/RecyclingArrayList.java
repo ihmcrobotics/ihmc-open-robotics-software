@@ -25,19 +25,20 @@ public class RecyclingArrayList<T>
       this(DEFAULT_INITIAL_SIZE, builder);
    }
 
-   public RecyclingArrayList(int initialSize, Class<T> clazz)
+   public RecyclingArrayList(int initialCapacity, Class<T> clazz)
    {
-      this(initialSize, createBuilderWithEmptyConstructor(clazz));
+      this(initialCapacity, createBuilderWithEmptyConstructor(clazz));
    }
 
    @SuppressWarnings("unchecked")
-   public RecyclingArrayList(int initialSize, Builder<T> builder)
+   public RecyclingArrayList(int initialCapacity, Builder<T> builder)
    {
-      elementData = (T[]) new Object[initialSize];
-      size = initialSize;
+      elementData = (T[]) new Object[initialCapacity];
+      size = initialCapacity;
       this.builder = builder;
 
       fillElementDataIfNeeded();
+      clear();
    }
 
    public int size()

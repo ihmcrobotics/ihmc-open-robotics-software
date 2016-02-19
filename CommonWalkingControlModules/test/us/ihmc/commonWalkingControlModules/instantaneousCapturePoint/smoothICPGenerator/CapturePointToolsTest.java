@@ -100,7 +100,7 @@ public class CapturePointToolsTest
          Quat4d orientation = new Quat4d();
          poseReferenceFrame.getPosition(pointToPack);
          poseReferenceFrame.getOrientation(orientation);
-         FramePoint footstepData = footstepList.get(i);
+         FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
          footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
       }
 
@@ -150,7 +150,7 @@ public class CapturePointToolsTest
             Quat4d orientation = new Quat4d();
             poseReferenceFrame.getPosition(pointToPack);
             poseReferenceFrame.getOrientation(orientation);
-            FramePoint footstepData = footstepList.get(i);
+            FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
             footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
          }
 
@@ -191,7 +191,7 @@ public class CapturePointToolsTest
             Quat4d orientation = new Quat4d();
             poseReferenceFrame.getPosition(pointToPack);
             poseReferenceFrame.getOrientation(orientation);
-            FramePoint footstepData = footstepList.get(i);
+            FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
             footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
          }
 
@@ -240,7 +240,7 @@ public class CapturePointToolsTest
             Quat4d orientation = new Quat4d();
             poseReferenceFrame.getPosition(pointToPack);
             poseReferenceFrame.getOrientation(orientation);
-            FramePoint footstepData = footstepList.get(i);
+            FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
             footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
          }
 
@@ -289,7 +289,7 @@ public class CapturePointToolsTest
             Quat4d orientation = new Quat4d();
             poseReferenceFrame.getPosition(pointToPack);
             poseReferenceFrame.getOrientation(orientation);
-            FramePoint footstepData = footstepList.get(i);
+            FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
             footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
          }
 
@@ -353,7 +353,7 @@ public class CapturePointToolsTest
             Quat4d orientation = new Quat4d();
             poseReferenceFrame.getPosition(pointToPack);
             poseReferenceFrame.getOrientation(orientation);
-            FramePoint footstepData = footstepList.get(i);
+            FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
             footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
          }
 
@@ -417,7 +417,7 @@ public class CapturePointToolsTest
             Quat4d orientation = new Quat4d();
             poseReferenceFrame.getPosition(pointToPack);
             poseReferenceFrame.getOrientation(orientation);
-            FramePoint footstepData = footstepList.get(i);
+            FramePoint footstepData = footstepList.getAndGrowIfNeeded(i);
             footstepData.setIncludingFrame(poseReferenceFrame.getRootFrame(), pointToPack);
          }
 
