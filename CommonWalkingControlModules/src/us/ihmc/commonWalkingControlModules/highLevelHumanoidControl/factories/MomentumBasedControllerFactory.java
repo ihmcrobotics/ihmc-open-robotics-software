@@ -17,7 +17,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.WholeBodyInverseDynamicsControlCore;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
@@ -204,9 +207,10 @@ public class MomentumBasedControllerFactory
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
-      momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors, yoTime,
-            gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, armControllerParameters, walkingControllerParameters,
-            yoGraphicsListRegistry, jointsToIgnore);
+      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      momentumBasedController = new MomentumBasedController(fullRobotModel, geometricJacobianHolder, centerOfMassJacobian, referenceFrames, footSwitches,
+            wristForceSensors, yoTime, gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, armControllerParameters,
+            walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
 
@@ -233,11 +237,21 @@ public class MomentumBasedControllerFactory
             bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
+      walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
+      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
+      WholeBodyInverseDynamicsControlCore wholeBodyInverseDynamicsControlCore = new WholeBodyInverseDynamicsControlCore(fullRobotModel, twistCalculator,
+            gravityZ, centerOfMassFrame, momentumOptimizationSettings, geometricJacobianHolder, contactablePlaneBodies, yoGraphicsListRegistry, registry);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
-      walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers, centerOfMassHeightTrajectoryGenerator,
-            transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters, instantaneousCapturePointPlanner,
-            icpAndMomentumBasedController, momentumBasedController);
+      walkingBehavior = new WalkingHighLevelHumanoidController(wholeBodyInverseDynamicsControlCore, variousWalkingProviders, variousWalkingManagers,
+            centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters,
+            instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////

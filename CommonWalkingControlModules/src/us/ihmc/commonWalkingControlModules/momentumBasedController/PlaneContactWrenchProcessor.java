@@ -34,9 +34,9 @@ public class PlaneContactWrenchProcessor
    private final Map<ContactablePlaneBody, DoubleYoVariable> groundReactionForceMagnitudes = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint> centersOfPressureWorld = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint2d> centersOfPressure2d = new LinkedHashMap<>();
+   private final Map<ContactablePlaneBody, YoFramePoint2d> yoCops = new LinkedHashMap<>();
 
    private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<>();
-   private final Map<ContactablePlaneBody, YoFramePoint2d> yoCops = new LinkedHashMap<>();
 
    public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
