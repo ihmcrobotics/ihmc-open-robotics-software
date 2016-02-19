@@ -290,6 +290,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable comTrajectoryTimeCurrent = new DoubleYoVariable("comTrajectoryTimeCurrent", registry);
    private final DoubleYoVariable comTrajectoryTimeDesired = new DoubleYoVariable("comTrajectoryTimeDesired", registry);
 
+   private final DoubleYoVariable turnInPlaceCoMTrajectoryBuffer = new DoubleYoVariable("turnInPlaceCoMTrajectoryBuffer", registry);
    private final DoubleYoVariable comTrajectoryDuration = new DoubleYoVariable("comTrajectoryDuration", registry);
    private final DoubleYoVariable maximumCoMTrajectoryDuration = new DoubleYoVariable("maximumCoMTrajectoryDuration", registry);
    private final DoubleYoVariable minimumCoMTrajectoryDuration = new DoubleYoVariable("minimumCoMTrajectoryDuration", registry);
@@ -311,6 +312,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       minYawRate.set(quadrupedControllerParameters.getMaxYawRate() * -1.0);
       maxYawRate.set(quadrupedControllerParameters.getMaxYawRate());
       distanceInsideSupportPolygonBeforeSwingingLeg.set(0.02);
+      turnInPlaceCoMTrajectoryBuffer.set(0.5);
       
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.HIND_LEFT);
@@ -1704,7 +1706,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          }
          else
          {
-            comTrajectoryDuration.set(1.0);
+            comTrajectoryDuration.set(swingDuration.getDoubleValue() * 2 + turnInPlaceCoMTrajectoryBuffer.getDoubleValue());
          }
          
          if (comTrajectoryDuration.getDoubleValue() > maximumCoMTrajectoryDuration.getDoubleValue()) comTrajectoryDuration.set(maximumCoMTrajectoryDuration.getDoubleValue());
