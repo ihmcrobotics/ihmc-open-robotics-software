@@ -1,13 +1,16 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
+package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.List;
 import java.util.Map;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointAccelerationHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointTorqueHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
