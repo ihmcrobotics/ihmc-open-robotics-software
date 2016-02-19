@@ -5,8 +5,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.lists.RecyclingArrayList.Builder;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Matrix3d;
@@ -45,9 +49,9 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    private final YoFrameVector initialVelocity;
    private final YoFrameVector finalVelocity;
 
-   private final ArrayList<double[]> parametersX;
-   private final ArrayList<double[]> parametersY;
-   private final ArrayList<double[]> parametersZ;
+   private final RecyclingArrayList<double[]> parametersX;
+   private final RecyclingArrayList<double[]> parametersY;
+   private final RecyclingArrayList<double[]> parametersZ;
 
    private final ArrayList<YoFrameEuclideanWaypoint> waypoints;
 
@@ -75,14 +79,34 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
       String initialVelocityName = name + "InitialVelocity";
       String finalVelocityName = name + "FinalVelocity";
 
-      initialVelocity = new YoFrameVector(initialVelocityName, referenceFrame, this.registry);
-      initialVelocity.set(0, 0, 0);
-      finalVelocity = new YoFrameVector(finalVelocityName, referenceFrame, this.registry);
-      finalVelocity.set(0, 0, 0);
+      if (allowMultipleFrames)
+      {
+         YoFrameVectorInMultipleFrames initialVelocity = new YoFrameVectorInMultipleFrames(initialVelocityName, this.registry, referenceFrame);
+         YoFrameVectorInMultipleFrames finalVelocity = new YoFrameVectorInMultipleFrames(finalVelocityName, this.registry, referenceFrame);
+         YoFramePointInMultipleFrames currentPosition = new YoFramePointInMultipleFrames(currentPositionName, this.registry, referenceFrame);
+         YoFrameVectorInMultipleFrames currentVelocity = new YoFrameVectorInMultipleFrames(currentVelocityName, this.registry, referenceFrame);
+         YoFrameVectorInMultipleFrames currentAcceleration = new YoFrameVectorInMultipleFrames(currentAccelerationName, this.registry, referenceFrame);
 
-      currentPosition = new YoFramePoint(currentPositionName, referenceFrame, this.registry);
-      currentVelocity = new YoFrameVector(currentVelocityName, referenceFrame, this.registry);
-      currentAcceleration = new YoFrameVector(currentAccelerationName, referenceFrame, this.registry);
+         registerMultipleFramesHolders(initialVelocity, finalVelocity, currentPosition, currentVelocity, currentAcceleration);
+
+         this.initialVelocity = initialVelocity;
+         this.finalVelocity = finalVelocity;
+         this.currentPosition = currentPosition;
+         this.currentVelocity = currentVelocity;
+         this.currentAcceleration = currentAcceleration;
+      }
+      else
+      {
+         initialVelocity = new YoFrameVector(initialVelocityName, referenceFrame, this.registry);
+         finalVelocity = new YoFrameVector(finalVelocityName, referenceFrame, this.registry);
+         currentPosition = new YoFramePoint(currentPositionName, referenceFrame, this.registry);
+         currentVelocity = new YoFrameVector(currentVelocityName, referenceFrame, this.registry);
+         currentAcceleration = new YoFrameVector(currentAccelerationName, referenceFrame, this.registry);
+
+      }
+
+      initialVelocity.set(0, 0, 0);
+      finalVelocity.set(0, 0, 0);
 
       currentTime = new DoubleYoVariable(name + "CurrentTime", this.registry);
       trajectoryTime = new DoubleYoVariable(name + "TrajectoryTime", this.registry);
@@ -90,9 +114,18 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
       numberOfWayPoints = 0;
 
-      parametersX = new ArrayList<>();
-      parametersY = new ArrayList<>();
-      parametersZ = new ArrayList<>();
+      Builder<double[]> builder = new Builder<double[]>()
+      {
+         @Override public double[] newInstance()
+         {
+            return new double[3];
+         }
+      };
+
+      parametersX = new RecyclingArrayList<>(maximumNumberOfWaypoints, builder);
+      parametersY = new RecyclingArrayList<>(maximumNumberOfWaypoints, builder);
+      parametersZ = new RecyclingArrayList<>(maximumNumberOfWaypoints, builder);
+
       timeMatrix = new Matrix3d();
       this.waypoints = new ArrayList<>();
 
@@ -131,9 +164,9 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
       for (int i = 0; i < numberOfWayPoints; i++)
       {
-         parametersX.add(new double[3]);
-         parametersY.add(new double[3]);
-         parametersZ.add(new double[3]);
+         parametersX.add();
+         parametersY.add();
+         parametersZ.add();
       }
 
       initialTime.set(waypoints.get(0).getTime());
@@ -323,7 +356,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    private double previousState = 0;
    private double nextState = 0;
 
-   private double calculatePosition(int waypointIndex, ArrayList<double[]> parameters, Double alpha)
+   private double calculatePosition(int waypointIndex, RecyclingArrayList<double[]> parameters, Double alpha)
    {
       previousState =
             parameters.get(waypointIndex)[0] * MathTools.square(currentTime.getDoubleValue()) + parameters.get(waypointIndex)[1] * currentTime.getDoubleValue()
@@ -334,7 +367,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
       return alpha * nextState + (1 - alpha) * previousState;
    }
 
-   private double calculateVelocity(int waypointIndex, ArrayList<double[]> parameters, double alpha)
+   private double calculateVelocity(int waypointIndex, RecyclingArrayList<double[]> parameters, double alpha)
    {
       previousState = 2 * parameters.get(waypointIndex)[0] * currentTime.getDoubleValue() + parameters.get(waypointIndex)[1];
       nextState = 2 * parameters.get(waypointIndex + 1)[0] * currentTime.getDoubleValue() + parameters.get(waypointIndex + 1)[1];
@@ -342,7 +375,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
       return alpha * nextState + (1 - alpha) * previousState;
    }
 
-   private double calculateAcceleration(int waypointIndex, ArrayList<double[]> parameters, double alpha)
+   private double calculateAcceleration(int waypointIndex, RecyclingArrayList<double[]> parameters, double alpha)
    {
       previousState = 2 * parameters.get(waypointIndex)[0];
       nextState = 2 * parameters.get(waypointIndex + 1)[0];
