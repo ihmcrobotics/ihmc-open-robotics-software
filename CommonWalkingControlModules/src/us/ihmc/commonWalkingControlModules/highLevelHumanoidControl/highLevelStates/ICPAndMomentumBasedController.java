@@ -195,9 +195,7 @@ public class ICPAndMomentumBasedController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFeet.get(robotSide));
-         if (desiredCoP != null)
-            cops.get(robotSide).setIncludingFrame(desiredCoP);
+         momentumBasedController.getDesiredCenterOfPressure(contactableFeet.get(robotSide), cops.get(robotSide));
       }
 
       momentumBasedController.getAdmissibleDesiredGroundReactionWrench(admissibleGroundReactionWrench);

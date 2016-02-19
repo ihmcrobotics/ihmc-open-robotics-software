@@ -35,6 +35,7 @@ public class HoldPositionState extends AbstractFootControlState
 
    private final RigidBody pelvisBody;
    private final FramePoint2d cop = new FramePoint2d();
+   private final FramePoint2d desiredCoP = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FootSwitchInterface footSwitch;
@@ -102,7 +103,7 @@ public class HoldPositionState extends AbstractFootControlState
       footSwitch.computeAndPackCoP(cop);
       correctDesiredOrientationForSmartHoldPosition();
       desiredHoldOrientation.set(desiredOrientation);
-      FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFoot);
+      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
       partialFootholdControlModule.applyShrunkPolygon(contactState);

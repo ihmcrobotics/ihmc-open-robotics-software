@@ -14,6 +14,7 @@ public class FullyConstrainedState extends AbstractFootControlState
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private final FramePoint2d cop = new FramePoint2d();
+   private final FramePoint2d desiredCoP = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FootSwitchInterface footSwitch;
@@ -44,7 +45,7 @@ public class FullyConstrainedState extends AbstractFootControlState
    public void doSpecificAction()
    {
       footSwitch.computeAndPackCoP(cop);
-      FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFoot);
+      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
       partialFootholdControlModule.applyShrunkPolygon(contactState);
