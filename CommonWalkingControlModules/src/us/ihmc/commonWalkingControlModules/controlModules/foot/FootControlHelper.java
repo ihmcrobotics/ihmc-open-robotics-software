@@ -56,7 +56,7 @@ public class FootControlHelper
 
    private final long jacobianId;
    private final GeometricJacobian jacobian;
-   private final GeometricJacobian rootToFootJacobian;
+   private final long rootToFootJacobianId;
    private final EnumYoVariable<ConstraintType> requestedState;
    private final FrameVector fullyConstrainedNormalContactVector;
    private final BooleanYoVariable isDesiredCoPOnEdge;
@@ -118,8 +118,7 @@ public class FootControlHelper
       jacobian = momentumBasedController.getJacobian(jacobianId);
 
       rootBody = twistCalculator.getRootBody();
-      long rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, foot, foot.getBodyFixedFrame());
-      rootToFootJacobian = momentumBasedController.getJacobian(rootToFootJacobianId);
+      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, foot, foot.getBodyFixedFrame());
 
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
 
@@ -212,7 +211,7 @@ public class FootControlHelper
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-      spatialAccelerationCommandToPack.setJacobian(rootToFootJacobian);
+      spatialAccelerationCommandToPack.setJacobianId(rootToFootJacobianId);
       spatialAccelerationCommandToPack.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
       spatialAccelerationCommandToPack.set(rootBody, contactableFoot.getRigidBody());
    }

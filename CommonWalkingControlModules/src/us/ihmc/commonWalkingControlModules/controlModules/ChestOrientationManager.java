@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
@@ -20,9 +18,7 @@ import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectory
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
@@ -32,8 +28,6 @@ public class ChestOrientationManager
 
    private final YoVariableRegistry registry;
    private final ChestOrientationControlModule chestOrientationControlModule;
-   private final MomentumBasedController momentumBasedController;
-   private long jacobianId = GeometricJacobianHolder.NULL_JACOBIAN_ID;
 
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
@@ -60,7 +54,6 @@ public class ChestOrientationManager
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
-      this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();
       this.chestTrajectoryMessageSubscriber = chestTrajectoryMessageSubscriber;
       this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
@@ -69,10 +62,13 @@ public class ChestOrientationManager
 
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody chest = fullRobotModel.getChest();
+      RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       double controlDT = momentumBasedController.getControlDT();
-      chestOrientationControlModule = new ChestOrientationControlModule(pelvisZUpFrame, chest, twistCalculator, controlDT, chestControlGains, registry);
+      long jacobianId = momentumBasedController.getOrCreateGeometricJacobian(elevator, chest, chestFrame);
+      chestOrientationControlModule = new ChestOrientationControlModule(pelvisZUpFrame, elevator, chest, jacobianId, twistCalculator, controlDT,
+            chestControlGains, registry);
 
       yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestFrame, registry);
 
@@ -150,18 +146,15 @@ public class ChestOrientationManager
          isTrackingOrientation.set(!isTrajectoryDone);
       }
 
-      if (jacobianId != GeometricJacobianHolder.NULL_JACOBIAN_ID)
-      {
-         chestOrientationControlModule.compute();
+      chestOrientationControlModule.compute();
 
-         if (yoControlledAngularAcceleration != null)
+      if (yoControlledAngularAcceleration != null)
+      {
+         SpatialAccelerationVector spatialAcceleration = chestOrientationControlModule.getSpatialAccelerationCommand().getSpatialAcceleration();
+         if (spatialAcceleration.getExpressedInFrame() != null) // That happens when there is no joint to control.
          {
-            SpatialAccelerationVector spatialAcceleration = chestOrientationControlModule.getSpatialAccelerationCommand().getSpatialAcceleration();
-            if (spatialAcceleration.getExpressedInFrame() != null) // That happens when there is no joint to control.
-            {
-               spatialAcceleration.getAngularPart(controlledAngularAcceleration);
-               yoControlledAngularAcceleration.set(controlledAngularAcceleration);
-            }
+            spatialAcceleration.getAngularPart(controlledAngularAcceleration);
+            yoControlledAngularAcceleration.set(controlledAngularAcceleration);
          }
       }
    }
@@ -270,55 +263,6 @@ public class ChestOrientationManager
          isTrackingOrientation.set(true);
          isTrajectoryStopped.set(false);
       }
-   }
-
-   public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector desiredAngularAcceleration)
-   {
-      chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-   }
-
-   public long createJacobian(FullRobotModel fullRobotModel, String[] chestOrientationControlJointNames)
-   {
-      RigidBody rootBody = fullRobotModel.getRootJoint().getSuccessor();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
-      InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
-
-      ReferenceFrame chestFrame = chestOrientationControlModule.getChest().getBodyFixedFrame();
-      long jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chestOrientationControlJoints, chestFrame);
-      return jacobianId;
-   }
-
-   public void setUp(RigidBody base, long jacobianId)
-   {
-      this.jacobianId = jacobianId;
-      chestOrientationControlModule.setBase(base);
-      chestOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
-   }
-
-   public void setUp(RigidBody base, int jacobianId, double proportionalGainX, double proportionalGainY, double proportionalGainZ, double derivativeGainX,
-         double derivativeGainY, double derivativeGainZ)
-   {
-      this.jacobianId = jacobianId;
-      chestOrientationControlModule.setBase(base);
-      chestOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
-      chestOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
-      chestOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
-   }
-
-   public void setControlGains(double proportionalGain, double derivativeGain)
-   {
-      chestOrientationControlModule.setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
-      chestOrientationControlModule.setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
-   }
-
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
-   {
-      chestOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
-   }
-
-   public void turnOff()
-   {
-      setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()

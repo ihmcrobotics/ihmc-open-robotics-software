@@ -10,7 +10,6 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -44,8 +43,7 @@ public class RootJointAngularAccelerationControlModule
       rootSuccessor = rootJoint.getSuccessor();
       rootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootPredecessor, rootSuccessor, rootJoint.getFrameAfterJoint());
       spatialAccelerationCommand.set(rootPredecessor, rootSuccessor);
-      GeometricJacobian jacobian = momentumBasedController.getJacobian(rootJacobianId);
-      spatialAccelerationCommand.setJacobian(jacobian);
+      spatialAccelerationCommand.setJacobianId(rootJacobianId);
 
       registry = new YoVariableRegistry(getClass().getSimpleName());
       double controlDT = momentumBasedController.getControlDT();

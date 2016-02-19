@@ -65,7 +65,6 @@ public class MotionConstraintHandler
    private final YoVariableRegistry registry;
    private final BooleanYoVariable removeNullspaceFromJ;
    private final GeometricJacobianHolder geometricJacobianHolder;
-   private final boolean jacobiansHaveToBeUpdated;
    private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
 
    public MotionConstraintHandler(String name, InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator,
@@ -75,8 +74,7 @@ public class MotionConstraintHandler
       removeNullspaceFromJ = new BooleanYoVariable(name + "RemoveNullspaceFromJ", registry);
       removeNullspaceFromJ.set(true);
 
-      this.geometricJacobianHolder = (geometricJacobianHolder != null) ? geometricJacobianHolder : new GeometricJacobianHolder();
-      jacobiansHaveToBeUpdated = geometricJacobianHolder == null;
+      this.geometricJacobianHolder = geometricJacobianHolder;
 
       this.nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
 
@@ -129,7 +127,7 @@ public class MotionConstraintHandler
    public void setDesiredSpatialAcceleration(SpatialAccelerationCommand spatialAccelerationCommand)
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
-      GeometricJacobian jacobian = spatialAccelerationCommand.getJacobian();
+      long jacobianId = spatialAccelerationCommand.getJacobianId();
       double weight = spatialAccelerationCommand.getWeight();
 
       SpatialAccelerationVector taskSpaceAcceleration = spatialAccelerationCommand.getSpatialAcceleration();
@@ -143,8 +141,7 @@ public class MotionConstraintHandler
 
          long baseToEndEffectorJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, taskSpaceAcceleration.getExpressedInFrame());
          GeometricJacobian baseToEndEffectorJacobian = geometricJacobianHolder.getJacobian(baseToEndEffectorJacobianId);
-         if (jacobiansHaveToBeUpdated)
-            baseToEndEffectorJacobian.compute();
+         baseToEndEffectorJacobian.compute();
 
          // TODO: inefficient
          convectiveTermCalculator.computeJacobianDerivativeTerm(baseToEndEffectorJacobian, convectiveTerm);
@@ -155,7 +152,7 @@ public class MotionConstraintHandler
          jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
 
          tempBaseToEndEffectorJacobianMatrix.set(baseToEndEffectorJacobian.getJacobianMatrix());
-         tempJacobianMatrix.set(jacobian.getJacobianMatrix());
+         tempJacobianMatrix.set(geometricJacobianHolder.getJacobian(jacobianId).getJacobianMatrix());
 
          int nullity = nullspaceMultipliers.getNumRows();
          if (nullity > 0)

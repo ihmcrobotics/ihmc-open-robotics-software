@@ -2,19 +2,16 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -39,11 +36,9 @@ public class LoadBearingHandControlState extends HandControlState
    private final FrameVector contactNormal;
 
    private final ContactablePlaneBody handPalm;
-   private final ReferenceFrame handControlFrame;
    private final ReferenceFrame handFrame;
    private final ReferenceFrame elevatorFrame;
 
-   private final FramePose desiredPose = new FramePose();
 
    public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
          RigidBody elevator, RigidBody endEffector, long jacobianId, YoVariableRegistry parentRegistry)
@@ -54,8 +49,7 @@ public class LoadBearingHandControlState extends HandControlState
       registry = new YoVariableRegistry(name);
 
       spatialAccelerationCommand.set(elevator, endEffector);
-      GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
-      spatialAccelerationCommand.setJacobian(jacobian);
+      spatialAccelerationCommand.setJacobianId(jacobianId);
 
       this.momentumBasedController = momentumBasedController;
 
@@ -64,15 +58,13 @@ public class LoadBearingHandControlState extends HandControlState
       coefficientOfFriction = new DoubleYoVariable(name + "CoefficientOfFriction", registry);
       handAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
 
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      elevatorFrame = fullRobotModel.getElevatorFrame();
-      handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
+      elevatorFrame = elevator.getBodyFixedFrame();
+      handFrame = endEffector.getBodyFixedFrame();
 
       SideDependentList<ContactablePlaneBody> contactableHands = momentumBasedController.getContactableHands();
       if (contactableHands != null)
       {
          handPalm = contactableHands.get(robotSide);
-         handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
          contactNormal = new FrameVector();
          contactNormal.setToNaN();
          momentumBasedController.setPlaneContactStateFree(handPalm);
@@ -80,7 +72,6 @@ public class LoadBearingHandControlState extends HandControlState
       else
       {
          handPalm = null;
-         handControlFrame = null;
          contactNormal = null;
       }
    }
@@ -130,8 +121,6 @@ public class LoadBearingHandControlState extends HandControlState
 
       contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
       momentumBasedController.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), contactNormal);
-      desiredPose.setToZero(handControlFrame);
-      desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    @Override
