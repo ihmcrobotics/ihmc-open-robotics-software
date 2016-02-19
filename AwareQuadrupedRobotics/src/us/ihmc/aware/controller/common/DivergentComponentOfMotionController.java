@@ -125,6 +125,7 @@ public class DivergentComponentOfMotionController
       vrpPositionOutput.changeFrame(comFrame);
       cmpPositionOutput.changeFrame(comFrame);
       dcmPositionSetpoint.changeFrame(comFrame);
+      dcmVelocitySetpoint.changeFrame(comFrame);
       dcmPositionEstimate.changeFrame(comFrame);
 
       double omega = getNaturalFrequency();
@@ -145,6 +146,7 @@ public class DivergentComponentOfMotionController
       vrpPositionOutput.changeFrame(vrpPositionOutputFrame);
       cmpPositionOutput.changeFrame(cmpPositionOutputFrame);
       dcmPositionSetpoint.changeFrame(dcmPositionSetpointFrame);
+      dcmVelocitySetpoint.changeFrame(dcmPositionVelocityFrame);
       dcmPositionEstimate.changeFrame(dcmPositionEstimateFrame);
    }
 }

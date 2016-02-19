@@ -77,7 +77,8 @@ public class PiecewiseForwardDcmTrajectory
          this.vrpPositionAtSoS[i].add(0, 0, comHeight);
       }
 
-      this.dcmPositionAtSoS[0].set(dcmPositionAtSoS);
+      this.dcmPositionAtSoS[0].setIncludingFrame(dcmPositionAtSoS);
+      this.dcmPositionAtSoS[0].changeFrame(worldFrame);
       for (int i = 0; i < numberOfSteps - 1; i++)
       {
          this.dcmPositionAtSoS[i + 1].set(this.dcmPositionAtSoS[i]);
