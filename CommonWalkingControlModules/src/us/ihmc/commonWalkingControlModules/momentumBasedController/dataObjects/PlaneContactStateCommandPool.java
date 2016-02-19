@@ -9,7 +9,6 @@ public class PlaneContactStateCommandPool extends InverseDynamicsCommand<PlaneCo
    public PlaneContactStateCommandPool()
    {
       super(InverseDynamicsCommandType.PLANE_CONTACT_STATE_POOL);
-      clear();
    }
 
    public PlaneContactStateCommand createCommand()
