@@ -72,7 +72,7 @@ public class QuadrupedControllerManager implements RobotController
       builder.addStandPrepController();
 
       builder.addStandReadyController();
-      builder.addQuadrupedCenterOfMassVerificationController(inverseKinematicsCalculators);
+//      builder.addQuadrupedCenterOfMassVerificationController(inverseKinematicsCalculators);
       builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
       builder.addVirtualModelBasedStandController(virtualModelController);
       builder.addTrotWalkController();
@@ -84,8 +84,8 @@ public class QuadrupedControllerManager implements RobotController
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.POSITION_CRAWL);
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.TROT_WALK);
       builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.SLIDER_BOARD);
-      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.COM_VERIFICATION);
-      builder.addPermissibleTransition(QuadrupedControllerState.COM_VERIFICATION, QuadrupedControllerState.STAND_PREP);
+//      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.COM_VERIFICATION);
+//      builder.addPermissibleTransition(QuadrupedControllerState.COM_VERIFICATION, QuadrupedControllerState.STAND_PREP);
       builder.addPermissibleTransition(QuadrupedControllerState.SLIDER_BOARD, QuadrupedControllerState.STAND_PREP);
 
       this.stateMachine = builder.build();
