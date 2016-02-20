@@ -38,8 +38,7 @@ public class RigidBodyOrientationControlModule
    {
       this.base = base;
       this.endEffector = endEffector;
-      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, visualize,
-            parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, parentRegistry);
       this.twistCalculator = twistCalculator;
    }
 

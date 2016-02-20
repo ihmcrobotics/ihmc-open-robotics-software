@@ -31,6 +31,7 @@ public abstract class YoFrameTuple<T extends FrameTuple<?>> extends ReferenceFra
 
    private final DoubleYoVariable x, y, z; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple; // This is only for assistance. The data is stored in the YoVariables, not in here!
+   /** Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the multiple frames version of this {@link YoFrameTuple} will work properly. */
    private final ReferenceFrame referenceFrame; // Redundant but allows to make sure the frame isn't changed
 
    public YoFrameTuple(DoubleYoVariable xVariable, DoubleYoVariable yVariable, DoubleYoVariable zVariable, ReferenceFrame referenceFrame)

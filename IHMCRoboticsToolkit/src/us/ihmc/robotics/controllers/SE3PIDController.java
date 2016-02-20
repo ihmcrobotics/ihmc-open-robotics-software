@@ -43,12 +43,12 @@ public class SE3PIDController
       this.bodyFrame = bodyFrame;
       if (gains != null)
       {
-         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, gains.getOrientationGains(), visualize, registry);
+         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, gains.getOrientationGains(), registry);
          positionController = new EuclideanPositionController(namePrefix, bodyFrame, dt, gains.getPositionGains(), visualize, registry);
       }
       else
       {
-         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, visualize, registry);
+         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, registry);
          positionController = new EuclideanPositionController(namePrefix, bodyFrame, dt, visualize, registry);
       }
    }
