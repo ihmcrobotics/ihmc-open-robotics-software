@@ -236,7 +236,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 0);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.075);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.10);
       params.setDefault(DCM_PROPORTIONAL_GAINS, 1.0, 1.0, 0);
       params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
@@ -763,8 +763,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       solePositionEstimate.get(robotQuadrant).changeFrame(worldFrame);
       double xStride = footholdPosition.getX() - solePositionEstimate.get(robotQuadrant).getX();
       double yStride = footholdPosition.getY() - solePositionEstimate.get(robotQuadrant).getY();
-      xOffset = Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
-      yOffset = Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
+      xOffset = Math.cos(-bodyYaw) * xStride - Math.sin(-bodyYaw) * yStride;
+      yOffset = Math.sin(-bodyYaw) * xStride + Math.cos(-bodyYaw) * yStride;
       footholdPosition.setZ(solePositionEstimate.get(robotQuadrant).getZ());
       footholdPosition.add(0, 0, -xOffset * Math.tan(supportPolygonEstimate.getNominalPitch()));
       footholdPosition.add(0, 0, yOffset * Math.tan(supportPolygonEstimate.getNominalRoll()));
