@@ -18,6 +18,12 @@ project.ext.bintrayLicenseName = "GPL-3.0"
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
+	maven {
+		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+	}
+}
+
+repositories {
    mavenLocal()
    jcenter()
    mavenCentral()
@@ -37,7 +43,9 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
-	compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.1.0-SNAPSHOT'
+	// compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.1.0-SNAPSHOT'
+	// compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.0.10'
+	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-jbullet', version: '3.1.0-internal2'
 	compile group: 'io.netty', name: 'netty', version: '3.9.0.Final' //'3.5.8.Final'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
