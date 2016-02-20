@@ -28,6 +28,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
 
    private final DoubleYoVariable qx, qy, qz, qs;
    private final FrameOrientation frameOrientation = new FrameOrientation();
+   /** Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the multiple frames version of this {@link YoFrameQuaternion} will work properly. */
    private final ReferenceFrame referenceFrame;
 
    public YoFrameQuaternion(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
@@ -101,6 +102,13 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       checkReferenceFrameMatch(frameOrientation);
       this.frameOrientation.setIncludingFrame(frameOrientation);
       getYoValuesFromFrameOrientation(notifyListeners);
+   }
+
+   public void setAndMatchFrame(FrameOrientation frameOrientation)
+   {
+      this.frameOrientation.setIncludingFrame(frameOrientation);
+      frameOrientation.changeFrame(getReferenceFrame());
+      getYoValuesFromFrameOrientation();
    }
 
    public void set(YoFrameQuaternion yoFrameQuaternion)
