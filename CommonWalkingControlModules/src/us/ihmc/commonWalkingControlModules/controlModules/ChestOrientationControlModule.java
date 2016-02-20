@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -28,7 +28,7 @@ public class ChestOrientationControlModule
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody elevator, RigidBody chest, long jacobianId, TwistCalculator twistCalculator,
-         double controlDT, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+         double controlDT, YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
       this.chest = chest;
       this.elevator = elevator;

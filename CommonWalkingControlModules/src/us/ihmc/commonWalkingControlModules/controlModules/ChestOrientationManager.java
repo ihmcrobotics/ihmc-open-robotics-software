@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -48,7 +48,7 @@ public class ChestOrientationManager
 
    private final BooleanYoVariable initializeToCurrent;
 
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGains chestControlGains,
+   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface chestControlGains,
          ChestOrientationProvider chestOrientationProvider, ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber,
          StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, double trajectoryTime, YoVariableRegistry parentRegistry)
    {

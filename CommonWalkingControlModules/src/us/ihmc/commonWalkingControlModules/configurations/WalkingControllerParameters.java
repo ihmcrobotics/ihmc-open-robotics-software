@@ -7,7 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -79,7 +79,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
 
-   public abstract YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry);
+   public abstract YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry);
 
    public abstract YoPDGains createCoMHeightControlGains(YoVariableRegistry registry);
 
@@ -87,7 +87,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
 
-   public abstract YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry);
+   public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
    public abstract YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry);
 

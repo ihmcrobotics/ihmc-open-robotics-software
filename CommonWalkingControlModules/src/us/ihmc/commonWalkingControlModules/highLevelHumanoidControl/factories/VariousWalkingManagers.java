@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -57,7 +57,7 @@ public class VariousWalkingManagers
          HeadOrientationProvider desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
          HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = variousWalkingProviders.getHeadTrajectoryMessageSubscriber();
 
-         YoOrientationPIDGains headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
+         YoOrientationPIDGainsInterface headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
          double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
          headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains,
                desiredHeadOrientationProvider, headTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, initialHeadYawPitchRoll, registry);
@@ -70,7 +70,7 @@ public class VariousWalkingManagers
       {
          ChestOrientationProvider desiredChestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
          ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = variousWalkingProviders.getChestTrajectoryMessageSubscriber();
-         YoOrientationPIDGains chestControlGains = walkingControllerParameters.createChestControlGains(registry);
+         YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
 
          chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, desiredChestOrientationProvider,
                chestTrajectoryMessageSubscriber, stopAllTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, registry);

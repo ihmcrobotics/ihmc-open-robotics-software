@@ -6,7 +6,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
-public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
+public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterface
 {
    private static final String[] directionNames = new String[] { "x", "y", "z" };
 

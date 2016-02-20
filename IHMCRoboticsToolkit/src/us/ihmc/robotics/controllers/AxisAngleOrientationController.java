@@ -54,14 +54,14 @@ public class AxisAngleOrientationController
    private final YoFrameOrientation currentOrientationViz, desiredOrientationViz;
    private final FrameOrientation currentOrientation;
 
-   private final YoOrientationPIDGains gains;
+   private final YoOrientationPIDGainsInterface gains;
 
    public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
    {
       this(prefix, bodyFrame, dt, false, parentRegistry);
    }
 
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
       this(prefix, bodyFrame, dt, gains, false, parentRegistry);
    }
@@ -71,7 +71,7 @@ public class AxisAngleOrientationController
       this(prefix, bodyFrame, dt, null, visualize, parentRegistry);
    }
 
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGains gains, boolean visualize, YoVariableRegistry parentRegistry)
+   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains, boolean visualize, YoVariableRegistry parentRegistry)
    {
       this.visualize = visualize;
 
@@ -239,7 +239,7 @@ public class AxisAngleOrientationController
       gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void setGains(YoOrientationPIDGains gains)
+   public void setGains(YoOrientationPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
