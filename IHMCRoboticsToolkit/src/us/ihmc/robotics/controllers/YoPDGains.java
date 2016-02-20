@@ -5,7 +5,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-public class YoPDGains
+public class YoPDGains implements PDGainsInterface
 {
    private final DoubleYoVariable kp;
    private final DoubleYoVariable zeta;
@@ -63,6 +63,7 @@ public class YoPDGains
       maximumJerk.set(maxJerk);
    }
 
+   @Override
    public double getKp()
    {
       return kp.getDoubleValue();
@@ -73,16 +74,19 @@ public class YoPDGains
       return zeta.getDoubleValue();
    }
 
+   @Override
    public double getKd()
    {
       return kd.getDoubleValue();
    }
 
+   @Override
    public double getMaximumAcceleration()
    {
       return maximumAcceleration.getDoubleValue();
    }
 
+   @Override
    public double getMaximumJerk()
    {
       return maximumJerk.getDoubleValue();
