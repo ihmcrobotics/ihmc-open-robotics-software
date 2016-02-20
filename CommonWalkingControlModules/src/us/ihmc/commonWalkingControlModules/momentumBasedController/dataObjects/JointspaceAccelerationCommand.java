@@ -120,6 +120,17 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
       setDesiredAcceleration(jointIndex, desiredAcceleration);
    }
 
+   @Override
+   public void set(JointspaceAccelerationCommand other)
+   {
+      joints.clear();
+      for (int i = 0; i < other.getNumberOfJoints(); i++)
+         joints.add(other.joints.get(i));
+      desiredAccelerations.set(other.desiredAccelerations);
+      hasWeight = other.hasWeight;
+      weight = other.weight;
+   }
+
    private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
    {
       MathTools.checkIfEqual(joint.getDegreesOfFreedom(), desiredAcceleration.getNumRows());
@@ -172,16 +183,5 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
             ret += ".";
       }
       return ret;
-   }
-
-   @Override
-   public void set(JointspaceAccelerationCommand other)
-   {
-      joints.clear();
-      for (int i = 0; i < other.getNumberOfJoints(); i++)
-         joints.add(other.joints.get(i));
-      desiredAccelerations.set(other.desiredAccelerations);
-      hasWeight = other.hasWeight;
-      weight = other.weight;
    }
 }
