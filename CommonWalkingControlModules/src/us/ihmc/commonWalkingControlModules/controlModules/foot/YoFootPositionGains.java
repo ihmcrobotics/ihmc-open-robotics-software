@@ -4,13 +4,13 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.controllers.YoPositionPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-public class YoFootPositionGains implements YoPositionPIDGains
+public class YoFootPositionGains implements YoPositionPIDGainsInterface
 {
    private final DoubleYoVariable proportionalXYGain, proportionalZGain;
    private final DoubleYoVariable derivativeXYGain, derivativeZGain;

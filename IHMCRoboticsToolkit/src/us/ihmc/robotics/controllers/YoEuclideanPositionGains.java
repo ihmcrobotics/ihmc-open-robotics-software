@@ -6,7 +6,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
-public class YoEuclideanPositionGains implements YoPositionPIDGains
+public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
 {
    private static final String[] directionNames = new String[] { "x", "y", "z" };
 

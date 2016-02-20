@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 
-public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains, YoOrientationPIDGains
+public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGainsInterface, YoOrientationPIDGains
 {
    private final DoubleYoVariable proportionalGain;
    private final DoubleYoVariable derivativeGain;
@@ -46,7 +46,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
       maximumJerk.set(Double.POSITIVE_INFINITY);
    }
 
-   public YoPositionPIDGains getPositionGains()
+   public YoPositionPIDGainsInterface getPositionGains()
    {
       return this;
    }

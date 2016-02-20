@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.J
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.YoPositionPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -119,7 +119,7 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchVelocity = new DoubleYoVariable(namePrefix + "ToeOffCurrentPitchVelocity", registry);
 
       this.gains = gains;
-      YoPositionPIDGains positionGains = gains.getPositionGains();
+      YoPositionPIDGainsInterface positionGains = gains.getPositionGains();
       proportionalGainMatrix = positionGains.createProportionalGainMatrix();
       derivativeGainMatrix = positionGains.createDerivativeGainMatrix();
 
