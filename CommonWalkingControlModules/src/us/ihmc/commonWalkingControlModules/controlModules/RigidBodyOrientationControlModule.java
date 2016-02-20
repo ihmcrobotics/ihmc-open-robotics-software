@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -62,7 +63,7 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.compute(outputToPack, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
    }
 
-   public void setGains(YoOrientationPIDGainsInterface gains)
+   public void setGains(OrientationPIDGainsInterface gains)
    {
       axisAngleOrientationController.setGains(gains);
    }

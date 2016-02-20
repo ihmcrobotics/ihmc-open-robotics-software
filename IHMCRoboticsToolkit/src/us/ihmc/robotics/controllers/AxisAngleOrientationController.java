@@ -239,11 +239,8 @@ public class AxisAngleOrientationController
       gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void setGains(YoOrientationPIDGainsInterface gains)
+   public void setGains(OrientationPIDGainsInterface gains)
    {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      gains.set(gains);
    }
 }
