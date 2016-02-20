@@ -152,7 +152,7 @@ public class SE3PIDController
       orientationController.setGains(gains.getOrientationGains());
    }
 
-   public void setPositionGains(YoPositionPIDGains gains)
+   public void setPositionGains(YoPositionPIDGainsInterface gains)
    {
       positionController.setGains(gains);
    }

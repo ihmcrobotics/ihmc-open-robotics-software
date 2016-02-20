@@ -48,7 +48,7 @@ public class EuclideanPositionController implements PositionController
 
    private final double dt;
 
-   private final YoPositionPIDGains gains;
+   private final YoPositionPIDGainsInterface gains;
 
    public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
    {
@@ -60,7 +60,7 @@ public class EuclideanPositionController implements PositionController
       this(prefix, bodyFrame, dt, null, visualize, parentRegistry);
    }
 
-   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPositionPIDGains gains, boolean visualize, YoVariableRegistry parentRegistry)
+   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPositionPIDGainsInterface gains, boolean visualize, YoVariableRegistry parentRegistry)
    {
       this.visualize = visualize;
 
@@ -234,7 +234,7 @@ public class EuclideanPositionController implements PositionController
       gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void setGains(YoPositionPIDGains gains)
+   public void setGains(YoPositionPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
