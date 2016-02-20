@@ -39,6 +39,8 @@ public class EuclideanPositionController implements PositionController
    private final YoFramePoint yoCurrentPosition;
    /** For visualization only. */
    private final YoFramePoint yoDesiredPosition;
+   /** For visualization only. */
+   private final YoFrameVector controlledLinearAcceleration;
 
    private final YoPositionPIDGainsInterface gains;
 
@@ -74,6 +76,8 @@ public class EuclideanPositionController implements PositionController
       rateLimitedFeedbackLinearAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAcceleration", "",
             registry, gains.getYoMaximumJerk(), dt, feedbackLinearAcceleration);
 
+      controlledLinearAcceleration = new YoFrameVector(prefix + "ControlledLinearAcceleration", bodyFrame, registry);
+
       currentPosition = new FramePoint(bodyFrame);
       yoCurrentPosition = new YoFramePoint(prefix + "CurrentPosition", worldFrame, registry);
       yoDesiredPosition = new YoFramePoint(prefix + "DesiredPosition", worldFrame, registry);
@@ -84,6 +88,7 @@ public class EuclideanPositionController implements PositionController
    public void reset()
    {
       rateLimitedFeedbackLinearAcceleration.reset();
+      controlledLinearAcceleration.setToZero();
    }
 
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
@@ -109,6 +114,7 @@ public class EuclideanPositionController implements PositionController
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
+      controlledLinearAcceleration.set(output);
    }
 
    private void computeProportionalTerm(FramePoint desiredPosition)

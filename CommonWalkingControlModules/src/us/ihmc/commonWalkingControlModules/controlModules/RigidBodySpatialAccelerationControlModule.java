@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -19,16 +18,12 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class RigidBodySpatialAccelerationControlModule
 {
-   private static final boolean VISUALIZE = true;
-
    private final YoVariableRegistry registry;
    private final TwistCalculator twistCalculator;
    private final SE3PIDController se3pdController;
    private final SpatialAccelerationVector acceleration;
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
-
-   private final YoFrameVector desiredAccelerationLinearViz, desiredAccelerationAngularViz;
 
    public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
          double dt, YoVariableRegistry parentRegistry)
@@ -43,19 +38,14 @@ public class RigidBodySpatialAccelerationControlModule
       this.twistCalculator = twistCalculator;
       this.endEffector = endEffector;
       this.endEffectorFrame = endEffectorFrame;
-      this.se3pdController = new SE3PIDController(namePrefix, endEffectorFrame, VISUALIZE, dt, taskspaceGains, registry);
+      this.se3pdController = new SE3PIDController(namePrefix, endEffectorFrame, dt, taskspaceGains, registry);
       this.acceleration = new SpatialAccelerationVector();
-
-      desiredAccelerationLinearViz = new YoFrameVector(namePrefix + "LinearAccelViz", endEffectorFrame, registry);
-      desiredAccelerationAngularViz = new YoFrameVector(namePrefix + "AngularAccelViz", endEffectorFrame, registry);
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
-      desiredAccelerationLinearViz.setToZero();
-      desiredAccelerationAngularViz.setToZero();
       se3pdController.reset();
    }
 
@@ -79,10 +69,6 @@ public class RigidBodySpatialAccelerationControlModule
       currentTwist.changeFrame(endEffectorFrame);
 
       se3pdController.compute(acceleration, desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, currentTwist);
-
-      acceleration.getExpressedInFrame().checkReferenceFrameMatch(desiredAccelerationLinearViz.getReferenceFrame());
-      desiredAccelerationLinearViz.set(acceleration.getLinearPartX(), acceleration.getLinearPartY(), acceleration.getLinearPartZ());
-      desiredAccelerationAngularViz.set(acceleration.getAngularPartX(), acceleration.getAngularPartY(), acceleration.getAngularPartZ());
    }
 
    private final FramePose desiredEndEffectorPose = new FramePose();

@@ -50,6 +50,9 @@ public class AxisAngleOrientationController
     */
    private final YoFrameVector yoDesiredRotationVector;
 
+   /** For visualization only. */
+   private final YoFrameVector controlledAngularAcceleration;
+
    private final YoOrientationPIDGainsInterface gains;
 
    public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
@@ -84,6 +87,8 @@ public class AxisAngleOrientationController
       rateLimitedFeedbackAngularAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAcceleration", "",
             registry, gains.getYoMaximumJerk(), dt, feedbackAngularAcceleration);
 
+      controlledAngularAcceleration = new YoFrameVector(prefix + "ControlledAngularAcceleration", bodyFrame, registry);
+
       yoCurrentRotationVector = new YoFrameVector(prefix + "CurrentRotationVector", worldFrame, registry);
       yoDesiredRotationVector = new YoFrameVector(prefix + "DesiredRotationVector", worldFrame, registry);
       tempOrientation = new FrameOrientation(bodyFrame);
@@ -94,6 +99,7 @@ public class AxisAngleOrientationController
    public void reset()
    {
       rateLimitedFeedbackAngularAcceleration.reset();
+      controlledAngularAcceleration.setToZero();
    }
 
    public void compute(FrameVector output, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity,
@@ -123,6 +129,7 @@ public class AxisAngleOrientationController
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
+      controlledAngularAcceleration.set(output);
    }
 
    private void computeProportionalTerm(FrameOrientation desiredOrientation)
