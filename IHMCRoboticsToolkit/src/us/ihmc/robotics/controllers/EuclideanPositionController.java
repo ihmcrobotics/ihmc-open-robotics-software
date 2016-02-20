@@ -6,7 +6,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -27,12 +26,6 @@ public class EuclideanPositionController implements PositionController
    private final Matrix3d proportionalGainMatrix;
    private final Matrix3d derivativeGainMatrix;
    private final Matrix3d integralGainMatrix;
-
-   //TODO: Take the filtering out of here if it doesn't make sense to be here.
-   // If it does make sense, then clean it up and support it better.
-   private final AlphaFilteredYoFrameVector filteredVelocity;
-   private final FrameVector filteredVelocityTemp;
-   private final DoubleYoVariable alphaVelocityFilter;
 
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
@@ -86,11 +79,6 @@ public class EuclideanPositionController implements PositionController
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
 
-      alphaVelocityFilter = new DoubleYoVariable(prefix + "AlphaPosVel", registry);
-      alphaVelocityFilter.set(0.0);
-      filteredVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, "FiltVelocity", registry, alphaVelocityFilter, bodyFrame);
-      filteredVelocityTemp = new FrameVector(bodyFrame);
-
       preLimitedOutput = new YoFrameVector(prefix + "PositionPreLimitedOutput", bodyFrame, registry);
       rateLimitedOutput = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "PositionRateLimitedOutput", "", registry, gains.getYoMaximumJerk(), dt, preLimitedOutput);
 
@@ -107,12 +95,8 @@ public class EuclideanPositionController implements PositionController
 
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
    {
-      currentVelocity.changeFrame(bodyFrame);
-      filteredVelocity.update(currentVelocity);
-      filteredVelocity.getFrameTuple(filteredVelocityTemp);
-
       computeProportionalTerm(desiredPosition);
-      computeDerivativeTerm(desiredVelocity, filteredVelocityTemp);
+      computeDerivativeTerm(desiredVelocity, currentVelocity);
       computeIntegralTerm();
       output.setToNaN(bodyFrame);
       output.add(proportionalTerm, derivativeTerm);

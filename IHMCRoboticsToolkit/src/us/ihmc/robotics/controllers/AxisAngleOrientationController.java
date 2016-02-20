@@ -9,12 +9,10 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 
 public class AxisAngleOrientationController
 {
@@ -30,12 +28,6 @@ public class AxisAngleOrientationController
    private final Matrix3d proportionalGainMatrix;
    private final Matrix3d derivativeGainMatrix;
    private final Matrix3d integralGainMatrix;
-
-   //TODO: Take the filtering out of here if it doesn't make sense to be here.
-   // If it does make sense, then clean it up and support it better.
-   private final AlphaFilteredYoFrameVector filteredVelocity;
-   private final FrameVector filteredVelocityTemp;
-   private final DoubleYoVariable alphaVelocityFilter;
 
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
@@ -61,7 +53,8 @@ public class AxisAngleOrientationController
       this(prefix, bodyFrame, dt, false, parentRegistry);
    }
 
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
+   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains,
+         YoVariableRegistry parentRegistry)
    {
       this(prefix, bodyFrame, dt, gains, false, parentRegistry);
    }
@@ -71,7 +64,8 @@ public class AxisAngleOrientationController
       this(prefix, bodyFrame, dt, null, visualize, parentRegistry);
    }
 
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains, boolean visualize, YoVariableRegistry parentRegistry)
+   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains, boolean visualize,
+         YoVariableRegistry parentRegistry)
    {
       this.visualize = visualize;
 
@@ -79,7 +73,8 @@ public class AxisAngleOrientationController
       this.bodyFrame = bodyFrame;
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      if (gains == null) gains = new YoAxisAngleOrientationGains(prefix, registry);
+      if (gains == null)
+         gains = new YoAxisAngleOrientationGains(prefix, registry);
 
       this.gains = gains;
       proportionalGainMatrix = gains.createProportionalGainMatrix();
@@ -94,11 +89,6 @@ public class AxisAngleOrientationController
       proportionalTerm = new FrameVector(bodyFrame);
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
-
-      alphaVelocityFilter = new DoubleYoVariable(prefix + "AlphaAngleVel", registry);
-      alphaVelocityFilter.set(0.0);
-      filteredVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, "FiltAngularVelocity", registry, alphaVelocityFilter, bodyFrame);
-      filteredVelocityTemp = new FrameVector(bodyFrame);
 
       preLimitedOutput = new YoFrameVector(prefix + "OrientationPreLimitedOutput", bodyFrame, registry);
       rateLimitedOutput = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "OrientationRateLimitedOutput", "", registry,
@@ -119,11 +109,8 @@ public class AxisAngleOrientationController
    public void compute(FrameVector output, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity,
          FrameVector feedForward)
    {
-      filteredVelocity.update(currentAngularVelocity);
-      filteredVelocity.getFrameTuple(filteredVelocityTemp);
-
       computeProportionalTerm(desiredOrientation);
-      computeDerivativeTerm(desiredAngularVelocity, filteredVelocityTemp);
+      computeDerivativeTerm(desiredAngularVelocity, currentAngularVelocity);
       computeIntegralTerm();
       output.setToZero(proportionalTerm.getReferenceFrame());
       output.add(proportionalTerm, derivativeTerm);
@@ -136,11 +123,11 @@ public class AxisAngleOrientationController
       {
          output.scale(gains.getMaximumAcceleration() / outputLength);
       }
-      
+
       preLimitedOutput.set(output);
       rateLimitedOutput.update();
       rateLimitedOutput.getFrameTuple(output);
-      
+
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
    }
