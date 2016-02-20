@@ -24,17 +24,11 @@ public class RigidBodyOrientationControlModule
    public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
          YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, base, endEffector, twistCalculator, dt, null, false, parentRegistry);
+      this(namePrefix, base, endEffector, twistCalculator, dt, null, parentRegistry);
    }
 
    public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
          YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, base, endEffector, twistCalculator, dt, gains, false, parentRegistry);
-   }
-
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
-         YoOrientationPIDGainsInterface gains, boolean visualize, YoVariableRegistry parentRegistry)
    {
       this.base = base;
       this.endEffector = endEffector;
