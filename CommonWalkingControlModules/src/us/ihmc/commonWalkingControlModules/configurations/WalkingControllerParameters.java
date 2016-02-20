@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -89,13 +89,13 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 

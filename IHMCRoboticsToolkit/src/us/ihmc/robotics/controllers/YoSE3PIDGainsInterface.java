@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 
-public interface YoSE3PIDGains
+public interface YoSE3PIDGainsInterface
 {
    public abstract YoPositionPIDGainsInterface getPositionGains();
    

@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-public class YoIndependentSE3PIDGains implements YoSE3PIDGains
+public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
 {
    private final YoEuclideanPositionGains positionGains;
    private final YoAxisAngleOrientationGains orientationGains;
