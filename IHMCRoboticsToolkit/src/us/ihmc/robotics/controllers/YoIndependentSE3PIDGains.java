@@ -19,11 +19,13 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGains
       orientationGains.reset();
    }
 
+   @Override
    public YoEuclideanPositionGains getPositionGains()
    {
       return positionGains;
    }
 
+   @Override
    public YoAxisAngleOrientationGains getOrientationGains()
    {
       return orientationGains;

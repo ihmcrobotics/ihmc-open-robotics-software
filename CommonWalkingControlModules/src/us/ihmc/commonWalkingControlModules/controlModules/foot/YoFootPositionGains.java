@@ -34,6 +34,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       maximumJerk.set(Double.POSITIVE_INFINITY);
    }
 
+   @Override
    public void reset()
    {
       proportionalXYGain.set(0.0);
@@ -45,6 +46,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       maximumJerk.set(Double.POSITIVE_INFINITY);
    }
 
+   @Override
    public Matrix3d createProportionalGainMatrix()
    {
       Matrix3d proportionalGainMatrix = new Matrix3d();
@@ -59,6 +61,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       return proportionalGainMatrix;
    }
 
+   @Override
    public Matrix3d createDerivativeGainMatrix()
    {
       Matrix3d derivativeGainMatrix = new Matrix3d();
@@ -73,6 +76,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       return derivativeGainMatrix;
    }
 
+   @Override
    public Matrix3d createIntegralGainMatrix()
    {
       return new Matrix3d();
@@ -82,6 +86,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    {
       VariableChangedListener kdXYUpdater = new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             derivativeXYGain.set(GainCalculator.computeDerivativeGain(proportionalXYGain.getDoubleValue(), dampingRatio.getDoubleValue()));
@@ -96,6 +101,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
       VariableChangedListener kdZUpdater = new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             derivativeZGain.set(GainCalculator.computeDerivativeGain(proportionalZGain.getDoubleValue(), dampingRatio.getDoubleValue()));
@@ -109,6 +115,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
          kdZUpdater.variableChanged(null);
    }
 
+   @Override
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
       proportionalXYGain.set(proportionalGainX);
@@ -121,6 +128,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       proportionalZGain.set(proportionalGainZ);
    }
 
+   @Override
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       derivativeXYGain.set(derivativeGainX);
@@ -138,35 +146,42 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       this.dampingRatio.set(dampingRatio);
    }
 
+   @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
    }
 
+   @Override
    public void setProportionalGains(double[] proportionalGains)
    {
       setProportionalGains(proportionalGains[0], proportionalGains[1], proportionalGains[2]);
    }
 
+   @Override
    public void setDerivativeGains(double[] derivativeGains)
    {
       setDerivativeGains(derivativeGains[0], derivativeGains[1], derivativeGains[2]);
    }
 
+   @Override
    public void setIntegralGains(double[] integralGains, double maxIntegralError)
    {
    }
 
+   @Override
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       this.maximumAcceleration.set(maxAcceleration);
       this.maximumJerk.set(maxJerk);
    }
 
+   @Override
    public DoubleYoVariable getYoMaximumAcceleration()
    {
       return maximumAcceleration;
    }
 
+   @Override
    public DoubleYoVariable getYoMaximumJerk()
    {
       return maximumJerk;
@@ -174,6 +189,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
    private double[] tempPropotionalGains = new double[3];
 
+   @Override
    public double[] getProportionalGains()
    {
       tempPropotionalGains[0] = proportionalXYGain.getDoubleValue();
@@ -185,6 +201,7 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
    private double[] tempDerivativeGains = new double[3];
 
+   @Override
    public double[] getDerivativeGains()
    {
       tempDerivativeGains[0] = derivativeXYGain.getDoubleValue();
@@ -196,21 +213,25 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
    private double[] tempIntegralGains = new double[3];
 
+   @Override
    public double[] getIntegralGains()
    {
       return tempIntegralGains;
    }
 
+   @Override
    public double getMaximumIntegralError()
    {
       return 0.0;
    }
 
+   @Override
    public double getMaximumAcceleration()
    {
       return maximumAcceleration.getDoubleValue();
    }
 
+   @Override
    public double getMaximumJerk()
    {
       return maximumJerk.getDoubleValue();

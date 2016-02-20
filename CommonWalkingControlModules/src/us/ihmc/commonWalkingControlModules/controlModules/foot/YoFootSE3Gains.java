@@ -20,11 +20,13 @@ public class YoFootSE3Gains implements YoSE3PIDGains
       orientationGains.reset();
    }
 
+   @Override
    public YoFootPositionGains getPositionGains()
    {
       return positionGains;
    }
 
+   @Override
    public YoFootOrientationGains getOrientationGains()
    {
       return orientationGains;
