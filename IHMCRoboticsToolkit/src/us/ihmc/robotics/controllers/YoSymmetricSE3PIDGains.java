@@ -85,12 +85,37 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
 
    public void setMaximumAcceleration(double maxAcceleration)
    {
-      this.maximumAcceleration.set(maxAcceleration);
+      maximumAcceleration.set(maxAcceleration);
    }
 
    public void setMaximumJerk(double maxJerk)
    {
-      this.maximumJerk.set(maxJerk);
+      maximumJerk.set(maxJerk);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface gains)
+   {
+      setProportionalGains(gains.getProportionalGains());
+      setDerivativeGains(gains.getDerivativeGains());
+      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+   }
+
+   @Override
+   public void set(PositionPIDGainsInterface gains)
+   {
+      setProportionalGains(gains.getProportionalGains());
+      setDerivativeGains(gains.getDerivativeGains());
+      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+   }
+
+   @Override
+   public void set(SE3PIDGainsInterface gains)
+   {
+      set(gains.getPositionGains());
+      set(gains.getOrientationGains());
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)
@@ -194,8 +219,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    @Override
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
-      this.maximumAcceleration.set(maxAcceleration);
-      this.maximumJerk.set(maxJerk);
+      maximumAcceleration.set(maxAcceleration);
+      maximumJerk.set(maxJerk);
    }
 
    @Override
