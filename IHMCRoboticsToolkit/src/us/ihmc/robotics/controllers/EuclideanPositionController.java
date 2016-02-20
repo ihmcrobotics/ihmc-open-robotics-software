@@ -234,7 +234,7 @@ public class EuclideanPositionController implements PositionController
       gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void setGains(YoPositionPIDGainsInterface gains)
+   public void setGains(PositionPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
