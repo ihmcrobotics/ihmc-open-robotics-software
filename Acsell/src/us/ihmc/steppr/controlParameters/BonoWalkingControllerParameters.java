@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -441,7 +441,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
@@ -464,7 +464,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
@@ -518,7 +518,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 

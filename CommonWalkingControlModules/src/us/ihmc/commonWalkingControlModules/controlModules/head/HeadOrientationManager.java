@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.I
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -47,7 +47,7 @@ public class HeadOrientationManager
    private final BooleanYoVariable hasBeenInitialized;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoOrientationPIDGains gains, HeadOrientationProvider desiredHeadOrientationProvider, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
+         YoOrientationPIDGainsInterface gains, HeadOrientationProvider desiredHeadOrientationProvider, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
          double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());

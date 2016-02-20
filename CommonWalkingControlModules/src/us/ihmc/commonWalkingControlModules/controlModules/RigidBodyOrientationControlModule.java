@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -27,13 +27,13 @@ public class RigidBodyOrientationControlModule
    }
 
    public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
-         YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+         YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, base, endEffector, twistCalculator, dt, gains, false, parentRegistry);
    }
 
    public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
-         YoOrientationPIDGains gains, boolean visualize, YoVariableRegistry parentRegistry)
+         YoOrientationPIDGainsInterface gains, boolean visualize, YoVariableRegistry parentRegistry)
    {
       this.base = base;
       this.endEffector = endEffector;
@@ -62,7 +62,7 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.compute(outputToPack, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
    }
 
-   public void setGains(YoOrientationPIDGains gains)
+   public void setGains(YoOrientationPIDGainsInterface gains)
    {
       axisAngleOrientationController.setGains(gains);
    }

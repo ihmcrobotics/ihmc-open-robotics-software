@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public interface HeadOrientationControllerParameters
 {
    public abstract String[] getDefaultHeadOrientationControlJointNames();
 
-   public abstract YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry);
+   public abstract YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry);
 
    public abstract double[] getInitialHeadYawPitchRoll();
 

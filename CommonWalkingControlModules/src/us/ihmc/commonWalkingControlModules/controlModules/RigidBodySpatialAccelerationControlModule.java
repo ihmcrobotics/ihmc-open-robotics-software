@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.robotics.controllers.SE3PIDController;
 import us.ihmc.robotics.controllers.SE3PIDGains;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -186,7 +186,7 @@ public class RigidBodySpatialAccelerationControlModule
       se3pdController.setPositionGains(gains);
    }
 
-   public void setOrientationGains(YoOrientationPIDGains gains)
+   public void setOrientationGains(YoOrientationPIDGainsInterface gains)
    {
       se3pdController.setOrientationGains(gains);
    }

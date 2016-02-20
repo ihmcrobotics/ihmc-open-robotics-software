@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -201,7 +201,7 @@ public class FootControlHelper
       accelerationControlModule.setGains(gains);
    }
 
-   public void setOrientationGains(YoOrientationPIDGains gains)
+   public void setOrientationGains(YoOrientationPIDGainsInterface gains)
    {
       accelerationControlModule.setOrientationGains(gains);
    }

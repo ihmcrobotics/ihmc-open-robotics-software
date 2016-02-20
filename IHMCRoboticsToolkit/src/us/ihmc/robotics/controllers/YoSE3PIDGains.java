@@ -5,5 +5,5 @@ public interface YoSE3PIDGains
 {
    public abstract YoPositionPIDGainsInterface getPositionGains();
    
-   public abstract YoOrientationPIDGains getOrientationGains();
+   public abstract YoOrientationPIDGainsInterface getOrientationGains();
 }

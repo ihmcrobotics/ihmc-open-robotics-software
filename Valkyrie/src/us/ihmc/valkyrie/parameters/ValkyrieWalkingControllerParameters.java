@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -515,7 +515,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("pelvisOrientation", registry);
 
@@ -538,7 +538,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
@@ -596,7 +596,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
