@@ -4,7 +4,7 @@ import us.ihmc.robotics.controllers.SE3PIDController;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -37,7 +37,7 @@ public class RigidBodySpatialAccelerationControlModule
    }
 
    public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
-         double dt, YoSE3PIDGains taskspaceGains, YoVariableRegistry parentRegistry)
+         double dt, YoSE3PIDGainsInterface taskspaceGains, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.twistCalculator = twistCalculator;
@@ -176,7 +176,7 @@ public class RigidBodySpatialAccelerationControlModule
       se3pdController.setGains(gains);
    }
 
-   public void setGains(YoSE3PIDGains gains)
+   public void setGains(YoSE3PIDGainsInterface gains)
    {
       se3pdController.setGains(gains);
    }

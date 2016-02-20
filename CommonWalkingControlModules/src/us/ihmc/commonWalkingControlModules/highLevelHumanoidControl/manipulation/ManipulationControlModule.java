@@ -27,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -102,8 +102,8 @@ public class ManipulationControlModule
       handControlModules = new SideDependentList<HandControlModule>();
 
       YoPIDGains jointspaceControlGains = armControllerParameters.createJointspaceControlGains(registry);
-      YoSE3PIDGains taskspaceGains = armControllerParameters.createTaskspaceControlGains(registry);
-      YoSE3PIDGains taskspaceLoadBearingGains = armControllerParameters.createTaskspaceControlGainsForLoadBearing(registry);
+      YoSE3PIDGainsInterface taskspaceGains = armControllerParameters.createTaskspaceControlGains(registry);
+      YoSE3PIDGainsInterface taskspaceLoadBearingGains = armControllerParameters.createTaskspaceControlGainsForLoadBearing(registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {

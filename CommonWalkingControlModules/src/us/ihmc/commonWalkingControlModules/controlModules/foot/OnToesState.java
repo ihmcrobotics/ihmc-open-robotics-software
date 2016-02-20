@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.P
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.SpatialAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -85,7 +85,7 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint2d userDefinedContactPoint = new FramePoint2d();
    private final FramePoint2d toeOffContactPoint = new FramePoint2d();
 
-   private final YoSE3PIDGains gains;
+   private final YoSE3PIDGainsInterface gains;
    private final Matrix3d proportionalGainMatrix;
    private final Matrix3d derivativeGainMatrix;
 
@@ -93,7 +93,7 @@ public class OnToesState extends AbstractFootControlState
 
    private final OneDoFJoint kneeJoint;
 
-   public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper, registry);
 

@@ -40,7 +40,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -146,7 +146,7 @@ public class HandControlModule
 
    private final double controlDT;
 
-   private final YoSE3PIDGains taskspaceGains, taskspaceLoadBearingGains;
+   private final YoSE3PIDGainsInterface taskspaceGains, taskspaceLoadBearingGains;
 
    private final StateChangedListener<HandControlMode> stateChangedlistener;
    private final HandPoseStatusProducer handPoseStatusProducer;
@@ -161,7 +161,7 @@ public class HandControlModule
    private final PoseReferenceFrame optionalHandControlFrame;
 
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
-         YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains, ControlStatusProducer controlStatusProducer,
+         YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, YoSE3PIDGainsInterface taskspaceLoadBearingGains, ControlStatusProducer controlStatusProducer,
          HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry;

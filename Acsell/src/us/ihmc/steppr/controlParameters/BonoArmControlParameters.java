@@ -6,7 +6,7 @@ import java.util.Map;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -36,13 +36,13 @@ public class BonoArmControlParameters implements ArmControllerParameters
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGains(YoVariableRegistry registry)
    {
       return null;
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
    {
       return null;
    }

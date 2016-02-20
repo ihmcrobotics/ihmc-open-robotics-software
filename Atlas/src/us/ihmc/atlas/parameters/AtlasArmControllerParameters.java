@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,7 +56,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains taskspaceControlGains = new YoSymmetricSE3PIDGains("ArmTaskspace", registry);
 
@@ -79,7 +79,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
    {
       YoIndependentSE3PIDGains taskspaceControlGains = new YoIndependentSE3PIDGains("ArmLoadBearing", registry);
       taskspaceControlGains.reset();

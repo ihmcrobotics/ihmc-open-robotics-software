@@ -7,7 +7,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGainsInterface, YoOrientationPIDGainsInterface
+public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositionPIDGainsInterface, YoOrientationPIDGainsInterface
 {
    private final DoubleYoVariable proportionalGain;
    private final DoubleYoVariable derivativeGain;

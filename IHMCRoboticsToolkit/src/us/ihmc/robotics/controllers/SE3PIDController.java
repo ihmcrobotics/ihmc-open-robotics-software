@@ -38,7 +38,7 @@ public class SE3PIDController
       this(namePrefix, bodyFrame, visualize, dt, null, registry);
    }
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, boolean visualize, double dt, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, boolean visualize, double dt, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       if (gains != null)
@@ -146,7 +146,7 @@ public class SE3PIDController
       orientationController.setMaxAccelerationAndJerk(gains.getOrientationMaximumAcceleration(), gains.getOrientationMaximumJerk());
    }
 
-   public void setGains(YoSE3PIDGains gains)
+   public void setGains(YoSE3PIDGainsInterface gains)
    {
       positionController.setGains(gains.getPositionGains());
       orientationController.setGains(gains.getOrientationGains());
