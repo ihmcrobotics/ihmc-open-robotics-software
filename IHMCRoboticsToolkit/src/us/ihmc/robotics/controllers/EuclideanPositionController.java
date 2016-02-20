@@ -3,7 +3,6 @@ package us.ihmc.robotics.controllers;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -11,14 +10,12 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class EuclideanPositionController implements PositionController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable positionErrorMagnitude;
    private final YoFrameVector positionError;
    private final YoFrameVector positionErrorCumulated;
    private final YoFrameVector velocityError;
@@ -31,66 +28,62 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector proportionalTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
-   private final FramePoint currentPosition;
 
-   private final boolean visualize;
-   private final YoFramePoint currentPositionViz, desiredPositionViz;
-
-   private final YoFrameVector preLimitedOutput;
-   private final RateLimitedYoFrameVector rateLimitedOutput;
+   private final YoFrameVector feedbackLinearAcceleration;
+   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
 
    private final double dt;
+
+   private final FramePoint currentPosition;
+   /** For visualization only. */
+   private final YoFramePoint yoCurrentPosition;
+   /** For visualization only. */
+   private final YoFramePoint yoDesiredPosition;
 
    private final YoPositionPIDGainsInterface gains;
 
    public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
    {
-      this(prefix, bodyFrame, dt, false, parentRegistry);
+      this(prefix, bodyFrame, dt, null, parentRegistry);
    }
 
-   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, boolean visualize, YoVariableRegistry parentRegistry)
+   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPositionPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
-      this(prefix, bodyFrame, dt, null, visualize, parentRegistry);
-   }
-
-   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPositionPIDGainsInterface gains, boolean visualize, YoVariableRegistry parentRegistry)
-   {
-      this.visualize = visualize;
-
       this.dt = dt;
 
       this.bodyFrame = bodyFrame;
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      if (gains == null) gains = new YoEuclideanPositionGains(prefix, registry);
+      if (gains == null)
+         gains = new YoEuclideanPositionGains(prefix, registry);
 
       this.gains = gains;
       proportionalGainMatrix = gains.createProportionalGainMatrix();
       derivativeGainMatrix = gains.createDerivativeGainMatrix();
       integralGainMatrix = gains.createIntegralGainMatrix();
 
-      positionErrorMagnitude = new DoubleYoVariable(prefix + "PositionErrorMagnitude", registry);
       positionError = new YoFrameVector(prefix + "PositionError", bodyFrame, registry);
       positionErrorCumulated = new YoFrameVector(prefix + "PositionErrorCumulated", bodyFrame, registry);
       velocityError = new YoFrameVector(prefix + "LinearVelocityError", bodyFrame, registry);
 
-      currentPosition = new FramePoint(bodyFrame);
       proportionalTerm = new FrameVector(bodyFrame);
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
 
-      preLimitedOutput = new YoFrameVector(prefix + "PositionPreLimitedOutput", bodyFrame, registry);
-      rateLimitedOutput = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "PositionRateLimitedOutput", "", registry, gains.getYoMaximumJerk(), dt, preLimitedOutput);
+      feedbackLinearAcceleration = new YoFrameVector(prefix + "FeedbackLinearAcceleration", bodyFrame, registry);
+      rateLimitedFeedbackLinearAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAcceleration", "",
+            registry, gains.getYoMaximumJerk(), dt, feedbackLinearAcceleration);
 
-      currentPositionViz = visualize ? new YoFramePoint(prefix + "CurrentPosition", worldFrame, registry) : null;
-      desiredPositionViz = visualize ? new YoFramePoint(prefix + "DesiredPosition", worldFrame, registry) : null;
+      currentPosition = new FramePoint(bodyFrame);
+      yoCurrentPosition = new YoFramePoint(prefix + "CurrentPosition", worldFrame, registry);
+      yoDesiredPosition = new YoFramePoint(prefix + "DesiredPosition", worldFrame, registry);
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
-      rateLimitedOutput.reset();
+      rateLimitedFeedbackLinearAcceleration.reset();
    }
 
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
@@ -102,18 +95,17 @@ public class EuclideanPositionController implements PositionController
       output.add(proportionalTerm, derivativeTerm);
       output.add(integralTerm);
 
-      
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
-      double outputLength = output.length();
-      if (outputLength > gains.getMaximumAcceleration())
+      double feedbackLinearAccelerationMagnitude = output.length();
+      if (feedbackLinearAccelerationMagnitude > gains.getMaximumAcceleration())
       {
-         output.scale(gains.getMaximumAcceleration() / outputLength);
+         output.scale(gains.getMaximumAcceleration() / feedbackLinearAccelerationMagnitude);
       }
-      
-      preLimitedOutput.set(output);
-      rateLimitedOutput.update();
-      rateLimitedOutput.getFrameTuple(output);
+
+      feedbackLinearAcceleration.set(output);
+      rateLimitedFeedbackLinearAcceleration.update();
+      rateLimitedFeedbackLinearAcceleration.getFrameTuple(output);
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
@@ -124,7 +116,6 @@ public class EuclideanPositionController implements PositionController
       visualizeDesiredAndActualPositions(desiredPosition);
 
       desiredPosition.changeFrame(bodyFrame);
-      positionErrorMagnitude.set(desiredPosition.distance(currentPosition));
       positionError.set(desiredPosition);
 
       proportionalTerm.set(desiredPosition);
@@ -166,11 +157,9 @@ public class EuclideanPositionController implements PositionController
 
    private void visualizeDesiredAndActualPositions(FramePoint desiredPosition)
    {
-      if (visualize)
-      {
-         desiredPositionViz.setAndMatchFrame(desiredPosition);
-         currentPositionViz.setAndMatchFrame(currentPosition);
-      }
+      yoDesiredPosition.setAndMatchFrame(desiredPosition);
+      currentPosition.setToZero(bodyFrame);
+      yoCurrentPosition.setAndMatchFrame(currentPosition);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -220,9 +209,6 @@ public class EuclideanPositionController implements PositionController
 
    public void setGains(PositionPIDGainsInterface gains)
    {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      this.gains.set(gains);
    }
 }
