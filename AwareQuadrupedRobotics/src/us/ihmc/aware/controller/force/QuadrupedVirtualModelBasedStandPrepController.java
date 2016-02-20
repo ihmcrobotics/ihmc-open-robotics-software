@@ -300,23 +300,8 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       FramePoint finalPosition = pool.lease(FramePoint.class);
       finalPosition.setToZero(referenceFrames.getBodyFrame());
 
-      if (quadrant.isQuadrantInFront())
-      {
-         finalPosition.add(params.get(PARAM_STANCE_LENGTH) / 2, 0.0, 0.0);
-      }
-      else
-      {
-         finalPosition.add(-params.get(PARAM_STANCE_LENGTH) / 2, 0.0, 0.0);
-      }
-
-      if (quadrant.isQuadrantOnRightSide())
-      {
-         finalPosition.add(0.0, -params.get(PARAM_STANCE_WIDTH) / 2, 0.0);
-      }
-      else
-      {
-         finalPosition.add(0.0, params.get(PARAM_STANCE_WIDTH) / 2, 0.0);
-      }
+      finalPosition.add(quadrant.getEnd().negateIfHindEnd(params.get(PARAM_STANCE_LENGTH) / 2.0), 0.0, 0.0);
+      finalPosition.add(0.0, quadrant.getSide().negateIfRightSide(params.get(PARAM_STANCE_WIDTH) / 2.0), 0.0);
 
       finalPosition.add(params.get(PARAM_STANCE_X_OFFSET), params.get(PARAM_STANCE_Y_OFFSET), -params.get(
             PARAM_STANCE_HEIGHT));
