@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
@@ -75,6 +78,25 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
    public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   @Override
+   public void set(SE3PIDGainsInterface gains)
+   {
+      set(gains.getPositionGains());
+      set(gains.getOrientationGains());
+   }
+
+   @Override
+   public void set(PositionPIDGainsInterface positionGains)
+   {
+      this.positionGains.set(positionGains);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface orientationGains)
+   {
+      this.orientationGains.set(orientationGains);
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)

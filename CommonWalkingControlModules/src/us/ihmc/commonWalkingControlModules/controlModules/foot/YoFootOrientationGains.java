@@ -4,6 +4,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -35,7 +36,6 @@ public class YoFootOrientationGains implements YoOrientationPIDGainsInterface
       maximumJerk.set(Double.POSITIVE_INFINITY);
    }
 
-   @Override
    public void reset()
    {
       proportionalXYGain.set(0.0);
@@ -145,8 +145,8 @@ public class YoFootOrientationGains implements YoOrientationPIDGainsInterface
 
    public void setDampingRatio(double dampingRatio)
    {
-      this.dampingRatioXY.set(dampingRatio);
-      this.dampingRatioZ.set(dampingRatio);
+      dampingRatioXY.set(dampingRatio);
+      dampingRatioZ.set(dampingRatio);
    }
 
    public void setDampingRatios(double dampingRatioXY, double dampingRatioZ)
@@ -179,19 +179,28 @@ public class YoFootOrientationGains implements YoOrientationPIDGainsInterface
 
    public void setMaximumAcceleration(double maxAcceleration)
    {
-      this.maximumAcceleration.set(maxAcceleration);
+      maximumAcceleration.set(maxAcceleration);
    }
 
    public void setMaximumJerk(double maxJerk)
    {
-      this.maximumJerk.set(maxJerk);
+      maximumJerk.set(maxJerk);
    }
 
    @Override
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
-      this.maximumAcceleration.set(maxAcceleration);
-      this.maximumJerk.set(maxJerk);
+      maximumAcceleration.set(maxAcceleration);
+      maximumJerk.set(maxJerk);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface gains)
+   {
+      setProportionalGains(gains.getProportionalGains());
+      setDerivativeGains(gains.getDerivativeGains());
+      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
    }
 
    @Override

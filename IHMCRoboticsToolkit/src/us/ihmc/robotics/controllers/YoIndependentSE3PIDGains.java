@@ -100,4 +100,23 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
    {
       orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
+
+   @Override
+   public void set(SE3PIDGainsInterface gains)
+   {
+      set(gains.getPositionGains());
+      set(gains.getOrientationGains());
+   }
+
+   @Override
+   public void set(PositionPIDGainsInterface positionGains)
+   {
+      this.positionGains.set(positionGains);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface orientationGains)
+   {
+      this.orientationGains.set(orientationGains);
+   }
 }

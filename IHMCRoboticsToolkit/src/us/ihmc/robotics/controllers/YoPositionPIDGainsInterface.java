@@ -4,8 +4,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-
-public interface YoPositionPIDGainsInterface
+public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
 {
    public abstract void reset();
 
@@ -32,16 +31,4 @@ public interface YoPositionPIDGainsInterface
    public abstract DoubleYoVariable getYoMaximumAcceleration();
 
    public abstract DoubleYoVariable getYoMaximumJerk();
-
-   public abstract double[] getProportionalGains();
-
-   public abstract double[] getDerivativeGains();
-   
-   public abstract double[] getIntegralGains();
-
-   public abstract double getMaximumIntegralError();
-
-   public abstract double getMaximumAcceleration();
-
-   public abstract double getMaximumJerk();
 }

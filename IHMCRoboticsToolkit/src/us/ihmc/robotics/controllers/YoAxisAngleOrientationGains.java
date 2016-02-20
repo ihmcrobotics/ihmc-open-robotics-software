@@ -39,7 +39,6 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
       maxJerk.set(Double.POSITIVE_INFINITY);
    }
 
-   @Override
    public void reset()
    {
       for (int i = 0; i < proportionalGains.length; i++)
@@ -156,6 +155,15 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    {
       this.maxAcceleration.set(maxAcceleration);
       this.maxJerk.set(maxJerk);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface gains)
+   {
+      setProportionalGains(gains.getProportionalGains());
+      setDerivativeGains(gains.getDerivativeGains());
+      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
    }
 
    @Override
