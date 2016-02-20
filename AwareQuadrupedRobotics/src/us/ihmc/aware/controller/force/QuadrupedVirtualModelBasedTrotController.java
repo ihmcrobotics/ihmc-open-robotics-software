@@ -37,7 +37,9 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -516,9 +518,14 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeight());
 
       // compute center of mass height
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         solePositionEstimate.get(robotQuadrant).changeFrame(worldFrame);
+      }
+      double minFrontFootHeight = Math.min(solePositionEstimate.get(RobotQuadrant.FRONT_LEFT).getZ(), solePositionEstimate.get(RobotQuadrant.FRONT_RIGHT).getZ());
+      double minHindFootHeight = Math.min(solePositionEstimate.get(RobotQuadrant.HIND_LEFT).getZ(), solePositionEstimate.get(RobotQuadrant.HIND_RIGHT).getZ());
       comPositionEstimate.changeFrame(worldFrame);
-      supportCentroidEstimate.changeFrame(worldFrame);
-      comHeightEstimate = comPositionEstimate.getZ() - supportPolygonEstimate.getLowestFootstepZHeight();
+      comHeightEstimate = comPositionEstimate.getZ() - ((minFrontFootHeight + minHindFootHeight) / 2.0);
    }
 
    private void updateSetpoints()
