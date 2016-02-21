@@ -7,38 +7,26 @@ import java.util.Map;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class DesiredOneDoFJointTorqueHolder
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final List<MutableDouble> unusedMutableDoubles;
    private final List<OneDoFJoint> jointsWithDesiredTorques;
    private final Map<OneDoFJoint, MutableDouble> jointDesiredTorqueMap;
-   private final Map<OneDoFJoint, DoubleYoVariable> yoJointDesiredTorqueMap;
 
-   public DesiredOneDoFJointTorqueHolder(InverseDynamicsJoint[] allJoints, YoVariableRegistry parentRegistry)
+   public DesiredOneDoFJointTorqueHolder()
    {
-      OneDoFJoint[] allOneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
-      int numberOfOneDoFJoints = allOneDoFJoints.length;
-      unusedMutableDoubles = new ArrayList<>(numberOfOneDoFJoints);
-      jointsWithDesiredTorques = new ArrayList<>(numberOfOneDoFJoints);
-      jointDesiredTorqueMap = new HashMap<>(numberOfOneDoFJoints);
-      yoJointDesiredTorqueMap = new HashMap<>(numberOfOneDoFJoints);
+      this(50);
+   }
 
-      for (int i = 0; i < numberOfOneDoFJoints; i++)
-      {
-         OneDoFJoint oneDoFJoint = allOneDoFJoints[i];
-         DoubleYoVariable yoJointDesiredTorque = new DoubleYoVariable("tau_d_" + oneDoFJoint.getName(), registry);
-         yoJointDesiredTorqueMap.put(oneDoFJoint, yoJointDesiredTorque);
-      }
+   public DesiredOneDoFJointTorqueHolder(int initialCapacity)
+   {
+      unusedMutableDoubles = new ArrayList<>(initialCapacity);
+      jointsWithDesiredTorques = new ArrayList<>(initialCapacity);
+      jointDesiredTorqueMap = new HashMap<>(initialCapacity);
 
-      parentRegistry.addChild(registry);
    }
 
    public void reset()
@@ -65,7 +53,7 @@ public class DesiredOneDoFJointTorqueHolder
       }
    }
 
-   private void registerDesiredTorque(OneDoFJoint oneDoFJoint, double tauDesired)
+   public void registerDesiredTorque(OneDoFJoint oneDoFJoint, double tauDesired)
    {
       jointsWithDesiredTorques.add(oneDoFJoint);
 
@@ -80,8 +68,15 @@ public class DesiredOneDoFJointTorqueHolder
          jointMutableTorque = unusedMutableDoubles.remove(unusedMutableDoubles.size() - 1);
       jointDesiredTorqueMap.put(oneDoFJoint, jointMutableTorque);
       jointMutableTorque.setValue(tauDesired);
+   }
 
-      yoJointDesiredTorqueMap.get(oneDoFJoint).set(tauDesired);
+   public void insertDesiredTorquesIntoOneDoFJoints(OneDoFJoint[] oneDoFJoints)
+   {
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         joint.setTau(jointDesiredTorqueMap.get(joint).doubleValue());
+      }
    }
 
    public OneDoFJoint getOneDoFJoint(int index)

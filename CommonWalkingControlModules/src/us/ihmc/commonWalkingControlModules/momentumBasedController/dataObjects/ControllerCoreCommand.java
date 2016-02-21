@@ -4,14 +4,31 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointTorqueHolder;
 
-public class ControllerCoreCommandList
+public class ControllerCoreCommand
 {
-   private final InverseDynamicsCommandList solverCommandList = new InverseDynamicsCommandList();
-   private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
+   private final InverseDynamicsCommandList solverCommandList;
+   private final FeedbackControlCommandList feedbackControlCommandList;
+   private final DesiredOneDoFJointTorqueHolder desiredOneDoFJointTorqueHolder;
+   private final boolean enableControllerCore;
 
-   public ControllerCoreCommandList()
+   public ControllerCoreCommand(boolean enableControllerCore)
    {
+      this.enableControllerCore = enableControllerCore;
+
+      if (enableControllerCore)
+      {
+         solverCommandList = new InverseDynamicsCommandList();
+         feedbackControlCommandList = new FeedbackControlCommandList();
+         desiredOneDoFJointTorqueHolder = null;
+      }
+      else
+      {
+         solverCommandList = null;
+         feedbackControlCommandList = null;
+         desiredOneDoFJointTorqueHolder = new DesiredOneDoFJointTorqueHolder();
+      }
    }
 
    public void clear()
@@ -40,9 +57,19 @@ public class ControllerCoreCommandList
       return feedbackControlCommandList;
    }
 
-   public void set(ControllerCoreCommandList other)
+   public DesiredOneDoFJointTorqueHolder geDesiredOneDoFJointTorqueHolder()
+   {
+      return desiredOneDoFJointTorqueHolder;
+   }
+
+   public void set(ControllerCoreCommand other)
    {
       solverCommandList.set(other.solverCommandList);
       feedbackControlCommandList.set(other.feedbackControlCommandList);
+   }
+
+   public boolean enableControllerCore()
+   {
+      return enableControllerCore;
    }
 }

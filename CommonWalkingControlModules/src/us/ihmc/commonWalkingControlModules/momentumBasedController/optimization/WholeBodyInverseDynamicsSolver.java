@@ -26,7 +26,6 @@ public class WholeBodyInverseDynamicsSolver
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final OptimizationMomentumControlModule optimizationMomentumControlModule;
 
-   private final DesiredOneDoFJointTorqueHolder desiredOneDoFJointTorqueHolder;
    private final DesiredOneDoFJointAccelerationHolder desiredOneDoFJointAccelerationHolder;
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
@@ -46,7 +45,6 @@ public class WholeBodyInverseDynamicsSolver
       optimizationMomentumControlModule = new OptimizationMomentumControlModule(toolbox, momentumOptimizationSettings, registry);
 
       jointsToOptimizeFors = momentumOptimizationSettings.getJointsToOptimizeFor();
-      desiredOneDoFJointTorqueHolder = new DesiredOneDoFJointTorqueHolder(jointsToOptimizeFors, registry);
       desiredOneDoFJointAccelerationHolder = new DesiredOneDoFJointAccelerationHolder(jointsToOptimizeFors, registry);
 
       planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
@@ -61,7 +59,6 @@ public class WholeBodyInverseDynamicsSolver
    {
       inverseDynamicsCalculator.reset();
       optimizationMomentumControlModule.reset();
-      desiredOneDoFJointTorqueHolder.reset();
       desiredOneDoFJointAccelerationHolder.reset();
    }
 
@@ -99,7 +96,6 @@ public class WholeBodyInverseDynamicsSolver
       }
 
       inverseDynamicsCalculator.compute();
-      desiredOneDoFJointTorqueHolder.extractDesiredTorquesFromInverseDynamicsJoints(jointsToOptimizeFors);
       desiredOneDoFJointAccelerationHolder.extractDesiredAccelerationsFromInverseDynamicsJoints(jointsToOptimizeFors);
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       wrenchVisualizer.visualize(externalWrenchSolution);
@@ -108,11 +104,6 @@ public class WholeBodyInverseDynamicsSolver
    public void submitInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
    {
       optimizationMomentumControlModule.setInverseDynamicsCommand(inverseDynamicsCommand);
-   }
-
-   public DesiredOneDoFJointTorqueHolder getDesiredOneDoFJointTorqueHolder()
-   {
-      return desiredOneDoFJointTorqueHolder;
    }
 
    public DesiredOneDoFJointAccelerationHolder getDesiredOneDoFJointAccelerationHolder()
@@ -128,5 +119,10 @@ public class WholeBodyInverseDynamicsSolver
    public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
    {
       return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
+   }
+
+   public InverseDynamicsJoint[] getJointsToOptimizeFors()
+   {
+      return jointsToOptimizeFors;
    }
 }

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -27,5 +27,5 @@ public abstract class HighLevelBehavior extends State<HighLevelState>
 
    public abstract void setControllerCoreOuput(ControllerCoreOuput controllerCoreOuput);
 
-   public abstract ControllerCoreCommandList getControllerCoreCommandList();
+   public abstract ControllerCoreCommand getControllerCoreCommand();
 }

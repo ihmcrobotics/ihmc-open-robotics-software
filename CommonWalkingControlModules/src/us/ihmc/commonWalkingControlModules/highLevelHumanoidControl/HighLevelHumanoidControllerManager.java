@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -176,8 +176,8 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-      ControllerCoreCommandList controllerCoreCommandList = stateMachine.getCurrentState().getControllerCoreCommandList();
-      controllerCore.submitControllerCoreCommandList(controllerCoreCommandList);
+      ControllerCoreCommand controllerCoreCommandList = stateMachine.getCurrentState().getControllerCoreCommand();
+      controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
       controllerCore.compute();
       reportDesiredCenterOfPressureForEstimator();
    }
