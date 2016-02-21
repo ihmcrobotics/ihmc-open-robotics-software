@@ -127,15 +127,15 @@ public class MotionConstraintHandler
    public void setDesiredSpatialAcceleration(SpatialAccelerationCommand spatialAccelerationCommand)
    {
       // (S * J) * vdot = S * (Tdot - Jdot * v)
-      long jacobianId = spatialAccelerationCommand.getJacobianId();
-      double weight = spatialAccelerationCommand.getWeight();
-
-      SpatialAccelerationVector taskSpaceAcceleration = spatialAccelerationCommand.getSpatialAcceleration();
       DenseMatrix64F selectionMatrix = spatialAccelerationCommand.getSelectionMatrix();
-      DenseMatrix64F nullspaceMultipliers = spatialAccelerationCommand.getNullspaceMultipliers();
 
       if (selectionMatrix.getNumRows() > 0)
       {
+         double weight = spatialAccelerationCommand.getWeight();
+         
+         SpatialAccelerationVector taskSpaceAcceleration = spatialAccelerationCommand.getSpatialAcceleration();
+         DenseMatrix64F nullspaceMultipliers = spatialAccelerationCommand.getNullspaceMultipliers();
+
          RigidBody base = spatialAccelerationCommand.getBase();
          RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
 
@@ -152,11 +152,15 @@ public class MotionConstraintHandler
          jBlockCompact.reshape(selectionMatrix.getNumRows(), baseToEndEffectorJacobian.getNumberOfColumns());
 
          tempBaseToEndEffectorJacobianMatrix.set(baseToEndEffectorJacobian.getJacobianMatrix());
-         tempJacobianMatrix.set(geometricJacobianHolder.getJacobian(jacobianId).getJacobianMatrix());
 
          int nullity = nullspaceMultipliers.getNumRows();
          if (nullity > 0)
          {
+            long jacobianId = spatialAccelerationCommand.getJacobianId();
+            if (jacobianId == GeometricJacobianHolder.NULL_JACOBIAN_ID)
+               throw new RuntimeException("Need to provide a valid jacobianId for doing singularity escape.");
+
+            tempJacobianMatrix.set(geometricJacobianHolder.getJacobian(jacobianId).getJacobianMatrix());
             // Take the singular value decomposition of the leg Jacobian to find the approximate nullspace.
             SingularValueDecomposition<DenseMatrix64F> svd = getCachedSVD(tempJacobianMatrix.getNumRows(), tempJacobianMatrix.getNumCols());
             svd.decompose(tempJacobianMatrix);

@@ -41,7 +41,7 @@ public class LoadBearingHandControlState extends HandControlState
 
 
    public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
-         RigidBody elevator, RigidBody endEffector, long jacobianId, YoVariableRegistry parentRegistry)
+         RigidBody elevator, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 
@@ -49,7 +49,6 @@ public class LoadBearingHandControlState extends HandControlState
       registry = new YoVariableRegistry(name);
 
       spatialAccelerationCommand.set(elevator, endEffector);
-      spatialAccelerationCommand.setJacobianId(jacobianId);
 
       this.momentumBasedController = momentumBasedController;
 

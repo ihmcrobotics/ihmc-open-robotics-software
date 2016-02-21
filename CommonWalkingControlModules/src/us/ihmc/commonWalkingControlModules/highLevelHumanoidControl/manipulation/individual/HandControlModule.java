@@ -211,7 +211,6 @@ public class HandControlModule
       hand = fullRobotModel.getHand(robotSide);
       chest = fullRobotModel.getChest();
       ReferenceFrame handFrame = hand.getBodyFixedFrame();
-      long jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chest, hand, handFrame);
 
       chestFrame = chest.getBodyFixedFrame();
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
@@ -319,7 +318,7 @@ public class HandControlModule
       {
          userControlModeState = new UserControlModeState(stateNamePrefix, robotSide, oneDoFJoints, momentumBasedController, registry);
          loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController,
-               fullRobotModel.getElevator(), hand, jacobianId, registry);
+               fullRobotModel.getElevator(), hand, registry);
 
          if (armControlParameters.useInverseKinematicsTaskspaceControl())
          {
@@ -329,7 +328,7 @@ public class HandControlModule
          else
          {
             taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlMode.TASK_SPACE_POSITION,
-                  jacobianId, chest, hand, yoGraphicsListRegistry, registry);
+                  chest, hand, yoGraphicsListRegistry, registry);
          }
       }
 

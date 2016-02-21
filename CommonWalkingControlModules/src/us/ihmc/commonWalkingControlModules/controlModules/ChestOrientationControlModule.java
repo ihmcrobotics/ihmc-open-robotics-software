@@ -27,8 +27,8 @@ public class ChestOrientationControlModule
    private final RigidBodyOrientationControlModule orientationControlModule;
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
-   public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody elevator, RigidBody chest, long jacobianId, TwistCalculator twistCalculator,
-         double controlDT, YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
+   public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody elevator, RigidBody chest, TwistCalculator twistCalculator, double controlDT,
+         YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
       this.chest = chest;
       this.elevator = elevator;
@@ -41,7 +41,6 @@ public class ChestOrientationControlModule
       orientationControlModule = new RigidBodyOrientationControlModule("chest", elevator, chest, twistCalculator, controlDT, gains, registry);
 
       spatialAccelerationCommand.set(elevator, chest);
-      spatialAccelerationCommand.setJacobianId(jacobianId);
    }
 
    public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)

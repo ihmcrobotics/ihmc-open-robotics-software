@@ -60,8 +60,8 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, long jacobianId, RigidBody base, RigidBody endEffector,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 
@@ -69,7 +69,6 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       registry = new YoVariableRegistry(name);
 
       spatialAccelerationCommand.set(base, endEffector);
-      spatialAccelerationCommand.setJacobianId(jacobianId);
 
       this.base = base;
 

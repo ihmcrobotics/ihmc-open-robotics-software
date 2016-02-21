@@ -249,7 +249,6 @@ public class HeadOrientationControlModule
       controlledSpatialAcceleration.set(headFrame, elevator.getBodyFixedFrame(), headFrame, controlledLinearAcceleration, controlledAngularAcceleration);
 
       spatialAccelerationCommand.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
-      spatialAccelerationCommand.setJacobianId(jacobianId);
    }
 
    private void saveDoAccelerationIntegration()

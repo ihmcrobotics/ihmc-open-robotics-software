@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +15,7 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
 {
    private boolean hasWeight;
    private double weight;
-   private long jacobianId;
+   private long jacobianId = GeometricJacobianHolder.NULL_JACOBIAN_ID;
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
