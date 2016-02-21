@@ -6,14 +6,11 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class EuclideanPositionController implements PositionController
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry;
 
    private final YoFrameVector positionError;
@@ -33,14 +30,6 @@ public class EuclideanPositionController implements PositionController
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
 
    private final double dt;
-
-   private final FramePoint currentPosition;
-   /** For visualization only. */
-   private final YoFramePoint yoCurrentPosition;
-   /** For visualization only. */
-   private final YoFramePoint yoDesiredPosition;
-   /** For visualization only. */
-   private final YoFrameVector controlledLinearAcceleration;
 
    private final YoPositionPIDGainsInterface gains;
 
@@ -76,19 +65,12 @@ public class EuclideanPositionController implements PositionController
       rateLimitedFeedbackLinearAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAcceleration", "",
             registry, gains.getYoMaximumJerk(), dt, feedbackLinearAcceleration);
 
-      controlledLinearAcceleration = new YoFrameVector(prefix + "ControlledLinearAcceleration", bodyFrame, registry);
-
-      currentPosition = new FramePoint(bodyFrame);
-      yoCurrentPosition = new YoFramePoint(prefix + "CurrentPosition", worldFrame, registry);
-      yoDesiredPosition = new YoFramePoint(prefix + "DesiredPosition", worldFrame, registry);
-
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
       rateLimitedFeedbackLinearAcceleration.reset();
-      controlledLinearAcceleration.setToZero();
    }
 
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
@@ -114,13 +96,10 @@ public class EuclideanPositionController implements PositionController
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
-      controlledLinearAcceleration.set(output);
    }
 
    private void computeProportionalTerm(FramePoint desiredPosition)
    {
-      visualizeDesiredAndActualPositions(desiredPosition);
-
       desiredPosition.changeFrame(bodyFrame);
       positionError.set(desiredPosition);
 
@@ -159,13 +138,6 @@ public class EuclideanPositionController implements PositionController
 
       positionErrorCumulated.getFrameTuple(integralTerm);
       integralGainMatrix.transform(integralTerm.getVector());
-   }
-
-   private void visualizeDesiredAndActualPositions(FramePoint desiredPosition)
-   {
-      yoDesiredPosition.setAndMatchFrame(desiredPosition);
-      currentPosition.setToZero(bodyFrame);
-      yoCurrentPosition.setAndMatchFrame(currentPosition);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)

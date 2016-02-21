@@ -14,8 +14,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AxisAngleOrientationController
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry;
 
    private final YoFrameVector rotationErrorInBody;
@@ -38,20 +36,6 @@ public class AxisAngleOrientationController
    private final RateLimitedYoFrameVector rateLimitedFeedbackAngularAcceleration;
 
    private final double dt;
-
-   private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
-   private final FrameOrientation tempOrientation;
-   /**
-    * For visualization only. As quaternions are not really intuitive for most people and Euler angles suffer from gimbal lock, I thought rotation vector would be a good tradeoff. 
-    */
-   private final YoFrameVector yoCurrentRotationVector;
-   /**
-    * For visualization only. As quaternions are not really intuitive for most people and Euler angles suffer from gimbal lock, I thought rotation vector would be a good tradeoff. 
-    */
-   private final YoFrameVector yoDesiredRotationVector;
-
-   /** For visualization only. */
-   private final YoFrameVector controlledAngularAcceleration;
 
    private final YoOrientationPIDGainsInterface gains;
 
@@ -87,19 +71,12 @@ public class AxisAngleOrientationController
       rateLimitedFeedbackAngularAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAcceleration", "",
             registry, gains.getYoMaximumJerk(), dt, feedbackAngularAcceleration);
 
-      controlledAngularAcceleration = new YoFrameVector(prefix + "ControlledAngularAcceleration", bodyFrame, registry);
-
-      yoCurrentRotationVector = new YoFrameVector(prefix + "CurrentRotationVector", worldFrame, registry);
-      yoDesiredRotationVector = new YoFrameVector(prefix + "DesiredRotationVector", worldFrame, registry);
-      tempOrientation = new FrameOrientation(bodyFrame);
-
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
       rateLimitedFeedbackAngularAcceleration.reset();
-      controlledAngularAcceleration.setToZero();
    }
 
    public void compute(FrameVector output, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity,
@@ -129,13 +106,10 @@ public class AxisAngleOrientationController
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
-      controlledAngularAcceleration.set(output);
    }
 
    private void computeProportionalTerm(FrameOrientation desiredOrientation)
    {
-      visualizeDesiredAndActualOrientations(desiredOrientation);
-
       desiredOrientation.changeFrame(bodyFrame);
       desiredOrientation.getQuaternion(errorQuaternion);
       errorAngleAxis.set(errorQuaternion);
@@ -180,21 +154,6 @@ public class AxisAngleOrientationController
 
       rotationErrorCumulated.getFrameTuple(integralTerm);
       integralGainMatrix.transform(integralTerm.getVector());
-   }
-
-   private void visualizeDesiredAndActualOrientations(FrameOrientation desiredOrientation)
-   {
-      tempOrientation.setIncludingFrame(desiredOrientation);
-      tempOrientation.changeFrame(worldFrame);
-      tempOrientation.getAxisAngle(tempAxisAngle);
-      yoDesiredRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
-      yoDesiredRotationVector.scale(tempAxisAngle.getAngle());
-
-      tempOrientation.setToZero(bodyFrame);
-      tempOrientation.changeFrame(worldFrame);
-      tempOrientation.getAxisAngle(tempAxisAngle);
-      yoCurrentRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
-      yoCurrentRotationVector.scale(tempAxisAngle.getAngle());
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
