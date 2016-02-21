@@ -44,8 +44,8 @@ public class RootJointAngularAccelerationControlModule
 
       registry = new YoVariableRegistry(getClass().getSimpleName());
       double controlDT = momentumBasedController.getControlDT();
-      rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootPredecessor, rootSuccessor,
-            momentumBasedController.getTwistCalculator(), controlDT, gains, registry);
+      rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootSuccessor, momentumBasedController.getTwistCalculator(),
+            controlDT, gains, registry);
       this.controlledPelvisAngularAcceleration = new YoFrameVector("controlled" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
             registry);
 
@@ -78,7 +78,7 @@ public class RootJointAngularAccelerationControlModule
    {
       vectorToPack.setToZero(rootJoint.getFrameAfterJoint());
       rootJointOrientationControlModule.compute(vectorToPack, orientationTrajectoryData.getOrientation(), orientationTrajectoryData.getAngularVelocity(),
-            orientationTrajectoryData.getAngularAcceleration());
+            orientationTrajectoryData.getAngularAcceleration(), rootPredecessor);
       //      ret.changeFrame(rootJoint.getFrameAfterJoint());
    }
 

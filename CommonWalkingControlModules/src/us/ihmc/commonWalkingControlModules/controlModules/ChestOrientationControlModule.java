@@ -38,7 +38,7 @@ public class ChestOrientationControlModule
       this.yoDesiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", chestOrientationExpressedInFrame, registry);
       this.yoFeedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", chestOrientationExpressedInFrame, registry);
 
-      orientationControlModule = new RigidBodyOrientationControlModule("chest", elevator, chest, twistCalculator, controlDT, gains, registry);
+      orientationControlModule = new RigidBodyOrientationControlModule("chest", chest, twistCalculator, controlDT, gains, registry);
 
       spatialAccelerationCommand.set(elevator, chest);
    }
@@ -70,7 +70,7 @@ public class ChestOrientationControlModule
       yoDesiredAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
       yoFeedForwardAngularAcceleration.getFrameTupleIncludingFrame(feedForwardAngularAcceleration);
 
-      orientationControlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      orientationControlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration, elevator);
       spatialAccelerationCommand.setAngularAcceleration(chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), controlledAngularAcceleration);
    }
 

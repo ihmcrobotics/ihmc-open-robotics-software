@@ -16,21 +16,18 @@ public class RigidBodyOrientationControlModule
    private final AxisAngleOrientationController axisAngleOrientationController;
 
    private final RigidBody endEffector;
-   private final RigidBody base;
    private final TwistCalculator twistCalculator;
    private final Twist endEffectorTwist = new Twist();
    private final FrameVector currentAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
-         YoVariableRegistry parentRegistry)
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody endEffector, TwistCalculator twistCalculator, double dt, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, base, endEffector, twistCalculator, dt, null, parentRegistry);
+      this(namePrefix, endEffector, twistCalculator, dt, null, parentRegistry);
    }
 
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
-         YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody endEffector, TwistCalculator twistCalculator, double dt, YoOrientationPIDGainsInterface gains,
+         YoVariableRegistry parentRegistry)
    {
-      this.base = base;
       this.endEffector = endEffector;
       this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, parentRegistry);
       this.twistCalculator = twistCalculator;
@@ -42,7 +39,7 @@ public class RigidBodyOrientationControlModule
    }
 
    public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity,
-         FrameVector feedForwardAngularAcceleration)
+         FrameVector feedForwardAngularAcceleration, RigidBody base)
    {
       // using twists is a bit overkill; optimize if needed.
       twistCalculator.getRelativeTwist(endEffectorTwist, base, endEffector);
@@ -76,9 +73,9 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public RigidBody getBase()
+   public void getEndEffectorCurrentAngularVelocity(FrameVector angularVelocityToPack)
    {
-      return base;
+      angularVelocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
    public RigidBody getEndEffector()

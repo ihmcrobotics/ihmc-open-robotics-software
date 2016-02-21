@@ -146,7 +146,7 @@ public class HeadOrientationControlModule
 
       if (jacobianId != GeometricJacobianHolder.NULL_JACOBIAN_ID)
       {
-         controlModule = new RigidBodyOrientationControlModule("head", elevator, head, twistCalculator, dt, gains, registry);
+         controlModule = new RigidBodyOrientationControlModule("head", head, twistCalculator, dt, gains, registry);
 
          baseFrame = momentumBasedController.getJacobian(jacobianId).getBaseFrame();
          InverseDynamicsJoint[] cloneOfControlledJoints = ScrewTools.cloneJointPath(headOrientationControlJoints);
@@ -243,7 +243,7 @@ public class HeadOrientationControlModule
 
    private void computeJointsDesiredAcceleration()
    {
-      controlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      controlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration, elevator);
       controlledLinearAcceleration.setToZero(headFrame);
 
       controlledSpatialAcceleration.set(headFrame, elevator.getBodyFixedFrame(), headFrame, controlledLinearAcceleration, controlledAngularAcceleration);
