@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -22,7 +20,9 @@ public class DoNothingBehavior extends HighLevelBehavior
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
-   private final ArrayList<OneDoFJoint> allRobotJoints = new ArrayList<OneDoFJoint>();
+   private final OneDoFJoint[] allRobotJoints;
+
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(false);
 
    public DoNothingBehavior(MomentumBasedController momentumBasedController, BipedSupportPolygons bipedSupportPolygons)
    {
@@ -30,7 +30,7 @@ public class DoNothingBehavior extends HighLevelBehavior
 
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.momentumBasedController = momentumBasedController;
-      momentumBasedController.getFullRobotModel().getOneDoFJoints(allRobotJoints);
+      allRobotJoints = momentumBasedController.getFullRobotModel().getOneDoFJoints();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -50,10 +50,11 @@ public class DoNothingBehavior extends HighLevelBehavior
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
       momentumBasedController.callUpdatables();
 
-      for (int i = 0; i < allRobotJoints.size(); i++)
+      for (int i = 0; i < allRobotJoints.length; i++)
       {
-         allRobotJoints.get(i).setTau(0.0);
+         allRobotJoints[i].setTau(0.0);
       }
+      controllerCoreCommand.geDesiredOneDoFJointTorqueHolder().extractDesiredTorquesFromInverseDynamicsJoints(allRobotJoints);
    }
 
    @Override
@@ -77,9 +78,8 @@ public class DoNothingBehavior extends HighLevelBehavior
    }
 
    @Override
-   public ControllerCoreCommandList getControllerCoreCommandList()
+   public ControllerCoreCommand getControllerCoreCommand()
    {
-      // Needs to be fixed.
-      return null;
+      return controllerCoreCommand;
    }
 }

@@ -25,7 +25,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
@@ -236,7 +236,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
-   private final ControllerCoreCommandList controllerCoreCommandList = new ControllerCoreCommandList();
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(true);
    private ControllerCoreOuput controllerCoreOuput;
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
@@ -1780,27 +1780,27 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       planeContactStateCommandPool.clear();
       double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded(footDesiredCoPs);
 
-      controllerCoreCommandList.clear();
+      controllerCoreCommand.clear();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         controllerCoreCommandList.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
-         controllerCoreCommandList.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
+         controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
+         controllerCoreCommand.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
          YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.createCommand();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          planeContactStateCommand.setWRhoSmoother(wRhoSmoother);
       }
 
-      controllerCoreCommandList.addInverseDynamicsCommand(planeContactStateCommandPool);
-      controllerCoreCommandList.addInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
-      controllerCoreCommandList.addInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
-      controllerCoreCommandList.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommandPool);
+      controllerCoreCommand.addInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
 
-      controllerCoreCommandList.addInverseDynamicsCommand(getUncontrolledJointCommand());
-      controllerCoreCommandList.addInverseDynamicsCommand(unconstrainedJointCommand);
+      controllerCoreCommand.addInverseDynamicsCommand(getUncontrolledJointCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(unconstrainedJointCommand);
 
-      controllerCoreCommandList.addInverseDynamicsCommand(icpAndMomentumBasedController.getInverseDynamicsCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(icpAndMomentumBasedController.getInverseDynamicsCommand());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -2050,8 +2050,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    @Override
-   public ControllerCoreCommandList getControllerCoreCommandList()
+   public ControllerCoreCommand getControllerCoreCommand()
    {
-      return controllerCoreCommandList;
+      return controllerCoreCommand;
    }
 }

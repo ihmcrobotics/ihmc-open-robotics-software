@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -105,6 +105,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final MomentumBasedController momentumBasedController;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
+
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(false);
 
    public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, BipedSupportPolygons bipedSupportPolygons, boolean useArms, boolean robotIsHanging,
          MomentumBasedController momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
@@ -304,6 +306,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          printForceSensorsOffsets.set(false);
          printFootSensorsOffset();
       }
+
+      controllerCoreCommand.geDesiredOneDoFJointTorqueHolder().extractDesiredTorquesFromInverseDynamicsJoints(fullRobotModel.getOneDoFJoints());
    }
 
    private void callUpdatables()
@@ -950,9 +954,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    }
 
    @Override
-   public ControllerCoreCommandList getControllerCoreCommandList()
+   public ControllerCoreCommand getControllerCoreCommand()
    {
-      return null;
+      return controllerCoreCommand;
    }
 
    // private void tareFootSensors()
