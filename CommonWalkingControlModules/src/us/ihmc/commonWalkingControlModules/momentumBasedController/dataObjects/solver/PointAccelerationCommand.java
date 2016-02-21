@@ -5,70 +5,68 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccelerationCommand>
 {
-   private GeometricJacobian rootToEndEffectorJacobian;
+   private boolean hasWeight;
+   private double weight;
    private final FramePoint contactPoint = new FramePoint();
    private final FrameVector desiredAcceleration = new FrameVector();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(3);
+
+   private RigidBody base;
+   private RigidBody endEffector;
 
    public PointAccelerationCommand()
    {
       super(InverseDynamicsCommandType.TASKSPACE_POINT_MOTION);
    }
 
-   public PointAccelerationCommand(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration,
-         DenseMatrix64F selectionMatrix)
+   public PointAccelerationCommand(FramePoint bodyFixedPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
    {
       super(InverseDynamicsCommandType.TASKSPACE_POINT_MOTION);
-      set(rootToEndEffectorJacobian, contactPoint, desiredAcceleration, selectionMatrix);
+      set(bodyFixedPoint, desiredAcceleration, selectionMatrix);
    }
 
-   public PointAccelerationCommand(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   public PointAccelerationCommand(FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
    {
-      this(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
+      this(bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
    }
 
-   public PointAccelerationCommand(PointAccelerationCommand pointAccelerationCommand)
+   public void setBase(RigidBody base)
    {
-      super(InverseDynamicsCommandType.TASKSPACE_POINT_MOTION);
-      this.rootToEndEffectorJacobian = pointAccelerationCommand.rootToEndEffectorJacobian;
-      this.contactPoint.set(pointAccelerationCommand.contactPoint);
-      this.desiredAcceleration.set(pointAccelerationCommand.desiredAcceleration);
-      if (selectionMatrix != null)
-         this.selectionMatrix.set(pointAccelerationCommand.selectionMatrix);
-      else
-         setSelectionMatrixToIdentity();
+      this.base = base;
    }
 
-   public void set(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   public void setEndEffector(RigidBody endEffector)
    {
-      set(jacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
+      this.endEffector = endEffector;
+   }
+
+   public void set(FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   {
+      set(bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
    }
 
    @Override
    public void set(PointAccelerationCommand other)
    {
-      this.rootToEndEffectorJacobian = other.rootToEndEffectorJacobian;
-      this.contactPoint.setIncludingFrame(other.contactPoint);
-      this.desiredAcceleration.setIncludingFrame(other.desiredAcceleration);
-      if (selectionMatrix != null)
-         this.selectionMatrix.set(selectionMatrix);
-      else
-         setSelectionMatrixToIdentity();
+      contactPoint.setIncludingFrame(other.contactPoint);
+      desiredAcceleration.setIncludingFrame(other.desiredAcceleration);
+      selectionMatrix.set(selectionMatrix);
+      setWeight(other.weight);
    }
 
-   public void set(GeometricJacobian rootToEndEffectorJacobian, FramePoint contactPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
+   public void set(FramePoint bodyFixedPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
    {
-      this.rootToEndEffectorJacobian = rootToEndEffectorJacobian;
-      this.contactPoint.setIncludingFrame(contactPoint);
+      this.contactPoint.setIncludingFrame(bodyFixedPoint);
       this.desiredAcceleration.setIncludingFrame(desiredAcceleration);
       if (selectionMatrix != null)
          this.selectionMatrix.set(selectionMatrix);
       else
          setSelectionMatrixToIdentity();
+      removeWeight();
    }
 
    private void setSelectionMatrixToIdentity()
@@ -77,9 +75,35 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
       CommonOps.setIdentity(selectionMatrix);
    }
 
-   public GeometricJacobian getRootToEndEffectorJacobian()
+   public void setWeight(double weight)
    {
-      return rootToEndEffectorJacobian;
+      this.weight = weight;
+      hasWeight = weight != Double.POSITIVE_INFINITY;
+   }
+
+   public void removeWeight()
+   {
+      setWeight(Double.POSITIVE_INFINITY);
+   }
+
+   public boolean getHasWeight()
+   {
+      return hasWeight;
+   }
+
+   public double getWeight()
+   {
+      return weight;
+   }
+
+   public RigidBody getBase()
+   {
+      return base;
+   }
+
+   public RigidBody getEndEffector()
+   {
+      return endEffector;
    }
 
    public FramePoint getContactPoint()
@@ -100,6 +124,7 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": rootToEndEffectorJacobian = " + rootToEndEffectorJacobian;
+      String ret = getClass().getSimpleName() + ": base = " + base.getName() + "endEffector = " + endEffector.getName() + ", acceleration = " + desiredAcceleration;
+      return ret;
    }
 }

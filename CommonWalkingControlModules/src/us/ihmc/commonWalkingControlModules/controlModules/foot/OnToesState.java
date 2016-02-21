@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -30,12 +28,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -64,8 +57,6 @@ public class OnToesState extends AbstractFootControlState
    private final FrameVector contactPointLinearVelocity = new FrameVector();
    private final FramePoint proportionalPart = new FramePoint();
    private final FrameVector derivativePart = new FrameVector();
-
-   private final long rootToFootJacobianId;
 
    private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
@@ -98,7 +89,6 @@ public class OnToesState extends AbstractFootControlState
       super(ConstraintType.TOES, footControlHelper, registry);
 
       kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
-      rootToFootJacobianId = createRootToFootJacobian();
       twistCalculator = momentumBasedController.getTwistCalculator();
 
       String namePrefix = contactableFoot.getName();
@@ -147,29 +137,12 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
+      pointAccelerationCommand.setBase(rootBody);
+      pointAccelerationCommand.setEndEffector(contactableFoot.getRigidBody());
       kneeJointCommand.addJoint(kneeJoint, Double.NaN);
       commandList.addCommand(spatialAccelerationCommand);
       commandList.addCommand(pointAccelerationCommand);
       commandList.addCommand(kneeJointCommand);
-   }
-
-   private long createRootToFootJacobian()
-   {
-      long jacobianId;
-      RigidBody foot = contactableFoot.getRigidBody();
-      ReferenceFrame jacobianFrame = rootBody.getBodyFixedFrame();
-
-      if (USE_TOEOFF_TRAJECTORY)
-      {
-         jacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, foot, jacobianFrame);
-      }
-      else
-      {
-         ArrayList<InverseDynamicsJoint> jointPathWithoutKnee = new ArrayList<>(Arrays.asList(ScrewTools.createJointPath(rootBody, foot)));
-         jointPathWithoutKnee.remove(kneeJoint);
-         jacobianId = momentumBasedController.getOrCreateGeometricJacobian(jointPathWithoutKnee.toArray(new InverseDynamicsJoint[0]), jacobianFrame);
-      }
-      return jacobianId;
    }
 
    @Override
@@ -238,8 +211,7 @@ public class OnToesState extends AbstractFootControlState
       desiredLinearAcceleration.add(derivativePart);
       contactPointDesiredAcceleration.setAndMatchFrame(desiredLinearAcceleration);
 
-      GeometricJacobian jacobian = momentumBasedController.getJacobian(rootToFootJacobianId);
-      pointAccelerationCommand.set(jacobian, contactPointPosition, desiredLinearAcceleration);
+      pointAccelerationCommand.set(contactPointPosition, desiredLinearAcceleration);
 
       if (!USE_TOEOFF_TRAJECTORY)
          kneeJointCommand.setOneDoFJointDesiredAcceleration(kneeJoint, 0.0);

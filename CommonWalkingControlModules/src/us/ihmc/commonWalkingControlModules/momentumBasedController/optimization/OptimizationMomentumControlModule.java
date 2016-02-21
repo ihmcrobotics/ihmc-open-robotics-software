@@ -35,11 +35,8 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.optimization.EqualityConstraintEnforcer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -390,7 +387,7 @@ public class OptimizationMomentumControlModule
          setDesiredSpatialAcceleration((SpatialAccelerationCommand) inverseDynamicsCommand);
          return;
       case TASKSPACE_POINT_MOTION:
-         setDesiredPointAcceleration((PointAccelerationCommand) inverseDynamicsCommand);
+         primaryMotionConstraintHandler.submitPointAccelerationCommand((PointAccelerationCommand) inverseDynamicsCommand);
          return;
       case JOINTSPACE_MOTION:
          setDesiredJointAcceleration((JointspaceAccelerationCommand) inverseDynamicsCommand);
@@ -442,25 +439,6 @@ public class OptimizationMomentumControlModule
       else
       {
          primaryMotionConstraintHandler.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand); // weight is arbitrary,
-      }
-   }
-
-   private void setDesiredPointAcceleration(PointAccelerationCommand desiredPointAccelerationCommand)
-   {
-      GeometricJacobian rootToEndEffectorJacobian = desiredPointAccelerationCommand.getRootToEndEffectorJacobian();
-      FramePoint bodyFixedPoint = desiredPointAccelerationCommand.getContactPoint();
-      FrameVector desiredAccelerationWithRespectToBase = desiredPointAccelerationCommand.getDesiredAcceleration();
-      DenseMatrix64F selectionMatrix = desiredPointAccelerationCommand.getSelectionMatrix();
-
-      if (selectionMatrix != null)
-      {
-         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase,
-               selectionMatrix, Double.POSITIVE_INFINITY);
-      }
-      else
-      {
-         primaryMotionConstraintHandler.setDesiredPointAcceleration(rootToEndEffectorJacobian, bodyFixedPoint, desiredAccelerationWithRespectToBase,
-               Double.POSITIVE_INFINITY);
       }
    }
 

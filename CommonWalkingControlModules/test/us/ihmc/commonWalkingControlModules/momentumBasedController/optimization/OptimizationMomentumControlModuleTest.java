@@ -257,7 +257,9 @@ public class OptimizationMomentumControlModuleTest
       FramePoint bodyFixedPoint = new FramePoint(endEffector.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
       FrameVector desiredPointAcceleration = new FrameVector(base.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
 
-      PointAccelerationCommand desiredPointAccelerationCommand = new PointAccelerationCommand(jacobian, bodyFixedPoint, desiredPointAcceleration);
+      PointAccelerationCommand desiredPointAccelerationCommand = new PointAccelerationCommand(bodyFixedPoint, desiredPointAcceleration);
+      desiredPointAccelerationCommand.setBase(elevator);
+      desiredPointAccelerationCommand.setEndEffector(endEffector);
       momentumControlModule.setInverseDynamicsCommand(desiredPointAccelerationCommand);
 
       MomentumModuleSolution momentumModuleSolution;
