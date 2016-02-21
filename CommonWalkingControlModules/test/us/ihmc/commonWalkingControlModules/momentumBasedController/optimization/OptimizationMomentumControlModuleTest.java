@@ -524,7 +524,7 @@ public class OptimizationMomentumControlModuleTest
 
       MomentumModuleSolution momentumModuleSolution = momentumControlModule.compute();
 
-      GeometricJacobian jacobian = geometricJacobiandHolder.getJacobian(desiredSpatialAccelerationCommand.getJacobianId());
+      GeometricJacobian jacobian = geometricJacobiandHolder.getJacobian(desiredSpatialAccelerationCommand.getJacobianForNullspaceId());
       NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), nullity);
       DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();

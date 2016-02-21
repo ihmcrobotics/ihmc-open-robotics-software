@@ -171,7 +171,7 @@ public class FootControlHelper
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-      spatialAccelerationCommandToPack.setJacobianId(rootToFootJacobianId);
+      spatialAccelerationCommandToPack.setJacobianForNullspaceId(rootToFootJacobianId);
       spatialAccelerationCommandToPack.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
       spatialAccelerationCommandToPack.set(rootBody, contactableFoot.getRigidBody());
    }
