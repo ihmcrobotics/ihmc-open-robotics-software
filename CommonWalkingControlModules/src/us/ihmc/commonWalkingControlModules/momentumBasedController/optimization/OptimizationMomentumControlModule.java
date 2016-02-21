@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -100,6 +101,12 @@ public class OptimizationMomentumControlModule
    private final DenseMatrix64F dampedLeastSquaresFactorMatrix;
    private final DenseMatrix64F bOriginal = new DenseMatrix64F(Momentum.SIZE, 1);
    private final int nDoF;
+
+   public OptimizationMomentumControlModule(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings, YoVariableRegistry parentRegistry)
+   {
+      this(toolbox.getRobotRootJoint(), toolbox.getCenterOfMassFrame(), toolbox.getGravityZ(), momentumOptimizationSettings, toolbox.getTwistCalculator(),
+            toolbox.getGeometricJacobianHolder(), toolbox.getContactablePlaneBodies(), parentRegistry);
+   }
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double gravityZ, MomentumOptimizationSettings momentumOptimizationSettings,
          TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder, List<? extends ContactablePlaneBody> contactablePlaneBodies,

@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerW
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyInverseDynamicsControlCore;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
@@ -241,10 +242,10 @@ public class MomentumBasedControllerFactory
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
       walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
-      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
-      WholeBodyInverseDynamicsControlCore wholeBodyInverseDynamicsControlCore = new WholeBodyInverseDynamicsControlCore(fullRobotModel, twistCalculator,
-            gravityZ, centerOfMassFrame, momentumOptimizationSettings, geometricJacobianHolder, contactablePlaneBodies, yoGraphicsListRegistry, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, referenceFrames, controlDT, gravityZ, geometricJacobianHolder,
+            twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
+      WholeBodyInverseDynamicsControlCore wholeBodyInverseDynamicsControlCore = new WholeBodyInverseDynamicsControlCore(toolbox, momentumOptimizationSettings, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
