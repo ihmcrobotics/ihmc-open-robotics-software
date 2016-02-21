@@ -156,7 +156,7 @@ public class MotionConstraintHandler
          int nullity = nullspaceMultipliers.getNumRows();
          if (nullity > 0)
          {
-            long jacobianId = spatialAccelerationCommand.getJacobianId();
+            long jacobianId = spatialAccelerationCommand.getJacobianForNullspaceId();
             if (jacobianId == GeometricJacobianHolder.NULL_JACOBIAN_ID)
                throw new RuntimeException("Need to provide a valid jacobianId for doing singularity escape.");
 

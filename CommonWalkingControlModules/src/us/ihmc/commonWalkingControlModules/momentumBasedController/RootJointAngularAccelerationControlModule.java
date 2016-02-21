@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.OrientationTrajectoryData;
@@ -21,7 +19,6 @@ public class RootJointAngularAccelerationControlModule
 
    private final YoFrameVector controlledPelvisAngularAcceleration;
    private InverseDynamicsJoint rootJoint;
-   private final DenseMatrix64F rootJointNullspaceMultipliers = new DenseMatrix64F(0, 1);
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
@@ -62,8 +59,7 @@ public class RootJointAngularAccelerationControlModule
    public void doControl(OrientationTrajectoryData orientationTrajectoryData)
    {
       computeDesiredRootJointAngularAcceleration(orientationTrajectoryData, rootJointAngularAcceleration);
-      spatialAccelerationCommand.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration,
-            rootJointNullspaceMultipliers);
+      spatialAccelerationCommand.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration);
 
       rootJointAngularAcceleration.changeFrame(this.controlledPelvisAngularAcceleration.getReferenceFrame());
       this.controlledPelvisAngularAcceleration.set(rootJointAngularAcceleration);
