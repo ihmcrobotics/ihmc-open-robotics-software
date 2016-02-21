@@ -227,7 +227,7 @@ public class OnToesState extends AbstractFootControlState
       pointAccelerationCommand.set(contactPointPosition, desiredLinearAcceleration);
 
       if (!USE_TOEOFF_TRAJECTORY)
-         kneeJointCommand.setOneDoFJointDesiredAcceleration(kneeJoint, 0.0);
+         kneeJointCommand.setOneDoFJointDesiredAcceleration(0, 0.0);
 
       setupSingleContactPoint();
    }
