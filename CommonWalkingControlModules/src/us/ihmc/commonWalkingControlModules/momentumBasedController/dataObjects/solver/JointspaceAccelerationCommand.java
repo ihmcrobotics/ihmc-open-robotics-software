@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

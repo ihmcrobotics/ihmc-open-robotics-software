@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.MomentumModuleSolution;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class MomentumControlModuleException extends NoConvergenceException
