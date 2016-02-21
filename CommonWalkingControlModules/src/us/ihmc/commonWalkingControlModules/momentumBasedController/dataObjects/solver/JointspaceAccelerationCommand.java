@@ -56,7 +56,7 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
          unusedIntegers.add(jointToJointIndexMap.remove(joints.remove(joints.size() - 1)));
 
       desiredAccelerations.clear();
-      resetWeight();
+      removeWeight();
    }
 
    public void addJoint(OneDoFJoint joint, double desiredAcceleration)
@@ -118,10 +118,9 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
       setDesiredAcceleration(jointIndex, desiredAcceleration);
    }
 
-   public void resetWeight()
+   public void removeWeight()
    {
-      hasWeight = false;
-      weight = Double.POSITIVE_INFINITY;
+      setWeight(Double.POSITIVE_INFINITY);
    }
 
    public void setWeight(double weight)
