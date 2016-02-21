@@ -188,18 +188,13 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       return endEffector;
    }
 
-   public void setHasWeight(boolean hasWeight)
-   {
-      this.hasWeight = hasWeight;
-   }
-
    public void setWeight(double weight)
    {
       this.weight = weight;
       hasWeight = weight != Double.POSITIVE_INFINITY;
    }
 
-   private void removeWeight()
+   public void removeWeight()
    {
       setWeight(Double.POSITIVE_INFINITY);
    }
