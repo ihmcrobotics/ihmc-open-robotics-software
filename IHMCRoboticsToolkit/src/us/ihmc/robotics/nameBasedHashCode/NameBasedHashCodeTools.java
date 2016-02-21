@@ -47,7 +47,12 @@ public class NameBasedHashCodeTools
 
    public static long combineHashCodes(long hashCodeToUpdate, NameBasedHashCodeHolder holder)
    {
-      return PRIME * hashCodeToUpdate + (holder == null ? 0L : holder.nameBasedHashCode());
+      return PRIME * hashCodeToUpdate + (holder == null ? NULL_HASHCODE : holder.nameBasedHashCode());
+   }
+
+   public static long combineHashCodes(NameBasedHashCodeHolder holder1, NameBasedHashCodeHolder holder2)
+   {
+      return PRIME * (holder1 == null ? NULL_HASHCODE : holder1.nameBasedHashCode()) + (holder2 == null ? NULL_HASHCODE : holder2.nameBasedHashCode());
    }
 
    public static long combineHashCodes(String string, NameBasedHashCodeHolder holder)
