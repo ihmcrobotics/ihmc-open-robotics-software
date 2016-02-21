@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
@@ -57,6 +58,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
    private TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+   private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
 
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
@@ -150,6 +152,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          OneDoFJoint joint = oneDoFJoints[i];
          doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
          jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
+         jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
       }
 
       if (doPositionControl)
@@ -566,5 +569,11 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    {
       this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
       this.selectionMatrix.set(selectionMatrix);
+   }
+
+   @Override
+   public JointspaceFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return jointspaceFeedbackControlCommand;
    }
 }

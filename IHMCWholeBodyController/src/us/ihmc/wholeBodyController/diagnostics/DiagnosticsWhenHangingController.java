@@ -17,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -939,6 +941,18 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       {
          diagnosticsWhenHangingHelper.setAppliedTorque(appliedTorque);
       }
+   }
+
+   @Override
+   public void setControllerCoreOuput(ControllerCoreOuput controllerCoreOuput)
+   {
+      
+   }
+
+   @Override
+   public ControllerCoreCommandList getControllerCoreCommandList()
+   {
+      return null;
    }
 
    // private void tareFootSensors()

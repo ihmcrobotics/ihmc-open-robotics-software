@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -51,6 +52,8 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    public abstract void doSpecificAction();
 
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
+
+   public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
    @Override
    public void doAction()

@@ -11,6 +11,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
@@ -43,6 +47,10 @@ public class OnToesState extends AbstractFootControlState
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
    private final JointspaceAccelerationCommand kneeJointCommand = new JointspaceAccelerationCommand();
+
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+   private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
 
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
@@ -143,6 +151,11 @@ public class OnToesState extends AbstractFootControlState
       commandList.addCommand(spatialAccelerationCommand);
       commandList.addCommand(pointAccelerationCommand);
       commandList.addCommand(kneeJointCommand);
+
+      spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      pointFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
+      feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
    }
 
    @Override
@@ -356,5 +369,11 @@ public class OnToesState extends AbstractFootControlState
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return commandList;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return feedbackControlCommandList;
    }
 }

@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
@@ -28,6 +30,7 @@ public class ChestOrientationManager
 
    private final YoVariableRegistry registry;
    private final ChestOrientationControlModule chestOrientationControlModule;
+   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
@@ -68,6 +71,8 @@ public class ChestOrientationManager
       double controlDT = momentumBasedController.getControlDT();
       chestOrientationControlModule = new ChestOrientationControlModule(pelvisZUpFrame, elevator, chest, twistCalculator, controlDT, chestControlGains,
             registry);
+
+      orientationFeedbackControlCommand.set(elevator, chest);
 
       yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestFrame, registry);
 
@@ -267,5 +272,10 @@ public class ChestOrientationManager
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return chestOrientationControlModule.getSpatialAccelerationCommand();
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return orientationFeedbackControlCommand;
    }
 }

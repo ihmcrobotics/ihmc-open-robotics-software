@@ -5,6 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -37,6 +38,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
    private final RigidBody base;
 
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
@@ -69,6 +71,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       registry = new YoVariableRegistry(name);
 
       spatialAccelerationCommand.set(base, endEffector);
+      spatialFeedbackControlCommand.set(base, endEffector);
 
       this.base = base;
 
@@ -214,5 +217,11 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    public SpatialAccelerationCommand getInverseDynamicsCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   @Override
+   public SpatialFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return spatialFeedbackControlCommand;
    }
 }
