@@ -119,7 +119,7 @@ public class JointSpaceHandControlState extends HandControlState
             enablePositionControl();
             if (!setDesiredJointAccelerations.getBooleanValue())
                feedforwardAcceleration = 0.0;
-            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(joint, feedforwardAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, feedforwardAcceleration);
          }
          else
          {
@@ -135,7 +135,7 @@ public class JointSpaceHandControlState extends HandControlState
             rateLimitedAcceleration.update(desiredAcceleration);
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
-            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(joint, desiredAcceleration + feedforwardAcceleration);
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration + feedforwardAcceleration);
          }
       }
    }

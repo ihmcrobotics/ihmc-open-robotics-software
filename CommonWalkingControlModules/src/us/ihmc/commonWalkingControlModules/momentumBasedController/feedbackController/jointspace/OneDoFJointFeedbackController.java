@@ -131,7 +131,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qDDFeedbackRateLimited.update();
 
       qDDDesired.set(qDDFeedforward.getDoubleValue() + qDDFeedbackRateLimited.getDoubleValue());
-      output.setOneDoFJointDesiredAcceleration(joint, qDDDesired.getDoubleValue());
+      output.setOneDoFJointDesiredAcceleration(0, qDDDesired.getDoubleValue());
    }
 
    public OneDoFJoint getJoint()

@@ -300,7 +300,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
          rateLimitedDesiredAcceleration.setMaxRate(maxJerk);
          rateLimitedDesiredAcceleration.update(desiredAcceleration);
 
-         jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(joint, desiredAcceleration);
+         jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
       }
 
       return jointspaceAccelerationCommand;
