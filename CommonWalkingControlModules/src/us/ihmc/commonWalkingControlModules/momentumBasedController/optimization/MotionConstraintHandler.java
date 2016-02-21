@@ -14,6 +14,7 @@ import org.ejml.ops.SingularOps;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -67,8 +68,8 @@ public class MotionConstraintHandler
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
 
-   public MotionConstraintHandler(String name, InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator,
-         GeometricJacobianHolder geometricJacobianHolder, YoVariableRegistry parentRegistry)
+   public MotionConstraintHandler(String name, InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name + getClass().getSimpleName());
       removeNullspaceFromJ = new BooleanYoVariable(name + "RemoveNullspaceFromJ", registry);
@@ -323,9 +324,18 @@ public class MotionConstraintHandler
 
    private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
 
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
-         DenseMatrix64F selectionMatrix, double weight)
+   public void submitPointAccelerationCommand(PointAccelerationCommand command)
    {
+      RigidBody base = command.getBase();
+      RigidBody endEffector = command.getEndEffector();
+      long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, base.getBodyFixedFrame());
+      GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
+
+      FramePoint bodyFixedPoint = command.getContactPoint();
+      FrameVector desiredAccelerationWithRespectToBase = command.getDesiredAcceleration();
+      DenseMatrix64F selectionMatrix = command.getSelectionMatrix();
+      double weight = command.getWeight();
+
       pointJacobian.set(jacobian, bodyFixedPoint);
       pointJacobian.compute();
       desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
@@ -344,29 +354,6 @@ public class MotionConstraintHandler
       DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, selectionMatrix.getNumRows(), 1);
       MatrixTools.setDenseMatrixFromTuple3d(tempPPointMatrixVelocity, pPointVelocity.getVector(), 0, 0);
       CommonOps.mult(selectionMatrix, tempPPointMatrixVelocity, pBlock);
-
-      MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
-      weightBlock.setValue(weight);
-
-      motionConstraintIndex++;
-   }
-
-   public void setDesiredPointAcceleration(GeometricJacobian jacobian, FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase,
-         double weight)
-   {
-      pointJacobian.set(jacobian, bodyFixedPoint);
-      pointJacobian.compute();
-      desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
-
-      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
-      DenseMatrix64F jFullBlock = getMatrixFromList(jList, motionConstraintIndex, pointJacobianMatrix.getNumRows(), nDegreesOfFreedom);
-      compactBlockToFullBlock(jacobian.getJointsInOrder(), pointJacobianMatrix, jFullBlock);
-
-      pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
-      pPointVelocity.scale(-1.0);
-      pPointVelocity.add(desiredAccelerationWithRespectToBase);
-      DenseMatrix64F pBlock = getMatrixFromList(pList, motionConstraintIndex, pointJacobianMatrix.getNumRows(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(pBlock, pPointVelocity.getVector(), 0, 0);
 
       MutableDouble weightBlock = getMutableDoubleFromList(weightList, motionConstraintIndex);
       weightBlock.setValue(weight);
