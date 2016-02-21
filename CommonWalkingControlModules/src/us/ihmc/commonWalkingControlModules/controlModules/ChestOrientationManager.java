@@ -66,9 +66,8 @@ public class ChestOrientationManager
       chestFrame = chest.getBodyFixedFrame();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       double controlDT = momentumBasedController.getControlDT();
-      long jacobianId = momentumBasedController.getOrCreateGeometricJacobian(elevator, chest, chestFrame);
-      chestOrientationControlModule = new ChestOrientationControlModule(pelvisZUpFrame, elevator, chest, jacobianId, twistCalculator, controlDT,
-            chestControlGains, registry);
+      chestOrientationControlModule = new ChestOrientationControlModule(pelvisZUpFrame, elevator, chest, twistCalculator, controlDT, chestControlGains,
+            registry);
 
       yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestFrame, registry);
 

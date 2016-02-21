@@ -25,7 +25,6 @@ public class RootJointAngularAccelerationControlModule
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
-   private final long rootJacobianId;
    private final RigidBody rootPredecessor;
    private final RigidBody rootSuccessor;
 
@@ -41,9 +40,7 @@ public class RootJointAngularAccelerationControlModule
 
       rootPredecessor = rootJoint.getPredecessor();
       rootSuccessor = rootJoint.getSuccessor();
-      rootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootPredecessor, rootSuccessor, rootJoint.getFrameAfterJoint());
       spatialAccelerationCommand.set(rootPredecessor, rootSuccessor);
-      spatialAccelerationCommand.setJacobianId(rootJacobianId);
 
       registry = new YoVariableRegistry(getClass().getSimpleName());
       double controlDT = momentumBasedController.getControlDT();
