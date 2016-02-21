@@ -1,18 +1,15 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointAccelerationHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointTorqueHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -22,7 +19,7 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class WholeBodyInverseDynamicsControlCore
+public class WholeBodyInverseDynamicsSolver
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -37,7 +34,7 @@ public class WholeBodyInverseDynamicsControlCore
 
    private final InverseDynamicsJoint[] jointsToOptimizeFors;
 
-   public WholeBodyInverseDynamicsControlCore(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
+   public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
    {
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
@@ -126,5 +123,10 @@ public class WholeBodyInverseDynamicsControlCore
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
    {
       planeContactWrenchProcessor.getDesiredCenterOfPressure(contactablePlaneBody, desiredCoPToPack);
+   }
+
+   public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
+   {
+      return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
    }
 }

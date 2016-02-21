@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
@@ -135,5 +136,41 @@ public class VariousWalkingManagers
    public PelvisICPBasedTranslationManager getPelvisICPBasedTranslationManager()
    {
       return pelvisICPBasedTranslationManager;
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+
+      if (manipulationControlModule != null)
+      {
+         FeedbackControlCommandList template = manipulationControlModule.createFeedbackControlTemplate();
+         for(int i = 0; i < template.getNumberOfCommands(); i++)
+            ret.addCommand(template.getCommand(i));
+      }
+
+      if (feetManager != null)
+      {
+         FeedbackControlCommandList template = feetManager.createFeedbackControlTemplate();
+         for(int i = 0; i < template.getNumberOfCommands(); i++)
+            ret.addCommand(template.getCommand(i));
+      }
+
+      if (headOrientationManager != null)
+      {
+         ret.addCommand(headOrientationManager.getFeedbackControlCommand());
+      }
+
+      if(chestOrientationManager != null)
+      {
+         ret.addCommand(chestOrientationManager.getFeedbackControlCommand());
+      }
+
+      if (pelvisOrientationManager != null)
+      {
+         ret.addCommand(pelvisOrientationManager.getFeedbackControlCommand());
+      }
+
+      return ret;
    }
 }

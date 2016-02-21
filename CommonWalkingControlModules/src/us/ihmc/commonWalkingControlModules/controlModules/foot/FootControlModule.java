@@ -11,6 +11,8 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -413,5 +415,22 @@ public class FootControlModule
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return stateMachine.getCurrentState().getInverseDynamicsCommand();
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return stateMachine.getCurrentState().getFeedbackControlCommand();
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+      for (ConstraintType constraintType : ConstraintType.values())
+      {
+         AbstractFootControlState state = stateMachine.getState(constraintType);
+         if (state != null && state.getFeedbackControlCommand() != null)
+            ret.addCommand(state.getFeedbackControlCommand());
+      }
+      return ret;
    }
 }

@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -380,5 +382,22 @@ public class FeetManager
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).getInverseDynamicsCommand();
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getFeedbackControlCommand();
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FeedbackControlCommandList template = footControlModules.get(robotSide).createFeedbackControlTemplate();
+         for (int i = 0; i < template.getNumberOfCommands(); i++)
+            ret.addCommand(template.getCommand(i));
+      }
+      return ret;
    }
 }

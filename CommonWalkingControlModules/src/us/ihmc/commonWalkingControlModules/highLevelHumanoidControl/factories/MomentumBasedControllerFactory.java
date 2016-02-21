@@ -19,7 +19,9 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyInverseDynamicsControlCore;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
@@ -245,12 +247,14 @@ public class MomentumBasedControllerFactory
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, referenceFrames, controlDT, gravityZ, geometricJacobianHolder,
             twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
-      WholeBodyInverseDynamicsControlCore wholeBodyInverseDynamicsControlCore = new WholeBodyInverseDynamicsControlCore(toolbox, momentumOptimizationSettings, registry);
+      FeedbackControlCommandList template = variousWalkingManagers.createFeedbackControlTemplate();
+      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, momentumOptimizationSettings, template, registry);
+      ControllerCoreOuput controllerCoreOuput = controllerCore.getOutputForHighLevelController();
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
-      walkingBehavior = new WalkingHighLevelHumanoidController(wholeBodyInverseDynamicsControlCore, variousWalkingProviders, variousWalkingManagers,
+      walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
             centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters,
             instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
@@ -265,8 +269,8 @@ public class MomentumBasedControllerFactory
       // Setup the HighLevelHumanoidControllerManager /////////////////////////////////////////////
       // This is the "highest level" controller that enables switching between
       // the different controllers (walking, multi-contact, driving, etc.)
-      highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(initialBehavior, highLevelBehaviors, momentumBasedController,
-            variousWalkingProviders, centerOfPressureDataHolderForEstimator, dataProducer);
+      highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(controllerCore, initialBehavior, highLevelBehaviors, momentumBasedController,
+            variousWalkingProviders, centerOfPressureDataHolderForEstimator, controllerCoreOuput, dataProducer);
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);

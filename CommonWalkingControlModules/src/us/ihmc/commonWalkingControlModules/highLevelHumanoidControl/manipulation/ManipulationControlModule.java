@@ -13,6 +13,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
@@ -443,5 +445,22 @@ public class ManipulationControlModule
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
    {
       return handControlModules.get(robotSide).getInverseDynamicsCommand();
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
+   {
+      return handControlModules.get(robotSide).getFeedbackControlCommand();
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FeedbackControlCommandList template = handControlModules.get(robotSide).createFeedbackControlTemplate();
+         for (int i = 0; i < template.getNumberOfCommands(); i++)
+            ret.addCommand(template.getCommand(i));
+      }
+      return ret;
    }
 }

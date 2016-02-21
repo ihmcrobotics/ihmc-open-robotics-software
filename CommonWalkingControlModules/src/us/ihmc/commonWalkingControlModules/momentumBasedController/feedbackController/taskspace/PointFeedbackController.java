@@ -59,14 +59,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       this.endEffector = endEffector;
 
       String endEffectorName = endEffector.getName();
-      registry = new YoVariableRegistry(endEffectorName + "SpatialFBController");
+      registry = new YoVariableRegistry(endEffectorName + "PointFBController");
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
       double dt = toolbox.getControlDT();
       accelerationControlModule = new BodyFixedPointLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, dt, registry);
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isSpatialFBControllerEnabled", registry);
+      isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
       
       yoDesiredPosition = new YoFramePoint(endEffectorName + "DesiredPosition", worldFrame, registry);
@@ -78,7 +78,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoFeedForwardLinearAcceleration = new YoFrameVector(endEffectorName + "FeedForwardLinearAcceleration", worldFrame, registry);
       yoDesiredLinearAcceleration = new YoFrameVector(endEffectorName + "DesiredLinearAcceleration", worldFrame, registry);
 
-      weightForSolver = new DoubleYoVariable(endEffectorName + "SpatialWeight", registry);
+      weightForSolver = new DoubleYoVariable(endEffectorName + "PointWeight", registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
 
       parentRegistry.addChild(registry);

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -21,7 +22,6 @@ public class UserControlModeState extends HandControlState
    private final DoubleYoVariable timeSinceLastUserMesage;
    private final BooleanYoVariable abortUserControlMode;
    private final DoubleYoVariable yoTime;
-   private final MomentumBasedController momentumBasedController;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
    public UserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController,
@@ -46,7 +46,6 @@ public class UserControlModeState extends HandControlState
       timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
       abortUserControlMode = new BooleanYoVariable(namePrefix + "AbortUserControlMode", registry);
       yoTime = momentumBasedController.getYoTime();
-      this.momentumBasedController = momentumBasedController;
    }
 
    public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage message)
@@ -108,5 +107,11 @@ public class UserControlModeState extends HandControlState
    public JointspaceAccelerationCommand getInverseDynamicsCommand()
    {
       return jointspaceAccelerationCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return null;
    }
 }

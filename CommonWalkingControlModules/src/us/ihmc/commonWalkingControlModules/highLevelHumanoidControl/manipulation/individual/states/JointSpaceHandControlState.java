@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
@@ -27,6 +28,7 @@ public class JointSpaceHandControlState extends HandControlState
    private Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+   private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
 
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
 
@@ -35,7 +37,6 @@ public class JointSpaceHandControlState extends HandControlState
    private final BooleanYoVariable setDesiredJointAccelerations;
 
    private final YoVariableRegistry registry;
-   private final MomentumBasedController momentumBasedController;
    private final BooleanYoVariable initialized;
 
    private final boolean doPositionControl;
@@ -54,7 +55,7 @@ public class JointSpaceHandControlState extends HandControlState
       String name = namePrefix + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
 
-      this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
+      oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
       initialized = new BooleanYoVariable(name + "Initialized", registry);
       initialized.set(false);
 
@@ -86,8 +87,6 @@ public class JointSpaceHandControlState extends HandControlState
          rateLimitedAccelerations = null;
       }
 
-      this.momentumBasedController = momentumBasedController;
-
       doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
 
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -95,6 +94,7 @@ public class JointSpaceHandControlState extends HandControlState
          OneDoFJoint joint = oneDoFJoints[i];
          doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
          jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
+         jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
       }
 
       parentRegistry.addChild(registry);
@@ -196,6 +196,7 @@ public class JointSpaceHandControlState extends HandControlState
       }
    }
 
+   @Override
    public boolean isDone()
    {
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
@@ -216,5 +217,11 @@ public class JointSpaceHandControlState extends HandControlState
    public JointspaceAccelerationCommand getInverseDynamicsCommand()
    {
       return jointspaceAccelerationCommand;
+   }
+
+   @Override
+   public JointspaceFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return jointspaceFeedbackControlCommand;
    }
 }

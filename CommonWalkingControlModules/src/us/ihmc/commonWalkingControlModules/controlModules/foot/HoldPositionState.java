@@ -6,6 +6,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -25,6 +27,7 @@ public class HoldPositionState extends AbstractFootControlState
    private static final boolean CONTROL_WRT_PELVIS = false;
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
    private static final double EPSILON = 0.010;
 
@@ -65,6 +68,7 @@ public class HoldPositionState extends AbstractFootControlState
       doSmartHoldPosition = new BooleanYoVariable(namePrefix + "DoSmartHoldPosition", registry);
 
       doSmartHoldPosition.set(true);
+      spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
    }
 
    @Override
@@ -176,5 +180,11 @@ public class HoldPositionState extends AbstractFootControlState
    public SpatialAccelerationCommand getInverseDynamicsCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return spatialFeedbackControlCommand;
    }
 }

@@ -2,9 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import javax.vecmath.Quat4d;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
@@ -31,6 +33,7 @@ import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -73,6 +76,7 @@ public class PelvisOrientationManager
 
    private final OrientationTrajectoryData orientationTrajectoryData = new OrientationTrajectoryData();
    private final RootJointAngularAccelerationControlModule rootJointAngularAccelerationControlModule;
+   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
@@ -108,6 +112,11 @@ public class PelvisOrientationManager
       pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
       for (RobotSide robotSide : RobotSide.values)
          pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
+
+      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      orientationFeedbackControlCommand.set(elevator, pelvis);
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
       {
@@ -454,5 +463,10 @@ public class PelvisOrientationManager
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return rootJointAngularAccelerationControlModule.getInverseDynamicsCommand();
+   }
+
+   public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return orientationFeedbackControlCommand;
    }
 }

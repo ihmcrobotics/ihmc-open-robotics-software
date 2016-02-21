@@ -77,7 +77,7 @@ public class WholeBodyFeedbackController
    {
       RigidBody endEffector = commandExample.getEndEffector();
 
-      if (pointFeedbackControllerMap.containsKey(endEffector))
+      if (spatialFeedbackControllerMap.containsKey(endEffector))
          return;
 
       SpatialFeedbackController controller = new SpatialFeedbackController(endEffector, toolbox, registry);
@@ -120,6 +120,15 @@ public class WholeBodyFeedbackController
          OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, toolbox.getControlDT(), registry);
          oneDoFJointFeedbackControllerMap.put(joint, controller);
          allControllers.add(controller);
+      }
+   }
+
+   public void initialize()
+   {
+      for (int i = 0; i < allControllers.size(); i++)
+      {
+         FeedbackControllerInterface controller = allControllers.get(i);
+         controller.initialize();
       }
    }
 

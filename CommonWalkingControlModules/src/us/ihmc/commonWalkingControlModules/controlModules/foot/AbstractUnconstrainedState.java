@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -23,6 +25,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = false;
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
    protected boolean trajectoryWasReplanned;
 
@@ -59,6 +62,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
       else
          legJointLimitAvoidanceControlModule = null;
+
+      spatialFeedbackControlCommand.set(rootBody, foot);
    }
 
    /**
@@ -146,5 +151,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public SpatialAccelerationCommand getInverseDynamicsCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return spatialFeedbackControlCommand;
    }
 }

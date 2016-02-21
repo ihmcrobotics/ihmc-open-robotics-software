@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -38,6 +40,11 @@ public class DoNothingBehavior extends HighLevelBehavior
    }
 
    @Override
+   public void setControllerCoreOuput(ControllerCoreOuput controllerCoreOuput)
+   {
+   }
+
+   @Override
    public void doAction()
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
@@ -66,6 +73,13 @@ public class DoNothingBehavior extends HighLevelBehavior
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
+      return null;
+   }
+
+   @Override
+   public ControllerCoreCommandList getControllerCoreCommandList()
+   {
+      // Needs to be fixed.
       return null;
    }
 }

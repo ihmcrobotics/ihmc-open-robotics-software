@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
@@ -18,6 +21,7 @@ import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -46,6 +50,8 @@ public class HeadOrientationManager
 
    private final BooleanYoVariable hasBeenInitialized;
 
+   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
          YoOrientationPIDGainsInterface gains, HeadOrientationProvider desiredHeadOrientationProvider, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
          double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
@@ -54,7 +60,8 @@ public class HeadOrientationManager
 
       this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();
-      chestFrame = momentumBasedController.getFullRobotModel().getChest().getBodyFixedFrame();
+      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       this.headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, chestFrame, headOrientationControllerParameters, gains,
@@ -62,6 +69,10 @@ public class HeadOrientationManager
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       parentRegistry.addChild(registry);
+
+      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBody head = fullRobotModel.getHead();
+      orientationFeedbackControlCommand.set(elevator, head);
 
       if (desiredHeadOrientationProvider != null || headTrajectoryMessageSubscriber != null)
       {
@@ -223,5 +234,10 @@ public class HeadOrientationManager
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return headOrientationControlModule.getInverseDynamicsCommand();
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return orientationFeedbackControlCommand;
    }
 }
