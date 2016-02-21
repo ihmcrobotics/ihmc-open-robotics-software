@@ -167,9 +167,14 @@ public class RigidBodySpatialAccelerationControlModule
       se3pdController.setOrientationMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void getEndeffectorVelocity(FrameVector vectorToPack)
+   public void getEndEffectorCurrentLinearVelocity(FrameVector endEffectorLinearVelocityToPack)
    {
-      currentTwist.getBodyOriginLinearPartInBaseFrame(vectorToPack);
+      currentTwist.getBodyOriginLinearPartInBaseFrame(endEffectorLinearVelocityToPack);
+   }
+
+   public void getEndEffectorCurrentAngularVelocity(FrameVector endEffectorAngularVelocityToPack)
+   {
+      currentTwist.getAngularVelocityInBaseFrame(endEffectorAngularVelocityToPack);
    }
 
    public ReferenceFrame getTrackingFrame()
