@@ -1,15 +1,15 @@
 package us.ihmc.wholeBodyController.concurrent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point2d;
 
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.humanoidRobotics.model.IntermediateDesiredJointDataHolder;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -21,8 +21,8 @@ public class ControllerDataForEstimatorHolder
    private final Map<String, Point2d> centerOfPressure = new HashMap<String, Point2d>();
    private AtomicReference<RobotMotionStatus> robotMotionStatus = new AtomicReference<RobotMotionStatus>(null);
 
-   private final Set<RigidBody> controllerFeet;
-   private final Set<RigidBody> estimatorFeet;
+   private final List<RigidBody> controllerFeet;
+   private final List<RigidBody> estimatorFeet;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
 
@@ -36,8 +36,8 @@ public class ControllerDataForEstimatorHolder
          RobotMotionStatusHolder controllerRobotMotionStatusHolder, DesiredJointDataHolder estimatorJointDataHolder,
          DesiredJointDataHolder controllerJointDataHolder)
    {      
-      this.controllerFeet = controllerCenterOfPressureDataHolder.getRigidBodies();
-      this.estimatorFeet = estimatorCenterOfPressureDataHolder.getRigidBodies();
+      this.controllerFeet = new ArrayList<>(controllerCenterOfPressureDataHolder.getRigidBodies());
+      this.estimatorFeet = new ArrayList<>(estimatorCenterOfPressureDataHolder.getRigidBodies());
 
       this.estimatorCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
       this.controllerCenterOfPressureDataHolder = controllerCenterOfPressureDataHolder;
@@ -47,16 +47,18 @@ public class ControllerDataForEstimatorHolder
 
       this.intermediateDesiredJointDataHolder = new IntermediateDesiredJointDataHolder(estimatorJointDataHolder, controllerJointDataHolder);
       
-      for (RigidBody foot : controllerFeet)
+      for (int i = 0; i < controllerFeet.size(); i++)
       {
+         RigidBody foot = controllerFeet.get(i);
          centerOfPressure.put(foot.getName(), new Point2d());
       }
    }
 
    public void readControllerDataIntoEstimator()
    {
-      for (RigidBody foot : estimatorFeet)
+      for (int i = 0; i < estimatorFeet.size(); i++)
       {
+         RigidBody foot = estimatorFeet.get(i);
          estimatorCenterOfPressureDataHolder.setCenterOfPressure(centerOfPressure.get(foot.getName()), foot);
       }
 
@@ -68,8 +70,9 @@ public class ControllerDataForEstimatorHolder
 
    public void writeControllerDataFromController()
    {
-      for (RigidBody foot : controllerFeet)
+      for (int i = 0; i < controllerFeet.size(); i++)
       {
+         RigidBody foot = controllerFeet.get(i);
          controllerCenterOfPressureDataHolder.getCenterOfPressureByName(centerOfPressure.get(foot.getName()), foot);
       }
 
