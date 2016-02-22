@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -193,7 +195,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrupedSupportPolygon currentSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
-   private final ConvexPolygon2d supportPolygonHolder = new ConvexPolygon2d();
+   private final List<FramePoint> tempSupportPolygonFramePointHolder = new ArrayList<FramePoint>(4);
 
    private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators = new QuadrantDependentList<>();
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
@@ -1056,13 +1058,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
-      supportPolygonHolder.clear();
+      tempSupportPolygonFramePointHolder.clear();
       for(RobotQuadrant quadrant : supportPolygon.getSupportingQuadrantsInOrder())
       {
-         supportPolygonHolder.addVertex(supportPolygon.getFootstep(quadrant).getX(), supportPolygon.getFootstep(quadrant).getY());
+         tempSupportPolygonFramePointHolder.add(supportPolygon.getFootstep(quadrant));
       }
-      supportPolygonHolder.update();
-      yoFramePolygon.setConvexPolygon2d(supportPolygonHolder);
+      
+      yoFramePolygon.setConvexPolygon2d(tempSupportPolygonFramePointHolder);
    }
    
    /**
@@ -1662,7 +1664,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       private void updateAndDrawCommonTriangle(QuadrupedSupportPolygon firstTripleSupportPolygon, QuadrupedSupportPolygon secondTripleSupportPolygon, RobotQuadrant firstSwingLeg, RobotQuadrant secondSwingLeg, double shrunkenPolygonOffset)
       {
          if (firstTripleSupportPolygon.getFirstNonSupportingQuadrant().getSameSideQuadrant() != secondTripleSupportPolygon.getFirstNonSupportingQuadrant())
+         {
             return;
+         }
          
          QuadrupedSupportPolygon commonPolygon = new QuadrupedSupportPolygon();
          firstTripleSupportPolygon.getShrunkenCommonTriangle2d(secondTripleSupportPolygon, commonPolygon, firstSwingLeg, shrunkenPolygonOffset, shrunkenPolygonOffset, shrunkenPolygonOffset);
