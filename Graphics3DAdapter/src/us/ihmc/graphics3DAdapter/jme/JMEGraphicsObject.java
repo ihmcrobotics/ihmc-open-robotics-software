@@ -10,7 +10,16 @@ import java.util.concurrent.Callable;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.jmonkeyengine.hub.tralala.ShapeUtilities;
+import com.jme3.app.Application;
+import com.jme3.asset.AssetManager;
+import com.jme3.material.Material;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 import jme3tools.optimize.GeometryBatchFactory;
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -33,18 +42,8 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScal
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.graphics3DAdapter.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
+import us.ihmc.graphics3DAdapter.tralala.ShapeUtilities;
 import us.ihmc.robotics.geometry.RotationTools;
-
-import com.jme3.app.Application;
-import com.jme3.asset.AssetManager;
-import com.jme3.material.Material;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.Bucket;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
 public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 {

@@ -53,6 +53,12 @@ repositories {
     mavenCentral()
 }
 
+repositories {
+   maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty"
+   }
+}
+
 task publishAllToMavenLocal(type: GradleBuild) {
     buildFile "build.gradle"
     def allTasks = new ArrayList<String>()

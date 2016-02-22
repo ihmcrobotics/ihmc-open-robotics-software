@@ -115,7 +115,7 @@ public class SteppingStonesCaptureRegionIntersectionCalculator
             }
             else
             {
-               intersectionPolygonsViz.get(i).setConvexPolygon2d(null);
+               intersectionPolygonsViz.get(i).clearAndHide();
 
                // intersectionPolygonsViz.get(i).setConvexPolygon2d(captureRegionPolygon);
             }
