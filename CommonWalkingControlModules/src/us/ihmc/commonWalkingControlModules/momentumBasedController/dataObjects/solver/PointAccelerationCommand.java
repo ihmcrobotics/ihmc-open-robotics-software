@@ -18,6 +18,9 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
    private RigidBody base;
    private RigidBody endEffector;
 
+   private String baseName;
+   private String endEffectorName;
+
    public PointAccelerationCommand()
    {
       super(InverseDynamicsCommandType.TASKSPACE_POINT_MOTION);
@@ -37,11 +40,13 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
    public void setBase(RigidBody base)
    {
       this.base = base;
+      baseName = base.getName();
    }
 
    public void setEndEffector(RigidBody endEffector)
    {
       this.endEffector = endEffector;
+      endEffectorName = endEffector.getName();
    }
 
    public void set(FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
@@ -56,6 +61,12 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
       desiredAcceleration.setIncludingFrame(other.desiredAcceleration);
       selectionMatrix.set(selectionMatrix);
       setWeight(other.weight);
+
+      base = other.base;
+      endEffector = other.endEffector;
+
+      baseName = other.baseName;
+      endEffectorName = other.endEffectorName;
    }
 
    public void set(FramePoint bodyFixedPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
@@ -101,9 +112,19 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
       return base;
    }
 
+   public String getBaseName()
+   {
+      return baseName;
+   }
+
    public RigidBody getEndEffector()
    {
       return endEffector;
+   }
+
+   public String getEndEffectorName()
+   {
+      return endEffectorName;
    }
 
    public FramePoint getContactPoint()

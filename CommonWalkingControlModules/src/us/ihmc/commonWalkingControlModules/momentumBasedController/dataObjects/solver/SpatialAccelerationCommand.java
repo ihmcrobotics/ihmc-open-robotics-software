@@ -18,8 +18,12 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(SpatialAccelerationVector.SIZE);
+
    private RigidBody base;
    private RigidBody endEffector;
+
+   private String baseName;
+   private String endEffectorName;
 
    public SpatialAccelerationCommand()
    {
@@ -35,8 +39,20 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
 
    public void set(RigidBody base, RigidBody endEffector)
    {
+      setBase(base);
+      setEndEffector(endEffector);
+   }
+
+   public void setBase(RigidBody base)
+   {
       this.base = base;
+      baseName = base.getName();
+   }
+
+   public void setEndEffector(RigidBody endEffector)
+   {
       this.endEffector = endEffector;
+      endEffectorName = endEffector.getName();
    }
 
    public void setJacobianForNullspaceId(long jacobianId)
@@ -104,6 +120,8 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       selectionMatrix.set(other.getSelectionMatrix());
       base = other.getBase();
       endEffector = other.getEndEffector();
+      baseName = other.baseName;
+      endEffectorName = other.endEffectorName;
    }
 
    public void resetNullspaceMultipliers()
@@ -167,9 +185,19 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       return base;
    }
 
+   public String getBaseName()
+   {
+      return baseName;
+   }
+
    public RigidBody getEndEffector()
    {
       return endEffector;
+   }
+
+   public String getEndEffectorName()
+   {
+      return endEffectorName;
    }
 
    public void setWeight(double weight)

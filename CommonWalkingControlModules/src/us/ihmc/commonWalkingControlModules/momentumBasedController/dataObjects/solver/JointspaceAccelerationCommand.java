@@ -16,6 +16,7 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
    private double weight;
 
    private final int initialCapacity = 15;
+   private final List<String> jointNames = new ArrayList<>(initialCapacity);
    private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
    private final DenseMatrixArrayList desiredAccelerations = new DenseMatrixArrayList(initialCapacity);
 
@@ -39,6 +40,8 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
 
    public void clear()
    {
+      joints.clear();
+      jointNames.clear();
       desiredAccelerations.clear();
       removeWeight();
    }
@@ -46,6 +49,7 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
    public void addJoint(OneDoFJoint joint, double desiredAcceleration)
    {
       joints.add(joint);
+      jointNames.add(joint.getName());
       DenseMatrix64F jointDesiredAcceleration = desiredAccelerations.add();
       jointDesiredAcceleration.reshape(1, 1);
       jointDesiredAcceleration.set(0, 0, desiredAcceleration);
@@ -55,6 +59,7 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
    {
       checkConsistency(joint, desiredAcceleration);
       joints.add(joint);
+      jointNames.add(joint.getName());
       desiredAccelerations.add().set(desiredAcceleration);
    }
 
@@ -85,9 +90,12 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
    @Override
    public void set(JointspaceAccelerationCommand other)
    {
-      joints.clear();
+      clear();
       for (int i = 0; i < other.getNumberOfJoints(); i++)
+      {
          joints.add(other.joints.get(i));
+         jointNames.add(other.jointNames.get(i));
+      }
       desiredAccelerations.set(other.desiredAccelerations);
       hasWeight = other.hasWeight;
       weight = other.weight;
@@ -121,6 +129,11 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
    public InverseDynamicsJoint getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
+   }
+
+   public String getJointName(int jointIndex)
+   {
+      return jointNames.get(jointIndex);
    }
 
    public DenseMatrix64F getDesiredAcceleration(int jointIndex)

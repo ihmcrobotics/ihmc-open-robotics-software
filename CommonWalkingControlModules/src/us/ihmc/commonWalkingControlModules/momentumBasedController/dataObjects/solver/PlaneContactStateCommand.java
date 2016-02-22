@@ -14,6 +14,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContactStateCommand>
 {
    private RigidBody rigidBody;
+   private String rigidBodyName;
    private long id = -1L;
    private double coefficientOfFriction = Double.NaN;
    private double wRhoSmoother = 0.0;
@@ -34,6 +35,7 @@ public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContac
    public void setContactingRigidBody(RigidBody rigidBody)
    {
       this.rigidBody = rigidBody;
+      rigidBodyName = rigidBody.getName();
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -103,6 +105,11 @@ public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContac
       return rigidBody;
    }
 
+   public String getContactingRigidBodyName()
+   {
+      return rigidBodyName;
+   }
+
    public void getContactPoint(int index, FramePoint contactPointToPack)
    {
       contactPointToPack.setIncludingFrame(contactPoints.get(index));
@@ -122,6 +129,7 @@ public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContac
    public void set(PlaneContactStateCommand other)
    {
       rigidBody = other.rigidBody;
+      rigidBodyName = other.rigidBodyName;
       coefficientOfFriction = other.coefficientOfFriction;
       contactPoints.copyFromListAndTrimSize(other.contactPoints);
       contactNormal.setIncludingFrame(other.contactNormal);

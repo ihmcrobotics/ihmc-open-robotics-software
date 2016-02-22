@@ -6,6 +6,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrenchCommand>
 {
    private RigidBody rigidBody;
+   private String rigidBodyName;
    private final Wrench externalWrenchAppliedOnRigidBody = new Wrench();
 
    public ExternalWrenchCommand()
@@ -16,6 +17,7 @@ public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrench
    public void set(RigidBody rigidBody, Wrench externalWrench)
    {
       this.rigidBody = rigidBody;
+      rigidBodyName = rigidBody.getName();
       externalWrenchAppliedOnRigidBody.set(externalWrench);
       externalWrenchAppliedOnRigidBody.changeFrame(rigidBody.getBodyFixedFrame());
    }
@@ -23,6 +25,11 @@ public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrench
    public RigidBody getRigidBody()
    {
       return rigidBody;
+   }
+
+   public String getRigidBodyName()
+   {
+      return rigidBodyName;
    }
 
    public Wrench getExternalWrench()
@@ -34,6 +41,7 @@ public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrench
    public void set(ExternalWrenchCommand other)
    {
       rigidBody = other.rigidBody;
+      rigidBodyName = other.rigidBodyName;
       externalWrenchAppliedOnRigidBody.set(other.externalWrenchAppliedOnRigidBody);
    }
 }
