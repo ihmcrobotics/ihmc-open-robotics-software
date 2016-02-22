@@ -173,6 +173,11 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
       return taskspaceWaypoints[getNumberOfWaypoints() - 1];
    }
 
+   public double getTrajectoryTime()
+   {
+      return getLastWaypoint().time;
+   }
+
    private void rangeCheck(int waypointIndex)
    {
       if (waypointIndex >= getNumberOfWaypoints() || waypointIndex < 0)

@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
+import java.util.Random;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -12,6 +14,7 @@ import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified waypoints."
@@ -106,6 +109,16 @@ public class FootTrajectoryMessage extends IHMCRosApiMessage<FootTrajectoryMessa
       return taskspaceWaypoints;
    }
 
+   public SE3WaypointMessage getLastWaypoint()
+   {
+      return taskspaceWaypoints[getNumberOfWaypoints() - 1];
+   }
+
+   public double getTrajectoryTime()
+   {
+      return getLastWaypoint().time;
+   }
+
    private void rangeCheck(int waypointIndex)
    {
       if (waypointIndex >= getNumberOfWaypoints() || waypointIndex < 0)
@@ -138,6 +151,23 @@ public class FootTrajectoryMessage extends IHMCRosApiMessage<FootTrajectoryMessa
          transformedFootTrajectoryMessage.taskspaceWaypoints[i] = taskspaceWaypoints[i].transform(transform);
 
       return transformedFootTrajectoryMessage;
+   }
+
+   public FootTrajectoryMessage(Random random)
+   {
+      this(RobotSide.generateRandomRobotSide(random), random.nextInt(10));
+
+      double time = 0.0;
+
+      for (int i = 0; i < getNumberOfWaypoints(); i++)
+      {
+         time += RandomTools.generateRandomDouble(random, 0.1, 5.0);
+         Point3d position = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Quat4d orientation = RandomTools.generateRandomQuaternion(random);
+         Vector3d linearVelocity = RandomTools.generateRandomVector(random);
+         Vector3d angularVelocity = RandomTools.generateRandomVector(random);
+         setWaypoint(i, time, position, orientation, linearVelocity, angularVelocity);
+      }
    }
 
    @Override

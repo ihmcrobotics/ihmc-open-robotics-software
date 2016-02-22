@@ -130,7 +130,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBea
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -262,9 +261,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Handstep
       registerPacketClass(HandstepPacket.class);
-
-      //Foot pose (similar to hand pose)
-      registerPacketClass(FootPosePacket.class);
 
       //Vehicle
       registerPacketClass(VehiclePosePacket.class);

@@ -21,7 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -310,7 +310,7 @@ public abstract class DRCPushRecoveryTest
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
       footPose.getPose(desiredFootPosition, desiredFootOrientation);
-      FootPosePacket footPosePacket = new FootPosePacket(footSide, desiredFootPosition, desiredFootOrientation, 0.6);
+      FootTrajectoryMessage footPosePacket = new FootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
       drcSimulationTestHelper.send(footPosePacket);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 

@@ -20,7 +20,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -116,44 +115,6 @@ public abstract class PacketValidityChecker
       }
 
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      return null;
-   }
-
-   /**
-    * Checks the validity of a {@link FootPosePacket}.
-    * @param packetToCheck
-    * @return null if the packet is valid, or the error message.
-    */
-   public static String validateFootPosePacket(FootPosePacket packetToCheck)
-   {
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getPosition());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "position field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
       if (packetFieldErrorType != null)
       {
          String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();

@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
@@ -24,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProduce
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class VariousWalkingProviders
 {
@@ -52,7 +50,6 @@ public class VariousWalkingProviders
    private final PelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final ChestOrientationProvider desiredChestOrientationProvider;
-   private final FootPoseProvider footPoseProvider;
 
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final ControlStatusProducer controlStatusProducer;
@@ -71,9 +68,8 @@ public class VariousWalkingProviders
          FootstepProvider footstepProvider, HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          PelvisPoseProvider desiredPelvisPoseProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
          AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, ChestOrientationProvider desiredChestOrientationProvider,
-         FootPoseProvider footPoseProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
-         AbortWalkingProvider abortProvider)
+         DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
+         HandPoseStatusProducer handPoseStatusProducer, AbortWalkingProvider abortProvider)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
       this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
@@ -93,7 +89,6 @@ public class VariousWalkingProviders
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.desiredChestOrientationProvider = desiredChestOrientationProvider;
       this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
-      this.footPoseProvider = footPoseProvider;
 
       this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
 
@@ -125,14 +120,6 @@ public class VariousWalkingProviders
       if (desiredChestOrientationProvider != null)
       {
          desiredChestOrientationProvider.getDesiredChestOrientation();
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (footPoseProvider != null)
-         {
-            footPoseProvider.getDesiredFootPose(robotSide);
-         }
       }
 
       if (handTrajectoryMessageSubscriber != null)
@@ -240,11 +227,6 @@ public class VariousWalkingProviders
    public ChestOrientationProvider getDesiredChestOrientationProvider()
    {
       return desiredChestOrientationProvider;
-   }
-
-   public FootPoseProvider getDesiredFootPoseProvider()
-   {
-      return footPoseProvider;
    }
 
    public ControlStatusProducer getControlStatusProducer()

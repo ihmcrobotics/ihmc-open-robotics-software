@@ -18,7 +18,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -114,16 +113,6 @@ public class FeetManager
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
       footControlModule.setFootstep(footstep);
       setContactStateForSwing(upcomingSwingSide);
-   }
-
-   public void requestMoveStraight(RobotSide robotSide, FramePose footPose, double trajectoryTime)
-   {
-      FootControlModule footControlModule = footControlModules.get(robotSide);
-      footControlModule.setFootPose(footPose, trajectoryTime);
-      if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_STRAIGHT)
-         footControlModule.resetCurrentState();
-      else
-         setContactStateForMoveStraight(robotSide);
    }
 
    public void handleFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
@@ -287,13 +276,6 @@ public class FeetManager
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);
-   }
-
-   private void setContactStateForMoveStraight(RobotSide robotSide)
-   {
-      FootControlModule footControlModule = footControlModules.get(robotSide);
-      footControlModule.doSingularityEscapeBeforeTransitionToNextState();
-      footControlModule.setContactState(ConstraintType.MOVE_STRAIGHT);
    }
 
    private void setContactStateForMoveViaWaypoints(RobotSide robotSide)

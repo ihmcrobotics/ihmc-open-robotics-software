@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
@@ -26,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredChestOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -74,8 +72,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(),
             trajectoryTimeHeadOrientation, registry);
 
-      FootPoseProvider footPoseProvider = new UserDesiredFootPoseProvider(fullRobotModel, walkingControllerParameters.getDefaultSwingTime(), registry);
-
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
@@ -91,8 +87,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
             pelvisHeightTrajectoryMessageSubscriber, footstepPovider, headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider,
-            handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, highLevelStateProvider,
-            controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
+            handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, highLevelStateProvider, controlStatusProducer,
+            capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }

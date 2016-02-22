@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulation
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
@@ -67,7 +66,6 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
       DesiredComHeightProvider comHeightProvider = null;
       PelvisPoseProvider pelvisPoseProvider = null;
       ChestOrientationProvider chestOrientationProvider = null;
-      DesiredFootPoseProvider footPoseProvider = null;
 
       ControlStatusProducer controlStatusProducer = null;
 
@@ -84,8 +82,8 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
             pelvisHeightTrajectoryMessageSubscriber, footstepProvider, headOrientationProvider, comHeightProvider, pelvisPoseProvider,
-            handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, highLevelStateProvider,
-            controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
+            handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, highLevelStateProvider, controlStatusProducer,
+            capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }
