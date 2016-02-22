@@ -8,14 +8,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
 @ClassDocumentation("This message commands the controller to start loading an end effector that was unloaded to support the robot weight. "
-      + "The only application at the moment is making a foot loadbearing."
-      + "When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
+      + " One application is making a foot loadbearing."
+      + " When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
 public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffectorLoadBearingMessage>
 {
    public enum EndEffector implements DocumentedEnum<EndEffector>
    {
-      FOOT;
+      FOOT, HAND;
 
       public static final EndEffector[] values = values();
 
@@ -24,6 +24,8 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
          switch (this)
          {
          case FOOT:
+            return true;
+         case HAND:
             return true;
          default:
             throw new RuntimeException("Should not get there.");
@@ -41,6 +43,10 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
                   + " Then the robot is ready to walk."
                   + " It is preferable to request a foot to switch to load bearing when it is aready close to the ground.";
 
+         case HAND:
+            return "In this case, the user also needs to provide the robotSide."
+                  + " It is preferable to request a hand to switch to load bearing when it is aready close to the ground.";
+
          default:
             return "No documentation available.";
          }
@@ -53,12 +59,40 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
       }
    }
 
+   public enum LoadBearingRequest implements DocumentedEnum<LoadBearingRequest>
+   {
+      LOAD, UNLOAD;
+
+      public static final LoadBearingRequest[] values = values();
+
+      @Override
+      public String getDocumentation(LoadBearingRequest var)
+      {
+         switch (var)
+         {
+         case LOAD:
+            return "Request to load the given end-effector.";
+         case UNLOAD:
+            return "Request to unload the given end-effector.";
+         default:
+            return "No documentation available.";
+         }
+      }
+
+      @Override
+      public LoadBearingRequest[] getDocumentedValues()
+      {
+         return values();
+      }
+   }
+
    @FieldDocumentation("At the moment, since only the feet can be requested to switch to loadbearing, the robotSide has to be provided."
          + " It refers to which of the two feet should switch to loadbearing.")
    public RobotSide robotSide;
-   @FieldDocumentation("At the moment, only the feet can be requested to switch to loadbearing so this needs to be equal to EndEffector.FOOT."
-         + " When the option for another end-effector will be available, the corresponding enum value for that end-effector will be added.")
+   @FieldDocumentation("Spcifies which end-effector should be loaded/unloaded.")
    public EndEffector endEffector;
+   @FieldDocumentation("Wether the end-effector should be loaded or unloaded.")
+   public LoadBearingRequest request;
 
    /**
     * Empty constructor for serialization.
@@ -75,11 +109,12 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
     * @param robotSide refers to the side of the end-effector if necessary.
     * @param endEffector refers to the end-effector that will switch to load bearing.
     */
-   public EndEffectorLoadBearingMessage(RobotSide robotSide, EndEffector endEffector)
+   public EndEffectorLoadBearingMessage(RobotSide robotSide, EndEffector endEffector, LoadBearingRequest request)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.endEffector = endEffector;
+      this.request = request;
    }
 
    public RobotSide getRobotSide()
@@ -90,6 +125,11 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
    public EndEffector getEndEffector()
    {
       return endEffector;
+   }
+
+   public LoadBearingRequest getRequest()
+   {
+      return request;
    }
 
    @Override

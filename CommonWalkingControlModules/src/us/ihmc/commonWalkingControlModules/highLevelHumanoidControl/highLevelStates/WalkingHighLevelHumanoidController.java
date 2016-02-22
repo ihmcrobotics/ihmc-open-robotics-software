@@ -50,6 +50,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
@@ -1596,7 +1597,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (!hasNewFootLoadBearingRequest)
          {
             hasNewFootLoadBearingRequest = endEffectorLoadBearingMessageSubscriber != null
-                  && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide);
+                  && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide) == LoadBearingRequest.LOAD;
          }
 
          if (isInFlamingoStance.getBooleanValue() && hasNewFootLoadBearingRequest)
