@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehaviorTest.class,
-   us.ihmc.humanoidBehaviors.behaviors.primitives.HandStateBehaviorTest.class,
    us.ihmc.humanoidBehaviors.behaviors.primitives.ThighStateBehaviorTest.class
 })
 
