@@ -49,26 +49,21 @@ public class FourBarKinematicLoop
       masterJointQ = new DoubleYoVariable(name + "MasterJointQ", registry);
       masterJointQ.set(masterJoint.getQ());
 
-      // Link lengths
-      joint1Position.setToZero(passiveJoint1.getFrameBeforeJoint());
-      joint1Position.changeFrame(masterJoint.getFrameAfterJoint());
-      masterL = Math.sqrt(Math.pow(joint1Position.getX(), 2) + Math.pow(joint1Position.getY(), 2) + Math.pow(joint1Position.getZ(), 2));
-      
-      joint2Position.setToZero(passiveJoint2.getFrameBeforeJoint());
-      joint2Position.changeFrame(passiveJoint1.getFrameAfterJoint());
-      L1 = Math.sqrt(Math.pow(joint2Position.getX(), 2) + Math.pow(joint2Position.getY(), 2) + Math.pow(joint2Position.getZ(), 2));
-      
-      joint3Position.setToZero(passiveJoint3.getFrameBeforeJoint());
-      joint3Position.changeFrame(passiveJoint2.getFrameAfterJoint());
-      L2 = Math.sqrt(Math.pow(joint3Position.getX(), 2) + Math.pow(joint3Position.getY(), 2) + Math.pow(joint3Position.getZ(), 2));
-      
-      masterJointPosition.setToZero(masterJoint.getFrameBeforeJoint());
-      masterJointPosition.changeFrame(passiveJoint3.getFrameAfterJoint());
-      L3 = Math.sqrt(Math.pow(masterJointPosition.getX(), 2) + Math.pow(masterJointPosition.getY(), 2) + Math.pow(masterJointPosition.getZ(), 2));
+      // Link lengths     
+      masterL = getLinkLength(masterJoint, passiveJoint1, joint1Position);     
+      L1 = getLinkLength(passiveJoint1, passiveJoint2, joint2Position);
+      L2 = getLinkLength(passiveJoint2, passiveJoint3, joint3Position);
+      L3 = getLinkLength(passiveJoint3, masterJoint, masterJointPosition);
            
       // Close the loop
       fourBarCalculator = new FourBarCalculatorFromFastRunner(masterL, L1, L2, L3);
       fourBarCalculator.solveForAngleDAB(masterJointQ.getDoubleValue());
    }
-
+   
+   public double getLinkLength(RevoluteJoint joint1, RevoluteJoint joint2, FramePoint positionJoint2) 
+   {
+      positionJoint2.setToZero(joint2.getFrameBeforeJoint());
+      positionJoint2.changeFrame(joint1.getFrameAfterJoint());
+      return Math.sqrt(Math.pow(positionJoint2.getX(), 2) + Math.pow(positionJoint2.getY(), 2) + Math.pow(positionJoint2.getZ(), 2));
+   }
 }
