@@ -72,7 +72,7 @@ public class QuadrupedPathPreview
 
       for (int i = 0; i < tripleSupportPolygons.length; i++)
       {
-         String polygonName = "trippleSupport" + i;
+         String polygonName = "tripleSupport" + i;
          YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
          tripleSupportPolygons[i] = yoFrameConvexPolygon2d;
 

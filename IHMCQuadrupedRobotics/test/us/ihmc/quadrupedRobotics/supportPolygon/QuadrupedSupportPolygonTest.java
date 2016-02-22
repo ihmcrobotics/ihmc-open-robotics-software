@@ -1,11 +1,8 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.testing.TestPlanTarget.Fast;
+import static org.junit.Assert.*;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrantNameFromOrdinal;
+import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 import java.util.Random;
 
@@ -778,6 +775,20 @@ public class QuadrupedSupportPolygonTest
    
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
+   public void testDistanceFromP1ToTrotLine()
+   {
+      QuadrupedSupportPolygon poly = createDiamondPolygon();
+      FramePoint flFoot = poly.getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint hrFoot = poly.getFootstep(RobotQuadrant.HIND_RIGHT);
+      double distance = poly.getDistanceFromP1ToTrotLine(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      assertEquals("not 0.5", 0.5, distance, 1e-7);
+      flFoot.add(0.25, 0.0, 0.0);
+      distance = poly.getDistanceFromP1ToTrotLine(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      assertEquals("not 0.25", 0.25, distance, 1e-7);
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetBounds()
    {
       QuadrupedSupportPolygon poly = createSimplePolygon();
@@ -1249,6 +1260,24 @@ public class QuadrupedSupportPolygonTest
       footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 1.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(1.0, 1.0, 0.0));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createDiamondPolygon()
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.5, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.5, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(0.5, 1.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 0.5, 0.0));
       
       QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
