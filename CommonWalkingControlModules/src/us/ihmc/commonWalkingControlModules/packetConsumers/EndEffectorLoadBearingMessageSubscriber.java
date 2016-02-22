@@ -1,50 +1,60 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import java.util.LinkedHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<EndEffectorLoadBearingMessage>
 {
-   private static final int NO_LOAD_BEARING_REQUEST = -1;
-   private static final int LOAD_BEARING_REQUEST_FOR_BOTH_SIDES = 2;
-   private static final int LOAD_BEARING_REQUEST_FOR_SINGLE_SIDED_END_EFFECTOR = 1;
-
    private final HumanoidGlobalDataProducer globalDataProducer;
 
-   private final LinkedHashMap<EndEffector, AtomicInteger> latestMessageReferencePerEndEffector = new LinkedHashMap<>();
+   private final SideDependentList<EnumMap<EndEffector, AtomicReference<LoadBearingRequest>>> latestMessageReferenceForSideDependentEndEffectors = SideDependentList.createListOfEnumMaps(EndEffector.class);
+   private final Map<EndEffector, AtomicReference<LoadBearingRequest>> latestMessageReferenceForOtherEndEffectors = new HashMap<>();
 
    public EndEffectorLoadBearingMessageSubscriber(HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
 
       for (EndEffector endEffector : EndEffector.values)
-         latestMessageReferencePerEndEffector.put(endEffector, new AtomicInteger(-1));
+      {
+         if (endEffector.isRobotSideNeeded())
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               latestMessageReferenceForSideDependentEndEffectors.get(robotSide).put(endEffector, new AtomicReference<LoadBearingRequest>(null));
+            }
+         }
+         else
+         {
+            latestMessageReferenceForOtherEndEffectors.put(endEffector, new AtomicReference<LoadBearingRequest>(null));
+         }
+      }
 
       globalDataProducer.attachListener(EndEffectorLoadBearingMessage.class, this);
    }
 
-   public boolean pollMessage(EndEffector endEffector)
+   public LoadBearingRequest pollMessage(EndEffector endEffector)
    {
       if (endEffector.isRobotSideNeeded())
          throw new RuntimeException("Need to provide robotSide for the endEffector: " + endEffector);
-      boolean isNewMessageAvailable = latestMessageReferencePerEndEffector.get(endEffector).get() == LOAD_BEARING_REQUEST_FOR_SINGLE_SIDED_END_EFFECTOR;
-      clearMessageInQueue(endEffector);
-      return isNewMessageAvailable;
+
+      return latestMessageReferenceForOtherEndEffectors.get(endEffector).getAndSet(null);
    }
 
-   public boolean pollMessage(EndEffector endEffector, RobotSide robotSide)
+   public LoadBearingRequest pollMessage(EndEffector endEffector, RobotSide robotSide)
    {
       if (endEffector.isRobotSideNeeded())
       {
-         boolean isNewMessageAvailable = latestMessageReferencePerEndEffector.get(endEffector).get() == robotSide.ordinal();
-         clearMessageInQueue(endEffector, robotSide);
-         return isNewMessageAvailable;
+         return latestMessageReferenceForSideDependentEndEffectors.get(robotSide).get(endEffector).getAndSet(null);
       }
       else
          return pollMessage(endEffector);
@@ -54,22 +64,14 @@ public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<E
    {
       if (endEffector.isRobotSideNeeded())
          throw new RuntimeException("Need to provide robotSide for the endEffector: " + endEffector);
-      latestMessageReferencePerEndEffector.get(endEffector).set(NO_LOAD_BEARING_REQUEST);
+      latestMessageReferenceForOtherEndEffectors.get(endEffector).set(null);
    }
 
    public void clearMessageInQueue(EndEffector endEffector, RobotSide robotSide)
    {
       if (endEffector.isRobotSideNeeded())
       {
-         AtomicInteger latestMessage = latestMessageReferencePerEndEffector.get(endEffector);
-         if (latestMessage.get() == robotSide.ordinal())
-         {
-            latestMessage.set(NO_LOAD_BEARING_REQUEST);
-         }
-         else if (latestMessage.get() == LOAD_BEARING_REQUEST_FOR_BOTH_SIDES)
-         {
-            latestMessage.set(robotSide.getOppositeSide().ordinal());
-         }
+         latestMessageReferenceForSideDependentEndEffectors.get(robotSide).get(endEffector).set(null);
       }
       else
          clearMessageInQueue(endEffector);
@@ -78,7 +80,12 @@ public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<E
    public void clearMessagesInQueue()
    {
       for (EndEffector endEffector : EndEffector.values)
-         latestMessageReferencePerEndEffector.get(endEffector).set(NO_LOAD_BEARING_REQUEST);
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            clearMessageInQueue(endEffector, robotSide);
+         }
+      }
    }
 
    @Override
@@ -88,24 +95,16 @@ public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<E
          return;
 
       EndEffector endEffector = endEffectorLoadBearingMessage.getEndEffector();
-      RobotSide robotSide = endEffectorLoadBearingMessage.getRobotSide();
-
-      AtomicInteger latestMessage = latestMessageReferencePerEndEffector.get(endEffector);
+      LoadBearingRequest request = endEffectorLoadBearingMessage.getRequest();
 
       if (endEffector.isRobotSideNeeded())
       {
-         if (latestMessage.get() == NO_LOAD_BEARING_REQUEST) // non of the sides were requested to switch to loadbearing
-         {
-            latestMessage.set(robotSide.ordinal()); // 0 for left side, 1 for right side.
-         }
-         else
-         {
-            latestMessage.set(LOAD_BEARING_REQUEST_FOR_BOTH_SIDES); // Both sides are requested to switching to loadbearing.
-         }
+         RobotSide robotSide = endEffectorLoadBearingMessage.getRobotSide();
+         latestMessageReferenceForSideDependentEndEffectors.get(robotSide).get(endEffector).set(request);
       }
       else
       {
-         latestMessage.set(LOAD_BEARING_REQUEST_FOR_SINGLE_SIDED_END_EFFECTOR); // No robotSide smartness needed here, just need to set to something else than -1.
+         latestMessageReferenceForOtherEndEffectors.get(endEffector).set(request);
       }
    }
 }

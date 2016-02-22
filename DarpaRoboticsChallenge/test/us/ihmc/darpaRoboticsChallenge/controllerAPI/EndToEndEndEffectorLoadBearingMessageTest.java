@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -39,7 +40,7 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
 
    @SuppressWarnings("unchecked")
    @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test//(timeout = 300000)
+   @Test(timeout = 300000)
    public void testSwitchFootToLoadBearing() throws Exception
    {
       BambooTools.reportTestStartedMessage();
@@ -71,7 +72,7 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
          assertTrue(success);
          
          // Now we can do the usual test.
-         EndEffectorLoadBearingMessage endEffectorLoadBearingMessage = new EndEffectorLoadBearingMessage(robotSide, EndEffector.FOOT);
+         EndEffectorLoadBearingMessage endEffectorLoadBearingMessage = new EndEffectorLoadBearingMessage(robotSide, EndEffector.FOOT, LoadBearingRequest.LOAD);
 
          drcSimulationTestHelper.send(endEffectorLoadBearingMessage);
 
