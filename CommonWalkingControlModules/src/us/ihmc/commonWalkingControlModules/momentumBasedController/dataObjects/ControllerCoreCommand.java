@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointTorqueHolder;
 
-public class ControllerCoreCommand
+public class ControllerCoreCommand implements ControllerCoreCommandInterface
 {
    private final InverseDynamicsCommandList solverCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
@@ -47,16 +47,19 @@ public class ControllerCoreCommand
       feedbackControlCommandList.addCommand(feedbackControlCommand);
    }
 
+   @Override
    public InverseDynamicsCommandList getInverseDynamicsCommandList()
    {
       return solverCommandList;
    }
 
+   @Override
    public FeedbackControlCommandList getFeedbackControlCommandList()
    {
       return feedbackControlCommandList;
    }
 
+   @Override
    public DesiredOneDoFJointTorqueHolder geDesiredOneDoFJointTorqueHolder()
    {
       return desiredOneDoFJointTorqueHolder;
@@ -68,6 +71,7 @@ public class ControllerCoreCommand
       feedbackControlCommandList.set(other.feedbackControlCommandList);
    }
 
+   @Override
    public boolean enableControllerCore()
    {
       return enableControllerCore;

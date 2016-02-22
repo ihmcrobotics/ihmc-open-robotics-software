@@ -5,43 +5,41 @@ import java.util.Map;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class SlowLoopControllerCoreCommandHolder
 {
-   private static final int INITIAL_CAPACITY = 15;
-   private final Map<String, RigidBody> slowLoopRigidBodyMap = new HashMap<>();
    private final Map<String, RigidBody> fastLoopRigidBodyMap = new HashMap<>();
+   private final Map<String, OneDoFJoint> fastLoopJointMap = new HashMap<>();
 
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-   private final PlaneContactStateCommandPool planeContactStateCommandPool = new PlaneContactStateCommandPool();
-
-   private final RecyclingArrayList<ExternalWrenchCommand> externalWrenchCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, ExternalWrenchCommand.class);
-   private final RecyclingArrayList<JointspaceAccelerationCommand> jointspaceAccelerationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, JointspaceAccelerationCommand.class);
-   private final RecyclingArrayList<MomentumRateCommand> momentumRateCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, MomentumRateCommand.class);
-   private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, PlaneContactStateCommand.class);
-   private final RecyclingArrayList<PointAccelerationCommand> pointAccelerationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, PointAccelerationCommand.class);
-   private final RecyclingArrayList<SpatialAccelerationCommand> spatialAccelerationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, SpatialAccelerationCommand.class);
-
-   public SlowLoopControllerCoreCommandHolder(FullHumanoidRobotModel slowLoopFullRobotModel, FullHumanoidRobotModel fastLoopFullRobotModel)
+   private final ControllerCoreCommandDataCopier intermediateCommandDataCopier = new ControllerCoreCommandDataCopier();
+   private final ControllerCoreCommandDataCopier fastLoopCommandDataCopier = new ControllerCoreCommandDataCopier();
+   
+   public SlowLoopControllerCoreCommandHolder(FullHumanoidRobotModel fastLoopFullRobotModel)
    {
-      setupRigidBodyMap(slowLoopFullRobotModel, slowLoopRigidBodyMap);
       setupRigidBodyMap(fastLoopFullRobotModel, fastLoopRigidBodyMap);
+      for (OneDoFJoint joint : fastLoopFullRobotModel.getOneDoFJoints())
+         fastLoopJointMap.put(joint.getName(), joint);
    }
 
    public void writeSlowLoopData(ControllerCoreCommand commandToWrite)
    {
-      
+      intermediateCommandDataCopier.copyDataFrom(commandToWrite);
+   }
+
+   public void readFastLoopData()
+   {
+      fastLoopCommandDataCopier.copyDataFrom(intermediateCommandDataCopier);
+      fastLoopCommandDataCopier.retrieveRigidBodiesFromName(fastLoopRigidBodyMap);
+      fastLoopCommandDataCopier.retrieveJointsFromName(fastLoopJointMap);
+   }
+
+   public ControllerCoreCommandInterface getFastLoopControllerCoreCommand()
+   {
+      return fastLoopCommandDataCopier;
    }
 
    // No need to put all of the rigid bodies (there is a lot especially when having hands).
@@ -66,14 +64,17 @@ public class SlowLoopControllerCoreCommandHolder
 
    public static class Builder implements us.ihmc.concurrent.Builder<SlowLoopControllerCoreCommandHolder>
    {
-      public Builder()
+      private final FullHumanoidRobotModel fastLoopFullRobotModel;
+
+      public Builder(FullHumanoidRobotModel fastLoopFullRobotModel)
       {
+         this.fastLoopFullRobotModel = fastLoopFullRobotModel;
       }
 
       @Override
       public SlowLoopControllerCoreCommandHolder newInstance()
       {
-         return null;
+         return new SlowLoopControllerCoreCommandHolder(fastLoopFullRobotModel);
       }
    }
 }

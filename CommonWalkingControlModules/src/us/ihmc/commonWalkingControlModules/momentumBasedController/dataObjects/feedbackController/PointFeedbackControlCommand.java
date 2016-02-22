@@ -28,6 +28,9 @@ public class PointFeedbackControlCommand extends FeedbackControlCommand<PointFee
    private RigidBody base;
    private RigidBody endEffector;
 
+   private String baseName;
+   private String endEffectorName;
+
    private final PositionPIDGains gains = new PositionPIDGains();
    private double weightForSolver = Double.POSITIVE_INFINITY;
 
@@ -38,18 +41,20 @@ public class PointFeedbackControlCommand extends FeedbackControlCommand<PointFee
 
    public void set(RigidBody base, RigidBody endEffector)
    {
-      this.base = base;
-      this.endEffector = endEffector;
+      setBase(base);
+      setEndEffector(endEffector);
    }
 
    public void setBase(RigidBody base)
    {
       this.base = base;
+      baseName = base.getName();
    }
 
    public void setEndEffector(RigidBody endEffector)
    {
       this.endEffector = endEffector;
+      endEffectorName = endEffector.getName();
    }
 
    public void setGains(PositionPIDGainsInterface gains)
@@ -60,7 +65,10 @@ public class PointFeedbackControlCommand extends FeedbackControlCommand<PointFee
    @Override
    public void set(PointFeedbackControlCommand other)
    {
-      set(other.base, other.endEffector);
+      base = other.base;
+      endEffector = other.endEffector;
+      baseName = other.baseName;
+      endEffectorName = other.endEffectorName;
       setSelectionMatrix(other.selectionMatrix);
       setGains(other.gains);
       setWeightForSolver(other.weightForSolver);
@@ -132,9 +140,19 @@ public class PointFeedbackControlCommand extends FeedbackControlCommand<PointFee
       return base;
    }
 
+   public String getBaseName()
+   {
+      return baseName;
+   }
+
    public RigidBody getEndEffector()
    {
       return endEffector;
+   }
+
+   public String getEndEffectorName()
+   {
+      return endEffectorName;
    }
 
    public DenseMatrix64F getSelectionMatrix()

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -74,6 +75,14 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
    {
       checkConsistency(joints.get(jointIndex), desiredAcceleration);
       desiredAccelerations.get(jointIndex).set(desiredAcceleration);
+   }
+
+   public void retrieveJointsFromName(Map<String, ? extends InverseDynamicsJoint> nameToJointMap)
+   {
+      for (int i = 0; i < getNumberOfJoints(); i++)
+      {
+         joints.set(i, nameToJointMap.get(jointNames.get(i)));
+      }
    }
 
    public void removeWeight()
