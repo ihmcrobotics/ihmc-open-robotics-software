@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.frames;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -9,6 +10,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -113,6 +115,33 @@ public class YoFrameConvexPolygon2d extends ReferenceFrameHolder implements Vari
       }
    }
 
+   public void setConvexPolygon2d(List<FramePoint> framePoints)
+   {
+      if (framePoints == null)
+      {
+         hide();
+         setToNaN();
+         return;
+      }
+
+      try
+      {
+         convexPolygon2dForWriting.clear(referenceFrame);
+         convexPolygon2dForWriting.setAndUpdate(framePoints);
+         getYoValuesFromFrameConvexPolygon2d();
+      }
+      catch (Exception e)
+      {
+         System.err.println("In YoFrameConvexPolygon2d.java: " + e.getClass().getSimpleName() + " while calling setConvexPolygon2d(ConvexPolygon2d).");
+      }
+   }
+   
+   public void clearAndHide()
+   {
+      hide();
+      setToNaN();
+   }
+   
    private void setToNaN()
    {
       for (int i = 0; i < yoFramePoints.size(); i++)
