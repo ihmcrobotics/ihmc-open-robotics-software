@@ -780,10 +780,10 @@ public class QuadrupedSupportPolygonTest
       QuadrupedSupportPolygon poly = createDiamondPolygon();
       FramePoint flFoot = poly.getFootstep(RobotQuadrant.FRONT_LEFT);
       FramePoint hrFoot = poly.getFootstep(RobotQuadrant.HIND_RIGHT);
-      double distance = poly.getDistanceFromP1ToTrotLine(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      double distance = poly.getDistanceFromP1ToTrotLine2d(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
       assertEquals("not 0.5", 0.5, distance, 1e-7);
       flFoot.add(0.25, 0.0, 0.0);
-      distance = poly.getDistanceFromP1ToTrotLine(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      distance = poly.getDistanceFromP1ToTrotLine2d(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
       assertEquals("not 0.25", 0.25, distance, 1e-7);
    }
    
