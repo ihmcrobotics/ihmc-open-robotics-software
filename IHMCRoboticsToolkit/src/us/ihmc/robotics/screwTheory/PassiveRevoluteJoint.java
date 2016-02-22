@@ -3,11 +3,13 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {
+   private boolean hasBeenInitialized = false;
 
    /**
     * In this type of joint:
@@ -19,12 +21,29 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     *    2) getTau() should always return a zero because, since the joint is NOT actuated,
     *    there is no torque.
     */
-
-   public PassiveRevoluteJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, FrameVector jointAxis)
+   
+   public PassiveRevoluteJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, FrameVector jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       super(name, predecessor, beforeJointFrame, jointAxis);
    }
-
+   
+   /**
+    * This method should only be called once. Do not use as a setQ(), or setQD()
+    */
+   public void initializePositionAndVelocity(double q, double qd)
+   {
+      if(!hasBeenInitialized)
+      {
+         this.q = q;
+         this.qd = qd;         
+      }
+      else
+      {
+         throw new RuntimeException(getName() + " has already been initialized!");
+      }
+      hasBeenInitialized = true;
+   }
+   
    /**
     * Torque on a passive joint is always zero
     */
