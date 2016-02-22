@@ -6,7 +6,6 @@ public enum PrimitiveBehaviorType
    FOOTSTEP_LIST,
    HAND_POSE,
    FOOT_STATE,
-   HAND_STATE,
    HEAD_ORIENTATION,
    COM_HEIGHT,
    FOOT_POSE,

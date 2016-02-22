@@ -9,13 +9,12 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.BumStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
@@ -36,7 +35,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
@@ -80,7 +78,6 @@ public class ScriptBehavior extends BehaviorInterface
    private final FootstepListBehavior footstepListBehavior;
    private final HandPoseBehavior handPoseBehavior;
    private final FootStateBehavior footStateBehavior;
-   private final HandStateBehavior handStateBehavior;
    private final HeadOrientationBehavior headOrientationBehavior;
    private final ComHeightBehavior comHeightBehavior;
    private final FootPoseBehavior footPoseBehavior;
@@ -116,7 +113,6 @@ public class ScriptBehavior extends BehaviorInterface
       }
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       footStateBehavior = new FootStateBehavior(outgoingCommunicationBridge);
-      handStateBehavior = new HandStateBehavior(outgoingCommunicationBridge, yoTime);
       headOrientationBehavior = new HeadOrientationBehavior(outgoingCommunicationBridge, yoTime);
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
       if (doubleSupport != null)
@@ -161,7 +157,6 @@ public class ScriptBehavior extends BehaviorInterface
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOTSTEP_LIST, footstepListBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_POSE, handPoseBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOT_STATE, footStateBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_STATE, handStateBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HEAD_ORIENTATION, headOrientationBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.COM_HEIGHT, comHeightBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOT_POSE, footPoseBehavior);
@@ -407,10 +402,6 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.FOOT_STATE;
       }
-      else if (scriptObject instanceof HandStatePacket)
-      {
-         ret = PrimitiveBehaviorType.HAND_STATE;
-      }
       else if (scriptObject instanceof HeadOrientationPacket)
       {
          ret = PrimitiveBehaviorType.HEAD_ORIENTATION;
@@ -476,11 +467,6 @@ public class ScriptBehavior extends BehaviorInterface
       {
          footStateBehavior.initialize();
          footStateBehavior.setInput((FootStatePacket) inputPacket.getScriptObject());
-      }
-      else if (behaviorType.equals(PrimitiveBehaviorType.HAND_STATE))
-      {
-         handStateBehavior.initialize();
-         handStateBehavior.setInput((HandStatePacket) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.HEAD_ORIENTATION))
       {
@@ -605,7 +591,6 @@ public class ScriptBehavior extends BehaviorInterface
       footstepListBehavior.consumeObjectFromNetworkProcessor(object);
       handPoseBehavior.consumeObjectFromNetworkProcessor(object);
       footStateBehavior.consumeObjectFromNetworkProcessor(object);
-      handStateBehavior.consumeObjectFromNetworkProcessor(object);
       headOrientationBehavior.consumeObjectFromNetworkProcessor(object);
       comHeightBehavior.consumeObjectFromNetworkProcessor(object);
       footPoseBehavior.consumeObjectFromNetworkProcessor(object);
@@ -624,7 +609,6 @@ public class ScriptBehavior extends BehaviorInterface
       footstepListBehavior.consumeObjectFromController(object);
       handPoseBehavior.consumeObjectFromController(object);
       footStateBehavior.consumeObjectFromController(object);
-      handStateBehavior.consumeObjectFromController(object);
       headOrientationBehavior.consumeObjectFromController(object);
       comHeightBehavior.consumeObjectFromController(object);
       footPoseBehavior.consumeObjectFromController(object);
