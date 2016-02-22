@@ -13,16 +13,12 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
@@ -58,7 +54,6 @@ public class VariousWalkingProviders
 
    // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
    private final FootstepProvider footstepProvider;
-   private final HandstepProvider handstepProvider;
    private final AbortWalkingProvider abortProvider;
 
    private final AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator;
@@ -69,14 +64,11 @@ public class VariousWalkingProviders
    private final HeadOrientationProvider desiredHeadOrientationProvider;
    private final PelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
-   private final HandPoseProvider desiredHandPoseProvider;
-   private final DesiredSteeringWheelProvider desiredSteeringWheelProvider;
    private final ChestOrientationProvider desiredChestOrientationProvider;
    private final FootPoseProvider footPoseProvider;
 
    // TODO: Rename DesiredFootStateProvider to DesiredFootLoadBearingProvider, do the same for the packet, etc.
    private final DesiredFootStateProvider desiredFootLoadBearingProvider;
-   private final HandLoadBearingProvider desiredHandLoadBearingProvider;
    private final DesiredPelvisLoadBearingProvider desiredPelvisLoadBearingProvider;
    private final DesiredThighLoadBearingProvider desiredThighLoadBearingProvider;
 
@@ -98,16 +90,14 @@ public class VariousWalkingProviders
          FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
          StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
-         FootstepProvider footstepProvider, HandstepProvider handstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
+         FootstepProvider footstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
-         PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
-         HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber, DesiredSteeringWheelProvider desiredSteeringWheelProvider,
-         HandLoadBearingProvider desiredHandLoadBearingProvider, AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
-         ChestOrientationProvider desiredChestOrientationProvider, FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
-         DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
-         DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider, ControlStatusProducer controlStatusProducer,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
-         ObjectWeightProvider objectWeightProvider, DesiredJointsPositionProvider desiredJointsPositionProvider,
+         PelvisPoseProvider desiredPelvisPoseProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
+         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, ChestOrientationProvider desiredChestOrientationProvider,
+         FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
+         DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
+         ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
+         HandPoseStatusProducer handPoseStatusProducer, ObjectWeightProvider objectWeightProvider, DesiredJointsPositionProvider desiredJointsPositionProvider,
          SingleJointPositionProvider singleJointPositionProvider, AbortWalkingProvider abortProvider, MultiJointPositionProvider multiJointPositionProvider)
    {
       this.handTrajectoryMessageSubscriber = handTrajectorySubscriber;
@@ -123,20 +113,16 @@ public class VariousWalkingProviders
 
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
-      this.handstepProvider = handstepProvider;
       this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
       this.desiredPelvisPoseProvider = desiredPelvisPoseProvider;
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.desiredChestOrientationProvider = desiredChestOrientationProvider;
-      this.desiredHandPoseProvider = desiredHandPoseProvider;
-      this.desiredSteeringWheelProvider = desiredSteeringWheelProvider;
       this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
       this.footPoseProvider = footPoseProvider;
 
       this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
 
-      this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
       this.desiredFootLoadBearingProvider = footStateProvider;
       this.desiredThighLoadBearingProvider = thighLoadBearingProvider;
       this.desiredPelvisLoadBearingProvider = pelvisLoadBearingProvider;
@@ -178,11 +164,6 @@ public class VariousWalkingProviders
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (desiredHandPoseProvider != null)
-         {
-            desiredHandPoseProvider.getDesiredHandPose(robotSide);
-         }
-
          if (footPoseProvider != null)
          {
             footPoseProvider.getDesiredFootPose(robotSide);
@@ -271,11 +252,6 @@ public class VariousWalkingProviders
       return footstepProvider;
    }
 
-   public HandstepProvider getHandstepProvider()
-   {
-      return handstepProvider;
-   }
-
    public HeadOrientationProvider getDesiredHeadOrientationProvider()
    {
       return desiredHeadOrientationProvider;
@@ -311,24 +287,9 @@ public class VariousWalkingProviders
       return desiredPelvisLoadBearingProvider;
    }
 
-   public HandPoseProvider getDesiredHandPoseProvider()
-   {
-      return desiredHandPoseProvider;
-   }
-
    public HandComplianceControlParametersSubscriber getHandComplianceControlParametersSubscriber()
    {
       return handComplianceControlParametersSubscriber;
-   }
-
-   public DesiredSteeringWheelProvider getDesiredSteeringWheelProvider()
-   {
-      return desiredSteeringWheelProvider;
-   }
-
-   public HandLoadBearingProvider getDesiredHandLoadBearingProvider()
-   {
-      return desiredHandLoadBearingProvider;
    }
 
    public HashMap<Footstep, TrajectoryParameters> getMapFromFootstepsToTrajectoryParameters()

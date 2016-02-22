@@ -221,12 +221,11 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, armTrajectoryMessageSubscriber,
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
-            pelvisHeightTrajectoryMessageSubscriber, footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider,
-            desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handComplianceControlParametersSubscriber, desiredSteeringWheelProvider,
-            handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer,
-            handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider,
-            multiJointPositionProvider);
+            pelvisHeightTrajectoryMessageSubscriber, footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider,
+            pelvisPoseProvider, handComplianceControlParametersSubscriber, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider,
+            footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer,
+            capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider,
+            abortWalkingProvider, multiJointPositionProvider);
 
       return variousWalkingProviders;
    }
