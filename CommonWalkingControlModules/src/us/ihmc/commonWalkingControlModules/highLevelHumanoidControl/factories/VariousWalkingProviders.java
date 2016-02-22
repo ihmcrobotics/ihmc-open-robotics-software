@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBeari
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
@@ -54,6 +54,8 @@ public class VariousWalkingProviders
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber;
 
+   private final HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber;
+
    // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
    private final FootstepProvider footstepProvider;
    private final HandstepProvider handstepProvider;
@@ -68,7 +70,6 @@ public class VariousWalkingProviders
    private final PelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final HandPoseProvider desiredHandPoseProvider;
-   private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
    private final DesiredSteeringWheelProvider desiredSteeringWheelProvider;
    private final ChestOrientationProvider desiredChestOrientationProvider;
    private final FootPoseProvider footPoseProvider;
@@ -100,7 +101,7 @@ public class VariousWalkingProviders
          FootstepProvider footstepProvider, HandstepProvider handstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
-         HandComplianceControlParametersProvider handComplianceControlParametersProvider, DesiredSteeringWheelProvider desiredSteeringWheelProvider,
+         HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber, DesiredSteeringWheelProvider desiredSteeringWheelProvider,
          HandLoadBearingProvider desiredHandLoadBearingProvider, AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
          ChestOrientationProvider desiredChestOrientationProvider, FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
          DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
@@ -130,7 +131,7 @@ public class VariousWalkingProviders
       this.desiredChestOrientationProvider = desiredChestOrientationProvider;
       this.desiredHandPoseProvider = desiredHandPoseProvider;
       this.desiredSteeringWheelProvider = desiredSteeringWheelProvider;
-      this.handComplianceControlParametersProvider = handComplianceControlParametersProvider;
+      this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
       this.footPoseProvider = footPoseProvider;
 
       this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
@@ -315,9 +316,9 @@ public class VariousWalkingProviders
       return desiredHandPoseProvider;
    }
 
-   public HandComplianceControlParametersProvider getHandComplianceControlParametersProvider()
+   public HandComplianceControlParametersSubscriber getHandComplianceControlParametersSubscriber()
    {
-      return handComplianceControlParametersProvider;
+      return handComplianceControlParametersSubscriber;
    }
 
    public DesiredSteeringWheelProvider getDesiredSteeringWheelProvider()

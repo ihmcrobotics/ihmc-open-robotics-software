@@ -9,15 +9,19 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -53,6 +57,9 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final DesiredFootPoseProvider desiredFootPoseProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
+   private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
+   private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
+
    private final DoubleYoVariable time;
    private final DoubleYoVariable scriptEventStartTime, scriptEventDuration;
 
@@ -70,6 +77,8 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
       this.scriptFileLoader = scriptFileLoader;
       desiredHandPoseProvider = new DesiredHandPoseProvider(referenceFrames,fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
+      handTrajectoryMessageSubscriber = new HandTrajectoryMessageSubscriber(null);
+      armTrajectoryMessageSubscriber = new ArmTrajectoryMessageSubscriber(null);
       desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
       handstepProvider = new DesiredHandstepProvider(fullRobotModel);
       desiredComHeightProvider = new DesiredComHeightProvider(null);
@@ -129,6 +138,20 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          desiredHandPoseProvider.receivedPacket(handPosePacket);
 
          setupTimesForNewScriptEvent(handPosePacket.getTrajectoryTime());
+      }
+      else if (scriptObject instanceof HandTrajectoryMessage)
+      {
+         HandTrajectoryMessage handTrajectoryMessage = (HandTrajectoryMessage) scriptObject;
+         handTrajectoryMessageSubscriber.receivedPacket(handTrajectoryMessage);
+
+         setupTimesForNewScriptEvent(handTrajectoryMessage.getLastWaypoint().time);
+      }
+      else if (scriptObject instanceof ArmTrajectoryMessage)
+      {
+         ArmTrajectoryMessage armTrajectoryMessage = (ArmTrajectoryMessage) scriptObject;
+         armTrajectoryMessageSubscriber.receivedPacket(armTrajectoryMessage);
+         
+         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
       }
       else if (scriptObject instanceof PelvisPosePacket)
       {

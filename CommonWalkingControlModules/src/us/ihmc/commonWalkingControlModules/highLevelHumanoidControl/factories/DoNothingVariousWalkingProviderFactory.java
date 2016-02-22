@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelP
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
@@ -103,7 +103,7 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
       MultiJointPositionProvider multiJointPositionProvider = null;
       AbortWalkingProvider abortWalkingProvider = null;
 
-      HandComplianceControlParametersProvider handComplianceControlParametersProvider = null;
+      HandComplianceControlParametersSubscriber handComplianceControlParametersProvider = null;
 
       DesiredSteeringWheelProvider desiredSteeringWheelProvider = null;
 

@@ -23,7 +23,7 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
 {
    public enum BaseForControl implements DocumentedEnum<BaseForControl>
    {
-      CHEST, WORLD;
+      CHEST, WORLD, WALKING_PATH;
 
       @Override
       public String getDocumentation(BaseForControl var)
@@ -34,6 +34,8 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
             return "The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.";
          case WORLD:
             return "The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.";
+         case WALKING_PATH:
+            return "The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.";
 
          default:
             return "No documentation available.";

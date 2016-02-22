@@ -2,14 +2,11 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -18,27 +15,22 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
+import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
+import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -58,23 +50,13 @@ public class ManipulationControlModule
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
    private final SideDependentList<HandControlModule> handControlModules;
 
-   private final ArmControllerParameters armControlParameters;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
    private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
    private final ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
-   private final HandPoseProvider handPoseProvider;
-   private final HandstepProvider handstepProvider;
-   private final HandLoadBearingProvider handLoadBearingProvider;
-   private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
-
-   private final DoubleYoVariable handSwingClearance = new DoubleYoVariable("handSwingClearance", registry);
-
-   private final DoubleYoVariable timeTransitionBeforeLoadBearing = new DoubleYoVariable("timeTransitionBeforeLoadBearing", registry);
-
-   private final BooleanYoVariable goToLoadBearingWhenHandlingHandstep;
+   private final HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber;
 
    private final BooleanYoVariable isIgnoringInputs = new BooleanYoVariable("isManipulationIgnoringInputs", registry);
    private final DoubleYoVariable startTimeForIgnoringInputs = new DoubleYoVariable("startTimeForIgnoringManipulationInputs", registry);
@@ -86,7 +68,6 @@ public class ManipulationControlModule
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       fullRobotModel = momentumBasedController.getFullRobotModel();
-      this.armControlParameters = armControllerParameters;
       this.yoTime = momentumBasedController.getYoTime();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -96,30 +77,22 @@ public class ManipulationControlModule
       armTrajectoryMessageSubscriber = variousWalkingProviders.geArmTrajectoryMessageSubscriber();
       armDesiredAccelerationsMessageSubscriber = variousWalkingProviders.getArmDesiredAccelerationsMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
-      handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
-      handstepProvider = variousWalkingProviders.getHandstepProvider();
-      handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
-      handComplianceControlParametersProvider = variousWalkingProviders.getHandComplianceControlParametersProvider();
+      handComplianceControlParametersSubscriber = variousWalkingProviders.getHandComplianceControlParametersSubscriber();
 
       handControlModules = new SideDependentList<HandControlModule>();
 
       YoPIDGains jointspaceControlGains = armControllerParameters.createJointspaceControlGains(registry);
       YoSE3PIDGainsInterface taskspaceGains = armControllerParameters.createTaskspaceControlGains(registry);
-      YoSE3PIDGainsInterface taskspaceLoadBearingGains = armControllerParameters.createTaskspaceControlGainsForLoadBearing(registry);
+
+      ControlStatusProducer controlStatusProducer = variousWalkingProviders.getControlStatusProducer();
+      HandPoseStatusProducer handPoseStatusProducer = variousWalkingProviders.getHandPoseStatusProducer();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters,
-               jointspaceControlGains, taskspaceGains, taskspaceLoadBearingGains, variousWalkingProviders.getControlStatusProducer(),
-               variousWalkingProviders.getHandPoseStatusProducer(), registry);
+               jointspaceControlGains, taskspaceGains, controlStatusProducer, handPoseStatusProducer, registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }
-
-      goToLoadBearingWhenHandlingHandstep = new BooleanYoVariable("goToLoadBearingWhenHandlingHandstep", registry);
-      goToLoadBearingWhenHandlingHandstep.set(true);
-
-      handSwingClearance.set(0.08);
-      timeTransitionBeforeLoadBearing.set(0.2);
 
       parentRegistry.addChild(registry);
    }
@@ -167,7 +140,8 @@ public class ManipulationControlModule
       if (yoTime.getDoubleValue() - startTimeForIgnoringInputs.getDoubleValue() < durationForIgnoringInputs.getDoubleValue())
       {
          isIgnoringInputs.set(true);
-         handPoseProvider.clear();
+         handTrajectoryMessageSubscriber.clearMessagesInQueue();
+         armTrajectoryMessageSubscriber.clearMessagesInQueue();
       }
       else
       {
@@ -182,10 +156,6 @@ public class ManipulationControlModule
          handleStopAllTrajectoryMessages(robotSide);
 
          handleCompliantControlRequests(robotSide);
-         handleDefaultState(robotSide);
-         handleHandPoses(robotSide);
-         handleHandsteps(robotSide);
-         handleLoadBearing(robotSide);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -231,121 +201,22 @@ public class ManipulationControlModule
          handControlModule.holdPositionInJointSpace();
    }
 
-   private void handleDefaultState(RobotSide robotSide)
-   {
-      if (handPoseProvider == null)
-         return;
-
-      if (handPoseProvider.checkForHomePosition(robotSide))
-      {
-         goToDefaultState(robotSide, handPoseProvider.getTrajectoryTime());
-      }
-   }
-
-   private void handleHandPoses(RobotSide robotSide)
-   {
-      if (handPoseProvider == null)
-         return;
-
-      if (handPoseProvider.checkForNewPose(robotSide))
-      {
-         if (handPoseProvider.checkHandPosePacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
-         {
-            FramePose desiredHandPose = handPoseProvider.getDesiredHandPose(robotSide);
-            double trajectoryTime = handPoseProvider.getTrajectoryTime();
-            ReferenceFrame desiredReferenceFrame = handPoseProvider.getDesiredReferenceFrame(robotSide);
-            boolean[] controlledOrientationAxes = handPoseProvider.getControlledOrientationAxes(robotSide);
-            double percentOfTrajectoryWithOrientationBeingControlled = handPoseProvider.getPercentOfTrajectoryWithOrientationBeingControlled(robotSide);
-
-            handControlModules.get(robotSide).moveInStraightLine(desiredHandPose, trajectoryTime, desiredReferenceFrame, controlledOrientationAxes,
-                  percentOfTrajectoryWithOrientationBeingControlled, handSwingClearance.getDoubleValue());
-         }
-         else
-         {
-            Map<OneDoFJoint, Double> finalDesiredJointAngleMaps = handPoseProvider.getFinalDesiredJointAngleMaps(robotSide);
-            double trajectoryTime = handPoseProvider.getTrajectoryTime();
-            handControlModules.get(robotSide).moveUsingQuinticSplines(finalDesiredJointAngleMaps, trajectoryTime);
-         }
-      }
-      else if (handPoseProvider.checkForNewPoseList(robotSide))
-      {
-         if (handPoseProvider.checkHandPoseListPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
-         {
-            FramePose[] desiredHandPoses = handPoseProvider.getDesiredHandPoses(robotSide);
-            double trajectoryTime = handPoseProvider.getTrajectoryTime();
-            ReferenceFrame desiredReferenceFrame = handPoseProvider.getDesiredReferenceFrame(robotSide);
-
-            handControlModules.get(robotSide).moveInStraightLinesViaWayPoints(desiredHandPoses, trajectoryTime, desiredReferenceFrame);
-         }
-         else
-         {
-            Map<OneDoFJoint, double[]> desiredJointAngleForWaypointTrajectory = handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide);
-            double trajectoryTime = handPoseProvider.getTrajectoryTime();
-
-            handControlModules.get(robotSide).moveJointspaceWithWaypoints(desiredJointAngleForWaypointTrajectory, trajectoryTime);
-         }
-      }
-      else if (handPoseProvider.checkForNewRotateAboutAxisPacket(robotSide))
-      {
-         Point3d rotationAxisOriginInWorld = handPoseProvider.getRotationAxisOriginInWorld(robotSide);
-         Vector3d rotationAxisInWorld = handPoseProvider.getRotationAxisInWorld(robotSide);
-         double rotationAngleRightHandRule = handPoseProvider.getRotationAngleRightHandRule(robotSide);
-         boolean controlHandAngleAboutAxis = handPoseProvider.controlHandAngleAboutAxis(robotSide);
-         double graspOffsetFromControlFrame = handPoseProvider.getGraspOffsetFromControlFrame(robotSide);
-         double trajectoryTime = handPoseProvider.getTrajectoryTime();
-         handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis,
-               graspOffsetFromControlFrame, trajectoryTime);
-      }
-   }
-
-   private void handleHandsteps(RobotSide robotSide)
-   {
-      if ((handstepProvider != null) && (handstepProvider.checkForNewHandstep(robotSide)))
-      {
-         Handstep desiredHandstep = handstepProvider.getDesiredHandstep(robotSide);
-         FramePose handstepPose = new FramePose(ReferenceFrame.getWorldFrame());
-         desiredHandstep.getPose(handstepPose);
-         FrameVector surfaceNormal = new FrameVector();
-         desiredHandstep.getSurfaceNormal(surfaceNormal);
-
-         ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
-         double swingTrajectoryTime = desiredHandstep.getSwingTrajectoryTime();
-         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, handSwingClearance.getDoubleValue(),
-               swingTrajectoryTime, trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue(), timeTransitionBeforeLoadBearing.getDoubleValue());
-      }
-   }
-
-   private void handleLoadBearing(RobotSide robotSide)
-   {
-      if ((handLoadBearingProvider != null) && handLoadBearingProvider.checkForNewInformation(robotSide))
-      {
-         if (handLoadBearingProvider.hasLoadBearingBeenRequested(robotSide))
-         {
-            handControlModules.get(robotSide).requestLoadBearing();
-         }
-         else
-         {
-            handControlModules.get(robotSide).holdPositionInBase();
-         }
-      }
-   }
-
    private void handleCompliantControlRequests(RobotSide robotSide)
    {
-      if (handComplianceControlParametersProvider != null && handComplianceControlParametersProvider.checkForNewRequest(robotSide))
+      if (handComplianceControlParametersSubscriber != null && handComplianceControlParametersSubscriber.checkForNewRequest(robotSide))
       {
-         if (handComplianceControlParametersProvider.isResetRequested(robotSide))
+         if (handComplianceControlParametersSubscriber.isResetRequested(robotSide))
          {
             handControlModules.get(robotSide).setEnableCompliantControl(false, null, null, null, null, Double.NaN, Double.NaN);
          }
          else
          {
-            boolean[] enableLinearCompliance = handComplianceControlParametersProvider.getEnableLinearCompliance(robotSide);
-            boolean[] enableAngularCompliance = handComplianceControlParametersProvider.getEnableAngularCompliance(robotSide);
-            Vector3d desiredForce = handComplianceControlParametersProvider.getDesiredForce(robotSide);
-            Vector3d desiredTorque = handComplianceControlParametersProvider.getDesiredTorque(robotSide);
-            double forceDeadzone = handComplianceControlParametersProvider.getForceDeadzone(robotSide);
-            double torqueDeadzone = handComplianceControlParametersProvider.getTorqueDeadzone(robotSide);
+            boolean[] enableLinearCompliance = handComplianceControlParametersSubscriber.getEnableLinearCompliance(robotSide);
+            boolean[] enableAngularCompliance = handComplianceControlParametersSubscriber.getEnableAngularCompliance(robotSide);
+            Vector3d desiredForce = handComplianceControlParametersSubscriber.getDesiredForce(robotSide);
+            Vector3d desiredTorque = handComplianceControlParametersSubscriber.getDesiredTorque(robotSide);
+            double forceDeadzone = handComplianceControlParametersSubscriber.getForceDeadzone(robotSide);
+            double torqueDeadzone = handComplianceControlParametersSubscriber.getTorqueDeadzone(robotSide);
             handControlModules.get(robotSide).setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce, desiredTorque,
                   forceDeadzone, torqueDeadzone);
          }
@@ -362,7 +233,7 @@ public class ManipulationControlModule
 
    public void goToDefaultState(RobotSide robotSide, double trajectoryTime)
    {
-      handControlModules.get(robotSide).moveUsingQuinticSplines(armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), trajectoryTime);
+      handControlModules.get(robotSide).goToDefaultState(trajectoryTime);
    }
 
    public void initializeDesiredToCurrent()
@@ -370,7 +241,7 @@ public class ManipulationControlModule
       hasBeenInitialized.set(true);
       for (RobotSide side : RobotSide.values)
       {
-         handControlModules.get(side).initializeDesiredToCurrent();
+         handControlModules.get(side).holdPositionInJointSpace();
       }
    }
 
@@ -430,16 +301,6 @@ public class ManipulationControlModule
             return true;
       }
       return false;
-   }
-
-   public void setHandSwingClearanceForHandsteps(double handSwingClearance)
-   {
-      this.handSwingClearance.set(handSwingClearance);
-   }
-
-   public double getHandSwingClearanceForHandsteps()
-   {
-      return handSwingClearance.getDoubleValue();
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
