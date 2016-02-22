@@ -19,7 +19,7 @@ public class PassiveRevoluteJointTest
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    private FrameVector frameVec = new FrameVector();
    private RigidBody rigidBody = new RigidBody("rigidBody", referenceFrame);
-   private PassiveRevoluteJoint joint = new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
+   private PassiveRevoluteJoint joint = null; // new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
    private DenseMatrix64F matrix = new DenseMatrix64F();
    private int rowStart = 1;
    private Wrench jointWrench = new Wrench();
