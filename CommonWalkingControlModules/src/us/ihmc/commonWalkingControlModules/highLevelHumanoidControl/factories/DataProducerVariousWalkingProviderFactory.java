@@ -33,7 +33,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelP
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
@@ -131,7 +131,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
             walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), objectCommunicator);
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = new AutomaticManipulationAbortCommunicator(objectCommunicator);
 
-      HandComplianceControlParametersProvider handComplianceControlParametersProvider = new HandComplianceControlParametersProvider();
+      HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber = new HandComplianceControlParametersSubscriber();
 
       DesiredSteeringWheelProvider desiredSteeringWheelProvider = new DesiredSteeringWheelProvider(objectCommunicator);
 
@@ -200,7 +200,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(DesiredSteeringAnglePacket.class, desiredSteeringWheelProvider.getDesiredSteeringAngleProvider());
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
 
-      objectCommunicator.attachListener(HandComplianceControlParametersPacket.class, handComplianceControlParametersProvider);
+      objectCommunicator.attachListener(HandComplianceControlParametersPacket.class, handComplianceControlParametersSubscriber);
 
       objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
@@ -222,7 +222,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
             pelvisHeightTrajectoryMessageSubscriber, footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters, headOrientationProvider,
-            desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider,
+            desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handComplianceControlParametersSubscriber, desiredSteeringWheelProvider,
             handLoadBearingProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
             highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer,
             handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider,

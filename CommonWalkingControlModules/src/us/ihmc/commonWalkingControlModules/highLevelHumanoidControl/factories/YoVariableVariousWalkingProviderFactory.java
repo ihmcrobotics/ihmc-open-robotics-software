@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBeari
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
@@ -117,7 +117,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       MultiJointPositionProvider multiJointPositionProvider = null;
 
       AbortWalkingProvider abortWalkingProvider = null;
-      HandComplianceControlParametersProvider handComplianceControlParametersProvider = null;
+      HandComplianceControlParametersSubscriber handComplianceControlParametersProvider = null;
 
       DesiredSteeringWheelProvider desiredSteeringWheelProvider = null;
 

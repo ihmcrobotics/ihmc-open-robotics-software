@@ -163,6 +163,22 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       return jointTrajectory1DMessages[jointIndex].getWaypoint(waypointIndex);
    }
 
+   public void getFinalJointAngles(double[] finalJointAnglesToPack)
+   {
+      for (int i = 0; i < getNumberOfJoints(); i++)
+      {
+         finalJointAnglesToPack[i] = jointTrajectory1DMessages[i].getLastWaypoint().position;
+      }
+   }
+
+   public double getTrajectoryTime()
+   {
+      double trajectoryTime = 0.0;
+      for (int i = 0; i < getNumberOfJoints(); i++)
+         trajectoryTime = Math.max(trajectoryTime, jointTrajectory1DMessages[i].getLastWaypoint().time);
+      return trajectoryTime;
+   }
+
    private void rangeCheck(int jointIndex)
    {
       if (jointIndex >= getNumberOfJoints() || jointIndex < 0)

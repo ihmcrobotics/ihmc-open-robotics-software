@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianc
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class HandComplianceControlParametersProvider implements PacketConsumer<HandComplianceControlParametersPacket>
+public class HandComplianceControlParametersSubscriber implements PacketConsumer<HandComplianceControlParametersPacket>
 {
    public final SideDependentList<AtomicBoolean> hasNewRequest = new SideDependentList<AtomicBoolean>(new AtomicBoolean(false), new AtomicBoolean(false));
    public final SideDependentList<AtomicBoolean> isResetRequested = new SideDependentList<AtomicBoolean>(new AtomicBoolean(false), new AtomicBoolean(false));
@@ -29,7 +29,7 @@ public class HandComplianceControlParametersProvider implements PacketConsumer<H
    public final SideDependentList<AtomicDouble> torqueDeadzoneSize = new SideDependentList<AtomicDouble>(new AtomicDouble(Double.NaN),
          new AtomicDouble(Double.NaN));
 
-   public HandComplianceControlParametersProvider()
+   public HandComplianceControlParametersSubscriber()
    {
    }
 
