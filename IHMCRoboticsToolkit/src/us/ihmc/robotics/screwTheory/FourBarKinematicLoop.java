@@ -29,6 +29,8 @@ public class FourBarKinematicLoop
    private final PassiveRevoluteJoint passiveJoint1, passiveJoint2, passiveJoint3;
 
    private final DoubleYoVariable masterJointQ;
+   private final DoubleYoVariable masterJointQd;
+   
    private final FramePoint masterJointPosition, joint1Position, joint2Position, joint3Position;
    private double masterL, L1, L2, L3;
 
@@ -48,6 +50,9 @@ public class FourBarKinematicLoop
       
       masterJointQ = new DoubleYoVariable(name + "MasterJointQ", registry);
       masterJointQ.set(masterJoint.getQ());
+      
+      masterJointQd = new DoubleYoVariable(name + "MasterJointQd", registry);
+      masterJointQd.set(masterJoint.getQd());
 
       // Link lengths     
       masterL = getLinkLength(masterJoint, passiveJoint1, joint1Position);     
@@ -58,6 +63,13 @@ public class FourBarKinematicLoop
       // Close the loop
       fourBarCalculator = new FourBarCalculatorFromFastRunner(masterL, L1, L2, L3);
       fourBarCalculator.solveForAngleDAB(masterJointQ.getDoubleValue());
+      fourBarCalculator.solveForAngleDAB(masterJointQ.getDoubleValue(), masterJointQd.getDoubleValue());
+      
+      passiveJoint1.initializePositionAndVelocity(fourBarCalculator.getAngleABC(), fourBarCalculator.getAngleDtABC());
+      passiveJoint2.initializePositionAndVelocity(fourBarCalculator.getAngleBCD(), fourBarCalculator.getAngleDtBCD());
+      passiveJoint3.initializePositionAndVelocity(fourBarCalculator.getAngleCDA(), fourBarCalculator.getAngleDtCDA());
+      //      System.out.println("Q joint1: " + fourBarCalculator.getAngleDAB() + "\nQjoint2: " + fourBarCalculator.getAngleBCD() + "\nQjoint3: " + fourBarCalculator.getAngleCDA());
+
    }
    
    public double getLinkLength(RevoluteJoint joint1, RevoluteJoint joint2, FramePoint positionJoint2) 
