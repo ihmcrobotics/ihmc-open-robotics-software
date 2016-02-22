@@ -359,44 +359,52 @@ public abstract class PacketValidityChecker
       if (packet.getRobotSide() == null)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering hand side missing");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering hand side missing");
       }
 
       if (packet.getSteeringWheelCenter() == null)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel center missing");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel center missing");
       }
 
       if (packet.getSteeringWheelRotationAxis() == null)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel rotation axis missing");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel rotation axis missing");
       }
 
       if (packet.getSteeringWheelZeroAxis() == null)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel zero axis missing");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel zero axis missing");
       }
 
       if (Double.isNaN(packet.getSteeringWheelRadius()))
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel radius missing");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel radius missing");
       }
 
       if (packet.getSteeringWheelId() <= 0)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Invalid steering wheel ID, must be greater than or equal to 1");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class,
+                  "Invalid steering wheel ID, must be greater than or equal to 1");
       }
 
       if (packet.getSteeringWheelId() == steeringWheelIdAtomic.get(packet.getRobotSide()).get())
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class,
-               "Invalid steering wheel ID, must be different than the previous ID");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class,
+                  "Invalid steering wheel ID, must be different than the previous ID");
       }
 
       ObjectErrorType errorType = ObjectValidityChecker.validateTuple3d(packet.getSteeringWheelCenter());
@@ -404,7 +412,8 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel center " + errorType.getMessage());
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel center " + errorType.getMessage());
       }
 
       errorType = ObjectValidityChecker.validateTuple3d(packet.getSteeringWheelRotationAxis());
@@ -412,7 +421,8 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel rotation axis " + errorType.getMessage());
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel rotation axis " + errorType.getMessage());
       }
 
       errorType = ObjectValidityChecker.validateTuple3d(packet.getSteeringWheelCenter());
@@ -420,7 +430,8 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel zero axis " + errorType.getMessage());
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel zero axis " + errorType.getMessage());
       }
 
       return packetIsValid;
@@ -434,26 +445,30 @@ public abstract class PacketValidityChecker
       if (Double.isNaN(packet.getDesiredAbsoluteSteeringAngle()))
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Desired steering angle missing");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Desired steering angle missing");
       }
 
       if (steeringWheelIdAtomic.get(packet.getRobotSide()).get() == -1)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Never received SteeringWheelInformationPacket");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Never received SteeringWheelInformationPacket");
       }
 
       if (packet.getSteeringWheelId() <= 0)
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Invalid steering wheel ID, must be greater than or equal to 1");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Invalid steering wheel ID, must be greater than or equal to 1");
       }
 
       if (packet.getSteeringWheelId() != steeringWheelIdAtomic.get(packet.getRobotSide()).get())
       {
          packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class,
-               "Unexpected steering wheel ID, probably dropped the last SteeringWheelInformationPacket");
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class,
+                  "Unexpected steering wheel ID, probably dropped the last SteeringWheelInformationPacket");
       }
 
       return packetIsValid;
@@ -471,7 +486,9 @@ public abstract class PacketValidityChecker
       if (handTrajectoryMessage.getNumberOfWaypoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
+         return false;
       }
 
       for (int i = 0; i < handTrajectoryMessage.getNumberOfWaypoints(); i++)
@@ -481,7 +498,8 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -490,7 +508,8 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          errorMessage = "robotSide field " + errorType.getMessage();
-         globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
          return false;
       }
 
@@ -507,14 +526,16 @@ public abstract class PacketValidityChecker
       if (packetFieldErrorType != null)
       {
          errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
-         globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
          return false;
       }
 
       if (armTrajectoryMessage.jointTrajectory1DMessages == null)
       {
          errorMessage = "Trajectory points are empty.";
-         globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
          return false;
       }
 
@@ -522,7 +543,8 @@ public abstract class PacketValidityChecker
       if (numberOfJoints == 0)
       {
          errorMessage = "ArmJointTrajectoryPacket does not contain any points";
-         globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
          return false;
       }
 
@@ -533,8 +555,8 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "Error with the " + jointIndex + " jointTrajectory1DMessage: " + errorMessage;
-
-            globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
             return false;
          }
       }
@@ -553,7 +575,9 @@ public abstract class PacketValidityChecker
       if (headTrajectoryMessage.getNumberOfWaypoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
+         return false;
       }
 
       for (int i = 0; i < headTrajectoryMessage.getNumberOfWaypoints(); i++)
@@ -563,7 +587,8 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -582,7 +607,9 @@ public abstract class PacketValidityChecker
       if (chestTrajectoryMessage.getNumberOfWaypoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
+         return false;
       }
 
       for (int i = 0; i < chestTrajectoryMessage.getNumberOfWaypoints(); i++)
@@ -592,7 +619,8 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -611,7 +639,9 @@ public abstract class PacketValidityChecker
       if (pelvisTrajectoryMessage.getNumberOfWaypoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
+         return false;
       }
 
       for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfWaypoints(); i++)
@@ -621,7 +651,8 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -641,7 +672,9 @@ public abstract class PacketValidityChecker
       if (footTrajectoryMessage.getNumberOfWaypoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
+         return false;
       }
 
       for (int i = 0; i < footTrajectoryMessage.getNumberOfWaypoints(); i++)
@@ -651,7 +684,8 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -660,7 +694,8 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          errorMessage = "robotSide field " + errorType.getMessage();
-         globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
          return false;
       }
 
@@ -680,7 +715,8 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          errorMessage = "endEffector field " + errorType.getMessage();
-         globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
          return false;
       }
 
@@ -690,7 +726,8 @@ public abstract class PacketValidityChecker
          if (endEffectorLoadBearingMessage.getRobotSide() == null)
          {
             errorMessage = "robotSide field is null. It is required for the endEffector " + endEffectorLoadBearingMessage.getEndEffector();
-            globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -710,7 +747,9 @@ public abstract class PacketValidityChecker
       if (pelvisHeightTrajectoryMessage.getNumberOfWaypoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
+         return false;
       }
 
       for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfWaypoints(); i++)
@@ -720,7 +759,8 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -739,7 +779,8 @@ public abstract class PacketValidityChecker
       if (packetFieldErrorType != null)
       {
          errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
-         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
          return false;
       }
 
@@ -747,7 +788,8 @@ public abstract class PacketValidityChecker
       if (packetFieldErrorType != null)
       {
          errorMessage = "armControlMode field" + packetFieldErrorType.getMessage();
-         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
          return false;
       }
 
@@ -755,14 +797,16 @@ public abstract class PacketValidityChecker
       if (isInUserControlMode && armDesiredAccelerationsMessage.armDesiredJointAccelerations == null)
       {
          errorMessage = "The field with desired joint acceleration is empty.";
-         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
          return false;
       }
 
       if (isInUserControlMode && armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
       {
          errorMessage = "The field with desired joint acceleration is empty.";
-         globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
          return false;
       }
 
