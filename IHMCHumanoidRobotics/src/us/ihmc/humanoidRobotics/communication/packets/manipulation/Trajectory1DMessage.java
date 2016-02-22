@@ -68,14 +68,21 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
       return waypoints.length;
    }
 
+   @Override
    public Waypoint1DMessage getWaypoint(int waypointIndex)
    {
       return waypoints[waypointIndex];
    }
 
+   @Override
    public Waypoint1DMessage[] getWaypoints()
    {
       return waypoints;
+   }
+
+   public Waypoint1DMessage getLastWaypoint()
+   {
+      return waypoints[getNumberOfWaypoints() - 1];
    }
 
    private void rangeCheck(int waypointIndex)
