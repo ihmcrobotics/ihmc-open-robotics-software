@@ -25,7 +25,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
@@ -44,7 +43,7 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, HOLD_POSITION, TOES, SWING, MOVE_STRAIGHT, MOVE_VIA_WAYPOINTS
+      FULL, HOLD_POSITION, TOES, SWING, MOVE_VIA_WAYPOINTS
    }
 
    private static final double coefficientOfFriction = 0.8;
@@ -60,7 +59,6 @@ public class FootControlModule
 
    private final HoldPositionState holdPositionState;
    private final SwingState swingState;
-   private final MoveStraightState moveStraightState;
    private final MoveViaWaypointsState moveViaWaypointsState;
    private final OnToesState onToesState;
    private final FullyConstrainedState supportState;
@@ -125,9 +123,6 @@ public class FootControlModule
             swingFootControlGains, registry);
       states.add(swingState);
 
-      moveStraightState = new MoveStraightState(footControlHelper, swingFootControlGains, registry);
-      states.add(moveStraightState);
-
       moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, swingFootControlGains, registry);
       states.add(moveViaWaypointsState);
 
@@ -142,7 +137,6 @@ public class FootControlModule
       Arrays.fill(trues, true);
 
       contactStatesMap.put(ConstraintType.SWING, falses);
-      contactStatesMap.put(ConstraintType.MOVE_STRAIGHT, falses);
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
       contactStatesMap.put(ConstraintType.HOLD_POSITION, trues);
@@ -202,17 +196,13 @@ public class FootControlModule
 
    public void requestTouchdownForDisturbanceRecovery()
    {
-      if (stateMachine.getCurrentState() == moveStraightState)
-         moveStraightState.requestTouchdownForDisturbanceRecovery();
-      else if (stateMachine.getCurrentState() == moveViaWaypointsState)
+      if (stateMachine.getCurrentState() == moveViaWaypointsState)
          moveViaWaypointsState.requestTouchdownForDisturbanceRecovery();
    }
 
    public void requestStopTrajectoryIfPossible()
    {
-      if (stateMachine.getCurrentState() == moveStraightState)
-         moveStraightState.requestStopTrajectory();
-      else if (stateMachine.getCurrentState() == moveViaWaypointsState)
+      if (stateMachine.getCurrentState() == moveViaWaypointsState)
          moveViaWaypointsState.requestStopTrajectory();
    }
 
@@ -379,11 +369,6 @@ public class FootControlModule
       boolean isAnkleAtLowerLimit = anklePitchJoint.getQ() > anklePitchJoint.getJointLimitUpper() - 0.05;
 
       return isKneeAlmostStraight && isAnkleAtLowerLimit;
-   }
-
-   public void setFootPose(FramePose footPose, double trajectoryTime)
-   {
-      moveStraightState.setFootPose(footPose, trajectoryTime);
    }
 
    public void setFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)

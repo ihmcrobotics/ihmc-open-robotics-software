@@ -23,7 +23,7 @@ import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspCylinderBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
@@ -33,7 +33,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
@@ -121,7 +121,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private final SideDependentList<HandPoseBehavior> handPoseBehaviors = new SideDependentList<>();
    private final SideDependentList<HandPoseListBehavior> handPoseListBehaviors = new SideDependentList<>();
-   private final FootPoseBehavior footPoseBehavior;
+   private final FootTrajectoryBehavior footPoseBehavior;
    private final ChestOrientationBehavior chestOrientationBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
    private final FootstepListBehavior footstepListBehavior;
@@ -350,7 +350,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
       registry.addChild(pelvisPoseBehavior.getYoVariableRegistry());
 
-      footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
+      footPoseBehavior = new FootTrajectoryBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
       registry.addChild(footPoseBehavior.getYoVariableRegistry());
 
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
@@ -2348,7 +2348,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-      FootPoseTask footPoseTask = new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior,
+      FootTrajectoryTask footPoseTask = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior,
             trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
 
       if (parallelize)

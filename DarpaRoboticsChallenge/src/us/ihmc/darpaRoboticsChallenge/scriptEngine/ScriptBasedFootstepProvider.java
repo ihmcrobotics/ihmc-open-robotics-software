@@ -11,10 +11,10 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -54,11 +54,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredHandstepProvider handstepProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
-   private final DesiredFootPoseProvider desiredFootPoseProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
    private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
+   private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
 
    private final DoubleYoVariable time;
    private final DoubleYoVariable scriptEventStartTime, scriptEventDuration;
@@ -77,13 +77,13 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
       this.scriptFileLoader = scriptFileLoader;
       desiredHandPoseProvider = new DesiredHandPoseProvider(referenceFrames,fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
-      handTrajectoryMessageSubscriber = new HandTrajectoryMessageSubscriber(null);
-      armTrajectoryMessageSubscriber = new ArmTrajectoryMessageSubscriber(null);
       desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
       handstepProvider = new DesiredHandstepProvider(fullRobotModel);
       desiredComHeightProvider = new DesiredComHeightProvider(null);
 
-      desiredFootPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), null);
+      handTrajectoryMessageSubscriber = new HandTrajectoryMessageSubscriber(null);
+      armTrajectoryMessageSubscriber = new ArmTrajectoryMessageSubscriber(null);
+      footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(null);
    }
 
    private void loadScriptFileIfNecessary()
@@ -126,10 +126,10 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          this.addFootstepDataList(footstepDataList);
          setupTimesForNewScriptEvent(0.5); // Arbitrary half second duration. With footsteps, it waits till they are done before looking for a new command.
       }
-      else if (scriptObject instanceof FootPosePacket)
+      else if (scriptObject instanceof FootTrajectoryMessage)
       {
-         FootPosePacket footPosePacket = (FootPosePacket) scriptObject;
-         desiredFootPoseProvider.receivedPacket(footPosePacket);
+         FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
+         footTrajectoryMessageSubscriber.receivedPacket(message);
          setupTimesForNewScriptEvent(0.5);
       }
       else if (scriptObject instanceof HandPosePacket)
@@ -282,9 +282,9 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       return desiredComHeightProvider;
    }
 
-   public DesiredFootPoseProvider getDesiredFootPoseProvider()
+   public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()
    {
-      return desiredFootPoseProvider;
+      return footTrajectoryMessageSubscriber;
    }
 
    public DesiredHandstepProvider getDesiredHandstepProvider()

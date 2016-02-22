@@ -306,16 +306,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       return jointspaceAccelerationCommand;
    }
 
-   protected boolean handleFootPose(RobotSide robotSide)
-   {
-      FootPoseProvider footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
-      if (footPoseProvider == null || !footPoseProvider.checkForNewPose(robotSide))
-         return false;
-
-      feetManager.requestMoveStraight(robotSide, footPoseProvider.getDesiredFootPose(robotSide), footPoseProvider.getTrajectoryTime());
-      return true;
-   }
-
    protected boolean handleFootTrajectoryMessage(RobotSide robotSide)
    {
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();

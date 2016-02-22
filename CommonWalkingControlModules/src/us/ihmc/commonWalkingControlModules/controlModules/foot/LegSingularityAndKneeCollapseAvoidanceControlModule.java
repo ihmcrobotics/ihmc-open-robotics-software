@@ -972,7 +972,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       if (!USE_UNREACHABLE_FOOTSTEP_CORRECTION)
          return;
 
-      if (constraintType != ConstraintType.SWING && constraintType != ConstraintType.MOVE_STRAIGHT)
+      if (constraintType != ConstraintType.SWING && constraintType != ConstraintType.MOVE_VIA_WAYPOINTS)
          return;
 
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
