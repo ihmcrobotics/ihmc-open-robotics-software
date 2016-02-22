@@ -14,10 +14,15 @@ public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrench
       super(InverseDynamicsCommandType.EXTERNAL_WRENCH);
    }
 
-   public void set(RigidBody rigidBody, Wrench externalWrench)
+   public void setRigidBody(RigidBody rigidBody)
    {
       this.rigidBody = rigidBody;
       rigidBodyName = rigidBody.getName();
+   }
+
+   public void set(RigidBody rigidBody, Wrench externalWrench)
+   {
+      setRigidBody(rigidBody);
       externalWrenchAppliedOnRigidBody.set(externalWrench);
       externalWrenchAppliedOnRigidBody.changeFrame(rigidBody.getBodyFixedFrame());
    }

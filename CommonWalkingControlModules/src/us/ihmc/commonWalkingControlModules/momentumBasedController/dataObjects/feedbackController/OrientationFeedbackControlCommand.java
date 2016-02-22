@@ -24,6 +24,9 @@ public class OrientationFeedbackControlCommand extends FeedbackControlCommand<Or
    private RigidBody base;
    private RigidBody endEffector;
 
+   private String baseName;
+   private String endEffectorName;
+
    private final OrientationPIDGains gains = new OrientationPIDGains();
    private double weightForSolver = Double.POSITIVE_INFINITY;
 
@@ -36,7 +39,10 @@ public class OrientationFeedbackControlCommand extends FeedbackControlCommand<Or
    @Override
    public void set(OrientationFeedbackControlCommand other)
    {
-      set(other.base, other.endEffector);
+      base = other.base;
+      endEffector = other.endEffector;
+      baseName = other.baseName;
+      endEffectorName = other.endEffectorName;
       setSelectionMatrix(other.selectionMatrix);
       setGains(other.gains);
       desiredOrientationInWorld.set(other.desiredOrientationInWorld);
@@ -47,18 +53,20 @@ public class OrientationFeedbackControlCommand extends FeedbackControlCommand<Or
 
    public void set(RigidBody base, RigidBody endEffector)
    {
-      this.base = base;
-      this.endEffector = endEffector;
+      setBase(base);
+      setEndEffector(endEffector);
    }
 
    public void setBase(RigidBody base)
    {
       this.base = base;
+      baseName = base.getName();
    }
 
    public void setEndEffector(RigidBody endEffector)
    {
       this.endEffector = endEffector;
+      endEffectorName = endEffector.getName();
    }
 
    public void setGains(OrientationPIDGainsInterface gains)
@@ -117,9 +125,19 @@ public class OrientationFeedbackControlCommand extends FeedbackControlCommand<Or
       return base;
    }
 
+   public String getBaseName()
+   {
+      return baseName;
+   }
+
    public RigidBody getEndEffector()
    {
       return endEffector;
+   }
+
+   public String getEndEffectorName()
+   {
+      return endEffectorName;
    }
 
    public double getWeightForSolver()

@@ -38,6 +38,9 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
    private RigidBody base;
    private RigidBody endEffector;
 
+   private String baseName;
+   private String endEffectorName;
+
    private final SE3PIDGains gains = new SE3PIDGains();
    private double weightForSolver = Double.POSITIVE_INFINITY;
 
@@ -50,7 +53,10 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
    @Override
    public void set(SpatialFeedbackControlCommand other)
    {
-      set(other.base, other.endEffector);
+      base = other.base;
+      endEffector = other.endEffector;
+      baseName = other.baseName;
+      endEffectorName = other.endEffectorName;
       setSelectionMatrix(other.selectionMatrix);
       setGains(other.gains);
       setWeightForSolver(other.weightForSolver);
@@ -69,18 +75,20 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
 
    public void set(RigidBody base, RigidBody endEffector)
    {
-      this.base = base;
-      this.endEffector = endEffector;
+      setBase(base);
+      setEndEffector(endEffector);
    }
 
    public void setBase(RigidBody base)
    {
       this.base = base;
+      baseName = base.getName();
    }
 
    public void setEndEffector(RigidBody endEffector)
    {
       this.endEffector = endEffector;
+      endEffectorName = endEffector.getName();
    }
 
    public void setGains(SE3PIDGains gains)
@@ -182,9 +190,19 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
       return base;
    }
 
+   public String getBaseName()
+   {
+      return baseName;
+   }
+
    public RigidBody getEndEffector()
    {
       return endEffector;
+   }
+
+   public String getEndEffectorName()
+   {
+      return endEffectorName;
    }
 
    public DenseMatrix64F getNullspaceMultipliers()

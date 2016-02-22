@@ -1,27 +1,22 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Queue;
+import java.util.Map;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.controllers.SimplePDGainsHolder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<JointspaceFeedbackControlCommand>
 {
    private final int initialCapacity = 15;
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
-   private final Queue<MutableInt> unusedIntegers = new ArrayDeque<>(initialCapacity);
-   private final LinkedHashMap<InverseDynamicsJoint, MutableInt> jointToJointIndexMap = new LinkedHashMap<>(initialCapacity);
+   private final List<String> jointNames = new ArrayList<>(initialCapacity);
 
    private final RecyclingArrayList<MutableDouble> desiredPositions = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
    private final RecyclingArrayList<MutableDouble> desiredVelocities = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
@@ -33,21 +28,13 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<Joi
    public JointspaceFeedbackControlCommand()
    {
       super(FeedbackControlCommandType.JOINTSPACE_CONTROL);
-      initializeUnusedIntegers();
       clear();
-   }
-
-   private void initializeUnusedIntegers()
-   {
-      for (int i = 0; i < initialCapacity; i++)
-         unusedIntegers.add(new MutableInt(-1));
    }
 
    public void clear()
    {
-      while (!joints.isEmpty())
-         unusedIntegers.add(jointToJointIndexMap.remove(joints.remove(joints.size() - 1)));
-
+      joints.clear();
+      jointNames.clear();
       desiredPositions.clear();
       desiredVelocities.clear();
       feedForwardAccelerations.clear();
@@ -61,11 +48,10 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<Joi
    public void addJoint(OneDoFJoint joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
    {
       joints.add(joint);
+      jointNames.add(joint.getName());
       desiredPositions.add().setValue(desiredPosition);
       desiredVelocities.add().setValue(desiredVelocity);
       feedForwardAccelerations.add().setValue(feedForwardAcceleration);
-
-      updateIndexMap(joint, joints.size() - 1);
    }
 
    public void setWeightForSolver(double weight)
@@ -81,14 +67,6 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<Joi
       feedForwardAccelerations.get(jointIndex).setValue(feedForwardAcceleration);
    }
 
-   public void setOneDoFJointDesiredAcceleration(OneDoFJoint joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
-   {
-      int jointIndex = jointToJointIndexMap.get(joint).intValue();
-      desiredPositions.get(jointIndex).setValue(desiredPosition);
-      desiredVelocities.get(jointIndex).setValue(desiredVelocity);
-      feedForwardAccelerations.get(jointIndex).setValue(feedForwardAcceleration);
-   }
-
    @Override
    public void set(JointspaceFeedbackControlCommand other)
    {
@@ -99,23 +77,18 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<Joi
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
+         jointNames.add(other.jointNames.get(i));
          desiredPositions.add().setValue(other.getDesiredPosition(i));
          desiredVelocities.add().setValue(other.getDesiredVelocity(i));
          feedForwardAccelerations.add().setValue(other.getFeedForwardAcceleration(i));
       }
    }
 
-   private void updateIndexMap(InverseDynamicsJoint joint, int jointIndex)
+   public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
    {
-      if (unusedIntegers.isEmpty())
+      for (int i = 0; i < getNumberOfJoints(); i++)
       {
-         jointToJointIndexMap.put(joint, new MutableInt(joints.size() - 1));
-      }
-      else
-      {
-         MutableInt jointMutableIndex = unusedIntegers.remove();
-         jointMutableIndex.setValue(jointIndex);
-         jointToJointIndexMap.put(joint, jointMutableIndex);
+         joints.set(i, nameToJointMap.get(jointNames.get(i)));
       }
    }
 

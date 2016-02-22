@@ -14,7 +14,7 @@ public class DesiredOneDoFJointTorqueHolder
 {
    private final List<MutableDouble> unusedMutableDoubles;
    private final List<OneDoFJoint> jointsWithDesiredTorques;
-   private final Map<OneDoFJoint, MutableDouble> jointDesiredTorqueMap;
+   private final Map<String, MutableDouble> jointDesiredTorqueMap;
 
    public DesiredOneDoFJointTorqueHolder()
    {
@@ -32,7 +32,7 @@ public class DesiredOneDoFJointTorqueHolder
    public void reset()
    {
       for (int i = 0; i < jointsWithDesiredTorques.size(); i++)
-         unusedMutableDoubles.add(jointDesiredTorqueMap.remove(jointsWithDesiredTorques.get(i)));
+         unusedMutableDoubles.add(jointDesiredTorqueMap.remove(jointsWithDesiredTorques.get(i).getName()));
       jointsWithDesiredTorques.clear();
    }
 
@@ -53,11 +53,19 @@ public class DesiredOneDoFJointTorqueHolder
       }
    }
 
+   public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
+   {
+      for (int i = 0; i < jointsWithDesiredTorques.size(); i++)
+      {
+         jointsWithDesiredTorques.set(i, nameToJointMap.get(jointsWithDesiredTorques.get(i).getName()));
+      }
+   }
+
    public void registerDesiredTorque(OneDoFJoint oneDoFJoint, double tauDesired)
    {
       jointsWithDesiredTorques.add(oneDoFJoint);
 
-      if (jointDesiredTorqueMap.containsKey(oneDoFJoint))
+      if (jointDesiredTorqueMap.containsKey(oneDoFJoint.getName()))
          throw new RuntimeException("Reset before registering new joint torques.");
 
       MutableDouble jointMutableTorque;
@@ -66,7 +74,7 @@ public class DesiredOneDoFJointTorqueHolder
          jointMutableTorque = new MutableDouble();
       else
          jointMutableTorque = unusedMutableDoubles.remove(unusedMutableDoubles.size() - 1);
-      jointDesiredTorqueMap.put(oneDoFJoint, jointMutableTorque);
+      jointDesiredTorqueMap.put(oneDoFJoint.getName(), jointMutableTorque);
       jointMutableTorque.setValue(tauDesired);
    }
 
@@ -75,7 +83,7 @@ public class DesiredOneDoFJointTorqueHolder
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         joint.setTau(jointDesiredTorqueMap.get(joint).doubleValue());
+         joint.setTau(jointDesiredTorqueMap.get(joint.getName()).doubleValue());
       }
    }
 
@@ -86,7 +94,7 @@ public class DesiredOneDoFJointTorqueHolder
 
    public double getDesiredJointTorque(int index)
    {
-      return jointDesiredTorqueMap.get(jointsWithDesiredTorques.get(index)).doubleValue();
+      return jointDesiredTorqueMap.get(jointsWithDesiredTorques.get(index).getName()).doubleValue();
    }
 
    public void set(DesiredOneDoFJointTorqueHolder other)
