@@ -3,13 +3,13 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {
    private boolean hasBeenInitialized = false;
+   private final boolean isPartOfClosedKinematicLoop;
 
    /**
     * In this type of joint:
@@ -25,6 +25,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    public PassiveRevoluteJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, FrameVector jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       super(name, predecessor, beforeJointFrame, jointAxis);
+      this.isPartOfClosedKinematicLoop = isPartOfClosedKinematicLoop;
    }
    
    /**
@@ -131,5 +132,10 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    public boolean isPassiveJoint()
    {
       return true;
+   }
+   
+   public boolean isPartOfClosedKinematicLoop()
+   {
+      return isPartOfClosedKinematicLoop;
    }
 }
