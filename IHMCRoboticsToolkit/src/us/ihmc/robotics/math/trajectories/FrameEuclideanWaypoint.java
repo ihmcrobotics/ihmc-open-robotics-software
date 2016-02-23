@@ -45,6 +45,31 @@ public class FrameEuclideanWaypoint extends ReferenceFrameHolder implements Eucl
       setIncludingFrame(frameEuclideanWaypoint);
    }
 
+   public void setTime(double time)
+   {
+      this.time = time;
+   }
+
+   public void setPosition(Point3d position)
+   {
+      this.position.set(position);
+   }
+
+   public void setPosition(FramePoint position)
+   {
+      this.position.set(position);
+   }
+
+   public void setLinearVelocity(Vector3d linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
+   public void setLinearVelocity(FrameVector linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
    public void set(double time, Point3d position, Vector3d linearVelocity)
    {
       // Ensuring frame consistency without crashing
@@ -117,6 +142,21 @@ public class FrameEuclideanWaypoint extends ReferenceFrameHolder implements Eucl
       linearVelocity.setIncludingFrame(frameEuclideanWaypoint.linearVelocity);
    }
 
+   public void setTimeToZero()
+   {
+      time = 0.0;
+   }
+
+   public void setPositionToZero()
+   {
+      position.setToZero();
+   }
+
+   public void setLinearVelocityToZero()
+   {
+      linearVelocity.setToZero();
+   }
+
    public void setToZero()
    {
       time = 0.0;
@@ -130,6 +170,21 @@ public class FrameEuclideanWaypoint extends ReferenceFrameHolder implements Eucl
       time = 0.0;
       position.setToZero(referenceFrame);
       linearVelocity.setToZero(referenceFrame);
+   }
+
+   public void setTimeToNaN()
+   {
+      time = Double.NaN;
+   }
+
+   public void setPositionToNaN()
+   {
+      position.setToNaN();
+   }
+
+   public void setLinearVelocityToNaN()
+   {
+      linearVelocity.setToNaN();
    }
 
    public void setToNaN()

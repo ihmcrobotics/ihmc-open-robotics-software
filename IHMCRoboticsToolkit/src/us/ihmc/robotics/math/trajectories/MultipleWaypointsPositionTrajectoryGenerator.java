@@ -10,6 +10,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /*
@@ -141,8 +142,18 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
    public void appendWaypoints(EuclideanWaypointInterface[] euclideanWaypoint)
    {
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + euclideanWaypoint.length);
+
       for (int i = 0; i < euclideanWaypoint.length; i++)
          appendWaypointUnsafe(euclideanWaypoint[i]);
+   }
+
+   public void appendWaypoints(RecyclingArrayList<? extends EuclideanWaypointInterface> euclideanWaypoint)
+   {
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + euclideanWaypoint.size());
+
+      for (int i = 0; i < euclideanWaypoint.size(); i++)
+         appendWaypointUnsafe(euclideanWaypoint.get(i));
    }
 
    private void checkNumberOfWaypoints(int length)
