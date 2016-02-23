@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationMa
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
@@ -53,13 +52,12 @@ public class VariousWalkingManagers
       double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
       if (fullRobotModel.getHead() != null)
       {
-         HeadOrientationProvider desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
          HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = variousWalkingProviders.getHeadTrajectoryMessageSubscriber();
 
          YoOrientationPIDGainsInterface headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
          double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
          headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains,
-               desiredHeadOrientationProvider, headTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, initialHeadYawPitchRoll, registry);
+               headTrajectoryMessageSubscriber, initialHeadYawPitchRoll, registry);
       }
 
       ChestOrientationManager chestOrientationManager = null;

@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;

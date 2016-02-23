@@ -97,6 +97,16 @@ public class HeadTrajectoryMessage extends IHMCRosApiMessage<HeadTrajectoryMessa
       return taskspaceWaypoints;
    }
 
+   public SO3WaypointMessage getLastWaypoint()
+   {
+      return taskspaceWaypoints[getNumberOfWaypoints() - 1];
+   }
+
+   public double getTrajectoryTime()
+   {
+      return getLastWaypoint().getTime();
+   }
+
    private void rangeCheck(int waypointIndex)
    {
       if (waypointIndex >= getNumberOfWaypoints() || waypointIndex < 0)

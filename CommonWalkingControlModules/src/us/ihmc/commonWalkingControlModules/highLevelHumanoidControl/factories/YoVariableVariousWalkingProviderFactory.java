@@ -19,14 +19,12 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessage
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredChestOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
@@ -68,8 +66,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
       double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
-      HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(),
-            trajectoryTimeHeadOrientation, registry);
       DesiredComHeightProvider desiredComHeightProvider = null;
       PelvisPoseProvider pelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
       ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(),
@@ -89,9 +85,9 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, armTrajectoryMessageSubscriber,
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
-            pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPovider, headOrientationProvider, desiredComHeightProvider,
-            pelvisPoseProvider, handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, chestOrientationProvider,
-            highLevelStateProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
+            pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPovider, desiredComHeightProvider, pelvisPoseProvider,
+            handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, chestOrientationProvider, highLevelStateProvider,
+            controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }
