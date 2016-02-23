@@ -30,7 +30,7 @@ public class SpiralBasedAlgorithm
 
    public static Point3d[] generatePointsOnSphere(Point3d sphereOrigin, double sphereRadius, int numberOfPointsToGenerate)
    {
-      return generatePointsOnSphere(new Point3d(), sphereRadius, numberOfPointsToGenerate, computeMagicDeltaN(numberOfPointsToGenerate));
+      return generatePointsOnSphere(sphereOrigin, sphereRadius, numberOfPointsToGenerate, computeMagicDeltaN(numberOfPointsToGenerate));
    }
 
    /**
