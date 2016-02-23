@@ -11,11 +11,9 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -26,8 +24,8 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
@@ -189,10 +187,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Quat4d desiredChestQuat = new Quat4d();
 
 
-      DoubleYoVariable controllerDesiredInWorldQx = (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qx");
-      DoubleYoVariable controllerDesiredInWorldQy = (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qy");
-      DoubleYoVariable controllerDesiredInWorldQz = (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qz");
-      DoubleYoVariable controllerDesiredInWorldQs = (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qs");
+      DoubleYoVariable controllerDesiredInWorldQx = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qx");
+      DoubleYoVariable controllerDesiredInWorldQy = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qy");
+      DoubleYoVariable controllerDesiredInWorldQz = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qz");
+      DoubleYoVariable controllerDesiredInWorldQs = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qs");
       YoFrameQuaternion controllerDesiredOrientationInWorld = new YoFrameQuaternion(controllerDesiredInWorldQx, controllerDesiredInWorldQy, controllerDesiredInWorldQz, controllerDesiredInWorldQs, worldFrame);
       FrameOrientation controllerChestDesiredFrameOrientation = new FrameOrientation();
       DoubleYoVariable chestAxisAngleErrorX = (DoubleYoVariable) scs.getVariable("chestElevatorAxisAngleOrientationController", "chestElevatorAxisAngleErrorInBody" + "X");

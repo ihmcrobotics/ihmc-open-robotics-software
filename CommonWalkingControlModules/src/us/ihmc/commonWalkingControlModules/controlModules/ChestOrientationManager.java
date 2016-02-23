@@ -17,19 +17,15 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class ChestOrientationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ChestOrientationControlModule chestOrientationControlModule;
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
@@ -40,7 +36,6 @@ public class ChestOrientationManager
 
    private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
    private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-   private final YoFrameVector yoControlledAngularAcceleration;
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
 
@@ -54,9 +49,7 @@ public class ChestOrientationManager
    private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   private final FrameVector controlledAngularAcceleration = new FrameVector();
-
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface chestControlGains,
+   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains,
          VariousWalkingProviders variousWalkingProviders, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.yoTime = momentumBasedController.getYoTime();
@@ -69,13 +62,9 @@ public class ChestOrientationManager
       RigidBody chest = fullRobotModel.getChest();
       RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
-      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
-      double controlDT = momentumBasedController.getControlDT();
-      chestOrientationControlModule = new ChestOrientationControlModule(pelvisZUpFrame, elevator, chest, twistCalculator, controlDT, chestControlGains, registry);
 
       orientationFeedbackControlCommand.set(elevator, chest);
-
-      yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestFrame, registry);
+      orientationFeedbackControlCommand.setGains(gains);
 
       boolean allowMultipleFrames = true;
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", 15, allowMultipleFrames, pelvisZUpFrame, registry);
@@ -115,20 +104,11 @@ public class ChestOrientationManager
             waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
 
          waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         desiredOrientation.changeFrame(worldFrame);
+         desiredAngularVelocity.setToZero(worldFrame);
+         feedForwardAngularAcceleration.setToZero(worldFrame);
+         orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
-      }
-
-      chestOrientationControlModule.compute();
-
-      if (yoControlledAngularAcceleration != null)
-      {
-         SpatialAccelerationVector spatialAcceleration = chestOrientationControlModule.getSpatialAccelerationCommand().getSpatialAcceleration();
-         if (spatialAcceleration.getExpressedInFrame() != null) // That happens when there is no joint to control.
-         {
-            spatialAcceleration.getAngularPart(controlledAngularAcceleration);
-            yoControlledAngularAcceleration.set(controlledAngularAcceleration);
-         }
       }
    }
 
@@ -218,7 +198,7 @@ public class ChestOrientationManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return chestOrientationControlModule.getSpatialAccelerationCommand();
+      return null;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
