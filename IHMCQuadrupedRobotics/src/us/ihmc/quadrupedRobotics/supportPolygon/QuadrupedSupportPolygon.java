@@ -33,6 +33,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
+   private static final FramePoint ZERO_FRAME_POINT = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
    private final FramePoint temporaryFramePoint = new FramePoint();
    private final FrameVector tempPlaneNormalInWorld = new FrameVector();
    
@@ -352,7 +353,7 @@ public class QuadrupedSupportPolygon implements Serializable
    public FramePoint getFootstepOrCreateIfNonSupporting(RobotQuadrant robotQuadrant)
    {
       if  (!containsFootstep(robotQuadrant))
-         setFootstep(robotQuadrant, new FramePoint());
+         setFootstep(robotQuadrant, ZERO_FRAME_POINT);
       
       return getFootstep(robotQuadrant);
    }
@@ -1064,6 +1065,8 @@ public class QuadrupedSupportPolygon implements Serializable
       // verify swing legs are not diagonals quadrants
       if (getFirstNonSupportingQuadrant() == polygonToCompare.getFirstNonSupportingQuadrant().getDiagonalOppositeQuadrant())
          throw new UndefinedOperationException("Swing quadrants must not be diagonal opposites.");
+      if (commonPolygonToPack == this)
+         throw new RuntimeException("Can't pack into self. commonPolygonToPack = this");
 
       // return null if swing legs are not same side *** Assumes regular gait ***
       RobotQuadrant thisSwingLeg = getFirstNonSupportingQuadrant();
@@ -1107,38 +1110,28 @@ public class QuadrupedSupportPolygon implements Serializable
    }
 
    /**
-    *  This method returns the common support polygon bewteen this and the supplied supportPolygon
-    *  shrunken by the specified amounts.  Each amount is the distance in meters the edge should be
-    *  moved in parallel to itself.
-    *
-    *  *** Assumes regular gait 
-    *
-    * @param nextSupportPolygon SupportPolygon
-    *        1) must contain only three legs
-    *        2) exactly two footsteps must be the same
-    * @param quadrantForIntersection LegName is the legname to assign to the intersection footstep
-    *        3) must be one of the swinging (same side) leg names
-    * @param frontDistance double  distance to shrink the front side
-    * @param sideDistance double  distance to shrink the side side
-    * @param hindDistance double  distance to shrink the hind side
-    *
-    * @return SupportPolygon That is common to both (can be null for opposite side swing legs)
-    *        This should be the two matching feet and the intersection of the two tror lines
-    *        Each side is shrunken by the specified distance.
-    *        If the remaining distance is insufficent to shrink, then return null
+    * Returns the shrunken common triangle.
+    * 
+    * @param nextSupportPolygon
+    * @param shrunkenCommonPolygonToPack
+    * @param tempCommonSupportPolygon Can be any non-null polygon.
+    * @param quadrantForIntersection
+    * @param frontDistance
+    * @param sideDistance
+    * @param hindDistance
     */
    public void getShrunkenCommonTriangle2d(QuadrupedSupportPolygon nextSupportPolygon, QuadrupedSupportPolygon shrunkenCommonPolygonToPack,
-         RobotQuadrant quadrantForIntersection, double frontDistance, double sideDistance, double hindDistance)
+         QuadrupedSupportPolygon tempCommonSupportPolygon, RobotQuadrant quadrantForIntersection, double frontDistance, double sideDistance,
+         double hindDistance)
    {
-      QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
-      getCommonTriangle2d(nextSupportPolygon, commonSupportPolygon, quadrantForIntersection);
+      getCommonTriangle2d(nextSupportPolygon, tempCommonSupportPolygon, quadrantForIntersection);
       
-      shrunkenCommonPolygonToPack.set(commonSupportPolygon);
+      shrunkenCommonPolygonToPack.set(tempCommonSupportPolygon);
       
-      RobotQuadrant swingLeg = commonSupportPolygon.getFirstNonSupportingQuadrant();
+      RobotQuadrant swingLeg = tempCommonSupportPolygon.getFirstNonSupportingQuadrant();
       RobotQuadrant swingLegSameSide = swingLeg.getSameSideQuadrant();
-      RobotQuadrant nextEdgeQuadrant = commonSupportPolygon.getNextClockwiseSupportingQuadrant(swingLegSameSide);
-      RobotQuadrant previousEdgeQuadrant = commonSupportPolygon.getNextCounterClockwiseSupportingQuadrant(swingLegSameSide);
+      RobotQuadrant nextEdgeQuadrant = tempCommonSupportPolygon.getNextClockwiseSupportingQuadrant(swingLegSameSide);
+      RobotQuadrant previousEdgeQuadrant = tempCommonSupportPolygon.getNextCounterClockwiseSupportingQuadrant(swingLegSameSide);
       
       RobotQuadrant frontEdgeQuadrant;
       RobotQuadrant sideEdgeQuadrant;
@@ -1156,11 +1149,11 @@ public class QuadrupedSupportPolygon implements Serializable
          hindEdgeQuadrant = swingLegSameSide;
       }
       
-      commonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, frontEdgeQuadrant, frontDistance);
-      commonSupportPolygon.set(shrunkenCommonPolygonToPack);
-      commonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, sideEdgeQuadrant, sideDistance);
-      commonSupportPolygon.set(shrunkenCommonPolygonToPack);
-      commonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, hindEdgeQuadrant, hindDistance);
+      tempCommonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, frontEdgeQuadrant, frontDistance);
+      tempCommonSupportPolygon.set(shrunkenCommonPolygonToPack);
+      tempCommonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, sideEdgeQuadrant, sideDistance);
+      tempCommonSupportPolygon.set(shrunkenCommonPolygonToPack);
+      tempCommonSupportPolygon.getShrunkenPolygon2d(shrunkenCommonPolygonToPack, hindEdgeQuadrant, hindDistance);
    }
    
    /**
