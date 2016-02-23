@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
@@ -49,7 +48,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
    private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
-   private final DesiredHandstepProvider handstepProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
@@ -74,7 +72,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
       this.scriptFileLoader = scriptFileLoader;
       desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
-      handstepProvider = new DesiredHandstepProvider(fullRobotModel);
       desiredComHeightProvider = new DesiredComHeightProvider(null);
 
       handTrajectoryMessageSubscriber = new HandTrajectoryMessageSubscriber(null);
@@ -269,11 +266,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()
    {
       return footTrajectoryMessageSubscriber;
-   }
-
-   public DesiredHandstepProvider getDesiredHandstepProvider()
-   {
-      return handstepProvider;
    }
 
    @Override
