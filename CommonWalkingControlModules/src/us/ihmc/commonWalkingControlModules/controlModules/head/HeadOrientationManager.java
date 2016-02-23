@@ -17,7 +17,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class HeadOrientationManager
 {
@@ -25,7 +24,6 @@ public class HeadOrientationManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
-   private final HeadOrientationControlModule headOrientationControlModule;
    private final HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable receivedNewHeadOrientationTime;
@@ -41,6 +39,7 @@ public class HeadOrientationManager
    private final FrameOrientation homeOrientation = new FrameOrientation();
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
@@ -57,12 +56,10 @@ public class HeadOrientationManager
       RigidBody chest = fullRobotModel.getChest();
       RigidBody elevator = fullRobotModel.getElevator();
       orientationFeedbackControlCommand.set(elevator, head);
+      orientationFeedbackControlCommand.setGains(gains);
       chestFrame = chest.getBodyFixedFrame();
       headFrame = head.getBodyFixedFrame();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      this.headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, chestFrame, headOrientationControllerParameters, gains,
-            registry, yoGraphicsListRegistry);
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       parentRegistry.addChild(registry);
 
@@ -119,9 +116,10 @@ public class HeadOrientationManager
          isTrackingOrientation.set(!waypointOrientationTrajectoryGenerator.isDone());
       }
       waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-      headOrientationControlModule.setOrientationToTrack(desiredOrientation);
-
-      headOrientationControlModule.compute();
+      desiredOrientation.changeFrame(worldFrame);
+      desiredAngularVelocity.setToZero(worldFrame);
+      feedForwardAngularAcceleration.setToZero(worldFrame);
+      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
    }
 
    private void handleHeadTrajectoryMessages()
@@ -156,7 +154,7 @@ public class HeadOrientationManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return headOrientationControlModule.getInverseDynamicsCommand();
+      return null;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
