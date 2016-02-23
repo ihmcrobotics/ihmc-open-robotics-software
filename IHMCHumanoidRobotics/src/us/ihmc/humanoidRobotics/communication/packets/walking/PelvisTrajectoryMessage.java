@@ -103,6 +103,16 @@ public class PelvisTrajectoryMessage extends IHMCRosApiMessage<PelvisTrajectoryM
       return taskspaceWaypoints;
    }
 
+   public SE3WaypointMessage getLastWaypoint()
+   {
+      return taskspaceWaypoints[getNumberOfWaypoints() - 1];
+   }
+
+   public double getTrajectoryTime()
+   {
+      return getLastWaypoint().time;
+   }
+
    private void rangeCheck(int waypointIndex)
    {
       if (waypointIndex >= getNumberOfWaypoints() || waypointIndex < 0)
