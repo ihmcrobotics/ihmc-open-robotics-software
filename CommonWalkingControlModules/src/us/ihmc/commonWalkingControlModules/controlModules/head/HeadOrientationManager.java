@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -16,157 +15,116 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class HeadOrientationManager
 {
+   private static final double defaultTrajectoryTime = 1.0;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
    private final HeadOrientationControlModule headOrientationControlModule;
-   private final MomentumBasedController momentumBasedController;
    private final HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber;
-   private final HeadOrientationProvider desiredHeadOrientationProvider;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable receivedNewHeadOrientationTime;
-   private final DoubleYoVariable headOrientationTrajectoryTime;
-   private OrientationTrajectoryGenerator activeTrajectoryGenerator;
-   private final OrientationInterpolationTrajectoryGenerator simpleOrientationTrajectoryGenerator;
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
 
    private final BooleanYoVariable isTrackingOrientation;
-   private final BooleanYoVariable isUsingWaypointTrajectory;
 
+   private final ReferenceFrame headFrame;
    private final ReferenceFrame chestFrame;
-   private final YoQuaternionProvider initialOrientationProvider;
-   private final YoQuaternionProvider finalOrientationProvider;
 
    private final BooleanYoVariable hasBeenInitialized;
+
+   private final FrameOrientation homeOrientation = new FrameOrientation();
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoOrientationPIDGainsInterface gains, HeadOrientationProvider desiredHeadOrientationProvider, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
-         double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
+         YoOrientationPIDGainsInterface gains, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber, double[] initialDesiredHeadYawPitchRoll,
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
-      this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+
+      RigidBody head = fullRobotModel.getHead();
+      RigidBody chest = fullRobotModel.getChest();
+      RigidBody elevator = fullRobotModel.getElevator();
+      orientationFeedbackControlCommand.set(elevator, head);
+      chestFrame = chest.getBodyFixedFrame();
+      headFrame = head.getBodyFixedFrame();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       this.headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, chestFrame, headOrientationControllerParameters, gains,
             registry, yoGraphicsListRegistry);
-      this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       parentRegistry.addChild(registry);
 
-      RigidBody elevator = fullRobotModel.getElevator();
-      RigidBody head = fullRobotModel.getHead();
-      orientationFeedbackControlCommand.set(elevator, head);
+      receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
+      isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
 
-      if (desiredHeadOrientationProvider != null || headTrajectoryMessageSubscriber != null)
-      {
+      hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
+      hasBeenInitialized.set(false);
 
-         receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
-         isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-         headOrientationTrajectoryTime = new DoubleYoVariable("headOrientationTrajectoryTime", registry);
-
-         hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
-         hasBeenInitialized.set(false);
-
-         headOrientationTrajectoryTime.set(trajectoryTime);
-         DoubleProvider trajectoryTimeProvider = new YoVariableDoubleProvider(headOrientationTrajectoryTime);
-         initialOrientationProvider = new YoQuaternionProvider("headInitialOrientation", chestFrame, registry);
-         finalOrientationProvider = new YoQuaternionProvider("headFinalOrientation", chestFrame, registry);
-         desiredOrientation.setIncludingFrame(chestFrame, initialDesiredHeadYawPitchRoll);
-         finalOrientationProvider.setOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", chestFrame, trajectoryTimeProvider,
-               initialOrientationProvider, finalOrientationProvider, registry);
-         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", 15, true, chestFrame, registry);
-         waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
-         simpleOrientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
-
-         isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
-         isUsingWaypointTrajectory.set(false);
-
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-      }
-      else
-      {
-         receivedNewHeadOrientationTime = null;
-         headOrientationTrajectoryTime = null;
-         isTrackingOrientation = null;
-         isUsingWaypointTrajectory = null;
-         hasBeenInitialized = null;
-         initialOrientationProvider = null;
-         finalOrientationProvider = null;
-         simpleOrientationTrajectoryGenerator = null;
-         waypointOrientationTrajectoryGenerator = null;
-      }
+      homeOrientation.setIncludingFrame(chestFrame, initialDesiredHeadYawPitchRoll);
+      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", 15, true, chestFrame, registry);
+      waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
    }
 
    private void initialize()
    {
-      if (hasBeenInitialized == null || hasBeenInitialized.getBooleanValue())
+      if (hasBeenInitialized.getBooleanValue())
          return;
 
       hasBeenInitialized.set(true);
 
-      ReferenceFrame headFrame = momentumBasedController.getFullRobotModel().getHead().getBodyFixedFrame();
       desiredOrientation.setToZero(headFrame);
-      desiredOrientation.changeFrame(chestFrame);
-      initialOrientationProvider.setOrientation(desiredOrientation);
-      receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-      simpleOrientationTrajectoryGenerator.initialize();
-      isTrackingOrientation.set(true);
-      isUsingWaypointTrajectory.set(false);
-      activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
+      goToHome(defaultTrajectoryTime, desiredOrientation);
    }
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   public void goToHomeFromCurrentDesired(double trajectoryTime)
+   {
+      waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      goToHome(trajectoryTime, desiredOrientation);
+   }
+
+   public void goToHome(double trajectoryTime, FrameOrientation initialOrientation)
+   {
+      initialOrientation.changeFrame(chestFrame);
+      desiredAngularVelocity.setToZero(chestFrame);
+
+      waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(chestFrame);
+      waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, initialOrientation, desiredAngularVelocity);
+      waypointOrientationTrajectoryGenerator.appendWaypoint(trajectoryTime, homeOrientation, desiredAngularVelocity);
+      waypointOrientationTrajectoryGenerator.initialize();
+
+      receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
+      isTrackingOrientation.set(true);
+   }
 
    public void compute()
    {
       initialize();
 
-      if (isUsingWaypointTrajectory != null)
-      {
-         if (isUsingWaypointTrajectory.getBooleanValue())
-            activeTrajectoryGenerator = waypointOrientationTrajectoryGenerator;
-         else
-            activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-      }
-
-      checkForNewDesiredOrientationInformation();
       handleHeadTrajectoryMessages();
 
-      if (desiredHeadOrientationProvider != null)
+      if (isTrackingOrientation.getBooleanValue())
       {
-         if (isTrackingOrientation.getBooleanValue())
-         {
-            double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
-            activeTrajectoryGenerator.compute(deltaTime);
-            isTrackingOrientation.set(!activeTrajectoryGenerator.isDone());
-         }
-         activeTrajectoryGenerator.getOrientation(desiredOrientation);
-         headOrientationControlModule.setOrientationToTrack(desiredOrientation);
+         double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
+         waypointOrientationTrajectoryGenerator.compute(deltaTime);
+         isTrackingOrientation.set(!waypointOrientationTrajectoryGenerator.isDone());
       }
+      waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      headOrientationControlModule.setOrientationToTrack(desiredOrientation);
 
       headOrientationControlModule.compute();
    }
-
-   private final FrameOrientation tempOrientation = new FrameOrientation();
-   private final FrameVector tempAngularVelocity = new FrameVector();
 
    private void handleHeadTrajectoryMessages()
    {
@@ -176,59 +134,26 @@ public class HeadOrientationManager
       HeadTrajectoryMessage message = headTrajectoryMessageSubscriber.pollMessage();
       receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
 
-      waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-      waypointOrientationTrajectoryGenerator.clear();
-
       if (message.getWaypoint(0).getTime() > 1.0e-5)
       {
-         activeTrajectoryGenerator.getOrientation(tempOrientation);
-         tempOrientation.changeFrame(worldFrame);
-         tempAngularVelocity.setToZero(worldFrame);
+         waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
+         desiredOrientation.changeFrame(worldFrame);
+         desiredAngularVelocity.setToZero(worldFrame);
 
-         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         waypointOrientationTrajectoryGenerator.clear();
+         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
+      }
+      else
+      {
+         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         waypointOrientationTrajectoryGenerator.clear();
       }
 
       waypointOrientationTrajectoryGenerator.appendWaypoints(message.getWaypoints());
       waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
       waypointOrientationTrajectoryGenerator.initialize();
-      isUsingWaypointTrajectory.set(true);
-      activeTrajectoryGenerator = waypointOrientationTrajectoryGenerator;
       isTrackingOrientation.set(true);
-   }
-
-   private void checkForNewDesiredOrientationInformation()
-   {
-      if (desiredHeadOrientationProvider == null)
-         return;
-
-      if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
-      {
-         simpleOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         initialOrientationProvider.setOrientation(desiredOrientation);
-         FrameOrientation desiredHeadOrientation = desiredHeadOrientationProvider.getDesiredHeadOrientation();
-         desiredHeadOrientation.changeFrame(chestFrame);
-         finalOrientationProvider.setOrientation(desiredHeadOrientation);
-         headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
-         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-         simpleOrientationTrajectoryGenerator.initialize();
-         isTrackingOrientation.set(true);
-         isUsingWaypointTrajectory.set(false);
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-      }
-      else if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
-      {
-         simpleOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         initialOrientationProvider.setOrientation(desiredOrientation);
-         headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
-         headOrientationControlModule.getDesiredFrameOrientation(desiredOrientation);
-         finalOrientationProvider.setOrientation(desiredOrientation);
-         headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
-         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-         simpleOrientationTrajectoryGenerator.initialize();
-         isTrackingOrientation.set(true);
-         isUsingWaypointTrajectory.set(false);
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-      }
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
