@@ -374,6 +374,23 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       addVertices(vertices, numberOfVertices);
       update();
    }
+   
+   /**
+    * This method does:
+    * 1- {@code clear()};
+    * 2- {@code addVertexByProjectionOntoXYPlane(vertices.get(i)};
+    * 3- {@code update()}.
+    * @param vertices {@code List<FramePoint>} the list of points that is used to creates the vertices.
+    */
+   public void setAndUpdate(List<FramePoint> vertices)
+   {
+      clear();
+      for (int i = 0; i < vertices.size(); i++)
+      {
+         addVertexByProjectionOntoXYPlane(vertices.get(i));
+      }
+      update();
+   }
 
    /**
     * This method does:

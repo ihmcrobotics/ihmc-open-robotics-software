@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
 /**
@@ -117,9 +118,18 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D[i].getTime(), waypoints1D[i].getPosition(), waypoints1D[i].getVelocity());
    }
 
+   public void appendWaypoints(RecyclingArrayList<? extends Waypoint1DInterface> waypoints1D)
+   {
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.size());
+
+      for (int i = 0; i < waypoints1D.size(); i++)
+         appendWaypointUnsafe(waypoints1D.get(i).getTime(), waypoints1D.get(i).getPosition(), waypoints1D.get(i).getVelocity());
+   }
+
    public void appendWaypoints(TrajectoryWaypoint1DDataInterface trajectoryWaypoint1DData)
    {
-      appendWaypoints(trajectoryWaypoint1DData.getWaypoints());
+      for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfWaypoints(); i++)
+         appendWaypoint(trajectoryWaypoint1DData.getWaypoint(i));
    }
 
    private void checkNumberOfWaypoints(int length)

@@ -45,6 +45,31 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       setIncludingFrame(frameSO3Waypoint);
    }
 
+   public void setTime(double time)
+   {
+      this.time = time;
+   }
+
+   public void setOrientation(Quat4d orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
+   public void setOrientation(FrameOrientation orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
+   public void setAngularVelocity(Vector3d angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
+   }
+   
+   public void setAngularVelocity(FrameVector angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
+   }
+
    public void set(double time, Quat4d orientation, Vector3d angularVelocity)
    {
       // Ensuring frame consistency without crashing
@@ -117,6 +142,21 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       angularVelocity.setIncludingFrame(frameSO3Waypoint.angularVelocity);
    }
 
+   public void setTimeToZero()
+   {
+      time = 0.0;
+   }
+
+   public void setOrientationToZero()
+   {
+      orientation.setToZero();
+   }
+
+   public void setAngularVelocityToZero()
+   {
+      angularVelocity.setToZero();
+   }
+
    public void setToZero()
    {
       time = 0.0;
@@ -130,6 +170,21 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       time = 0.0;
       orientation.setToZero(referenceFrame);
       angularVelocity.setToZero(referenceFrame);
+   }
+
+   public void setTimeToNaN()
+   {
+      time = Double.NaN;
+   }
+
+   public void setOrientationToNaN()
+   {
+      orientation.setToNaN();
+   }
+
+   public void setAngularVelocityToNaN()
+   {
+      angularVelocity.setToNaN();
    }
 
    public void setToNaN()

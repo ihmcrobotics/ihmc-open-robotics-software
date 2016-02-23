@@ -40,6 +40,8 @@ public class QuadrupedSupportPolygon implements Serializable
    private final FramePoint[] tempPointListForInCirclePoint = new FramePoint[4];
    private final FramePoint tempInCircleCenter = new FramePoint();
    
+   private final FramePoint tempIntersection = new FramePoint();
+   
    private final FrameVector[] tempVectorsForCommonSupportPolygon = new FrameVector[] {new FrameVector(), new FrameVector()};
    private final Point2d[] tempPointsForCornerCircle = new Point2d[] {new Point2d(), new Point2d(), new Point2d(), new Point2d()};
    private final Vector2d tempVectorForCornerCircle = new Vector2d();
@@ -1390,6 +1392,18 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       
       return firstLeg.getDiagonalOppositeQuadrant();
+   }
+   
+   /**
+    * Gets distance from P1 to trotLine specified by front quadrant.
+    */
+   public double getDistanceFromP1ToTrotLine2d(RobotQuadrant trotQuadrant, FramePoint p1, FramePoint p2)
+   {
+      GeometryTools.getIntersectionBetweenTwoLines2d(tempIntersection, p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()));
+
+      //beacuse this is a 2d method, set Z's to be the same
+      tempIntersection.setZ(p1.getZ());
+      return tempIntersection.distance(p1);
    }
 
    /**

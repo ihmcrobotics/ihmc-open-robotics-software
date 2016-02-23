@@ -595,9 +595,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    }
 
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
-   @Ignore
-
-	@DeployableTestMethod(estimatedDuration = 50.0)
+	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
