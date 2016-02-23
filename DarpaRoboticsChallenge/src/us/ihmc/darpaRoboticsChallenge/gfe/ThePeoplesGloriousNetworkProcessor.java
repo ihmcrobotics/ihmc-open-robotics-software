@@ -32,7 +32,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RosArmJointTrajectorySubscriber;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
@@ -92,7 +92,7 @@ public class ThePeoplesGloriousNetworkProcessor
       HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       gfe_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
-      gfe_communicator.attachListener(HighLevelStateChangePacket.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
+      gfe_communicator.attachListener(HighLevelStateChangeMessage.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
       gfe_communicator.attachListener(CapturabilityBasedStatus.class, new RosCapturabilityBasedStatusPublisher(rosMainNode, namespace));
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel);

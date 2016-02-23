@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMess
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 
 public class VariousWalkingProviders
 {
@@ -40,11 +40,11 @@ public class VariousWalkingProviders
 
    // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
    private final FootstepProvider footstepProvider;
-   private final AbortWalkingProvider abortProvider;
+   private final AbortWalkingMessageSubscriber abortWalkingMessageSubscriber;
 
    private final AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator;
 
-   private final DesiredHighLevelStateProvider desiredHighLevelStateProvider;
+   private final HighLevelStateMessageSubscriber highLevelStateMessageSubscriber;
 
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final ControlStatusProducer controlStatusProducer;
@@ -64,9 +64,9 @@ public class VariousWalkingProviders
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
          FootstepProvider footstepProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
          AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
-         DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer,
+         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber, ControlStatusProducer controlStatusProducer,
          CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
-         AbortWalkingProvider abortProvider)
+         AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
       this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
@@ -81,7 +81,7 @@ public class VariousWalkingProviders
       this.pelvisHeightTrajectoryMessageSubscriber = pelvisHeightTrajectoryMessageSubscriber;
       this.goHomeMessageSubscriber = goHomeMessageSubscriber;
 
-      this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
+      this.highLevelStateMessageSubscriber = highLevelStateMessageSubscriber;
       this.footstepProvider = footstepProvider;
       this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
 
@@ -93,13 +93,13 @@ public class VariousWalkingProviders
 
       this.handPoseStatusProducer = handPoseStatusProducer;
 
-      if (abortProvider == null)
+      if (abortWalkingMessageSubscriber == null)
       {
-         this.abortProvider = new AbortWalkingProvider();
+         this.abortWalkingMessageSubscriber = new AbortWalkingMessageSubscriber();
       }
       else
       {
-         this.abortProvider = abortProvider;
+         this.abortWalkingMessageSubscriber = abortWalkingMessageSubscriber;
       }
 
    }
@@ -192,9 +192,9 @@ public class VariousWalkingProviders
       return goHomeMessageSubscriber;
    }
 
-   public DesiredHighLevelStateProvider getDesiredHighLevelStateProvider()
+   public HighLevelStateMessageSubscriber getHighLevelStateMessageSubscriber()
    {
-      return desiredHighLevelStateProvider;
+      return highLevelStateMessageSubscriber;
    }
 
    public FootstepProvider getFootstepProvider()
@@ -222,9 +222,9 @@ public class VariousWalkingProviders
       return handPoseStatusProducer;
    }
 
-   public AbortWalkingProvider getAbortProvider()
+   public AbortWalkingMessageSubscriber getAbortWalkingMessageSubscriber()
    {
-      return abortProvider;
+      return abortWalkingMessageSubscriber;
    }
 
    public AutomaticManipulationAbortCommunicator getAutomaticManipulationAbortCommunicator()

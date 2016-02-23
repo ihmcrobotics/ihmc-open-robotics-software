@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModu
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
@@ -403,7 +403,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          transferStates.put(robotSide, transferState);
 
-         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide, variousWalkingProviders.getAbortProvider());
+         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide, variousWalkingProviders.getAbortWalkingMessageSubscriber());
          DoneWithTransferCondition doneWithTransferCondition = new DoneWithTransferCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide.getOppositeSide());
@@ -569,11 +569,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doAction()
       {
          //abort walk and clear if should abort
-         if (variousWalkingProviders.getAbortProvider().shouldAbortWalking())
+         if (variousWalkingProviders.getAbortWalkingMessageSubscriber().shouldAbortWalking())
          {
             upcomingFootstepList.clearCurrentFootsteps();
             upcomingFootstepList.requestCancelPlanToProvider();
-            variousWalkingProviders.getAbortProvider().walkingAborted();
+            variousWalkingProviders.getAbortWalkingMessageSubscriber().walkingAborted();
             readyToGrabNextFootstep.set(true);
          }
 
@@ -694,7 +694,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return;
          }
 
-         if (automaticManipulationAbortCommunicator != null && automaticManipulationAbortCommunicator.checkForNewInformation())
+         if (automaticManipulationAbortCommunicator != null && automaticManipulationAbortCommunicator.isNewMessageAvailable())
          {
             isAutomaticManipulationAbortEnabled.set(automaticManipulationAbortCommunicator.isAutomaticManipulationAbortRequested());
          }
@@ -1603,19 +1603,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private class StopWalkingCondition extends DoneWithSingleSupportCondition
    {
       private final RobotSide robotSide;
-      private final AbortWalkingProvider abortState;
+      private final AbortWalkingMessageSubscriber abortWalkingMessageSubscriber;
 
-      public StopWalkingCondition(RobotSide robotSide, AbortWalkingProvider abortVariable)
+      public StopWalkingCondition(RobotSide robotSide, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
       {
          super();
 
          this.robotSide = robotSide;
-         this.abortState = abortVariable;
+         this.abortWalkingMessageSubscriber = abortWalkingMessageSubscriber;
       }
 
       public boolean checkCondition()
       {
-         if (abortState.shouldAbortWalking())
+         if (abortWalkingMessageSubscriber.shouldAbortWalking())
          {
             return true;
          }

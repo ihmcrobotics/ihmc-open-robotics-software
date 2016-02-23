@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
@@ -31,15 +31,15 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.WholeBodyTrajectoryMe
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProviders.NetworkControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -114,17 +114,17 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
             objectCommunicator);
       BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
       PauseWalkingMessageSubscriber pauseWalkingMessageSubscriber = new PauseWalkingMessageSubscriber(footstepPathCoordinator);
-      DesiredHighLevelStateProvider highLevelStateProvider = new DesiredHighLevelStateProvider();
+      HighLevelStateMessageSubscriber highLevelStateProvider = new HighLevelStateMessageSubscriber();
 
-      AbortWalkingProvider abortWalkingProvider = new AbortWalkingProvider();
+      AbortWalkingMessageSubscriber abortWalkingMessageSubscriber = new AbortWalkingMessageSubscriber();
 
       objectCommunicator.attachListener(FootstepDataListMessage.class, footstepPathConsumer);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
       objectCommunicator.attachListener(PauseWalkingMessage.class, pauseWalkingMessageSubscriber);
-      objectCommunicator.attachListener(HighLevelStatePacket.class, highLevelStateProvider);
-      objectCommunicator.attachListener(AutomaticManipulationAbortPacket.class, automaticManipulationAbortCommunicator);
+      objectCommunicator.attachListener(HighLevelStateMessage.class, highLevelStateProvider);
+      objectCommunicator.attachListener(AutomaticManipulationAbortMessage.class, automaticManipulationAbortCommunicator);
       objectCommunicator.attachListener(HandComplianceControlParametersPacket.class, handComplianceControlParametersSubscriber);
-      objectCommunicator.attachListener(AbortWalkingPacket.class, abortWalkingProvider);
+      objectCommunicator.attachListener(AbortWalkingMessage.class, abortWalkingMessageSubscriber);
 
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 
@@ -133,7 +133,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
             pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber,
             stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPathCoordinator,
             handComplianceControlParametersSubscriber, automaticManipulationAbortCommunicator, highLevelStateProvider, controlStatusProducer,
-            capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
+            capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingMessageSubscriber);
 
       return variousWalkingProviders;
    }

@@ -9,17 +9,18 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 @ClassDocumentation("This message is used to switch the control scheme between force and position control.\n"
                                   + "WARNING: When in position control, the IHMC balance algorithms will be disabled and\n"
                                   + "it is up to the user to ensure stability.")
-public class HighLevelStatePacket extends Packet<HighLevelStatePacket>
+public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 {
-   public us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState highLevelState;
+   public HighLevelState highLevelState;
 
-   public HighLevelStatePacket()
+   public HighLevelStateMessage()
    {
-      // Empty constructor for deserialization
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HighLevelStatePacket(HighLevelState highLevelState)
+   public HighLevelStateMessage(HighLevelState highLevelState)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.highLevelState = highLevelState;
    }
 
@@ -30,7 +31,7 @@ public class HighLevelStatePacket extends Packet<HighLevelStatePacket>
 
    public boolean equals(Object obj)
    {
-      return ((obj instanceof HighLevelStatePacket) && this.epsilonEquals((HighLevelStatePacket) obj, 0));
+      return ((obj instanceof HighLevelStateMessage) && this.epsilonEquals((HighLevelStateMessage) obj, 0));
    }
 
    public String toString()
@@ -39,12 +40,12 @@ public class HighLevelStatePacket extends Packet<HighLevelStatePacket>
    }
 
    @Override
-   public boolean epsilonEquals(HighLevelStatePacket other, double epsilon)
+   public boolean epsilonEquals(HighLevelStateMessage other, double epsilon)
    {
       return this.getHighLevelState().equals(other.getHighLevelState());
    }
 
-   public HighLevelStatePacket(Random random)
+   public HighLevelStateMessage(Random random)
    {
       double value = random.nextInt(3);
       HighLevelState highLevelState = HighLevelState.WALKING;

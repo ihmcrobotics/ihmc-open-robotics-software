@@ -8,10 +8,10 @@ import us.ihmc.communication.packets.Packet;
  */
 @ClassDocumentation("This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.")
 
-public class AbortWalkingPacket extends Packet<AbortWalkingPacket>
+public class AbortWalkingMessage extends Packet<AbortWalkingMessage>
 {
    @Override
-   public boolean epsilonEquals(AbortWalkingPacket other, double epsilon)
+   public boolean epsilonEquals(AbortWalkingMessage other, double epsilon)
    {
       return true;
    }

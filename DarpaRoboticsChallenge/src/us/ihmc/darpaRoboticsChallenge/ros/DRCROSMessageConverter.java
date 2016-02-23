@@ -49,8 +49,8 @@ import ihmc_msgs.SingleJointAnglePacketMessage;
 import ihmc_msgs.StopMotionPacketMessage;
 import ihmc_msgs.WholeBodyTrajectoryPacketMessage;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
 import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -102,8 +102,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((HeadOrientationPacket) packet);
       else if (packet instanceof PauseWalkingMessage)
          return convertToRosMessage((PauseWalkingMessage) packet);
-      else if (packet instanceof HighLevelStatePacket)
-         return convertToRosMessage((HighLevelStatePacket) packet);
+      else if (packet instanceof HighLevelStateMessage)
+         return convertToRosMessage((HighLevelStateMessage) packet);
       else if (packet instanceof ArmTrajectoryMessage)
          return convertToRosMessage((ArmTrajectoryMessage) packet);
       else if (packet instanceof JointAnglesPacket)
@@ -114,8 +114,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((AtlasDesiredPumpPSIPacket) packet);
       else if (packet instanceof AtlasWristSensorCalibrationRequestPacket)
          return convertToRosMessage((AtlasWristSensorCalibrationRequestPacket) packet);
-      else if (packet instanceof HighLevelStateChangePacket)
-         return convertToRosMessage((HighLevelStateChangePacket) packet);
+      else if (packet instanceof HighLevelStateChangeMessage)
+         return convertToRosMessage((HighLevelStateChangeMessage) packet);
       else if (packet instanceof MultiJointAnglePacket)
          return convertToRosMessage((MultiJointAnglePacket) packet);
       else if (packet instanceof HandComplianceControlParametersPacket)
@@ -618,7 +618,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStatePacketMessage convertToRosMessage(HighLevelStatePacket packet)
+   public static HighLevelStatePacketMessage convertToRosMessage(HighLevelStateMessage packet)
    {
       HighLevelStatePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HighLevelStatePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -627,9 +627,9 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStatePacket convertToPacket(HighLevelStatePacketMessage message)
+   public static HighLevelStateMessage convertToPacket(HighLevelStatePacketMessage message)
    {
-      HighLevelStatePacket ret = new HighLevelStatePacket(convertByteToEnum(HighLevelState.class, message.getHighLevelState()));ret.setUniqueId(
+      HighLevelStateMessage ret = new HighLevelStateMessage(convertByteToEnum(HighLevelState.class, message.getHighLevelState()));ret.setUniqueId(
          message.getUniqueId());
 
       return ret;
@@ -766,7 +766,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStateChangePacketMessage convertToRosMessage(HighLevelStateChangePacket packet)
+   public static HighLevelStateChangePacketMessage convertToRosMessage(HighLevelStateChangeMessage packet)
    {
       HighLevelStateChangePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HighLevelStateChangePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -776,9 +776,9 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStateChangePacket convertToPacket(HighLevelStateChangePacketMessage message)
+   public static HighLevelStateChangeMessage convertToPacket(HighLevelStateChangePacketMessage message)
    {
-      HighLevelStateChangePacket ret = new HighLevelStateChangePacket(convertByteToEnum(HighLevelState.class, message.getInitialState()),
+      HighLevelStateChangeMessage ret = new HighLevelStateChangeMessage(convertByteToEnum(HighLevelState.class, message.getInitialState()),
             convertByteToEnum(HighLevelState.class, message.getEndState()));
 
       return ret;

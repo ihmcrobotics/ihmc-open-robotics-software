@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 
 /**
  * Created by agrabertilton on 4/28/15.
  */
-public class AbortWalkingProvider implements PacketConsumer<AbortWalkingPacket>
+public class AbortWalkingMessageSubscriber implements PacketConsumer<AbortWalkingMessage>
 {
    private boolean abortWalking;
 
-   public AbortWalkingProvider()
+   public AbortWalkingMessageSubscriber()
    {
    }
 
@@ -30,7 +30,7 @@ public class AbortWalkingProvider implements PacketConsumer<AbortWalkingPacket>
    }
 
    @Override
-   public void receivedPacket(AbortWalkingPacket packet)
+   public void receivedPacket(AbortWalkingMessage packet)
    {
       triggerAbort();
    }

@@ -22,8 +22,8 @@ import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanWaypointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingAction;
 import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingCommand;
@@ -119,8 +119,8 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacke
 import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
@@ -197,7 +197,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       // Hand pose
       registerPacketClass(HandPosePacket.class);
-      registerPacketClass(AutomaticManipulationAbortPacket.class);
+      registerPacketClass(AutomaticManipulationAbortMessage.class);
       registerPacketClass(ManipulationAbortedStatus.class);
       registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketField(HandConfiguration.class);
@@ -304,7 +304,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       registerPacketField(ArrayList.class);
       registerPacketField(FootstepStatus.Status.class);
-      registerPacketClass(AbortWalkingPacket.class);
+      registerPacketClass(AbortWalkingMessage.class);
       
       // Head orientation
       registerPacketClass(HeadOrientationPacket.class);
@@ -340,9 +340,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(DetectedObjectPacket.class);
 
       // high levle state
-      registerPacketClass(HighLevelStatePacket.class);
+      registerPacketClass(HighLevelStateMessage.class);
       registerPacketClass(HighLevelState.class);
-      registerPacketClass(HighLevelStateChangePacket.class);
+      registerPacketClass(HighLevelStateChangeMessage.class);
             
       // Recording
       registerPacketClass(EndOfScriptCommand.class);

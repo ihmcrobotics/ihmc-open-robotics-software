@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
@@ -43,7 +43,7 @@ public class IHMCRosApiMessageMap
 	   ChestOrientationPacket.class,
 	   HeadOrientationPacket.class,
 	   PauseWalkingMessage.class,
-	   HighLevelStatePacket.class,
+	   HighLevelStateMessage.class,
 	   ArmTrajectoryMessage.class,
 	   JointAnglesPacket.class,
 	   AtlasElectricMotorEnablePacket.class,
@@ -66,7 +66,7 @@ public class IHMCRosApiMessageMap
       ChestOrientationPacket.class,
       HeadOrientationPacket.class,
       PauseWalkingMessage.class,
-      HighLevelStatePacket.class,
+      HighLevelStateMessage.class,
       ArmTrajectoryMessage.class,
       JointAnglesPacket.class,
       AtlasElectricMotorEnablePacket.class,
@@ -108,7 +108,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
       PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
       PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");
-      PACKET_TO_TOPIC_MAP.put(HighLevelStatePacket.class, "/control/high_level_state");
+      PACKET_TO_TOPIC_MAP.put(HighLevelStateMessage.class, "/control/high_level_state");
       PACKET_TO_TOPIC_MAP.put(ArmTrajectoryMessage.class, "/control/arm_joint_trajectory");
       PACKET_TO_TOPIC_MAP.put(JointAnglesPacket.class, "/control/joint_angles");
       PACKET_TO_TOPIC_MAP.put(AtlasElectricMotorEnablePacket.class, "/control/enable_electric_motor");
