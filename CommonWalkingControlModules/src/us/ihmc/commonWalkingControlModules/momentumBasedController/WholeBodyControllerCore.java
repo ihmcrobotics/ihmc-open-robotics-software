@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointAccelerationHolder;
@@ -14,6 +15,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -22,6 +24,7 @@ public class WholeBodyControllerCore
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final BooleanYoVariable isEnabled = new BooleanYoVariable("isControllerCoreEnabled", registry);
+   private final IntegerYoVariable numberOfFBControllerEnabled = new IntegerYoVariable("numberOfFBControllerEnabled", registry);
 
    private final WholeBodyFeedbackController feedbackController;
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
@@ -82,12 +85,15 @@ public class WholeBodyControllerCore
       if (isEnabled.getBooleanValue())
       {
          feedbackController.compute();
-         inverseDynamicsSolver.submitInverseDynamicsCommand(feedbackController.getOutput());
+         InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
+         numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
+         inverseDynamicsSolver.submitInverseDynamicsCommand(feedbackControllerOutput);
          inverseDynamicsSolver.compute();
          desiredOneDoFJointTorqueHolder.extractDesiredTorquesFromInverseDynamicsJoints(oneDoFJoints);
       }
       else
       {
+         numberOfFBControllerEnabled.set(0);
          desiredOneDoFJointTorqueHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
       }
    }
