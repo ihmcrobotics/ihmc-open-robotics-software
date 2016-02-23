@@ -23,11 +23,11 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
    {
    }
 
-   public Trajectory1DMessage(Trajectory1DMessage trajectory1dMessage)
+   public Trajectory1DMessage(TrajectoryWaypoint1DDataInterface trajectory1dMessage)
    {
       waypoints = new Waypoint1DMessage[trajectory1dMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
-         waypoints[i] = new Waypoint1DMessage(trajectory1dMessage.waypoints[i]);
+         waypoints[i] = new Waypoint1DMessage(trajectory1dMessage.getWaypoint(i));
    }
 
    /**
@@ -68,6 +68,7 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
       return waypoints.length;
    }
 
+   @Override
    public Waypoint1DMessage getWaypoint(int waypointIndex)
    {
       return waypoints[waypointIndex];
@@ -76,6 +77,18 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
    public Waypoint1DMessage[] getWaypoints()
    {
       return waypoints;
+   }
+
+   @Override
+   public Waypoint1DMessage getLastWaypoint()
+   {
+      return waypoints[getNumberOfWaypoints() - 1];
+   }
+
+   @Override
+   public double getTrajectoryTime()
+   {
+      return getLastWaypoint().getTime();
    }
 
    private void rangeCheck(int waypointIndex)
