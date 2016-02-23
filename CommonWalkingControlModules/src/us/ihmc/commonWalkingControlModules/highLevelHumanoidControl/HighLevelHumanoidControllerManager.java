@@ -10,9 +10,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
-import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -43,8 +43,8 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
 
-   private final DesiredHighLevelStateProvider highLevelStateProvider;
-   private final BooleanYoVariable isListeningToHighLevelStatePacket = new BooleanYoVariable("isListeningToHighLevelStatePacket", registry);
+   private final HighLevelStateMessageSubscriber highLevelStateMessageSubscriber;
+   private final BooleanYoVariable isListeningToHighLevelStateMessage = new BooleanYoVariable("isListeningToHighLevelStateMessage", registry);
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final ControllerCoreOuput controllerCoreOuput;
@@ -67,13 +67,13 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
       if (variousWalkingProviders != null)
       {
-         this.highLevelStateProvider = variousWalkingProviders.getDesiredHighLevelStateProvider();
-         isListeningToHighLevelStatePacket.set(true);
+         this.highLevelStateMessageSubscriber = variousWalkingProviders.getHighLevelStateMessageSubscriber();
+         isListeningToHighLevelStateMessage.set(true);
       }
       else
       {
-         this.highLevelStateProvider = null;
-         isListeningToHighLevelStatePacket.set(false);
+         this.highLevelStateMessageSubscriber = null;
+         isListeningToHighLevelStateMessage.set(false);
       }
 
       for (int i = 0; i < highLevelBehaviors.size(); i++)
@@ -135,7 +135,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
          {
             currentStateForOpenSource.set(newState.getStateEnum());
             if (dataProducer != null)
-               dataProducer.queueDataToSend(new HighLevelStateChangePacket(oldState.getStateEnum(), newState.getStateEnum()));
+               dataProducer.queueDataToSend(new HighLevelStateChangeMessage(oldState.getStateEnum(), newState.getStateEnum()));
          }
       });
 
@@ -154,7 +154,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void setListenToHighLevelStatePackets(boolean isListening)
    {
-      isListeningToHighLevelStatePacket.set(isListening);
+      isListeningToHighLevelStateMessage.set(isListening);
    }
 
    public void initialize()
@@ -166,11 +166,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void doControl()
    {
-      if (isListeningToHighLevelStatePacket.getBooleanValue())
+      if (isListeningToHighLevelStateMessage.getBooleanValue())
       {
-         if (highLevelStateProvider != null && highLevelStateProvider.checkForNewState())
+         if (highLevelStateMessageSubscriber != null && highLevelStateMessageSubscriber.isNewMessageAvailable())
          {
-            requestedHighLevelState.set(highLevelStateProvider.getDesiredHighLevelState());
+            requestedHighLevelState.set(highLevelStateMessageSubscriber.pollMessage());
          }
       }
 

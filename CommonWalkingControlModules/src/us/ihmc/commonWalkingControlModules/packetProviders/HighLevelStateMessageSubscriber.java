@@ -3,30 +3,30 @@ package us.ihmc.commonWalkingControlModules.packetProviders;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 
-public class DesiredHighLevelStateProvider implements PacketConsumer<HighLevelStatePacket>
+public class HighLevelStateMessageSubscriber implements PacketConsumer<HighLevelStateMessage>
 {
    private final AtomicReference<HighLevelState> highLevelState = new AtomicReference<HighLevelState>(null);
 
-   public DesiredHighLevelStateProvider()
+   public HighLevelStateMessageSubscriber()
    {
    }
 
-   public boolean checkForNewState()
+   public boolean isNewMessageAvailable()
    {
       return highLevelState.get() != null;
    }
 
-   public HighLevelState getDesiredHighLevelState()
+   public HighLevelState pollMessage()
    {
       return highLevelState.getAndSet(null);
    }
 
-   public void receivedPacket(HighLevelStatePacket object)
+   @Override
+   public void receivedPacket(HighLevelStateMessage object)
    {
       highLevelState.set(object.getHighLevelState());
    }
-
 }

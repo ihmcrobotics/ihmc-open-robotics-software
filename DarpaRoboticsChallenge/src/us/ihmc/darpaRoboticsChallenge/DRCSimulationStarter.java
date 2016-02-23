@@ -36,7 +36,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidBehaviors.BehaviorVisualizer;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -137,7 +137,7 @@ public class DRCSimulationStarter
    /**
     * Register a controller to be created in addition to the walking controller.
     * For instance, the {@link CarIngressEgressController} can be created by passing its factory, i.e. {@link CarIngressEgressControllerFactory}.
-    * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStatePacket} to the controller.
+    * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStateMessage} to the controller.
     * @param controllerFactory a factory to create an additional controller.
     */
    public void registerHighLevelController(HighLevelBehaviorFactory controllerFactory)

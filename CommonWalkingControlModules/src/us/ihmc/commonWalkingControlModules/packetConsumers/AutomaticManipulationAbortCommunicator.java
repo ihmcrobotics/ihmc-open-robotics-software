@@ -3,11 +3,11 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 
-public class AutomaticManipulationAbortCommunicator implements PacketConsumer<AutomaticManipulationAbortPacket>
+public class AutomaticManipulationAbortCommunicator implements PacketConsumer<AutomaticManipulationAbortMessage>
 {
    private final HumanoidGlobalDataProducer globalDataProducer;
    private final AtomicBoolean hasReceivedNewPacket = new AtomicBoolean(false);
@@ -18,7 +18,7 @@ public class AutomaticManipulationAbortCommunicator implements PacketConsumer<Au
       this.globalDataProducer = globalDataProducer;
    }
 
-   public boolean checkForNewInformation()
+   public boolean isNewMessageAvailable()
    {
       return hasReceivedNewPacket.getAndSet(false);
    }
@@ -36,7 +36,7 @@ public class AutomaticManipulationAbortCommunicator implements PacketConsumer<Au
    }
 
    @Override
-   public void receivedPacket(AutomaticManipulationAbortPacket packet)
+   public void receivedPacket(AutomaticManipulationAbortMessage packet)
    {
       if (packet == null)
          return;

@@ -36,7 +36,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -153,7 +153,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDoFJoints();
       
       robotController.doControl();
-      controllerCommunicatorServer.send(new HighLevelStatePacket(HighLevelState.WALKING));
+      controllerCommunicatorServer.send(new HighLevelStateMessage(HighLevelState.WALKING));
       
       new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator_server, packetRouter, "/ihmc_ros/atlas");
       
@@ -250,7 +250,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDoFJoints();
 	   
 	   robotController.doControl();
-	   packetCommunicatorClient.send(new HighLevelStatePacket(HighLevelState.WALKING));
+	   packetCommunicatorClient.send(new HighLevelStateMessage(HighLevelState.WALKING));
 	   
 	   for(int i = 0; i < 100; i++)
 	   {

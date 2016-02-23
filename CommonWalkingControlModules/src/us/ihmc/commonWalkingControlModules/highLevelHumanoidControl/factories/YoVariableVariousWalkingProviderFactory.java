@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
@@ -25,7 +25,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMess
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
@@ -61,7 +61,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters,
             registry);
 
-      DesiredHighLevelStateProvider highLevelStateProvider = null;
+      HighLevelStateMessageSubscriber highLevelStateProvider = null;
 
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
 
@@ -69,7 +69,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       HandPoseStatusProducer handPoseStatusProducer = null;
 
-      AbortWalkingProvider abortWalkingProvider = null;
+      AbortWalkingMessageSubscriber abortWalkingProvider = null;
       HandComplianceControlParametersSubscriber handComplianceControlParametersProvider = null;
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;

@@ -28,7 +28,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
 import us.ihmc.humanoidRobotics.communication.packets.BumStatePacket;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
@@ -435,7 +435,7 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.THIGH_STATE;
       }
-      else if (scriptObject instanceof HighLevelStatePacket)
+      else if (scriptObject instanceof HighLevelStateMessage)
       {
          ret = PrimitiveBehaviorType.HIGH_LEVEL_STATE;
       }
@@ -511,7 +511,7 @@ public class ScriptBehavior extends BehaviorInterface
       else if (behaviorType.equals(PrimitiveBehaviorType.HIGH_LEVEL_STATE))
       {
          highLevelStateBehavior.initialize();
-         highLevelStateBehavior.setInput((HighLevelStatePacket) inputPacket.getScriptObject());
+         highLevelStateBehavior.setInput((HighLevelStateMessage) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.FINGER_STATE))
       {
