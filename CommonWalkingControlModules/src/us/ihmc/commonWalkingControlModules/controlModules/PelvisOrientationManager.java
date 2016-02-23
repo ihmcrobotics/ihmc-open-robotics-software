@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngu
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.OrientationTrajectoryData;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -24,6 +25,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.SO3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,10 +75,12 @@ public class PelvisOrientationManager
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame desiredPelvisFrame;
 
+   private final PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isPelvisOrientationOffsetTrajectoryStopped", registry);
 
    public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
+         PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber,
          StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();
@@ -84,6 +88,7 @@ public class PelvisOrientationManager
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       pelvisFrame = referenceFrames.getPelvisFrame();
+      this.pelvisOrientationTrajectoryMessageSubscriber = pelvisOrientationTrajectoryMessageSubscriber;
       this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       YoOrientationPIDGainsInterface pelvisOrientationControlGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
@@ -174,7 +179,7 @@ public class PelvisOrientationManager
       desiredPelvisFrame.update();
 
       handleStopAllTrajectoryMessage();
-
+      handlePelvisOrientationTrajectoryMessages();
 
       if (isTrajectoryStopped.getBooleanValue())
       {
@@ -215,18 +220,18 @@ public class PelvisOrientationManager
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-      
+
       waypointOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
       tempOrientation.changeFrame(desiredPelvisFrame);
       tempAngularVelocity.setToZero(desiredPelvisFrame);
-      
+
       waypointOrientationOffsetTrajectoryGenerator.clear();
       waypointOrientationOffsetTrajectoryGenerator.switchTrajectoryFrame(desiredPelvisFrame);
       waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       tempOrientation.setToZero(desiredPelvisFrame);
       waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(trajectoryTime, tempOrientation, tempAngularVelocity);
       waypointOrientationOffsetTrajectoryGenerator.initialize();
-      
+
       isTrajectoryStopped.set(false);
    }
 
@@ -239,9 +244,20 @@ public class PelvisOrientationManager
 
    public void handlePelvisTrajectoryMessage(PelvisTrajectoryMessage message)
    {
+      handleSO3Waypoints(message.getWaypoints());
+   }
+
+   private void handlePelvisOrientationTrajectoryMessages()
+   {
+      if (pelvisOrientationTrajectoryMessageSubscriber != null && pelvisOrientationTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
+         handleSO3Waypoints(pelvisOrientationTrajectoryMessageSubscriber.pollMessage().getWaypoints());
+   }
+
+   public void handleSO3Waypoints(SO3WaypointInterface[] waypoints)
+   {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
 
-      if (message.getWaypoint(0).getTime() > 1.0e-5)
+      if (waypoints[0].getTime() > 1.0e-5)
       {
          waypointOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
          tempOrientation.changeFrame(worldFrame);
@@ -257,7 +273,7 @@ public class PelvisOrientationManager
          waypointOrientationOffsetTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       }
 
-      waypointOrientationOffsetTrajectoryGenerator.appendWaypoints(message.getWaypoints());
+      waypointOrientationOffsetTrajectoryGenerator.appendWaypoints(waypoints);
       waypointOrientationOffsetTrajectoryGenerator.changeFrame(desiredPelvisFrame);
       waypointOrientationOffsetTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
