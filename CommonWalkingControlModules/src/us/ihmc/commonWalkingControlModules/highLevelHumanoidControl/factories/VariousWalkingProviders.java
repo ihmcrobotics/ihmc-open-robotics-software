@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessa
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 
 public class VariousWalkingProviders
@@ -38,7 +37,6 @@ public class VariousWalkingProviders
    private final HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber;
    private final GoHomeMessageSubscriber goHomeMessageSubscriber;
 
-   // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
    private final FootstepProvider footstepProvider;
    private final AbortWalkingMessageSubscriber abortWalkingMessageSubscriber;
 
@@ -47,10 +45,7 @@ public class VariousWalkingProviders
    private final HighLevelStateMessageSubscriber highLevelStateMessageSubscriber;
 
    // TODO: Shouldn't really be in providers but this class is the easiest to access
-   private final ControlStatusProducer controlStatusProducer;
-
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
-
    private final HandPoseStatusProducer handPoseStatusProducer;
 
    public VariousWalkingProviders(HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber,
@@ -60,11 +55,9 @@ public class VariousWalkingProviders
          PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber,
          FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
          StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
-         GoHomeMessageSubscriber goHomeMessageSubscriber,
-         // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
-         FootstepProvider footstepProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
-         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
-         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber, ControlStatusProducer controlStatusProducer,
+         GoHomeMessageSubscriber goHomeMessageSubscriber, FootstepProvider footstepProvider,
+         HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
+         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
          CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
          AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
@@ -86,8 +79,6 @@ public class VariousWalkingProviders
       this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
 
       this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
-
-      this.controlStatusProducer = controlStatusProducer;
 
       this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
 
@@ -205,11 +196,6 @@ public class VariousWalkingProviders
    public HandComplianceControlParametersSubscriber getHandComplianceControlParametersSubscriber()
    {
       return handComplianceControlParametersSubscriber;
-   }
-
-   public ControlStatusProducer getControlStatusProducer()
-   {
-      return controlStatusProducer;
    }
 
    public CapturabilityBasedStatusProducer getCapturabilityBasedStatusProducer()

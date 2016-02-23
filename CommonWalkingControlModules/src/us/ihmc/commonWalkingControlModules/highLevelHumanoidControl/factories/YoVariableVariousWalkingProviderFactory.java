@@ -24,9 +24,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessa
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -63,8 +61,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       HighLevelStateMessageSubscriber highLevelStateProvider = null;
 
-      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
 
       HandPoseStatusProducer handPoseStatusProducer = null;
@@ -78,8 +74,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber,
             stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPovider, handComplianceControlParametersProvider,
-            automaticManipulationAbortCommunicator, highLevelStateProvider, controlStatusProducer, capturabilityBasedStatusProducer,
-            handPoseStatusProducer, abortWalkingProvider);
+            automaticManipulationAbortCommunicator, highLevelStateProvider, capturabilityBasedStatusProducer, handPoseStatusProducer,
+            abortWalkingProvider);
 
       return variousProviders;
    }

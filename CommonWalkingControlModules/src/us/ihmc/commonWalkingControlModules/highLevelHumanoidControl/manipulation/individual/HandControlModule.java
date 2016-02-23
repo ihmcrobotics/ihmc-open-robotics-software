@@ -27,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -132,8 +131,7 @@ public class HandControlModule
    private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap = new HashMap<>();
 
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
-         YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, ControlStatusProducer controlStatusProducer,
-         HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
+         YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry;
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
