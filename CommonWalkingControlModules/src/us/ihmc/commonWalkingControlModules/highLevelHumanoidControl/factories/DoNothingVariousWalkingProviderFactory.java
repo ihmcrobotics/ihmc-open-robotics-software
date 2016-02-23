@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAcceleratio
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
@@ -64,7 +63,6 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
       DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = null;
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
-      DesiredComHeightProvider comHeightProvider = null;
 
       ControlStatusProducer controlStatusProducer = null;
 
@@ -80,9 +78,9 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, armTrajectoryMessageSubscriber,
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber,
-            stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepProvider, comHeightProvider,
-            handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, highLevelStateProvider, controlStatusProducer,
-            capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
+            stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepProvider, handComplianceControlParametersProvider,
+            automaticManipulationAbortCommunicator, highLevelStateProvider, controlStatusProducer, capturabilityBasedStatusProducer,
+            handPoseStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }

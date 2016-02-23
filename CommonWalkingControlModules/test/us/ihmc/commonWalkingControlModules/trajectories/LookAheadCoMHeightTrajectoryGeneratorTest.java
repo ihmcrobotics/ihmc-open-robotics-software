@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProviderTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -69,8 +68,6 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       Random random = new Random(1776L);
 
-      DesiredComHeightProvider desiredComHeightProvider = null;
-
       double minimumHeightAboveGround = 0.595 + 0.03;
       double nominalHeightAboveGround = 0.675 + 0.03;
       double maximumHeightAboveGround = 0.735 + 0.03;
@@ -89,9 +86,9 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       DoubleYoVariable yoTime = robot.getYoTime();
 
       setupStuff(yoGraphicsListRegistry, registry);
-      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(desiredComHeightProvider, null,
-            null, minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames,
-            yoTime, yoGraphicsListRegistry, registry);
+      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(null, null,
+            minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime,
+            yoGraphicsListRegistry, registry);
 
       lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(true);
 
