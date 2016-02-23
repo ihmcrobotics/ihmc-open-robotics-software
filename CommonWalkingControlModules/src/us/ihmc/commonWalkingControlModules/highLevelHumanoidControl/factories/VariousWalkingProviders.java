@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulation
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
@@ -55,9 +54,6 @@ public class VariousWalkingProviders
    private final ChestOrientationProvider desiredChestOrientationProvider;
    private final FootPoseProvider footPoseProvider;
 
-   // TODO: Rename DesiredFootStateProvider to DesiredFootLoadBearingProvider, do the same for the packet, etc.
-   private final DesiredFootStateProvider desiredFootLoadBearingProvider;
-
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final ControlStatusProducer controlStatusProducer;
 
@@ -75,9 +71,9 @@ public class VariousWalkingProviders
          FootstepProvider footstepProvider, HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          PelvisPoseProvider desiredPelvisPoseProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
          AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, ChestOrientationProvider desiredChestOrientationProvider,
-         FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
-         ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
-         HandPoseStatusProducer handPoseStatusProducer, AbortWalkingProvider abortProvider)
+         FootPoseProvider footPoseProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer,
+         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
+         AbortWalkingProvider abortProvider)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
       this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
@@ -100,8 +96,6 @@ public class VariousWalkingProviders
       this.footPoseProvider = footPoseProvider;
 
       this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
-
-      this.desiredFootLoadBearingProvider = footStateProvider;
 
       this.controlStatusProducer = controlStatusProducer;
 
@@ -251,11 +245,6 @@ public class VariousWalkingProviders
    public FootPoseProvider getDesiredFootPoseProvider()
    {
       return footPoseProvider;
-   }
-
-   public DesiredFootStateProvider getDesiredFootStateProvider()
-   {
-      return desiredFootLoadBearingProvider;
    }
 
    public ControlStatusProducer getControlStatusProducer()
