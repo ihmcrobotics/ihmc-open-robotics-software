@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
@@ -21,35 +22,38 @@ import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspCylinderBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.GraspCylinderPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
@@ -80,6 +84,7 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.math.trajectories.WaypointTrajectory1DCalculator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -119,8 +124,9 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final DoubleYoVariable timeToWaitBeforeEnable;
    private final BooleanYoVariable enableHandOrientation;
 
-   private final SideDependentList<HandPoseBehavior> handPoseBehaviors = new SideDependentList<>();
-   private final SideDependentList<HandPoseListBehavior> handPoseListBehaviors = new SideDependentList<>();
+   private final SideDependentList<ArmTrajectoryBehavior> armTrajectoryBehaviors = new SideDependentList<>();
+   private final SideDependentList<HandTrajectoryBehavior> handTrajectoryBehaviors = new SideDependentList<>();
+   private final SideDependentList<GoHomeBehavior> armGoHomeBehaviors = new SideDependentList<>();
    private final FootTrajectoryBehavior footPoseBehavior;
    private final ChestOrientationBehavior chestOrientationBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
@@ -365,13 +371,17 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-         HandPoseBehavior handPoseBehavior = new HandPoseBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
-         registry.addChild(handPoseBehavior.getYoVariableRegistry());
-         handPoseBehaviors.put(robotSide, handPoseBehavior);
+         ArmTrajectoryBehavior armTrajectoryBehavior = new ArmTrajectoryBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
+         registry.addChild(armTrajectoryBehavior.getYoVariableRegistry());
+         armTrajectoryBehaviors.put(robotSide, armTrajectoryBehavior);
 
-         HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
-         registry.addChild(handPoseListBehavior.getYoVariableRegistry());
-         handPoseListBehaviors.put(robotSide, handPoseListBehavior);
+         HandTrajectoryBehavior handTrajectoryBehavior = new HandTrajectoryBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
+         registry.addChild(handTrajectoryBehavior.getYoVariableRegistry());
+         handTrajectoryBehaviors.put(robotSide, handTrajectoryBehavior);
+
+         GoHomeBehavior armGoHomeBehavior = new GoHomeBehavior(namePrefix + "Arm", outgoingCommunicationBridge, yoTime);
+         registry.addChild(armGoHomeBehavior.getYoVariableRegistry());
+         armGoHomeBehaviors.put(robotSide, armGoHomeBehavior);
       }
 
       graspCylinderBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
@@ -464,6 +474,8 @@ public class DiagnosticBehavior extends BehaviorInterface
             new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", steeringWheelFinalPosition, 0.035, YoAppearance.Red()));
 
       updateSteeringWheelParameters();
+      
+      requestedDiagnostic.set(DiagnosticTask.KARATE_KID);
    }
 
    private void setupArmsInverseKinematics(FullHumanoidRobotModel fullRobotModel)
@@ -858,7 +870,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       submitPelvisHomeCommand(true);
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
 
       //Mean stuff  (shiftWeight + CoM + chestOrientation + PelvisOrientation)
       desiredPelvisOffset.set(supportCornerPoints.get(0));
@@ -988,7 +1000,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
       submitCoMHomeCommand(true);
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
    }
 
    private void sequenceUpperBody()
@@ -1035,7 +1047,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void sequenceGoHome()
    {
       submitPelvisHomeCommand(true);
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
       submitChestHomeCommand(true);
    }
 
@@ -1228,7 +1240,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitFootPosesShort(robotSide);
       }
 
-      submitHandPoseHomeCommand(false);
+      submitArmGoHomeCommand(false);
    }
 
    private void submitFootPosesShort(RobotSide robotSide)
@@ -1294,7 +1306,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitFootPosesLong(robotSide);
       }
 
-      submitHandPoseHomeCommand(false);
+      submitArmGoHomeCommand(false);
    }
 
    private void submitFootPosesLong(RobotSide robotSide)
@@ -1659,7 +1671,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
       pipeLine.requestNewStage();
 
       //square up the feet
@@ -1706,7 +1718,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       //turn in place
       submitWalkToLocation(false, 0.0, 0.0, 0.0, 0.0);
 
-      submitHandPoseHomeCommand(false);
+      submitArmGoHomeCommand(false);
 
       /////////// chest bending backward///////////
       submitDesiredChestOrientation(false, 0.0, Math.toRadians(-10.0), 0.0);
@@ -1878,50 +1890,52 @@ public class DiagnosticBehavior extends BehaviorInterface
       SideDependentList<double[]> armsDown1 = computeSymmetricArmJointAngles(upperArmDown1, 0.0, null, true);
 
       int numberOfHandPoses = 10;
-      SideDependentList<double[][]> armFlyingSequence = new SideDependentList<>(new double[numberOfArmJoints][numberOfHandPoses],
-            new double[numberOfArmJoints][numberOfHandPoses]);
+      
+      WaypointTrajectory1DCalculator calculator = new WaypointTrajectory1DCalculator();
 
-      for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
+      for (RobotSide flyingSide : RobotSide.values)
       {
-         for (int poseIndex = 0; poseIndex < numberOfHandPoses; poseIndex++)
+         ArmTrajectoryMessage flyingMessage = new ArmTrajectoryMessage(flyingSide, numberOfArmJoints);
+
+         for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
          {
-            for (RobotSide side : RobotSide.values)
+            calculator.clear();
+
+            for (int poseIndex = 0; poseIndex < numberOfHandPoses; poseIndex++)
             {
                double desiredJointAngle;
                switch (poseIndex % 6)
                {
                case 0:
-                  desiredJointAngle = armsDown1.get(side)[jointIndex];
+                  desiredJointAngle = armsDown1.get(flyingSide)[jointIndex];
                   break;
                case 1:
-                  desiredJointAngle = armsDown2.get(side)[jointIndex];
+                  desiredJointAngle = armsDown2.get(flyingSide)[jointIndex];
                   break;
                case 2:
-                  desiredJointAngle = armsIntermediateOnWayUp.get(side)[jointIndex];
+                  desiredJointAngle = armsIntermediateOnWayUp.get(flyingSide)[jointIndex];
                   break;
                case 3:
-                  desiredJointAngle = armsUp1.get(side)[jointIndex];
+                  desiredJointAngle = armsUp1.get(flyingSide)[jointIndex];
                   break;
                case 4:
-                  desiredJointAngle = armsUp2.get(side)[jointIndex];
+                  desiredJointAngle = armsUp2.get(flyingSide)[jointIndex];
                   break;
                case 5:
-                  desiredJointAngle = armsIntermediateOnWayDown.get(side)[jointIndex];
+                  desiredJointAngle = armsIntermediateOnWayDown.get(flyingSide)[jointIndex];
                   break;
                default:
                   throw new RuntimeException("Should not get there!");
                }
-               armFlyingSequence.get(side)[jointIndex][poseIndex] = desiredJointAngle;
+               calculator.appendWaypoint(desiredJointAngle);
             }
+            calculator.computeWaypointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
+            calculator.computeWaypointVelocities(true);
+            flyingMessage.setTrajectory1DMessage(jointIndex, new Trajectory1DMessage(calculator.getTrajectoryData()));
          }
-      }
 
-      for (RobotSide tempSide : RobotSide.values)
-      {
-         HandPoseListPacket handPoseListPacket = new HandPoseListPacket(tempSide, armFlyingSequence.get(tempSide),
-               flyingTrajectoryTime.getDoubleValue() * numberOfHandPoses);
-         pipeLine.submitTaskForPallelPipesStage(handPoseListBehaviors.get(tempSide),
-               new HandPoseListTask(handPoseListPacket, handPoseListBehaviors.get(tempSide), yoTime, sleepTimeBetweenPoses.getDoubleValue()));
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
+               new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide), yoTime, sleepTimeBetweenPoses.getDoubleValue()));
       }
 
       // Put the arms in front
@@ -1994,7 +2008,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
 
       //
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
    }
@@ -2116,16 +2130,16 @@ public class DiagnosticBehavior extends BehaviorInterface
          pipeLine.submitSingleTaskStage(pelvisPoseTask);
    }
 
-   private void submitHandPoseHomeCommand(boolean parallelize)
+   private void submitArmGoHomeCommand(boolean parallelize)
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandPosePacket handPosePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime.getDoubleValue());
-         HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
+         GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
+         GoHomeBehavior armGoHomeBehavior = armGoHomeBehaviors.get(robotSide);
          if (parallelize)
-            pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
+            pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
          else
-            pipeLine.submitSingleTaskStage(new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
+            pipeLine.submitSingleTaskStage(new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
       }
    }
 
@@ -2170,9 +2184,9 @@ public class DiagnosticBehavior extends BehaviorInterface
                msg += desiredJointAngles[i] + ", ";
             System.out.println(msg);
          }
-         HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
-         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior,
-               trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+         ArmTrajectoryBehavior armTrajectoryBehavior = armTrajectoryBehaviors.get(robotSide);
+         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, trajectoryTime.getDoubleValue(), desiredJointAngles);
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior, trajectoryTime, sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
 
@@ -2825,8 +2839,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         handPoseListBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
+         handTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
+         armTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
          footstepListBehavior.consumeObjectFromNetworkProcessor(object);
          walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
          turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
@@ -2840,8 +2854,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).consumeObjectFromController(object);
-         handPoseListBehaviors.get(robotSide).consumeObjectFromController(object);
+         handTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
+         armTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
          footstepListBehavior.consumeObjectFromController(object);
          walkToLocationBehavior.consumeObjectFromController(object);
          turnInPlaceBehavior.consumeObjectFromController(object);
@@ -2869,7 +2883,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       chestOrientationBehavior.pause();
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).pause();
+         handTrajectoryBehaviors.get(robotSide).pause();
+         armTrajectoryBehaviors.get(robotSide).pause();
       }
    }
 
@@ -2881,7 +2896,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       chestOrientationBehavior.resume();
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).resume();
+         handTrajectoryBehaviors.get(robotSide).pause();
+         armTrajectoryBehaviors.get(robotSide).pause();
       }
    }
 
