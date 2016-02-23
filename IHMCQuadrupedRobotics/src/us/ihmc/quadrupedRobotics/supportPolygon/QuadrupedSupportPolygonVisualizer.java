@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -47,6 +46,9 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon(); 
    private final YoFrameConvexPolygon2d currentSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon currentQuadSupportPolygonArtifact = new YoArtifactPolygon("supportPolygonArtifact", currentSupportPolygon, Color.blue, false);
+   
+   private final QuadrupedSupportPolygon tempCommonSupportPolygon = new QuadrupedSupportPolygon();
+   private final QuadrupedSupportPolygon tempPolygon = new QuadrupedSupportPolygon();
 
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint centroidFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -100,14 +102,13 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       secondQuadrupedPolygon.setFootstep(RobotQuadrant.HIND_RIGHT, new FramePoint(WORLD, 1.0, 1.0, 0.0));
       secondQuadrupedPolygon.setFootstep(RobotQuadrant.HIND_LEFT, new FramePoint(WORLD, 0.0, 0.0, 0.0));
       
-      QuadrupedSupportPolygon commonPolygonToPack = new QuadrupedSupportPolygon();
 //      firstQuadrupedPolygon.getCommonSupportPolygon(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT);
-      firstQuadrupedPolygon.getShrunkenCommonTriangle2d(secondQuadrupedPolygon, commonPolygonToPack , RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
+      firstQuadrupedPolygon.getShrunkenCommonTriangle2d(secondQuadrupedPolygon, tempCommonSupportPolygon, tempPolygon, RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
       
-      vertices.get(RobotQuadrant.FRONT_LEFT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_LEFT));
-      vertices.get(RobotQuadrant.FRONT_RIGHT).set(commonPolygonToPack.getFootstep(RobotQuadrant.FRONT_RIGHT));
+      vertices.get(RobotQuadrant.FRONT_LEFT).set(tempCommonSupportPolygon.getFootstep(RobotQuadrant.FRONT_LEFT));
+      vertices.get(RobotQuadrant.FRONT_RIGHT).set(tempCommonSupportPolygon.getFootstep(RobotQuadrant.FRONT_RIGHT));
       vertices.remove(RobotQuadrant.HIND_RIGHT);
-      vertices.get(RobotQuadrant.HIND_LEFT).set(commonPolygonToPack.getFootstep(RobotQuadrant.HIND_LEFT));
+      vertices.get(RobotQuadrant.HIND_LEFT).set(tempCommonSupportPolygon.getFootstep(RobotQuadrant.HIND_LEFT));
       
 //      for(RobotQuadrant quadrant : RobotQuadrant.values)
 //      {

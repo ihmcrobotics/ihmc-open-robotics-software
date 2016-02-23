@@ -42,7 +42,7 @@ public class TimeTools
       return (double)(timeInMilliSeconds / 60000.0);
    }
 
-   public static long milliSecondsToNanoSeconds(int timeInMilliseconds)
+   public static long milliSecondsToNanoSeconds(long timeInMilliseconds)
    {
       return ((long) timeInMilliseconds) * 1000000L;
    }

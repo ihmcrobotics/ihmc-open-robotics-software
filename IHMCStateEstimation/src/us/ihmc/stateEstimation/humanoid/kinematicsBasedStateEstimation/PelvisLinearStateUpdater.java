@@ -209,9 +209,10 @@ public class PelvisLinearStateUpdater
    private void setupBunchOfVariables()
    {
       int windowSize = (int)(delayTimeBeforeTrustingFoot.getDoubleValue() / estimatorDT);
-      
-      for (RigidBody foot : feet)
+
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          ReferenceFrame footFrame = feetContactablePlaneBodies.get(foot).getSoleFrame();
          footFrames.put(foot, footFrame);
          
@@ -389,9 +390,10 @@ public class PelvisLinearStateUpdater
    private int setTrustedFeetUsingFootSwitches()
    {
       int numberOfEndEffectorsTrusted = 0;
-      
-      for(RigidBody foot : feet)
+
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          if (footSwitches.get(foot).hasFootHitGround())
             haveFeetHitGroundFiltered.get(foot).set(true);
          else
@@ -404,17 +406,21 @@ public class PelvisLinearStateUpdater
       // Update only if at least one foot hit the ground
       if(numberOfEndEffectorsTrusted > 0)
       {
-         for(RigidBody foot : feet)
+         for (int i = 0; i < feet.size(); i++)
+         {
+            RigidBody foot = feet.get(i);
             areFeetTrusted.get(foot).set(haveFeetHitGroundFiltered.get(foot).getBooleanValue());
+         }
       }
       
       // Else if there is a foot with a force past the threshold trust the force and not the CoP      
       else
       {
          RigidBody trustedFoot = null;
-         
-         for(RigidBody foot : feet)
+
+         for (int i = 0; i < feet.size(); i++)
          {
+            RigidBody foot = feet.get(i);
             if(footSwitches.get(foot).getForceMagnitudePastThreshhold())
             {
                trustedFoot = foot;
@@ -425,8 +431,9 @@ public class PelvisLinearStateUpdater
          
          if(trustedFoot != null)
          {
-            for(RigidBody foot : feet)
+            for (int i = 0; i < feet.size(); i++)
             {
+               RigidBody foot = feet.get(i);
                areFeetTrusted.get(foot).set(foot == trustedFoot);
             }            
          }
@@ -436,13 +443,17 @@ public class PelvisLinearStateUpdater
       {
          if(ALLOW_USING_IMU_ONLY)
          {
-            for(RigidBody foot : feet)
+            for (int i = 0; i < feet.size(); i++)
+            {
+               RigidBody foot = feet.get(i);
                areFeetTrusted.get(foot).set(false);
+            }
          }
          else
          {
-            for (RigidBody foot : feet)
+            for (int i = 0; i < feet.size(); i++)
             {
+               RigidBody foot = feet.get(i);
                if (areFeetTrusted.get(foot).getBooleanValue()) 
                   numberOfEndEffectorsTrusted++;
             }
@@ -455,15 +466,17 @@ public class PelvisLinearStateUpdater
    private int filterTrustedFeetBasedOnContactForces(int numberOfEndEffectorsTrusted)
    {
       double totalForceZ = 0.0;
-      for (RigidBody foot : feet)
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
          footSwitches.get(foot).computeAndPackFootWrench(footWrench);
          totalForceZ += footWrench.getLinearPartZ();
       }
 
-      for (RigidBody foot : feet)
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
          footForcesZInPercentOfTotalForce.get(foot).set(footWrench.getLinearPartZ() / totalForceZ);
 
@@ -538,9 +551,10 @@ public class PelvisLinearStateUpdater
    {
       listOfTrustedFeet.clear();
       listOfUnTrustedFeet.clear();
-      
-      for(RigidBody foot : feet)
+
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          if(areFeetTrusted.get(foot).getBooleanValue())
             listOfTrustedFeet.add(foot);
          else

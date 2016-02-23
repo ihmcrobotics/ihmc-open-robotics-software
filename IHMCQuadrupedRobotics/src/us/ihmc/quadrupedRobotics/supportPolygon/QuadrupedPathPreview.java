@@ -30,6 +30,8 @@ public class QuadrupedPathPreview
    private SwingTargetGenerator swingTargetGenerator;
    private QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon updatedSupportPolygon = new QuadrupedSupportPolygon();
+   private final QuadrupedSupportPolygon tempCommonSupportPolygon = new QuadrupedSupportPolygon();
+   private final QuadrupedSupportPolygon tempPolygon = new QuadrupedSupportPolygon();
 
    private final DoubleYoVariable inscribedCircleRadius = new DoubleYoVariable("inscribedCircleRadius", registry);
    private final YoFramePoint[] circleCenters = new YoFramePoint[iterations]; //new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
@@ -72,7 +74,7 @@ public class QuadrupedPathPreview
 
       for (int i = 0; i < tripleSupportPolygons.length; i++)
       {
-         String polygonName = "trippleSupport" + i;
+         String polygonName = "tripleSupport" + i;
          YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
          tripleSupportPolygons[i] = yoFrameConvexPolygon2d;
 
@@ -110,11 +112,10 @@ public class QuadrupedPathPreview
          drawSupportPolygon(nextSwingLegSupportPolygon, tripleSupportPolygons[i * 2 + 1]);
 
          //if there's a common draw it
-         QuadrupedSupportPolygon shrunkenCommonSupportPolygon = new QuadrupedSupportPolygon();
-         swingLegSupportPolygon.getShrunkenCommonTriangle2d(nextSwingLegSupportPolygon, shrunkenCommonSupportPolygon, swingLeg, 0.02, 0.02, 0.02);
-         drawSupportPolygon(shrunkenCommonSupportPolygon, commonSupportPolygons[i]);
+         swingLegSupportPolygon.getShrunkenCommonTriangle2d(nextSwingLegSupportPolygon, tempCommonSupportPolygon, tempPolygon, swingLeg, 0.02, 0.02, 0.02);
+         drawSupportPolygon(tempCommonSupportPolygon, commonSupportPolygons[i]);
 
-         shrunkenCommonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
+         tempCommonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
          YoFramePoint circleCenter = circleCenters[i];
          circleCenter.setXY(circleCenter2d);
 

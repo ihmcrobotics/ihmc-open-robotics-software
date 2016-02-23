@@ -1,11 +1,8 @@
 package us.ihmc.quadrupedRobotics.supportPolygon;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.testing.TestPlanTarget.Fast;
+import static org.junit.Assert.*;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrantNameFromOrdinal;
+import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 import java.util.Random;
 
@@ -383,9 +380,9 @@ public class QuadrupedSupportPolygonTest
    public void testGetOrCreateFootstep()
    {
       QuadrupedSupportPolygon noFL = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
-      FramePoint footstep1 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstep1 = noFL.reviveFootstep(RobotQuadrant.FRONT_LEFT);
       assertNotNull("null", footstep1);
-      FramePoint footstep2 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstep2 = noFL.reviveFootstep(RobotQuadrant.FRONT_LEFT);
       assertTrue("not same ref", footstep1 == footstep2);
    }
    
@@ -639,6 +636,16 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.25, 0.75, 0.0), 1e-7));
       assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.75, 0.75, 0.0), 1e-7));
       
+      poly.shrinkPolygon2d(RobotQuadrant.FRONT_LEFT, 0.05);
+      poly.shrinkPolygon2d(RobotQuadrant.FRONT_RIGHT, -0.05);
+      poly.shrinkPolygon2d(RobotQuadrant.HIND_RIGHT, 0.10);
+      poly.shrinkPolygon2d(RobotQuadrant.HIND_LEFT, -0.15);
+      
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.10, 0.35, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(0.80, 0.35, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.10, 0.7, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.80, 0.7, 0.0), 1e-7));
+      
       final QuadrupedSupportPolygon createEmptyPolygon = createEmptyPolygon();
       JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
@@ -672,7 +679,8 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.0, 0.0, 0.0), 1e-7));
       assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 1e-7));
       
-      poly1.getShrunkenCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
+      QuadrupedSupportPolygon tempPoly = new QuadrupedSupportPolygon();
+      poly1.getShrunkenCommonTriangle2d(poly2, poly3, tempPoly, RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
       
       Vector3d expected;
       FramePoint actual;
@@ -774,6 +782,20 @@ public class QuadrupedSupportPolygonTest
             poly10.getCommonTriangle2d(poly11, poly12, RobotQuadrant.FRONT_RIGHT);
          }
       });
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testDistanceFromP1ToTrotLine()
+   {
+      QuadrupedSupportPolygon poly = createDiamondPolygon();
+      FramePoint flFoot = poly.getFootstep(RobotQuadrant.FRONT_LEFT);
+      FramePoint hrFoot = poly.getFootstep(RobotQuadrant.HIND_RIGHT);
+      double distance = poly.getDistanceFromP1ToTrotLine2d(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      assertEquals("not 0.5", 0.5, distance, 1e-7);
+      flFoot.add(0.25, 0.0, 0.0);
+      distance = poly.getDistanceFromP1ToTrotLine2d(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      assertEquals("not 0.25", 0.25, distance, 1e-7);
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
@@ -1249,6 +1271,24 @@ public class QuadrupedSupportPolygonTest
       footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 1.0, 0.0));
       footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(1.0, 1.0, 0.0));
+      
+      QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         framePoints.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame(), footPoints.get(robotQuadrant)));
+      }
+      
+      return new QuadrupedSupportPolygon(framePoints);
+   }
+   
+   private QuadrupedSupportPolygon createDiamondPolygon()
+   {
+      QuadrantDependentList<Tuple3d> footPoints = new QuadrantDependentList<>();
+      
+      footPoints.set(RobotQuadrant.HIND_LEFT, new Point3d(0.5, 0.0, 0.0));
+      footPoints.set(RobotQuadrant.HIND_RIGHT, new Point3d(1.0, 0.5, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_RIGHT, new Point3d(0.5, 1.0, 0.0));
+      footPoints.set(RobotQuadrant.FRONT_LEFT, new Point3d(0.0, 0.5, 0.0));
       
       QuadrantDependentList<FramePoint> framePoints = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

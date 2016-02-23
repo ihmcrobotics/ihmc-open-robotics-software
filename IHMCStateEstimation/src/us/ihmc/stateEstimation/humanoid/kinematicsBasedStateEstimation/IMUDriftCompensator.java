@@ -93,9 +93,10 @@ public class IMUDriftCompensator
       this.footSwitches = footSwitches;
       loadPercentageOnFeetThresholdForIMUDrift.set(0.5);
       this.feet.addAll(footFrames.keySet());
-      
-      for (RigidBody foot : feet)
+
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          String namePrefix = foot.getName();
          
          YoFrameQuaternion footOrientationInWorld = new YoFrameQuaternion(namePrefix + "FootOrientationInWorld", worldFrame, registry);
@@ -237,8 +238,11 @@ public class IMUDriftCompensator
    private boolean areFeetLoadedEnough()
    {
       double totalLoadPercentage = 0.0;
-      for (RigidBody foot : feet)
+      for (int i = 0; i < feet.size(); i++)
+      {
+         RigidBody foot = feet.get(i);
          totalLoadPercentage += footSwitches.get(foot).computeFootLoadPercentage();
+      }
       totalLoadPercentageOnFeet.set(totalLoadPercentage);
       boolean areFeetLoadedEnough = totalLoadPercentageOnFeet.getDoubleValue() > loadPercentageOnFeetThresholdForIMUDrift.getDoubleValue();
       isIMUDriftFeetLoadedEnough.set(areFeetLoadedEnough);
@@ -247,8 +251,9 @@ public class IMUDriftCompensator
 
    private boolean areFeetAngularVelocitiesClose()
    {
-      for(RigidBody foot : feet)
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          YoFrameVector angularVelocityDifferenceFromAverage = yoFootAngularVelocityDifferencesFromAverage.get(foot);
          boolean isAngularVelocityXLowEnough = Math.abs(angularVelocityDifferenceFromAverage.getX()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getX();
          boolean isAngularVelocityYLowEnough = Math.abs(angularVelocityDifferenceFromAverage.getY()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getY();
@@ -317,8 +322,9 @@ public class IMUDriftCompensator
    
    private void updateFootOrientations()
    {
-      for (RigidBody foot : feet)
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          FrameOrientation footOrientation = footOrientations.get(foot);
                   
          footOrientation.setToZero(footFrames.get(foot));
@@ -371,8 +377,9 @@ public class IMUDriftCompensator
    
    public void resetFootAngularVelocitiesFiltered()
    {
-      for (RigidBody foot : feet)
+      for (int i = 0; i < feet.size(); i++)
       {
+         RigidBody foot = feet.get(i);
          footAngularVelocitiesInWorldFilteredX.get(foot).set(0.0);
          footAngularVelocitiesInWorldFilteredY.get(foot).set(0.0);
          footAngularVelocitiesInWorldFilteredZ.get(foot).set(0.0);
