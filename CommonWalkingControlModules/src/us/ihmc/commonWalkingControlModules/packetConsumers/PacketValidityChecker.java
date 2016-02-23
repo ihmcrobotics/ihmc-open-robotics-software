@@ -24,6 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
@@ -488,7 +489,7 @@ public abstract class PacketValidityChecker
       {
          errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
          if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+            globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
          return false;
       }
 
@@ -496,7 +497,7 @@ public abstract class PacketValidityChecker
       {
          errorMessage = "Trajectory points are empty.";
          if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+            globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
          return false;
       }
 
@@ -505,7 +506,7 @@ public abstract class PacketValidityChecker
       {
          errorMessage = "ArmJointTrajectoryPacket does not contain any points";
          if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+            globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
          return false;
       }
 
@@ -517,7 +518,7 @@ public abstract class PacketValidityChecker
          {
             errorMessage = "Error with the " + jointIndex + " jointTrajectory1DMessage: " + errorMessage;
             if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
+               globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -681,6 +682,15 @@ public abstract class PacketValidityChecker
          return false;
       }
 
+      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRequest());
+      if (errorType != null)
+      {
+         errorMessage = "request field " + errorType.getMessage();
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
+         return false;
+      }
+
       if (endEffectorLoadBearingMessage.getEndEffector().isRobotSideNeeded())
       {
          errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRobotSide());
@@ -689,6 +699,38 @@ public abstract class PacketValidityChecker
             errorMessage = "robotSide field is null. It is required for the endEffector " + endEffectorLoadBearingMessage.getEndEffector();
             if (globalDataProducer != null)
                globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   public static boolean validateGoHomeMessage(GoHomeMessage goHomeMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      String errorMessage = validatePacket(goHomeMessage, true);
+      if (errorMessage != null)
+         return false;
+
+      ObjectErrorType errorType;
+
+      errorType = ObjectValidityChecker.validateEnum(goHomeMessage.getBodyPart());
+      if (errorType != null)
+      {
+         errorMessage = "endEffector field " + errorType.getMessage();
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(goHomeMessage.getClass(), errorMessage);
+         return false;
+      }
+
+      if (goHomeMessage.getBodyPart().isRobotSideNeeded())
+      {
+         errorType = ObjectValidityChecker.validateEnum(goHomeMessage.getRobotSide());
+         if (goHomeMessage.getRobotSide() == null)
+         {
+            errorMessage = "robotSide field is null. It is required for the bodyPart " + goHomeMessage.getBodyPart();
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(goHomeMessage.getClass(), errorMessage);
             return false;
          }
       }
@@ -821,7 +863,6 @@ public abstract class PacketValidityChecker
       errorType = ObjectValidityChecker.validateTuple4d(so3Waypoint.orientation);
       if (errorType != null)
          return "SO3 waypoint orientation field " + errorType.getMessage();
-      ;
 
       errorType = ObjectValidityChecker.validateTuple3d(so3Waypoint.angularVelocity);
       if (errorType != null)

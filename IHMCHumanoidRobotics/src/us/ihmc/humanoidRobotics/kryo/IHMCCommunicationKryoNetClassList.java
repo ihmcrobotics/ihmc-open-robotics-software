@@ -136,7 +136,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
@@ -232,6 +234,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WholeBodyTrajectoryMessage.class);
       registerPacketClass(PelvisHeightTrajectoryMessage.class);
       registerPacketClass(StopAllTrajectoryMessage.class);
+      registerPacketClass(GoHomeMessage.class);
       
       // Trajectory message fields
       registerPacketClass(BaseForControl.class);
@@ -240,6 +243,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(EuclideanWaypointMessage.class);
       registerPacketClass(SO3WaypointMessage.class);
       registerPacketClass(SE3WaypointMessage.class);
+      registerPacketClass(BodyPart.class);
 
       registerPacketField(ArmControlMode.class);
       registerPacketField(BaseForControl.class);
@@ -253,6 +257,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SO3WaypointMessage[].class);
       registerPacketField(SE3WaypointMessage.class);
       registerPacketField(SE3WaypointMessage[].class);
+      registerPacketField(BodyPart.class);
       
 
       // Hand pose list

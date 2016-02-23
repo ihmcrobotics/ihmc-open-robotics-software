@@ -11,8 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationMa
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
@@ -69,12 +67,10 @@ public class VariousWalkingManagers
 
       if (fullRobotModel.getChest() != null)
       {
-         ChestOrientationProvider desiredChestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
-         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = variousWalkingProviders.getChestTrajectoryMessageSubscriber();
          YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
 
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, desiredChestOrientationProvider,
-               chestTrajectoryMessageSubscriber, stopAllTrajectoryMessageSubscriber, trajectoryTimeHeadOrientation, registry);
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, variousWalkingProviders,
+               trajectoryTimeHeadOrientation, registry);
       }
 
       ManipulationControlModule manipulationControlModule = null;
@@ -145,14 +141,14 @@ public class VariousWalkingManagers
       if (manipulationControlModule != null)
       {
          FeedbackControlCommandList template = manipulationControlModule.createFeedbackControlTemplate();
-         for(int i = 0; i < template.getNumberOfCommands(); i++)
+         for (int i = 0; i < template.getNumberOfCommands(); i++)
             ret.addCommand(template.getCommand(i));
       }
 
       if (feetManager != null)
       {
          FeedbackControlCommandList template = feetManager.createFeedbackControlTemplate();
-         for(int i = 0; i < template.getNumberOfCommands(); i++)
+         for (int i = 0; i < template.getNumberOfCommands(); i++)
             ret.addCommand(template.getCommand(i));
       }
 
@@ -161,7 +157,7 @@ public class VariousWalkingManagers
          ret.addCommand(headOrientationManager.getFeedbackControlCommand());
       }
 
-      if(chestOrientationManager != null)
+      if (chestOrientationManager != null)
       {
          ret.addCommand(chestOrientationManager.getFeedbackControlCommand());
       }

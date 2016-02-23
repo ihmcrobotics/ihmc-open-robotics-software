@@ -24,7 +24,6 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
          switch (this)
          {
          case FOOT:
-            return true;
          case HAND:
             return true;
          default:
@@ -86,10 +85,9 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
       }
    }
 
-   @FieldDocumentation("At the moment, since only the feet can be requested to switch to loadbearing, the robotSide has to be provided."
-         + " It refers to which of the two feet should switch to loadbearing.")
+   @FieldDocumentation("Needed to identify a side dependent end-effector.")
    public RobotSide robotSide;
-   @FieldDocumentation("Spcifies which end-effector should be loaded/unloaded.")
+   @FieldDocumentation("Specifies which end-effector should be loaded/unloaded.")
    public EndEffector endEffector;
    @FieldDocumentation("Wether the end-effector should be loaded or unloaded.")
    public LoadBearingRequest request;
