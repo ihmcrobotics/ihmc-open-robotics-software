@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -66,7 +65,6 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
       DesiredHighLevelStateProvider highLevelStateProvider = null;
       DesiredComHeightProvider comHeightProvider = null;
       PelvisPoseProvider pelvisPoseProvider = null;
-      ChestOrientationProvider chestOrientationProvider = null;
 
       ControlStatusProducer controlStatusProducer = null;
 
@@ -83,8 +81,8 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
             pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepProvider, comHeightProvider, pelvisPoseProvider, handComplianceControlParametersProvider,
-            automaticManipulationAbortCommunicator, chestOrientationProvider, highLevelStateProvider, controlStatusProducer,
-            capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
+            automaticManipulationAbortCommunicator, highLevelStateProvider, controlStatusProducer, capturabilityBasedStatusProducer,
+            handPoseStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }
