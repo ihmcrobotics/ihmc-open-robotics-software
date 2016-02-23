@@ -75,7 +75,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
-      isEnabled = new BooleanYoVariable(endEffectorName + "isOrientationFBControllerEnabled", registry);
+      isEnabled = new BooleanYoVariable(endEffectorName + "IsOrientationFBControllerEnabled", registry);
       isEnabled.set(false);
 
       yoDesiredOrientation = new YoFrameQuaternion(endEffectorName + "DesiredOrientation", worldFrame, registry);
