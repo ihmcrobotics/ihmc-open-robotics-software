@@ -24,11 +24,11 @@ public class Waypoint1DMessage extends IHMCRosApiMessage<Waypoint1DMessage> impl
    {
    }
 
-   public Waypoint1DMessage(Waypoint1DMessage waypoint1d)
+   public Waypoint1DMessage(Waypoint1DInterface waypoint1d)
    {
-      time = waypoint1d.time;
-      position = waypoint1d.position;
-      velocity = waypoint1d.velocity;
+      time = waypoint1d.getTime();
+      position = waypoint1d.getPosition();
+      velocity = waypoint1d.getVelocity();
    }
 
    public Waypoint1DMessage(double time, double position, double velocity)
