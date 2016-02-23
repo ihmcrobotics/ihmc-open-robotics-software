@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscrib
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -92,12 +91,10 @@ public class ManipulationControlModule
       YoPIDGains jointspaceControlGains = armControllerParameters.createJointspaceControlGains(registry);
       YoSE3PIDGainsInterface taskspaceGains = armControllerParameters.createTaskspaceControlGains(registry);
 
-      HandPoseStatusProducer handPoseStatusProducer = variousWalkingProviders.getHandPoseStatusProducer();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters,
-               jointspaceControlGains, taskspaceGains, handPoseStatusProducer, registry);
+               jointspaceControlGains, taskspaceGains, registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }
 
