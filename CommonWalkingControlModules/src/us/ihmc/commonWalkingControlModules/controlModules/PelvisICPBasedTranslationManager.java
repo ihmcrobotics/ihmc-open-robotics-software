@@ -158,7 +158,10 @@ public class PelvisICPBasedTranslationManager
 
       if (message.getWaypoint(0).getTime() > 1.0e-5)
       {
-         waypointPositionTrajectoryGenerator.getPosition(tempPosition);
+         if (isRunning.getBooleanValue())
+            waypointPositionTrajectoryGenerator.getPosition(tempPosition);
+         else
+            tempPosition.setToZero(pelvisZUpFrame);
          tempPosition.changeFrame(worldFrame);
          tempVelocity.setToZero(worldFrame);
 

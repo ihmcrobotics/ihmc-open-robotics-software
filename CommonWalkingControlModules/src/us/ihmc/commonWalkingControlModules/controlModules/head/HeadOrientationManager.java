@@ -77,7 +77,7 @@ public class HeadOrientationManager
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
    }
 
-   private void initialize()
+   public void initialize()
    {
       if (hasBeenInitialized.getBooleanValue())
          return;
@@ -110,8 +110,6 @@ public class HeadOrientationManager
 
    public void compute()
    {
-      initialize();
-
       handleHeadTrajectoryMessages();
 
       if (isTrackingOrientation.getBooleanValue())
