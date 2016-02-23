@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
@@ -20,7 +19,6 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
@@ -50,7 +48,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private boolean loadedScriptFile = false;
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
-   private final DesiredHandPoseProvider desiredHandPoseProvider;
    private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredHandstepProvider handstepProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
@@ -76,7 +73,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       this.scriptEventDuration = new DoubleYoVariable("scriptEventDuration", registry);
 
       this.scriptFileLoader = scriptFileLoader;
-      desiredHandPoseProvider = new DesiredHandPoseProvider(referenceFrames,fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
       desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
       handstepProvider = new DesiredHandstepProvider(fullRobotModel);
       desiredComHeightProvider = new DesiredComHeightProvider(null);
@@ -131,13 +127,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
          footTrajectoryMessageSubscriber.receivedPacket(message);
          setupTimesForNewScriptEvent(0.5);
-      }
-      else if (scriptObject instanceof HandPosePacket)
-      {
-         HandPosePacket handPosePacket = (HandPosePacket) scriptObject;
-         desiredHandPoseProvider.receivedPacket(handPosePacket);
-
-         setupTimesForNewScriptEvent(handPosePacket.getTrajectoryTime());
       }
       else if (scriptObject instanceof HandTrajectoryMessage)
       {
@@ -265,11 +254,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    public boolean isBlindWalking()
    {
       return false;
-   }
-
-   public DesiredHandPoseProvider getDesiredHandPoseProvider()
-   {
-      return desiredHandPoseProvider;
    }
 
    public DesiredPelvisPoseProvider getDesiredPelvisPoseProvider()
