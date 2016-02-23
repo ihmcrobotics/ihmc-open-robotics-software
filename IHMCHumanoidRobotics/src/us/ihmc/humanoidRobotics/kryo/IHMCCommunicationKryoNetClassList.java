@@ -136,14 +136,15 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
@@ -230,6 +231,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HeadTrajectoryMessage.class);
       registerPacketClass(ChestTrajectoryMessage.class);
       registerPacketClass(PelvisTrajectoryMessage.class);
+      registerPacketClass(PelvisOrientationTrajectoryMessage.class);
       registerPacketClass(FootTrajectoryMessage.class);
       registerPacketClass(WholeBodyTrajectoryMessage.class);
       registerPacketClass(PelvisHeightTrajectoryMessage.class);

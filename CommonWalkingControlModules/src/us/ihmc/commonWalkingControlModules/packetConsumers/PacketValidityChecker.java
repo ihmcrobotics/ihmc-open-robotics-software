@@ -28,6 +28,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -583,6 +584,38 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + i + "th " + errorMessage;
             if (globalDataProducer != null)
                globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   public static boolean validatePelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   {
+      String errorMessage = validatePacket(pelvisOrientationTrajectoryMessage, true);
+      if (errorMessage != null)
+         return false;
+
+      SO3WaypointMessage previousWaypoint = null;
+
+      if (pelvisOrientationTrajectoryMessage.getNumberOfWaypoints() == 0)
+      {
+         errorMessage = "Received trajectory message with no waypoint.";
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(pelvisOrientationTrajectoryMessage.getClass(), errorMessage);
+         return false;
+      }
+
+      for (int i = 0; i < pelvisOrientationTrajectoryMessage.getNumberOfWaypoints(); i++)
+      {
+         SO3WaypointMessage waypoint = pelvisOrientationTrajectoryMessage.getWaypoint(i);
+         errorMessage = validateSO3WaypointMessage(waypoint, previousWaypoint, false);
+         if (errorMessage != null)
+         {
+            errorMessage = "The " + i + "th " + errorMessage;
+            if (globalDataProducer != null)
+               globalDataProducer.notifyInvalidPacketReceived(pelvisOrientationTrajectoryMessage.getClass(), errorMessage);
             return false;
          }
       }

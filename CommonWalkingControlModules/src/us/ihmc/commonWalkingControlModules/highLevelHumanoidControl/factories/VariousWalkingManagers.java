@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -81,8 +82,9 @@ public class VariousWalkingManagers
       FeetManager feetManager = new FeetManager(momentumBasedController, stopAllTrajectoryMessageSubscriber, walkingControllerParameters, swingTimeProvider,
             registry);
 
+      PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisOrientationTrajectoryMessageSubscriber();
       PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController,
-            stopAllTrajectoryMessageSubscriber, registry);
+            pelvisOrientationTrajectoryMessageSubscriber, stopAllTrajectoryMessageSubscriber, registry);
 
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
       PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController,
