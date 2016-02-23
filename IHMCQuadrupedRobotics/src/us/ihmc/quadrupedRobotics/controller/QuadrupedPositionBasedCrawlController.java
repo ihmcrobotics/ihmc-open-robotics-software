@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -302,6 +302,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable comTrajectoryTimeStart = new DoubleYoVariable("comTrajectoryTimeStart", registry);
    private final DoubleYoVariable comTrajectoryTimeCurrent = new DoubleYoVariable("comTrajectoryTimeCurrent", registry);
    private final DoubleYoVariable comTrajectoryTimeDesired = new DoubleYoVariable("comTrajectoryTimeDesired", registry);
+   private final DoubleYoVariable comTrajectoryTimeLastCalled = new DoubleYoVariable("comTrajectoryTimeLastCalled", registry);
+   private final DoubleYoVariable comTrajectoryTimeScaleFactor = new DoubleYoVariable("comTrajectoryTimeScaleFactor", registry);
+   private final DoubleYoVariable distanceToTrotLine = new DoubleYoVariable("distanceToTrotLine", registry);
+
 
    private final DoubleYoVariable turnInPlaceCoMTrajectoryBuffer = new DoubleYoVariable("turnInPlaceCoMTrajectoryBuffer", registry);
    private final DoubleYoVariable comTrajectoryDuration = new DoubleYoVariable("comTrajectoryDuration", registry);
@@ -384,7 +388,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       comTrajectoryTimeDesired.set(1.0);
       maximumCoMTrajectoryDuration.set(6.0);
       minimumCoMTrajectoryDuration.set(0.01);
-       
+      comTrajectoryTimeScaleFactor.set(1.0);
+
       shrunkenPolygonSize.set(0.02);
 
       timeToFilterDesiredAtCrawlStart.set(4.0);
@@ -890,13 +895,29 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation.getFrameTuple());
       }
    }
+
+   FramePoint tempCOMTarget = new FramePoint(ReferenceFrame.getWorldFrame());
+   private double computeDistanceToTrotLine2d(RobotQuadrant swingQuadrant)
+   {
+      comTrajectoryGenerator.getFinalPosition(tempCOMTarget);
+      FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFrameTuple();
+
+      //do this only if the desiredBodyCurrent != tempCOMTarget
+      double distanceToTrotLine;
+      if (desiredBodyCurrent.distance(tempCOMTarget) > 1e-3)
+         distanceToTrotLine = fourFootSupportPolygon.getDistanceFromP1ToTrotLine2d(swingQuadrant.getAcrossBodyFrontQuadrant(), desiredBodyCurrent, tempCOMTarget);
+      else
+         distanceToTrotLine = -0.1234;
+
+      return distanceToTrotLine;
+   }
    
    private void computeCurrentSupportPolygonAndDistanceInside(RobotQuadrant swingQuadrant)
    {
       currentSupportPolygon.set(fourFootSupportPolygon);
       if (swingQuadrant != null) currentSupportPolygon.removeFootstep(swingQuadrant); 
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));   
+      distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));
    }
 
    private void updateGraphics()
@@ -928,13 +949,18 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    {
       if(!comTrajectoryGenerator.isDone() && !comTrajectoryGeneratorRequiresReInitailization.getBooleanValue() && (walkingStateMachine.isCurrentState(CrawlGateWalkingState.TRIPLE_SUPPORT) || !isDesiredVelocityAndYawRateZero()))
       {
-         comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
+         double deltaTimeFromLastCall = robotTimestamp.getDoubleValue() - comTrajectoryTimeLastCalled.getDoubleValue();
+         double deltaTimeToUse = comTrajectoryTimeScaleFactor.getDoubleValue()*deltaTimeFromLastCall;
+         comTrajectoryTimeCurrent.set(comTrajectoryTimeCurrent.getDoubleValue() + deltaTimeToUse);
+         //comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
          comTrajectoryGenerator.getPosition(desiredCoMFramePosition);
          comTrajectoryGenerator.getVelocity(desiredCoMVelocity);
          desiredCoMFramePosition.setZ(desiredCoMPose.getPosition().getZ());
          
          desiredCoMPose.setPosition(desiredCoMFramePosition);
+
+         comTrajectoryTimeLastCalled.set(robotTimestamp.getDoubleValue());
       }
    }
 
@@ -1723,7 +1749,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          initializeCoMTrajectory(new FramePoint2d(ReferenceFrame.getWorldFrame(), initialCoMPosition.getX(), initialCoMPosition.getY()));
          comTrajectoryGenerator.setToDone();
       }
-      
+
+      Random random = new Random(100L);
       private void initializeCoMTrajectory(FramePoint2d target)
       {
          FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFrameTuple();
@@ -1752,12 +1779,17 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          
          if (comTrajectoryDuration.getDoubleValue() > maximumCoMTrajectoryDuration.getDoubleValue()) comTrajectoryDuration.set(maximumCoMTrajectoryDuration.getDoubleValue());
          if (comTrajectoryDuration.getDoubleValue() < minimumCoMTrajectoryDuration.getDoubleValue()) comTrajectoryDuration.set(minimumCoMTrajectoryDuration.getDoubleValue());
-         
+
+
+         //PDN: this is just so I can see when the value changes
+         comTrajectoryDuration.set(comTrajectoryDuration.getDoubleValue() + random.nextDouble()/1000.0);
          comTrajectoryGenerator.setTrajectoryTime(comTrajectoryDuration.getDoubleValue());
 
          desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
          
          comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
+         comTrajectoryTimeLastCalled.set(comTrajectoryTimeStart.getDoubleValue());
+         comTrajectoryTimeCurrent.set(0.0);
          comTrajectoryGenerator.setInitialConditions(initialCoMPosition, initialCoMVelocity);
          comTrajectoryGenerator.setFinalConditions(desiredCoMTarget, desiredBodyVelocity);
          comTrajectoryGenerator.initialize();
@@ -1833,6 +1865,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          speedMatchScalar.set(0.0);
       }
 
+      private FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
       @Override
       public void doAction()
       {
@@ -1847,7 +1880,17 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
 
          computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
-         
+
+         //Only need to slow down if com target is on other side of trot line
+         double thresholdDistance = 0.01;
+         comTrajectoryGenerator.getFinalPosition(tempFramePoint);
+         boolean cOMTargetOutsideOfSupportPolygon = isCOMTargetInsideSupportPolygon(swingQuadrant, tempFramePoint, thresholdDistance);
+         if (!cOMTargetOutsideOfSupportPolygon)
+            distanceToTrotLine.set(computeDistanceToTrotLine2d(swingQuadrant));
+         else
+            distanceToTrotLine.set(0.12345);
+
+
          doActionTripleSupportTimer.stopTimer();
       }
 
@@ -1867,6 +1910,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          initializeSwingTrajectory(swingQuadrant, yoDesiredFootPosition.getFrameTuple(), swingTarget, swingDuration.getDoubleValue());
 
          //check if there will be a risk of crossing trot line before finishing front leg swimg
+         //supportPolygon.getDistanceFromP1ToTrotLine()
+
+
          if (swingQuadrant.isQuadrantInFront())
          {
             computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
@@ -1885,13 +1931,25 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          }
          
          doTransitionIntoTripleSupportTimer.stopTimer();
+
+
       }
       
 
       @Override
       public void doTransitionOutOfAction()
       {
+         //reset this just in case
+         comTrajectoryTimeScaleFactor.set(1.0);
+      }
 
+      private boolean isCOMTargetInsideSupportPolygon(RobotQuadrant swingQuadrant, FramePoint cOMTarget, double thresholdDistance)
+      {
+         currentSupportPolygon.set(fourFootSupportPolygon);
+         if (swingQuadrant != null) currentSupportPolygon.removeFootstep(swingQuadrant);
+         cOMTarget.changeFrame(ReferenceFrame.getWorldFrame());
+         double distanceInside = currentSupportPolygon.distanceInside2d(cOMTarget);
+         return distanceInside > thresholdDistance;
       }
       
       /**
