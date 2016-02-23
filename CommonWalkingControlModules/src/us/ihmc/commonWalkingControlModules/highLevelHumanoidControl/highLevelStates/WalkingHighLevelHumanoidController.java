@@ -33,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
@@ -49,6 +50,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
@@ -161,6 +163,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
    private final EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber;
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
+   private final GoHomeMessageSubscriber goHomeMessageSubscriber;
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
 
@@ -314,6 +317,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
       endEffectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       pelvisTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisTrajectoryMessageSubscriber();
+      goHomeMessageSubscriber = variousWalkingProviders.getGoHomeMessageSubscriber();
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
       DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
@@ -666,12 +670,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (transferToSide == null)
             handleAutomaticManipulationAbortOnICPError();
 
-         if (transferToSide == null && pelvisTrajectoryMessageSubscriber != null && pelvisTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
+         if (transferToSide == null)
          {
-            PelvisTrajectoryMessage pelvisTrajectoryMessage = pelvisTrajectoryMessageSubscriber.pollMessage();
-            pelvisOrientationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-            pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-            centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+            if (pelvisTrajectoryMessageSubscriber != null && pelvisTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
+            {
+               PelvisTrajectoryMessage pelvisTrajectoryMessage = pelvisTrajectoryMessageSubscriber.pollMessage();
+               pelvisOrientationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+               pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+               centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+            }
+            else if (goHomeMessageSubscriber != null && goHomeMessageSubscriber.isNewMessageAvailable(BodyPart.PELVIS))
+            {
+               pelvisOrientationManager.goToHome(goHomeMessageSubscriber.pollMessage(BodyPart.PELVIS));
+               pelvisICPBasedTranslationManager.freeze();
+            }
          }
       }
 

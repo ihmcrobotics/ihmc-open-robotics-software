@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessag
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
@@ -38,6 +39,7 @@ public class VariousWalkingProviders
    private final PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber;
 
    private final HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber;
+   private final GoHomeMessageSubscriber goHomeMessageSubscriber;
 
    // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
    private final FootstepProvider footstepProvider;
@@ -63,13 +65,13 @@ public class VariousWalkingProviders
          HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber, ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber,
          PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber, FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber,
          EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
-         PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
+         PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber, GoHomeMessageSubscriber goHomeMessageSubscriber,
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
          FootstepProvider footstepProvider, HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          PelvisPoseProvider desiredPelvisPoseProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
          AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, ChestOrientationProvider desiredChestOrientationProvider,
-         DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
-         HandPoseStatusProducer handPoseStatusProducer, AbortWalkingProvider abortProvider)
+         DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer,
+         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer, AbortWalkingProvider abortProvider)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
       this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
@@ -81,6 +83,7 @@ public class VariousWalkingProviders
       this.endEffectorLoadBearingMessageSubscriber = endEffectorLoadBearingMessageSubscriber;
       this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
       this.pelvisHeightTrajectoryMessageSubscriber = pelvisHeightTrajectoryMessageSubscriber;
+      this.goHomeMessageSubscriber = goHomeMessageSubscriber;
 
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
@@ -142,6 +145,8 @@ public class VariousWalkingProviders
          stopAllTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (pelvisHeightTrajectoryMessageSubscriber != null)
          pelvisHeightTrajectoryMessageSubscriber.clearMessagesInQueue();
+      if (goHomeMessageSubscriber != null)
+         goHomeMessageSubscriber.clearMessagesInQueue();
    }
 
    public HandTrajectoryMessageSubscriber getHandTrajectoryMessageSubscriber()
@@ -192,6 +197,11 @@ public class VariousWalkingProviders
    public PelvisHeightTrajectoryMessageSubscriber getPelvisHeightTrajectoryMessageSubscriber()
    {
       return pelvisHeightTrajectoryMessageSubscriber;
+   }
+
+   public GoHomeMessageSubscriber getGoHomeMessageSubscriber()
+   {
+      return goHomeMessageSubscriber;
    }
 
    public DesiredHighLevelStateProvider getDesiredHighLevelStateProvider()

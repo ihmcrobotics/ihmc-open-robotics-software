@@ -232,15 +232,8 @@ public class PelvisOrientationManager
       {
          if (pelvisPoseProvider.checkForHomeOrientation())
          {
-            initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-            offsetTrajectoryTime.set(pelvisPoseProvider.getTrajectoryTime());
-            activeOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
-            initialPelvisOrientationOffset.set(tempOrientation);
-            finalPelvisOrientationOffset.set(0.0, 0.0, 0.0);
-            pelvisOrientationOffsetTrajectoryGenerator.initialize();
-            isUsingWaypointTrajectory.set(false);
-            isTrajectoryStopped.set(false);
-            activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
+            double trajectoryTime = pelvisPoseProvider.getTrajectoryTime();
+            goToHome(trajectoryTime);
          }
          else if (pelvisPoseProvider.checkForNewOrientation())
          {
@@ -288,6 +281,24 @@ public class PelvisOrientationManager
       desiredPelvisAngularVelocity.getFrameTupleIncludingFrame(tempAngularVelocity);
       desiredPelvisAngularAcceleration.getFrameTupleIncludingFrame(tempAngularAcceleration);
       orientationTrajectoryData.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+   }
+
+   public void goToHome()
+   {
+      goToHome(defaultTrajectoryTime);
+   }
+
+   public void goToHome(double trajectoryTime)
+   {
+      initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
+      offsetTrajectoryTime.set(trajectoryTime);
+      activeOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
+      initialPelvisOrientationOffset.set(tempOrientation);
+      finalPelvisOrientationOffset.set(0.0, 0.0, 0.0);
+      pelvisOrientationOffsetTrajectoryGenerator.initialize();
+      isUsingWaypointTrajectory.set(false);
+      isTrajectoryStopped.set(false);
+      activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
    }
 
    private void handleStopAllTrajectoryMessage()
