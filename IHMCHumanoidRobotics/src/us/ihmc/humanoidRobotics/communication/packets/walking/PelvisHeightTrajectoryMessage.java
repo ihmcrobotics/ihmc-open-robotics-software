@@ -90,6 +90,16 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiMessage<PelvisHeigh
       return waypoints;
    }
 
+   public Waypoint1DMessage getLastWaypoint()
+   {
+      return waypoints[getNumberOfWaypoints() - 1];
+   }
+
+   public double getTrajectoryTime()
+   {
+      return getLastWaypoint().getTime();
+   }
+
    private void rangeCheck(int waypointIndex)
    {
       if (waypointIndex >= getNumberOfWaypoints() || waypointIndex < 0)

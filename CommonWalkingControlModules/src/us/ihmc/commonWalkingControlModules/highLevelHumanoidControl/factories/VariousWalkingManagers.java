@@ -100,6 +100,10 @@ public class VariousWalkingManagers
    {
       if (manipulationControlModule != null)
          manipulationControlModule.initialize();
+      if (headOrientationManager != null)
+         headOrientationManager.initialize();
+      if (chestOrientationManager != null)
+         chestOrientationManager.initialize();
    }
 
    public HeadOrientationManager getHeadOrientationManager()

@@ -28,7 +28,7 @@ public class ChestOrientationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ChestOrientationControlModule chestOrientationControlModule;
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
@@ -36,11 +36,13 @@ public class ChestOrientationManager
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final GoHomeMessageSubscriber goHomeMessageSubscriber;
    private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewChestOrientationTime;
+   private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
 
-   private final BooleanYoVariable isTrajectoryStopped;
-   private final BooleanYoVariable isTrackingOrientation;
+   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
+   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
    private final YoFrameVector yoControlledAngularAcceleration;
+
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
 
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
    private final ReferenceFrame pelvisZUpFrame;
@@ -48,11 +50,15 @@ public class ChestOrientationManager
 
    private final BooleanYoVariable initializeToCurrent;
 
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+
+   private final FrameVector controlledAngularAcceleration = new FrameVector();
+
    public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface chestControlGains,
          VariousWalkingProviders variousWalkingProviders, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(getClass().getSimpleName());
-
       this.yoTime = momentumBasedController.getYoTime();
       this.chestTrajectoryMessageSubscriber = variousWalkingProviders.getChestTrajectoryMessageSubscriber();
       this.stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
@@ -71,10 +77,6 @@ public class ChestOrientationManager
 
       yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestFrame, registry);
 
-      isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
-      isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-      receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
-
       boolean allowMultipleFrames = true;
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", 15, allowMultipleFrames, pelvisZUpFrame, registry);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
@@ -84,11 +86,15 @@ public class ChestOrientationManager
       parentRegistry.addChild(registry);
    }
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+   public void initialize()
+   {
+      if (hasBeenInitialized.getBooleanValue())
+         return;
 
-   private final FrameVector controlledAngularAcceleration = new FrameVector();
+      hasBeenInitialized.set(true);
+
+      holdCurrentOrientation();
+   }
 
    public void compute()
    {
@@ -198,7 +204,8 @@ public class ChestOrientationManager
       waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
       
       desiredOrientation.changeFrame(pelvisZUpFrame);
-      waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
+      waypointOrientationTrajectoryGenerator.clear();
+      waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(pelvisZUpFrame);
       waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
 
       desiredOrientation.setToZero(pelvisZUpFrame);
