@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -49,7 +48,6 @@ public class VariousWalkingProviders
    private final DesiredHighLevelStateProvider desiredHighLevelStateProvider;
    private final PelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
-   private final ChestOrientationProvider desiredChestOrientationProvider;
 
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final ControlStatusProducer controlStatusProducer;
@@ -67,9 +65,9 @@ public class VariousWalkingProviders
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
          FootstepProvider footstepProvider, DesiredComHeightProvider desiredComHeightProvider, PelvisPoseProvider desiredPelvisPoseProvider,
          HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber, AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
-         ChestOrientationProvider desiredChestOrientationProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
-         ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
-         HandPoseStatusProducer handPoseStatusProducer, AbortWalkingProvider abortProvider)
+         DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer,
+         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
+         AbortWalkingProvider abortProvider)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
       this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
@@ -87,7 +85,6 @@ public class VariousWalkingProviders
       this.footstepProvider = footstepProvider;
       this.desiredPelvisPoseProvider = desiredPelvisPoseProvider;
       this.desiredComHeightProvider = desiredComHeightProvider;
-      this.desiredChestOrientationProvider = desiredChestOrientationProvider;
       this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
 
       this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
@@ -115,11 +112,6 @@ public class VariousWalkingProviders
       {
          desiredPelvisPoseProvider.getDesiredPelvisPosition(ReferenceFrame.getWorldFrame());
          desiredPelvisPoseProvider.getDesiredPelvisOrientation(ReferenceFrame.getWorldFrame());
-      }
-
-      if (desiredChestOrientationProvider != null)
-      {
-         desiredChestOrientationProvider.getDesiredChestOrientation();
       }
 
       if (handTrajectoryMessageSubscriber != null)
@@ -224,11 +216,6 @@ public class VariousWalkingProviders
    public HandComplianceControlParametersSubscriber getHandComplianceControlParametersSubscriber()
    {
       return handComplianceControlParametersSubscriber;
-   }
-
-   public ChestOrientationProvider getDesiredChestOrientationProvider()
-   {
-      return desiredChestOrientationProvider;
    }
 
    public ControlStatusProducer getControlStatusProducer()

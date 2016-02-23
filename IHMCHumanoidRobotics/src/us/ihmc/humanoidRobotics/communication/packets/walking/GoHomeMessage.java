@@ -66,11 +66,26 @@ public class GoHomeMessage extends IHMCRosApiMessage<GoHomeMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   public GoHomeMessage(BodyPart bodyPart, double trajectoryTime)
+   {
+      checkRobotSide(bodyPart);
+      this.bodyPart = bodyPart;
+      this.trajectoryTime = trajectoryTime;
+   }
+
    public GoHomeMessage(BodyPart bodyPart, RobotSide robotSide, double trajectoryTime)
    {
+      if (robotSide == null)
+         checkRobotSide(bodyPart);
       this.bodyPart = bodyPart;
       this.robotSide = robotSide;
       this.trajectoryTime = trajectoryTime;
+   }
+
+   private void checkRobotSide(BodyPart bodyPart)
+   {
+      if (bodyPart.isRobotSideNeeded())
+         throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
    }
 
    public BodyPart getBodyPart()
