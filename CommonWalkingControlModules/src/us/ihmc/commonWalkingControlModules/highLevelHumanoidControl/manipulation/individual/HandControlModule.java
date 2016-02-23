@@ -26,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -118,7 +117,6 @@ public class HandControlModule
    private final YoSE3PIDGainsInterface taskspaceGains;
 
    private final StateChangedListener<HandControlMode> stateChangedlistener;
-   private final HandPoseStatusProducer handPoseStatusProducer;
    private final BooleanYoVariable hasHandPoseStatusBeenSent;
 
    private final BooleanYoVariable areAllArmJointEnabled;
@@ -131,7 +129,7 @@ public class HandControlModule
    private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap = new HashMap<>();
 
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
-         YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
+         YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, YoVariableRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry;
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -147,8 +145,6 @@ public class HandControlModule
       {
          yoGraphicsListRegistry = null;
       }
-
-      this.handPoseStatusProducer = handPoseStatusProducer;
 
       hasHandPoseStatusBeenSent = new BooleanYoVariable(namePrefix + "HasHandPoseStatusBeenSent", registry);
       hasHandPoseStatusBeenSent.set(false);
@@ -339,8 +335,6 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
-      checkAndSendHandPoseStatusIsCompleted();
-
       for (OneDoFJoint joint : oneDoFJoints)
       {
          qDesireds.get(joint).set(joint.getqDesired());
@@ -357,18 +351,6 @@ public class HandControlModule
             return true;
       }
       return false;
-   }
-
-   private void checkAndSendHandPoseStatusIsCompleted()
-   {
-      boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlMode.TASK_SPACE_POSITION;
-      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlMode.JOINT_SPACE;
-
-      if ((handPoseStatusProducer != null) && isExecutingHandPose && isDone() && !hasHandPoseStatusBeenSent.getBooleanValue())
-      {
-         handPoseStatusProducer.sendCompletedStatus(robotSide);
-         hasHandPoseStatusBeenSent.set(true);
-      }
    }
 
    public boolean isDone()
@@ -407,9 +389,6 @@ public class HandControlModule
          handTaskspaceToJointspaceCalculator.initializeFromCurrentJointAngles();
       }
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
-
-      if (handPoseStatusProducer != null)
-         handPoseStatusProducer.sendStartedStatus(robotSide);
 
       stateMachine.checkTransitionConditions();
    }
@@ -709,9 +688,6 @@ public class HandControlModule
       jointSpaceHandControlState.setTrajectories(trajectoryGenrators);
       requestedState.set(jointSpaceHandControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
-
-      if (handPoseStatusProducer != null)
-         handPoseStatusProducer.sendStartedStatus(robotSide);
    }
 
    public boolean isLoadBearing()

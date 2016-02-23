@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTraj
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 
 public class VariousWalkingProviders
@@ -46,7 +45,6 @@ public class VariousWalkingProviders
 
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
-   private final HandPoseStatusProducer handPoseStatusProducer;
 
    public VariousWalkingProviders(HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber,
          ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber, ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber,
@@ -58,8 +56,7 @@ public class VariousWalkingProviders
          GoHomeMessageSubscriber goHomeMessageSubscriber, FootstepProvider footstepProvider,
          HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
          AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
-         AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
+         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
       this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
@@ -82,8 +79,6 @@ public class VariousWalkingProviders
 
       this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
 
-      this.handPoseStatusProducer = handPoseStatusProducer;
-
       if (abortWalkingMessageSubscriber == null)
       {
          this.abortWalkingMessageSubscriber = new AbortWalkingMessageSubscriber();
@@ -92,7 +87,6 @@ public class VariousWalkingProviders
       {
          this.abortWalkingMessageSubscriber = abortWalkingMessageSubscriber;
       }
-
    }
 
    public void clearPoseProviders()
@@ -201,11 +195,6 @@ public class VariousWalkingProviders
    public CapturabilityBasedStatusProducer getCapturabilityBasedStatusProducer()
    {
       return capturabilityBasedStatusProducer;
-   }
-
-   public HandPoseStatusProducer getHandPoseStatusProducer()
-   {
-      return handPoseStatusProducer;
    }
 
    public AbortWalkingMessageSubscriber getAbortWalkingMessageSubscriber()

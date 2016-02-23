@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTraj
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
@@ -63,8 +62,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
 
-      HandPoseStatusProducer handPoseStatusProducer = null;
-
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
       HandComplianceControlParametersSubscriber handComplianceControlParametersProvider = null;
 
@@ -74,8 +71,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber,
             stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPovider, handComplianceControlParametersProvider,
-            automaticManipulationAbortCommunicator, highLevelStateProvider, capturabilityBasedStatusProducer, handPoseStatusProducer,
-            abortWalkingProvider);
+            automaticManipulationAbortCommunicator, highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }
