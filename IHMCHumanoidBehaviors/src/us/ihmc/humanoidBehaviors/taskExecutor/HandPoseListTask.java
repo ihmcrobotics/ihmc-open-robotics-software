@@ -6,7 +6,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class HandPoseListTask extends BehaviorTask
 {
-   private static final boolean DEBUG = false;
    private final HandPoseListPacket handPoseListPacket;
    private final HandPoseListBehavior handPoseListBehavior;
 
