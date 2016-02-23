@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.C
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -191,16 +190,14 @@ public class MomentumBasedControllerFactory
       double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
       double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
 
-      DesiredComHeightProvider desiredComHeightProvider = variousWalkingProviders.getDesiredComHeightProvider();
       StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
       PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisHeightTrajectoryMessageSubscriber();
 
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(desiredComHeightProvider,
-            stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, minimumHeightAboveGround, nominalHeightAboveGround,
-            maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry,
-            registry);
+      LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(stopAllTrajectoryMessageSubscriber,
+            pelvisHeightTrajectoryMessageSubscriber, minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround,
+            defaultOffsetHeightAboveGround, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
       centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
 
       ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, feet, capturePointPlannerParameters,
