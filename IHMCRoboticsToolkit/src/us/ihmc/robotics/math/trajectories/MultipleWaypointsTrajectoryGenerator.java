@@ -128,7 +128,8 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
    public void appendWaypoints(TrajectoryWaypoint1DDataInterface trajectoryWaypoint1DData)
    {
-      appendWaypoints(trajectoryWaypoint1DData.getWaypoints());
+      for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfWaypoints(); i++)
+         appendWaypoint(trajectoryWaypoint1DData.getWaypoint(i));
    }
 
    private void checkNumberOfWaypoints(int length)

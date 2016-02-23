@@ -1,11 +1,13 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class WaypointTrajectory1DCalculator
 {
-   private final RecyclingArrayList<SimpleWaypoint1D> waypoints = new RecyclingArrayList<>(20, SimpleWaypoint1D.class);
+   private static final double EPSILON = 1.0e-7;
+   private final SimpleTrajectoryWaypoint1DData trajectory = new SimpleTrajectoryWaypoint1DData();
    private final YoPolynomial polynomial = new YoPolynomial("polynomial", 6, new YoVariableRegistry("Dummy"));
 
    public WaypointTrajectory1DCalculator()
@@ -15,12 +17,12 @@ public class WaypointTrajectory1DCalculator
 
    public void clear()
    {
-      waypoints.clear();
+      trajectory.clear();
    }
 
    public void appendWaypoint(Waypoint1DInterface waypoint)
    {
-      waypoints.add().set(waypoint);
+      trajectory.addWaypoint(waypoint);
    }
 
    public void appendWaypoint(double position)
@@ -35,7 +37,7 @@ public class WaypointTrajectory1DCalculator
 
    public void appendWaypoint(double time, double position, double velocity)
    {
-      waypoints.add().set(time, position, velocity);
+      trajectory.addWaypoint(time, position, velocity);
    }
 
    public void computeWaypointTimes(double firstWaypointTime, double trajectoryTime)
@@ -46,24 +48,35 @@ public class WaypointTrajectory1DCalculator
 
       if (numberOfWaypoints == 1)
       {
-         waypoints.get(0).setTime(trajectoryTime);
+         trajectory.getWaypoint(0).setTime(trajectoryTime);
          return;
       }
 
       double totalLength = 0.0;
 
       for (int i = 0; i < numberOfWaypoints - 1; i++)
-         totalLength += Math.abs(waypoints.get(i + 1).getPosition() - waypoints.get(i).getPosition());
+         totalLength += Math.abs(trajectory.getWaypoint(i + 1).getPosition() - trajectory.getWaypoint(i).getPosition());
 
-      waypoints.get(0).setTime(firstWaypointTime);
-      waypoints.get(waypoints.size() - 1).setTime(firstWaypointTime + trajectoryTime);
+      trajectory.getWaypoint(0).setTime(firstWaypointTime);
+      trajectory.getWaypoint(trajectory.getNumberOfWaypoints() - 1).setTime(firstWaypointTime + trajectoryTime);
       double time = firstWaypointTime;
 
-      for (int i = 1; i < numberOfWaypoints - 1; i++)
+      if (totalLength > EPSILON * getNumberOfWaypoints())
       {
-         double subLength = Math.abs(waypoints.get(i).getPosition() - waypoints.get(i - 1).getPosition());
-         time += trajectoryTime * (subLength / totalLength);
-         waypoints.get(i).setTime(time);
+         for (int i = 1; i < numberOfWaypoints - 1; i++)
+         {
+            double subLength = Math.abs(trajectory.getWaypoint(i).getPosition() - trajectory.getWaypoint(i - 1).getPosition());
+            time += trajectoryTime * (subLength / totalLength);
+            trajectory.getWaypoint(i).setTime(time);
+         }
+      }
+      else
+      {
+         for (int i = 1; i < numberOfWaypoints - 1; i++)
+         {
+            time += trajectoryTime / getNumberOfWaypoints();
+            trajectory.getWaypoint(i).setTime(time);
+         }
       }
    }
 
@@ -73,31 +86,51 @@ public class WaypointTrajectory1DCalculator
       if (numberOfWaypoints < 3)
          throw new RuntimeException("Need at least 3 waypoints.");
 
+      SimpleWaypoint1D firstWaypoint;
+      SimpleWaypoint1D secondWaypoint;
+      SimpleWaypoint1D thirdWaypoint;
+
       if (startAndFinishWithZeroVelocity)
       {
-         waypoints.get(0).setVelocity(0.0);
-         waypoints.get(numberOfWaypoints - 1).setVelocity(0.0);
+         trajectory.getWaypoint(0).setVelocity(0.0);
+         trajectory.getWaypoint(numberOfWaypoints - 1).setVelocity(0.0);
 
          if (numberOfWaypoints == 3)
          {
-            waypoints.get(1).setVelocity(compute2ndWaypointVelocityWithVelocityConstraint(waypoints.get(0), waypoints.get(1), waypoints.get(2)));
+            firstWaypoint = trajectory.getWaypoint(0);
+            secondWaypoint = trajectory.getWaypoint(1);
+            thirdWaypoint = trajectory.getWaypoint(2);
+            secondWaypoint.setVelocity(compute2ndWaypointVelocityWithVelocityConstraint(firstWaypoint, secondWaypoint, thirdWaypoint));
             return;
          }
       }
       else
       {
-         waypoints.get(0).setVelocity(computeWaypointVelocity(waypoints.get(0), waypoints.get(1), waypoints.get(2), Waypoint.FIRST));
-         waypoints.get(numberOfWaypoints - 1).setVelocity(computeWaypointVelocity(waypoints.get(numberOfWaypoints - 3), waypoints.get(numberOfWaypoints - 2),
-               waypoints.get(numberOfWaypoints - 1), Waypoint.THIRD));
+         firstWaypoint = trajectory.getWaypoint(0);
+         secondWaypoint = trajectory.getWaypoint(1);
+         thirdWaypoint = trajectory.getWaypoint(2);
+         firstWaypoint.setVelocity(computeWaypointVelocity(firstWaypoint, secondWaypoint, thirdWaypoint, Waypoint.FIRST));
+
+         firstWaypoint = trajectory.getWaypoint(numberOfWaypoints - 3);
+         secondWaypoint = trajectory.getWaypoint(numberOfWaypoints - 2);
+         thirdWaypoint = trajectory.getWaypoint(numberOfWaypoints - 1);
+         thirdWaypoint.setVelocity(computeWaypointVelocity(firstWaypoint, secondWaypoint, thirdWaypoint, Waypoint.THIRD));
       }
 
       for (int i = 1; i < numberOfWaypoints - 1; i++)
       {
-         Waypoint1DInterface firstWaypoint = waypoints.get(i - 1);
-         Waypoint1DInterface secondWaypoint = waypoints.get(i);
-         Waypoint1DInterface thirdWaypoint = waypoints.get(i + 1);
-         waypoints.get(i).setVelocity(computeWaypointVelocity(firstWaypoint, secondWaypoint, thirdWaypoint, Waypoint.SECOND));
+         firstWaypoint = trajectory.getWaypoint(i - 1);
+         secondWaypoint = trajectory.getWaypoint(i);
+         thirdWaypoint = trajectory.getWaypoint(i + 1);
+         secondWaypoint.setVelocity(computeWaypointVelocity(firstWaypoint, secondWaypoint, thirdWaypoint, Waypoint.SECOND));
       }
+   }
+
+   public boolean shouldVelocityBeZero(Waypoint1DInterface firstWaypoint, Waypoint1DInterface secondWaypoint)
+   {
+      double deltaPosition = Math.abs(secondWaypoint.getPosition() - firstWaypoint.getPosition());
+      double deltaTime = Math.abs(secondWaypoint.getTime() - firstWaypoint.getTime());
+      return MathTools.epsilonEquals(0.0, deltaPosition / deltaTime, 1.0e-7);
    }
 
    private double compute2ndWaypointVelocityWithVelocityConstraint(Waypoint1DInterface firstWaypoint, Waypoint1DInterface secondWaypoint,
@@ -113,6 +146,13 @@ public class WaypointTrajectory1DCalculator
       double tf = thirdWaypoint.getTime();
       double zf = thirdWaypoint.getPosition();
       double zdf = thirdWaypoint.getVelocity();
+
+      if (MathTools.epsilonEquals(tf, t0, EPSILON))
+         return 0.0;
+      else if (MathTools.epsilonEquals(t0, tIntermediate, EPSILON))
+         tIntermediate += 0.001 * (tf - t0);
+      else if (MathTools.epsilonEquals(tIntermediate, tf, EPSILON))
+         tIntermediate -= 0.001 * (tf - t0);
 
       polynomial.setQuarticUsingWayPoint(t0, tIntermediate, tf, z0, zd0, zIntermediate, zf, zdf);
       polynomial.compute(tIntermediate);
@@ -137,6 +177,13 @@ public class WaypointTrajectory1DCalculator
       double tf = thirdWaypoint.getTime();
       double zf = thirdWaypoint.getPosition();
 
+      if (MathTools.epsilonEquals(tf, t0, EPSILON))
+         return 0.0;
+      else if (MathTools.epsilonEquals(t0, tIntermediate, EPSILON))
+         tIntermediate += 0.001 * (tf - t0);
+      else if (MathTools.epsilonEquals(tIntermediate, tf, EPSILON))
+         tIntermediate -= 0.001 * (tf - t0);
+
       polynomial.setQuadraticUsingIntermediatePoint(t0, tIntermediate, tf, z0, zIntermediate, zf);
       switch (waypointToComputeVelocityOf)
       {
@@ -157,11 +204,16 @@ public class WaypointTrajectory1DCalculator
 
    public int getNumberOfWaypoints()
    {
-      return waypoints.size();
+      return trajectory.getNumberOfWaypoints();
    }
 
    public RecyclingArrayList<? extends Waypoint1DInterface> getWaypoints()
    {
-      return waypoints;
+      return trajectory.getWaypoints();
+   }
+
+   public TrajectoryWaypoint1DDataInterface getTrajectoryData()
+   {
+      return trajectory;
    }
 }
