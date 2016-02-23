@@ -22,6 +22,7 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.GlobalTimer;
 
 public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 {
@@ -46,6 +47,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final DoubleYoVariable yOffsetFromCenterOfHips = new DoubleYoVariable("yOffsetFromCenterOfHips", registry);
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
+   
+   private final GlobalTimer getSwingTargetTimer = new GlobalTimer("getSwingTargetTimer", registry);
 
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
    private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
@@ -104,9 +107,12 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint projectedLegPitchPosition = new FramePoint();
    private final FrameVector scaledVelocityVector = new FrameVector();
    
+   @Override
    public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, double swingDuration, FramePoint swingTargetToPack,
          double desiredYawRate)
    {
+      getSwingTargetTimer.startTimer();
+      
       getSwingTarget(swingLeg, desiredBodyVelocity, swingTargetToPack, desiredYawRate);
       
       ReferenceFrame frameBeforeHipPitch = referenceFrames.getFrameBeforeLegJoint(swingLeg, LegJointName.HIP_PITCH);
@@ -144,6 +150,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          swingTargetToPack.setY(footDesiredVector2d.getY());
       }      
       swingTargetToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      getSwingTargetTimer.stopTimer();
    }
    
    private double getMaxSwingDistanceGivenBodyVelocity(RobotQuadrant swingLeg, FramePoint swingTarget, FrameVector desiredBodyVelocity, double swingDuration)
