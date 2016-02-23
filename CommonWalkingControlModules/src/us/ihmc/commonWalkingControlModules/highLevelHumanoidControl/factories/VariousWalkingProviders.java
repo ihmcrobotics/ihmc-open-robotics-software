@@ -14,14 +14,12 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControl
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class VariousWalkingProviders
 {
@@ -46,7 +44,6 @@ public class VariousWalkingProviders
    private final AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator;
 
    private final DesiredHighLevelStateProvider desiredHighLevelStateProvider;
-   private final PelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
 
    // TODO: Shouldn't really be in providers but this class is the easiest to access
@@ -63,11 +60,10 @@ public class VariousWalkingProviders
          EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
          PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber, GoHomeMessageSubscriber goHomeMessageSubscriber,
          // TODO: (Sylvain) The following subscribers need to be renamed and a triage needs to be done too.
-         FootstepProvider footstepProvider, DesiredComHeightProvider desiredComHeightProvider, PelvisPoseProvider desiredPelvisPoseProvider,
-         HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber, AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
-         DesiredHighLevelStateProvider desiredHighLevelStateProvider, ControlStatusProducer controlStatusProducer,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
-         AbortWalkingProvider abortProvider)
+         FootstepProvider footstepProvider, DesiredComHeightProvider desiredComHeightProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
+         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
+         ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
+         HandPoseStatusProducer handPoseStatusProducer, AbortWalkingProvider abortProvider)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
       this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
@@ -83,7 +79,6 @@ public class VariousWalkingProviders
 
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
-      this.desiredPelvisPoseProvider = desiredPelvisPoseProvider;
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
 
@@ -108,12 +103,6 @@ public class VariousWalkingProviders
 
    public void clearPoseProviders()
    {
-      if (desiredPelvisPoseProvider != null)
-      {
-         desiredPelvisPoseProvider.getDesiredPelvisPosition(ReferenceFrame.getWorldFrame());
-         desiredPelvisPoseProvider.getDesiredPelvisOrientation(ReferenceFrame.getWorldFrame());
-      }
-
       if (handTrajectoryMessageSubscriber != null)
          handTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (armTrajectoryMessageSubscriber != null)
@@ -201,11 +190,6 @@ public class VariousWalkingProviders
    public FootstepProvider getFootstepProvider()
    {
       return footstepProvider;
-   }
-
-   public PelvisPoseProvider getDesiredPelvisPoseProvider()
-   {
-      return desiredPelvisPoseProvider;
    }
 
    public DesiredComHeightProvider getDesiredComHeightProvider()

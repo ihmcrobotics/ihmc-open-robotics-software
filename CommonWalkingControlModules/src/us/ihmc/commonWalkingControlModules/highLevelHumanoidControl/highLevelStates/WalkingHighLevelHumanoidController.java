@@ -681,8 +681,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
             else if (goHomeMessageSubscriber != null && goHomeMessageSubscriber.isNewMessageAvailable(BodyPart.PELVIS))
             {
-               pelvisOrientationManager.goToHome(goHomeMessageSubscriber.pollMessage(BodyPart.PELVIS));
-               pelvisICPBasedTranslationManager.freeze();
+               pelvisOrientationManager.goToHomeFromCurrentDesired(goHomeMessageSubscriber.pollMessage(BodyPart.PELVIS));
+               pelvisICPBasedTranslationManager.goToHome();
             }
          }
       }
@@ -1136,8 +1136,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            pelvisICPBasedTranslationManager.clearProvider();
-            pelvisOrientationManager.clearProvider();
             if (footTrajectoryMessageSubscriber != null)
                footTrajectoryMessageSubscriber.clearMessagesInQueue();
          }

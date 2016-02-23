@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -47,7 +47,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private boolean loadedScriptFile = false;
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
-   private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
+   private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
@@ -71,7 +71,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       this.scriptEventDuration = new DoubleYoVariable("scriptEventDuration", registry);
 
       this.scriptFileLoader = scriptFileLoader;
-      desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
+      pelvisTrajectoryMessageSubscriber = new PelvisTrajectoryMessageSubscriber(null);
       desiredComHeightProvider = new DesiredComHeightProvider(null);
 
       handTrajectoryMessageSubscriber = new HandTrajectoryMessageSubscriber(null);
@@ -139,10 +139,10 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          
          setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
       }
-      else if (scriptObject instanceof PelvisPosePacket)
+      else if (scriptObject instanceof PelvisTrajectoryMessage)
       {
-         PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
-         desiredPelvisPoseProvider.receivedPacket(pelvisPosePacket);
+         PelvisTrajectoryMessage pelvisPosePacket = (PelvisTrajectoryMessage) scriptObject;
+         pelvisTrajectoryMessageSubscriber.receivedPacket(pelvisPosePacket);
 
          setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }
@@ -253,9 +253,9 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       return false;
    }
 
-   public DesiredPelvisPoseProvider getDesiredPelvisPoseProvider()
+   public PelvisTrajectoryMessageSubscriber getPelvisTrajectorySubscriber()
    {
-      return desiredPelvisPoseProvider;
+      return pelvisTrajectoryMessageSubscriber;
    }
 
    public DesiredComHeightProvider getDesiredComHeightProvider()

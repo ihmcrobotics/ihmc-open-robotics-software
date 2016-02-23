@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageS
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
@@ -45,7 +44,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -117,7 +115,6 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       PauseWalkingMessageSubscriber pauseWalkingMessageSubscriber = new PauseWalkingMessageSubscriber(footstepPathCoordinator);
       DesiredHighLevelStateProvider highLevelStateProvider = new DesiredHighLevelStateProvider();
       DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider(objectCommunicator);
-      DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
 
       AbortWalkingProvider abortWalkingProvider = new AbortWalkingProvider();
 
@@ -127,7 +124,6 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(HighLevelStatePacket.class, highLevelStateProvider);
       objectCommunicator.attachListener(ComHeightPacket.class, desiredComHeightProvider);
       objectCommunicator.attachListener(AutomaticManipulationAbortPacket.class, automaticManipulationAbortCommunicator);
-      objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider);
       objectCommunicator.attachListener(HandComplianceControlParametersPacket.class, handComplianceControlParametersSubscriber);
       objectCommunicator.attachListener(AbortWalkingPacket.class, abortWalkingProvider);
 
@@ -136,9 +132,9 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, armTrajectoryMessageSubscriber,
             armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
-            pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPathCoordinator, desiredComHeightProvider, pelvisPoseProvider,
-            handComplianceControlParametersSubscriber, automaticManipulationAbortCommunicator, highLevelStateProvider, controlStatusProducer,
-            capturabilityBasedStatusProducer, handPoseStatusProducer, abortWalkingProvider);
+            pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPathCoordinator, desiredComHeightProvider, handComplianceControlParametersSubscriber,
+            automaticManipulationAbortCommunicator, highLevelStateProvider, controlStatusProducer, capturabilityBasedStatusProducer,
+            handPoseStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }
