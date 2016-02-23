@@ -21,6 +21,7 @@ import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,81 +74,24 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
    
-   private class QuadrantDependentFootstepList extends QuadrantDependentList<FramePoint>
+   private class QuadrantDependentFootstepList extends RecyclingQuadrantDependentList<FramePoint>
    {
-      private final FramePoint[] framePointsForStorageWhenNull = new FramePoint[4];
-      {
-         framePointsForStorageWhenNull[0] = new FramePoint();
-         framePointsForStorageWhenNull[1] = new FramePoint();
-         framePointsForStorageWhenNull[2] = new FramePoint();
-         framePointsForStorageWhenNull[3] = new FramePoint();
-      }
-      
       public QuadrantDependentFootstepList()
       {
-         super();
-      }
-      
-      @Override
-      public void set(RobotQuadrant robotQuadrant, FramePoint element)
-      {
-         // do nothing
-         if (element == get(robotQuadrant))
+         super(new GenericTypeAdapter<FramePoint>()
          {
-            return;
-         }
-         // remove
-         if (element == null && containsQuadrant(robotQuadrant))
-         {
-            super.set(robotQuadrant, element);
-            return;
-         }
-         // add
-         else if (element != null && !containsQuadrant(robotQuadrant))
-         {
-            FramePoint storageWhenNull = framePointsForStorageWhenNull[robotQuadrant.ordinal()];
-            storageWhenNull.setIncludingFrame(element);
-            super.set(robotQuadrant, storageWhenNull);
-            return;
-         }
-         // replace
-         else if (element != get(robotQuadrant))
-         {
-            get(robotQuadrant).setIncludingFrame(element);
-         }
-      }
-      
-      @Override
-      public FramePoint remove(RobotQuadrant robotQuadrant)
-      {
-         // remove
-         if (containsQuadrant(robotQuadrant))
-         {
-            framePointsForStorageWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
-            return super.remove(robotQuadrant);
-         }
-         // do nothing
-         else
-         {
-            return get(robotQuadrant);
-         }
-      }
-      
-      @Override
-      public FramePoint get(RobotQuadrant key)
-      {
-         return super.get(key);
-      }
+            @Override
+            public FramePoint makeANewV()
+            {
+               return new FramePoint();
+            }
 
-      @Override
-      public void clear()
-      {
-         for (RobotQuadrant robotQuadrant : quadrants())
-         {
-            framePointsForStorageWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
-         }
-         
-         super.clear();
+            @Override
+            public void setAV(FramePoint newV, FramePoint setThisV)
+            {
+               setThisV.setIncludingFrame(newV);
+            }
+         });
       }
    }
    
@@ -350,12 +294,9 @@ public class QuadrupedSupportPolygon implements Serializable
       return footsteps.get(robotQuadrant);
    }
    
-   public FramePoint getFootstepOrCreateIfNonSupporting(RobotQuadrant robotQuadrant)
-   {
-      if  (!containsFootstep(robotQuadrant))
-         setFootstep(robotQuadrant, ZERO_FRAME_POINT);
-      
-      return getFootstep(robotQuadrant);
+   public FramePoint reviveFootstep(RobotQuadrant robotQuadrant)
+   {      
+      return footsteps.revive(robotQuadrant);
    }
    
    public void set(QuadrupedSupportPolygon polygon)
@@ -1083,7 +1024,7 @@ public class QuadrupedSupportPolygon implements Serializable
       direction2.sub(polygonToCompare.getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()), polygonToCompare.getFootstep(thisSwingLeg));
       
       commonPolygonToPack.clear();
-      FramePoint intersection = commonPolygonToPack.getFootstepOrCreateIfNonSupporting(quadrantToAssignToIntersection);
+      FramePoint intersection = commonPolygonToPack.reviveFootstep(quadrantToAssignToIntersection);
       GeometryTools.getIntersectionBetweenTwoLines2d(intersection, getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2);
       
       commonPolygonToPack.setFootstep(thisSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()));
