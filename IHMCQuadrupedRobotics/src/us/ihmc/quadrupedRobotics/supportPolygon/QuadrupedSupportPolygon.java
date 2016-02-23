@@ -33,6 +33,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
+   private static final FramePoint ZERO_FRAME_POINT = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
    private final FramePoint temporaryFramePoint = new FramePoint();
    private final FrameVector tempPlaneNormalInWorld = new FrameVector();
    
@@ -352,7 +353,7 @@ public class QuadrupedSupportPolygon implements Serializable
    public FramePoint getFootstepOrCreateIfNonSupporting(RobotQuadrant robotQuadrant)
    {
       if  (!containsFootstep(robotQuadrant))
-         setFootstep(robotQuadrant, new FramePoint());
+         setFootstep(robotQuadrant, ZERO_FRAME_POINT);
       
       return getFootstep(robotQuadrant);
    }
