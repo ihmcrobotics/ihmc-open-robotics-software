@@ -1331,13 +1331,20 @@ public class QuadrupedSupportPolygon implements Serializable
    /**
     * Gets distance from P1 to trotLine specified by front quadrant.
     */
-   public double getDistanceFromP1ToTrotLine2d(RobotQuadrant trotQuadrant, FramePoint p1, FramePoint p2)
+   public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint p1, FramePoint p2)
    {
-      GeometryTools.getIntersectionBetweenTwoLines2d(tempIntersection, p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()));
+      boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(tempIntersection, p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()));
 
-      //beacuse this is a 2d method, set Z's to be the same
-      tempIntersection.setZ(p1.getZ());
-      return tempIntersection.distance(p1);
+      if (intersectionExists)
+      {
+         //beacuse this is a 2d method, set Z's to be the same
+         tempIntersection.setZ(p1.getZ());
+         return tempIntersection.distance(p1);
+      }
+      else
+      {
+         return Double.POSITIVE_INFINITY;
+      }
    }
 
    /**

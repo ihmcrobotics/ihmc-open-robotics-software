@@ -80,6 +80,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 {
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
+   private static final double DEFAULT_YAW_IN_PLACE_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
@@ -186,6 +187,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable shrunkenPolygonSize = new DoubleYoVariable("shrunkenPolygonSize", registry);
 
    private final DoubleYoVariable nominalYaw = new DoubleYoVariable("nominalYaw", registry);
+   
+   private final DoubleYoVariable desiredYawInPlace = new DoubleYoVariable("desiredYawInPlace", registry);
+   private final DoubleYoVariable filteredDesiredYawInPlaceAlpha = new DoubleYoVariable("filteredDesiredYawInPlaceAlpha", registry);
+   private final DoubleYoVariable filteredDesiredYawInPlaceAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredYawInPlaceAlphaBreakFrequency", registry);
+   private final AlphaFilteredWrappingYoVariable filteredDesiredYawInPlace = new AlphaFilteredWrappingYoVariable("filteredDesiredYawInPlace", "", registry, desiredYawInPlace, filteredDesiredYawInPlaceAlpha, -Math.PI, Math.PI);
+   
+   
    private final YoFrameLineSegment2d nominalYawLineSegment = new YoFrameLineSegment2d("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactLineSegment2d nominalYawArtifact = new YoArtifactLineSegment2d("nominalYawArtifact", nominalYawLineSegment, Color.YELLOW, 0.02, 0.02);
    private final FramePoint2d endPoint2d = new FramePoint2d();
@@ -207,9 +215,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
 
    private final DoubleYoVariable distanceInside = new DoubleYoVariable("distanceInside", registry);
-   private final BooleanYoVariable possibleTipOnFrontSwingLeg = new BooleanYoVariable("possibleTipOnFrontSwingLeg", registry);
-   private final DoubleYoVariable approximateTimeUntilCrossTrotLine = new DoubleYoVariable("approximateTimeUntilCrossTrotLine", registry);
-
 
    private final QuadrantDependentList<ReferenceFrame> legAttachmentFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint> actualFeetLocations = new QuadrantDependentList<YoFramePoint>();
@@ -308,6 +313,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable comTrajectoryTimeLastCalled = new DoubleYoVariable("comTrajectoryTimeLastCalled", registry);
    private final DoubleYoVariable comTrajectoryTimeScaleFactor = new DoubleYoVariable("comTrajectoryTimeScaleFactor", registry);
    private final DoubleYoVariable distanceToTrotLine = new DoubleYoVariable("distanceToTrotLine", registry);
+   private final DoubleYoVariable distanceTravelAtEndOfSwing = new DoubleYoVariable("distanceTravelAtEndOfSwing", registry);
+   private final BooleanYoVariable slowBodyDown = new BooleanYoVariable("slowBodyDown", registry);
+   private final DoubleYoVariable timeToSlowTo = new DoubleYoVariable("timeToSlowTo", registry);
+
 
 
    private final DoubleYoVariable turnInPlaceCoMTrajectoryBuffer = new DoubleYoVariable("turnInPlaceCoMTrajectoryBuffer", registry);
@@ -426,6 +435,14 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredCoMRollAlphaBreakFrequency.getDoubleValue(), dt));
       filteredDesiredCoMRollAlphaBreakFrequency.addVariableChangedListener(
             createBreakFrequencyChangeListener(dt, filteredDesiredCoMRollAlphaBreakFrequency, filteredDesiredCoMRollAlpha));
+      
+      
+      filteredDesiredYawInPlaceAlphaBreakFrequency.set(DEFAULT_YAW_IN_PLACE_BREAK_FREQUENCY);
+      filteredDesiredYawInPlaceAlpha.set(
+            AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredYawInPlaceAlphaBreakFrequency.getDoubleValue(), dt));
+      filteredDesiredYawInPlaceAlphaBreakFrequency.addVariableChangedListener(
+            createBreakFrequencyChangeListener(dt, filteredDesiredYawInPlaceAlphaBreakFrequency, filteredDesiredYawInPlaceAlpha));
+      
       
       filteredDesiredCoMHeightAlphaBreakFrequency.set(DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY);
       filteredDesiredCoMHeightAlpha.set(
@@ -908,9 +925,15 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       //do this only if the desiredBodyCurrent != tempCOMTarget
       double distanceToTrotLine;
       if (desiredBodyCurrent.distance(tempCOMTarget) > 1e-3)
-         distanceToTrotLine = fourFootSupportPolygon.getDistanceFromP1ToTrotLine2d(swingQuadrant.getAcrossBodyFrontQuadrant(), desiredBodyCurrent, tempCOMTarget);
+      {
+         distanceToTrotLine = fourFootSupportPolygon.getDistanceFromP1ToTrotLineInDirection2d(swingQuadrant.getAcrossBodyQuadrant(), desiredBodyCurrent, tempCOMTarget);
+      }
       else
-         distanceToTrotLine = -0.1234;
+      {
+         //For now, use distance inside. We really want the perpendicular distance to the trot line.
+         computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
+         distanceToTrotLine = distanceInside.getDoubleValue();
+      }
 
       return distanceToTrotLine;
    }
@@ -982,7 +1005,23 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       nominalYawLineSegment.set(centroidFramePoint2d, endPoint2d);
       DoubleYoVariable desiredYaw = desiredCoMOrientation.getYaw();
-      desiredYaw.set(nominalYaw.getDoubleValue());
+      
+      //only let desiredYawInPlace be non zero when not walking
+      double maxYawInPlace = 0.4;
+      if (!isDesiredVelocityAndYawRateZero())
+      {
+         desiredYawInPlace.set(0.0);
+      }
+      else
+      {
+         if (desiredYawInPlace.getDoubleValue() > maxYawInPlace)
+            desiredYawInPlace.set(maxYawInPlace);
+         else if (desiredYawInPlace.getDoubleValue() < -maxYawInPlace)
+            desiredYawInPlace.set(-maxYawInPlace);
+      }
+      
+      filteredDesiredYawInPlace.update();
+      desiredYaw.set(nominalYaw.getDoubleValue() + filteredDesiredYawInPlace.getDoubleValue());
    }
    
    /**
@@ -1887,15 +1926,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          //Only need to slow down if com target is on other side of trot line
          double thresholdDistance = 0.01;
          comTrajectoryGenerator.getFinalPosition(tempFramePoint);
-         boolean cOMTargetOutsideOfSupportPolygon = isCOMTargetInsideSupportPolygon(swingQuadrant, tempFramePoint, thresholdDistance);
-         if (!cOMTargetOutsideOfSupportPolygon)
-            distanceToTrotLine.set(computeDistanceToTrotLine2d(swingQuadrant));
-         else
-            distanceToTrotLine.set(0.12345);
 
+         distanceToTrotLine.set(computeDistanceToTrotLine2d(swingQuadrant));
 
          doActionTripleSupportTimer.stopTimer();
       }
+
+      FramePoint tempCOMTarget = new FramePoint(ReferenceFrame.getWorldFrame());
 
       @Override
       public void doTransitionIntoAction()
@@ -1911,31 +1948,87 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          finalSwingTarget.set(swingTarget);
          
          initializeSwingTrajectory(swingQuadrant, yoDesiredFootPosition.getFrameTuple(), swingTarget, swingDuration.getDoubleValue());
-
-         //check if there will be a risk of crossing trot line before finishing front leg swimg
-         //supportPolygon.getDistanceFromP1ToTrotLine()
-
-
-         if (swingQuadrant.isQuadrantInFront())
-         {
-            computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
-            
-            if (desiredVelocity.length() > 0.1e-3)
-            {
-               approximateTimeUntilCrossTrotLine.set(distanceInside.getDoubleValue() / desiredVelocity.length());
-               if (approximateTimeUntilCrossTrotLine.getDoubleValue() < swingDuration.getDoubleValue())
-                  possibleTipOnFrontSwingLeg.set(true);
-               else
-                  possibleTipOnFrontSwingLeg.set(false);
-
-            }
-            else
-               possibleTipOnFrontSwingLeg.set(false);
-         }
-         
          doTransitionIntoTripleSupportTimer.stopTimer();
 
+         //Determine if we need to slow down body motion
+         distanceToTrotLine.set(computeDistanceToTrotLine2d(swingQuadrant));
+         distanceTravelAtEndOfSwing.set(distanceToTravelInGivenTime(swingDuration.getDoubleValue()));
 
+         //only need to slow if COM target is outside of triple support polygon
+         comTrajectoryGenerator.getFinalPosition(tempCOMTarget);
+         boolean targetIsInSupportPolygon = isCOMTargetInsideSupportPolygon(swingQuadrant, tempCOMTarget, 0.01);
+
+         timeToSlowTo.set(swingDuration.getDoubleValue());
+         if (targetIsInSupportPolygon)
+         {
+            slowBodyDown.set(false);
+            comTrajectoryTimeScaleFactor.set(1.0);
+         }
+         else
+         {
+            double stabilityMargin = distanceInsideSupportPolygonBeforeSwingingLeg.getDoubleValue();
+            double distanceOverTravel =  distanceToTrotLine.getDoubleValue() - distanceTravelAtEndOfSwing.getDoubleValue() - stabilityMargin;
+            if (distanceOverTravel < 0.0)
+            {
+               slowBodyDown.set(true);
+               timeToSlowTo.set(getTimeToTravelDistance(distanceToTrotLine.getDoubleValue() - stabilityMargin, swingDuration.getDoubleValue()));
+               comTrajectoryTimeScaleFactor.set(timeToSlowTo.getDoubleValue()/swingDuration.getDoubleValue());
+            }
+            else
+            {
+               slowBodyDown.set(false);
+               comTrajectoryTimeScaleFactor.set(1.0);
+            }
+         }
+      }
+
+      FramePoint tempStartPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint tempEndPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      private double getTimeToTravelDistance(double distanceToTravel, double swingTime)
+      {
+         double currentTimeForCOMTrajectoryGenerator = comTrajectoryGenerator.getCurrentTime();
+         //recompute just to be safe
+         comTrajectoryGenerator.compute(currentTimeForCOMTrajectoryGenerator);
+         comTrajectoryGenerator.getPosition(tempStartPoint);
+
+         int maxNumberOfTests = 20;
+         double deltaT = swingTime/((double)maxNumberOfTests);
+         double timeToSlowTo = swingTime;
+         for(double timeToTest = swingTime; timeToTest > deltaT; timeToTest = timeToTest - deltaT)
+         {
+            timeToSlowTo = timeToTest;
+            comTrajectoryGenerator.compute(timeToTest);
+            comTrajectoryGenerator.getPosition(tempEndPoint);
+            double distanceTraveled = tempStartPoint.getXYPlaneDistance(tempEndPoint);
+            if (distanceTraveled <= distanceToTravel)
+               break;
+         }
+
+         //set it back to what it was before
+         comTrajectoryGenerator.compute(currentTimeForCOMTrajectoryGenerator);
+
+         return timeToSlowTo;
+      }
+
+
+      private double distanceToTravelInGivenTime(double timeElapsed)
+      {
+         double currentTimeForCOMTrajectoryGenerator = comTrajectoryGenerator.getCurrentTime();
+
+         //recompute just to be safe
+         comTrajectoryGenerator.compute(currentTimeForCOMTrajectoryGenerator);
+         comTrajectoryGenerator.getPosition(tempStartPoint);
+
+         //compute position after time in future
+         comTrajectoryGenerator.compute(currentTimeForCOMTrajectoryGenerator + timeElapsed);
+         comTrajectoryGenerator.getPosition(tempEndPoint);
+
+         double distanceTraveled = tempStartPoint.getXYPlaneDistance(tempEndPoint);
+
+         //set it back to what it was before
+         comTrajectoryGenerator.compute(currentTimeForCOMTrajectoryGenerator);
+
+         return distanceTraveled;
       }
       
 

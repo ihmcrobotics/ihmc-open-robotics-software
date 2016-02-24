@@ -28,7 +28,7 @@ public class NaiveFaceTracker
    private final ArrayList<Face> trackedFaces = new ArrayList<>();
    private final Set<Face> unmatchedFaces = new HashSet<>();
 
-   public ArrayList<Face> update(Rect[] faces)
+   public ArrayList<Face> matchTrackedFaces(Rect[] faces)
    {
       unmatchedFaces.clear();
 
@@ -92,7 +92,7 @@ public class NaiveFaceTracker
          Graphics2D g2 = bufferedImage.createGraphics();
 
          Rect[] faces = faceDetector.detect(bufferedImage);
-         ArrayList<Face> trackedFaces = faceTracker.update(faces);
+         ArrayList<Face> trackedFaces = faceTracker.matchTrackedFaces(faces);
 
          for (int i = 0; i < trackedFaces.size(); i++)
          {
