@@ -178,6 +178,7 @@ public class WholeBodyFeedbackController
             break;
          case COMMAND_LIST:
             submitFeedbackControlCommandList((FeedbackControlCommandList) feedbackControlCommand);
+            break;
          default:
             throw new RuntimeException("The command type: " + commandType + " is not handled.");
          }
