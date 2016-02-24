@@ -711,9 +711,13 @@ public class ICPPlanner
       finalDesiredCapturePointPositionToPack.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
+   private final FramePoint tempFinalICP = new FramePoint();
+
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
-      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(entryCornerPoints.get(1));
+      entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+      tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
 
    public void reset(double time)
