@@ -86,6 +86,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       VisionPoseEstimator visionPoseEstimator = new VisionPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
             robotConfigurationDataBuffer, false);
+      
+      BallPoseEstimator ballPoseEstimator = new BallPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
+              robotConfigurationDataBuffer, false);
+      
       cameraDataReceiver.registerCameraListener(visionPoseEstimator);
    }
 
