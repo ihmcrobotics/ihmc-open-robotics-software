@@ -25,6 +25,7 @@ public class YoTranslationFrame extends ReferenceFrame
    public void setTranslationToParent(FrameTuple<?> translationToParent)
    {
       this.translationToParent.set(translationToParent);
+      update();
    }
 
    public void setToZero()
