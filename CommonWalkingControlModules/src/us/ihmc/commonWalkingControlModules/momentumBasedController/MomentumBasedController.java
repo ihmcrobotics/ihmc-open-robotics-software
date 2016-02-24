@@ -27,7 +27,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -122,9 +121,6 @@ public class MomentumBasedController
    private final ArrayList<OneDoFJoint> jointsWithDesiredAcceleration = new ArrayList<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredTorqueYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-
-   @Deprecated
-   private final EnumYoVariable<RobotSide> upcomingSupportLeg = EnumYoVariable.create("upcomingSupportLeg", "", RobotSide.class, registry, true); // FIXME: not general enough; this should not be here
 
    private final ContactPointVisualizer contactPointVisualizer;
 
@@ -781,12 +777,6 @@ public class MomentumBasedController
    public ReferenceFrame getPelvisZUpFrame()
    {
       return referenceFrames.getPelvisZUpFrame();
-   }
-
-   @Deprecated
-   public EnumYoVariable<RobotSide> getUpcomingSupportLeg()
-   {
-      return upcomingSupportLeg;
    }
 
    public CommonHumanoidReferenceFrames getReferenceFrames()
