@@ -4,8 +4,9 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointTorqueHolder;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -13,7 +14,7 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
 {
    private final InverseDynamicsCommandDataCopier inverseDynamicsCommandDataCopier = new InverseDynamicsCommandDataCopier();
    private final FeedbackControlCommandDataCopier feedbackControlCommandDataCopier = new FeedbackControlCommandDataCopier();
-   private final DesiredOneDoFJointTorqueHolder desiredOneDoFJointTorqueHolder = new DesiredOneDoFJointTorqueHolder();
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private boolean enableControllerCore;
 
@@ -23,65 +24,40 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
 
    public void copyDataFrom(ControllerCoreCommandInterface controllerCoreCommand)
    {
-      enableControllerCore = controllerCoreCommand.enableControllerCore();
-      if (enableControllerCore)
-      {
-         inverseDynamicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseDynamicsCommandList());
-         feedbackControlCommandDataCopier.copyFromOther(controllerCoreCommand.getFeedbackControlCommandList());
-      }
-      else
-      {
-         desiredOneDoFJointTorqueHolder.set(controllerCoreCommand.geDesiredOneDoFJointTorqueHolder());
-      }
+      inverseDynamicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseDynamicsCommandList());
+      feedbackControlCommandDataCopier.copyFromOther(controllerCoreCommand.getFeedbackControlCommandList());
+      lowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
    public void retrieveRigidBodiesFromName(Map<String, RigidBody> nameToRigidBodyMap)
    {
-      if (enableControllerCore)
-      {
-         inverseDynamicsCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
-         feedbackControlCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
-      }
+      inverseDynamicsCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
+      feedbackControlCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
    }
 
    public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
    {
-      if (enableControllerCore)
-      {
-         inverseDynamicsCommandDataCopier.retrieveJointsFromName(nameToJointMap);
-         feedbackControlCommandDataCopier.retrieveJointsFromName(nameToJointMap);
-      }
-      else
-      {
-         desiredOneDoFJointTorqueHolder.retrieveJointsFromName(nameToJointMap);
-      }
+      inverseDynamicsCommandDataCopier.retrieveJointsFromName(nameToJointMap);
+      feedbackControlCommandDataCopier.retrieveJointsFromName(nameToJointMap);
+      lowLevelOneDoFJointDesiredDataHolder.retrieveJointsFromName(nameToJointMap);
    }
 
    @Override
    public InverseDynamicsCommandList getInverseDynamicsCommandList()
    {
-      if (enableControllerCore)
-         return inverseDynamicsCommandDataCopier.getInverseDynamicsCommandList();
-      else
-         return null;
+      return inverseDynamicsCommandDataCopier.getInverseDynamicsCommandList();
    }
 
    @Override
    public FeedbackControlCommandList getFeedbackControlCommandList()
    {
-      if (enableControllerCore)
-         return feedbackControlCommandDataCopier.getFeedbackControlCommandList();
-      else
-         return null;
+      return feedbackControlCommandDataCopier.getFeedbackControlCommandList();
    }
 
    @Override
-   public DesiredOneDoFJointTorqueHolder geDesiredOneDoFJointTorqueHolder()
+   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelOneDoFJointDesiredDataHolder()
    {
-      if (enableControllerCore)
-         return null;
-      else
-         return desiredOneDoFJointTorqueHolder;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    @Override

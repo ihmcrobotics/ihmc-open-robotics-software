@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -23,6 +24,7 @@ public class DoNothingBehavior extends HighLevelBehavior
    private final OneDoFJoint[] allRobotJoints;
 
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(false);
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
    public DoNothingBehavior(MomentumBasedController momentumBasedController, BipedSupportPolygons bipedSupportPolygons)
    {
@@ -37,6 +39,9 @@ public class DoNothingBehavior extends HighLevelBehavior
          ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
          footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
       }
+
+      lowLevelOneDoFJointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(allRobotJoints);
    }
 
    @Override
@@ -49,12 +54,11 @@ public class DoNothingBehavior extends HighLevelBehavior
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
       momentumBasedController.callUpdatables();
-
       for (int i = 0; i < allRobotJoints.length; i++)
       {
          allRobotJoints[i].setTau(0.0);
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(allRobotJoints[i], 0.0);
       }
-      controllerCoreCommand.geDesiredOneDoFJointTorqueHolder().extractDesiredTorquesFromInverseDynamicsJoints(allRobotJoints);
    }
 
    @Override

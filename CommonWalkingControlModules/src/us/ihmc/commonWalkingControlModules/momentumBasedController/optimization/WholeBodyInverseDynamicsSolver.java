@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
@@ -14,7 +16,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -26,11 +30,12 @@ public class WholeBodyInverseDynamicsSolver
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final OptimizationMomentumControlModule optimizationMomentumControlModule;
 
-   private final DesiredOneDoFJointAccelerationHolder desiredOneDoFJointAccelerationHolder;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
 
+   private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFors;
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
@@ -45,7 +50,9 @@ public class WholeBodyInverseDynamicsSolver
       optimizationMomentumControlModule = new OptimizationMomentumControlModule(toolbox, momentumOptimizationSettings, registry);
 
       jointsToOptimizeFors = momentumOptimizationSettings.getJointsToOptimizeFor();
-      desiredOneDoFJointAccelerationHolder = new DesiredOneDoFJointAccelerationHolder(jointsToOptimizeFors, registry);
+      controlledOneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFors, OneDoFJoint.class);
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
+      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
       planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
 
@@ -59,7 +66,6 @@ public class WholeBodyInverseDynamicsSolver
    {
       inverseDynamicsCalculator.reset();
       optimizationMomentumControlModule.reset();
-      desiredOneDoFJointAccelerationHolder.reset();
    }
 
    public void initialize()
@@ -96,7 +102,8 @@ public class WholeBodyInverseDynamicsSolver
       }
 
       inverseDynamicsCalculator.compute();
-      desiredOneDoFJointAccelerationHolder.extractDesiredAccelerationsFromInverseDynamicsJoints(jointsToOptimizeFors);
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       wrenchVisualizer.visualize(externalWrenchSolution);
    }
@@ -106,9 +113,9 @@ public class WholeBodyInverseDynamicsSolver
       optimizationMomentumControlModule.setInverseDynamicsCommand(inverseDynamicsCommand);
    }
 
-   public DesiredOneDoFJointAccelerationHolder getDesiredOneDoFJointAccelerationHolder()
+   public LowLevelOneDoFJointDesiredDataHolder getOutput()
    {
-      return desiredOneDoFJointAccelerationHolder;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
