@@ -118,6 +118,6 @@ public class SE3PIDGains implements SE3PIDGainsInterface
    @Override
    public OrientationPIDGainsInterface getOrientationGains()
    {
-      return null;
+      return orientationGains;
    }
 }
