@@ -107,7 +107,7 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
    public void setAndMatchFrame(FrameOrientation frameOrientation)
    {
       this.frameOrientation.setIncludingFrame(frameOrientation);
-      frameOrientation.changeFrame(getReferenceFrame());
+      this.frameOrientation.changeFrame(getReferenceFrame());
       getYoValuesFromFrameOrientation();
    }
 
