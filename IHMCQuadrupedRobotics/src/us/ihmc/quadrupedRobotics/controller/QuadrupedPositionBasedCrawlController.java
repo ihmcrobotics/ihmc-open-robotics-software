@@ -909,7 +909,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       //do this only if the desiredBodyCurrent != tempCOMTarget
       double distanceToTrotLine;
       if (desiredBodyCurrent.distance(tempCOMTarget) > 1e-3)
-         distanceToTrotLine = fourFootSupportPolygon.getDistanceFromP1ToTrotLine2d(swingQuadrant.getAcrossBodyQuadrant(), desiredBodyCurrent, tempCOMTarget);
+      {
+         distanceToTrotLine = fourFootSupportPolygon.getDistanceFromP1ToTrotLineInDirection2d(swingQuadrant.getAcrossBodyQuadrant(), desiredBodyCurrent, tempCOMTarget);
+      }
       else
       {
          //For now, use distance inside. We really want the perpendicular distance to the trot line.
