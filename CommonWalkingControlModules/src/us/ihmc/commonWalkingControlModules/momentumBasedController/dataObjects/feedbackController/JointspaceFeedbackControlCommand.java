@@ -59,7 +59,7 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<Joi
       weightForSolver = weight;
    }
 
-   public void setOneDoFJointDesiredAcceleration(int jointIndex, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
+   public void setOneDoFJoint(int jointIndex, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
    {
       MathTools.checkIfEqual(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       desiredPositions.get(jointIndex).setValue(desiredPosition);

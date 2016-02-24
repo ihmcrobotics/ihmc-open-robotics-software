@@ -85,6 +85,17 @@ public class OrientationFeedbackControlCommand extends FeedbackControlCommand<Or
       feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
    }
 
+   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   {
+      desiredOrientation.changeFrame(worldFrame);
+      desiredAngularVelocity.changeFrame(worldFrame);
+      feedForwardAngularAcceleration.changeFrame(worldFrame);
+
+      desiredOrientation.getQuaternion(desiredOrientationInWorld);
+      desiredAngularVelocity.get(desiredAngularVelocityInWorld);
+      feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
+   }
+
    public void setSelectionMatrixToIdentity()
    {
       selectionMatrix.reshape(3, SpatialAccelerationVector.SIZE);

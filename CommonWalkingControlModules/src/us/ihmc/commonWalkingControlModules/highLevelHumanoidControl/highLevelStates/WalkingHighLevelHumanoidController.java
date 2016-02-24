@@ -27,6 +27,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
@@ -1751,6 +1753,22 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doPelvisControl();
       JointspaceAccelerationCommand unconstrainedJointCommand = doUnconstrainedJointControl();
 
+      submitControllerCoreCommands(unconstrainedJointCommand);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         controllerCoreOuput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
+         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+      }
+
+      momentumBasedController.doSecondaryControl();
+
+      momentumBasedController.doPassiveKneeControl();
+      momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
+   }
+
+   public void submitControllerCoreCommands(JointspaceAccelerationCommand unconstrainedJointCommand)
+   {
       planeContactStateCommandPool.clear();
       double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded(footDesiredCoPs);
 
@@ -1759,7 +1777,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
-         controllerCoreCommand.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
+
+         InverseDynamicsCommand<?> handInverseDynamicsCommand = manipulationControlModule.getInverseDynamicsCommand(robotSide);
+         if (handInverseDynamicsCommand != null)
+            controllerCoreCommand.addInverseDynamicsCommand(handInverseDynamicsCommand);
+
+         FeedbackControlCommand<?> handFeedbackControlCommand = manipulationControlModule.getFeedbackControlCommand(robotSide);
+         if (handFeedbackControlCommand != null)
+            controllerCoreCommand.addFeedbackControlCommand(handFeedbackControlCommand);
+
          YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.createCommand();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
@@ -1775,17 +1801,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerCoreCommand.addInverseDynamicsCommand(unconstrainedJointCommand);
 
       controllerCoreCommand.addInverseDynamicsCommand(icpAndMomentumBasedController.getInverseDynamicsCommand());
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         controllerCoreOuput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
-         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
-      }
-
-      momentumBasedController.doSecondaryControl();
-
-      momentumBasedController.doPassiveKneeControl();
-      momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
    }
 
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();

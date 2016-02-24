@@ -1,21 +1,19 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import java.util.LinkedHashMap;
-
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -25,8 +23,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -57,15 +53,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
    private TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator;
-   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
-   private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
-
-   private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
-   private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
-   private final DoubleYoVariable feedForwardAccelerationScaleFactor;
-   private final DoubleYoVariable feedForwardAccelerationAlpha;
-   private final LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredFeedForwardAccelerations;
-   private final DoubleYoVariable maxAcceleration;
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand;
+   private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelJointDesiredData;
 
    private final DoubleYoVariable percentOfTrajectoryWithOrientationBeingControlled;
    private final DoubleYoVariable startTimeInStateToIgnoreOrientation;
@@ -84,9 +74,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final DenseMatrix64F identityScaledWithOrientationControlFactor = CommonOps.identity(SpatialMotionVector.SIZE);
    private final DenseMatrix64F selectionMatrixWithReducedAngularControl = CommonOps.identity(SpatialMotionVector.SIZE);
 
-   private final double dt;
    private final OneDoFJoint[] oneDoFJoints;
-   private final boolean[] doIntegrateDesiredAccelerations;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable initialTime;
@@ -139,60 +127,35 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       currentOrientationControlFactor = new DoubleYoVariable(namePrefix + "CurrentOrientationControlFactor", registry);
       currentOrientationControlFactor.set(Double.NaN);
 
-      dt = momentumBasedController.getControlDT();
-
       oneDoFJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
-
-      doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
-
-      
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
-         jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
-         jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
-      }
 
       if (doPositionControl)
       {
-         maxAcceleration = null;
-         pidControllers = null;
-         rateLimitedAccelerations = null;
+         lowLevelJointDesiredData = new LowLevelOneDoFJointDesiredDataHolder(oneDoFJoints.length);
+         lowLevelJointDesiredData.registerJointsWithEmptyData(oneDoFJoints);
+         lowLevelJointDesiredData.setJointsControlMode(oneDoFJoints, LowLevelJointControlMode.POSITION_CONTROL);
 
-         feedForwardAccelerationAlpha = new DoubleYoVariable(namePrefix + "FeedForwardAccelerationAlpha", registry);
-         feedForwardAccelerationScaleFactor = new DoubleYoVariable(namePrefix + "FeedForwardAccelerationScaleFactor", registry);
-         filteredFeedForwardAccelerations = new LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable>();
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, dt);
-         feedForwardAccelerationAlpha.set(alpha);
+         jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+         jointspaceFeedbackControlCommand = null;
 
-         for (OneDoFJoint joint : oneDoFJoints)
+         for (int i = 0; i < oneDoFJoints.length; i++)
          {
-            AlphaFilteredYoVariable filteredFeedForwardAcceleration = new AlphaFilteredYoVariable("qdd_ff_filt_" + joint.getName(), registry,
-                  feedForwardAccelerationAlpha);
-            filteredFeedForwardAccelerations.put(joint, filteredFeedForwardAcceleration);
+            OneDoFJoint joint = oneDoFJoints[i];
+            jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
          }
       }
       else // Force control at the joints
       {
-         feedForwardAccelerationAlpha = null;
-         feedForwardAccelerationScaleFactor = null;
-         filteredFeedForwardAccelerations = null;
+         lowLevelJointDesiredData = null;
 
-         maxAcceleration = gains.getYoMaximumAcceleration();
+         jointspaceAccelerationCommand = null;
+         jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
+         jointspaceFeedbackControlCommand.setGains(gains);
 
-         pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
-         rateLimitedAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
-
-         for (OneDoFJoint joint : oneDoFJoints)
+         for (int i = 0; i < oneDoFJoints.length; i++)
          {
-            String suffix = StringUtils.uncapitalize(joint.getName());
-            PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
-            pidControllers.put(joint, pidController);
-
-            RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(suffix + "Acceleration", registry, gains.getYoMaximumJerk(), dt);
-            rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
+            OneDoFJoint joint = oneDoFJoints[i];
+            jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
          }
       }
 
@@ -258,11 +221,10 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          {
             OneDoFJoint joint = oneDoFJoints[i];
             // The feed forward is really messy when controlling w.r.t. world frame, it's better to leave it to zero for now.
-            AlphaFilteredYoVariable filteredFeedForwardAcceleration = filteredFeedForwardAccelerations.get(joint);
-            filteredFeedForwardAcceleration.update(joint.getQddDesired());
-            double desiredAcceleration = filteredFeedForwardAcceleration.getDoubleValue();
-            desiredAcceleration *= feedForwardAccelerationScaleFactor.getDoubleValue();
-            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
+            double feedForwardAcceleration = 0.0;
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, feedForwardAcceleration);
+            lowLevelJointDesiredData.setDesiredJointPosition(joint, joint.getqDesired());
+            lowLevelJointDesiredData.setDesiredJointVelocity(joint, joint.getQdDesired());
          }
       }
       else
@@ -271,24 +233,12 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          {
             OneDoFJoint joint = oneDoFJoints[i];
 
-            double q = joint.getQ();
-            double qd = joint.getQd();
             double qDesired = joint.getqDesired();
             double qdDesired = joint.getQdDesired();
-
-            RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
-
             // TODO No feed-forward acceleration yet, needs to be implemented.
-            double feedforwardAcceleration = 0.0;
+            double feedForwardAcceleration = 0.0;
 
-            PIDController pidController = pidControllers.get(joint);
-            double desiredAcceleration = feedforwardAcceleration + pidController.computeForAngles(q, qDesired, qd, qdDesired, dt);
-
-            desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
-            rateLimitedAcceleration.update(desiredAcceleration);
-            desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
-
-            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
+            jointspaceFeedbackControlCommand.setOneDoFJoint(i, qDesired, qdDesired, feedForwardAcceleration);
          }
       }
    }
@@ -336,8 +286,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       poseTrajectoryGenerator.showVisualization();
       poseTrajectoryGenerator.initialize();
       doneTrajectoryTime.set(Double.NaN);
-
-      saveDoAccelerationIntegration();
 
       if (doPositionControl)
          enablePositionControl();
@@ -404,15 +352,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       currentOrientationControlFactor.set(Double.NaN);
    }
 
-   private void saveDoAccelerationIntegration()
-   {
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
-      }
-   }
-
    private void enablePositionControl()
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -428,7 +367,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         joint.setIntegrateDesiredAccelerations(doIntegrateDesiredAccelerations[i]);
          joint.setUnderPositionControl(false);
       }
    }
@@ -490,14 +428,14 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       }
    }
 
-   @Override
-   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
-   {
-   }
-
    public void setCompliantControlFrame(ReferenceFrame compliantControlFrame)
    {
       handCompliantControlHelper.setCompliantControlFrame(compliantControlFrame);
+   }
+
+   @Override
+   public void setControlFrameFixedInEndEffector(ReferenceFrame controlFrame)
+   {
    }
 
    @Override
@@ -510,6 +448,12 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    public ReferenceFrame getReferenceFrame()
    {
       return desiredPose.getReferenceFrame();
+   }
+
+   @Override
+   public ReferenceFrame getTrackingFrame()
+   {
+      return taskspaceToJointspaceCalculator.getControlFrame();
    }
 
    public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce,
@@ -575,5 +519,11 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    public JointspaceFeedbackControlCommand getFeedbackControlCommand()
    {
       return jointspaceFeedbackControlCommand;
+   }
+
+   @Override
+   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData()
+   {
+      return lowLevelJointDesiredData;
    }
 }

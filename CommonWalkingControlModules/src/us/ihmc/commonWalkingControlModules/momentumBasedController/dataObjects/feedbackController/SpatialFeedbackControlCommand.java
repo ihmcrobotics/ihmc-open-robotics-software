@@ -12,6 +12,7 @@ import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -21,7 +22,8 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final Point3d bodyFixedPointToControlInEndEffectorFrame = new Point3d();
+   private final Point3d controlFrameOriginInEndEffectorFrame = new Point3d();
+   private final Quat4d controlFrameOrientationInEndEffectorFrame = new Quat4d();
 
    private final Point3d desiredPositionInWorld = new Point3d();
    private final Vector3d desiredLinearVelocityInWorld = new Vector3d();
@@ -62,7 +64,8 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
       setWeightForSolver(other.weightForSolver);
       nullspaceMultipliers.set(nullspaceMultipliers);
 
-      bodyFixedPointToControlInEndEffectorFrame.set(other.bodyFixedPointToControlInEndEffectorFrame);
+      controlFrameOriginInEndEffectorFrame.set(other.controlFrameOriginInEndEffectorFrame);
+      controlFrameOrientationInEndEffectorFrame.set(other.controlFrameOrientationInEndEffectorFrame);
 
       desiredPositionInWorld.set(other.desiredPositionInWorld);
       desiredLinearVelocityInWorld.set(other.desiredLinearVelocityInWorld);
@@ -91,7 +94,7 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
       endEffectorName = endEffector.getName();
    }
 
-   public void setGains(SE3PIDGains gains)
+   public void setGains(SE3PIDGainsInterface gains)
    {
       this.gains.set(gains);
    }
@@ -118,16 +121,60 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
       feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
    }
 
-   public void resetBodyFixedPoint()
+   public void changeFrameAndSet(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
    {
-      bodyFixedPointToControlInEndEffectorFrame.set(0.0, 0.0, 0.0);
+      desiredPosition.changeFrame(worldFrame);
+      desiredLinearVelocity.changeFrame(worldFrame);
+      feedForwardLinearAcceleration.changeFrame(worldFrame);
+
+      desiredPosition.get(desiredPositionInWorld);
+      desiredLinearVelocity.get(desiredLinearVelocityInWorld);
+      feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
    }
 
-   public void setBodyFixedPointToControl(FramePoint bodyFixedPointInEndEffectorFrame)
+   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
-      bodyFixedPointInEndEffectorFrame.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      desiredOrientation.changeFrame(worldFrame);
+      desiredAngularVelocity.changeFrame(worldFrame);
+      feedForwardAngularAcceleration.changeFrame(worldFrame);
 
-      bodyFixedPointInEndEffectorFrame.get(bodyFixedPointToControlInEndEffectorFrame);
+      desiredOrientation.getQuaternion(desiredOrientationInWorld);
+      desiredAngularVelocity.get(desiredAngularVelocityInWorld);
+      feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
+   }
+
+   public void resetBodyFixedPoint()
+   {
+      controlFrameOriginInEndEffectorFrame.set(0.0, 0.0, 0.0);
+      controlFrameOrientationInEndEffectorFrame.set(0.0, 0.0, 0.0, 1.0);
+   }
+
+   public void setControlFrameFixedInEndEffector(FramePoint position, FrameOrientation orientation)
+   {
+      position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      orientation.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      position.get(controlFrameOriginInEndEffectorFrame);
+      orientation.getQuaternion(controlFrameOrientationInEndEffectorFrame);
+   }
+
+   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePoint position, FrameOrientation orientation)
+   {
+      position.changeFrame(endEffector.getBodyFixedFrame());
+      orientation.changeFrame(endEffector.getBodyFixedFrame());
+      position.get(controlFrameOriginInEndEffectorFrame);
+      orientation.getQuaternion(controlFrameOrientationInEndEffectorFrame);
+   }
+
+   public void setControlFrameFixedInEndEffector(FramePose pose)
+   {
+      pose.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      pose.getPose(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+   }
+
+   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePose pose)
+   {
+      pose.changeFrame(endEffector.getBodyFixedFrame());
+      pose.getPose(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
    }
 
    public void resetNullspaceMultpliers()
@@ -180,9 +227,10 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
       feedForwardAngularAccelerationToPack.setIncludingFrame(worldFrame, feedForwardAngularAccelerationInWorld);
    }
 
-   public void getBodyFixedPointIncludingFrame(FramePoint bodyFixedPointToControl)
+   public void getControlFramePoseIncludingFrame(FramePoint position, FrameOrientation orientation)
    {
-      bodyFixedPointToControl.setIncludingFrame(endEffector.getBodyFixedFrame(), bodyFixedPointToControlInEndEffectorFrame);
+      position.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFrameOriginInEndEffectorFrame);
+      orientation.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFrameOrientationInEndEffectorFrame);
    }
 
    public RigidBody getBase()

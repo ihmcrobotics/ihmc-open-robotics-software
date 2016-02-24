@@ -75,7 +75,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final BodyFixedPointSpatialAccelerationControlModule accelerationControlModule;
 
    private RigidBody base;
-   private ReferenceFrame baseFrame;
 
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
@@ -128,7 +127,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
-      baseFrame = base.getBodyFixedFrame();
 
       output.set(base, endEffector);
       output.setJacobianForNullspaceId(command.getJacobianForNullspaceId());
@@ -138,8 +136,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       setWeightForSolver(command.getWeightForSolver());
       selectionMatrix.set(command.getSelectionMatrix());
 
-      command.getBodyFixedPointIncludingFrame(tempPosition);
-      accelerationControlModule.setPointToControl(tempPosition);
+      command.getControlFramePoseIncludingFrame(tempPosition, tempOrientation);
+      accelerationControlModule.setBodyFixedControlFrame(tempPosition, tempOrientation);
       
       command.getIncludingFrame(tempPosition, tempLinearVelocity, feedForwardLinearAcceleration);
       yoDesiredPosition.setAndMatchFrame(tempPosition);
@@ -191,11 +189,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       accelerationControlModule.doPositionControl(tempPosition, tempOrientation, tempLinearVelocity, tempAngularVelocity, feedForwardLinearAcceleration, feedForwardAngularAcceleration, base);
       accelerationControlModule.getAcceleration(desiredSpatialAcceleration);
+      desiredSpatialAcceleration.changeBodyFrameNoRelativeAcceleration(endEffectorFrame);
+      desiredSpatialAcceleration.changeFrameNoRelativeMotion(endEffectorFrame);
 
       updatePositionVisualization();
       updateOrientationVisualization();
 
-      output.setAngularAcceleration(endEffectorFrame, baseFrame, desiredAngularAcceleration);
+      output.set(desiredSpatialAcceleration);
    }
 
    private void updatePositionVisualization()
@@ -215,7 +215,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
       yoDesiredAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
 
-      tempOrientation.setToZero(endEffectorFrame);
+      tempOrientation.setToZero(accelerationControlModule.getTrackingFrame());
       yoCurrentOrientation.setAndMatchFrame(tempOrientation);
 
       accelerationControlModule.getEndEffectorCurrentAngularVelocity(tempAngularVelocity);

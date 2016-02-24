@@ -13,7 +13,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
@@ -59,7 +58,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -80,7 +78,6 @@ public class HandControlModule
    private final YoVariableRegistry registry;
 
    private final GenericStateMachine<HandControlMode, HandControlState> stateMachine;
-   private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator;
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
@@ -107,14 +104,11 @@ public class HandControlModule
    private final Map<OneDoFJoint, BooleanYoVariable> areJointsEnabled;
    private final String name;
    private final RobotSide robotSide;
-   private final TwistCalculator twistCalculator;
    private final RigidBody chest, hand;
 
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final double controlDT;
-
-   private final YoSE3PIDGainsInterface taskspaceGains;
 
    private final StateChangedListener<HandControlMode> stateChangedlistener;
    private final BooleanYoVariable hasHandPoseStatusBeenSent;
@@ -163,8 +157,6 @@ public class HandControlModule
 
       this.controlDT = momentumBasedController.getControlDT();
 
-      this.taskspaceGains = taskspaceGains;
-
       fullRobotModel = momentumBasedController.getFullRobotModel();
       hand = fullRobotModel.getHand(robotSide);
       chest = fullRobotModel.getChest();
@@ -174,7 +166,6 @@ public class HandControlModule
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
       this.robotSide = robotSide;
-      twistCalculator = momentumBasedController.getTwistCalculator();
 
       oneDoFJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
 
@@ -207,9 +198,6 @@ public class HandControlModule
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       stateMachine = new GenericStateMachine<>(name, name + "SwitchTime", HandControlMode.class, yoTime, registry);
 
-      handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(name, twistCalculator, hand, handControlFrame, controlDT, registry);
-      handSpatialAccelerationControlModule.setGains(taskspaceGains);
-
       handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix + "Hand", chest, hand, controlDT, registry);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
       handTaskspaceToJointspaceCalculator.setupWithDefaultParameters();
@@ -238,8 +226,9 @@ public class HandControlModule
       else
       {
          userControlModeState = new UserControlModeState(stateNamePrefix, robotSide, oneDoFJoints, momentumBasedController, registry);
+         RigidBody elevator = fullRobotModel.getElevator();
          loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController,
-               fullRobotModel.getElevator(), hand, registry);
+               elevator, hand, registry);
 
          if (armControlParameters.useInverseKinematicsTaskspaceControl())
          {
@@ -249,7 +238,7 @@ public class HandControlModule
          else
          {
             taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlMode.TASK_SPACE_POSITION, chest, hand,
-                  yoGraphicsListRegistry, registry);
+                  taskspaceGains, yoGraphicsListRegistry, registry);
          }
       }
 
@@ -373,9 +362,7 @@ public class HandControlModule
    public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix,
          double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
    {
-      handSpatialAccelerationControlModule.setGains(taskspaceGains);
       taskSpacePositionControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, percentOfTrajectoryWithOrientationBeingControlled, trajectoryTime);
-      taskSpacePositionControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
       taskSpacePositionControlState.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
       taskSpacePositionControlState.setSelectionMatrix(selectionMatrix);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
@@ -389,6 +376,7 @@ public class HandControlModule
          handTaskspaceToJointspaceCalculator.initializeFromCurrentJointAngles();
       }
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
+      taskSpacePositionControlState.setControlFrameFixedInEndEffector(handControlFrame);
 
       stateMachine.checkTransitionConditions();
    }
@@ -410,12 +398,18 @@ public class HandControlModule
       positionTrajectoryGenerator.clear();
       orientationTrajectoryGenerator.clear();
 
+      ReferenceFrame trajectoryFrame = baseForControlToReferenceFrameMap.get(base);
+      if (trajectoryFrame == null)
+         throw new RuntimeException("The base: " + base + " is not handled.");
+      else
+         PrintTools.info(this, "Executing hand trajectory in: " + base + ", found corresponding frame: " + trajectoryFrame);
+
       if (taskspaceWaypoints[0].getTime() > 1.0e-5)
       {
-         tempPosition.setToZero(handControlFrame);
+         FramePose desiredFramePose = computeDesiredFramePose(trajectoryFrame);
+         desiredFramePose.getPoseIncludingFrame(tempPosition, tempOrientation);
          tempPosition.changeFrame(worldFrame);
          tempLinearVelocity.setToZero(worldFrame);
-         tempOrientation.setToZero(handControlFrame);
          tempOrientation.changeFrame(worldFrame);
          tempAngularVelocity.setToZero(worldFrame);
 
@@ -425,12 +419,6 @@ public class HandControlModule
 
       positionTrajectoryGenerator.appendWaypoints(taskspaceWaypoints);
       orientationTrajectoryGenerator.appendWaypoints(taskspaceWaypoints);
-
-      ReferenceFrame trajectoryFrame = baseForControlToReferenceFrameMap.get(base);
-      if (trajectoryFrame == null)
-         throw new RuntimeException("The base: " + base + " is not handled.");
-      else
-         PrintTools.info(this, "Executing hand trajectory in: " + base + ", found corresponding frame: " + trajectoryFrame);
 
       positionTrajectoryGenerator.changeFrame(trajectoryFrame);
       orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
@@ -628,7 +616,7 @@ public class HandControlModule
       if (stateMachine.getCurrentState() instanceof TaskspaceHandPositionControlState)
       {
          pose = taskSpacePositionControlState.getDesiredPose();
-         ReferenceFrame oldControlFrame = handSpatialAccelerationControlModule.getTrackingFrame();
+         ReferenceFrame oldControlFrame = taskSpacePositionControlState.getReferenceFrame();
          if (newControlFrame != oldControlFrame)
          {
             pose.getPose(oldTrackingFrameTransform);

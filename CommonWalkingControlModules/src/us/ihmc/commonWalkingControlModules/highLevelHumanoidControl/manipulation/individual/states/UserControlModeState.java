@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -87,7 +88,6 @@ public class UserControlModeState extends HandControlState
 
       for (int i = 0; i < userControlledJoints.length; i++)
       {
-         OneDoFJoint joint = userControlledJoints[i];
          jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, userDesiredJointAccelerations[i].getDoubleValue());
       }
    }
@@ -111,6 +111,12 @@ public class UserControlModeState extends HandControlState
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return null;
+   }
+
+   @Override
+   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData()
    {
       return null;
    }
