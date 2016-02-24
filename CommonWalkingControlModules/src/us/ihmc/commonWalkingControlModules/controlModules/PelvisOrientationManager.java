@@ -5,10 +5,8 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
@@ -62,8 +60,6 @@ public class PelvisOrientationManager
 
    private final DoubleYoVariable yoTime;
 
-   private final OrientationTrajectoryData orientationTrajectoryData = new OrientationTrajectoryData();
-   private final RootJointAngularAccelerationControlModule rootJointAngularAccelerationControlModule;
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
@@ -91,9 +87,6 @@ public class PelvisOrientationManager
       this.pelvisOrientationTrajectoryMessageSubscriber = pelvisOrientationTrajectoryMessageSubscriber;
       this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
-      YoOrientationPIDGainsInterface pelvisOrientationControlGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
-      rootJointAngularAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController, pelvisOrientationControlGains,
-            registry);
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
       double defaultStepTime = walkingControllerParameters.getDefaultSwingTime();
       pelvisOrientationTrajectoryGenerator.setTrajectoryTime(defaultStepTime);
@@ -102,10 +95,12 @@ public class PelvisOrientationManager
       for (RobotSide robotSide : RobotSide.values)
          pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
 
+      YoOrientationPIDGainsInterface pelvisOrientationControlGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody elevator = fullRobotModel.getElevator();
       RigidBody pelvis = fullRobotModel.getPelvis();
       orientationFeedbackControlCommand.set(elevator, pelvis);
+      orientationFeedbackControlCommand.setGains(pelvisOrientationControlGains);
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
       {
@@ -207,9 +202,8 @@ public class PelvisOrientationManager
       desiredPelvisOrientationWithOffset.getFrameOrientationIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.getFrameTupleIncludingFrame(tempAngularVelocity);
       desiredPelvisAngularAcceleration.getFrameTupleIncludingFrame(tempAngularAcceleration);
-      orientationTrajectoryData.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
-
-      rootJointAngularAccelerationControlModule.doControl(orientationTrajectoryData);
+      
+      orientationFeedbackControlCommand.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
    }
 
    public void goToHomeFromCurrentDesired()
@@ -421,7 +415,7 @@ public class PelvisOrientationManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return rootJointAngularAccelerationControlModule.getInverseDynamicsCommand();
+      return null;
    }
 
    public OrientationFeedbackControlCommand getFeedbackControlCommand()

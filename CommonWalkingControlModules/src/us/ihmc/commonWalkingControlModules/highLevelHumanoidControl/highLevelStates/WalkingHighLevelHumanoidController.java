@@ -1801,7 +1801,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommandPool);
       controllerCoreCommand.addFeedbackControlCommand(headOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(chestOrientationManager.getFeedbackControlCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(pelvisOrientationManager.getInverseDynamicsCommand());
+      controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(getUncontrolledJointCommand());
       controllerCoreCommand.addInverseDynamicsCommand(unconstrainedJointCommand);
