@@ -37,7 +37,7 @@ public class ChestOrientationManager
    private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
    private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasChestOrientationManagerBeenInitialized", registry);
 
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
    private final ReferenceFrame pelvisZUpFrame;
@@ -103,12 +103,13 @@ public class ChestOrientationManager
          if (isTrajectoryDone)
             waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
 
-         waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         desiredAngularVelocity.setToZero(worldFrame);
-         feedForwardAngularAcceleration.setToZero(worldFrame);
-         orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
       }
+
+      waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      desiredAngularVelocity.setToZero(worldFrame);
+      feedForwardAngularAcceleration.setToZero(worldFrame);
+      orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
    }
 
    public void holdCurrentOrientation()
