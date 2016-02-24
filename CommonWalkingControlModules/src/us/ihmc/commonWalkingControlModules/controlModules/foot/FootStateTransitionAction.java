@@ -16,7 +16,6 @@ public class FootStateTransitionAction implements StateTransitionAction
 
    public void doTransitionAction()
    {
-      footControlHelper.resetAccelerationControlModule();
       footControlHelper.setRequestedStateAsProcessed();
       footControlHelper.resetSingularityEscape();
       waitSingularityEscapeBeforeTransitionToNextState.set(false);
