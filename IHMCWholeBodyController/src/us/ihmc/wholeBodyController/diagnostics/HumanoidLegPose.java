@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
+package us.ihmc.wholeBodyController.diagnostics;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 
