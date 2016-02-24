@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -30,7 +29,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
@@ -355,20 +353,6 @@ public class FootControlModule
          swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
       }
       swingState.setFootstep(footstep);
-   }
-
-   public boolean isLegDoingToeOffAndAtLimit()
-   {
-      if (getCurrentConstraintType() != ConstraintType.TOES)
-         return false;
-      RobotSide robotSide = footControlHelper.getRobotSide();
-      OneDoFJoint kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
-      OneDoFJoint anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-      double straightKneeThresholdInToeOFf = 0.42;
-      boolean isKneeAlmostStraight = kneeJoint.getQ() < straightKneeThresholdInToeOFf;
-      boolean isAnkleAtLowerLimit = anklePitchJoint.getQ() > anklePitchJoint.getJointLimitUpper() - 0.05;
-
-      return isKneeAlmostStraight && isAnkleAtLowerLimit;
    }
 
    public void setFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)

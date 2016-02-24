@@ -93,7 +93,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private boolean VISUALIZE = true;
 
    private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
-   private static final boolean CHECK_FOR_OVEREXTENSION_ON_TOE_OFF_LEG = false;
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
 
@@ -1490,12 +1489,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (!icpTrajectoryIsDone)
             return false;
-
-         if (CHECK_FOR_OVEREXTENSION_ON_TOE_OFF_LEG)
-         {
-            if (feetManager.isLegDoingToeOffAndAtLimit(robotSide.getOppositeSide()))
-               return true;
-         }
 
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
          desiredICP.getFrameTuple2dIncludingFrame(desiredICP2d);

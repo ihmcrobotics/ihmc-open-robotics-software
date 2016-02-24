@@ -340,16 +340,6 @@ public class FeetManager
       footControlModules.get(robotSide).doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLeg.getDoubleValue());
    }
 
-   public void resetCurrentState(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).resetCurrentState();
-   }
-
-   public boolean isLegDoingToeOffAndAtLimit(RobotSide robotSide)
-   {
-      return footControlModules.get(robotSide).isLegDoingToeOffAndAtLimit();
-   }
-
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       for (RobotSide robotSide : RobotSide.values)
