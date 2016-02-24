@@ -2,33 +2,25 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointTorqueHolder;
 
 public class ControllerCoreCommand implements ControllerCoreCommandInterface
 {
    private final InverseDynamicsCommandList solverCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
-   private final DesiredOneDoFJointTorqueHolder desiredOneDoFJointTorqueHolder;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private final boolean enableControllerCore;
 
    public ControllerCoreCommand(boolean enableControllerCore)
    {
       this.enableControllerCore = enableControllerCore;
 
-      if (enableControllerCore)
-      {
-         solverCommandList = new InverseDynamicsCommandList();
-         feedbackControlCommandList = new FeedbackControlCommandList();
-         desiredOneDoFJointTorqueHolder = null;
-      }
-      else
-      {
-         solverCommandList = null;
-         feedbackControlCommandList = null;
-         desiredOneDoFJointTorqueHolder = new DesiredOneDoFJointTorqueHolder();
-      }
+      solverCommandList = new InverseDynamicsCommandList();
+      feedbackControlCommandList = new FeedbackControlCommandList();
+      lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
    public void clear()
@@ -47,6 +39,11 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       feedbackControlCommandList.addCommand(feedbackControlCommand);
    }
 
+   public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderInterface lowLevelJointData)
+   {
+      lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);
+   }
+
    @Override
    public InverseDynamicsCommandList getInverseDynamicsCommandList()
    {
@@ -60,15 +57,16 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    @Override
-   public DesiredOneDoFJointTorqueHolder geDesiredOneDoFJointTorqueHolder()
+   public LowLevelOneDoFJointDesiredDataHolder getLowLevelOneDoFJointDesiredDataHolder()
    {
-      return desiredOneDoFJointTorqueHolder;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    public void set(ControllerCoreCommand other)
    {
       solverCommandList.set(other.solverCommandList);
       feedbackControlCommandList.set(other.feedbackControlCommandList);
+      lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    @Override

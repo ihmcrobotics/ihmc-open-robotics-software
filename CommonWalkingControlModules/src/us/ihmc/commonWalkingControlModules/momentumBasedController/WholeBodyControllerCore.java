@@ -3,14 +3,14 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyFeedbackController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointAccelerationHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredOneDoFJointTorqueHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.WholeBodyInverseDynamicsSolver;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.YoDesiredOneDoFJointTorqueHolder;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -30,7 +30,7 @@ public class WholeBodyControllerCore
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
 
    private final ControllerCoreOuput controllerCoreOuput;
-   private final DesiredOneDoFJointTorqueHolder desiredOneDoFJointTorqueHolder;
+   private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private OneDoFJoint[] oneDoFJoints;
 
@@ -41,7 +41,7 @@ public class WholeBodyControllerCore
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
       inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, momentumOptimizationSettings, registry);
       oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsSolver.getJointsToOptimizeFors(), OneDoFJoint.class);
-      desiredOneDoFJointTorqueHolder = new YoDesiredOneDoFJointTorqueHolder(oneDoFJoints, registry);
+      yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(oneDoFJoints, registry);
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = inverseDynamicsSolver.getDesiredCenterOfPressureDataHolder();
       controllerCoreOuput = new ControllerCoreOuput(desiredCenterOfPressureDataHolder);
@@ -53,14 +53,14 @@ public class WholeBodyControllerCore
    {
       feedbackController.initialize();
       inverseDynamicsSolver.initialize();
-      desiredOneDoFJointTorqueHolder.reset();
+      yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
    public void reset()
    {
       feedbackController.reset();
       inverseDynamicsSolver.reset();
-      desiredOneDoFJointTorqueHolder.reset();
+      yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
    public void submitControllerCoreCommand(ControllerCoreCommand controllerCoreCommand)
@@ -74,10 +74,8 @@ public class WholeBodyControllerCore
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
          inverseDynamicsSolver.submitInverseDynamicsCommand(controllerCoreCommand.getInverseDynamicsCommandList());
       }
-      else
-      {
-         desiredOneDoFJointTorqueHolder.set(controllerCoreCommand.geDesiredOneDoFJointTorqueHolder());
-      }
+
+      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
    public void compute()
@@ -89,23 +87,14 @@ public class WholeBodyControllerCore
          numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
          inverseDynamicsSolver.submitInverseDynamicsCommand(feedbackControllerOutput);
          inverseDynamicsSolver.compute();
-         desiredOneDoFJointTorqueHolder.extractDesiredTorquesFromInverseDynamicsJoints(oneDoFJoints);
+         LowLevelOneDoFJointDesiredDataHolder solverOutput = inverseDynamicsSolver.getOutput();
+         yoLowLevelOneDoFJointDesiredDataHolder.completeWith(solverOutput);
       }
       else
       {
          numberOfFBControllerEnabled.set(0);
-         desiredOneDoFJointTorqueHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
+         yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
       }
-   }
-
-   public DesiredOneDoFJointTorqueHolder getDesiredOneDoFJointTorqueHolder()
-   {
-      return desiredOneDoFJointTorqueHolder;
-   }
-
-   public DesiredOneDoFJointAccelerationHolder getDesiredOneDoFJointAccelerationHolder()
-   {
-      return inverseDynamicsSolver.getDesiredOneDoFJointAccelerationHolder();
    }
 
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
@@ -116,5 +105,10 @@ public class WholeBodyControllerCore
    public ControllerCoreOuput getOutputForHighLevelController()
    {
       return controllerCoreOuput;
+   }
+
+   public LowLevelOneDoFJointDesiredDataHolderInterface getOutputForLowLevelController()
+   {
+      return yoLowLevelOneDoFJointDesiredDataHolder;
    }
 }
