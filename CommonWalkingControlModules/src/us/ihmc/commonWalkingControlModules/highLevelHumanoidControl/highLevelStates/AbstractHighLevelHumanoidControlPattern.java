@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -44,7 +45,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+   private final JointspaceFeedbackControlCommand unconstrainedJointsCommand = new JointspaceFeedbackControlCommand();
    
    protected final DoubleYoVariable yoTime;
    protected final double controlDT;
@@ -85,8 +86,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final YoPDGains unconstrainedJointsControlGains;
-
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
    {
@@ -121,8 +120,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       this.walkingControllerParameters = walkingControllerParameters;
 
-      this.unconstrainedJointsControlGains = walkingControllerParameters.createUnconstrainedJointsControlGains(registry);
-
       coefficientOfFriction.set(1.0);
 
       // Setup foot control modules:
@@ -136,13 +133,15 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       for (OneDoFJoint joint : unconstrainedJoints)
       {
-
-         jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
+         unconstrainedJointsCommand.addJoint(joint, 0.0, 0.0, 0.0);
          String jointName = joint.getName();
          unconstrainedDesiredPositions.put(joint, new DoubleYoVariable("unconstrained_q_d_" + jointName, registry));
          preRateLimitedDesiredAccelerations.put(joint, new DoubleYoVariable("prl_unconstrained_qdd_d_" + jointName, registry));
          rateLimitedDesiredAccelerations.put(joint, new RateLimitedYoVariable("rl_unconstrained_qdd_d_" + jointName, registry, Double.POSITIVE_INFINITY, controlDT));
       }
+
+      YoPDGains unconstrainedJointsControlGains = walkingControllerParameters.createUnconstrainedJointsControlGains(registry);
+      unconstrainedJointsCommand.setGains(unconstrainedJointsControlGains);
 
       for (int i = 0; i < uncontrolledJoints.size(); i++)
          uncontrolledJointsCommand.addJoint(uncontrolledJoints.get(i), 0.0);
@@ -279,30 +278,16 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       pelvisOrientationManager.compute();
    }
 
-   protected JointspaceAccelerationCommand doUnconstrainedJointControl()
+   protected JointspaceFeedbackControlCommand doUnconstrainedJointControl()
    {
-      double kp = unconstrainedJointsControlGains.getKp();
-      double kd = unconstrainedJointsControlGains.getKd();
-      double maxAcceleration = unconstrainedJointsControlGains.getMaximumAcceleration();
-      double maxJerk = unconstrainedJointsControlGains.getMaximumJerk();
-
       for (int i = 0; i < unconstrainedJoints.length; i++)
       {
          OneDoFJoint joint = unconstrainedJoints[i];
-         double qDesired = unconstrainedDesiredPositions.get(joint).getDoubleValue();
-         double desiredAcceleration = kp * (qDesired -  joint.getQ()) - kd * joint.getQd();
-
-         desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration);
-         preRateLimitedDesiredAccelerations.get(joint).set(desiredAcceleration);
-
-         RateLimitedYoVariable rateLimitedDesiredAcceleration = rateLimitedDesiredAccelerations.get(joint);
-         rateLimitedDesiredAcceleration.setMaxRate(maxJerk);
-         rateLimitedDesiredAcceleration.update(desiredAcceleration);
-
-         jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, desiredAcceleration);
+         double desiredPosition = unconstrainedDesiredPositions.get(joint).getDoubleValue();
+         unconstrainedJointsCommand.setOneDoFJoint(i, desiredPosition, 0.0, 0.0);
       }
 
-      return jointspaceAccelerationCommand;
+      return unconstrainedJointsCommand;
    }
 
    protected boolean handleFootTrajectoryMessage(RobotSide robotSide)
