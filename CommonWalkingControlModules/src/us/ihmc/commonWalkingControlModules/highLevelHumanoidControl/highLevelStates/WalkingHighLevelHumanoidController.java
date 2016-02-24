@@ -1776,7 +1776,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
+         InverseDynamicsCommand<?> footInverseDynamicsCommand = feetManager.getInverseDynamicsCommand(robotSide);
+         if (footInverseDynamicsCommand != null)
+            controllerCoreCommand.addInverseDynamicsCommand(footInverseDynamicsCommand);
+
+         FeedbackControlCommand<?> footFeedbackControlCommand = feetManager.getFeedbackControlCommand(robotSide);
+         if (footFeedbackControlCommand != null)
+            controllerCoreCommand.addFeedbackControlCommand(footFeedbackControlCommand);
 
          InverseDynamicsCommand<?> handInverseDynamicsCommand = manipulationControlModule.getInverseDynamicsCommand(robotSide);
          if (handInverseDynamicsCommand != null)

@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.SpatialFeedbackControlCommand;
@@ -8,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -22,14 +22,10 @@ import us.ihmc.tools.FormattingTools;
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
-   private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = false;
 
-   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
    protected boolean trajectoryWasReplanned;
-
-   protected final YoSE3PIDGainsInterface gains;
 
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
@@ -39,14 +35,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
-   private final RigidBody pelvis;
-
-   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
+         YoVariableRegistry registry)
    {
       super(constraintType, footControlHelper, registry);
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
-      this.gains = gains;
 
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName() + FormattingTools.underscoredToCamelCase(constraintType.toString().toLowerCase(), true);
@@ -56,7 +50,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
-      pelvis = momentumBasedController.getFullRobotModel().getPelvis();
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
          legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
@@ -64,6 +57,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          legJointLimitAvoidanceControlModule = null;
 
       spatialFeedbackControlCommand.set(rootBody, foot);
+      spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setJacobianForNullspaceId(footControlHelper.getJacobianId());
+      FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
+      anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
    }
 
    /**
@@ -86,15 +84,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       initializeTrajectory();
 
-      footControlHelper.setGains(gains);
       footControlHelper.resetSelectionMatrix();
    }
 
    @Override
    public void doSpecificAction()
    {
-      footControlHelper.setGains(gains);
-
       //TODO: If we reinitialize after singularity escape, we 
       // need to do it smartly. The stuff below causes really
       // bad swing tracking due to a huge discontinuity in the desireds.
@@ -123,18 +118,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          desiredLinearAcceleration.setToZero();
       }
 
-      RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
-      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration,
-            desiredAngularAcceleration, baseForControl);
-      accelerationControlModule.getAcceleration(footAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.setSelectionMatrix(footControlHelper.getSelectionMatrix());
+      spatialFeedbackControlCommand.setNullspaceMultipliers(footControlHelper.getNullspaceMultipliers());
 
-      footControlHelper.submitTaskspaceConstraint(footAcceleration, spatialAccelerationCommand);
-
-      desiredPosition.changeFrame(worldFrame);
-      yoDesiredPosition.set(desiredPosition);
-      desiredLinearVelocity.changeFrame(worldFrame);
-      yoDesiredLinearVelocity.set(desiredLinearVelocity);
+      yoDesiredPosition.setAndMatchFrame(desiredPosition);
+      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
    }
 
    @Override
@@ -150,7 +140,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    @Override
    public SpatialAccelerationCommand getInverseDynamicsCommand()
    {
-      return spatialAccelerationCommand;
+      return null;
    }
 
    @Override
