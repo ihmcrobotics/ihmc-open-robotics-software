@@ -14,6 +14,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -71,6 +72,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final SideDependentList<YoFrameVector2d> entryCMPUserOffsets = new SideDependentList<>();
    private final SideDependentList<YoFrameVector2d> exitCMPUserOffsets = new SideDependentList<>();
 
+   private final IntegerYoVariable numberOfUpcomingFootsteps;
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
 
    private final FramePoint cmp = new FramePoint();
@@ -114,6 +116,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       safeDistanceFromCMPToSupportEdgesWhenSteppingDown = new DoubleYoVariable(namePrefix + "SafeDistanceFromCMPToSupportEdgesWhenSteppingDown", registry);
 
       stepLengthToCMPOffsetFactor = new DoubleYoVariable(namePrefix + "StepLengthToCMPOffsetFactor", registry);
+
+      numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
 
       supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
 
@@ -261,6 +265,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    {
       RobotSide transferFromSide = transferToSide.getOppositeSide();
       int numberOfUpcomingFootsteps = upcomingFootsteps.size();
+      this.numberOfUpcomingFootsteps.set(numberOfUpcomingFootsteps);
       int cmpIndex = 0;
       boolean noUpcomingFootsteps = numberOfUpcomingFootsteps == 0;
       isDoneWalking.set(noUpcomingFootsteps);
@@ -317,6 +322,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    public void computeReferenceCMPsStartingFromSingleSupport(RobotSide supportSide)
    {
       int numberOfUpcomingFootsteps = upcomingFootsteps.size();
+      this.numberOfUpcomingFootsteps.set(numberOfUpcomingFootsteps);
       int constantCMPIndex = 0;
       boolean onlyOneUpcomingFootstep = numberOfUpcomingFootsteps == 1;
       isDoneWalking.set(onlyOneUpcomingFootstep);
