@@ -6,7 +6,7 @@ public enum NetworkParameterKeys
    logger("Hostname/IP of the logger or visualizer network.", "127.0.0.1", true),
    networkManager("Hostname/IP of the network manager, as seen from the communication shaper.", "127.0.0.1", true),
    
-   rosURI("Fully qualified ROS master URI.", "http://127.0.0.1:11311", true),
+   rosURI("Fully qualified ROS master URI.", "http://127.0.0.1:11311", false),
    head("Hostname/IP of the head.", "", true),
    leftHand("Hostname/IP of the left hand.", "", true),
    rightHand("Hostname/IP of the right hand.", "", true),
