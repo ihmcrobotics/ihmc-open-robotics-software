@@ -122,7 +122,7 @@ public class BodyFixedPointLinearAccelerationControlModule
       desiredPosition.changeFrame(frameAtBodyFixedPoint);
       positionError.setAndMatchFrame(desiredPosition);
 
-      proportionalTerm.set(desiredPosition);
+      positionError.getFrameTupleIncludingFrame(proportionalTerm);
       proportionalGainMatrix.transform(proportionalTerm.getVector());
       proportionalTerm.changeFrame(baseFrame);
    }
@@ -133,7 +133,7 @@ public class BodyFixedPointLinearAccelerationControlModule
       twistCalculator.getRelativeTwist(endEffectorTwist, base, endEffector);
       endEffectorTwist.changeFrame(baseFrame);
       bodyFixedPoint.setToZero(frameAtBodyFixedPoint);
-      bodyFixedPoint.changeFrame(endEffector.getBodyFixedFrame());
+      bodyFixedPoint.changeFrame(base.getBodyFixedFrame());
       endEffectorTwist.getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, bodyFixedPoint);
 
       desiredVelocity.changeFrame(baseFrame);

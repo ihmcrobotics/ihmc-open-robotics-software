@@ -27,6 +27,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       solverCommandList.clear();
       feedbackControlCommandList.clear();
+      lowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
    public void addInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
