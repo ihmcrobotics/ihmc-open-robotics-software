@@ -380,9 +380,9 @@ public class QuadrupedSupportPolygonTest
    public void testGetOrCreateFootstep()
    {
       QuadrupedSupportPolygon noFL = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
-      FramePoint footstep1 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstep1 = noFL.reviveFootstep(RobotQuadrant.FRONT_LEFT);
       assertNotNull("null", footstep1);
-      FramePoint footstep2 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstep2 = noFL.reviveFootstep(RobotQuadrant.FRONT_LEFT);
       assertTrue("not same ref", footstep1 == footstep2);
    }
    
