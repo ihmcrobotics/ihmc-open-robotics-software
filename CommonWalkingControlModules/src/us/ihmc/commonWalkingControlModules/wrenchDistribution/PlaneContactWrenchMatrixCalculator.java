@@ -87,6 +87,11 @@ public class PlaneContactWrenchMatrixCalculator
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F tempVector = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
+   private final Map<Integer, FrameVector> basisVectors = new LinkedHashMap<Integer, FrameVector>();
+   private final Map<Integer, FramePoint> contactPoints = new LinkedHashMap<Integer, FramePoint>();
+   private FrameVector basisVector;
+   private FramePoint contactPoint;
+
    private final Wrench tempWrench = new Wrench();
 
    public PlaneContactWrenchMatrixCalculator(ReferenceFrame centerOfMassFrame, int rhoSize, int maxNPointsPerPlane, int maxNSupportVectors, double wRho,
@@ -125,6 +130,12 @@ public class PlaneContactWrenchMatrixCalculator
       CommonOps.setIdentity(wRhoPenalizerMatrix);
       CommonOps.scale(wRhoPenalizer, wRhoPenalizerMatrix);
 
+      for (int i = 0; i < rhoSize; i++)
+      {
+         basisVectors.put(i, new FrameVector(centerOfMassFrame));
+         contactPoints.put(i, new FramePoint(centerOfMassFrame));
+      }
+
       this.planeContactStates = new ArrayList<>(contactablePlaneBodies.size());
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
@@ -144,7 +155,8 @@ public class PlaneContactWrenchMatrixCalculator
 
       for (int i = 0; i < this.planeContactStates.size(); i++)
       {
-         RigidBody rigidBody = this.planeContactStates.get(i).getRigidBody();
+         PlaneContactState planeContactState = this.planeContactStates.get(i);
+         RigidBody rigidBody = planeContactState.getRigidBody();
          ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
 
          Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
@@ -204,9 +216,16 @@ public class PlaneContactWrenchMatrixCalculator
 
             for (int k = 0; k < nSupportVectors; k++)
             {
+             this.contactPoint = contactPoints.get(iRho);
+             contactPoint.getPosition(this.contactPoint);
+
+             basisVector = basisVectors.get(iRho);
+
                if (isInContact)
                {
                   computeBasisVector(planeContactState, contactPoint, k);
+
+                basisVector.set(currentBasisVector.getLinearPart());
 
                   currentBasisVector.getMatrixColumn(qRho, iRho);
                   rhoMin.set(iRho, 0, rhoMinScalar.getDoubleValue());
@@ -218,6 +237,8 @@ public class PlaneContactWrenchMatrixCalculator
                }
                else
                {
+                  basisVector.setToZero(centerOfMassFrame);
+
                   rhoMin.set(iRho, 0, 0.0);
                   wRhoMatrix.set(iRho, iRho, 0.0);
                   wRhoSmootherMatrix.set(iRho, iRho, 0.0);
@@ -407,5 +428,15 @@ public class PlaneContactWrenchMatrixCalculator
    public DenseMatrix64F getQRho()
    {
       return qRho;
+   }
+
+   public Map<Integer, FrameVector> getBasisVectors()
+   {
+      return basisVectors;
+   }
+
+   public Map<Integer, FramePoint> getContactPoints()
+   {
+      return contactPoints;
    }
 }
