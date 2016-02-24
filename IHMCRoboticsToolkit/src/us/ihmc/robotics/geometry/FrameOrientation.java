@@ -394,6 +394,11 @@ public class FrameOrientation extends ReferenceFrameHolder
       this.quaternion.mul(quaternion);
    }
 
+   public void conjugate()
+   {
+      quaternion.conjugate();
+   }
+
    public double dot(FrameOrientation frameOrientation)
    {
       checkReferenceFrameMatch(frameOrientation);

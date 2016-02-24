@@ -241,6 +241,13 @@ public class YoFrameQuaternion extends ReferenceFrameHolder
       getYoValuesFromFrameOrientation();
    }
 
+   public void conjugate()
+   {
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.conjugate();
+      getYoValuesFromFrameOrientation();
+   }
+
    /**
     * Compute the dot product between this quaternion and the orhter quaternion: this . other = qx * other.qx + qy * other.qy + qz * other.qz + qs * other.qs.
     * @param other
