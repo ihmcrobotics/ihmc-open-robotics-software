@@ -167,24 +167,6 @@ public class UpcomingFootstepList
       return footstepProvider.isEmpty();
    }
 
-   public int getNumberOfFootstepsToProvide()
-   {
-      if (footstepProvider == null)
-         return 0;
-
-      return footstepProvider.getNumberOfFootstepsToProvide();
-   }
-
-   public boolean doesNextFootstepListHaveFewerThanTwoElements()
-   {
-      return (footstepIndex.getIntegerValue() < 2);
-   }
-
-   public Footstep getFootstepTwoBackFromNextFootstepList()
-   {
-      return outputFootstepList.get(footstepIndex.getIntegerValue() - 2);
-   }
-
    public boolean hasNextFootsteps()
    {
       return (outputFootstepList.size() > 0);

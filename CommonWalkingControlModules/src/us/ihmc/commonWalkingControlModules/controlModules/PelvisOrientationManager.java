@@ -343,6 +343,18 @@ public class PelvisOrientationManager
       initialize(supportAnkleZUp);
    }
 
+   /** Go instantly to zero, no smooth interpolation. */
+   public void setToZeroInMidFeetZUpFrame()
+   {
+      tempOrientation.setToZero(midFeetZUpFrame);
+      tempOrientation.changeFrame(worldFrame);
+      initialPelvisOrientation.set(tempOrientation);
+      finalPelvisOrientation.set(tempOrientation);
+      desiredPelvisOrientation.set(tempOrientation);
+
+      initialize(midFeetZUpFrame);
+   }
+
    public void moveToAverageInSupportFoot(RobotSide supportSide)
    {
       desiredPelvisOrientation.getFrameOrientationIncludingFrame(tempOrientation);
