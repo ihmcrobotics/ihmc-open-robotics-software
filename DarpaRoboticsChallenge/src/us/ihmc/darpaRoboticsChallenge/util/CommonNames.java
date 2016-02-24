@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
+package us.ihmc.darpaRoboticsChallenge.util;
 
 /**
  * Centralized location for the names related to contols
