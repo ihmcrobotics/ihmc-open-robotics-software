@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
+package us.ihmc.wholeBodyController.diagnostics;
 
 public enum HumanoidSpinePose
 {
