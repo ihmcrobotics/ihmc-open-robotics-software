@@ -380,9 +380,9 @@ public class QuadrupedSupportPolygonTest
    public void testGetOrCreateFootstep()
    {
       QuadrupedSupportPolygon noFL = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
-      FramePoint footstep1 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstep1 = noFL.reviveFootstep(RobotQuadrant.FRONT_LEFT);
       assertNotNull("null", footstep1);
-      FramePoint footstep2 = noFL.getFootstepOrCreateIfNonSupporting(RobotQuadrant.FRONT_LEFT);
+      FramePoint footstep2 = noFL.reviveFootstep(RobotQuadrant.FRONT_LEFT);
       assertTrue("not same ref", footstep1 == footstep2);
    }
    
@@ -636,6 +636,16 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.25, 0.75, 0.0), 1e-7));
       assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.75, 0.75, 0.0), 1e-7));
       
+      poly.shrinkPolygon2d(RobotQuadrant.FRONT_LEFT, 0.05);
+      poly.shrinkPolygon2d(RobotQuadrant.FRONT_RIGHT, -0.05);
+      poly.shrinkPolygon2d(RobotQuadrant.HIND_RIGHT, 0.10);
+      poly.shrinkPolygon2d(RobotQuadrant.HIND_LEFT, -0.15);
+      
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.10, 0.35, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(0.80, 0.35, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(new Vector3d(0.10, 0.7, 0.0), 1e-7));
+      assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.80, 0.7, 0.0), 1e-7));
+      
       final QuadrupedSupportPolygon createEmptyPolygon = createEmptyPolygon();
       JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
@@ -669,7 +679,8 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.0, 0.0, 0.0), 1e-7));
       assertTrue("not common", poly3.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 1e-7));
       
-      poly1.getShrunkenCommonTriangle2d(poly2, poly3, RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
+      QuadrupedSupportPolygon tempPoly = new QuadrupedSupportPolygon();
+      poly1.getShrunkenCommonTriangle2d(poly2, poly3, tempPoly, RobotQuadrant.FRONT_RIGHT, 0.1, 0.1, 0.1);
       
       Vector3d expected;
       FramePoint actual;
@@ -780,10 +791,10 @@ public class QuadrupedSupportPolygonTest
       QuadrupedSupportPolygon poly = createDiamondPolygon();
       FramePoint flFoot = poly.getFootstep(RobotQuadrant.FRONT_LEFT);
       FramePoint hrFoot = poly.getFootstep(RobotQuadrant.HIND_RIGHT);
-      double distance = poly.getDistanceFromP1ToTrotLine(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      double distance = poly.getDistanceFromP1ToTrotLine2d(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
       assertEquals("not 0.5", 0.5, distance, 1e-7);
       flFoot.add(0.25, 0.0, 0.0);
-      distance = poly.getDistanceFromP1ToTrotLine(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
+      distance = poly.getDistanceFromP1ToTrotLine2d(RobotQuadrant.FRONT_RIGHT, flFoot, hrFoot);
       assertEquals("not 0.25", 0.25, distance, 1e-7);
    }
    
