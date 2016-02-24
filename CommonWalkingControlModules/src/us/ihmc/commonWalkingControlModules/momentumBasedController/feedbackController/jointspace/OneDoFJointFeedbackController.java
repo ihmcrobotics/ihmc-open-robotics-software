@@ -77,6 +77,8 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       weightForSolver.set(Double.POSITIVE_INFINITY);
 
       output.addJoint(joint, Double.NaN);
+
+      parentRegistry.addChild(registry);
    }
 
    @Override
@@ -117,6 +119,9 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    {
       if (!isEnabled.getBooleanValue())
          return;
+
+      qCurrent.set(joint.getQ());
+      qDCurrent.set(joint.getQd());
 
       if (isRevoluteJoint)
          qError.set(AngleTools.computeAngleDifferenceMinusPiToPi(qDesired.getDoubleValue(), qCurrent.getDoubleValue()));
