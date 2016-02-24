@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 
@@ -42,8 +43,14 @@ public class SDFExoskeleton extends SDFRobot {
 						footGroundContactPoints.get(robotSide).addAll(contactPointsForJoint);
 					}
 				}
+				
+				if (joint.getName().endsWith("_leg_hipy"))
+				{
+				   joint.addExternalForcePoint(new ExternalForcePoint(joint.getName() + "_humanExternalForcePoint", this));
+				}
 			}
 		}
+			
 	}
 
 	public List<GroundContactPoint> getFootGroundContactPoints(RobotSide robotSide) {
