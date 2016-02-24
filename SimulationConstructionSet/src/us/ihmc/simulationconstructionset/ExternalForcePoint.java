@@ -34,11 +34,21 @@ public class ExternalForcePoint extends KinematicPoint
       this(name, null, registry);
    }
 
+   /**
+    * @param name
+    * @param offset in world when all of the robot's joints are at zero
+    * @param robot
+    */
    public ExternalForcePoint(String name, Vector3d offset, Robot robot)
    {
       this(name, offset, robot.getRobotsYoVariableRegistry());
    }
 
+   /**
+   * @param name
+   * @param offset in world when all of the robot's joints are at zero
+   * @param robot
+   */
    public ExternalForcePoint(String name, Vector3d offset, YoVariableRegistry registry)
    {
       super(name, offset, registry);

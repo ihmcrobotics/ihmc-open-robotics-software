@@ -50,7 +50,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * for this method: X, Y, and Z.  To specified a particular axis use the public int provided in Joint.
     * 
     * @param jname name of this joint
-    * @param offset Vector3d representing the offset from the robot origin to the joint.
+    * @param offset Vector3d representing the offset from the joint's parent to this joint when all of the robot's joints are at zero
     * @param rob Robot to which this joint will belong
     * @param jaxis int representing the axis
     */
@@ -90,7 +90,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * of an arbitrary joint axis.
     *
     * @param jname name of this joint
-    * @param offset Vector3d representing the offset from the robot origin to the joint.
+    * @param offset Vector3d representing the offset from the joint's parent to this joint when all of the robot's joints are at zero
     * @param rob Robot to which this joint will belong
     * @param u_hat Vector3d representing the axis of rotation
     */
