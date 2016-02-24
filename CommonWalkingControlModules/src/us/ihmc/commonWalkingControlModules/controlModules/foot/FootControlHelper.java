@@ -5,13 +5,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -38,7 +35,6 @@ public class FootControlHelper
    private final ContactableFoot contactableFoot;
    private final MomentumBasedController momentumBasedController;
    private final TwistCalculator twistCalculator;
-   private final RigidBodySpatialAccelerationControlModule accelerationControlModule;
    private final WalkingControllerParameters walkingControllerParameters;
    private final PartialFootholdControlModule partialFootholdControlModule;
 
@@ -75,10 +71,7 @@ public class FootControlHelper
 
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
-      ReferenceFrame frameAfterAnkle = contactableFoot.getFrameAfterParentJoint();
       double controlDT = momentumBasedController.getControlDT();
-
-      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, frameAfterAnkle, controlDT, registry);
 
       partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, walkingControllerParameters,
             registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
@@ -187,38 +180,6 @@ public class FootControlHelper
    public MomentumBasedController getMomentumBasedController()
    {
       return momentumBasedController;
-   }
-
-   public RigidBodySpatialAccelerationControlModule getAccelerationControlModule()
-   {
-      return accelerationControlModule;
-   }
-
-   public void setGains(YoSE3PIDGainsInterface gains)
-   {
-      accelerationControlModule.setGains(gains);
-   }
-
-   public void setOrientationGains(YoOrientationPIDGainsInterface gains)
-   {
-      accelerationControlModule.setOrientationGains(gains);
-   }
-
-   public void setGainsToZero()
-   {
-      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionIntegralGains(0.0, 0.0, 0.0, 0.0);
-      accelerationControlModule.setPositionMaxAccelerationAndJerk(0.0, 0.0);
-      accelerationControlModule.setOrientationProportionalGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setOrientationDerivativeGains(0.0, 0.0, 0.0);
-      accelerationControlModule.setOrientationIntegralGains(0.0, 0.0, 0.0, 0.0);
-      accelerationControlModule.setOrientationMaxAccelerationAndJerk(0.0, 0.0);
-   }
-
-   public void resetAccelerationControlModule()
-   {
-      accelerationControlModule.reset();
    }
 
    public WalkingControllerParameters getWalkingControllerParameters()
