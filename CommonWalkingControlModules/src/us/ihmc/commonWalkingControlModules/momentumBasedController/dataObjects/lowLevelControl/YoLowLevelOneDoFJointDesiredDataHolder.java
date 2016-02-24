@@ -163,7 +163,11 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       for (int i = 0; i < other.getNumberOfJointsWithLowLevelData(); i++)
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
-         overwriteJointData(joint, other.getLowLevelJointData(joint));
+         YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+         if (lowLevelJointData == null)
+            continue;
+
+         lowLevelJointData.set(other.getLowLevelJointData(joint));
       }
    }
 

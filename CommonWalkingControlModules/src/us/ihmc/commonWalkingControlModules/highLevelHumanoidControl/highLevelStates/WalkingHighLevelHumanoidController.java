@@ -28,8 +28,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
@@ -1751,7 +1751,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doChestControl();
       doCapturePointBasedControl();
       doPelvisControl();
-      JointspaceAccelerationCommand unconstrainedJointCommand = doUnconstrainedJointControl();
+      JointspaceFeedbackControlCommand unconstrainedJointCommand = doUnconstrainedJointControl();
 
       submitControllerCoreCommands(unconstrainedJointCommand);
 
@@ -1767,7 +1767,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
    }
 
-   public void submitControllerCoreCommands(JointspaceAccelerationCommand unconstrainedJointCommand)
+   public void submitControllerCoreCommands(JointspaceFeedbackControlCommand unconstrainedJointCommand)
    {
       planeContactStateCommandPool.clear();
       double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded(footDesiredCoPs);
@@ -1804,7 +1804,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(getUncontrolledJointCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(unconstrainedJointCommand);
+      controllerCoreCommand.addFeedbackControlCommand(unconstrainedJointCommand);
 
       controllerCoreCommand.addInverseDynamicsCommand(icpAndMomentumBasedController.getInverseDynamicsCommand());
    }
