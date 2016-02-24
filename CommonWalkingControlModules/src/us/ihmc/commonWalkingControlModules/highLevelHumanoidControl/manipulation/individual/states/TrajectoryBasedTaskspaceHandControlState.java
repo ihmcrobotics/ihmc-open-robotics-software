@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.robotics.geometry.FramePose;
@@ -30,7 +29,9 @@ public abstract class TrajectoryBasedTaskspaceHandControlState extends HandContr
 
    public abstract ReferenceFrame getReferenceFrame();
 
-   public abstract void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule);
+   public abstract ReferenceFrame getTrackingFrame();
+
+   public abstract void setControlFrameFixedInEndEffector(ReferenceFrame controlFrame);
 
    public abstract void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator);
 

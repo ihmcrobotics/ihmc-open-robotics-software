@@ -116,10 +116,9 @@ public class HeadOrientationManager
          isTrackingOrientation.set(!waypointOrientationTrajectoryGenerator.isDone());
       }
       waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-      desiredOrientation.changeFrame(worldFrame);
       desiredAngularVelocity.setToZero(worldFrame);
       feedForwardAngularAcceleration.setToZero(worldFrame);
-      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
    }
 
    private void handleHeadTrajectoryMessages()

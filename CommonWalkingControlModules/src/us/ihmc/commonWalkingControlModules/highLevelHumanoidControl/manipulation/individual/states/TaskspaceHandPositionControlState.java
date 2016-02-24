@@ -2,11 +2,12 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
@@ -31,15 +31,11 @@ import us.ihmc.tools.FormattingTools;
 public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
 
    private final String name;
    private final YoVariableRegistry registry;
 
-   private final RigidBody base;
-
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    // viz stuff:
@@ -57,12 +53,16 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
    private PoseTrajectoryGenerator poseTrajectoryGenerator;
-   private RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
+
+   private final FramePose controlFramePose = new FramePose();
+   private final PoseReferenceFrame trackingFrame;
+   private final ReferenceFrame endEffectorFrame;
 
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, RigidBody base, RigidBody endEffector,
+         YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
@@ -70,13 +70,14 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
-      spatialAccelerationCommand.set(base, endEffector);
-      spatialFeedbackControlCommand.set(base, endEffector);
+      endEffectorFrame = endEffector.getBodyFixedFrame();
 
-      this.base = base;
+      spatialFeedbackControlCommand.set(base, endEffector);
+      spatialFeedbackControlCommand.setGains(gains);
 
       parentRegistry.addChild(registry);
 
+      trackingFrame = new PoseReferenceFrame("trackingFrame", endEffectorFrame);
       desiredPositionFrame = new PoseReferenceFrame(name + "DesiredFrame", worldFrame);
 
       if (yoGraphicsListRegistry != null)
@@ -110,17 +111,10 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       poseTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
       poseTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
-      handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
-            desiredAngularAcceleration, base);
-
-      handSpatialAccelerationControlModule.getAcceleration(handAcceleration);
-
-      ReferenceFrame handFrame = handSpatialAccelerationControlModule.getEndEffector().getBodyFixedFrame();
-      handAcceleration.changeBodyFrameNoRelativeAcceleration(handFrame);
-      handAcceleration.changeFrameNoRelativeMotion(handFrame);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredVelocity, desiredVelocity);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       updateVisualizers();
-      spatialAccelerationCommand.set(handAcceleration);
 
    }
 
@@ -184,12 +178,6 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    }
 
    @Override
-   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
-   {
-      handSpatialAccelerationControlModule = handRigidBodySpatialAccelerationControlModule;
-   }
-
-   @Override
    public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
    {
    }
@@ -208,6 +196,21 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    }
 
    @Override
+   public ReferenceFrame getTrackingFrame()
+   {
+      return trackingFrame;
+   }
+
+   @Override
+   public void setControlFrameFixedInEndEffector(ReferenceFrame controlFrame)
+   {
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(endEffectorFrame);
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+      trackingFrame.setPoseAndUpdate(controlFramePose);
+   }
+
+   @Override
    public FramePose getDesiredPose()
    {
       return desiredPose;
@@ -216,12 +219,18 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    @Override
    public SpatialAccelerationCommand getInverseDynamicsCommand()
    {
-      return spatialAccelerationCommand;
+      return null;
    }
 
    @Override
    public SpatialFeedbackControlCommand getFeedbackControlCommand()
    {
       return spatialFeedbackControlCommand;
+   }
+
+   @Override
+   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData()
+   {
+      return null;
    }
 }

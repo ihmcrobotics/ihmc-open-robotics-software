@@ -16,7 +16,7 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 public class BodyFixedPointSpatialAccelerationControlModule
 {
    private final YoVariableRegistry registry;
-   private final YoTranslationFrame bodyFixedPointFrame;
+   private final YoSE3OffsetFrame bodyFixedControlFrame;
    private final RigidBodySpatialAccelerationControlModule accelerationControlModule;
 
    public BodyFixedPointSpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, double dt,
@@ -30,9 +30,9 @@ public class BodyFixedPointSpatialAccelerationControlModule
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      bodyFixedPointFrame = new YoTranslationFrame("bodyFixedPointFrame", endEffector.getBodyFixedFrame(), registry);
+      bodyFixedControlFrame = new YoSE3OffsetFrame("bodyFixedControlFrame", endEffector.getBodyFixedFrame(), registry);
 
-      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, endEffector, bodyFixedPointFrame, dt,
+      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, endEffector, bodyFixedControlFrame, dt,
             taskspaceGains, registry);
 
       parentRegistry.addChild(registry);
@@ -56,9 +56,9 @@ public class BodyFixedPointSpatialAccelerationControlModule
             desiredLinearAccelerationOfOrigin, desiredAngularAcceleration, base);
    }
 
-   public void setPointToControl(FramePoint bodyFixedPointInEndEffectorFrame)
+   public void setBodyFixedControlFrame(FramePoint position, FrameOrientation orientation)
    {
-      bodyFixedPointFrame.setTranslationToParent(bodyFixedPointInEndEffectorFrame);
+      bodyFixedControlFrame.setOffsetToParent(position, orientation);
    }
 
    public void setGains(SE3PIDGainsInterface gains)
@@ -68,12 +68,12 @@ public class BodyFixedPointSpatialAccelerationControlModule
 
    public void setToControlBodyFixedFrame()
    {
-      bodyFixedPointFrame.setToZero();
+      bodyFixedControlFrame.setToZero();
    }
 
    public ReferenceFrame getTrackingFrame()
    {
-      return bodyFixedPointFrame;
+      return bodyFixedControlFrame;
    }
 
    public RigidBody getEndEffector()

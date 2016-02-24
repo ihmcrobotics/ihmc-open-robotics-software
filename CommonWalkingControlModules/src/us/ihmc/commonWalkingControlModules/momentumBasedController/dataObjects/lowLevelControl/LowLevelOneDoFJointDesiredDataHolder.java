@@ -239,6 +239,9 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    @Override
    public void completeWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
    {
+      if (other == null)
+         return;
+
       for (int i = 0; i < other.getNumberOfJointsWithLowLevelData(); i++)
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
@@ -263,6 +266,9 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
    {
       clear();
+
+      if (other == null)
+         return;
 
       for (int i = 0; i < other.getNumberOfJointsWithLowLevelData(); i++)
       {

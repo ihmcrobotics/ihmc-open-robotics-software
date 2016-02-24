@@ -104,10 +104,9 @@ public class ChestOrientationManager
             waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
 
          waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         desiredOrientation.changeFrame(worldFrame);
          desiredAngularVelocity.setToZero(worldFrame);
          feedForwardAngularAcceleration.setToZero(worldFrame);
-         orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
       }
    }
