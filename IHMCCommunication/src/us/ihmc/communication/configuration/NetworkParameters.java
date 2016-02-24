@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class NetworkParameters
@@ -80,25 +80,22 @@ public class NetworkParameters
          }
       }
 
-      for (NetworkParameterKeys key : NetworkParameterKeys.values())
-      {
-         String keyString = key.toString();
-         String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(keyString), '_').toUpperCase(Locale.getDefault());
-         if(key.isIPAddress())
-         {
-            envVarString += "_IP";
-         }
-         if(key.isRequired() && !parameters.containsKey(key))
-         {
-            PrintTools.error("Could not find Network Parameter key " + keyString + " (Env. Variable: " + envVarString + ") . Exiting.\n" + helpText);
-            System.exit(-1);
-         }
-      }
    }
 
    public static String getHost(NetworkParameterKeys key)
    {
-      return getInstance().parameters.get(key);
+      String value = getInstance().parameters.get(key);
+      if(value == null)
+      {
+          String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(key.toString()), '_').toUpperCase(Locale.getDefault());
+          if(key.isIPAddress())
+          {
+             envVarString += "_IP";
+          }
+          PrintTools.error("Could not find Network Parameter key " + key.toString() + " (Env. Variable: " + envVarString + ") . Exiting.\n" + helpText);
+          System.exit(-1);
+      }
+      return value;
    }
 
    public static URI getROSURI()
