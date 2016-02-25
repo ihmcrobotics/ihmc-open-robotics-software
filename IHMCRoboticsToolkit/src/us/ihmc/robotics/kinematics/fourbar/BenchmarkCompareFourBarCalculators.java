@@ -43,7 +43,7 @@ public class BenchmarkCompareFourBarCalculators
          double BAD = DAE + BAE;
 
          FourBarCalculatorFromFastRunner fastRunnerCalculator = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
-         fastRunnerCalculator.solveForAngleDAB(BAD);
+         fastRunnerCalculator.updateAnglesGivenAngleDAB(BAD);
       }
       totalTimeFastRunnerCalculator = System.currentTimeMillis() - startTimeFastRunnerCalculator;
 

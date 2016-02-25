@@ -25,7 +25,7 @@ public class FourBarCalculatorFromFastRunnerTest
    public void testSquare()
    {
       FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(1.0, 1.0, 1.0, 1.0);
-      fourBar.solveForAngleDAB(PI / 2);
+      fourBar.updateAnglesGivenAngleDAB(PI / 2);
       assertEquals(PI / 2, fourBar.getAngleDAB(), eps);
       assertEquals(PI / 2, fourBar.getAngleABC(), eps);
       assertEquals(PI / 2, fourBar.getAngleBCD(), eps);
@@ -37,7 +37,7 @@ public class FourBarCalculatorFromFastRunnerTest
    public void testSquareDer()
    {
       FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(1.0, 1.0, 1.0, 1.0);
-      fourBar.solveForAngleDAB(PI / 2, 1);
+      fourBar.updateAnglesAndVelocitiesGivenAngleDAB(PI / 2, 1);
       assertEquals(PI / 2, fourBar.getAngleDAB(), eps);
       assertEquals(PI / 2, fourBar.getAngleABC(), eps);
       assertEquals(PI / 2, fourBar.getAngleBCD(), eps);
@@ -53,7 +53,7 @@ public class FourBarCalculatorFromFastRunnerTest
    public void testParallelogram()
    {
       FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(1.0, 1.0, 1.0, 1.0);
-      fourBar.solveForAngleDAB(PI / 3, 1);
+      fourBar.updateAnglesAndVelocitiesGivenAngleDAB(PI / 3, 1);
       assertEquals(PI / 3, fourBar.getAngleDAB(), eps);
       assertEquals(2 * PI / 3, fourBar.getAngleABC(), eps);
       assertEquals(PI / 3, fourBar.getAngleBCD(), eps);
@@ -100,7 +100,7 @@ public class FourBarCalculatorFromFastRunnerTest
          }
       }
       FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(a, b, c, d);
-      fourBar.solveForAngleDAB(A);
+      fourBar.updateAnglesAndVelocitiesGivenAngleDAB(A, 0.0);
       assertEquals(A, fourBar.getAngleDAB(), eps);
       assertEquals(B, fourBar.getAngleABC(), eps);
       assertEquals(C, fourBar.getAngleBCD(), eps);
@@ -132,7 +132,7 @@ public class FourBarCalculatorFromFastRunnerTest
          double dBCD = -dABC;
 
          FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
-         fourBar.solveForAngleDAB(BAD, dBAD);
+         fourBar.updateAnglesAndVelocitiesGivenAngleDAB(BAD, dBAD);
          assertEquals(BAD, fourBar.getAngleDAB(), eps);
          assertEquals(ABC, fourBar.getAngleABC(), eps);
          assertEquals(BCD, fourBar.getAngleBCD(), eps);
@@ -205,12 +205,12 @@ public class FourBarCalculatorFromFastRunnerTest
             DAB_t0 = RandomTools.generateRandomDouble(rand, 0.1, Math.PI - 0.1);
             DAB_tf = DAB_t0 + dDAB * T;
 
-            DAB_t0_outOfRange = fourBar.solveForAngleDAB(DAB_t0);
+            DAB_t0_outOfRange = fourBar.updateAnglesGivenAngleDAB(DAB_t0);
             ABC_t0 = fourBar.getAngleABC();
             CDA_t0 = fourBar.getAngleCDA();
             BCD_t0 = fourBar.getAngleBCD();
 
-            DAB_tf_outOfRange = fourBar.solveForAngleDAB(DAB_tf);
+            DAB_tf_outOfRange = fourBar.updateAnglesGivenAngleDAB(DAB_tf);
             ABC_fourbar_tf = fourBar.getAngleABC();
             CDA_fourbar_tf = fourBar.getAngleCDA();
             BCD_fourbar_tf = fourBar.getAngleBCD();
@@ -238,7 +238,7 @@ public class FourBarCalculatorFromFastRunnerTest
             for (int j = 0; j < nSteps - 1; j++)
             {
                DAB_tj = DAB_t0 + dDAB * j * deltaT;
-               fourBar.solveForAngleDAB(DAB_tj, dDAB);
+               fourBar.updateAnglesAndVelocitiesGivenAngleDAB(DAB_tj, dDAB);
 
                ABC_next_tj += fourBar.getAngleDtABC() * deltaT;
                CDA_next_tj += fourBar.getAngleDtCDA() * deltaT;
@@ -313,12 +313,12 @@ public class FourBarCalculatorFromFastRunnerTest
          ddDAB = 2.0 * (DAB_tf - DAB_t0 - dDAB_t0 * T) / square(T);
          dDAB_tf = dDAB_t0 + ddDAB * T;
 
-         fourBar.solveForAngleDAB(DAB_t0, dDAB_t0);
+         fourBar.updateAnglesAndVelocitiesGivenAngleDAB(DAB_t0, dDAB_t0);
          ABC_t0 = fourBar.getAngleABC();
          CDA_t0 = fourBar.getAngleCDA();
          BCD_t0 = fourBar.getAngleBCD();
 
-         fourBar.solveForAngleDAB(DAB_tf, dDAB_tf);
+         fourBar.updateAnglesAndVelocitiesGivenAngleDAB(DAB_tf, dDAB_tf);
          ABC_fourbar_tf = fourBar.getAngleABC();
          CDA_fourbar_tf = fourBar.getAngleCDA();
          BCD_fourbar_tf = fourBar.getAngleBCD();
@@ -331,7 +331,7 @@ public class FourBarCalculatorFromFastRunnerTest
          {
             DAB_tj = ddDAB * square(j * deltaT) / 2.0 + dDAB_t0 * j * deltaT + DAB_t0;
             dDAB_tj = ddDAB * j * deltaT + dDAB_t0;
-            fourBar.solveForAngleDAB(DAB_tj, dDAB_tj, ddDAB);
+            fourBar.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(DAB_tj, dDAB_tj, ddDAB);
 
             ABC_next_tj += fourBar.getAngleDtABC() * deltaT + fourBar.getAngleDt2ABC() * square(deltaT) / 2.0;
             CDA_next_tj += fourBar.getAngleDtCDA() * deltaT + fourBar.getAngleDt2CDA() * square(deltaT) / 2.0;

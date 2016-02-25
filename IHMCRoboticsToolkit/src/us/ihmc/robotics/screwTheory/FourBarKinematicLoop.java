@@ -34,9 +34,15 @@ public class FourBarKinematicLoop
    private final FramePoint masterJointPosition, joint1Position, joint2Position, joint3Position;
    private double masterL, L1, L2, L3;
 
-   private final FourBarCalculatorFromFastRunner fourBarCalculator;
+   private FourBarCalculatorFromFastRunner fourBarCalculator;
+   private double offsetAngle1, offsetAngle2, offsetAngle3;
 
    public FourBarKinematicLoop(String name, YoVariableRegistry registry, RevoluteJoint masterJoint, PassiveRevoluteJoint passiveJoint1, PassiveRevoluteJoint passiveJoint2, PassiveRevoluteJoint passiveJoint3)
+   {
+      this(name, registry, masterJoint, passiveJoint1, passiveJoint2, passiveJoint3, 0.0, 0.0, 0.0);
+   }
+   
+   public FourBarKinematicLoop(String name, YoVariableRegistry registry, RevoluteJoint masterJoint, PassiveRevoluteJoint passiveJoint1, PassiveRevoluteJoint passiveJoint2, PassiveRevoluteJoint passiveJoint3, double offsetAngle1, double offsetAngle2, double offsetAngle3)
    {
       this.masterJoint = masterJoint;
       this.passiveJoint1 = passiveJoint1;
@@ -53,23 +59,37 @@ public class FourBarKinematicLoop
       
       masterJointQd = new DoubleYoVariable(name + "MasterJointQd", registry);
       masterJointQd.set(masterJoint.getQd());
-
-      // Link lengths     
-      masterL = getLinkLength(masterJoint, passiveJoint1, joint1Position);     
-      L1 = getLinkLength(passiveJoint1, passiveJoint2, joint2Position);
-      L2 = getLinkLength(passiveJoint2, passiveJoint3, joint3Position);
-      L3 = getLinkLength(passiveJoint3, masterJoint, masterJointPosition);
-           
-      // Close the loop
-      fourBarCalculator = new FourBarCalculatorFromFastRunner(masterL, L1, L2, L3);
-      fourBarCalculator.solveForAngleDAB(masterJointQ.getDoubleValue());
-      fourBarCalculator.solveForAngleDAB(masterJointQ.getDoubleValue(), masterJointQd.getDoubleValue());
       
-      passiveJoint1.initializePositionAndVelocity(fourBarCalculator.getAngleABC(), fourBarCalculator.getAngleDtABC());
-      passiveJoint2.initializePositionAndVelocity(fourBarCalculator.getAngleBCD(), fourBarCalculator.getAngleDtBCD());
-      passiveJoint3.initializePositionAndVelocity(fourBarCalculator.getAngleCDA(), fourBarCalculator.getAngleDtCDA());
-      //      System.out.println("Q joint1: " + fourBarCalculator.getAngleDAB() + "\nQjoint2: " + fourBarCalculator.getAngleBCD() + "\nQjoint3: " + fourBarCalculator.getAngleCDA());
+      this.offsetAngle1 = offsetAngle1;
+      this.offsetAngle2 = offsetAngle2;
+      this.offsetAngle3 = offsetAngle3;
+   }
 
+   
+   public void initialize()
+   {
+      masterL = getLinkLength(masterJoint, passiveJoint3, joint1Position);     
+      L1 = getLinkLength(masterJoint, passiveJoint1, joint2Position);
+      L2 = getLinkLength(passiveJoint1, passiveJoint2, joint3Position);
+      L3 = getLinkLength(passiveJoint2, passiveJoint3, masterJointPosition);    
+      
+      createCalculatorAndInitializePositionsAndVelocities();
+   }
+   
+   public void initialize(double masterL, double L1, double L2, double L3)  
+   {
+      this.masterL =  masterL;
+      this.L1 = L1;
+      this.L2 = L2;
+      this.L3 = L3;
+      
+      createCalculatorAndInitializePositionsAndVelocities();
+   }
+   
+   private void createCalculatorAndInitializePositionsAndVelocities()
+   {
+      fourBarCalculator = new FourBarCalculatorFromFastRunner(masterL, L1, L2, L3);
+      update();
    }
    
    public double getLinkLength(RevoluteJoint joint1, RevoluteJoint joint2, FramePoint positionJoint2) 
@@ -77,5 +97,16 @@ public class FourBarKinematicLoop
       positionJoint2.setToZero(joint2.getFrameBeforeJoint());
       positionJoint2.changeFrame(joint1.getFrameAfterJoint());
       return Math.sqrt(Math.pow(positionJoint2.getX(), 2) + Math.pow(positionJoint2.getY(), 2) + Math.pow(positionJoint2.getZ(), 2));
+   }
+   
+   public void update()
+   {        
+      fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJoint.q, masterJoint.qd);   
+      passiveJoint1.updateQ(fourBarCalculator.getAngleABC() + offsetAngle1);
+      passiveJoint2.updateQ(fourBarCalculator.getAngleBCD() + offsetAngle2);
+      passiveJoint3.updateQ(fourBarCalculator.getAngleCDA() + offsetAngle3);
+      passiveJoint1.updateQd(fourBarCalculator.getAngleDtABC());
+      passiveJoint2.updateQd(fourBarCalculator.getAngleDtBCD());
+      passiveJoint3.updateQd(fourBarCalculator.getAngleDtCDA());
    }
 }

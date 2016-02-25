@@ -1,11 +1,12 @@
 package us.ihmc.robotics.screwTheory;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
 
 public class RevoluteJointReferenceFrame extends OneDoFJointReferenceFrame
 {
@@ -32,5 +33,11 @@ public class RevoluteJointReferenceFrame extends OneDoFJointReferenceFrame
    {
       tempAxisAngle.set(axis, angle);
       transformToParent.setRotationAndZeroTranslation(tempAxisAngle);
+      
+//      System.out.println("angle = " + angle);
+//      FramePoint temp = new FramePoint();
+//      temp.setToZero(this);
+//      temp.changeFrame(ReferenceFrame.getWorldFrame());
+//      System.out.println(temp);
    }
 }

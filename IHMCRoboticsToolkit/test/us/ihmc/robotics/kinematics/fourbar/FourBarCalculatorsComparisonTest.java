@@ -74,7 +74,7 @@ public class FourBarCalculatorsComparisonTest
    {
       // (1) Fast runner calculations
       FourBarCalculatorFromFastRunner fastRunnerCalculator = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
-      fastRunnerCalculator.solveForAngleDAB(knownAngle);
+      fastRunnerCalculator.updateAnglesGivenAngleDAB(knownAngle);
       double outputFastRunnerCalculator = fastRunnerCalculator.getAngleABC();
 
       // (2) Other calculations
