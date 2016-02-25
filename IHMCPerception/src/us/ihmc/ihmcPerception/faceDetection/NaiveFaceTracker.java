@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.faceDetection;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,17 +25,17 @@ public class NaiveFaceTracker
 {
    private final double SHIFT_DELTA = 200.0;
 
-   private final ArrayList<Face> trackedFaces = new ArrayList<>();
-   private final Set<Face> unmatchedFaces = new HashSet<>();
+   private final ArrayList<Rect> trackedFaces = new ArrayList<>();
+   private final Set<Rect> unmatchedFaces = new HashSet<>();
 
-   public ArrayList<Face> matchTrackedFaces(Rect[] faces)
+   public ArrayList<Rect> matchTrackedFaces(Rect[] faces)
    {
       unmatchedFaces.clear();
 
       for(int i = 0; i < trackedFaces.size(); i++)
       {
-         int oldFaceX = trackedFaces.get(i).facialBorder.x;
-         int oldFaceY = trackedFaces.get(i).facialBorder.y;
+         int oldFaceX = trackedFaces.get(i).x;
+         int oldFaceY = trackedFaces.get(i).y;
          boolean matched = false;
 
          for(int j = 0; j < faces.length; j++)
@@ -50,7 +50,7 @@ public class NaiveFaceTracker
                if(faceShift < SHIFT_DELTA)
                {
                   matched = true;
-                  trackedFaces.get(i).updateCoordinates(faces[j]);
+                  trackedFaces.get(i).set(new double[]{faces[j].x, faces[j].y, faces[j].width, faces[j].height});
                   faces[j] = null;
                }
             }
@@ -67,7 +67,7 @@ public class NaiveFaceTracker
       for(int j = 0; j < faces.length; j++)
       {
          if(faces[j] != null)
-            trackedFaces.add(new Face(System.nanoTime(), faces[j]));
+            trackedFaces.add(faces[j]);
       }
 
       return trackedFaces;
@@ -90,15 +90,15 @@ public class NaiveFaceTracker
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
 
          Graphics2D g2 = bufferedImage.createGraphics();
+         g2.setColor(Color.WHITE);
 
          Rect[] faces = faceDetector.detect(bufferedImage);
-         ArrayList<Face> trackedFaces = faceTracker.matchTrackedFaces(faces);
+         ArrayList<Rect> trackedFaces = faceTracker.matchTrackedFaces(faces);
 
          for (int i = 0; i < trackedFaces.size(); i++)
          {
-            g2.setColor(trackedFaces.get(i).getColor());
-            g2.drawRect(trackedFaces.get(i).facialBorder.x, trackedFaces.get(i).facialBorder.y, trackedFaces.get(i).facialBorder.width,
-                  trackedFaces.get(i).facialBorder.height);
+            g2.drawRect(trackedFaces.get(i).x, trackedFaces.get(i).y, trackedFaces.get(i).width,
+                  trackedFaces.get(i).height);
          }
 
          if (panel == null)
