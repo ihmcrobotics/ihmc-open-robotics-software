@@ -12,10 +12,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DelayEstimatorBetweenTwoSignalsTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 1.0)
+   @Test(timeout = 30000)
    public void testPerfectSignal() throws Exception
    {
       double epsilon = 1.0e-15;
@@ -36,6 +38,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DelayedDoubleYoVariable delayedSignal = new DelayedDoubleYoVariable("delayedSignal", "", referenceSignal, expectedDelayInTicks, registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, delayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
       delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)
@@ -55,7 +58,8 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 1.0)
+   @Test(timeout = 30000)
    public void testWithShiftedSignal() throws Exception
    {
       double epsilon = 1.0e-15;
@@ -77,6 +81,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DoubleYoVariable shiftedDelayedSignal = new DoubleYoVariable("shiftedDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, shiftedDelayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
       delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)
@@ -97,7 +102,8 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 1.0)
+   @Test(timeout = 30000)
    public void testNoisySignal() throws Exception
    {
       Random random = new Random(5616515L);
@@ -113,6 +119,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       DoubleYoVariable noisyDelayedSignal = new DoubleYoVariable("noisyDelayedSignal", registry);
 
       DelayEstimatorBetweenTwoSignals delayEstimatorBetweenTwoSignals = new DelayEstimatorBetweenTwoSignals("delayedSignal", referenceSignal, noisyDelayedSignal, dt, registry);
+      delayEstimatorBetweenTwoSignals.setEstimationParameters(25, 25, 100);
       delayEstimatorBetweenTwoSignals.enable();
 
       for (int i = 0; i < numberOfTicks; i++)

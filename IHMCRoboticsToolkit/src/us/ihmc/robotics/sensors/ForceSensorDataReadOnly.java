@@ -11,9 +11,9 @@ public interface ForceSensorDataReadOnly
 
    public RigidBody getMeasurementLink();
 
-   public void packWrench(DenseMatrix64F wrenchToPack);
+   public void getWrench(DenseMatrix64F wrenchToPack);
 
-   public void packWrench(Wrench wrenchToPack);
+   public void getWrench(Wrench wrenchToPack);
 
-   public void packWrench(float[] wrenchToPack);
+   public void getWrench(float[] wrenchToPack);
 }

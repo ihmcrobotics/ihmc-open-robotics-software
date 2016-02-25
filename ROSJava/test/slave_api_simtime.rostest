@@ -1,6 +1,0 @@
-<launch>
-  <!-- test slave api with simulated time activated -->
-  <param name="use_sim_time" value="true" />
-  <node pkg="rosjava" type="SlaveApiTestNode" name="test_node" />
-  <test pkg="test_ros" type="test_slave_api.py" test-name="rosjava_slave_api_simtime" args="--profile=$(find rosjava)/test/rosjava_profile.yaml" />
-</launch>

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootSwitchUpdater;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -12,6 +14,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -45,7 +49,7 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
 
    private boolean hasBeenInitialized = false;
 
-   public QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
+   private QuadrupedKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          FootSwitchUpdater footSwitchUpdater, JointStateUpdater jointStateUpdater, CenterOfMassLinearStateUpdater comLinearStateUpdater,
          CenterOfMassImuBasedRotationalStateUpdater comRotationalStateUpdater, SDFFullRobotModel sdfFullRobotModelForViz, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -171,4 +175,46 @@ public class QuadrupedKinematicsBasedStateEstimator implements QuadrupedStateEst
    {
       isEnabled.set(true);
    }
+   
+   public static QuadrupedStateEstimator createKinematicsBasedStateEstimator(QuadrupedRobotParameters parameters, SensorOutputMapReadOnly sensorReader,
+         FootSwitchUpdater footSwitchUpdater, SDFFullRobotModel stateEstimatorFullRobotModel,
+         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      
+      QuadrupedReferenceFrames quadrupedReferenceFrames = new QuadrupedReferenceFrames(stateEstimatorFullRobotModel, parameters.getJointMap(),
+            parameters.getPhysicalProperties());
+      FullInverseDynamicsStructure inverseDynamicsStructure = FullInverseDynamicsStructure.createInverseDynamicStructure(stateEstimatorFullRobotModel);
+      
+      
+      JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorReader, null, registry);
+
+      QuadrantDependentList<RigidBody> shinRigidBodies = new QuadrantDependentList<>();
+      QuadrantDependentList<ReferenceFrame> footReferenceFrames = new QuadrantDependentList<>();
+
+      RigidBody[] bodies = ScrewTools.computeSubtreeSuccessors(stateEstimatorFullRobotModel.getElevator());
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         String name = quadrant.toString().toLowerCase() + "_shin";
+         RigidBody[] shinBody = ScrewTools.findRigidBodiesWithNames(bodies, name);
+         shinRigidBodies.set(quadrant, shinBody[0]);
+         footReferenceFrames.set(quadrant, quadrupedReferenceFrames.getFootFrame(quadrant));
+      }
+
+      CenterOfMassLinearStateUpdater comLinearStateUpdater = new CenterOfMassLinearStateUpdater(inverseDynamicsStructure,
+            shinRigidBodies, footReferenceFrames, registry, yoGraphicsListRegistry);
+      double initialHeight = parameters.getQuadrupedPositionBasedCrawlControllerParameters().getInitalCoMHeight();
+      comLinearStateUpdater.setInitialHeight(initialHeight);
+      
+      //XXX: here the null parameter should be imuProcessedOutputs which are not implemented in the SDFQuadrupedPerfectSimulatedSensor
+      CenterOfMassImuBasedRotationalStateUpdater comRotationalStateUpdater = new CenterOfMassImuBasedRotationalStateUpdater(inverseDynamicsStructure, null, registry);
+
+      QuadrupedStateEstimator simulationStateEstimator = new QuadrupedKinematicsBasedStateEstimator(inverseDynamicsStructure, sensorReader, footSwitchUpdater, jointStateUpdater,
+            comLinearStateUpdater, comRotationalStateUpdater, stateEstimatorFullRobotModel, registry, yoGraphicsListRegistry);
+      simulationStateEstimator.initialize();
+      return simulationStateEstimator;
+   }
+   
+
+
 }

@@ -21,6 +21,7 @@ public class DesiredVelocityProvider implements VectorProvider, PacketConsumer<D
    private final YoFrameVector desiredVelocity;
    private final Vector3d yoVelocityTemporary = new Vector3d();
    private final Vector3d velocity = new Vector3d();
+   private final Vector3d zeroVelocity = new Vector3d();
    private final AtomicReference<Vector3d> lastUpdatedVelocity = new AtomicReference<Vector3d>(yoVelocityTemporary);
    
    public DesiredVelocityProvider(GlobalDataProducer dataProducer, String prefix, YoVariableRegistry parentRegistry)
@@ -63,5 +64,10 @@ public class DesiredVelocityProvider implements VectorProvider, PacketConsumer<D
    public void receivedPacket(DesiredVelocityPacket packet)
    {
       lastUpdatedVelocity.set(packet.getVelocity());
+   }
+   
+   public void setToZero()
+   {
+      lastUpdatedVelocity.set(zeroVelocity);
    }
 }

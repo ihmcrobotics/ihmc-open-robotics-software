@@ -28,7 +28,7 @@ public class DoNothingCapturePointCenterOfPressureControlModule implements Captu
    {
    }
 
-   public void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
+   public void getDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack)
    {
       desiredCenterOfPressureToPack.setToZero(midFeetZUpFrame);
    }

@@ -70,19 +70,23 @@ public class QuadrupedControllerManager implements RobotController
             commonControllerParameters, quadrupedRobotParameters, requestedState);
       builder.addDoNothingController();
       builder.addStandPrepController();
+
       builder.addStandReadyController();
+//      builder.addQuadrupedCenterOfMassVerificationController(inverseKinematicsCalculators);
       builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
       builder.addVirtualModelBasedStandController(virtualModelController);
+      builder.addTrotWalkController();
       builder.addSliderBoardController();
-
-      builder.addJointsInitializedCondition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
-      builder.addStandingExitCondition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.STAND_READY);
-
-      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.VMC_STAND);
-      builder.addPermissibleTransition(QuadrupedControllerState.STAND_READY, QuadrupedControllerState.POSITION_CRAWL);
-
-      builder.addPermissibleTransition(QuadrupedControllerState.VMC_STAND, QuadrupedControllerState.STAND_PREP);
-      builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.STAND_PREP);
+      
+      builder.addPermissibleTransition(QuadrupedControllerState.POSITION_CRAWL, QuadrupedControllerState.SLIDER_BOARD);
+      builder.addPermissibleTransition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.STAND_PREP);
+      builder.addPermissibleTransition(QuadrupedControllerState.DO_NOTHING, QuadrupedControllerState.SLIDER_BOARD);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.POSITION_CRAWL);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.TROT_WALK);
+      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.SLIDER_BOARD);
+//      builder.addPermissibleTransition(QuadrupedControllerState.STAND_PREP, QuadrupedControllerState.COM_VERIFICATION);
+//      builder.addPermissibleTransition(QuadrupedControllerState.COM_VERIFICATION, QuadrupedControllerState.STAND_PREP);
+      builder.addPermissibleTransition(QuadrupedControllerState.SLIDER_BOARD, QuadrupedControllerState.STAND_PREP);
 
       this.stateMachine = builder.build();
 

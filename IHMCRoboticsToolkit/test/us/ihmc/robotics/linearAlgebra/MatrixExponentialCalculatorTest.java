@@ -1,17 +1,17 @@
 package us.ihmc.robotics.linearAlgebra;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class MatrixExponentialCalculatorTest
 {
@@ -36,9 +36,7 @@ public class MatrixExponentialCalculatorTest
       assertTrue(MatrixFeatures.isIdentical(taylorSeriesCheck, result, 1e-6));
    }
 
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testEfficiency()
    {

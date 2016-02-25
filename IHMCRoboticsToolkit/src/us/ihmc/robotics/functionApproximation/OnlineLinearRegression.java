@@ -39,7 +39,7 @@ public class OnlineLinearRegression{
 	{
 		LinearRegression solver = new LinearRegression(input,output);
 		solver.solve();
-		solver.packCoefficientVector(coefficientVector);
+		solver.getCoefficientVector(coefficientVector);
 		return coefficientVector;
 	}
 }

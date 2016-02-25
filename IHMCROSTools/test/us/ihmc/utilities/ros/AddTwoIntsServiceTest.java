@@ -12,12 +12,12 @@ import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.node.service.ServiceResponseListener;
 
-import test_ros.AddTwoInts;
-import test_ros.AddTwoIntsRequest;
-import test_ros.AddTwoIntsResponse;
-import us.ihmc.tools.testing.TestPlanTarget;
+import test_rosmaster.AddTwoInts;
+import test_rosmaster.AddTwoIntsRequest;
+import test_rosmaster.AddTwoIntsResponse;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.utilities.ros.service.AddTwoIntsClient;
 import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 

@@ -32,12 +32,12 @@ public class VideoConverter
       MP4VideoDemuxer demuxer = new MP4VideoDemuxer(source);
       
       
+      int frameRate = getFrameRate(demuxer);
       
       long endFrame = getFrame(endPTS, demuxer);
-      long startFrame = getFrame(startPTS, demuxer);
+      long startFrame = getFrame(startPTS, demuxer); // This also moves the stream to the startFrame
       long numberOfFrames = endFrame - startFrame;
       
-      int frameRate = getFrameRate(demuxer);
       
       MP4Packet frame;
       while((frame = demuxer.getNextPacket()) != null && demuxer.getCurrentFrame() <= endFrame)
@@ -81,11 +81,12 @@ public class VideoConverter
       
       
       
+      int frameRate = getFrameRate(demuxer);
+
       long endFrame = getFrame(endPTS, demuxer);
-      long startFrame = getFrame(startPTS, demuxer);
+      long startFrame = getFrame(startPTS, demuxer);  // This also moves the stream to the startFrame
       long numberOfFrames = endFrame - startFrame;
       
-      int frameRate = getFrameRate(demuxer);
       YUVPicture frame;
       while((frame = demuxer.getNextFrame()) != null && demuxer.getCurrentFrame() <= endFrame)
       {

@@ -32,6 +32,7 @@ import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 
 public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
@@ -41,9 +42,8 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
    private static final boolean DEBUG = true;
    private final ReferenceFrame comFrame = ReferenceFrame.constructAWorldFrame("com");
 
-   @Ignore // Cylindrical grasping stuff has been put the grave yard.
-
-	@DeployableTestMethod
+   // Cylindrical grasping stuff has been put the grave yard.
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void test4limbsTogether()
    {
@@ -71,9 +71,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       assertSumOfForcesIsAsExpected(endEffectorsWithAssignedForces, desiredCOMForces, HIGH_ACCURACY_THRESHOLD);
    }
 
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLeftFootAtOrigin()
    {
@@ -94,9 +92,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       assertSumOfForcesIsAsExpected(endEffectorsWithAssignedForces, desiredCOMForces, HIGH_ACCURACY_THRESHOLD);
    }
 
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLeftHandAtOrigin()
    {
@@ -141,8 +137,8 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
          for (int i = 0; i < 6; i++)
          {
             SpatialForceVector vectorToPack = new SpatialForceVector();
-            output.packExternallyActingSpatialForceVector(vectorToPack);
-            vectorToPack.packMatrix(forcesToPack);
+            output.getExternallyActingSpatialForceVector(vectorToPack);
+            vectorToPack.getMatrix(forcesToPack);
             sumOfForces[i] += forcesToPack[i];
          }
       }

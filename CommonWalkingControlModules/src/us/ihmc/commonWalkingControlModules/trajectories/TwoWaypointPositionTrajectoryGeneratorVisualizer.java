@@ -161,14 +161,14 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
    private void setBall(TwoWaypointPositionTrajectoryGenerator trajectoryGenerator, int tick)
    {
       FramePoint position = new FramePoint();
-      trajectoryGenerator.get(position);
+      trajectoryGenerator.getPosition(position);
       trajectoryBagOfBalls.setBall(position, YoAppearance.Black(), tick);
    }
 
    private void setCartesianSpeed(TwoWaypointPositionTrajectoryGenerator trajectoryGenerator)
    {
       FrameVector velocity = new FrameVector();
-      trajectoryGenerator.packVelocity(velocity);
+      trajectoryGenerator.getVelocity(velocity);
       cartesianSpeed.set(velocity.length());
    }
 

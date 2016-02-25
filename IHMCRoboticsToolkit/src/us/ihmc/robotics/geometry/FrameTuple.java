@@ -524,7 +524,7 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
       referenceFrame = frameTuple1.getReferenceFrame();
    }
 
-   public final void packMatrix(DenseMatrix64F matrix, int startRow)
+   public final void getInMatrixColumn(DenseMatrix64F matrix, int startRow)
    {
       MatrixTools.setDenseMatrixFromTuple3d(matrix, tuple, startRow, 0);
    }

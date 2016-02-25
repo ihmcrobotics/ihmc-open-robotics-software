@@ -14,7 +14,7 @@ import org.ajoberstar.grgit.*
 
 project.ext.repo = Grgit.open(projectDir)
 
-version = '0.7.0'
+version = '0.7.1'
 
 project.ext.fullVersion = version
 project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
@@ -48,21 +48,15 @@ if (buildType.equals("RELEASE")) {
 repositories {
     mavenLocal()
 
-    maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/releases/"
-    }
-
-    maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
-    }
-
-    maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/central/"
-    }
-
     jcenter()
 
     mavenCentral()
+}
+
+repositories {
+   maven {
+      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty"
+   }
 }
 
 task publishAllToMavenLocal(type: GradleBuild) {
@@ -71,7 +65,7 @@ task publishAllToMavenLocal(type: GradleBuild) {
     buildType = "LOCAL"
     project.ext.fullVersion = "LOCAL"
     subprojects.each { subproject ->
-        subproject.buildType = "LOCAL"
+//        subproject.buildType = "LOCAL"
         subproject.ext.fullVersion = "LOCAL"
         allTasks.add(":" + subproject.name + ":publishToMavenLocal")
     }

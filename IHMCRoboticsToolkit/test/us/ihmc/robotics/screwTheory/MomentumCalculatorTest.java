@@ -122,13 +122,13 @@ public class MomentumCalculatorTest
 
       Momentum momentum = computeMomentum(elevator, centerOfMassFrame);
       DenseMatrix64F momentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
-      momentum.packMatrix(momentumMatrix);
+      momentum.getMatrix(momentumMatrix);
 
       CentroidalMomentumMatrix centroidalMomentumMatrix = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
       centroidalMomentumMatrix.compute();
       DenseMatrix64F centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getMatrix();
       DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jointsArray), 1);
-      ScrewTools.packJointVelocitiesMatrix(jointsArray, jointVelocitiesMatrix);
+      ScrewTools.getJointVelocitiesMatrix(jointsArray, jointVelocitiesMatrix);
       DenseMatrix64F momentumFromCentroidalMomentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
       CommonOps.mult(centroidalMomentumMatrixMatrix, jointVelocitiesMatrix, momentumFromCentroidalMomentumMatrix);
 

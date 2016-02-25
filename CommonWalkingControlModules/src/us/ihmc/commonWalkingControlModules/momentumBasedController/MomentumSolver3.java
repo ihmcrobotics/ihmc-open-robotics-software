@@ -130,7 +130,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
             controlDT);
       MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
 
-      ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
+      ScrewTools.getJointVelocitiesMatrix(jointsInOrder, v);
       CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotV);
    }
 
@@ -147,7 +147,7 @@ public class MomentumSolver3 implements MomentumSolverInterface
       beta1.reshape(N.getNumCols(), 1);
 
       CommonOps.setIdentity(N);
-      momentumRateOfChange.packMatrix(beta1);
+      momentumRateOfChange.getMatrix(beta1);
 
       solve(T, alpha1, N, beta1);
    }

@@ -105,4 +105,10 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionB
       return maxYawRate;
    }
 
+   @Override
+   public double getXOffsetFromCenterOfHips()
+   {
+      return 0.0;
+   }
+
 }

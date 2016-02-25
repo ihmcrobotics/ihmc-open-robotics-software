@@ -73,7 +73,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       parentRegistry.addChild(registry);
    }
 
-   public void packLegStrengths(SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired)
+   public void getLegStrengths(SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints, FramePoint2d coPDesired)
    {
       updatePoints(virtualToePoints, coPDesired);
 

@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="rosjava" type="int64_publisher.py" name="node0" />
-  <node pkg="rosjava" type="PassthroughTestNode" name="rosjava_node" />
-  <test pkg="rosjava" type="test_int64_passthrough.py" test-name="int64_passthrough" />
-</launch>

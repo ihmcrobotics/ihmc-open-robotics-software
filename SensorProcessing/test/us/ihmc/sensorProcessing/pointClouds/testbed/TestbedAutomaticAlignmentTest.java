@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ejml.ops.MatrixFeatures;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.thoughtworks.xstream.XStream;
@@ -19,6 +18,7 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
  * @author Peter Abeles
@@ -32,8 +32,7 @@ public class TestbedAutomaticAlignmentTest {
    /**
     * Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.
     */
-   @Ignore
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void expectedSolution() {
 
@@ -63,8 +62,7 @@ public class TestbedAutomaticAlignmentTest {
    /**
     * Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.
     */
-	@Ignore
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void multipleRuns() {
 

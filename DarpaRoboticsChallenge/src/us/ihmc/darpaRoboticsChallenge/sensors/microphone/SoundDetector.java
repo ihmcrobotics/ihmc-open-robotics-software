@@ -14,7 +14,7 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
 import javax.swing.JLabel;
 
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import org.jtransforms.fft.DoubleFFT_1D;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;

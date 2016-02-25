@@ -49,12 +49,12 @@ public class DesiredJointAccelerationCalculatorOld
          InverseDynamicsJoint joint = jacobian.getJointsInOrder()[i];
          if (currentBody == joint.getPredecessor())
          {
-            joint.packPredecessorTwist(jointTwist);
+            joint.getPredecessorTwist(jointTwist);
             currentBody = joint.getSuccessor();
          }
          else
          {
-            joint.packSuccessorTwist(jointTwist);
+            joint.getSuccessorTwist(jointTwist);
             currentBody = joint.getPredecessor();            
          }
 
@@ -76,8 +76,8 @@ public class DesiredJointAccelerationCalculatorOld
       accelerationOfEndEffectorWithRespectToBase.getExpressedInFrame().checkReferenceFrameMatch(jacobianDerivativeTerm.getExpressedInFrame());
       jacobian.getJacobianFrame().checkReferenceFrameMatch(accelerationOfEndEffectorWithRespectToBase.getExpressedInFrame());
 
-      accelerationOfEndEffectorWithRespectToBase.packMatrix(biasedSpatialAcceleration, 0);    // unbiased at this point
-      jacobianDerivativeTerm.packMatrix(jacobianDerivativeTermMatrix, 0);
+      accelerationOfEndEffectorWithRespectToBase.getMatrix(biasedSpatialAcceleration, 0);    // unbiased at this point
+      jacobianDerivativeTerm.getMatrix(jacobianDerivativeTermMatrix, 0);
       CommonOps.subtractEquals(biasedSpatialAcceleration, jacobianDerivativeTermMatrix);
       jacobianSolver.setJacobian(jacobian.getJacobianMatrix());
       jacobianSolver.solve(jointAccelerations, biasedSpatialAcceleration);

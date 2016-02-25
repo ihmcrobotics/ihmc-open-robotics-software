@@ -75,8 +75,8 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       FramePoint2d lowerExtremeCoP = new FramePoint2d(supportReferenceFrame);
       FramePoint2d higherExtremeCoP = new FramePoint2d(supportReferenceFrame);
       
-      packLowerExtremeCoPPoint(lowerExtremeCoP, moveTime, omega0);
-      packHigherExtremeCoPPoint(higherExtremeCoP, moveTime, omega0);  // TODO: take amountToBeInside into account.
+      getLowerExtremeCoPPoint(lowerExtremeCoP, moveTime, omega0);
+      getHigherExtremeCoPPoint(higherExtremeCoP, moveTime, omega0);  // TODO: take amountToBeInside into account.
       lowerExtremeCoP.changeFrame(supportReferenceFrame);
       higherExtremeCoP.changeFrame(supportReferenceFrame);
       
@@ -106,8 +106,8 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
          
          moveTime += 0.001; //TODO: What the heck is this?
          
-         packLowerExtremeCoPPoint(lowerExtremeCoP, moveTime, omega0);
-         packHigherExtremeCoPPoint(higherExtremeCoP, moveTime, omega0); // TODO: take amountToBeInside into account.
+         getLowerExtremeCoPPoint(lowerExtremeCoP, moveTime, omega0);
+         getHigherExtremeCoPPoint(higherExtremeCoP, moveTime, omega0); // TODO: take amountToBeInside into account.
          lowerExtremeCoP.changeFrame(supportReferenceFrame);
          higherExtremeCoP.changeFrame(supportReferenceFrame);
          
@@ -131,7 +131,7 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       return Math.sqrt(4.0 + MathTools.square(finalTime*omega0));
    }
    
-   private void packCoP(FramePoint2d point2Pack, double time, double finalTime, double omega0)
+   private void getCoP(FramePoint2d point2Pack, double time, double finalTime, double omega0)
    {
       point2Pack.setIncludingFrame(finalDesiredICP.getFramePoint2dCopy());
       tempPointInitialDesired.setIncludingFrame(initialDesiredICP.getFramePoint2dCopy());
@@ -144,16 +144,16 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       point2Pack.scale(1.0 / (MathTools.cube(finalTime) * omega0 ));
    }
    
-   private void packLowerExtremeCoPPoint(FramePoint2d point2Pack, double finalTime, double omega0)
+   private void getLowerExtremeCoPPoint(FramePoint2d point2Pack, double finalTime, double omega0)
    {
       double time = symmetricPart(finalTime, omega0) - aSymmetricPart(finalTime, omega0);
-      packCoP(point2Pack, time, finalTime, omega0);
+      getCoP(point2Pack, time, finalTime, omega0);
    }
    
-   private void packHigherExtremeCoPPoint(FramePoint2d point2Pack, double finalTime, double omega0)
+   private void getHigherExtremeCoPPoint(FramePoint2d point2Pack, double finalTime, double omega0)
    {
       double time = symmetricPart(finalTime, omega0) + aSymmetricPart(finalTime, omega0);
-      packCoP(point2Pack, time, finalTime, omega0);
+      getCoP(point2Pack, time, finalTime, omega0);
    }
 
    public void getCurrentDesiredICPPositionAndVelocity(FramePoint2d desiredPosition, FrameVector2d desiredVelocity, double omega0, double time)

@@ -1,6 +1,0 @@
-pubs: 
-  '/chatter_out': std_msgs/String
-  '/int64': std_msgs/Int64
-subs: 
-  '/chatter_in': std_msgs/String
-  '/int64': std_msgs/Int64

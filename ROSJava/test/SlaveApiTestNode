@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec java -jar `rospack find rosjava`/dist/rosjava.jar org.ros.SlaveApiTestNode $@

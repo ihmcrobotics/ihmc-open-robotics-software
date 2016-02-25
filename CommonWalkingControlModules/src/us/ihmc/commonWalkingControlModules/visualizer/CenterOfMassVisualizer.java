@@ -55,7 +55,7 @@ public class CenterOfMassVisualizer implements Updatable
       yoPoint.set(comCalculator.getCenterOfMass());
 
       momentumCalculator.computeAndPack(momentum);
-      momentum.packLinearPart(frameVector);
+      momentum.getLinearPart(frameVector);
       yoVector.set(frameVector);
 
    }

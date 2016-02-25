@@ -69,8 +69,8 @@ public class PositionStateRobotModelUpdater implements Runnable
 
    private void updateRootJointTwistLinearPart(FrameVector centerOfMassVelocityWorld, SixDoFJoint rootJoint)
    {
-      rootJoint.packJointTwist(tempRootJointTwist);
-      tempRootJointTwist.packAngularPart(tempRootJointAngularVelocity);
+      rootJoint.getJointTwist(tempRootJointTwist);
+      tempRootJointTwist.getAngularPart(tempRootJointAngularVelocity);
 
       computeRootJointLinearVelocity(centerOfMassVelocityWorld, tempRootJointLinearVelocity, tempRootJointAngularVelocity, rootJoint);
       computeRootJointTwistLinearPart(rootJoint, tempRootJointTwist, tempRootJointLinearVelocity);
@@ -94,12 +94,12 @@ public class PositionStateRobotModelUpdater implements Runnable
       // \dot{r}^{root}
       centerOfMassJacobianBody.compute();
       tempComVelocityBody.setToZero(rootJointFrame);
-      centerOfMassJacobianBody.packCenterOfMassVelocity(tempComVelocityBody);
+      centerOfMassJacobianBody.getCenterOfMassVelocity(tempComVelocityBody);
       tempComVelocityBody.changeFrame(rootJointFrame);
 
       // \tilde{\omega} r^{root}
       tempComBody.setToZero(rootJointFrame);
-      centerOfMassCalculator.packCenterOfMass(tempComBody);
+      centerOfMassCalculator.getCenterOfMass(tempComBody);
       tempComBody.changeFrame(rootJointFrame);
       tempCrossPart.setToZero(rootJointFrame);
       tempCrossPart.cross(rootJointAngularVelocity, tempComBody);
@@ -119,9 +119,9 @@ public class PositionStateRobotModelUpdater implements Runnable
 
    private void computeRootJointTwistLinearPart(SixDoFJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointLinearVelocity)
    {
-      rootJoint.packJointTwist(tempRootJointTwistExisting);
+      rootJoint.getJointTwist(tempRootJointTwistExisting);
       tempRootJointTwistExisting.checkReferenceFramesMatch(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
-      tempRootJointTwistExisting.packAngularPart(tempRootJointTwistExistingAngularPart);
+      tempRootJointTwistExisting.getAngularPart(tempRootJointTwistExistingAngularPart);
 
       rootJointLinearVelocity.checkReferenceFrameMatch(rootJoint.getFrameAfterJoint());
 
@@ -156,7 +156,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    {
       // r^{estimation}
       tempCenterOfMassBody.setToZero(estimationFrame);
-      centerOfMassCalculator.packCenterOfMass(tempCenterOfMassBody);
+      centerOfMassCalculator.getCenterOfMass(tempCenterOfMassBody);
       tempCenterOfMassBody.changeFrame(estimationFrame);
 
       // R_{estimation}^{w}

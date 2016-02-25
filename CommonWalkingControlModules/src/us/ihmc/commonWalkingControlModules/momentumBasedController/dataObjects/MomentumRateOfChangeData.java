@@ -26,7 +26,7 @@ public class MomentumRateOfChangeData
       momentumSubspace.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
       CommonOps.setIdentity(momentumSubspace);
       momentumMultipliers.reshape(SpatialForceVector.SIZE, 1);
-      momentumRateOfChange.packMatrix(momentumMultipliers);
+      momentumRateOfChange.getMatrix(momentumMultipliers);
    }
 
    public void setLinearMomentumRateOfChange(FrameVector linearMomentumRateOfChange)

@@ -327,10 +327,6 @@ public class TrotWalkController extends QuadrupedController
          footLocation.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, footLocation);
          feetLocations.get(robotQuadrant).set(footLocation);
-         // TODO Figure why polygon foot has different value than feetLocations foot
-         // System.out.println("orig" + footLocation);
-         // System.out.println("polygon" + fourFootSupportPolygon.getFootstep(RobotQuadrant.FRONT_LEFT));
-         // System.out.println("quadList" + feetLocations.get(RobotQuadrant.FRONT_LEFT));
       }
 
       //update centroid
@@ -350,12 +346,12 @@ public class TrotWalkController extends QuadrupedController
       centerOfMassPosition.set(coMPosition);
       centerOfMassPositionXYProjection.set(centerOfMassPosition.getReferenceFrame(), centerOfMassPosition.getX(), centerOfMassPosition.getY(), 0.0);
       centerOfMassJacobian.compute();
-      centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
+      centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
       comVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassVelocity.set(comVelocity);
 
       // compute instantaneous capture point
-      double lowestFootZ = fourFootSupportPolygon.getLowestFootStepZHeight();
+      double lowestFootZ = fourFootSupportPolygon.getLowestFootstepZHeight();
       double zDelta = coMPosition.getZ() - lowestFootZ;
       double omega = Math.sqrt(GRAVITY / zDelta);
       icp.setX(coMPosition.getX() + centerOfMassVelocity.getX() / omega);
@@ -514,7 +510,7 @@ public class TrotWalkController extends QuadrupedController
 
    private void computeBodyRelativePositionsVelocities()
    {
-      double footZ = fourFootSupportPolygon.getLowestFootStepZHeight();
+      double footZ = fourFootSupportPolygon.getLowestFootstepZHeight();
       body_rel_z.set(bodyPose.getZ() - footZ);
    }
 
@@ -819,14 +815,14 @@ public class TrotWalkController extends QuadrupedController
       k_y.set(0.0); // 2000.0);
       b_y.set(50.0); // 0.0);    // 50 for pace, 0 for trot.
 
-      k_roll.set(3000.0);
-      b_roll.set(50.0);
+      k_roll.set(300.0);
+      b_roll.set(40.0);
 
-      k_pitch.set(5000.0); // 80.0);
-      b_pitch.set(50.0); // 20.0);
+      k_pitch.set(500.0); // 80.0);
+      b_pitch.set(40.0); // 20.0);
 
-      k_yaw.set(3000.0); // 80.0);    // 250.0);
-      b_yaw.set(50.0); // 20.0);    // 100.0);
+      k_yaw.set(300.0); // 80.0);    // 250.0);
+      b_yaw.set(40.0); // 20.0);    // 100.0);
 
       k_z.set(30000.0);
       b_z.set(10000.0);

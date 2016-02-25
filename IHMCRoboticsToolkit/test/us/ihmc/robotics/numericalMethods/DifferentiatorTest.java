@@ -1,15 +1,15 @@
 package us.ihmc.robotics.numericalMethods;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class DifferentiatorTest
 {
@@ -96,8 +96,8 @@ public class DifferentiatorTest
       assertEquals(0.0, differentiator.val(), delta);
    }
 
-// @Test(timeout=300000,expected = RuntimeException.class)
-   @Ignore
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalEqualZero()
    {
       dt = 0.0;
@@ -106,8 +106,8 @@ public class DifferentiatorTest
       // TODO 20120911 Khai-Long Ho Hoang: Differentiator class must be enhanced by a detection if time interval dt is equal zero.
    }
 
-// @Test(timeout=300000,expected = RuntimeException.class)
-   @Ignore
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalLessZero()
    {
       dt = -random.nextDouble();

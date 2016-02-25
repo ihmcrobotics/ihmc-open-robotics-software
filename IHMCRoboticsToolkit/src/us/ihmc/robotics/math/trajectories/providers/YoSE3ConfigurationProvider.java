@@ -28,12 +28,12 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
       orientation = new YoFrameQuaternion(name, frame, registry);
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }

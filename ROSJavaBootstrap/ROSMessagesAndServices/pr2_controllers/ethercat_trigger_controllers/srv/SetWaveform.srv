@@ -1,7 +1,0 @@
-float64 rep_rate
-float64 phase
-float64 duty_cycle
-int32 running
-int32 active_low
-int32 pulsed
----

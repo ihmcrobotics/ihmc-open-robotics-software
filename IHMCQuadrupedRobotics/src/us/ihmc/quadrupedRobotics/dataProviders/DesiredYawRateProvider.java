@@ -58,4 +58,9 @@ public class DesiredYawRateProvider implements DoubleProvider, PacketConsumer<De
    {
       lastReceivedYawRate.set(packet.getYawRate());
    }
+   
+   public void setToZero()
+   {
+      lastReceivedYawRate.set(0.0);
+   }
 }

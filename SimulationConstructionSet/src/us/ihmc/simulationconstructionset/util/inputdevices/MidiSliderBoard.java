@@ -104,7 +104,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          // if a motorized slider board is found
          if (preferedDevice.equals(Devices.MOTORIZED))
          {
-            System.out.println("Setting Up Motorized Slider Board");
+            PrintTools.info("Setting Up Motorized Slider Board");
 
             // sliderOffset = 80;
             sliderBoardMax = 127;
@@ -481,7 +481,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       if (!holder.hasUniqueVariable(name))
       {
-         System.err.println("trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
+         PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
       }
 
       setSlider(channel, holder.getVariable(name), min, max, exponent);
@@ -496,7 +496,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       if (!holder.hasUniqueVariable(name))
       {
-         System.err.println("trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
+         PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
       }
 
       setSlider(channel, holder.getVariable(name), min, max, exponent, hires);
@@ -516,7 +516,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       if (!holder.hasUniqueVariable(name))
       {
-         System.err.println("trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
+         PrintTools.warn("Trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
       }
 
       setKnob(channel, holder.getVariable(name), min, max, exponent);
@@ -526,7 +526,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       if (!holder.hasUniqueVariable(name))
       {
-         System.err.println("trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
+         PrintTools.warn("Trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
       }
 
       setKnob(channel, holder.getVariable(name), min, max, exponent, hires);
@@ -612,7 +612,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       }
       else
       {
-         PrintTools.error("Passed in null variable");
+         // PrintTools.error("Passed in null variable");
       }
    }
 

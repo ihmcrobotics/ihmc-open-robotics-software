@@ -156,8 +156,8 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    {
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
-      twistCalculator.packTwistOfBody(twist, rigidBody);    // Twist of bodyCoM and not IMU!
-      spatialAccelerationCalculator.packAccelerationOfBody(spatialAcceleration, rigidBody);
+      twistCalculator.getTwistOfBody(twist, rigidBody);    // Twist of bodyCoM and not IMU!
+      spatialAccelerationCalculator.getAccelerationOfBody(spatialAcceleration, rigidBody);
       spatialAcceleration.changeFrame(worldFrame, twist, twist);
 
       updatePerfectOrientation();
@@ -200,7 +200,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    {
       twistInIMUFrame.set(twist);
       twistInIMUFrame.changeFrame(imuFrame);
-      twistInIMUFrame.packAngularPart(angularVelocity);
+      twistInIMUFrame.getAngularPart(angularVelocity);
 
       perfGyroX.set(angularVelocity.getX());
       perfGyroY.set(angularVelocity.getY());
@@ -216,7 +216,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       imuFramePointInWorldFrame.changeFrame(worldFrame);
 
       acceleration.setToZero(worldFrame);
-      spatialAcceleration.packAccelerationOfPointFixedInBodyFrame(twistInWorldFrame, imuFramePointInWorldFrame, acceleration);
+      spatialAcceleration.getAccelerationOfPointFixedInBodyFrame(twistInWorldFrame, imuFramePointInWorldFrame, acceleration);
       acceleration.changeFrame(imuFrame);
 
       perfAccelX.set(acceleration.getX());

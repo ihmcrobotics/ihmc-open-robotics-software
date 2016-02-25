@@ -34,5 +34,5 @@ public interface CapturePointCenterOfPressureControlModule
            FrameVector2d desiredVelocity, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame,
            FrameVector2d currentVelocity); // TODO: get rid of last 3 arguments
 
-   public abstract void packDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack);
+   public abstract void getDesiredCenterOfPressure(FramePoint desiredCenterOfPressureToPack);
 }

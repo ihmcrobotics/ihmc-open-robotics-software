@@ -12,11 +12,12 @@ import org.junit.Test;
 
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class AverageQuaternionCalculatorTest
 {
-
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.04)
+   @Test(timeout = 500)
    public void testAgainstInterpolation() throws Exception
    {
       for (int nTest = 0; nTest < 10; nTest++)
@@ -46,7 +47,8 @@ public class AverageQuaternionCalculatorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.01)
+   @Test(timeout = 100)
    public void testWithRotationsAroundTheSameAxis() throws Exception
    {
       for (int nTest = 0; nTest < 10; nTest++)
