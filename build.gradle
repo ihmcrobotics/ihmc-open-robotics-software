@@ -59,7 +59,7 @@ repositories {
    }
 }
 
-task publishAllToMavenLocal(type: GradleBuild) {
+task publishAllToMavenLocal(type: GradleBuild) << {
     buildFile "build.gradle"
     def allTasks = new ArrayList<String>()
     buildType = "LOCAL"
