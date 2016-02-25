@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -9,10 +9,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3WaypointInterface
+public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements SO3WaypointInterface
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
@@ -91,6 +90,7 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       setIncludingFrame(referenceFrame, so3Waypoint);
    }
 
+   @Override
    public void set(FrameSO3Waypoint frameSO3Waypoint)
    {
       checkReferenceFrameMatch(frameSO3Waypoint);
@@ -132,6 +132,7 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       so3Waypoint.getAngularVelocity(angularVelocity.getVector());
    }
 
+   @Override
    public void setIncludingFrame(FrameSO3Waypoint frameSO3Waypoint)
    {
       frameSO3Waypoint.checkFrameConsistency();
@@ -157,6 +158,7 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       angularVelocity.setToZero();
    }
 
+   @Override
    public void setToZero()
    {
       time = 0.0;
@@ -164,6 +166,7 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       angularVelocity.setToZero();
    }
 
+   @Override
    public void setToZero(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -187,6 +190,7 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       angularVelocity.setToNaN();
    }
 
+   @Override
    public void setToNaN()
    {
       time = Double.NaN;
@@ -194,6 +198,7 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       angularVelocity.setToNaN();
    }
 
+   @Override
    public void setToNaN(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -213,11 +218,6 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
          throwFrameInconsistencyException();
       if (referenceFrame != angularVelocity.getReferenceFrame())
          throwFrameInconsistencyException();
-   }
-
-   private void throwFrameInconsistencyException()
-   {
-      throw new RuntimeException("The reference frames in the " + getClass().getSimpleName() + " are inconsistent.");
    }
 
    @Override
@@ -274,6 +274,7 @@ public class FrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypoin
       return angularVelocity;
    }
 
+   @Override
    public void changeFrame(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;

@@ -1,22 +1,24 @@
 package us.ihmc.robotics.math.trajectories;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.lists.RecyclingArrayList.Builder;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
 
 /**
  * This multi waypoint trajectory generator will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough
@@ -114,7 +116,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
       numberOfWayPoints = 0;
 
-      Builder<double[]> builder = new Builder<double[]>()
+      GenericTypeBuilder<double[]> builder = new GenericTypeBuilder<double[]>()
       {
          @Override public double[] newInstance()
          {

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -9,10 +9,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameEuclideanWaypoint extends ReferenceFrameHolder implements EuclideanWaypointInterface
+public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint> implements EuclideanWaypointInterface
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
@@ -213,11 +212,6 @@ public class FrameEuclideanWaypoint extends ReferenceFrameHolder implements Eucl
          throwFrameInconsistencyException();
       if (referenceFrame != linearVelocity.getReferenceFrame())
          throwFrameInconsistencyException();
-   }
-
-   private void throwFrameInconsistencyException()
-   {
-      throw new RuntimeException("The reference frames in the " + getClass().getSimpleName() + " are inconsistent.");
    }
 
    @Override

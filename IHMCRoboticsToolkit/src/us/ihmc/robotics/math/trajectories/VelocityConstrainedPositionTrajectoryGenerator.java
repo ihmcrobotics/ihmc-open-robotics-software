@@ -12,6 +12,8 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanWaypoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames

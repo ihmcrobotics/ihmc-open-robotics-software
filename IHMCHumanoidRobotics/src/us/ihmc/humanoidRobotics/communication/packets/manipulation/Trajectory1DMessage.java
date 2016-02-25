@@ -6,12 +6,13 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
-import us.ihmc.robotics.math.trajectories.TrajectoryWaypoint1DDataInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryWaypointDataInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.Waypoint1DInterface;
 import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the waypoints to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between waypoints.")
-public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> implements TrajectoryWaypoint1DDataInterface
+public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> implements TrajectoryWaypointDataInterface<Waypoint1DInterface>
 {
    @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
    public Waypoint1DMessage[] waypoints;
@@ -23,7 +24,7 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
    {
    }
 
-   public Trajectory1DMessage(TrajectoryWaypoint1DDataInterface trajectory1dMessage)
+   public Trajectory1DMessage(TrajectoryWaypointDataInterface<? extends Waypoint1DInterface> trajectory1dMessage)
    {
       waypoints = new Waypoint1DMessage[trajectory1dMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
