@@ -2,7 +2,7 @@ package us.ihmc.communication.packets;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 
-public abstract class IHMCRosApiMessage<T> extends Packet<T>
+public abstract class IHMCRosApiMessage<T extends IHMCRosApiMessage<T>> extends Packet<T>
 {
    public IHMCRosApiMessage()
    {
@@ -12,6 +12,6 @@ public abstract class IHMCRosApiMessage<T> extends Packet<T>
    
    public boolean rosConversionEpsilonEquals(T other, double epsilon)
    {
-      return this.uniqueId == ((Packet<T>) other).uniqueId && epsilonEquals(other, epsilon);
+      return this.uniqueId == other.uniqueId && epsilonEquals(other, epsilon);
    }
 }
