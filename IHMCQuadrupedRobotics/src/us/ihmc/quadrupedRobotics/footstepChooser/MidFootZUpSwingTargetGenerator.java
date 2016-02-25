@@ -48,6 +48,9 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final FramePoint centroid = new FramePoint(ReferenceFrame.getWorldFrame());
    
+   private final FramePoint tempFootPositionSameSideOppositeEnd = new FramePoint();
+   private final FramePoint tempFootPositionOppositeSideSameEnd = new FramePoint();
+   
    private final GlobalTimer getSwingTargetTimer = new GlobalTimer("getSwingTargetTimer", registry);
 
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
@@ -226,15 +229,15 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotQuadrant sameEndQuadrant = swingLeg.getAcrossBodyQuadrant();
 
-      FramePoint footPositionSameSideOppositeEnd =new FramePoint(supportPolygon.getFootstep(sameSideQuadrant));
-      FramePoint footPositionOppositeSideSameEnd = new FramePoint(supportPolygon.getFootstep(sameEndQuadrant));
+      tempFootPositionSameSideOppositeEnd.setIncludingFrame(supportPolygon.getFootstep(sameSideQuadrant));
+      tempFootPositionOppositeSideSameEnd.setIncludingFrame(supportPolygon.getFootstep(sameEndQuadrant));
 
       //midZUpFrame is oriented so X is perpendicular to the two same side feet, Y pointing backward
-      determineFootPositionFromHalfStride(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd,
-            footPositionSameSideOppositeEnd, oppositeSideZUpFrame);
+      determineFootPositionFromHalfStride(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, tempFootPositionSameSideOppositeEnd,
+            tempFootPositionSameSideOppositeEnd, oppositeSideZUpFrame);
 
-      determineFootPositionFromOppositeSideFoot(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, footPositionSameSideOppositeEnd,
-            footPositionOppositeSideSameEnd, oppositeSideZUpFrame);
+      determineFootPositionFromOppositeSideFoot(supportPolygon, swingLeg, desiredBodyVelocity, maxStepDistance, deltaYaw, tempFootPositionSameSideOppositeEnd,
+            tempFootPositionOppositeSideSameEnd, oppositeSideZUpFrame);
       
       //pack the destination with 20% of the position from halfStride and 80% of the position from the opposite side foot
       desiredSwingFootPositionFromHalfStride.scale(0.2);

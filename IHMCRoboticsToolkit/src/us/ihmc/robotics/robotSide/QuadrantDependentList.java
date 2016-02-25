@@ -27,13 +27,11 @@ public class QuadrantDependentList<V>
 
    public QuadrantDependentList()
    {
-      super();
+      
    }
    
    public QuadrantDependentList(V frontLeftObject, V frontRightObject, V hindLeftObject, V hindRightObject)
    {
-      super();
-      
       set(RobotQuadrant.FRONT_LEFT, frontLeftObject);
       set(RobotQuadrant.FRONT_RIGHT, frontRightObject);
       set(RobotQuadrant.HIND_RIGHT, hindRightObject);
