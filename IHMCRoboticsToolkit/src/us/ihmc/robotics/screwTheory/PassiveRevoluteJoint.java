@@ -138,4 +138,17 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    {
       return isPartOfClosedKinematicLoop;
    }
+   
+   void updateQ(double q)
+   {
+      if (Double.isNaN(q))
+         throw new RuntimeException("q is NaN! this = " + this);
+      this.q = q;
+      afterJointFrame.setAndUpdate(q);      
+   }
+   
+   void updateQd(double qd)
+   {
+      this.qd = qd;
+   }
 }

@@ -71,7 +71,7 @@ public class FourBarCalculatorFromFastRunner
     * @param angleDABInRadians is the angle formed by the sides a and b (see scheme in this class)
     * @return true if the angle DAB is out of range making the quadrilateral non-convex
     */
-   public boolean solveForAngleDAB(double angleDABInRadians)
+   public boolean updateAnglesGivenAngleDAB(double angleDABInRadians)
    {
       // Solve angles
       double A = clipToMinMax(angleDABInRadians, minA, maxA);
@@ -95,10 +95,10 @@ public class FourBarCalculatorFromFastRunner
     * @param angularVelocityDAB first time-derivative of the angle DAB
     * @return true if the angle DAB is out of range making the quadrilateral non-convex
     */
-   public boolean solveForAngleDAB(double angleDABInRadians, double angularVelocityDAB)
+   public boolean updateAnglesAndVelocitiesGivenAngleDAB(double angleDABInRadians, double angularVelocityDAB)
    {
       // Solve angles
-      boolean isAHittingBounds = solveForAngleDAB(angleDABInRadians);
+      boolean isAHittingBounds = updateAnglesGivenAngleDAB(angleDABInRadians);
 
       // Solve angular velocity
       double A = clipToMinMax(angleDABInRadians, minA, maxA);
@@ -125,10 +125,10 @@ public class FourBarCalculatorFromFastRunner
     * @param angularAccelerationDAB second time-derivative of the angle DAB
     * @return true if the angle DAB is out of range making the quadrilateral non-convex
     */
-   public boolean solveForAngleDAB(double angleDABInRadians, double angularVelocityDAB, double angularAccelerationDAB)
+   public boolean updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(double angleDABInRadians, double angularVelocityDAB, double angularAccelerationDAB)
    {
       // Solve angles and angular velocity
-      boolean isAHittingBounds = solveForAngleDAB(angleDABInRadians, angularVelocityDAB);
+      boolean isAHittingBounds = updateAnglesAndVelocitiesGivenAngleDAB(angleDABInRadians, angularVelocityDAB);
 
       // Solve angular acceleration
       double A = clipToMinMax(angleDABInRadians, minA, maxA);
