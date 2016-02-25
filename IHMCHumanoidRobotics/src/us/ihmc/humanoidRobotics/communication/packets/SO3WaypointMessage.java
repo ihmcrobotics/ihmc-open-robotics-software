@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.math.trajectories.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.SO3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one waypoint (orientation & angular velocity). "
       + "Feel free to look at EuclideanWaypoint (translational) and SE3Waypoint (rotational AND translational)")

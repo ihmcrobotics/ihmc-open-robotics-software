@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -11,10 +11,9 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSE3Waypoint extends ReferenceFrameHolder implements SE3WaypointInterface
+public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements SE3WaypointInterface
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
@@ -189,11 +188,6 @@ public class FrameSE3Waypoint extends ReferenceFrameHolder implements SE3Waypoin
          throwFrameInconsistencyException();
       if (referenceFrame != angularVelocity.getReferenceFrame())
          throwFrameInconsistencyException();
-   }
-
-   private void throwFrameInconsistencyException()
-   {
-      throw new RuntimeException("The reference frames in the " + getClass().getSimpleName() + " are inconsistent.");
    }
 
    @Override

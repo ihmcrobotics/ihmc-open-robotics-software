@@ -1,8 +1,9 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 public class WaypointTrajectory1DCalculator
 {
@@ -212,7 +213,7 @@ public class WaypointTrajectory1DCalculator
       return trajectory.getWaypoints();
    }
 
-   public TrajectoryWaypoint1DDataInterface getTrajectoryData()
+   public TrajectoryWaypointDataInterface getTrajectoryData()
    {
       return trajectory;
    }

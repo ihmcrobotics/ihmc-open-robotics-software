@@ -1,8 +1,8 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class SimpleTrajectoryWaypoint1DData implements TrajectoryWaypoint1DDataInterface
+public class SimpleTrajectoryWaypoint1DData implements TrajectoryWaypointDataInterface
 {
    private final RecyclingArrayList<SimpleWaypoint1D> waypoints = new RecyclingArrayList<>(15, SimpleWaypoint1D.class);
 

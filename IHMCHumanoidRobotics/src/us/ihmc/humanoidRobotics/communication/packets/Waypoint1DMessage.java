@@ -4,7 +4,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.math.trajectories.Waypoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.Waypoint1DInterface;
 
 @ClassDocumentation("This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D waypoints look at EuclideanWaypointMessage (translational), SO3WaypointMessage (rotational), and SE3WaypointMessage (translational AND rotational).")

@@ -15,6 +15,8 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3Waypoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3Waypoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**

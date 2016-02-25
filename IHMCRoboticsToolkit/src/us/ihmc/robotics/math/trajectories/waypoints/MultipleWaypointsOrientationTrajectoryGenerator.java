@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.ArrayList;
 
@@ -10,6 +10,8 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MultipleWaypointsOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames

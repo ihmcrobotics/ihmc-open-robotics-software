@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
 /**
@@ -126,7 +128,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D.get(i).getTime(), waypoints1D.get(i).getPosition(), waypoints1D.get(i).getVelocity());
    }
 
-   public void appendWaypoints(TrajectoryWaypoint1DDataInterface trajectoryWaypoint1DData)
+   public void appendWaypoints(TrajectoryWaypointDataInterface<? extends Waypoint1DInterface> trajectoryWaypoint1DData)
    {
       for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfWaypoints(); i++)
          appendWaypoint(trajectoryWaypoint1DData.getWaypoint(i));
