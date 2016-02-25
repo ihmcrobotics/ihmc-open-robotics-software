@@ -107,12 +107,12 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], velocities[i]);
    }
 
-   public void appendWaypoint(Waypoint1DInterface waypoint1D)
+   public void appendWaypoint(Waypoint1DInterface<?> waypoint1D)
    {
       appendWaypoint(waypoint1D.getTime(), waypoint1D.getPosition(), waypoint1D.getVelocity());
    }
 
-   public void appendWaypoints(Waypoint1DInterface[] waypoints1D)
+   public void appendWaypoints(Waypoint1DInterface<?>[] waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.length);
 
@@ -120,7 +120,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D[i].getTime(), waypoints1D[i].getPosition(), waypoints1D[i].getVelocity());
    }
 
-   public void appendWaypoints(RecyclingArrayList<? extends Waypoint1DInterface> waypoints1D)
+   public void appendWaypoints(RecyclingArrayList<? extends Waypoint1DInterface<?>> waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.size());
 
@@ -128,7 +128,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D.get(i).getTime(), waypoints1D.get(i).getPosition(), waypoints1D.get(i).getVelocity());
    }
 
-   public void appendWaypoints(TrajectoryWaypointDataInterface<? extends Waypoint1DInterface> trajectoryWaypoint1DData)
+   public void appendWaypoints(TrajectoryWaypointDataInterface<?, ? extends Waypoint1DInterface<?>> trajectoryWaypoint1DData)
    {
       for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfWaypoints(); i++)
          appendWaypoint(trajectoryWaypoint1DData.getWaypoint(i));

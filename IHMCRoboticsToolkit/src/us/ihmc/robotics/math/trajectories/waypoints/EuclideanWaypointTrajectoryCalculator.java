@@ -42,7 +42,7 @@ public class EuclideanWaypointTrajectoryCalculator
       this.referenceFrame = referenceFrame;
    }
 
-   public void appendWaypoint(EuclideanWaypointInterface waypoint)
+   public void appendWaypoint(EuclideanWaypointInterface<?> waypoint)
    {
       waypoints.add().set(waypoint);
    }
@@ -151,8 +151,8 @@ public class EuclideanWaypointTrajectoryCalculator
    private final FramePoint tempFramePoint = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
 
-   private void compute2ndWaypointVelocityWithVelocityConstraint(EuclideanWaypointInterface firstWaypoint, EuclideanWaypointInterface secondWaypoint,
-         EuclideanWaypointInterface thirdWaypoint, FrameVector linearVelocityToPack)
+   private void compute2ndWaypointVelocityWithVelocityConstraint(EuclideanWaypointInterface<?> firstWaypoint, EuclideanWaypointInterface<?> secondWaypoint,
+         EuclideanWaypointInterface<?> thirdWaypoint, FrameVector linearVelocityToPack)
    {
       for (Direction direction : Direction.values)
       {
@@ -184,7 +184,7 @@ public class EuclideanWaypointTrajectoryCalculator
       FIRST, SECOND, THIRD
    };
 
-   private void computeWaypointVelocity(EuclideanWaypointInterface firstWaypoint, EuclideanWaypointInterface secondWaypoint, EuclideanWaypointInterface thirdWaypoint,
+   private void computeWaypointVelocity(EuclideanWaypointInterface<?> firstWaypoint, EuclideanWaypointInterface<?> secondWaypoint, EuclideanWaypointInterface<?> thirdWaypoint,
          Waypoint waypointToComputeVelocityOf, FrameVector linearVelocityToPack)
    {
       for (Direction direction : Direction.values)
@@ -228,7 +228,7 @@ public class EuclideanWaypointTrajectoryCalculator
       return waypoints.size();
    }
 
-   public RecyclingArrayList<? extends EuclideanWaypointInterface> getWaypoints()
+   public RecyclingArrayList<? extends EuclideanWaypointInterface<?>> getWaypoints()
    {
       return waypoints;
    }

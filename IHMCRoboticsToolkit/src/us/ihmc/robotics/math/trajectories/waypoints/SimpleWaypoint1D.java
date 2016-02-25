@@ -3,15 +3,30 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-public class SimpleWaypoint1D implements Waypoint1DInterface
+import us.ihmc.robotics.MathTools;
+
+public class SimpleWaypoint1D implements Waypoint1DInterface<SimpleWaypoint1D>
 {
    private double time;
    private double position;
    private double velocity;
 
+   @Override
    public void setTime(double time)
    {
       this.time = time;
+   }
+
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time += timeOffsetToAdd;
+   }
+
+   @Override
+   public void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      time -= timeOffsetToSubtract;
    }
 
    public void setPosition(double position)
@@ -31,11 +46,19 @@ public class SimpleWaypoint1D implements Waypoint1DInterface
       setVelocity(velocity);
    }
 
-   public void set(Waypoint1DInterface other)
+   public void set(Waypoint1DInterface<?> other)
    {
       setTime(other.getTime());
       setPosition(other.getPosition());
       setVelocity(other.getVelocity());
+   }
+
+   @Override
+   public void set(SimpleWaypoint1D waypoint)
+   {
+      time = waypoint.time;
+      position = waypoint.position;
+      velocity = waypoint.velocity;
    }
 
    @Override
@@ -57,9 +80,24 @@ public class SimpleWaypoint1D implements Waypoint1DInterface
    }
 
    @Override
+   public boolean epsilonEquals(SimpleWaypoint1D other, double epsilon)
+   {
+      if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon))
+         return false;
+      return true;
+   }
+
+   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      return "(time = " + doubleFormat.format(time) + ", position = " + doubleFormat.format(position) + ", velocity = " + doubleFormat.format(velocity) + ")";
+      String timeString = "time = " + doubleFormat.format(getTime());
+      String positionString = "position = " + doubleFormat.format(getPosition());
+      String velocityString = "velocity = " + doubleFormat.format(getVelocity());
+      return "(" + timeString + ", " + positionString + ", " + velocityString + ")";
    }
 }

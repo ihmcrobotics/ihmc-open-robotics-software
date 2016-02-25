@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -11,8 +12,8 @@ import org.junit.Test;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.waypoints.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanWaypoint;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanWaypoint;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -71,28 +72,12 @@ public class FrameEuclideanWaypointTest
       final FramePoint expectedFinalPosition = FramePoint.generateRandomFramePoint(random, expectedFinalFrame, 10.0, 10.0, 10.0);
       final FrameVector expectedFinalLinearVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
 
-      EuclideanWaypointInterface expectedDataHolder = new EuclideanWaypointInterface()
-      {
-         @Override
-         public double getTime()
-         {
-            return expectedFinalTime;
-         }
+      SimpleEuclideanWaypoint expectedEuclideanWaypoint = new SimpleEuclideanWaypoint();
+      expectedEuclideanWaypoint.setTime(expectedFinalTime);
+      expectedEuclideanWaypoint.setPosition(expectedFinalPosition.getPoint());
+      expectedEuclideanWaypoint.setLinearVelocity(expectedFinalLinearVelocity.getVector());
 
-         @Override
-         public void getPosition(Point3d positionToPack)
-         {
-            expectedFinalPosition.get(positionToPack);
-         }
-
-         @Override
-         public void getLinearVelocity(Vector3d linearVelocityToPack)
-         {
-            expectedFinalLinearVelocity.get(linearVelocityToPack);
-         }
-      };
-
-      testedFrameEuclideanWaypoint = new FrameEuclideanWaypoint(expectedFinalFrame, expectedDataHolder);
+      testedFrameEuclideanWaypoint = new FrameEuclideanWaypoint(expectedFinalFrame, expectedEuclideanWaypoint);
 
       assertWaypointContainsExpectedData(expectedFinalFrame, expectedFinalTime, expectedFinalPosition, expectedFinalLinearVelocity,
             testedFrameEuclideanWaypoint, epsilon);
@@ -170,28 +155,12 @@ public class FrameEuclideanWaypointTest
       final FramePoint expectedFinalPosition = FramePoint.generateRandomFramePoint(random, expectedFinalFrame, 10.0, 10.0, 10.0);
       final FrameVector expectedFinalLinearVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
 
-      EuclideanWaypointInterface expectedDataHolder = new EuclideanWaypointInterface()
-      {
-         @Override
-         public double getTime()
-         {
-            return expectedFinalTime;
-         }
+      SimpleEuclideanWaypoint expectedEuclideanWaypoint = new SimpleEuclideanWaypoint();
+      expectedEuclideanWaypoint.setTime(expectedFinalTime);
+      expectedEuclideanWaypoint.setPosition(expectedFinalPosition.getPoint());
+      expectedEuclideanWaypoint.setLinearVelocity(expectedFinalLinearVelocity.getVector());
 
-         @Override
-         public void getPosition(Point3d positionToPack)
-         {
-            expectedFinalPosition.get(positionToPack);
-         }
-
-         @Override
-         public void getLinearVelocity(Vector3d linearVelocityToPack)
-         {
-            expectedFinalLinearVelocity.get(linearVelocityToPack);
-         }
-      };
-
-      testedFrameEuclideanWaypoint.setIncludingFrame(expectedFinalFrame, expectedDataHolder);
+      testedFrameEuclideanWaypoint.setIncludingFrame(expectedFinalFrame, expectedEuclideanWaypoint);
 
       assertWaypointContainsExpectedData(expectedFinalFrame, expectedFinalTime, expectedFinalPosition, expectedFinalLinearVelocity,
             testedFrameEuclideanWaypoint, epsilon);

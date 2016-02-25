@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements SE3WaypointInterface
+public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
@@ -38,7 +38,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       setIncludingFrame(time, position, orientation, linearVelocity, angularVelocity);
    }
 
-   public FrameSE3Waypoint(ReferenceFrame referenceFrame, SE3WaypointInterface se3WaypointInterface)
+   public FrameSE3Waypoint(ReferenceFrame referenceFrame, SE3WaypointInterface<?> se3WaypointInterface)
    {
       setIncludingFrame(referenceFrame, se3WaypointInterface);
    }
@@ -46,6 +46,52 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
    public FrameSE3Waypoint(FrameSE3Waypoint frameSE3Waypoint)
    {
       setIncludingFrame(frameSE3Waypoint);
+   }
+
+   @Override
+   public void setTime(double time)
+   {
+      this.time = time;
+   }
+
+   public void setPosition(Point3d position)
+   {
+      this.position.set(position);
+   }
+
+   public void setPosition(FramePoint position)
+   {
+      this.position.set(position);
+   }
+
+   public void setOrientation(Quat4d orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
+   public void setOrientation(FrameOrientation orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
+   public void setLinearVelocity(Vector3d linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
+   public void setLinearVelocity(FrameVector linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
+   public void setAngularVelocity(Vector3d angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
+   }
+
+   public void setAngularVelocity(FrameVector angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
    }
 
    public void set(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
@@ -65,12 +111,13 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(SE3WaypointInterface se3Waypoint)
+   public void set(SE3WaypointInterface<?> se3Waypoint)
    {
       // Ensuring frame consistency without crashing
       setIncludingFrame(referenceFrame, se3Waypoint);
    }
 
+   @Override
    public void set(FrameSE3Waypoint frameSE3Waypoint)
    {
       checkReferenceFrameMatch(frameSE3Waypoint);
@@ -112,7 +159,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       this.angularVelocity.setIncludingFrame(angularVelocity);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, SE3WaypointInterface se3Waypoint)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, SE3WaypointInterface<?> se3Waypoint)
    {
       setToZero(referenceFrame);
 
@@ -123,6 +170,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       se3Waypoint.getAngularVelocity(angularVelocity.getVector());
    }
 
+   @Override
    public void setIncludingFrame(FrameSE3Waypoint frameSE3Waypoint)
    {
       frameSE3Waypoint.checkFrameConsistency();
@@ -135,6 +183,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       angularVelocity.setIncludingFrame(frameSE3Waypoint.angularVelocity);
    }
 
+   @Override
    public void setToZero()
    {
       time = 0.0;
@@ -144,6 +193,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       angularVelocity.setToZero();
    }
 
+   @Override
    public void setToZero(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -154,6 +204,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       angularVelocity.setToZero(referenceFrame);
    }
 
+   @Override
    public void setToNaN()
    {
       time = Double.NaN;
@@ -163,6 +214,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       angularVelocity.setToNaN();
    }
 
+   @Override
    public void setToNaN(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -173,6 +225,13 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       angularVelocity.setToNaN(referenceFrame);
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time += timeOffsetToAdd;
+   }
+
+   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time -= timeOffsetToSubtract;
@@ -188,6 +247,12 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
          throwFrameInconsistencyException();
       if (referenceFrame != angularVelocity.getReferenceFrame())
          throwFrameInconsistencyException();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return Double.isNaN(time) || position.containsNaN() || orientation.containsNaN() || linearVelocity.containsNaN() || angularVelocity.containsNaN();
    }
 
    @Override
@@ -292,6 +357,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       return angularVelocity;
    }
 
+   @Override
    public void changeFrame(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -307,6 +373,7 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
       return referenceFrame;
    }
 
+   @Override
    public boolean epsilonEquals(FrameSE3Waypoint other, double epsilon)
    {
       checkFrameConsistency();
@@ -331,13 +398,28 @@ public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint> implements
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String timeToString = "time = " + doubleFormat.format(time);
-      String positionToString = ", position = (" + doubleFormat.format(position.getX()) + ", " + doubleFormat.format(position.getY()) + ", " + doubleFormat.format(position.getZ()) + ")";
-      String orientationToString = ", orientation = (" + doubleFormat.format(orientation.getQx()) + ", " + doubleFormat.format(orientation.getQy()) + ", " + doubleFormat.format(orientation.getQz()) + ", " + doubleFormat.format(orientation.getQs()) + ")";
-      String linearVelocityToString = ", linear velocity = (" + doubleFormat.format(linearVelocity.getX()) + ", " + doubleFormat.format(linearVelocity.getY()) + ", " + doubleFormat.format(linearVelocity.getZ()) + ")";
-      String angularVelocityToString = ", angular velocity = (" + doubleFormat.format(angularVelocity.getX()) + ", " + doubleFormat.format(angularVelocity.getY()) + ", " + doubleFormat.format(angularVelocity.getZ()) + ")";
-      String referenceFrameToString = ", reference frame = " + getReferenceFrame();
+      String xToString = doubleFormat.format(position.getX());
+      String yToString = doubleFormat.format(position.getY());
+      String zToString = doubleFormat.format(position.getZ());
+      String xDotToString = doubleFormat.format(linearVelocity.getX());
+      String yDotToString = doubleFormat.format(linearVelocity.getY());
+      String zDotToString = doubleFormat.format(linearVelocity.getZ());
+      String qxToString = doubleFormat.format(orientation.getQx());
+      String qyToString = doubleFormat.format(orientation.getQy());
+      String qzToString = doubleFormat.format(orientation.getQz());
+      String qsToString = doubleFormat.format(orientation.getQs());
+      String wxToString = doubleFormat.format(angularVelocity.getX());
+      String wyToString = doubleFormat.format(angularVelocity.getY());
+      String wzToString = doubleFormat.format(angularVelocity.getZ());
 
-      return "(" + timeToString + positionToString + orientationToString + linearVelocityToString + angularVelocityToString + referenceFrameToString + ")";
+      String timeToString = "time = " + doubleFormat.format(time);
+      String positionToString = "position = (" + xToString + ", " + yToString + ", " + zToString + ")";
+      String orientationToString = "orientation = (" + qxToString + ", " + qyToString + ", " + qzToString + ", " + qsToString + ")";
+      String linearVelocityToString = "linear velocity = (" + xDotToString + ", " + yDotToString + ", " + zDotToString + ")";
+      String angularVelocityToString = "angular velocity = (" + wxToString + ", " + wyToString + ", " + wzToString + ")";
+      String referenceFrameToString = "reference frame = " + getReferenceFrame();
+
+      return "SE3 waypoint: (" + timeToString + ", " + positionToString + ", " + orientationToString + ", " + linearVelocityToString + ", "
+            + angularVelocityToString + ", " + referenceFrameToString + ")";
    }
 }

@@ -4,16 +4,18 @@ import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameTrajectoryWaypointData<T extends FrameWaypoint<T>> extends ReferenceFrameHolder implements TrajectoryWaypointDataInterface<T>
+public class FrameTrajectoryWaypointData<T extends FrameTrajectoryWaypointData<T, W>, W extends FrameWaypoint<W>> extends ReferenceFrameHolder
+      implements TrajectoryWaypointDataInterface<T, W>
 {
    protected ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-   protected final RecyclingArrayList<T> waypoints;
+   protected final RecyclingArrayList<W> waypoints;
 
-   public FrameTrajectoryWaypointData(Class<T> waypointClass)
+   public FrameTrajectoryWaypointData(Class<W> waypointClass)
    {
       waypoints = new RecyclingArrayList<>(waypointClass);
    }
 
+   @Override
    public void clear()
    {
       waypoints.clear();
@@ -25,42 +27,48 @@ public class FrameTrajectoryWaypointData<T extends FrameWaypoint<T>> extends Ref
       waypoints.clear();
    }
 
-   public void addWaypoint(T waypoint)
+   @Override
+   public void addWaypoint(W waypoint)
    {
-      T newWaypoint = waypoints.add();
-      newWaypoint.setToZero(referenceFrame);
+      W newWaypoint = addAndInitializeWaypoint();
       newWaypoint.set(waypoint);
    }
 
-   public void addWaypointAndMatchFrame(T waypoint)
+   public void addWaypointAndMatchFrame(W waypoint)
    {
-      T newWaypoint = waypoints.add();
+      W newWaypoint = addAndInitializeWaypoint();
       newWaypoint.setIncludingFrame(waypoint);
       newWaypoint.changeFrame(referenceFrame);
    }
 
-   public void set(FrameTrajectoryWaypointData<T> other)
+   @Override
+   public void set(T other)
    {
       checkReferenceFrameMatch(other);
       clear();
       for (int i = 0; i < other.getNumberOfWaypoints(); i++)
       {
-         T newWaypoint = waypoints.add();
-         newWaypoint.setToZero(referenceFrame);
+         W newWaypoint = addAndInitializeWaypoint();
          newWaypoint.set(other.waypoints.get(i));
       }
    }
 
-   public void setIncludingFrame(FrameTrajectoryWaypointData<T> other)
+   public void setIncludingFrame(T other)
    {
       clear(other.referenceFrame);
       for (int i = 0; i < other.getNumberOfWaypoints(); i++)
       {
-         T newWaypoint = waypoints.add();
-         newWaypoint.setToZero(referenceFrame);
+         W newWaypoint = addAndInitializeWaypoint();
          // Here we don't want to do setIncludingFrame() in case there is inconsistency in other.
          newWaypoint.set(other.waypoints.get(i));
       }
+   }
+
+   protected W addAndInitializeWaypoint()
+   {
+      W newWaypoint = waypoints.add();
+      newWaypoint.setToZero(referenceFrame);
+      return newWaypoint;
    }
 
    public void changeFrame(ReferenceFrame referenceFrame)
@@ -80,13 +88,13 @@ public class FrameTrajectoryWaypointData<T extends FrameWaypoint<T>> extends Ref
    }
 
    @Override
-   public T getWaypoint(int waypointIndex)
+   public W getWaypoint(int waypointIndex)
    {
       return waypoints.get(waypointIndex);
    }
 
    @Override
-   public T getLastWaypoint()
+   public W getLastWaypoint()
    {
       return waypoints.getLast();
    }
@@ -101,5 +109,22 @@ public class FrameTrajectoryWaypointData<T extends FrameWaypoint<T>> extends Ref
    public ReferenceFrame getReferenceFrame()
    {
       return referenceFrame;
+   }
+
+   @Override
+   public boolean epsilonEquals(T other, double epsilon)
+   {
+      if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
+         return false;
+      if (referenceFrame != other.referenceFrame)
+         return false;
+      for (int i = 0; i < getNumberOfWaypoints(); i++)
+      {
+         W thisWaypoint = waypoints.get(i);
+         W otherWaypoint = other.waypoints.get(i);
+         if (!thisWaypoint.epsilonEquals(otherWaypoint, epsilon))
+            return false;
+      }
+      return true;
    }
 }

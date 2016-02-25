@@ -1,5 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -14,7 +17,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.EuclideanWaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the translational information for one waypoint (position & linear velocity). "
       + "Feel free to look at SO3Waypoint (rotational) and SE3Waypoint (rotational AND translational)")
-public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypointMessage> implements EuclideanWaypointInterface, TransformableDataObject<EuclideanWaypointMessage>
+public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypointMessage>
+      implements EuclideanWaypointInterface<EuclideanWaypointMessage>, TransformableDataObject<EuclideanWaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -32,18 +36,32 @@ public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypoin
 
    public EuclideanWaypointMessage(EuclideanWaypointMessage euclideanWaypointMessage)
    {
+      time = euclideanWaypointMessage.time;
       if (euclideanWaypointMessage.position != null)
          position = new Point3d(euclideanWaypointMessage.position);
       if (euclideanWaypointMessage.linearVelocity != null)
          linearVelocity = new Vector3d(euclideanWaypointMessage.linearVelocity);
-      time = euclideanWaypointMessage.time;
    }
 
    public EuclideanWaypointMessage(double time, Point3d position, Vector3d linearVelocity)
    {
+      this.time = time;
       this.position = position;
       this.linearVelocity = linearVelocity;
-      this.time = time;
+   }
+
+   @Override
+   public void set(EuclideanWaypointMessage waypoint)
+   {
+      time = waypoint.time;
+      if (waypoint.position != null)
+         position.set(waypoint.position);
+      else
+         position.set(0.0, 0.0, 0.0);
+      if (waypoint.linearVelocity != null)
+         linearVelocity.set(waypoint.linearVelocity);
+      else
+         linearVelocity.set(0.0, 0.0, 0.0);
    }
 
    @Override
@@ -52,6 +70,19 @@ public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypoin
       return time;
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time += timeOffsetToAdd;
+   }
+
+   @Override
+   public void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      time -= timeOffsetToSubtract;
+   }
+
+   @Override
    public void setTime(double time)
    {
       this.time = time;
@@ -125,6 +156,18 @@ public class EuclideanWaypointMessage extends IHMCRosApiMessage<EuclideanWaypoin
    @Override
    public String toString()
    {
-      return "Euclidean waypoint: time = " + time + ", position = " + position + ", linear velocity = " + linearVelocity;
+      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
+      String xToString = doubleFormat.format(position.getX());
+      String yToString = doubleFormat.format(position.getY());
+      String zToString = doubleFormat.format(position.getZ());
+      String xDotToString = doubleFormat.format(linearVelocity.getX());
+      String yDotToString = doubleFormat.format(linearVelocity.getY());
+      String zDotToString = doubleFormat.format(linearVelocity.getZ());
+
+      String timeToString = "time = " + doubleFormat.format(time);
+      String positionToString = "position = (" + xToString + ", " + yToString + ", " + zToString + ")";
+      String linearVelocityToString = "linear velocity = (" + xDotToString + ", " + yDotToString + ", " + zDotToString + ")";
+
+      return "Euclidean waypoint: (" + timeToString + ", " + positionToString + ", " + linearVelocityToString + ")";
    }
 }

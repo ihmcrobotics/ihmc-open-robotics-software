@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -14,7 +15,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3Waypoint;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -88,16 +89,13 @@ public class FrameSE3WaypointTest
       final FrameVector expectedFinalLinearVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
       final FrameVector expectedFinalAngularVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
 
-      SE3WaypointInterface expectedDataHolder = new SE3WaypointInterface()
-      {
-         @Override public void getOrientation(Quat4d orientationToPack){expectedFinalOrientation.getQuaternion(orientationToPack);}
-         @Override public void getAngularVelocity(Vector3d angularVelocityToPack){expectedFinalAngularVelocity.get(angularVelocityToPack);}
-         @Override public double getTime(){return expectedFinalTime;}
-         @Override public void getPosition(Point3d positionToPack){expectedFinalPosition.get(positionToPack);}
-         @Override public void getLinearVelocity(Vector3d linearVelocityToPack){expectedFinalLinearVelocity.get(linearVelocityToPack);}
-      };
+      SimpleSE3Waypoint expectedSE3Waypoint = new SimpleSE3Waypoint();
+      expectedSE3Waypoint.setPosition(expectedFinalPosition.getPoint());
+      expectedSE3Waypoint.setOrientation(expectedFinalOrientation.getQuaternion());
+      expectedSE3Waypoint.setLinearVelocity(expectedFinalLinearVelocity.getVector());
+      expectedSE3Waypoint.setAngularVelocity(expectedFinalAngularVelocity.getVector());
 
-      testedFrameSE3Waypoint = new FrameSE3Waypoint(expectedFinalFrame, expectedDataHolder);
+      testedFrameSE3Waypoint = new FrameSE3Waypoint(expectedFinalFrame, expectedSE3Waypoint);
 
       assertWaypointContainsExpectedData(expectedFinalFrame, expectedFinalTime, expectedFinalPosition, expectedFinalOrientation, expectedFinalLinearVelocity, expectedFinalAngularVelocity,
             testedFrameSE3Waypoint, epsilon);
@@ -196,16 +194,13 @@ public class FrameSE3WaypointTest
       final FrameVector expectedFinalLinearVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
       final FrameVector expectedFinalAngularVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
 
-      SE3WaypointInterface expectedDataHolder = new SE3WaypointInterface()
-      {
-         @Override public void getOrientation(Quat4d orientationToPack){expectedFinalOrientation.getQuaternion(orientationToPack);}
-         @Override public void getAngularVelocity(Vector3d angularVelocityToPack){expectedFinalAngularVelocity.get(angularVelocityToPack);}
-         @Override public double getTime(){return expectedFinalTime;}
-         @Override public void getPosition(Point3d positionToPack){expectedFinalPosition.get(positionToPack);}
-         @Override public void getLinearVelocity(Vector3d linearVelocityToPack){expectedFinalLinearVelocity.get(linearVelocityToPack);}
-      };
+      SimpleSE3Waypoint expectedSE3Waypoint = new SimpleSE3Waypoint();
+      expectedSE3Waypoint.setPosition(expectedFinalPosition.getPoint());
+      expectedSE3Waypoint.setOrientation(expectedFinalOrientation.getQuaternion());
+      expectedSE3Waypoint.setLinearVelocity(expectedFinalLinearVelocity.getVector());
+      expectedSE3Waypoint.setAngularVelocity(expectedFinalAngularVelocity.getVector());
 
-      testedFrameSE3Waypoint.setIncludingFrame(expectedFinalFrame, expectedDataHolder);
+      testedFrameSE3Waypoint.setIncludingFrame(expectedFinalFrame, expectedSE3Waypoint);
 
       assertWaypointContainsExpectedData(expectedFinalFrame, expectedFinalTime, expectedFinalPosition, expectedFinalOrientation, expectedFinalLinearVelocity, expectedFinalAngularVelocity,
             testedFrameSE3Waypoint, epsilon);

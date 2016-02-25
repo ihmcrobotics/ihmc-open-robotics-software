@@ -1,5 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -14,7 +17,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.SO3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one waypoint (orientation & angular velocity). "
       + "Feel free to look at EuclideanWaypoint (translational) and SE3Waypoint (rotational AND translational)")
-public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage> implements SO3WaypointInterface, TransformableDataObject<SO3WaypointMessage>
+public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage>
+      implements SO3WaypointInterface<SO3WaypointMessage>, TransformableDataObject<SO3WaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -41,9 +45,23 @@ public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage> im
 
    public SO3WaypointMessage(double time, Quat4d orientation, Vector3d angularVelocity)
    {
+      this.time = time;
       this.orientation = orientation;
       this.angularVelocity = angularVelocity;
-      this.time = time;
+   }
+
+   @Override
+   public void set(SO3WaypointMessage waypoint)
+   {
+      time = waypoint.time;
+      if (waypoint.orientation != null)
+         orientation.set(waypoint.orientation);
+      else
+         orientation.set(0.0, 0.0, 0.0, 1.0);
+      if (waypoint.angularVelocity != null)
+         angularVelocity.set(waypoint.angularVelocity);
+      else
+         angularVelocity.set(0.0, 0.0, 0.0);
    }
 
    @Override
@@ -52,6 +70,19 @@ public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage> im
       return time;
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time += timeOffsetToAdd;
+   }
+
+   @Override
+   public void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      time -= timeOffsetToSubtract;
+   }
+
+   @Override
    public void setTime(double time)
    {
       this.time = time;
@@ -80,6 +111,26 @@ public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage> im
    }
 
    @Override
+   public SO3WaypointMessage transform(RigidBodyTransform transform)
+   {
+      SO3WaypointMessage transformedWaypointMessage = new SO3WaypointMessage();
+
+      transformedWaypointMessage.time = time;
+
+      if (orientation != null)
+         transformedWaypointMessage.orientation = TransformTools.getTransformedQuat(orientation, transform);
+      else
+         transformedWaypointMessage.orientation = null;
+
+      if (angularVelocity != null)
+         transformedWaypointMessage.angularVelocity = TransformTools.getTransformedVector(angularVelocity, transform);
+      else
+         transformedWaypointMessage.angularVelocity = null;
+
+      return transformedWaypointMessage;
+   }
+
+   @Override
    public boolean epsilonEquals(SO3WaypointMessage other, double epsilon)
    {
       if (orientation == null && other.orientation != null)
@@ -103,28 +154,21 @@ public class SO3WaypointMessage extends IHMCRosApiMessage<SO3WaypointMessage> im
    }
 
    @Override
-   public SO3WaypointMessage transform(RigidBodyTransform transform)
-   {
-      SO3WaypointMessage transformedWaypointMessage = new SO3WaypointMessage();
-
-      transformedWaypointMessage.time = time;
-
-      if (orientation != null)
-         transformedWaypointMessage.orientation = TransformTools.getTransformedQuat(orientation, transform);
-      else
-         transformedWaypointMessage.orientation = null;
-
-      if (angularVelocity != null)
-         transformedWaypointMessage.angularVelocity = TransformTools.getTransformedVector(angularVelocity, transform);
-      else
-         transformedWaypointMessage.angularVelocity = null;
-
-      return transformedWaypointMessage;
-   }
-
-   @Override
    public String toString()
    {
-      return "SO3 waypoint: time = " + time + ", orientation = " + orientation + ", angular velocity = " + angularVelocity;
+      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
+      String qxToString = doubleFormat.format(orientation.getX());
+      String qyToString = doubleFormat.format(orientation.getY());
+      String qzToString = doubleFormat.format(orientation.getZ());
+      String qsToString = doubleFormat.format(orientation.getW());
+      String wxToString = doubleFormat.format(angularVelocity.getX());
+      String wyToString = doubleFormat.format(angularVelocity.getY());
+      String wzToString = doubleFormat.format(angularVelocity.getZ());
+
+      String timeToString = "time = " + doubleFormat.format(time);
+      String orientationToString = "orientation = (" + qxToString + ", " + qyToString + ", " + qzToString + ", " + qsToString + ")";
+      String angularVelocityToString = "angular velocity = (" + wxToString + ", " + wyToString + ", " + wzToString + ")";
+
+      return "SO3 waypoint: (" + timeToString + ", " + orientationToString + ", " + angularVelocityToString + ")";
    }
 }

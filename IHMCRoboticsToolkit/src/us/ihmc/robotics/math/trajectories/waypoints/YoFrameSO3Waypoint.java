@@ -19,7 +19,7 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSO3Waypoint extends ReferenceFrameHolder implements SO3WaypointInterface, YoMultipleFramesHolder
+public class YoFrameSO3Waypoint extends ReferenceFrameHolder implements SO3WaypointInterface<YoFrameSO3Waypoint>, YoMultipleFramesHolder
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -57,7 +57,13 @@ public class YoFrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypo
       };
    }
 
-   public void set(SO3WaypointInterface so3Waypoint)
+   @Override
+   public void setTime(double time)
+   {
+      this.time.set(time);
+   }
+
+   public void set(SO3WaypointInterface<?> so3Waypoint)
    {
       frameSO3Waypoint.setToZero(getReferenceFrame());
       frameSO3Waypoint.set(so3Waypoint);
@@ -71,6 +77,7 @@ public class YoFrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypo
       getYoValuesFromFrameSO3Waypoint();
    }
 
+   @Override
    public void set(YoFrameSO3Waypoint yoFrameSO3Waypoint)
    {
       frameSO3Waypoint.setToZero(getReferenceFrame());
@@ -99,11 +106,19 @@ public class YoFrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypo
       this.angularVelocity.set(angularVelocity);
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time.add(timeOffsetToAdd);
+   }
+
+   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time.sub(timeOffsetToSubtract);
    }
 
+   @Override
    public boolean containsNaN()
    {
       if (time.isNaN())
@@ -295,13 +310,6 @@ public class YoFrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypo
    }
 
    @Override
-   public String toString()
-   {
-      putYoValuesIntoFrameSO3Waypoint();
-
-      return frameSO3Waypoint.toString();
-   }
-
    public boolean epsilonEquals(YoFrameSO3Waypoint other, double epsilon)
    {
       if (getReferenceFrame() != other.getReferenceFrame())
@@ -313,5 +321,13 @@ public class YoFrameSO3Waypoint extends ReferenceFrameHolder implements SO3Waypo
       if (!angularVelocity.epsilonEquals(other.angularVelocity, epsilon))
          return false;
       return true;
+   }
+
+   @Override
+   public String toString()
+   {
+      putYoValuesIntoFrameSO3Waypoint();
+
+      return frameSO3Waypoint.toString();
    }
 }

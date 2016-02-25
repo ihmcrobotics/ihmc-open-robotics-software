@@ -2,21 +2,23 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class SimpleTrajectoryWaypoint1DData implements TrajectoryWaypointDataInterface
+public class SimpleTrajectoryWaypoint1DData extends SimpleTrajectoryWaypointData<SimpleWaypoint1D>
 {
-   private final RecyclingArrayList<SimpleWaypoint1D> waypoints = new RecyclingArrayList<>(15, SimpleWaypoint1D.class);
-
    public SimpleTrajectoryWaypoint1DData()
    {
-      clear();
+      super(SimpleWaypoint1D.class);
    }
 
-   public void clear()
+   public void set(SimpleTrajectoryWaypoint1DData trajectory)
    {
-      waypoints.clear();
+      clear();
+      for (int i = 0; i < trajectory.getNumberOfWaypoints(); i++)
+      {
+         addWaypoint(trajectory.waypoints.get(i));
+      }
    }
 
-   public void addWaypoint(Waypoint1DInterface waypoint)
+   public void addWaypoint(Waypoint1DInterface<?> waypoint)
    {
       waypoints.add().set(waypoint);
    }
@@ -26,31 +28,7 @@ public class SimpleTrajectoryWaypoint1DData implements TrajectoryWaypointDataInt
       waypoints.add().set(time, position, velocity);
    }
 
-   @Override
-   public SimpleWaypoint1D getWaypoint(int waypointIndex)
-   {
-      return waypoints.get(waypointIndex);
-   }
-
-   @Override
-   public int getNumberOfWaypoints()
-   {
-      return waypoints.size();
-   }
-
-   @Override
-   public SimpleWaypoint1D getLastWaypoint()
-   {
-      return waypoints.getLast();
-   }
-
-   @Override
-   public double getTrajectoryTime()
-   {
-      return getLastWaypoint().getTime();
-   }
-
-   public RecyclingArrayList<? extends Waypoint1DInterface> getWaypoints()
+   public RecyclingArrayList<? extends Waypoint1DInterface<?>> getWaypoints()
    {
       return waypoints;
    }

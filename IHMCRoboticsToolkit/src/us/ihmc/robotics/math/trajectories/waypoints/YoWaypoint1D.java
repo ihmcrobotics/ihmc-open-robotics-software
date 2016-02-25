@@ -5,10 +5,11 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class YoWaypoint1D implements Waypoint1DInterface
+public class YoWaypoint1D implements Waypoint1DInterface<YoWaypoint1D>
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -27,11 +28,25 @@ public class YoWaypoint1D implements Waypoint1DInterface
       velocity = new DoubleYoVariable(createName(namePrefix, "velocity", nameSuffix), registry);
    }
 
-   public void set(Waypoint1DInterface waypoint1d)
+   @Override
+   public void setTime(double time)
    {
-      time.set(waypoint1d.getTime());
-      position.set(waypoint1d.getPosition());
-      velocity.set(waypoint1d.getVelocity());
+      this.time.set(time);
+   }
+
+   public void set(Waypoint1DInterface<?> waypoint)
+   {
+      time.set(waypoint.getTime());
+      position.set(waypoint.getPosition());
+      velocity.set(waypoint.getVelocity());
+   }
+
+   @Override
+   public void set(YoWaypoint1D waypoint)
+   {
+      time.set(waypoint.getTime());
+      position.set(waypoint.getPosition());
+      velocity.set(waypoint.getVelocity());
    }
 
    public void set(double time, double position, double velocity)
@@ -48,6 +63,13 @@ public class YoWaypoint1D implements Waypoint1DInterface
       velocity.set(Double.NaN);
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time.add(timeOffsetToAdd);
+   }
+
+   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time.sub(timeOffsetToSubtract);
@@ -87,10 +109,24 @@ public class YoWaypoint1D implements Waypoint1DInterface
    }
 
    @Override
+   public boolean epsilonEquals(YoWaypoint1D other, double epsilon)
+   {
+      if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon))
+         return false;
+      return true;
+   }
+
+   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      return "(time = " + doubleFormat.format(time.getDoubleValue()) + ", position = " + doubleFormat.format(position.getDoubleValue()) + ", velocity = "
-            + doubleFormat.format(velocity.getDoubleValue()) + ")";
+      String timeString = "time = " + doubleFormat.format(getTime());
+      String positionString = "position = " + doubleFormat.format(getPosition());
+      String velocityString = "velocity = " + doubleFormat.format(getVelocity());
+      return "(" + timeString + ", " + positionString + ", " + velocityString + ")";
    }
 }
