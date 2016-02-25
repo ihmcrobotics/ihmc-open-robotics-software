@@ -22,7 +22,7 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSE3Waypoint extends ReferenceFrameHolder implements SE3WaypointInterface, YoMultipleFramesHolder
+public class YoFrameSE3Waypoint extends ReferenceFrameHolder implements SE3WaypointInterface<YoFrameSE3Waypoint>, YoMultipleFramesHolder
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -78,7 +78,13 @@ public class YoFrameSE3Waypoint extends ReferenceFrameHolder implements SE3Waypo
       };
    }
 
-   public void set(SE3WaypointInterface se3Waypoint)
+   @Override
+   public void setTime(double time)
+   {
+      this.time.set(time);
+   }
+
+   public void set(SE3WaypointInterface<?> se3Waypoint)
    {
       frameSE3Waypoint.setToZero(getReferenceFrame());
       frameSE3Waypoint.set(se3Waypoint);
@@ -92,6 +98,7 @@ public class YoFrameSE3Waypoint extends ReferenceFrameHolder implements SE3Waypo
       getYoValuesFromFrameSE3Waypoint();
    }
 
+   @Override
    public void set(YoFrameSE3Waypoint yoFrameSE3Waypoint)
    {
       frameSE3Waypoint.setToZero(getReferenceFrame());
@@ -126,11 +133,19 @@ public class YoFrameSE3Waypoint extends ReferenceFrameHolder implements SE3Waypo
       this.angularVelocity.set(angularVelocity);
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time.add(timeOffsetToAdd);
+   }
+
+   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time.sub(timeOffsetToSubtract);
    }
 
+   @Override
    public boolean containsNaN()
    {
       if (time.isNaN())
@@ -396,6 +411,7 @@ public class YoFrameSE3Waypoint extends ReferenceFrameHolder implements SE3Waypo
       return frameSE3Waypoint.toString();
    }
 
+   @Override
    public boolean epsilonEquals(YoFrameSE3Waypoint other, double epsilon)
    {
       if (getReferenceFrame() != other.getReferenceFrame())

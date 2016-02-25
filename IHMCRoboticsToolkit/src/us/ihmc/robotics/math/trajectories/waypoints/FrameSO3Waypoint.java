@@ -11,7 +11,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements SO3WaypointInterface
+public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
@@ -34,7 +34,7 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
       setIncludingFrame(time, orientation, angularVelocity);
    }
 
-   public FrameSO3Waypoint(ReferenceFrame referenceFrame, SO3WaypointInterface so3WaypointInterface)
+   public FrameSO3Waypoint(ReferenceFrame referenceFrame, SO3WaypointInterface<?> so3WaypointInterface)
    {
       setIncludingFrame(referenceFrame, so3WaypointInterface);
    }
@@ -44,6 +44,7 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
       setIncludingFrame(frameSO3Waypoint);
    }
 
+   @Override
    public void setTime(double time)
    {
       this.time = time;
@@ -63,7 +64,7 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
    {
       this.angularVelocity.set(angularVelocity);
    }
-   
+
    public void setAngularVelocity(FrameVector angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
@@ -84,7 +85,7 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(SO3WaypointInterface so3Waypoint)
+   public void set(SO3WaypointInterface<?> so3Waypoint)
    {
       // Ensuring frame consistency without crashing
       setIncludingFrame(referenceFrame, so3Waypoint);
@@ -123,7 +124,7 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
       this.angularVelocity.setIncludingFrame(angularVelocity);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, SO3WaypointInterface so3Waypoint)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, SO3WaypointInterface<?> so3Waypoint)
    {
       setToZero(referenceFrame);
 
@@ -207,6 +208,13 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
       angularVelocity.setToNaN(referenceFrame);
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time += timeOffsetToAdd;
+   }
+
+   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time -= timeOffsetToSubtract;
@@ -218,6 +226,12 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
          throwFrameInconsistencyException();
       if (referenceFrame != angularVelocity.getReferenceFrame())
          throwFrameInconsistencyException();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return Double.isNaN(time) || orientation.containsNaN() || angularVelocity.containsNaN();
    }
 
    @Override
@@ -288,13 +302,9 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
       return referenceFrame;
    }
 
+   @Override
    public boolean epsilonEquals(FrameSO3Waypoint other, double epsilon)
    {
-      checkFrameConsistency();
-      other.checkFrameConsistency();
-
-      if (referenceFrame != other.referenceFrame)
-         return false;
       if (!MathTools.epsilonEquals(time, other.time, epsilon))
          return false;
       if (!orientation.epsilonEquals(other.orientation, epsilon))
@@ -308,11 +318,19 @@ public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint> implements
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String timeToString = "time = " + doubleFormat.format(time);
-      String orientationToString = ", orientation = (" + doubleFormat.format(orientation.getQx()) + ", " + doubleFormat.format(orientation.getQy()) + ", " + doubleFormat.format(orientation.getQz()) + ", " + doubleFormat.format(orientation.getQs()) + ")";
-      String angularVelocityToString = ", angular velocity = (" + doubleFormat.format(angularVelocity.getX()) + ", " + doubleFormat.format(angularVelocity.getY()) + ", " + doubleFormat.format(angularVelocity.getZ()) + ")";
-      String referenceFrameToString = ", reference frame = " + getReferenceFrame();
+      String qxToString = doubleFormat.format(orientation.getQx());
+      String qyToString = doubleFormat.format(orientation.getQy());
+      String qzToString = doubleFormat.format(orientation.getQz());
+      String qsToString = doubleFormat.format(orientation.getQs());
+      String wxToString = doubleFormat.format(angularVelocity.getX());
+      String wyToString = doubleFormat.format(angularVelocity.getY());
+      String wzToString = doubleFormat.format(angularVelocity.getZ());
 
-      return "(" + timeToString + orientationToString + angularVelocityToString + referenceFrameToString + ")";
+      String timeToString = "time = " + doubleFormat.format(time);
+      String orientationToString = "orientation = (" + qxToString + ", " + qyToString + ", " + qzToString + ", " + qsToString + ")";
+      String angularVelocityToString = "angular velocity = (" + wxToString + ", " + wyToString + ", " + wzToString + ")";
+      String referenceFrameToString = "reference frame = " + referenceFrame.getName();
+
+      return "SO3 waypoint: (" + timeToString + ", " + orientationToString + ", " + angularVelocityToString + ", " + referenceFrameToString + ")";
    }
 }

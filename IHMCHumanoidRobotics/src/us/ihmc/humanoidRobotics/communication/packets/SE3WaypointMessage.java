@@ -1,5 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -15,7 +18,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.SE3WaypointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one waypoint. "
       + "Feel free to look at EuclideanWaypoint (translational) and SO3Waypoint (rotational)")
-public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> implements SE3WaypointInterface, TransformableDataObject<SE3WaypointMessage>
+public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> implements SE3WaypointInterface<SE3WaypointMessage>, TransformableDataObject<SE3WaypointMessage>
 {
    @FieldDocumentation("Time at which the waypoint has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -37,6 +40,7 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
 
    public SE3WaypointMessage(SE3WaypointMessage se3WaypointMessage)
    {
+      time = se3WaypointMessage.time;
       if (se3WaypointMessage.position != null)
          position = new Point3d(se3WaypointMessage.position);
       if (se3WaypointMessage.orientation != null)
@@ -45,7 +49,6 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
          linearVelocity = new Vector3d(se3WaypointMessage.linearVelocity);
       if (se3WaypointMessage.angularVelocity != null)
          angularVelocity = new Vector3d(se3WaypointMessage.angularVelocity);
-      time = se3WaypointMessage.time;
    }
 
    public SE3WaypointMessage(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
@@ -58,9 +61,43 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
    }
 
    @Override
+   public void set(SE3WaypointMessage waypoint)
+   {
+      time = waypoint.time;
+      if (waypoint.position != null)
+         position.set(waypoint.position);
+      else
+         position.set(0.0, 0.0, 0.0);
+      if (waypoint.orientation != null)
+         orientation.set(waypoint.orientation);
+      else
+         orientation.set(0.0, 0.0, 0.0, 1.0);
+      if (waypoint.linearVelocity != null)
+         linearVelocity.set(waypoint.linearVelocity);
+      else
+         linearVelocity.set(0.0, 0.0, 0.0);
+      if (waypoint.angularVelocity != null)
+         angularVelocity.set(waypoint.angularVelocity);
+      else
+         angularVelocity.set(0.0, 0.0, 0.0);
+   }
+
+   @Override
    public double getTime()
    {
       return time;
+   }
+
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time += timeOffsetToAdd;
+   }
+
+   @Override
+   public void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      time -= timeOffsetToSubtract;
    }
 
    public void setTime(double time)
@@ -182,6 +219,27 @@ public class SE3WaypointMessage extends IHMCRosApiMessage<SE3WaypointMessage> im
    @Override
    public String toString()
    {
-      return "SE3 waypoint: time = " + time + ", position = " + position + ", orientation = " + orientation + ", linear velocity = " + linearVelocity + ", angular velocity = " + angularVelocity;
+      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
+      String xToString = doubleFormat.format(position.getX());
+      String yToString = doubleFormat.format(position.getY());
+      String zToString = doubleFormat.format(position.getZ());
+      String xDotToString = doubleFormat.format(linearVelocity.getX());
+      String yDotToString = doubleFormat.format(linearVelocity.getY());
+      String zDotToString = doubleFormat.format(linearVelocity.getZ());
+      String qxToString = doubleFormat.format(orientation.getX());
+      String qyToString = doubleFormat.format(orientation.getY());
+      String qzToString = doubleFormat.format(orientation.getZ());
+      String qsToString = doubleFormat.format(orientation.getW());
+      String wxToString = doubleFormat.format(angularVelocity.getX());
+      String wyToString = doubleFormat.format(angularVelocity.getY());
+      String wzToString = doubleFormat.format(angularVelocity.getZ());
+
+      String timeToString = "time = " + doubleFormat.format(time);
+      String positionToString = "position = (" + xToString + ", " + yToString + ", " + zToString + ")";
+      String orientationToString = "orientation = (" + qxToString + ", " + qyToString + ", " + qzToString + ", " + qsToString + ")";
+      String linearVelocityToString = "linear velocity = (" + xDotToString + ", " + yDotToString + ", " + zDotToString + ")";
+      String angularVelocityToString = "angular velocity = (" + wxToString + ", " + wyToString + ", " + wzToString + ")";
+
+      return "SE3 waypoint: (" + timeToString + ", " + positionToString + ", " + orientationToString + ", " + linearVelocityToString + ", " + angularVelocityToString + ")";
    }
 }

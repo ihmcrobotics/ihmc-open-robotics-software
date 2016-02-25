@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3Waypoint;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -72,28 +72,12 @@ public class FrameSO3WaypointTest
       final FrameOrientation expectedFinalOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFinalFrame);
       final FrameVector expectedFinalAngularVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
 
-      SO3WaypointInterface expectedDataHolder = new SO3WaypointInterface()
-      {
-         @Override
-         public void getOrientation(Quat4d orientationToPack)
-         {
-            expectedFinalOrientation.getQuaternion(orientationToPack);
-         }
+      SimpleSO3Waypoint expectedSO3Waypoint = new SimpleSO3Waypoint();
+      expectedSO3Waypoint.setTime(expectedFinalTime);
+      expectedSO3Waypoint.setOrientation(expectedFinalOrientation.getQuaternion());
+      expectedSO3Waypoint.setAngularVelocity(expectedFinalAngularVelocity.getVector());
 
-         @Override
-         public void getAngularVelocity(Vector3d angularVelocityToPack)
-         {
-            expectedFinalAngularVelocity.get(angularVelocityToPack);
-         }
-
-         @Override
-         public double getTime()
-         {
-            return expectedFinalTime;
-         }
-      };
-
-      testedFrameSO3Waypoint = new FrameSO3Waypoint(expectedFinalFrame, expectedDataHolder);
+      testedFrameSO3Waypoint = new FrameSO3Waypoint(expectedFinalFrame, expectedSO3Waypoint);
 
       assertWaypointContainsExpectedData(expectedFinalFrame, expectedFinalTime, expectedFinalOrientation, expectedFinalAngularVelocity, testedFrameSO3Waypoint,
             epsilon);
@@ -171,28 +155,12 @@ public class FrameSO3WaypointTest
       final FrameOrientation expectedFinalOrientation = FrameOrientation.generateRandomFrameOrientation(random, expectedFinalFrame);
       final FrameVector expectedFinalAngularVelocity = FrameVector.generateRandomFrameVector(random, expectedFinalFrame);
 
-      SO3WaypointInterface expectedDataHolder = new SO3WaypointInterface()
-      {
-         @Override
-         public void getOrientation(Quat4d orientationToPack)
-         {
-            expectedFinalOrientation.getQuaternion(orientationToPack);
-         }
+      SimpleSO3Waypoint expectedSO3Waypoint = new SimpleSO3Waypoint();
+      expectedSO3Waypoint.setTime(expectedFinalTime);
+      expectedSO3Waypoint.setOrientation(expectedFinalOrientation.getQuaternion());
+      expectedSO3Waypoint.setAngularVelocity(expectedFinalAngularVelocity.getVector());
 
-         @Override
-         public void getAngularVelocity(Vector3d angularVelocityToPack)
-         {
-            expectedFinalAngularVelocity.get(angularVelocityToPack);
-         }
-
-         @Override
-         public double getTime()
-         {
-            return expectedFinalTime;
-         }
-      };
-
-      testedFrameSO3Waypoint.setIncludingFrame(expectedFinalFrame, expectedDataHolder);
+      testedFrameSO3Waypoint.setIncludingFrame(expectedFinalFrame, expectedSO3Waypoint);
 
       assertWaypointContainsExpectedData(expectedFinalFrame, expectedFinalTime, expectedFinalOrientation, expectedFinalAngularVelocity, testedFrameSO3Waypoint,
             epsilon);

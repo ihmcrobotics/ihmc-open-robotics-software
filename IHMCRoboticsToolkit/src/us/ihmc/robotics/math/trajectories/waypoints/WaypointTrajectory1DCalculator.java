@@ -21,7 +21,7 @@ public class WaypointTrajectory1DCalculator
       trajectory.clear();
    }
 
-   public void appendWaypoint(Waypoint1DInterface waypoint)
+   public void appendWaypoint(Waypoint1DInterface<?> waypoint)
    {
       trajectory.addWaypoint(waypoint);
    }
@@ -127,15 +127,15 @@ public class WaypointTrajectory1DCalculator
       }
    }
 
-   public boolean shouldVelocityBeZero(Waypoint1DInterface firstWaypoint, Waypoint1DInterface secondWaypoint)
+   public boolean shouldVelocityBeZero(Waypoint1DInterface<?> firstWaypoint, Waypoint1DInterface<?> secondWaypoint)
    {
       double deltaPosition = Math.abs(secondWaypoint.getPosition() - firstWaypoint.getPosition());
       double deltaTime = Math.abs(secondWaypoint.getTime() - firstWaypoint.getTime());
       return MathTools.epsilonEquals(0.0, deltaPosition / deltaTime, 1.0e-7);
    }
 
-   private double compute2ndWaypointVelocityWithVelocityConstraint(Waypoint1DInterface firstWaypoint, Waypoint1DInterface secondWaypoint,
-         Waypoint1DInterface thirdWaypoint)
+   private double compute2ndWaypointVelocityWithVelocityConstraint(Waypoint1DInterface<?> firstWaypoint, Waypoint1DInterface<?> secondWaypoint,
+         Waypoint1DInterface<?> thirdWaypoint)
    {
       double t0 = firstWaypoint.getTime();
       double z0 = firstWaypoint.getPosition();
@@ -166,7 +166,7 @@ public class WaypointTrajectory1DCalculator
       FIRST, SECOND, THIRD
    };
 
-   private double computeWaypointVelocity(Waypoint1DInterface firstWaypoint, Waypoint1DInterface secondWaypoint, Waypoint1DInterface thirdWaypoint,
+   private double computeWaypointVelocity(Waypoint1DInterface<?> firstWaypoint, Waypoint1DInterface<?> secondWaypoint, Waypoint1DInterface<?> thirdWaypoint,
          Waypoint waypointToComputeVelocityOf)
    {
       double t0 = firstWaypoint.getTime();
@@ -208,12 +208,12 @@ public class WaypointTrajectory1DCalculator
       return trajectory.getNumberOfWaypoints();
    }
 
-   public RecyclingArrayList<? extends Waypoint1DInterface> getWaypoints()
+   public RecyclingArrayList<? extends Waypoint1DInterface<?>> getWaypoints()
    {
       return trajectory.getWaypoints();
    }
 
-   public TrajectoryWaypointDataInterface getTrajectoryData()
+   public TrajectoryWaypointDataInterface<?, ? extends Waypoint1DInterface<?>> getTrajectoryData()
    {
       return trajectory;
    }

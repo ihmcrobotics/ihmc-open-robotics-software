@@ -19,7 +19,7 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameEuclideanWaypoint extends ReferenceFrameHolder implements EuclideanWaypointInterface, YoMultipleFramesHolder
+public class YoFrameEuclideanWaypoint extends ReferenceFrameHolder implements EuclideanWaypointInterface<YoFrameEuclideanWaypoint>, YoMultipleFramesHolder
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -57,7 +57,13 @@ public class YoFrameEuclideanWaypoint extends ReferenceFrameHolder implements Eu
       };
    }
 
-   public void set(EuclideanWaypointInterface euclideanWaypoint)
+   @Override
+   public void setTime(double time)
+   {
+      this.time.set(time);
+   }
+
+   public void set(EuclideanWaypointInterface<?> euclideanWaypoint)
    {
       frameEuclideanWaypoint.setToZero(getReferenceFrame());
       frameEuclideanWaypoint.set(euclideanWaypoint);
@@ -71,6 +77,7 @@ public class YoFrameEuclideanWaypoint extends ReferenceFrameHolder implements Eu
       getYoValuesFromFrameEuclideanWaypoint();
    }
 
+   @Override
    public void set(YoFrameEuclideanWaypoint yoFrameEuclideanWaypoint)
    {
       frameEuclideanWaypoint.setToZero(getReferenceFrame());
@@ -99,11 +106,19 @@ public class YoFrameEuclideanWaypoint extends ReferenceFrameHolder implements Eu
       this.linearVelocity.set(linearVelocity);
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time.add(timeOffsetToAdd);
+   }
+
+   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time.sub(timeOffsetToSubtract);
    }
 
+   @Override
    public boolean containsNaN()
    {
       if (time.isNaN())
@@ -295,12 +310,6 @@ public class YoFrameEuclideanWaypoint extends ReferenceFrameHolder implements Eu
    }
 
    @Override
-   public String toString()
-   {
-      putYoValuesIntoFrameEuclideanWaypoint();
-      return frameEuclideanWaypoint.toString();
-   }
-
    public boolean epsilonEquals(YoFrameEuclideanWaypoint other, double epsilon)
    {
       if (getReferenceFrame() != other.getReferenceFrame())
@@ -312,5 +321,12 @@ public class YoFrameEuclideanWaypoint extends ReferenceFrameHolder implements Eu
       if (!linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
          return false;
       return true;
+   }
+
+   @Override
+   public String toString()
+   {
+      putYoValuesIntoFrameEuclideanWaypoint();
+      return frameEuclideanWaypoint.toString();
    }
 }

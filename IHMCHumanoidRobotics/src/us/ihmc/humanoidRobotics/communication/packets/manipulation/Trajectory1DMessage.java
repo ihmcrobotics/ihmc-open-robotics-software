@@ -12,7 +12,8 @@ import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the waypoints to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between waypoints.")
-public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> implements TrajectoryWaypointDataInterface<Waypoint1DInterface>
+public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage>
+      implements TrajectoryWaypointDataInterface<Trajectory1DMessage, Waypoint1DMessage>
 {
    @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
    public Waypoint1DMessage[] waypoints;
@@ -24,7 +25,7 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
    {
    }
 
-   public Trajectory1DMessage(TrajectoryWaypointDataInterface<? extends Waypoint1DInterface> trajectory1dMessage)
+   public Trajectory1DMessage(TrajectoryWaypointDataInterface<?, ? extends Waypoint1DInterface<?>> trajectory1dMessage)
    {
       waypoints = new Waypoint1DMessage[trajectory1dMessage.getNumberOfWaypoints()];
       for (int i = 0; i < getNumberOfWaypoints(); i++)
@@ -51,6 +52,18 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
       waypoints = new Waypoint1DMessage[numberOfWaypoint];
    }
 
+   @Override
+   public void clear()
+   {
+      throw new RuntimeException("This cannot implement the method clear().");
+   }
+
+   @Override
+   public void addWaypoint(Waypoint1DMessage waypoint)
+   {
+      throw new RuntimeException("This cannot implement the method addWaypoint().");
+   }
+
    /**
     * Create a waypoint.
     * @param waypointIndex index of the waypoint to create.
@@ -64,6 +77,17 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
       waypoints[waypointIndex] = new Waypoint1DMessage(time, position, velocity);
    }
 
+   @Override
+   public void set(Trajectory1DMessage trajectory)
+   {
+      if (getNumberOfWaypoints() != trajectory.getNumberOfWaypoints())
+         throw new RuntimeException("Trajectory messages do not have the same number of waypoint.");
+
+      for (int i = 0; i < getNumberOfWaypoints(); i++)
+         waypoints[i].set(trajectory.waypoints[i]);
+   }
+
+   @Override
    public int getNumberOfWaypoints()
    {
       return waypoints.length;
@@ -103,7 +127,7 @@ public class Trajectory1DMessage extends IHMCRosApiMessage<Trajectory1DMessage> 
    {
       if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
          return false;
-      
+
       for (int i = 0; i < getNumberOfWaypoints(); i++)
       {
          if (!waypoints[i].epsilonEquals(other.waypoints[i], epsilon))

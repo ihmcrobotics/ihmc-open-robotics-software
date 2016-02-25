@@ -11,7 +11,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint> implements EuclideanWaypointInterface
+public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint> implements EuclideanWaypointInterface<FrameEuclideanWaypoint>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
@@ -34,7 +34,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       setIncludingFrame(time, position, linearVelocity);
    }
 
-   public FrameEuclideanWaypoint(ReferenceFrame referenceFrame, EuclideanWaypointInterface euclideanWaypointInterface)
+   public FrameEuclideanWaypoint(ReferenceFrame referenceFrame, EuclideanWaypointInterface<?> euclideanWaypointInterface)
    {
       setIncludingFrame(referenceFrame, euclideanWaypointInterface);
    }
@@ -44,6 +44,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       setIncludingFrame(frameEuclideanWaypoint);
    }
 
+   @Override
    public void setTime(double time)
    {
       this.time = time;
@@ -84,12 +85,13 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void set(EuclideanWaypointInterface euclideanWaypoint)
+   public void set(EuclideanWaypointInterface<?> euclideanWaypoint)
    {
       // Ensuring frame consistency without crashing
       setIncludingFrame(referenceFrame, euclideanWaypoint);
    }
 
+   @Override
    public void set(FrameEuclideanWaypoint frameEuclideanWaypoint)
    {
       checkReferenceFrameMatch(frameEuclideanWaypoint);
@@ -122,7 +124,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       this.linearVelocity.setIncludingFrame(linearVelocity);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanWaypointInterface euclideanWaypoint)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanWaypointInterface<?> euclideanWaypoint)
    {
       setToZero(referenceFrame);
 
@@ -131,6 +133,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       euclideanWaypoint.getLinearVelocity(linearVelocity.getVector());
    }
 
+   @Override
    public void setIncludingFrame(FrameEuclideanWaypoint frameEuclideanWaypoint)
    {
       frameEuclideanWaypoint.checkFrameConsistency();
@@ -156,6 +159,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       linearVelocity.setToZero();
    }
 
+   @Override
    public void setToZero()
    {
       time = 0.0;
@@ -163,6 +167,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       linearVelocity.setToZero();
    }
 
+   @Override
    public void setToZero(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -186,6 +191,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       linearVelocity.setToNaN();
    }
 
+   @Override
    public void setToNaN()
    {
       time = Double.NaN;
@@ -193,6 +199,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       linearVelocity.setToNaN();
    }
 
+   @Override
    public void setToNaN(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -201,9 +208,22 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       linearVelocity.setToNaN(referenceFrame);
    }
 
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      time += timeOffsetToAdd;
+   }
+
+   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time -= timeOffsetToSubtract;
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return Double.isNaN(time) || position.containsNaN() || linearVelocity.containsNaN();
    }
 
    public void checkFrameConsistency()
@@ -268,6 +288,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       return linearVelocity;
    }
 
+   @Override
    public void changeFrame(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
@@ -281,6 +302,7 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
       return referenceFrame;
    }
 
+   @Override
    public boolean epsilonEquals(FrameEuclideanWaypoint other, double epsilon)
    {
       checkFrameConsistency();
@@ -301,11 +323,18 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String timeToString = "time = " + doubleFormat.format(time);
-      String positionToString = ", position = (" + doubleFormat.format(position.getX()) + ", " + doubleFormat.format(position.getY()) + ", " + doubleFormat.format(position.getZ()) + ")";
-      String linearVelocityToString = ", linear velocity = (" + doubleFormat.format(linearVelocity.getX()) + ", " + doubleFormat.format(linearVelocity.getY()) + ", " + doubleFormat.format(linearVelocity.getZ()) + ")";
-      String referenceFrameToString = ", reference frame = " + getReferenceFrame();
+      String xToString = doubleFormat.format(position.getX());
+      String yToString = doubleFormat.format(position.getY());
+      String zToString = doubleFormat.format(position.getZ());
+      String xDotToString = doubleFormat.format(linearVelocity.getX());
+      String yDotToString = doubleFormat.format(linearVelocity.getY());
+      String zDotToString = doubleFormat.format(linearVelocity.getZ());
 
-      return "(" + timeToString + positionToString + linearVelocityToString + referenceFrameToString + ")";
+      String timeToString = "time = " + doubleFormat.format(time);
+      String positionToString = "position = (" + xToString + ", " + yToString + ", " + zToString + ")";
+      String linearVelocityToString = "linear velocity = (" + xDotToString + ", " + yDotToString + ", " + zDotToString + ")";
+      String referenceFrameToString = "reference frame = " + referenceFrame.getName();
+
+      return "Euclidean waypoint: (" + timeToString + ", " + positionToString + ", " + linearVelocityToString + ", " + referenceFrameToString + ")";
    }
 }
