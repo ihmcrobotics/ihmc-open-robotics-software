@@ -84,8 +84,6 @@ public class CentroidalMomentumRateADotVTermSCSTest
       assertADotV(random, joints, elevator, robot, numberOfJoints);
    }
 
-//   @Ignore
-
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void floatingChainTest() throws UnreasonableAccelerationException
@@ -149,7 +147,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
          centerOfMassFrame.update();
          
          robot.packIdJoints(idJoints);
-         ScrewTools.packJointVelocitiesMatrix(idJoints, v);
+         ScrewTools.getJointVelocitiesMatrix(idJoints, v);
 
          // Compute aDotV analytically
          aDotVAnalyticalCalculator.compute();

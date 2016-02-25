@@ -499,22 +499,27 @@ public class GeometryTools
       }
    };
    
-   public static void getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2)
    {
       tempDirectionsForIntersection.get()[0].sub(lineEnd1, lineStart1);
       tempDirectionsForIntersection.get()[1].sub(lineEnd2, lineStart2);
       
-      GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, lineStart1, tempDirectionsForIntersection.get()[0], lineStart2, tempDirectionsForIntersection.get()[1]);
+      return GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, lineStart1, tempDirectionsForIntersection.get()[0], lineStart2, tempDirectionsForIntersection.get()[1]);
    }
    
-   public static void getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint point1, FrameVector direction1, FramePoint point2, FrameVector direction2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint point1, FrameVector direction1, FramePoint point2, FrameVector direction2)
    {
       GeometryTools.intersection(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(), direction2.getY(), tempAlphaBeta.get());
       
       if (Double.isNaN(tempAlphaBeta.get()[0]) || Double.isNaN(tempAlphaBeta.get()[1]))
-         throw new UndefinedOperationException("Lines are parallel.");
+      {
+         intersectionToPack.set(Double.NaN, Double.NaN,Double.NaN);
+         return false;
+         //throw new UndefinedOperationException("Lines are parallel.");
+      }
       
       intersectionToPack.set(point1.getX() + direction1.getX() * tempAlphaBeta.get()[0], point1.getY() + direction1.getY() * tempAlphaBeta.get()[0], intersectionToPack.getZ());
+      return true;
    }
 
    /**
@@ -1021,13 +1026,46 @@ public class GeometryTools
     *    --  = --
     *    BC    CX
     *
-    *
+    * not garbage free!
     * @param A Point2d
     * @param B Point2d
     * @param C Point2d
     * @return Point2d the intersection point of the bisector with the opposite side
     */
    public static Point2d getTriangleBisector(Point2d A, Point2d B, Point2d C)
+   {
+      Point2d bisectorToPack = new Point2d();
+      getTriangleBisector(A, B, C, bisectorToPack);
+      return bisectorToPack;
+   }
+   
+   private static final ThreadLocal<Vector2d> tempAToC = new ThreadLocal<Vector2d>()
+   {
+      @Override
+      public Vector2d initialValue()
+      {
+         return new Vector2d();
+      }
+   };
+   
+   /**
+    *  This method returns the point representing where the bisector of an
+    *  angle of a triangle intersects the opposite side.
+    *  Given a triangle defined by three points (A,B,C),
+    *  To find the Bisector that divides the angle at B in half
+    *  and intersects AC at X.
+    *
+    *    BA    AX
+    *    --  = --
+    *    BC    CX
+    *
+    *
+    * @param A Point2d
+    * @param B Point2d
+    * @param C Point2d
+    * @return Point2d the intersection point of the bisector with the opposite side
+    */
+   public static void getTriangleBisector(Point2d A, Point2d B, Point2d C, Point2d bisectorToPack)
    {
       // find all proportional values
       double BA = B.distance(A);
@@ -1036,14 +1074,14 @@ public class GeometryTools
       double AX = AC / ((BC / BA) + 1.0);
 
       // use AX distance to find X along AC
-      Vector2d AtoC = new Vector2d(C);
+      Vector2d AtoC = tempAToC.get();
+      AtoC.set(C);
       AtoC.sub(A);
       AtoC.normalize();
       AtoC.scale(AX);
-      Point2d X = new Point2d(A);
-      X.add(AtoC);
 
-      return X;
+      bisectorToPack.set(A);
+      bisectorToPack.add(AtoC);
    }
 
    public static double getAngleFromFirstToSecondVector(Vector2d firstVector, Vector2d secondVector)
@@ -1620,7 +1658,8 @@ public class GeometryTools
       }
       else
       {
-         throw new RuntimeException("Unable to build a Triangle of the given triangle sides");
+         throw new RuntimeException("Unable to build a Triangle of the given triangle sides a: "
+                                    + lengthNeighbourSideA + " b: " + lengthNeighbourSideB + " c: " + lengthOppositeSideC);
       }
    }
 

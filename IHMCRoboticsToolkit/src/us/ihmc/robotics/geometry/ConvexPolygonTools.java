@@ -166,7 +166,7 @@ public class ConvexPolygonTools
       polygon2.addVerticesInClockwiseOrderInPolygon(verticesIndices[1][0], verticesIndices[1][1], combinedPolygonToPack);
       combinedPolygonToPack.update();
 
-      packConnectingEdges(polygon1, polygon2, connectingEdge1ToPack, connectingEdge2Topack, verticesIndices);
+      getConnectingEdges(polygon1, polygon2, connectingEdge1ToPack, connectingEdge2Topack, verticesIndices);
 
       return true;
    }
@@ -179,11 +179,11 @@ public class ConvexPolygonTools
       if (!success)
          return false;
 
-      packConnectingEdges(polygon1, polygon2, connectingEdge1ToPack, connectingEdge2Topack, verticesIndices);
+      getConnectingEdges(polygon1, polygon2, connectingEdge1ToPack, connectingEdge2Topack, verticesIndices);
       return true;
    }
 
-   private static void packConnectingEdges(ConvexPolygon2d polygon1, ConvexPolygon2d polygon2, LineSegment2d connectingEdge1ToPack,
+   private static void getConnectingEdges(ConvexPolygon2d polygon1, ConvexPolygon2d polygon2, LineSegment2d connectingEdge1ToPack,
          LineSegment2d connectingEdge2Topack, int[][] verticesIndices)
    {
       connectingEdge1ToPack.set(polygon1.getVertex(verticesIndices[0][0]), polygon2.getVertex(verticesIndices[1][0]));

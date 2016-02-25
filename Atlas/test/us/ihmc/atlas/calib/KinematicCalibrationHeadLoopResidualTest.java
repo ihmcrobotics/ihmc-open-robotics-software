@@ -21,7 +21,6 @@ import javax.vecmath.Vector3d;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import boofcv.abst.calib.ConfigChessboard;
@@ -40,6 +39,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
@@ -104,8 +104,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-   @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.0)
+	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void perfect() throws IOException
    {
@@ -155,8 +154,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-   @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.0)
+	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void smallError() throws IOException
    {
@@ -210,8 +208,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-   @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.0)
+	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void optimize() throws IOException
    {

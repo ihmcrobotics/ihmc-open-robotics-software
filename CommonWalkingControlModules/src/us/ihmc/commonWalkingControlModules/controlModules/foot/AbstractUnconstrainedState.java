@@ -130,7 +130,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
               desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
-      accelerationControlModule.packAcceleration(footAcceleration);
+      accelerationControlModule.getAcceleration(footAcceleration);
 
       footControlHelper.updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment();
       footControlHelper.submitTaskspaceConstraint(footAcceleration);

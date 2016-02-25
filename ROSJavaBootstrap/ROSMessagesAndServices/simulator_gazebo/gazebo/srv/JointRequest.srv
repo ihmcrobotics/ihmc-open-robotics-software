@@ -1,5 +1,0 @@
-#This message is deprecated.  Please use the version in gazebo_msgs instead.
-
-string joint_name   # name of the joint requested
----
-

@@ -215,15 +215,15 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       return cylinderAndPlaneContactMatrixCalculator.getWPhi();
    }
 
-   public void packWRhoSmoother(DenseMatrix64F wRhoSmootherToPack)
+   public void getWRhoSmoother(DenseMatrix64F wRhoSmootherToPack)
    {
       CommonOps.setIdentity(wRhoSmootherToPack);
       CommonOps.scale(wRhoSmoother.getDoubleValue(), wRhoSmootherToPack);
    }
 
-   public void packWRhoPenalizer(DenseMatrix64F wRhoPenalizerToPack)
+   public void getWRhoPenalizer(DenseMatrix64F wRhoPenalizerToPack)
    {
-      cylinderAndPlaneContactSpatialForceVectorCalculator.packWRhoPenalizer(wRhoPenalizerToPack, wRhoPenalizer.getDoubleValue());
+      cylinderAndPlaneContactSpatialForceVectorCalculator.getWRhoPenalizer(wRhoPenalizerToPack, wRhoPenalizer.getDoubleValue());
    }
 
    public void setRhoMinScalar(double rhoMinScalar)
@@ -236,9 +236,9 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       return cylinderAndPlaneContactMatrixCalculator.getRhoMin();
    }
 
-   public void packRhoPreviousAverageForEndEffectors(DenseMatrix64F rhoMeanToPack)
+   public void getRhoPreviousAverageForEndEffectors(DenseMatrix64F rhoMeanToPack)
    {
-      cylinderAndPlaneContactSpatialForceVectorCalculator.packRhoMean(rhoMeanToPack);
+      cylinderAndPlaneContactSpatialForceVectorCalculator.getRhoMean(rhoMeanToPack);
    }
 
    public DenseMatrix64F getQRho()

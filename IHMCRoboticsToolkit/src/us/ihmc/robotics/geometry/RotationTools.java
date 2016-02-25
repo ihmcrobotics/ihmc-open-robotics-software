@@ -460,6 +460,14 @@ public class RotationTools
       convertQuaternionToYawPitchRoll(quaternion.x, quaternion.y, quaternion.z, quaternion.w, yawPitchRollToPack);
    }
 
+   public static void convertQuaternionToRotationVector(Quat4d quaternion, Vector3d rotationVectorToPack)
+   {
+      AxisAngle4d axisAngle = axisAngleForRotationVectorConvertor.get();
+      axisAngle.set(quaternion);
+      rotationVectorToPack.set(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ());
+      rotationVectorToPack.scale(axisAngle.getAngle());
+   }
+
    public static void convertRotationVectorToAxisAngle(Vector3d rotationVector, AxisAngle4d axisAngleToPack)
    {
       RotationVectorToAxisAngleConverter rotationVectorToAxisAngleConverter = rotationVectorToAxisAngleConvertor.get();
@@ -471,6 +479,13 @@ public class RotationTools
       AxisAngle4d localAxisAngle = axisAngleForRotationVectorConvertor.get();
       convertRotationVectorToAxisAngle(rotationVector, localAxisAngle);
       rotationMatrixToPack.set(localAxisAngle);
+   }
+
+   public static void convertRotationVectorToQuaternion(Vector3d rotationVector, Quat4d quaternionToPack)
+   {
+      AxisAngle4d localAxisAngle = axisAngleForRotationVectorConvertor.get();
+      convertRotationVectorToAxisAngle(rotationVector, localAxisAngle);
+      quaternionToPack.set(localAxisAngle);
    }
 
    public static void convertTransformToQuaternion(RigidBodyTransform transform, Quat4d quaternionToPack)
@@ -555,6 +570,53 @@ public class RotationTools
    public static void convertYawPitchRollToQuaternion(double[] yawPitchRoll, Quat4d quaternionToPack)
    {
       convertYawPitchRollToQuaternion(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2], quaternionToPack);
+   }
+
+   private static final ThreadLocal<Vector3d> angularVelocityForIntegrator = new ThreadLocal<Vector3d>()
+   {
+      @Override
+      public Vector3d initialValue()
+      {
+         return new Vector3d();
+      }
+   };
+
+   private static final ThreadLocal<AxisAngle4d> axisAngleForIntegrator = new ThreadLocal<AxisAngle4d>()
+   {
+      @Override
+      public AxisAngle4d initialValue()
+      {
+         return new AxisAngle4d();
+      }
+   };
+
+   public static void integrateAngularVelocity(FrameVector angularVelocityToIntegrate, double integrationTime, FrameOrientation orientationResultToPack)
+   {
+      AxisAngle4d axisAngleResult = axisAngleForIntegrator.get();
+      integrateAngularVelocity(angularVelocityToIntegrate.getVector(), integrationTime, axisAngleResult);
+      orientationResultToPack.setIncludingFrame(angularVelocityToIntegrate.getReferenceFrame(), axisAngleResult);
+   }
+
+   public static void integrateAngularVelocity(Vector3d angularVelocityToIntegrate, double integrationTime, Matrix3d orientationResultToPack)
+   {
+      AxisAngle4d axisAngleResult = axisAngleForIntegrator.get();
+      integrateAngularVelocity(angularVelocityToIntegrate, integrationTime, axisAngleResult);
+      orientationResultToPack.set(axisAngleResult);
+   }
+
+   public static void integrateAngularVelocity(Vector3d angularVelocityToIntegrate, double integrationTime, Quat4d orientationResultToPack)
+   {
+      AxisAngle4d axisAngleResult = axisAngleForIntegrator.get();
+      integrateAngularVelocity(angularVelocityToIntegrate, integrationTime, axisAngleResult);
+      orientationResultToPack.set(axisAngleResult);
+   }
+
+   public static void integrateAngularVelocity(Vector3d angularVelocityToIntegrate, double integrationTime, AxisAngle4d orientationResultToPack)
+   {
+      Vector3d angularVelocityIntegrated = angularVelocityForIntegrator.get();
+      angularVelocityIntegrated.set(angularVelocityToIntegrate);
+      angularVelocityIntegrated.scale(integrationTime);
+      convertRotationVectorToAxisAngle(angularVelocityIntegrated, orientationResultToPack);
    }
 
    public static double computeQuaternionNormSquared(Quat4d quaternion)

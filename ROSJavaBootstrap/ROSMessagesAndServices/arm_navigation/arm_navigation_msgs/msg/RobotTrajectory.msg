@@ -1,2 +1,0 @@
-trajectory_msgs/JointTrajectory joint_trajectory
-arm_navigation_msgs/MultiDOFJointTrajectory multi_dof_joint_trajectory

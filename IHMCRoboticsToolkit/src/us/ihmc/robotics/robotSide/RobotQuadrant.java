@@ -521,8 +521,24 @@ public enum RobotQuadrant
          else if(name.contains("right") || name.contains("Right"))
             return RobotQuadrant.HIND_RIGHT;
       }
+      else if (name.contains("hip") || name.contains("Hip") || name.contains("HIP") || name.contains("knee") || name.contains("Knee") || name.contains("KNEE"))
+      {
+         if(name.contains("left") || name.contains("Left") || name.contains("LEFT"))
+            return RobotQuadrant.HIND_LEFT;
+         else if(name.contains("right") || name.contains("Right") || name.contains("RIGHT"))
+            return RobotQuadrant.HIND_RIGHT;
+      }
+      else if (name.contains("shoulder") || name.contains("Shoulder") || name.contains("SHOULDER") || name.contains("elbow") || name.contains("Elbow") || name.contains("ELBOW"))
+      {
+         if(name.contains("left") || name.contains("Left") || name.contains("LEFT"))
+            return RobotQuadrant.FRONT_LEFT;
+         else if(name.contains("right") || name.contains("Right") || name.contains("RIGHT"))
+            return RobotQuadrant.FRONT_RIGHT;
+      }
 
-      throw new RuntimeException("Could not find an associated quadrant for " + name);
+//      throw new RuntimeException("Could not find an associated quadrant for " + name);
+      System.err.println("Could not find an associated quadrant for " + name);
+      return null;
    }
 
    public String getCamelCaseNameForMiddleOfExpression()

@@ -1,9 +1,0 @@
-<package>
-  <description brief="rosjava">
-    An implementation of ROS in pure-Java with Android support.
-  </description>
-  <author>damonkohler@google.com (Damon Kohler)</author>
-  <license>Apache 2.0</license>
-  <review status="unreviewed" notes="" />
-  <url>http://ros.org/wiki/rosjava</url>
-</package>

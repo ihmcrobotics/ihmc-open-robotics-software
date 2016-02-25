@@ -1,8 +1,0 @@
-<package>
-  <description brief="common_rosdeps">Deprecated.</description>
-  <author>Maintained by Wim Meeussen</author>
-  <license>BSD</license>  
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/common_rosdeps</url>
-
-</package>

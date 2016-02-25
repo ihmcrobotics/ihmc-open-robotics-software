@@ -52,7 +52,7 @@ public class JointConfigurationData extends Packet<JointConfigurationData>
             jointConfigurations[i] = jointConfiguration;
          }
 
-         joint.packConfigurationMatrix(jointConfiguration, 0);
+         joint.getConfigurationMatrix(jointConfiguration, 0);
       }
    }
 

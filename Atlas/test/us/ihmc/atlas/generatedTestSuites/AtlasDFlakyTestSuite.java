@@ -13,9 +13,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.behaviorTests.AtlasHandPoseListBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class,
-   us.ihmc.atlas.communication.producers.AtlasRobotConfigurationDataBufferTest.class
+   us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class
 })
 
 public class AtlasDFlakyTestSuite

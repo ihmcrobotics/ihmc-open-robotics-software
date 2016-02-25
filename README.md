@@ -16,6 +16,22 @@ Individual projects all have their own license information. We use a combination
 ### Using IHMC Open Robotics Software .jar releases with Maven/Gradle
 The release .jars for the various *IHMCOpenRoboticsSoftware* packages are hosted on Bintray. You can browse the release packages at https://bintray.com/ihmcrobotics/ihmc-robotics-releases. Instructions for adding the Maven repository and identifying the artifacts can also be found on Bintray for each package.
 
+At a minimum, you will probably want to have the following repositories declared in your build script to use the IHMCOpenRoboticsSoftware .jars:
+
+```gradle
+repositories {
+   maven {
+      url  "http://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
+   }
+
+   maven {
+      url  "http://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
+   }
+
+   /* You will also need to add either jcenter() or mavenCentral() or both, depending on your preference */
+}
+```
+
 ### Developing with IHMC Open Robotics Software from source
 
 #### Requirements

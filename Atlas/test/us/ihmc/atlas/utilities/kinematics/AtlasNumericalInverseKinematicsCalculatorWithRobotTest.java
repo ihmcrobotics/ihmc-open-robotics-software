@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -16,6 +15,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends NumericalInverseKinematicsCalculatorWithRobotTest
 {
@@ -30,10 +30,8 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-
    
-   @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 120000)
    public void testTroublesomeCaseOne()
    {
@@ -48,5 +46,4 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
       boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
       assertTrue(success);
    }
-   
 }

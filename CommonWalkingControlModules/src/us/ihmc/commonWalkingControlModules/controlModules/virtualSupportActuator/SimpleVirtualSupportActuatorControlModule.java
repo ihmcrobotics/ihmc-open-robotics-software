@@ -80,7 +80,7 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       // distribute forces
       SideDependentList<Double> fZs = new SideDependentList<Double>();
       SideDependentList<FrameVector> torques = new SideDependentList<FrameVector>();
-      doubleSupportForceDistributor.packForcesAndTorques(fZs, torques, fZOnPelvisInPelvisFrame, torqueOnPelvis, legStrengths, virtualToePoints);
+      doubleSupportForceDistributor.getForcesAndTorques(fZs, torques, fZOnPelvisInPelvisFrame, torqueOnPelvis, legStrengths, virtualToePoints);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -126,7 +126,7 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       SideDependentList<Double> fZs = new SideDependentList<Double>();
       SideDependentList<FrameVector> torques = new SideDependentList<FrameVector>();
 
-      doubleSupportForceDistributor.packForcesAndTorques(fZs, torques, fZOnPelvisInPelvisFrame, torqueOnPelvisInPelvisFrame, legStrengths, null);
+      doubleSupportForceDistributor.getForcesAndTorques(fZs, torques, fZOnPelvisInPelvisFrame, torqueOnPelvisInPelvisFrame, legStrengths, null);
       Double fZOnPelvisForLeg = fZs.get(stanceSide);
       FrameVector torqueOnPelvisForLeg = torques.get(stanceSide);
 
@@ -152,7 +152,7 @@ public class SimpleVirtualSupportActuatorControlModule implements VirtualSupport
       Wrench wrenchOnPelvisInPelvisFrame = stanceFullLegJacobian.getWrenchInVTPNullSpace(fZOnPelvisForLeg, torqueOnPelvisForLeg);
       
       // compute joint torques
-      stanceFullLegJacobian.packLegTorques(supportLegTorquesToPack, wrenchOnPelvisInPelvisFrame);
+      stanceFullLegJacobian.getLegTorques(supportLegTorquesToPack, wrenchOnPelvisInPelvisFrame);
    }
    
 

@@ -114,7 +114,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       parentRegistry.addChild(registry);
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
+   public void getVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, OldBipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
          RobotSide upcomingSupportLeg)
    {
       // Find trailing leg
@@ -133,7 +133,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
             .getX());
       if (useAlternateToePoints)
       {
-         geometricVirtualToePointCalculator.packVirtualToePoints(virtualToePoints, bipedSupportPolygons, copDesired, upcomingSupportLeg);
+         geometricVirtualToePointCalculator.getVirtualToePoints(virtualToePoints, bipedSupportPolygons, copDesired, upcomingSupportLeg);
          return;
       }
 
@@ -393,7 +393,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> originalVirtualToePoints, FramePoint2d copDesired,
+   public void getVirtualToePoints(SideDependentList<FramePoint2d> originalVirtualToePoints, FramePoint2d copDesired,
          FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges, RobotSide upcomingSupportSide)
    {
       throw new RuntimeException("Not implemented!");

@@ -16,6 +16,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.sensorProcessing.controlFlowPorts.YoFramePointControlFlowOutputPortTest.class,
    us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPortTest.class,
    us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPortTest.class,
+   us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignalsTest.class,
    us.ihmc.sensorProcessing.encoder.SimulatedEncoderTest.class,
    us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTreeTest.class,
    us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMapTest.class,

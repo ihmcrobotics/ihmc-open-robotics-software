@@ -82,7 +82,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
 
       double dPositiondStraightUpParameter = straightUpVector.getZ();
       FrameVector parabolicAcceleration = new FrameVector(initialPosition.getReferenceFrame());
-      parabolicTrajectoryGenerator.packAcceleration(parabolicAcceleration);
+      parabolicTrajectoryGenerator.getAcceleration(parabolicAcceleration);
       double parabolicParameterDot = dPositiondStraightUpParameter / dPositiondParabolicParameter * straightUpParameterDot;
       double parabolicParameterDDot = (dPositiondStraightUpParameter * straightUpParameterDDot - parabolicAcceleration.getZ() * MathTools.square(parabolicParameterDot)) / dPositiondParabolicParameter;
       parabolicParameterTrajectory.setParams(0.0, parabolicParameterDot, parabolicParameterDDot, 1.0, 1.0, 0.0, straightUpTime.getDoubleValue(), straightUpTime.getDoubleValue() + parabolicTime.getDoubleValue());
@@ -148,13 +148,13 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
             parameterdd = 0.0;
          }
 
-         parabolicTrajectoryGenerator.packPosition(positionToPack, parameter);
+         parabolicTrajectoryGenerator.getPosition(positionToPack, parameter);
 
-         parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
+         parabolicTrajectoryGenerator.getVelocity(tempVector, parameter);
          velocityToPack.setIncludingFrame(tempVector);
          velocityToPack.scale(parameterd);
 
-         parabolicTrajectoryGenerator.packAcceleration(accelerationToPack);
+         parabolicTrajectoryGenerator.getAcceleration(accelerationToPack);
          accelerationToPack.scale(parameterd * parameterd);
          tempVector.scale(parameterdd);
          accelerationToPack.add(tempVector);

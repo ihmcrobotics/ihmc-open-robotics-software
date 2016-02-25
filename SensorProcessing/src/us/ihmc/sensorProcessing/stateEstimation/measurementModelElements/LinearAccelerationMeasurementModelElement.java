@@ -139,7 +139,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       tempTransform.get(rotationFromEstimationToMeasurement);
 
       // T_{i}^{p,p}
-      twistCalculator.packRelativeTwist(twistOfMeasurementFrameWithRespectToEstimation, estimationLink, measurementLink);
+      twistCalculator.getRelativeTwist(twistOfMeasurementFrameWithRespectToEstimation, estimationLink, measurementLink);
 
       // r^{p} 
       rPTemp.setIncludingFrame(centerOfMassPositionPort.getData());
@@ -159,16 +159,16 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private void computeRpd(FrameVector rPdToPack, TwistCalculator twistCalculator, FramePoint rP, FrameVector rd)
    {
       // T_{p}^{p,w}
-      twistCalculator.packTwistOfBody(twistOfEstimationLink, estimationLink);
+      twistCalculator.getTwistOfBody(twistOfEstimationLink, estimationLink);
       twistOfEstimationLink.changeFrame(estimationFrame);
       
       // \dot{r}^{p} = R_{w}^{p} \dot{r} - \tilde{\omega}r^{p} - v_{p}^{p,w}
       rPdToPack.setIncludingFrame(rd);
       rPdToPack.changeFrame(estimationFrame);
-      twistOfEstimationLink.packAngularPart(tempFrameVector);
+      twistOfEstimationLink.getAngularPart(tempFrameVector);
       tempFrameVector.cross(tempFrameVector, rP);
       rPdToPack.sub(tempFrameVector);
-      twistOfEstimationLink.packLinearPart(tempFrameVector);
+      twistOfEstimationLink.getLinearPart(tempFrameVector);
       rPdToPack.sub(tempFrameVector);
    }
 
@@ -180,13 +180,13 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       // TODO: code and computation repeated in LinearAccelerationMeasurementModelJacobianAssembler
       RigidBody elevator = twistCalculator.getRootBody();
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
-      twistCalculator.packRelativeTwist(twistOfMeasurementLink, elevator, measurementLink);
-      spatialAccelerationCalculator.packRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
+      twistCalculator.getRelativeTwist(twistOfMeasurementLink, elevator, measurementLink);
+      spatialAccelerationCalculator.getRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
       spatialAccelerationOfMeasurementLink.changeFrame(elevatorFrame, twistOfMeasurementLink, twistOfMeasurementLink);
 
       twistOfMeasurementWithRespectToEstimation.changeFrame(estimationFrame);
-      twistOfMeasurementWithRespectToEstimation.packAngularPart(omegaEstimationToMeasurement);
-      twistOfMeasurementWithRespectToEstimation.packLinearPart(vEstimationToMeasurement);
+      twistOfMeasurementWithRespectToEstimation.getAngularPart(omegaEstimationToMeasurement);
+      twistOfMeasurementWithRespectToEstimation.getLinearPart(vEstimationToMeasurement);
 
       FramePoint r = centerOfMassPositionPort.getData();
       FrameVector rd = centerOfMassVelocityPort.getData();
@@ -204,7 +204,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
       // dOmegaWWMdPhi
       twistOfMeasurementLink.changeFrame(elevatorFrame);
-      twistOfMeasurementLink.packAngularPart(tempFrameVector);
+      twistOfMeasurementLink.getAngularPart(tempFrameVector);
       MatrixTools.toTildeForm(tempMatrix, tempFrameVector.getVector());
       phiJOmega.mul(tempMatrix, rotationFromEstimationToWorld);
       phiJOmega.negate();
@@ -223,13 +223,13 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       phiJV.add(tempMatrix);
 
       // dOmegadWWMdPhi
-      spatialAccelerationOfMeasurementLink.packAngularPart(tempVector);
+      spatialAccelerationOfMeasurementLink.getAngularPart(tempVector);
       MatrixTools.toTildeForm(tempMatrix, tempVector);
       phiJOmegad.mul(tempMatrix, rotationFromEstimationToWorld);
       phiJOmegad.negate();
 
       // dVdWWMdPhi
-      spatialAccelerationCalculator.packRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
+      spatialAccelerationCalculator.getRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
       twistOfMeasurementWithRespectToEstimation.changeFrame(measurementLink.getBodyFixedFrame());
       twistOfMeasurementLink.changeFrame(measurementLink.getBodyFixedFrame());
       spatialAccelerationOfMeasurementLink.changeFrame(estimationLink.getBodyFixedFrame(), twistOfMeasurementFrameWithRespectToEstimation,
@@ -238,22 +238,22 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       twistOfMeasurementLink.changeFrame(estimationFrame);
 
       s.setToZero(estimationFrame);
-      spatialAccelerationOfMeasurementLink.packAngularPart(tempFrameVector);
+      spatialAccelerationOfMeasurementLink.getAngularPart(tempFrameVector);
       tempFrameVector.cross(tempFrameVector, rP);
       s.add(tempFrameVector);
 
-      spatialAccelerationOfMeasurementLink.packLinearPart(tempFrameVector);
+      spatialAccelerationOfMeasurementLink.getLinearPart(tempFrameVector);
       s.add(tempFrameVector);
 
-      twistOfMeasurementLink.packAngularPart(tempFrameVector);
+      twistOfMeasurementLink.getAngularPart(tempFrameVector);
       tempFrameVector.cross(tempFrameVector, rPd);
       s.add(tempFrameVector);
 
-      twistOfMeasurementLink.packLinearPart(tempFrameVector);
+      twistOfMeasurementLink.getLinearPart(tempFrameVector);
       tempFrameVector.cross(omega, tempFrameVector);
       s.add(tempFrameVector);
 
-      twistOfMeasurementLink.packAngularPart(tempFrameVector);
+      twistOfMeasurementLink.getAngularPart(tempFrameVector);
       tempFrameVector.cross(tempFrameVector, rP);
       tempFrameVector.cross(omega, tempFrameVector);
       s.add(tempFrameVector);
@@ -288,8 +288,8 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
            FrameVector rd, FrameVector rPd)
    {
       twistOfMeasurementWithRespectToEstimation.changeFrame(estimationFrame);
-      twistOfMeasurementWithRespectToEstimation.packAngularPart(omegaEstimationToMeasurement);
-      twistOfMeasurementWithRespectToEstimation.packLinearPart(vEstimationToMeasurement);
+      twistOfMeasurementWithRespectToEstimation.getAngularPart(omegaEstimationToMeasurement);
+      twistOfMeasurementWithRespectToEstimation.getLinearPart(vEstimationToMeasurement);
 
       // dOmegaWWMdOmega
       omegaJOmega.set(rotationFromEstimationToWorld);
@@ -398,7 +398,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private void computeUnbiasedEstimatedMeasurement(SpatialAccelerationCalculator spatialAccelerationCalculator, FrameVector estimatedMeasurement)
    {
       tempFramePoint.setToZero(measurementFrame);
-      spatialAccelerationCalculator.packLinearAccelerationOfBodyFixedPoint(estimatedMeasurement, measurementLink, tempFramePoint);
+      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(estimatedMeasurement, measurementLink, tempFramePoint);
       estimatedMeasurement.changeFrame(gravitationalAcceleration.getReferenceFrame());
       estimatedMeasurement.sub(gravitationalAcceleration);
       estimatedMeasurement.changeFrame(measurementFrame);

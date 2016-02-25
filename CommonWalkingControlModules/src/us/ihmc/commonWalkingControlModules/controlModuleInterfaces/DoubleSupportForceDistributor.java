@@ -6,7 +6,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface DoubleSupportForceDistributor
 {
-   void packForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesInPelvisFrameToPack,
+   public abstract void getForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesInPelvisFrameToPack,
                              double zForceInPelvisFrameTotal, FrameVector torqueInPelvisFrameTotal, 
                              SideDependentList<Double> legStrengths, SideDependentList<FramePoint2d> virtualToePoints);
 }

@@ -1,6 +1,7 @@
 package us.ihmc.tools.inputDevices.joystick;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
 import net.java.games.input.Controller;
@@ -14,14 +15,14 @@ public class JoystickUpdater implements Runnable
    private final Controller joystickController;
    private final Object listnerConch = new Object();
    private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
-   private final ArrayList<JoystickGeneralListener> generalListenersList;
+   private final ArrayList<JoystickStatusListener> generalListenersList;
    
    private HashMap<String, Float> lastValues = new HashMap<String, Float>();
    private int pollIntervalMillis = 5;
-   private float deadband = 0.0f;
    private boolean connected;
+   private boolean threadRunning = false;
 
-   public JoystickUpdater(Controller joystickController, ArrayList<JoystickGeneralListener> generalListenersList)
+   public JoystickUpdater(Controller joystickController, ArrayList<JoystickStatusListener> generalListenersList)
    {
       this.joystickController = joystickController;
       this.generalListenersList = generalListenersList;
@@ -48,7 +49,8 @@ public class JoystickUpdater implements Runnable
    @Override
    public void run()
    {
-      while (true)
+      threadRunning = true;
+      while (threadRunning)
       {
          joystickController.poll();
          EventQueue queue = joystickController.getEventQueue();
@@ -56,18 +58,6 @@ public class JoystickUpdater implements Runnable
 
          while (queue.getNextEvent(event))
          {
-            if (isJoystickAxisEvent(event))
-            {
-               if (isInDeadBand(event))
-               {
-                  event.set(event.getComponent(), 0.0f, event.getNanos());
-               }
-               else
-               {
-                  event.set(event.getComponent(), scaleValue(event), event.getNanos());
-               }
-            }
-
             if (isNewValue(event))
             {
                if (DEBUG)
@@ -77,16 +67,22 @@ public class JoystickUpdater implements Runnable
 
                synchronized (listnerConch)
                {
-                  for (JoystickEventListener listener : listeners)
+                  try
                   {
-                     listener.processEvent(event);
+                     for (JoystickEventListener listener : listeners)
+                     {
+                        listener.processEvent(event);
+                     }
+                  }
+                  catch (ConcurrentModificationException e)
+                  {
+                     // Some listeners might not be notified.
                   }
                }
 
-               for (JoystickGeneralListener listener : generalListenersList)
+               for (JoystickStatusListener listener : generalListenersList)
                {
                   listener.updateConnectivity(connected);
-
                }
             }
          }
@@ -100,6 +96,11 @@ public class JoystickUpdater implements Runnable
             e.printStackTrace();
          }
       }
+   }
+   
+   public void stopThread()
+   {
+      threadRunning = false;
    }
 
    private boolean isNewValue(Event event)
@@ -118,30 +119,6 @@ public class JoystickUpdater implements Runnable
       lastValues.put(event.getComponent().getName(), event.getValue());
 
       return true;
-   }
-
-   private float scaleValue(Event event)
-   {
-      if (event.getValue() > 0.0f)
-      {
-         return (event.getValue() - deadband) / (1.0f - deadband);
-      }
-      else
-      {
-         return (event.getValue() + deadband) / (1.0f - deadband);
-      }
-   }
-
-   private boolean isInDeadBand(Event event)
-   {
-      return (event.getValue() < deadband) && (event.getValue() > -deadband);
-   }
-
-   private boolean isJoystickAxisEvent(Event event)
-   {
-      String name = event.getComponent().getName();
-
-      return name.equals("X Axis") || name.equals("Y Axis") || name.equals("Z Rotation");
    }
 
    public void setPollIntervalMillis(int pollIntervalMillis)

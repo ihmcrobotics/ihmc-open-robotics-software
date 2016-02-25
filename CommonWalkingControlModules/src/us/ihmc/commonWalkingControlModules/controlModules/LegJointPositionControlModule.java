@@ -189,7 +189,7 @@ public class LegJointPositionControlModule
       softScaleFactor.set(0.25);    // (0.05);
    }
 
-   public void packTorquesForLegJointsPositionControl(double scaleFactorBasedOnJacobianDeterminant, LegTorques legTorquesToPackForSwingLeg, LegJointPositions desiredLegJointPositions,
+   public void getTorquesForLegJointsPositionControl(double scaleFactorBasedOnJacobianDeterminant, LegTorques legTorquesToPackForSwingLeg, LegJointPositions desiredLegJointPositions,
            LegJointVelocities desiredLegJointVelocities)
    {
       // RobotSide checks

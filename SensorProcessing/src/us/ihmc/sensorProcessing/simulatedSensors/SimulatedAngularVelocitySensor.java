@@ -35,10 +35,10 @@ public class SimulatedAngularVelocitySensor extends SimulatedSensor<Vector3d>
 
    public void startComputation()
    {
-      twistCalculator.packTwistOfBody(twist, rigidBody);
+      twistCalculator.getTwistOfBody(twist, rigidBody);
 
       twist.changeFrame(measurementFrame);
-      twist.packAngularPart(angularVelocity);
+      twist.getAngularPart(angularVelocity);
       yoFrameVectorPerfect.set(angularVelocity);
       
       corrupt(angularVelocity);

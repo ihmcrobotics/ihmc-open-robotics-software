@@ -57,14 +57,14 @@ public class DigitalIMUSensorProcessor implements IMUSensorProcessor
    {
       // use orientationOffset^T instead of rotationMatrix, because the angular velocity is measured in IMU body!
       // omega^B = R^B_IMUBody * omega^IMUBody
-      rawIMUSensors.packAngularVelocity(angularVelocity, imuIndex);
+      rawIMUSensors.getAngularVelocity(angularVelocity, imuIndex);
       orientationOffsetTranspose.transform(angularVelocity);
       processedSensors.setAngularVelocityInBody(angularVelocity, imuIndex);
    }
 
    private void processOrientation()
    {
-      rawIMUSensors.packOrientation(rotationMatrixBeforeOffset, imuIndex);
+      rawIMUSensors.getOrientation(rotationMatrixBeforeOffset, imuIndex);
 
       rotationMatrix.mul(rotationMatrixBeforeOffset, orientationOffset);
       processedSensors.setRotation(rotationMatrix, imuIndex);
@@ -74,7 +74,7 @@ public class DigitalIMUSensorProcessor implements IMUSensorProcessor
    {
       // Compute acceleration in world frame, subtracting off gravity:
       Vector3d acceleration = new Vector3d();
-      rawIMUSensors.packAcceleration(acceleration, imuIndex);
+      rawIMUSensors.getAcceleration(acceleration, imuIndex);
       acceleration.sub(accelerationOffset);
 
       // use rotationMatrixBeforeOffset instead of rotationMatrix, because the accelerations are measured in IMU body!

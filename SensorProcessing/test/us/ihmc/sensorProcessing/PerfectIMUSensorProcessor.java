@@ -47,19 +47,19 @@ public class PerfectIMUSensorProcessor implements SensorProcessor
 
    private void processOrientation()
    {
-      rawIMUSensors.packOrientation(rotationMatrix, imuIndex);
+      rawIMUSensors.getOrientation(rotationMatrix, imuIndex);
       processedIMUSensors.setRotation(rotationMatrix, imuIndex);
    }
 
    private void processAngularVelocity()
    {
-      rawIMUSensors.packAngularVelocity(angRate, imuIndex);
+      rawIMUSensors.getAngularVelocity(angRate, imuIndex);
       processedIMUSensors.setAngularVelocityInBody(angRate, imuIndex);
    }
 
    private void processAcceleration()
    {
-      rawIMUSensors.packAcceleration(acceleration, imuIndex);
+      rawIMUSensors.getAcceleration(acceleration, imuIndex);
 
       rotationMatrix.transform(acceleration); // Compute acceleration in world frame
       acceleration.setZ(acceleration.getZ() + 0.0); // Compensate gravity

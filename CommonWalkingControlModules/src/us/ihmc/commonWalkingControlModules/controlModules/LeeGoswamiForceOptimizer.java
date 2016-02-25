@@ -107,13 +107,13 @@ public class LeeGoswamiForceOptimizer
 
       // kd
       Vector3d desiredNetTorque = new Vector3d();
-      desiredNetSpatialForceVector.packAngularPart(desiredNetTorque);
+      desiredNetSpatialForceVector.getAngularPart(desiredNetTorque);
       desiredNetTorque.scale(wk.getDoubleValue());
       MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetTorque, 0, 0);
 
       // ld
       Vector3d desiredNetForce = new Vector3d();
-      desiredNetSpatialForceVector.packLinearPart(desiredNetForce);
+      desiredNetSpatialForceVector.getLinearPart(desiredNetForce);
       MatrixTools.setDenseMatrixFromTuple3d(xi, desiredNetForce, VECTOR3D_LENGTH, 0);
 
       // xi

@@ -77,14 +77,14 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
 
    private void updateInitialPosition()
    {
-      initialPositionProvider.get(tempInitialPosition);
+      initialPositionProvider.getPosition(tempInitialPosition);
       tempInitialPosition.changeFrame(initialPosition.getReferenceFrame());
       initialPosition.set(tempInitialPosition);
    }
 
    private void updateFinalPosition()
    {
-      finalPositionProvider.get(tempFinalPosition);
+      finalPositionProvider.getPosition(tempFinalPosition);
       tempFinalPosition.changeFrame(finalPosition.getReferenceFrame());
       finalPosition.set(tempFinalPosition);
    }
@@ -120,19 +120,19 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
    @Override
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -143,11 +143,11 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    @Override

@@ -37,7 +37,7 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
    {
       time.set(0.0);
       FrameOrientation orientationToPack = new FrameOrientation(ReferenceFrame.getWorldFrame());
-      orientationProvider.get(orientationToPack);
+      orientationProvider.getOrientation(orientationToPack);
       orientationToPack.changeFrame(orientation.getReferenceFrame());
       orientation.set(orientationToPack);
    }
@@ -52,25 +52,25 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
       return time.getDoubleValue() > finalTime.getDoubleValue();
    }
 
-   public void get(FrameOrientation orientationToPack)
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void packAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(orientation.getReferenceFrame());
    }
 
-   public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
    {
       angularAccelerationToPack.setToZero(orientation.getReferenceFrame());
    }
 
-   public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
-      get(orientationToPack);
-      packAngularVelocity(angularVelocityToPack);
-      packAngularAcceleration(angularAccelerationToPack);
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      getAngularAcceleration(angularAccelerationToPack);
    }
 }

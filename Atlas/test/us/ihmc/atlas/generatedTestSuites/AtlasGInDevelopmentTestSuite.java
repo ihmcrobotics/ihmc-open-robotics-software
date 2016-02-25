@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasTurnValveBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class
 })
 
 public class AtlasGInDevelopmentTestSuite

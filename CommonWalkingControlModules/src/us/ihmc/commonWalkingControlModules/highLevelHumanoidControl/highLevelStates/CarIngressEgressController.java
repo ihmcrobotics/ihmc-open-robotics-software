@@ -312,7 +312,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime.getDoubleValue();
             pelvisPositionTrajectoryGenerator.compute(time);
 
-            pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
+            pelvisPositionTrajectoryGenerator.getPosition(desiredPelvisWaypointPosition);
             desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
             pelvisPositionTrajectoryGenerator.clear();
             pelvisPositionTrajectoryGenerator.appendWaypoint(0.0, desiredPelvisWaypointPosition, desiredPelvisWaypointLinearVelocity);
@@ -329,7 +329,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime.getDoubleValue();
             pelvisPositionTrajectoryGenerator.compute(time);
 
-            pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
+            pelvisPositionTrajectoryGenerator.getPosition(desiredPelvisWaypointPosition);
             desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
             
             WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = pelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
@@ -350,7 +350,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FrameVector desiredVelocity = new FrameVector(pelvisPositionControlFrame);
       FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
 
-      pelvisPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
+      pelvisPositionTrajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
 
       FrameVector pelvisLinearAcceleration = new FrameVector();
       pelvisController.doPositionControl(pelvisLinearAcceleration, desiredPosition, desiredVelocity, desiredPelvisAcceleration, fullRobotModel.getElevator());
@@ -384,7 +384,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          {
             chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
             FrameOrientation previousDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
-            chestOrientationTrajectoryGenerator.get(previousDesiredChestOrientation);
+            chestOrientationTrajectoryGenerator.getOrientation(previousDesiredChestOrientation);
             initialDesiredChestOrientation.setOrientation(previousDesiredChestOrientation);
 
             FrameOrientation desiredChestOrientation = chestOrientationProvider.getDesiredChestOrientation();
@@ -400,9 +400,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       FrameOrientation desiredOrientation = new FrameOrientation(chestPositionControlFrame);
       FrameVector desiredAngularVelocity = new FrameVector(chestPositionControlFrame);
       FrameVector desiredAngularAcceleration = new FrameVector(chestPositionControlFrame);
-      chestOrientationTrajectoryGenerator.get(desiredOrientation);
-      chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
-      chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
+      chestOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      chestOrientationTrajectoryGenerator.getAngularVelocity(desiredAngularVelocity);
+      chestOrientationTrajectoryGenerator.getAngularAcceleration(desiredAngularAcceleration);
 
       chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 

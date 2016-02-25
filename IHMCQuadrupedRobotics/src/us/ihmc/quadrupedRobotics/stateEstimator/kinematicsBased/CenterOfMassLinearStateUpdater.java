@@ -108,7 +108,7 @@ public class CenterOfMassLinearStateUpdater
 
       yoRootJointVelocity.set(rootJointVelocity);
       tempVelocity.setIncludingFrame(rootJointVelocity);
-      rootJoint.packJointTwist(rootJointTwist);
+      rootJoint.getJointTwist(rootJointTwist);
       tempVelocity.changeFrame(rootJointTwist.getExpressedInFrame());
       rootJointTwist.setLinearPart(tempVelocity);
       rootJoint.setJointTwist(rootJointTwist);

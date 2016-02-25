@@ -1,9 +1,15 @@
 package us.ihmc.robotics.screwTheory;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Ignore;
 import org.junit.Test;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
@@ -12,11 +18,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
@@ -83,7 +85,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       Twist twist = new Twist(frameB, frameA, frameA, new Vector3d(), getRandomVector(random));    // pure rotational velocity
       FramePoint pointFixedInFrameB = new FramePoint(frameA, getRandomVector(random));
       FrameVector accelerationOfPointFixedInFrameB = new FrameVector(ReferenceFrame.getWorldFrame());
-      accel.packAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
+      accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
       Vector3d expected = new Vector3d(pointFixedInFrameB.getVectorCopy());
       expected.cross(twist.getAngularPart(), expected);
@@ -93,9 +95,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    }
 
    // TODO: Figure out this test and get it to pass if it should.
-   @Ignore
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testAccelerationOfPointFixedInBodyFrameAlternative()
    {
@@ -105,7 +105,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       Twist twist = new Twist(frameB, frameA, frameA, RandomTools.generateRandomVector(random), getRandomVector(random));
       FramePoint pointFixedInFrameB = new FramePoint(frameA);    // , getRandomVector(random));
       FrameVector accelerationOfPointFixedInFrameB = new FrameVector(ReferenceFrame.getWorldFrame());
-      accel.packAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
+      accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
       Twist twistOfCurrentWithRespectToNew = new Twist(twist);
       twistOfCurrentWithRespectToNew.invert();
@@ -113,14 +113,14 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       accel.changeFrame(frameB, twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
 
       FrameVector expected = new FrameVector();
-      accel.packLinearPart(expected);
+      accel.getLinearPart(expected);
 
       FrameVector crossPart = new FrameVector(expected.getReferenceFrame());
       twist.changeFrame(expected.getReferenceFrame());
       FrameVector omega = new FrameVector();
-      twist.packAngularPart(omega);
+      twist.getAngularPart(omega);
       FrameVector v = new FrameVector();
-      twist.packLinearPart(v);
+      twist.getLinearPart(v);
       crossPart.cross(omega, v);
       expected.add(crossPart);
       expected.changeFrame(accelerationOfPointFixedInFrameB.getReferenceFrame());
@@ -328,7 +328,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       origin.changeFrame(acceleration.getBaseFrame());
       acceleration.changeFrame(acceleration.getBaseFrame(), twistOfBodyWithRespectToBase, twistOfBodyWithRespectToBase);
       twistOfBodyWithRespectToBase.changeFrame(acceleration.getBaseFrame());
-      acceleration.packAccelerationOfPointFixedInBodyFrame(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
+      acceleration.getAccelerationOfPointFixedInBodyFrame(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
 
       originAccelerationBack.changeFrame(originAcceleration.getReferenceFrame());
       JUnitTools.assertTuple3dEquals(originAccelerationBack.getVector(), originAcceleration.getVector(), 1e-12);

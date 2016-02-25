@@ -1,9 +1,0 @@
-#This message is deprecated.  Please use the version in gazebo_msgs instead.
-
-string link_name          # name of link
-string reference_frame    # reference frame of returned information, must be a valid link
-                          # if empty, use inertial (gazebo world) frame
----
-gazebo/LinkState link_state
-bool success              # return true if get info is successful
-string status_message     # comments if available

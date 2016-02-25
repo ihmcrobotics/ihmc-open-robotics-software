@@ -1,11 +1,11 @@
 package us.ihmc.robotics.numericalMethods;
 
-import org.junit.Ignore;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import static org.junit.Assert.fail;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class QuarticEquationSolverTest
 {
@@ -70,9 +70,7 @@ public class QuarticEquationSolverTest
 
    }
    
-   @Ignore //TODO: Fix this
-
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testQuarticEquationSolver()
    {

@@ -1,5 +1,5 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.8'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
 }
 
 
@@ -16,13 +16,25 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
+repositories {
+	maven {
+		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+	}
+}
+
+repositories {
+   mavenLocal()
+   jcenter()
+   mavenCentral()
+}
+
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
 
 dependencies
 {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")

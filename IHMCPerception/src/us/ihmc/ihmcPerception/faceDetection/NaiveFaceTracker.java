@@ -23,27 +23,13 @@ import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 public class NaiveFaceTracker
 {
-//   static
-//   {
-//      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
-//   }
-
    private final double SHIFT_DELTA = 200.0;
 
-   private final OpenCVFaceDetector faceDetector;
    private final ArrayList<Face> trackedFaces = new ArrayList<>();
    private final Set<Face> unmatchedFaces = new HashSet<>();
 
-   public NaiveFaceTracker(double scale)
+   public ArrayList<Face> matchTrackedFaces(Rect[] faces)
    {
-      faceDetector = new OpenCVFaceDetector(scale);
-   }
-
-   public ArrayList<Face> detect(BufferedImage bufferedImage)
-   {
-      Rect[] faces = faceDetector.detect(bufferedImage);
-      Graphics2D g2 = bufferedImage.createGraphics();
-
       unmatchedFaces.clear();
 
       for(int i = 0; i < trackedFaces.size(); i++)
@@ -51,9 +37,6 @@ public class NaiveFaceTracker
          int oldFaceX = trackedFaces.get(i).facialBorder.x;
          int oldFaceY = trackedFaces.get(i).facialBorder.y;
          boolean matched = false;
-
-         g2.setColor(trackedFaces.get(i).getColor());
-         g2.drawRect(oldFaceX, oldFaceY, trackedFaces.get(i).facialBorder.width, trackedFaces.get(i).facialBorder.height);
 
          for(int j = 0; j < faces.length; j++)
          {
@@ -93,8 +76,9 @@ public class NaiveFaceTracker
    public static void main(String[] arg) throws IOException
    {
       NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
-      VideoCapture cap = new VideoCapture(0);
-      NaiveFaceTracker faceTracker = new NaiveFaceTracker(0.5);
+      VideoCapture cap = new VideoCapture(1);
+      OpenCVFaceDetector faceDetector = new OpenCVFaceDetector(0.5);
+      NaiveFaceTracker faceTracker = new NaiveFaceTracker();
       ImagePanel panel = null;
       Mat image = new Mat();
       MatOfByte mem = new MatOfByte();
@@ -104,7 +88,19 @@ public class NaiveFaceTracker
 //         Imgcodecs.imdecode(buf, flags)
          Imgcodecs.imencode(".bmp", image, mem);
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
-         faceTracker.detect(bufferedImage);
+
+         Graphics2D g2 = bufferedImage.createGraphics();
+
+         Rect[] faces = faceDetector.detect(bufferedImage);
+         ArrayList<Face> trackedFaces = faceTracker.matchTrackedFaces(faces);
+
+         for (int i = 0; i < trackedFaces.size(); i++)
+         {
+            g2.setColor(trackedFaces.get(i).getColor());
+            g2.drawRect(trackedFaces.get(i).facialBorder.x, trackedFaces.get(i).facialBorder.y, trackedFaces.get(i).facialBorder.width,
+                  trackedFaces.get(i).facialBorder.height);
+         }
+
          if (panel == null)
          {
             panel = ShowImages.showWindow(bufferedImage, "faces");

@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
 public class AtlasScriptBehaviorTest extends DRCScriptBehaviorTest
 {
    private final AtlasRobotModel robotModel;

@@ -184,7 +184,7 @@ public class CylinderAndPlaneContactMatrixCalculator
                SpatialForceVector currentBasisVector = qRhoVectors[iRho];
 
                setRhoMin(iRho, 0, model.getRhoMin(iRhoModel));
-               model.packQRhoBodyFrame(iRhoModel, currentBasisVector, endEffector.getReferenceFrame());
+               model.getQRhoBodyFrame(iRhoModel, currentBasisVector, endEffector.getReferenceFrame());
 
                currentBasisVector.changeFrame(centerOfMassFrame);
                setQRho(iRho, currentBasisVector);
@@ -200,7 +200,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
                setPhiMin(iPhi, 0, model.getPhiMin(iPhiModel));
                setPhiMax(iPhi, 0, model.getPhiMax(iPhiModel));
-               model.packQPhiBodyFrame(iPhiModel, currentBasisVector, endEffector.getReferenceFrame());
+               model.getQPhiBodyFrame(iPhiModel, currentBasisVector, endEffector.getReferenceFrame());
 
                currentBasisVector.changeFrame(centerOfMassFrame);
                setQPhi(iPhi, currentBasisVector);
@@ -266,7 +266,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
    private void setQRho(int rhoLocation, SpatialForceVector spatialForceVector)
    {
-      spatialForceVector.packMatrixColumn(qRho, rhoLocation);
+      spatialForceVector.getMatrixColumn(qRho, rhoLocation);
    }
 
    private void setPhiMin(int phiLocation, int i, double phiMin)
@@ -281,7 +281,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
    private void setQPhi(int phiLocation, SpatialForceVector spatialForceVector)
    {
-      spatialForceVector.packMatrixColumn(qPhi, phiLocation);
+      spatialForceVector.getMatrixColumn(qPhi, phiLocation);
    }
 
    private void packYoDoubles(int iPhi, int q, SpatialForceVector currentBasisVector, FramePoint localPoint)
@@ -290,13 +290,13 @@ public class CylinderAndPlaneContactMatrixCalculator
       graphicYoDoubles[q][iPhi][Y].set(localPoint.getY());
       graphicYoDoubles[q][iPhi][Z].set(localPoint.getZ());
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
-      currentBasisVector.packAngularPart(tempVector);
+      currentBasisVector.getAngularPart(tempVector);
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
       graphicYoDoubles[q][iPhi][xx].set(tempVector.getX());
       graphicYoDoubles[q][iPhi][yy].set(tempVector.getY());
       graphicYoDoubles[q][iPhi][zz].set(tempVector.getZ());
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame());
-      currentBasisVector.packLinearPart(tempVector);
+      currentBasisVector.getLinearPart(tempVector);
       tempVector.changeFrame(currentBasisVector.getExpressedInFrame().getRootFrame());
       graphicYoDoubles[q][iPhi][x].set(tempVector.getX());
       graphicYoDoubles[q][iPhi][y].set(tempVector.getY());

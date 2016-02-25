@@ -1,8 +1,6 @@
 plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.8'
+   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
 }
-
-
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
@@ -10,11 +8,24 @@ sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
-project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
-project.ext.licenseName = "GPLv3"
-project.ext.bintrayLicenseName = "GPL-3.0"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
+
 
 repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+	maven {
+		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+	}
+}
+
+repositories {
+   mavenLocal()
+   jcenter()
+   mavenCentral()
+}
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
@@ -22,14 +33,13 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'us.ihmc.thirdparty.net.java.java3d', name: 'vecmath', version: '1.5.2'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
-    compile group: 'us.ihmc.thirdparty', name: 'opencv', version: '3.1.0-internal2'
+    compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0'
 
 	compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-    compile ihmc.getProjectDependency(":ROSJavaMessages")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":SDFLoader")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")

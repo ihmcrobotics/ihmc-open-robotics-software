@@ -223,14 +223,19 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
-   
+
+   public double getCurrentTime()
+   {
+      return this.currentTime.getDoubleValue();
+   }
+
    public void setToDone()
    {
       currentTime.set(trajectoryTime.getDoubleValue() + 0.01);
    }
 
    @Override
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
@@ -246,41 +251,41 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    }
 
    @Override
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packVelocity(YoFrameVector velocityToPack)
+   public void getVelocity(YoFrameVector velocityToPack)
    {
       velocityToPack.set(currentVelocity);
    }
 
-   public void packVelocity(Vector3d velocityToPack)
+   public void getVelocity(Vector3d velocityToPack)
    {
       currentVelocity.get(velocityToPack);
    }
 
    @Override
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void packAcceleration(Vector3d accelerationToPack)
+   public void getAcceleration(Vector3d accelerationToPack)
    {
       currentAcceleration.get(accelerationToPack);
    }
 
    @Override
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
-   public void packLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
+   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
    {
       positionToPack.set(currentPosition);
       velocityToPack.set(currentVelocity);

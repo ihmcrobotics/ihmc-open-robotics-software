@@ -346,7 +346,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
          accelerationMultipliers.reshape(selectionMatrix.getNumRows(), 1);
          DenseMatrix64F spatialAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-         spatialAcceleration.packMatrix(spatialAccelerationMatrix, 0);
+         spatialAcceleration.getMatrix(spatialAccelerationMatrix, 0);
          CommonOps.mult(selectionMatrix, spatialAccelerationMatrix, accelerationMultipliers);
       }
    }

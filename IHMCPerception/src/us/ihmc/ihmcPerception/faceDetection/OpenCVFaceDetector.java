@@ -4,9 +4,14 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -50,15 +55,19 @@ public class OpenCVFaceDetector
       
       try
       {
-         Path xmlPath = Paths.get(ClassLoader.getSystemResource(HAARCASCADE_FRONTALFACE_ALT_XML).toURI());
+         URI uri = ClassLoader.getSystemResource(HAARCASCADE_FRONTALFACE_ALT_XML).toURI();
+         Map<String, String> env = new HashMap<>();
+         env.put("create", "true");
+         FileSystem zipfs = FileSystems.newFileSystem(uri, env);
+         Path xmlPath = Paths.get(uri);
          cascadeClassifierForFaces = new CascadeClassifier(xmlPath.toString());
-         
+
          if (cascadeClassifierForFaces.empty())
          {
             throw new RuntimeException("cascadeClassifier is empty");
          }
       }
-      catch (URISyntaxException e)
+      catch (URISyntaxException | IOException e)
       {
          cascadeClassifierForFaces = null;
          e.printStackTrace();

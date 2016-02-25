@@ -52,7 +52,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      positionTrajectoryInput.packLinearData(smoothedPosition, smoothedVelocity, smoothedAcceleration);
+      positionTrajectoryInput.getLinearData(smoothedPosition, smoothedVelocity, smoothedAcceleration);
       trajectoryReferenceFrame = smoothedPosition.getReferenceFrame();
 
       yoSmoothedPosition = new YoFramePoint(namePrefix + "SmoothedPosition", trajectoryReferenceFrame, registry);
@@ -104,7 +104,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 
    private void setRawData()
    {
-      positionTrajectoryInput.packLinearData(smoothedPosition, smoothedVelocity, smoothedAcceleration);
+      positionTrajectoryInput.getLinearData(smoothedPosition, smoothedVelocity, smoothedAcceleration);
       yoSmoothedPosition.set(smoothedPosition);
       yoSmoothedVelocity.set(smoothedVelocity);
       smoothedAcceleration.setToZero(trajectoryReferenceFrame);
@@ -121,7 +121,7 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
          return;
       }
       
-      positionTrajectoryInput.packLinearData(positionInput, velocityInput, accelerationInput);
+      positionTrajectoryInput.getLinearData(positionInput, velocityInput, accelerationInput);
       
       positionError.sub(positionInput, smoothedPosition);
       velocityError.sub(velocityInput, smoothedVelocity);
@@ -175,26 +175,26 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       return isTrajectoryInputDone && isSmoothingDone;
    }
 
-   public void get(FramePoint positionToPack)
+   public void getPosition(FramePoint positionToPack)
    {
       yoSmoothedPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void packVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector velocityToPack)
    {
       yoSmoothedVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void packAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector accelerationToPack)
    {
       yoSmoothedAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
    }
 
    public void showVisualization()
