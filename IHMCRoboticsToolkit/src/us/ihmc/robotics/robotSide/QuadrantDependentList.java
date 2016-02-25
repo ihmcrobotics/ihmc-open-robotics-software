@@ -48,17 +48,18 @@ public class QuadrantDependentList<V>
    public void set(RobotQuadrant robotQuadrant, V element)
    {
       V existingElement = get(robotQuadrant);
-      if (existingElement == element)
-         return;
       
-      if (element == null)
-         --size;
-      else if (existingElement == null)
-         ++size;
-      
-      elements[robotQuadrant.ordinal()] = element;
-      
-      fillQuadrantArray();
+      if (existingElement != element)
+      {
+         if (element == null)
+            --size;
+         else if (existingElement == null)
+            ++size;
+         
+         elements[robotQuadrant.ordinal()] = element;
+         
+         fillQuadrantArray();
+      }
    }
    
    public V remove(RobotQuadrant robotQuadrant)
@@ -66,11 +67,13 @@ public class QuadrantDependentList<V>
       V element = get(robotQuadrant);
       
       if (element != null)
+      {
          --size;
       
-      elements[robotQuadrant.ordinal()] = null;
+         elements[robotQuadrant.ordinal()] = null;
       
-      fillQuadrantArray();
+         fillQuadrantArray();
+      }
       
       return element;
    }
