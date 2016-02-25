@@ -66,7 +66,7 @@ public class QuadrupedSwingTrajectoryGenerator
       alphaSlopeAtStart.set(1.5);
 
       //stretchedSlowAtEndAlphaToAlphaFunction = new StretchedSlowAtEndAlphaToAlphaFunction(alphaSlopeAtStart.getDoubleValue());
-      Point2d[] listOfPoints = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.5, 0.8), new Point2d(1.0, 1.0)};
+      Point2d[] listOfPoints = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.6, 0.8), new Point2d(1.0, 1.0)};
       alphaToAlphaFunction = new MultipleSegmentConstantSlope(listOfPoints);
 
 

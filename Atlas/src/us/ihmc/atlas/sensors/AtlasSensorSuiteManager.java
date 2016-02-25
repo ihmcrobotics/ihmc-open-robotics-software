@@ -34,6 +34,8 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
+   private final boolean ENABLE_BALL_POSE_ESTIMATOR = false;
+	
    private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
          new IHMCCommunicationKryoNetClassList());
 
@@ -86,6 +88,13 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       VisionPoseEstimator visionPoseEstimator = new VisionPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
             robotConfigurationDataBuffer, false);
+      
+      if (ENABLE_BALL_POSE_ESTIMATOR)
+      {
+         BallPoseEstimator ballPoseEstimator = new BallPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
+               robotConfigurationDataBuffer, false);
+      }
+      
       cameraDataReceiver.registerCameraListener(visionPoseEstimator);
    }
 

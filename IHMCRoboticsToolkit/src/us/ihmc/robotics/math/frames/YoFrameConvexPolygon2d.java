@@ -132,7 +132,28 @@ public class YoFrameConvexPolygon2d extends ReferenceFrameHolder implements Vari
       }
       catch (Exception e)
       {
-         System.err.println("In YoFrameConvexPolygon2d.java: " + e.getClass().getSimpleName() + " while calling setConvexPolygon2d(ConvexPolygon2d).");
+         System.err.println("In YoFrameConvexPolygon2d.java: " + e.getClass().getSimpleName() + " while calling setConvexPolygon2d(List<FramePoint>).");
+      }
+   }
+   
+   public void setConvexPolygon2d(FramePoint[] framePoints)
+   {
+      if (framePoints == null)
+      {
+         hide();
+         setToNaN();
+         return;
+      }
+
+      try
+      {
+         convexPolygon2dForWriting.clear(referenceFrame);
+         convexPolygon2dForWriting.setAndUpdate(framePoints);
+         getYoValuesFromFrameConvexPolygon2d();
+      }
+      catch (Exception e)
+      {
+         System.err.println("In YoFrameConvexPolygon2d.java: " + e.getClass().getSimpleName() + " while calling setConvexPolygon2d(FramePoint[]).");
       }
    }
    
