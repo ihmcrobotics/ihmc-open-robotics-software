@@ -29,7 +29,7 @@ repositories {
 }
 
 def strings = ['ihmc', 'robotics']
-ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
