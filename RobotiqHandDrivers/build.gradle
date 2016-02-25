@@ -32,7 +32,7 @@ repositories {
 }
 
 def strings = ['ihmc', 'robotics']
-ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 dependencies {
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
