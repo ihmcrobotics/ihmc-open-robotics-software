@@ -975,8 +975,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    {
       if(!comTrajectoryGenerator.isDone() && !comTrajectoryGeneratorRequiresReInitailization.getBooleanValue() && (walkingStateMachine.isCurrentState(CrawlGateWalkingState.TRIPLE_SUPPORT) || !isDesiredVelocityAndYawRateZero()))
       {
-         double deltaTimeFromLastCall = robotTimestamp.getDoubleValue() - comTrajectoryTimeLastCalled.getDoubleValue();
-         double deltaTimeToUse = comTrajectoryTimeScaleFactor.getDoubleValue()*deltaTimeFromLastCall;
+//         double deltaTimeFromLastCall = robotTimestamp.getDoubleValue() - comTrajectoryTimeLastCalled.getDoubleValue();
+         double deltaTimeToUse = comTrajectoryTimeScaleFactor.getDoubleValue()*dt;
          comTrajectoryTimeCurrent.set(comTrajectoryTimeCurrent.getDoubleValue() + deltaTimeToUse);
          //comTrajectoryTimeCurrent.set(robotTimestamp.getDoubleValue() - comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryGenerator.compute(comTrajectoryTimeCurrent.getDoubleValue());
