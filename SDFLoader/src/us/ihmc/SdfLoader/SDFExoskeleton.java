@@ -43,11 +43,6 @@ public class SDFExoskeleton extends SDFRobot {
 						footGroundContactPoints.get(robotSide).addAll(contactPointsForJoint);
 					}
 				}
-				
-				if (joint.getName().endsWith("_leg_hipy"))
-				{
-				   joint.addExternalForcePoint(new ExternalForcePoint(joint.getName() + "_humanExternalForcePoint", this));
-				}
 			}
 		}
 			
