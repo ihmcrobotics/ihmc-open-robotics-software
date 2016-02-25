@@ -11,9 +11,9 @@ sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
-project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
-project.ext.licenseName = "GPLv3"
-project.ext.bintrayLicenseName = "GPL-3.0"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
 
 apply plugin: 'application'
 
@@ -32,7 +32,7 @@ repositories {
 }
 
 def strings = ['ihmc', 'robotics']
-ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -182,3 +182,37 @@ task deployViewer(dependsOn: [guiCaptureViewerDistTar, setupDeployViewerRemote])
    }
 }
 
+task checkThatDistributionDoesntAlreadyExist(type: Exec) {
+   def distTarFile = loggerDistTar.outputs.files.singleFile
+   workingDir project.projectDir
+   executable 'curl'
+   args = ["--write-out", "%{http_code}", "--silent", "--output", "/dev/null", "--head", "https://dl.bintray.com/ihmcrobotics/distributions/${distTarFile.name}"]
+   standardOutput = new ByteArrayOutputStream();
+
+   doLast {
+      execResult.assertNormalExitValue()
+      def output = standardOutput.toString()
+      if(output.equals("200")) {
+         throw new GradleException("Distribution ${distTarFile.name} already exists on Bintray. Distributions versions should not be overwritten. Did you mean to release a new version or hotfix?")
+      }
+   }
+}
+
+task publishLoggerDistributionToBintray(type: Exec, dependsOn: [checkThatDistributionDoesntAlreadyExist, loggerDistTar]) {
+   def distTarFile = loggerDistTar.outputs.files.singleFile
+   def user = project.hasProperty("bintray_user") ? project.bintray_user : "invalid"
+   def key = project.hasProperty("bintray_key") ? project.bintray_key : "invalid"
+
+   workingDir project.projectDir
+   executable 'curl'
+   args = ["--write-out", "%{http_code}", "--silent", "--output", "/dev/null", "-T", distTarFile.canonicalPath, "-u${user}:${key}", "https://api.bintray.com/content/ihmcrobotics/distributions/IHMCLogger/${project.version}/${distTarFile.name}?publish=1"]
+   standardOutput = new ByteArrayOutputStream();
+
+   doLast {
+      execResult.assertNormalExitValue()
+      def output = standardOutput.toString()
+      if(!output.equals("201")) {
+         throw new GradleException("Upload failed! HTTP Response code: ${output}.")
+      }
+   }
+}

@@ -21,7 +21,8 @@ public enum PacketDestination
    AUXILIARY_ROBOT_DATA_PUBLISHER, 
    ZERO_POSE_PRODUCER,
    SPEECH_TO_TEXT,
-   DRILL_DETECTOR;
+   DRILL_DETECTOR,
+   AUDIO_MODULE;
 
    public static final PacketDestination[] values = values();
    

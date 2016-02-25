@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@TestSuiteTarget(TestPlanTarget.Flaky)
 @SuiteClasses
 ({
    us.ihmc.acsell.BonoFlatGroundWalkingTest.class
 })
 
-public class AcsellAFastTestSuite
+public class AcsellAFlakyTestSuite
 {
    public static void main(String[] args)
    {
