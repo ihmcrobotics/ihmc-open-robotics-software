@@ -21,6 +21,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.exceptions.NoConvergenceExceptionTest.class,
    us.ihmc.tools.FormattingToolsTest.class,
    us.ihmc.tools.gui.GUIMessagePanelTest.class,
+   us.ihmc.tools.inputDevices.ghostMouse.GhostMousePlaybackTest.class,
    us.ihmc.tools.inputDevices.ghostMouse.GhostMouseStringToCharTest.class,
    us.ihmc.tools.inputDevices.joystick.JoystickTest.class,
    us.ihmc.tools.inputDevices.JoystickDirectionTest.class,
@@ -50,6 +51,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.taskExecutor.ParallelTaskTest.class,
    us.ihmc.tools.taskExecutor.PipeLineTest.class,
    us.ihmc.tools.taskExecutor.TaskExecutorTest.class,
+   us.ihmc.tools.thread.ThreadToolsTest.class,
    us.ihmc.tools.time.DateToolsTest.class,
    us.ihmc.tools.UnitConversionsTest.class
 })
