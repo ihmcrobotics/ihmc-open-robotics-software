@@ -41,6 +41,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -77,8 +79,11 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 {
+   private static final double MAX_YAW_IN_PLACE = 0.4;
+   
+   
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
-   private static final double DEFAULT_YAW_IN_PLACE_BREAK_FREQUENCY = 1.0;
+   private static final double DEFAULT_YAW_IN_PLACE_RATE_LIMIT = 0.2;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
@@ -190,9 +195,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable nominalYaw = new DoubleYoVariable("nominalYaw", registry);
    
    private final DoubleYoVariable desiredYawInPlace = new DoubleYoVariable("desiredYawInPlace", registry);
-   private final DoubleYoVariable filteredDesiredYawInPlaceAlpha = new DoubleYoVariable("filteredDesiredYawInPlaceAlpha", registry);
-   private final DoubleYoVariable filteredDesiredYawInPlaceAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredYawInPlaceAlphaBreakFrequency", registry);
-   private final AlphaFilteredWrappingYoVariable filteredDesiredYawInPlace = new AlphaFilteredWrappingYoVariable("filteredDesiredYawInPlace", "", registry, desiredYawInPlace, filteredDesiredYawInPlaceAlpha, -Math.PI, Math.PI);
+   private final DoubleYoVariable desiredYawInPlaceRateLimit = new DoubleYoVariable("desiredYawInPlaceRateLimit", registry);
+   private final RateLimitedYoVariable desiredYawInPlaceRateLimited;
    
    
    private final YoFrameLineSegment2d nominalYawLineSegment = new YoFrameLineSegment2d("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
@@ -438,11 +442,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             createBreakFrequencyChangeListener(dt, filteredDesiredCoMRollAlphaBreakFrequency, filteredDesiredCoMRollAlpha));
       
       
-      filteredDesiredYawInPlaceAlphaBreakFrequency.set(DEFAULT_YAW_IN_PLACE_BREAK_FREQUENCY);
-      filteredDesiredYawInPlaceAlpha.set(
-            AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredYawInPlaceAlphaBreakFrequency.getDoubleValue(), dt));
-      filteredDesiredYawInPlaceAlphaBreakFrequency.addVariableChangedListener(
-            createBreakFrequencyChangeListener(dt, filteredDesiredYawInPlaceAlphaBreakFrequency, filteredDesiredYawInPlaceAlpha));
+      desiredYawInPlaceRateLimited  = new RateLimitedYoVariable("desiredYawInPlaceRateLimited", registry, desiredYawInPlaceRateLimit, dt);
+      desiredYawInPlaceRateLimit.set(DEFAULT_YAW_IN_PLACE_RATE_LIMIT);
       
       
       filteredDesiredCoMHeightAlphaBreakFrequency.set(DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY);
@@ -1008,7 +1009,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       DoubleYoVariable desiredYaw = desiredCoMOrientation.getYaw();
       
       //only let desiredYawInPlace be non zero when not walking
-      double maxYawInPlace = 0.4;
+      double maxYawInPlace = MAX_YAW_IN_PLACE;
       if (!isDesiredVelocityAndYawRateZero())
       {
          desiredYawInPlace.set(0.0);
@@ -1021,8 +1022,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             desiredYawInPlace.set(-maxYawInPlace);
       }
       
-      filteredDesiredYawInPlace.update();
-      desiredYaw.set(nominalYaw.getDoubleValue() + filteredDesiredYawInPlace.getDoubleValue());
+    
+      desiredYawInPlaceRateLimited.update(desiredYawInPlace.getDoubleValue());
+      desiredYaw.set(nominalYaw.getDoubleValue() + desiredYawInPlaceRateLimited.getDoubleValue());
    }
    
    /**
