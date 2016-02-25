@@ -1,35 +1,25 @@
 package us.ihmc.robotics.robotSide;
 
+import us.ihmc.robotics.lists.GenericTypeBuilder;
+
 @SuppressWarnings("unchecked")
 public class RecyclingQuadrantDependentList<V> extends QuadrantDependentList<V>
 {
    private final V[] elementStorageForWhenNull = (V[]) new Object[4];
-   private final GenericTypeAdapter<V> genericTypeAdapter; 
+   private final GenericTypeBuilder<V> builder;
 
-   public RecyclingQuadrantDependentList(GenericTypeAdapter<V> genericTypeAdapter)
+   public RecyclingQuadrantDependentList(Class<V> clazz)
    {
       super();
       
-      this.genericTypeAdapter = genericTypeAdapter;
+      builder = GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz);
       
       for (int i = 0; i < 4; i++)
       {
-         V newV = genericTypeAdapter.makeANewV();
+         V newInstance = builder.newInstance();
          
-         if (newV == null)
-         {
-            throw new RuntimeException("New V cannot be null.");
-         }
-         
-         elementStorageForWhenNull[i] = newV;
+         elementStorageForWhenNull[i] = newInstance;
       }
-   }
-   
-   public interface GenericTypeAdapter<V>
-   {
-      public V makeANewV();
-      
-      public void setAV(V newV, V setThisV);
    }
    
    /**
@@ -53,33 +43,29 @@ public class RecyclingQuadrantDependentList<V> extends QuadrantDependentList<V>
       }
    }
 
-   @Override
-   public void set(RobotQuadrant robotQuadrant, V element)
+   public V add(RobotQuadrant robotQuadrant)
    {
+      V element = elementStorageForWhenNull[robotQuadrant.ordinal()];
       // do nothing
       if (element == get(robotQuadrant))
       {
-         return;
+         return element;
       }
       // remove
       if (element == null && containsQuadrant(robotQuadrant))
       {
          super.set(robotQuadrant, element);
-         return;
+         return element;
       }
       // add
       else if (element != null && !containsQuadrant(robotQuadrant))
       {
          V storageWhenNull = elementStorageForWhenNull[robotQuadrant.ordinal()];
-         genericTypeAdapter.setAV(element, storageWhenNull);
          super.set(robotQuadrant, storageWhenNull);
-         return;
+         return element;
       }
-      // replace
-      else if (element != get(robotQuadrant))
-      {
-         genericTypeAdapter.setAV(element, get(robotQuadrant));
-      }
+      
+      return element;
    }
 
    @Override

@@ -30,11 +30,10 @@ public class QuadrupedSupportPolygon implements Serializable
 {
    private static final long serialVersionUID = 4247638266737494462L;
    
-   private final QuadrantDependentFootstepList footsteps = new QuadrantDependentFootstepList();
+   private final RecyclingQuadrantDependentList<FramePoint> footsteps = new RecyclingQuadrantDependentList<>(FramePoint.class);
    
    private final FrameConvexPolygon2d tempFrameConvexPolygon2d = new FrameConvexPolygon2d();
    
-   private static final FramePoint ZERO_FRAME_POINT = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
    private final FramePoint temporaryFramePoint = new FramePoint();
    private final FrameVector tempPlaneNormalInWorld = new FrameVector();
    
@@ -70,28 +69,7 @@ public class QuadrupedSupportPolygon implements Serializable
    {
       for (RobotQuadrant robotQuadrant : polygon.getSupportingQuadrantsInOrder())
       {
-         footsteps.set(robotQuadrant, polygon.getFootstep(robotQuadrant));
-      }
-   }
-   
-   private class QuadrantDependentFootstepList extends RecyclingQuadrantDependentList<FramePoint>
-   {
-      public QuadrantDependentFootstepList()
-      {
-         super(new GenericTypeAdapter<FramePoint>()
-         {
-            @Override
-            public FramePoint makeANewV()
-            {
-               return new FramePoint();
-            }
-
-            @Override
-            public void setAV(FramePoint newV, FramePoint setThisV)
-            {
-               setThisV.setIncludingFrame(newV);
-            }
-         });
+         setFootstep(robotQuadrant, polygon.getFootstep(robotQuadrant));
       }
    }
    
@@ -296,7 +274,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public FramePoint reviveFootstep(RobotQuadrant robotQuadrant)
    {      
-      return footsteps.revive(robotQuadrant);
+      return footsteps.add(robotQuadrant);
    }
    
    public void set(QuadrupedSupportPolygon polygon)
@@ -309,7 +287,14 @@ public class QuadrupedSupportPolygon implements Serializable
 
    public void setFootstep(RobotQuadrant robotQuadrant, FramePoint footstep)
    {
-      footsteps.set(robotQuadrant, footstep);
+      if (footstep == null)
+      {
+         footsteps.remove(robotQuadrant);
+      }
+      else
+      {
+         footsteps.add(robotQuadrant).setIncludingFrame(footstep);
+      }
    }
 
    public void removeFootstep(RobotQuadrant robotQuadrant)
