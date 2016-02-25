@@ -31,16 +31,18 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
    private final IntegerYoVariable numberOfWaypoints;
    private final IntegerYoVariable currentWaypointIndex;
-   private final ArrayList<YoFrameEuclideanWaypoint> waypoints;
+   private final ArrayList<YoFrameEuclideanTrajectoryPoint> waypoints;
 
    private final VelocityConstrainedPositionTrajectoryGenerator subTrajectory;
 
-   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
+         YoVariableRegistry parentRegistry)
    {
       this(namePrefix, maximumNumberOfWaypoints, false, referenceFrame, parentRegistry);
    }
 
-   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, boolean allowMultipleFrames,
+         ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       super(allowMultipleFrames, referenceFrame);
 
@@ -62,7 +64,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         YoFrameEuclideanWaypoint waypoint = new YoFrameEuclideanWaypoint(namePrefix, "AtWaypoint" + i, registry, referenceFrame);
+         YoFrameEuclideanTrajectoryPoint waypoint = new YoFrameEuclideanTrajectoryPoint(namePrefix, "AtWaypoint" + i, registry, referenceFrame);
          waypoints.add(waypoint);
          if (allowMultipleFrames)
             registerMultipleFramesHolders(waypoint);
@@ -108,13 +110,13 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(EuclideanWaypointInterface euclideanWaypoint)
+   public void appendWaypoint(EuclideanTrajectoryPointInterface<?> euclideanWaypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(euclideanWaypoint);
    }
-   
-   private void appendWaypointUnsafe(EuclideanWaypointInterface euclideanWaypoint)
+
+   private void appendWaypointUnsafe(EuclideanTrajectoryPointInterface<?> euclideanWaypoint)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(euclideanWaypoint);
       numberOfWaypoints.increment();
@@ -122,7 +124,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
    public void appendWaypoints(double[] timeAtWaypoints, FramePoint[] positions, FrameVector[] linearVelocities)
    {
-      if (timeAtWaypoints.length != positions.length || (linearVelocities != null && positions.length != linearVelocities.length))
+      if (timeAtWaypoints.length != positions.length || linearVelocities != null && positions.length != linearVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");
 
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + timeAtWaypoints.length);
@@ -142,7 +144,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], linearVelocities[i]);
    }
 
-   public void appendWaypoints(EuclideanWaypointInterface[] euclideanWaypoint)
+   public void appendWaypoints(EuclideanTrajectoryPointInterface<?>[] euclideanWaypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + euclideanWaypoint.length);
 
@@ -150,7 +152,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          appendWaypointUnsafe(euclideanWaypoint[i]);
    }
 
-   public void appendWaypoints(RecyclingArrayList<? extends EuclideanWaypointInterface> euclideanWaypoint)
+   public void appendWaypoints(RecyclingArrayList<? extends EuclideanTrajectoryPointInterface<?>> euclideanWaypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + euclideanWaypoint.size());
 
@@ -198,7 +200,8 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    {
       currentTrajectoryTime.set(time);
 
-      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
+            && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
@@ -266,7 +269,8 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       if (numberOfWaypoints.getIntegerValue() == 0)
          return namePrefix + ": Has no waypoints.";
       else
-         return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = " + currentWaypointIndex.getIntegerValue()
-         + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: " + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
+         return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = "
+               + currentWaypointIndex.getIntegerValue() + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: "
+               + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
    }
 }

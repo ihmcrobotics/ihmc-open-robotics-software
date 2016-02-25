@@ -292,7 +292,7 @@ public class PelvisOrientationManager
       waypointOrientationOffsetTrajectoryGenerator.clear();
       waypointOrientationOffsetTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
 
-      if (message.getWaypoint(0).getTime() > 1.0e-5)
+      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          activeOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
          tempOrientation.changeFrame(worldFrame);
@@ -301,7 +301,7 @@ public class PelvisOrientationManager
          waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
 
-      waypointOrientationOffsetTrajectoryGenerator.appendWaypoints(message.getWaypoints());
+      waypointOrientationOffsetTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
       waypointOrientationOffsetTrajectoryGenerator.changeFrame(desiredPelvisFrame);
       waypointOrientationOffsetTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);

@@ -5,16 +5,16 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 
-@ClassDocumentation("This mesage commands the controller to move the pelvis to a new height in world while going through the specified waypoints."
+@ClassDocumentation("This mesage commands the controller to move the pelvis to a new height in world while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
-      + " A third order polynomial is used to interpolate between waypoints."
+      + " A third order polynomial is used to interpolate between trajectory points."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
 public class PelvisHeightTrajectoryMessage extends IHMCRosApiMessage<PelvisHeightTrajectoryMessage> implements VisualizablePacket
 {
-   @FieldDocumentation("List of waypoints to go through while executing the trajectory.")
-   public Waypoint1DMessage[] waypoints;
+   @FieldDocumentation("List of trajectory points to go through while executing the trajectory.")
+   public TrajectoryPoint1DMessage[] trajectoryPoints;
 
    /**
     * Empty constructor for serialization.
@@ -33,9 +33,9 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiMessage<PelvisHeigh
    {
       setUniqueId(pelvisHeightTrajectoryMessage.getUniqueId());
       setDestination(pelvisHeightTrajectoryMessage.getDestination());
-      waypoints = new Waypoint1DMessage[pelvisHeightTrajectoryMessage.getNumberOfWaypoints()];
-      for (int i = 0; i < getNumberOfWaypoints(); i++)
-         waypoints[i] = new Waypoint1DMessage(pelvisHeightTrajectoryMessage.waypoints[i]);
+      trajectoryPoints = new TrajectoryPoint1DMessage[pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints()];
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+         trajectoryPoints[i] = new TrajectoryPoint1DMessage(pelvisHeightTrajectoryMessage.trajectoryPoints[i]);
    }
 
    /**
@@ -47,64 +47,64 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiMessage<PelvisHeigh
    public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      waypoints = new Waypoint1DMessage[] {new Waypoint1DMessage(trajectoryTime, desiredHeight, 0.0)};
+      trajectoryPoints = new TrajectoryPoint1DMessage[] {new TrajectoryPoint1DMessage(trajectoryTime, desiredHeight, 0.0)};
    }
 
    /**
-    * Use this constructor to build a message with more than one waypoint.
-    * This constructor only allocates memory for the waypoints, you need to call {@link #setWaypoint(int, double, double, double)} for each waypoint afterwards.
+    * Use this constructor to build a message with more than one trajectory point.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param numberOfWaypoints number of waypoints that will be sent to the controller.
+    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */
-   public PelvisHeightTrajectoryMessage(int numberOfWaypoints)
+   public PelvisHeightTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      waypoints = new Waypoint1DMessage[numberOfWaypoints];
+      trajectoryPoints = new TrajectoryPoint1DMessage[numberOfTrajectoryPoints];
    }
 
    /**
-    * Create a waypoint.
-    * @param waypointIndex index of the waypoint to create.
-    * @param time time at which the waypoint has to be reached. The time is relative to when the trajectory starts.
-    * @param height define the desired height position to be reached at this waypoint. It is expressed in world frame.
-    * @param heightVelocity define the desired height velocity to be reached at this waypoint. It is expressed in world frame.
+    * Create a trajectory point.
+    * @param trajectoryPointIndex index of the trajectory point to create.
+    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * @param height define the desired height position to be reached at this trajectory point. It is expressed in world frame.
+    * @param heightVelocity define the desired height velocity to be reached at this trajectory point. It is expressed in world frame.
     */
-   public void setWaypoint(int waypointIndex, double time, double height, double heightVelocity)
+   public void setTrajectoryPoint(int trajectoryPointIndex, double time, double height, double heightVelocity)
    {
-      rangeCheck(waypointIndex);
-      waypoints[waypointIndex] = new Waypoint1DMessage(time, height, heightVelocity);
+      rangeCheck(trajectoryPointIndex);
+      trajectoryPoints[trajectoryPointIndex] = new TrajectoryPoint1DMessage(time, height, heightVelocity);
    }
 
-   public int getNumberOfWaypoints()
+   public int getNumberOfTrajectoryPoints()
    {
-      return waypoints.length;
+      return trajectoryPoints.length;
    }
 
-   public Waypoint1DMessage getWaypoint(int waypointIndex)
+   public TrajectoryPoint1DMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
-      return waypoints[waypointIndex];
+      return trajectoryPoints[trajectoryPointIndex];
    }
 
-   public Waypoint1DMessage[] getWaypoints()
+   public TrajectoryPoint1DMessage[] getTrajectoryPoints()
    {
-      return waypoints;
+      return trajectoryPoints;
    }
 
-   private void rangeCheck(int waypointIndex)
+   private void rangeCheck(int trajectoryPointIndex)
    {
-      if (waypointIndex >= getNumberOfWaypoints() || waypointIndex < 0)
-         throw new IndexOutOfBoundsException("Waypoint index: " + waypointIndex + ", number of waypoints: " + getNumberOfWaypoints());
+      if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
+         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
    }
 
    @Override
    public boolean epsilonEquals(PelvisHeightTrajectoryMessage other, double epsilon)
    {
-      if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
+      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          return false;
       
-      for (int i = 0; i < getNumberOfWaypoints(); i++)
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
-         if (!waypoints[i].epsilonEquals(other.waypoints[i], epsilon))
+         if (!trajectoryPoints[i].epsilonEquals(other.trajectoryPoints[i], epsilon))
             return false;
       }
 
@@ -114,9 +114,9 @@ public class PelvisHeightTrajectoryMessage extends IHMCRosApiMessage<PelvisHeigh
    @Override
    public String toString()
    {
-      if (waypoints != null)
-         return "Pelvis height 1D trajectory: number of 1D waypoints = " + getNumberOfWaypoints();
+      if (trajectoryPoints != null)
+         return "Pelvis height 1D trajectory: number of 1D trajectory points = " + getNumberOfTrajectoryPoints();
       else
-         return "Pelvis height 1D trajectory: no 1D waypoints";
+         return "Pelvis height 1D trajectory: no 1D trajectory point.";
    }
 }

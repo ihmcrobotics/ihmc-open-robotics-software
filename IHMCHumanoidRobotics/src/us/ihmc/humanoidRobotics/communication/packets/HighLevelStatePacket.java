@@ -7,8 +7,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 
 @ClassDocumentation("This message is used to switch the control scheme between force and position control.\n"
-                                  + "WARNING: When in position control, the IHMC balance algorithms will be disabled and\n"
-                                  + "it is up to the user to ensure stability.")
+      + "WARNING: When in position control, the IHMC balance algorithms will be disabled and\n" + "it is up to the user to ensure stability.")
 public class HighLevelStatePacket extends Packet<HighLevelStatePacket>
 {
    public us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState highLevelState;
@@ -28,11 +27,13 @@ public class HighLevelStatePacket extends Packet<HighLevelStatePacket>
       return highLevelState;
    }
 
+   @Override
    public boolean equals(Object obj)
    {
-      return ((obj instanceof HighLevelStatePacket) && this.epsilonEquals((HighLevelStatePacket) obj, 0));
+      return obj instanceof HighLevelStatePacket && this.epsilonEquals((HighLevelStatePacket) obj, 0);
    }
 
+   @Override
    public String toString()
    {
       return "State= " + highLevelState.toString();

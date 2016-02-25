@@ -10,14 +10,14 @@ import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified waypoints."
+@ClassDocumentation("This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points."
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
-      + " To excute a single straight line trajectory to reach a desired hand pose, set only one waypoint with zero velocity and its time to be equal to the desired trajectory time."
+      + " To excute a single straight line trajectory to reach a desired hand pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
 public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessage> implements TransformableDataObject<HandTrajectoryMessage>, VisualizablePacket
 {
@@ -51,8 +51,8 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
    public RobotSide robotSide;
    @FieldDocumentation("Specifies whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
    public BaseForControl base;
-   @FieldDocumentation("List of waypoints (in taskpsace) to go through while executing the trajectory. All the information contained in these waypoints needs to be expressed in world frame.")
-   public SE3WaypointMessage[] taskspaceWaypoints;
+   @FieldDocumentation("List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
+   public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
 
    /**
     * Empty constructor for serialization.
@@ -72,9 +72,9 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
       setUniqueId(handTrajectoryMessage.getUniqueId());
       setDestination(handTrajectoryMessage.getDestination());
       robotSide = handTrajectoryMessage.robotSide;
-      taskspaceWaypoints = new SE3WaypointMessage[handTrajectoryMessage.getNumberOfWaypoints()];
-      for (int i = 0; i < getNumberOfWaypoints(); i++)
-         taskspaceWaypoints[i] = new SE3WaypointMessage(handTrajectoryMessage.taskspaceWaypoints[i]);
+      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[handTrajectoryMessage.getNumberOfTrajectoryPoints()];
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(handTrajectoryMessage.taskspaceTrajectoryPoints[i]);
    }
 
    /**
@@ -106,43 +106,43 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
       this.base = base;
       Vector3d zeroLinearVelocity = new Vector3d();
       Vector3d zeroAngularVelocity = new Vector3d();
-      taskspaceWaypoints = new SE3WaypointMessage[] {new SE3WaypointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
+      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
    }
 
    /**
-    * Use this constructor to build a message with more than one waypoint.
-    * This constructor only allocates memory for the waypoints, you need to call {@link #setWaypoint(int, double, Point3d, Quat4d, Vector3d, Vector3d)} for each waypoint afterwards.
+    * Use this constructor to build a message with more than one trajectory point.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3d, Quat4d, Vector3d, Vector3d)} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
     * @param base define with respect to what base the hand is controlled.
-    * @param numberOfWaypoints number of waypoints that will be sent to the controller.
+    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, int numberOfWaypoints)
+   public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.base = base;
-      taskspaceWaypoints = new SE3WaypointMessage[numberOfWaypoints];
+      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfTrajectoryPoints];
    }
 
    /**
-    * Create a waypoint.
-    * @param waypointIndex index of the waypoint to create.
-    * @param time time at which the waypoint has to be reached. The time is relative to when the trajectory starts.
-    * @param position define the desired 3D position to be reached at this waypoint. It is expressed in world frame.
-    * @param orientation define the desired 3D orientation to be reached at this waypoint. It is expressed in world frame.
-    * @param linearVelocity define the desired 3D linear velocity to be reached at this waypoint. It is expressed in world frame.
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this waypoint. It is expressed in world frame.
+    * Create a trajectory point.
+    * @param trajectoryPointIndex index of the trajectory point to create.
+    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * @param position define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.
+    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.
+    * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
     */
-   public void setWaypoint(int waypointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
    {
-      rangeCheck(waypointIndex);
-      taskspaceWaypoints[waypointIndex] = new SE3WaypointMessage(time, position, orientation, linearVelocity, angularVelocity);
+      rangeCheck(trajectoryPointIndex);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
    }
 
-   public int getNumberOfWaypoints()
+   public int getNumberOfTrajectoryPoints()
    {
-      return taskspaceWaypoints.length;
+      return taskspaceTrajectoryPoints.length;
    }
 
    public RobotSide getRobotSide()
@@ -155,21 +155,21 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
       return base;
    }
 
-   public SE3WaypointMessage getWaypoint(int waypointIndex)
+   public SE3TrajectoryPointMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
-      rangeCheck(waypointIndex);
-      return taskspaceWaypoints[waypointIndex];
+      rangeCheck(trajectoryPointIndex);
+      return taskspaceTrajectoryPoints[trajectoryPointIndex];
    }
 
-   public SE3WaypointMessage[] getWaypoints()
+   public SE3TrajectoryPointMessage[] getTrajectoryPoints()
    {
-      return taskspaceWaypoints;
+      return taskspaceTrajectoryPoints;
    }
 
-   private void rangeCheck(int waypointIndex)
+   private void rangeCheck(int trajectoryPointIndex)
    {
-      if (waypointIndex >= getNumberOfWaypoints() || waypointIndex < 0)
-         throw new IndexOutOfBoundsException("Waypoint index: " + waypointIndex + ", number of waypoints: " + getNumberOfWaypoints());
+      if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
+         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
    }
 
    @Override
@@ -179,12 +179,12 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
          return false;
       if (base != other.base)
          return false;
-      if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
+      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          return false;
 
-      for (int i = 0; i < getNumberOfWaypoints(); i++)
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
-         if (!taskspaceWaypoints[i].epsilonEquals(other.taskspaceWaypoints[i], epsilon))
+         if (!taskspaceTrajectoryPoints[i].epsilonEquals(other.taskspaceTrajectoryPoints[i], epsilon))
             return false;
       }
 
@@ -194,10 +194,10 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
    @Override
    public HandTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      HandTrajectoryMessage transformedHandTrajectoryMessage = new HandTrajectoryMessage(robotSide, base, getNumberOfWaypoints());
+      HandTrajectoryMessage transformedHandTrajectoryMessage = new HandTrajectoryMessage(robotSide, base, getNumberOfTrajectoryPoints());
 
-      for (int i = 0; i < getNumberOfWaypoints(); i++)
-         transformedHandTrajectoryMessage.taskspaceWaypoints[i] = taskspaceWaypoints[i].transform(transform);
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+         transformedHandTrajectoryMessage.taskspaceTrajectoryPoints[i] = taskspaceTrajectoryPoints[i].transform(transform);
 
       return transformedHandTrajectoryMessage;
    }
@@ -206,10 +206,10 @@ public class HandTrajectoryMessage extends IHMCRosApiMessage<HandTrajectoryMessa
    public String toString()
    {
       String ret = "";
-      if (taskspaceWaypoints != null)
-         ret = "Hand SE3 trajectory: number of SE3 waypoints = " + getNumberOfWaypoints();
+      if (taskspaceTrajectoryPoints != null)
+         ret = "Hand SE3 trajectory: number of SE3 trajectory points = " + getNumberOfTrajectoryPoints();
       else
-         ret = "Hand SE3 trajectory: no SE3 waypoints";
+         ret = "Hand SE3 trajectory: no SE3 trajectory points";
 
       return ret + ", robotSide = " + robotSide + ", base for control = " + base;
    }

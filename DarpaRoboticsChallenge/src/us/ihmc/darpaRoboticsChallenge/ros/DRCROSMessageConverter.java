@@ -52,7 +52,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
-import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -638,7 +638,7 @@ public class DRCROSMessageConverter
    public static ArmJointTrajectoryPacketMessage convertToRosMessage(ArmTrajectoryMessage ihmcMessage)
    {
       int numberOfJoints = ihmcMessage.getNumberOfJoints();
-      int numberOfWaypoints = ihmcMessage.getNumberOfWaypointsForJointTrajectory(0);
+      int numberOfWaypoints = ihmcMessage.getNumberOfJointTrajectoryPoints(0);
       List<JointTrajectoryPointMessage> trajectoryPoints = new ArrayList<JointTrajectoryPointMessage>();
 
       for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
@@ -648,13 +648,13 @@ public class DRCROSMessageConverter
 
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            Waypoint1DMessage waypoint = ihmcMessage.getJointTrajectoryWaypoint(jointIndex, waypointIndex);
+            TrajectoryPoint1DMessage waypoint = ihmcMessage.getJointTrajectoryPoint(jointIndex, waypointIndex);
             positions[jointIndex] = waypoint.getPosition();
             velocities[jointIndex] = waypoint.getVelocity();
          }
 
          JointTrajectoryPointMessage waypointMessage = messageFactory.newFromType("ihmc_msgs/JointTrajectoryPointMessage");
-         waypointMessage.setTime(ihmcMessage.getJointTrajectoryWaypoint(0, waypointIndex).getTime());
+         waypointMessage.setTime(ihmcMessage.getJointTrajectoryPoint(0, waypointIndex).getTime());
          waypointMessage.setPositions(positions);
          waypointMessage.setVelocities(velocities);
          trajectoryPoints.add(waypointMessage);
@@ -685,7 +685,7 @@ public class DRCROSMessageConverter
             double time = waypointMessage.getTime();
             double position = waypointMessage.getPositions()[jointIndex];
             double velocity = waypointMessage.getVelocities()[jointIndex];
-            ihmcMessage.setWaypoint(jointIndex, waypointIndex, time, position, velocity);
+            ihmcMessage.setTrajectoryPoint(jointIndex, waypointIndex, time, position, velocity);
          }
       }
 

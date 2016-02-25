@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.SO3WaypointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacke
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.TrajectoryPoint1DListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
@@ -464,17 +464,17 @@ public abstract class PacketValidityChecker
          return false;
 
       ObjectErrorType errorType;
-      SE3WaypointMessage previousWaypoint = null;
+      SE3TrajectoryPointMessage previousWaypoint = null;
 
-      if (handTrajectoryMessage.getNumberOfWaypoints() == 0)
+      if (handTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
          globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
       }
 
-      for (int i = 0; i < handTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < handTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SE3WaypointMessage waypoint = handTrajectoryMessage.getWaypoint(i);
+         SE3TrajectoryPointMessage waypoint = handTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
@@ -509,7 +509,7 @@ public abstract class PacketValidityChecker
          return false;
       }
       
-      if (armTrajectoryMessage.jointTrajectory1DMessages == null)
+      if (armTrajectoryMessage.jointTrajectory1DListMessages == null)
       {
          errorMessage = "Trajectory points are empty.";
          globalDataProducer.notifyInvalidPacketReceived(ArmTrajectoryMessage.class, errorMessage);
@@ -526,7 +526,7 @@ public abstract class PacketValidityChecker
       
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         Trajectory1DMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectory(jointIndex);
+         TrajectoryPoint1DListMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
          errorMessage = validateJointTrajectory1DMessage(jointTrajectory1DMessage, false);
          if (errorMessage != null)
          {
@@ -546,17 +546,17 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return false;
 
-      SO3WaypointMessage previousWaypoint = null;
+      SO3TrajectoryPointMessage previousWaypoint = null;
 
-      if (headTrajectoryMessage.getNumberOfWaypoints() == 0)
+      if (headTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
          globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
       }
 
-      for (int i = 0; i < headTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < headTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SO3WaypointMessage waypoint = headTrajectoryMessage.getWaypoint(i);
+         SO3TrajectoryPointMessage waypoint = headTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateSO3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
@@ -575,17 +575,17 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return false;
 
-      SO3WaypointMessage previousWaypoint = null;
+      SO3TrajectoryPointMessage previousWaypoint = null;
 
-      if (chestTrajectoryMessage.getNumberOfWaypoints() == 0)
+      if (chestTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
          globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
       }
 
-      for (int i = 0; i < chestTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < chestTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SO3WaypointMessage waypoint = chestTrajectoryMessage.getWaypoint(i);
+         SO3TrajectoryPointMessage waypoint = chestTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateSO3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
@@ -604,17 +604,17 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return false;
 
-      SE3WaypointMessage previousWaypoint = null;
+      SE3TrajectoryPointMessage previousWaypoint = null;
 
-      if (pelvisTrajectoryMessage.getNumberOfWaypoints() == 0)
+      if (pelvisTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
          globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
       }
 
-      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SE3WaypointMessage waypoint = pelvisTrajectoryMessage.getWaypoint(i);
+         SE3TrajectoryPointMessage waypoint = pelvisTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
@@ -634,17 +634,17 @@ public abstract class PacketValidityChecker
          return false;
 
       ObjectErrorType errorType;
-      SE3WaypointMessage previousWaypoint = null;
+      SE3TrajectoryPointMessage previousWaypoint = null;
 
-      if (footTrajectoryMessage.getNumberOfWaypoints() == 0)
+      if (footTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
          globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
       }
 
-      for (int i = 0; i < footTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < footTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SE3WaypointMessage waypoint = footTrajectoryMessage.getWaypoint(i);
+         SE3TrajectoryPointMessage waypoint = footTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateSE3WaypointMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
@@ -701,17 +701,17 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return false;
 
-      Waypoint1DMessage previousWaypoint = null;
+      TrajectoryPoint1DMessage previousWaypoint = null;
 
-      if (pelvisHeightTrajectoryMessage.getNumberOfWaypoints() == 0)
+      if (pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
          globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
       }
 
-      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         Waypoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getWaypoint(i);
+         TrajectoryPoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateWaypoint1DMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
          {
@@ -764,7 +764,7 @@ public abstract class PacketValidityChecker
       return true;
    }
 
-   private static String validateSE3WaypointMessage(SE3WaypointMessage se3Waypoint, SE3WaypointMessage previousSE3Waypoint, boolean checkId)
+   private static String validateSE3WaypointMessage(SE3TrajectoryPointMessage se3Waypoint, SE3TrajectoryPointMessage previousSE3Waypoint, boolean checkId)
    {
       String errorMessage = validatePacket(se3Waypoint, checkId);
       if (errorMessage != null)
@@ -799,7 +799,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   private static String validateSO3WaypointMessage(SO3WaypointMessage so3Waypoint, SO3WaypointMessage previousSO3Waypoint, boolean checkId)
+   private static String validateSO3WaypointMessage(SO3TrajectoryPointMessage so3Waypoint, SO3TrajectoryPointMessage previousSO3Waypoint, boolean checkId)
    {
       String errorMessage = validatePacket(so3Waypoint, checkId);
       if (errorMessage != null)
@@ -826,7 +826,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   private static String validateWaypoint1DMessage(Waypoint1DMessage waypoint1D, Waypoint1DMessage previousWaypoint1D, boolean checkId)
+   private static String validateWaypoint1DMessage(TrajectoryPoint1DMessage waypoint1D, TrajectoryPoint1DMessage previousWaypoint1D, boolean checkId)
    {
       String errorMessage = validatePacket(waypoint1D, checkId);
       if (errorMessage != null)
@@ -855,28 +855,28 @@ public abstract class PacketValidityChecker
 
    private final static double MAX_ACCEPTED_JOINT_VELOCITY = 100.0;
 
-   public static String validateJointTrajectory1DMessage(Trajectory1DMessage jointTrajectory1DMessage, boolean checkId)
+   public static String validateJointTrajectory1DMessage(TrajectoryPoint1DListMessage jointTrajectory1DMessage, boolean checkId)
    {
       String errorMessage = validatePacket(jointTrajectory1DMessage, checkId);
       if (errorMessage != null)
          return errorMessage;
 
-      Waypoint1DMessage previousWaypoint = null;
+      TrajectoryPoint1DMessage previousWaypoint = null;
 
-      if (jointTrajectory1DMessage.getNumberOfWaypoints() == 0)
+      if (jointTrajectory1DMessage.getNumberOfTrajectoryPoints() == 0)
          return "The joint trajectory message has no waypoint.";
 
-      for (int i = 0; i < jointTrajectory1DMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < jointTrajectory1DMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         Waypoint1DMessage waypoint = jointTrajectory1DMessage.getWaypoint(i);
+         TrajectoryPoint1DMessage waypoint = jointTrajectory1DMessage.getTrajectoryPoint(i);
          errorMessage = validateWaypoint1DMessage(waypoint, previousWaypoint, false);
          if (errorMessage != null)
             return "The " + i + "th " + errorMessage;
       }
 
-      for (int waypointIndex = 0; waypointIndex < jointTrajectory1DMessage.getNumberOfWaypoints(); waypointIndex++)
+      for (int waypointIndex = 0; waypointIndex < jointTrajectory1DMessage.getNumberOfTrajectoryPoints(); waypointIndex++)
       {
-         Waypoint1DMessage waypoint = jointTrajectory1DMessage.getWaypoint(waypointIndex);
+         TrajectoryPoint1DMessage waypoint = jointTrajectory1DMessage.getTrajectoryPoint(waypointIndex);
          double waypointPosition = waypoint.getPosition();
 
          if (Math.abs(waypointPosition) > Math.PI)

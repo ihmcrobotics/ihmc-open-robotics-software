@@ -187,7 +187,7 @@ public class ChestOrientationManager
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       waypointOrientationTrajectoryGenerator.clear();
 
-      if (message.getWaypoint(0).getTime() > 1.0e-5)
+      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          activeTrajectoryGenerator.changeFrame(worldFrame);
          activeTrajectoryGenerator.getOrientation(desiredOrientation);
@@ -196,7 +196,7 @@ public class ChestOrientationManager
          waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, tempAngularVelocity);
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getWaypoints());
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
       waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);
