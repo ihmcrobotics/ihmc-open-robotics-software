@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
@@ -204,7 +202,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrupedSupportPolygon currentSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
-   private final List<FramePoint> tempSupportPolygonFramePointHolder = new ArrayList<FramePoint>(4);
+   private final RecyclingQuadrantDependentList<FramePoint> tempSupportPolygonFramePointHolder = new RecyclingQuadrantDependentList<FramePoint>(FramePoint.class);
    private final QuadrupedSupportPolygon tempCommonShrunkenPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon tempPolygonForCommonShrunken = new QuadrupedSupportPolygon();
 
@@ -1129,10 +1127,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       tempSupportPolygonFramePointHolder.clear();
       for(RobotQuadrant quadrant : supportPolygon.getSupportingQuadrantsInOrder())
       {
-         tempSupportPolygonFramePointHolder.add(supportPolygon.getFootstep(quadrant));
+         tempSupportPolygonFramePointHolder.add(quadrant).setIncludingFrame(supportPolygon.getFootstep(quadrant));
       }
       
-      yoFramePolygon.setConvexPolygon2d(tempSupportPolygonFramePointHolder);
+      yoFramePolygon.setConvexPolygon2d(tempSupportPolygonFramePointHolder.values());
    }
    
    /**

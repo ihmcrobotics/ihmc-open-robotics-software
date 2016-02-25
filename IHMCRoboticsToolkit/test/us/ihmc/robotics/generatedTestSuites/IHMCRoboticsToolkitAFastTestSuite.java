@@ -176,6 +176,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.referenceFrames.PoseReferenceFrameTest.class,
    us.ihmc.robotics.referenceFrames.ReferenceFrameTest.class,
    us.ihmc.robotics.robotSide.QuadrantDependentListTest.class,
+   us.ihmc.robotics.robotSide.RecyclingQuadrantDependentListTest.class,
    us.ihmc.robotics.robotSide.RobotQuadrantTest.class,
    us.ihmc.robotics.robotSide.RobotSideTest.class,
    us.ihmc.robotics.robotSide.SideDependentListTest.class,
