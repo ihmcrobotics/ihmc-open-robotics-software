@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAcc
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.TrajectoryPoint1DListMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -62,7 +62,7 @@ import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.SE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -521,7 +521,7 @@ public class HandControlModule
       }
 
       BaseForControl base = handTrajectoryMessage.getBase();
-      SE3WaypointInterface[] taskspaceWaypoints = handTrajectoryMessage.getWaypoints();
+      SE3TrajectoryPointInterface<?>[] taskspaceWaypoints = handTrajectoryMessage.getTrajectoryPoints();
 
       waypointPositionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
@@ -576,12 +576,12 @@ public class HandControlModule
          MultipleWaypointsTrajectoryGenerator trajectoryGenerator = waypointJointTrajectoryGenerators.get(joint);
          trajectoryGenerator.clear();
 
-         if (armTrajectoryMessage.getJointTrajectoryWaypoint(jointIndex, 0).getTime() > 1.0e-5)
+         if (armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, 0).getTime() > 1.0e-5)
          {
             appendFirstWaypointToWaypointJointspaceTrajectories(joint, trajectoryGenerator, false);
          }
 
-         Trajectory1DMessage jointTrajectory = armTrajectoryMessage.getJointTrajectory(jointIndex);
+         TrajectoryPoint1DListMessage jointTrajectory = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
          trajectoryGenerator.appendWaypoints(jointTrajectory);
          trajectoryGenerator.initialize();
       }
@@ -626,9 +626,9 @@ public class HandControlModule
 
       for (int jointIndex = 0; jointIndex < armTrajectoryMessage.getNumberOfJoints(); jointIndex++)
       {
-         for (int waypointIndex = 0; waypointIndex < armTrajectoryMessage.getNumberOfWaypointsForJointTrajectory(jointIndex); waypointIndex++)
+         for (int waypointIndex = 0; waypointIndex < armTrajectoryMessage.getNumberOfJointTrajectoryPoints(jointIndex); waypointIndex++)
          {
-            double waypointPosition = armTrajectoryMessage.getJointTrajectoryWaypoint(jointIndex, waypointIndex).getPosition();
+            double waypointPosition = armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, waypointIndex).getPosition();
             double jointLimitLower = oneDoFJoints[jointIndex].getJointLimitLower();
             double jointLimitUpper = oneDoFJoints[jointIndex].getJointLimitUpper();
             if (!MathTools.isInsideBoundsInclusive(waypointPosition, jointLimitLower, jointLimitUpper))

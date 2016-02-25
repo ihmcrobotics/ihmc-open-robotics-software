@@ -13,8 +13,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -862,14 +862,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
 
-      if (pelvisTrajectoryMessage.getWaypoint(0).getTime() > 1.0e-5)
+      if (pelvisTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
 
-      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SE3WaypointMessage waypoint = pelvisTrajectoryMessage.getWaypoint(i);
+         SE3TrajectoryPointMessage waypoint = pelvisTrajectoryMessage.getTrajectoryPoint(i);
          double time = waypoint.getTime();
          desiredPosition.setToZero(worldFrame);
          desiredVelocity.changeFrame(worldFrame);
@@ -902,14 +902,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
 
-      if (pelvisHeightTrajectoryMessage.getWaypoint(0).getTime() > 1.0e-5)
+      if (pelvisHeightTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
 
-      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         Waypoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getWaypoint(i);
+         TrajectoryPoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getTrajectoryPoint(i);
          double time = waypoint.getTime();
          double z = waypoint.getPosition();
          double zDot = waypoint.getVelocity();

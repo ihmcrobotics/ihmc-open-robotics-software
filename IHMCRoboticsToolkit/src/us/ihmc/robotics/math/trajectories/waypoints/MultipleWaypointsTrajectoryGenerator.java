@@ -12,7 +12,7 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
 /**
  * This class does a cubic interpolation between the provided waypoints.
- * 
+ *
  * Procedure for use:
  * 1. setWaypoints(double[] timeAtWaypoints, double[] positions, double[] velocities)
  *    clears the generator and appends the given waypoints
@@ -34,7 +34,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    private final IntegerYoVariable numberOfWaypoints;
    private final IntegerYoVariable currentWaypointIndex;
 
-   private final ArrayList<YoWaypoint1D> waypoints;
+   private final ArrayList<YoTrajectoryPoint1D> waypoints;
 
    private final SettableDoubleProvider initialPositionProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider initialVelocityProvider = new SettableDoubleProvider();
@@ -64,7 +64,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         YoWaypoint1D waypoint = new YoWaypoint1D(namePrefix, "AtWaypoint" + i, registry);
+         YoTrajectoryPoint1D waypoint = new YoTrajectoryPoint1D(namePrefix, "AtWaypoint" + i, registry);
          waypoints.add(waypoint);
       }
 
@@ -107,12 +107,12 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], velocities[i]);
    }
 
-   public void appendWaypoint(Waypoint1DInterface<?> waypoint1D)
+   public void appendWaypoint(TrajectoryPoint1DInterface<?> waypoint1D)
    {
       appendWaypoint(waypoint1D.getTime(), waypoint1D.getPosition(), waypoint1D.getVelocity());
    }
 
-   public void appendWaypoints(Waypoint1DInterface<?>[] waypoints1D)
+   public void appendWaypoints(TrajectoryPoint1DInterface<?>[] waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.length);
 
@@ -120,7 +120,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D[i].getTime(), waypoints1D[i].getPosition(), waypoints1D[i].getVelocity());
    }
 
-   public void appendWaypoints(RecyclingArrayList<? extends Waypoint1DInterface<?>> waypoints1D)
+   public void appendWaypoints(RecyclingArrayList<? extends TrajectoryPoint1DInterface<?>> waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.size());
 
@@ -128,10 +128,10 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D.get(i).getTime(), waypoints1D.get(i).getPosition(), waypoints1D.get(i).getVelocity());
    }
 
-   public void appendWaypoints(TrajectoryWaypointDataInterface<?, ? extends Waypoint1DInterface<?>> trajectoryWaypoint1DData)
+   public void appendWaypoints(TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectoryWaypoint1DData)
    {
-      for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfWaypoints(); i++)
-         appendWaypoint(trajectoryWaypoint1DData.getWaypoint(i));
+      for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfTrajectoryPoints(); i++)
+         appendWaypoint(trajectoryWaypoint1DData.getTrajectoryPoint(i));
    }
 
    private void checkNumberOfWaypoints(int length)
@@ -186,7 +186,8 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    {
       currentTrajectoryTime.set(time);
 
-      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+      if (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
+            && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
@@ -233,7 +234,8 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       if (numberOfWaypoints.getIntegerValue() == 0)
          return namePrefix + ": Has no waypoints.";
       else
-         return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = " + currentWaypointIndex.getIntegerValue()
-         + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: " + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
+         return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = "
+               + currentWaypointIndex.getIntegerValue() + "\nFirst waypoint: " + waypoints.get(0) + ", last waypoint: "
+               + waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
    }
 }

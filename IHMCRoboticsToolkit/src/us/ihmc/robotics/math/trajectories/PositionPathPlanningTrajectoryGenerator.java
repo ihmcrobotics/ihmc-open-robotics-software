@@ -17,7 +17,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanWaypoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -55,7 +55,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    private final RecyclingArrayList<double[]> parametersY;
    private final RecyclingArrayList<double[]> parametersZ;
 
-   private final ArrayList<YoFrameEuclideanWaypoint> waypoints;
+   private final ArrayList<YoFrameEuclideanTrajectoryPoint> waypoints;
 
    private final Matrix3d timeMatrix;
    private int numberOfWayPoints;
@@ -135,7 +135,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         YoFrameEuclideanWaypoint waypoint = new YoFrameEuclideanWaypoint(name, "AtWaypoint" + i, registry, referenceFrame);
+         YoFrameEuclideanTrajectoryPoint waypoint = new YoFrameEuclideanTrajectoryPoint(name, "AtWaypoint" + i, registry, referenceFrame);
          waypoints.add(waypoint);
          if (allowMultipleFrames)
             registerMultipleFramesHolders(waypoint);
@@ -143,7 +143,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
    }
 
-   private final ArrayList<YoFrameEuclideanWaypoint> subWayPoints = new ArrayList<>();
+   private final ArrayList<YoFrameEuclideanTrajectoryPoint> subWayPoints = new ArrayList<>();
 
    public void initialize()
    {
@@ -199,7 +199,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    private final Vector3d tempVectorForParameter = new Vector3d();
    private final Vector3d tempPositionVectorForParameter = new Vector3d();
 
-   private void updateParameters(ArrayList<YoFrameEuclideanWaypoint> waypoints, double[] parametersXToPack, double[] parametersYToPack,
+   private void updateParameters(ArrayList<YoFrameEuclideanTrajectoryPoint> waypoints, double[] parametersXToPack, double[] parametersYToPack,
          double[] parametersZToPack)
    {
       for (int i = 0; i < 3; i++)
@@ -399,7 +399,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    {
       numberOfWayPoints = 0;
 
-      for (YoFrameEuclideanWaypoint waypoint : waypoints)
+      for (YoFrameEuclideanTrajectoryPoint waypoint : waypoints)
       {
          waypoint.setToNaN();
       }

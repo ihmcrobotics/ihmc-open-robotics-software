@@ -167,7 +167,7 @@ public class HeadOrientationManager
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       waypointOrientationTrajectoryGenerator.clear();
 
-      if (message.getWaypoint(0).getTime() > 1.0e-5)
+      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          activeTrajectoryGenerator.getOrientation(tempOrientation);
          tempOrientation.changeFrame(worldFrame);
@@ -176,7 +176,7 @@ public class HeadOrientationManager
          waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getWaypoints());
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
       waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);
