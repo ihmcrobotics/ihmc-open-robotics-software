@@ -147,6 +147,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final FramePoint desiredCoMFramePosition = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
    
+   private final FrameVector tempComTrajComputedVelocity = new FrameVector();
+   private final FrameVector tempDesiredVelocityVector = new FrameVector();
+   
    private final BooleanYoVariable runOpenLoop = new BooleanYoVariable("runOpenLoop", "If true, runs in open loop mode. The leg motions will not depend on any feedback signals.", registry);
    
    private final YoFramePoint2d desiredCoMOffset;
@@ -1094,28 +1097,27 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    */
    public void calculateSwingTarget(RobotQuadrant swingLeg, FramePoint framePointToPack)
    {
+      tempComTrajComputedVelocity.setIncludingFrame(desiredCoMVelocity.getFrameTuple());
+      tempDesiredVelocityVector.setIncludingFrame(desiredVelocity.getFrameTuple());
       
-      FrameVector comTrajComputedVelocity = desiredCoMVelocity.getFrameVectorCopy();
-      FrameVector desiredVelocityVector = desiredVelocity.getFrameVectorCopy();
+      tempComTrajComputedVelocity.changeFrame(feedForwardBodyFrame);
+      tempDesiredVelocityVector.changeFrame(feedForwardBodyFrame);
       
-      comTrajComputedVelocity.changeFrame(feedForwardBodyFrame);
-      desiredVelocityVector.changeFrame(feedForwardBodyFrame);
-      
-      if(desiredVelocityVector.length() < 1e-3)
+      if(tempDesiredVelocityVector.length() < 1e-3)
       {
-         expectedAverageVelocity.setIncludingFrame(desiredVelocityVector);
+         expectedAverageVelocity.setIncludingFrame(tempDesiredVelocityVector);
       }
-      else if(comTrajComputedVelocity.getX() > 0 && desiredVelocityVector.getX() < 0 || comTrajComputedVelocity.getX() < 0 && desiredVelocityVector.getX() > 0)
+      else if(tempComTrajComputedVelocity.getX() > 0 && tempDesiredVelocityVector.getX() < 0 || tempComTrajComputedVelocity.getX() < 0 && tempDesiredVelocityVector.getX() > 0)
       {
-         expectedAverageVelocity.setIncludingFrame(desiredVelocityVector);
+         expectedAverageVelocity.setIncludingFrame(tempDesiredVelocityVector);
          expectedAverageVelocity.scale(swingDuration.getDoubleValue() / 3.0);
       } 
       else
       {
-         expectedAverageVelocity.setIncludingFrame(desiredVelocityVector);
-         expectedAverageVelocity.sub(desiredVelocityVector, comTrajComputedVelocity);
+         expectedAverageVelocity.setIncludingFrame(tempDesiredVelocityVector);
+         expectedAverageVelocity.sub(tempDesiredVelocityVector, tempComTrajComputedVelocity);
          expectedAverageVelocity.scale(swingDuration.getDoubleValue() / 3.0);
-         expectedAverageVelocity.add(comTrajComputedVelocity);
+         expectedAverageVelocity.add(tempComTrajComputedVelocity);
       }
       
       double yawRate = desiredYawRate.getDoubleValue();
