@@ -6,14 +6,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.EnumMap;
+import java.util.Locale;
 import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class NetworkParameters
 {
    public static final String defaultParameterFile = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCNetworkParameters.ini";
-   private static final String helpText = "Please use NetworkParametersCreator to create one and save it in " + defaultParameterFile + ", or pass in -DnetworkParameterFile=[path].";
+   private static final String helpText = "Please set all appropriate environment variables or use NetworkParametersCreator to create a properties file and save it in " + defaultParameterFile + ", or pass in -DnetworkParameterFile=[path].";
 
    private static NetworkParameters instance = null;
 
@@ -31,8 +34,8 @@ public class NetworkParameters
    private NetworkParameters()
    {
       File file = new File(System.getProperty("networkParameterFile", defaultParameterFile)).getAbsoluteFile();
-      PrintTools.info("Loading network parameters from " + file.getAbsolutePath());
-      
+      PrintTools.info("Looking for network parameters in network parameters file at " + file.getAbsolutePath());
+
       if (file.exists() && file.isFile())
       {
          try
@@ -42,30 +45,57 @@ public class NetworkParameters
             properties.load(stream);
             for (NetworkParameterKeys key : NetworkParameterKeys.values())
             {
-               if (properties.containsKey(key.toString()))
+               String keyString = key.toString();
+               if (properties.containsKey(keyString))
                {
-                  parameters.put(key, properties.getProperty(key.toString()));
+                  parameters.put(key, properties.getProperty(keyString));
                }
             }
             stream.close();
          }
          catch (IOException e)
          {
-            System.err.println("Network parameter file " + file.getAbsolutePath() + " cannot be loaded.\n" + helpText);
+            System.err.println("Network parameter file " + file.getAbsolutePath() + "exists but cannot be loaded. See stack trace.");
             e.printStackTrace();
-            System.exit(-1);
          }
       }
       else
       {
-         System.err.println("Network parameter file " + file.getAbsolutePath() + " does not exist.\n" + helpText);
-         System.exit(-1);
+         PrintTools.warn("Network parameter file " + file.getAbsolutePath() + " does not exist.");
       }
+
+      PrintTools.info("Looking for network parameters in environment variables");
+      for (NetworkParameterKeys key : NetworkParameterKeys.values())
+      {
+         String keyString = key.toString();
+         String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(keyString), '_').toUpperCase(Locale.getDefault());
+         if(key.isIPAddress())
+         {
+            envVarString += "_IP";
+         }
+
+         if(System.getenv().containsKey(envVarString))
+         {
+            parameters.put(key, System.getenv(envVarString));
+         }
+      }
+
    }
 
    public static String getHost(NetworkParameterKeys key)
    {
-      return getInstance().parameters.get(key);
+      String value = getInstance().parameters.get(key);
+      if(value == null)
+      {
+          String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(key.toString()), '_').toUpperCase(Locale.getDefault());
+          if(key.isIPAddress())
+          {
+             envVarString += "_IP";
+          }
+          PrintTools.error("Could not find Network Parameter key " + key.toString() + " (Env. Variable: " + envVarString + ") . Exiting.\n" + helpText);
+          System.exit(-1);
+      }
+      return value;
    }
 
    public static URI getROSURI()
