@@ -86,7 +86,7 @@ public class LogSessionBroadcaster extends Thread
          
          String cameraString = NetworkParameters.getHost(NetworkParameterKeys.loggedCameras);
          
-         if(cameraString != null)
+         if(cameraString != null && !cameraString.trim().isEmpty())
          {
             String[] split = cameraString.split(",");
             cameras = new byte[split.length];

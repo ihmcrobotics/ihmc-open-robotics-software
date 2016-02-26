@@ -223,7 +223,12 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
-   
+
+   public double getCurrentTime()
+   {
+      return this.currentTime.getDoubleValue();
+   }
+
    public void setToDone()
    {
       currentTime.set(trajectoryTime.getDoubleValue() + 0.01);
