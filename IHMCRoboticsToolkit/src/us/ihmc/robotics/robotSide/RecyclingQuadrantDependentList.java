@@ -1,95 +1,74 @@
 package us.ihmc.robotics.robotSide;
 
-@SuppressWarnings("unchecked")
-public class RecyclingQuadrantDependentList<V> extends QuadrantDependentList<V>
-{
-   private final V[] elementStorageForWhenNull = (V[]) new Object[4];
-   private final GenericTypeAdapter<V> genericTypeAdapter; 
+import java.lang.reflect.Array;
 
-   public RecyclingQuadrantDependentList(GenericTypeAdapter<V> genericTypeAdapter)
+import us.ihmc.robotics.lists.GenericTypeBuilder;
+
+@SuppressWarnings("unchecked")
+public class RecyclingQuadrantDependentList<V>
+{
+   private final V[] elementStorageForWhenNull;
+   private final GenericTypeBuilder<V> builder;   
+   private final V[][] valueArrays;
+   private final QuadrantDependentList<V> quadrantDependentList;
+
+   public RecyclingQuadrantDependentList(Class<V> clazz)
    {
-      super();
+      quadrantDependentList = new QuadrantDependentList<>();
+      builder = GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz);
       
-      this.genericTypeAdapter = genericTypeAdapter;
-      
+      elementStorageForWhenNull = (V[]) Array.newInstance(clazz, 4);
       for (int i = 0; i < 4; i++)
       {
-         V newV = genericTypeAdapter.makeANewV();
+         V newInstance = builder.newInstance();
          
-         if (newV == null)
-         {
-            throw new RuntimeException("New V cannot be null.");
-         }
-         
-         elementStorageForWhenNull[i] = newV;
+         elementStorageForWhenNull[i] = newInstance;
       }
-   }
-   
-   public interface GenericTypeAdapter<V>
-   {
-      public V makeANewV();
       
-      public void setAV(V newV, V setThisV);
-   }
-   
-   /**
-    * Ensures quadrant has an element in it and return it.
-    * Revived element from temp storage will be dirty.
-    * 
-    * @param robotQuadrant
-    * @return element in quadrant
-    */
-   public V revive(RobotQuadrant robotQuadrant)
-   {
-      if (!containsQuadrant(robotQuadrant))
-      {
-         V storageWhenNull = elementStorageForWhenNull[robotQuadrant.ordinal()];
-         super.set(robotQuadrant, storageWhenNull);
-         return storageWhenNull;
-      }
-      else
-      {
-         return get(robotQuadrant);
-      }
+      valueArrays = (V[][]) new Object[5][];
+      valueArrays[0] = (V[]) Array.newInstance(clazz, 0);
+      valueArrays[1] = (V[]) Array.newInstance(clazz, 1);
+      valueArrays[2] = (V[]) Array.newInstance(clazz, 2);
+      valueArrays[3] = (V[]) Array.newInstance(clazz, 3);
+      valueArrays[4] = (V[]) elementStorageForWhenNull;
    }
 
-   @Override
-   public void set(RobotQuadrant robotQuadrant, V element)
+   public V add(RobotQuadrant robotQuadrant)
    {
+      V element = elementStorageForWhenNull[robotQuadrant.ordinal()];
       // do nothing
       if (element == get(robotQuadrant))
       {
-         return;
+         return element;
       }
       // remove
       if (element == null && containsQuadrant(robotQuadrant))
       {
-         super.set(robotQuadrant, element);
-         return;
+         quadrantDependentList.set(robotQuadrant, element);
+         fillValueArray();
+         return element;
       }
       // add
       else if (element != null && !containsQuadrant(robotQuadrant))
       {
          V storageWhenNull = elementStorageForWhenNull[robotQuadrant.ordinal()];
-         genericTypeAdapter.setAV(element, storageWhenNull);
-         super.set(robotQuadrant, storageWhenNull);
-         return;
+         quadrantDependentList.set(robotQuadrant, storageWhenNull);
+         fillValueArray();
+         return element;
       }
-      // replace
-      else if (element != get(robotQuadrant))
-      {
-         genericTypeAdapter.setAV(element, get(robotQuadrant));
-      }
+      
+      return element;
    }
 
-   @Override
    public V remove(RobotQuadrant robotQuadrant)
    {
       // remove
       if (containsQuadrant(robotQuadrant))
       {
          elementStorageForWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
-         return super.remove(robotQuadrant);
+         V remove = quadrantDependentList.remove(robotQuadrant);
+         fillValueArray();
+         return remove;
       }
       // do nothing
       else
@@ -98,13 +77,35 @@ public class RecyclingQuadrantDependentList<V> extends QuadrantDependentList<V>
       }
    }
 
-   @Override
    public V get(RobotQuadrant key)
    {
-      return super.get(key);
+      return quadrantDependentList.get(key);
+   }
+   
+   private void fillValueArray()
+   {
+      if (size() == 4)
+         return;
+      
+      for (int i = 0, j = 0; i < elementStorageForWhenNull.length; i++)
+      {
+         if (containsQuadrant(RobotQuadrant.values[i]))
+         {
+            valueArrays[size()][j++] = elementStorageForWhenNull[i];
+         }
+      }
+   }
+   
+   public V[] values()
+   {
+      return valueArrays[size()];
+   }
+   
+   public RobotQuadrant[] quadrants()
+   {
+      return quadrantDependentList.quadrants();
    }
 
-   @Override
    public void clear()
    {
       for (RobotQuadrant robotQuadrant : quadrants())
@@ -112,6 +113,16 @@ public class RecyclingQuadrantDependentList<V> extends QuadrantDependentList<V>
          elementStorageForWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
       }
 
-      super.clear();
+      quadrantDependentList.clear();
+   }
+   
+   public int size()
+   {
+      return quadrantDependentList.size();
+   }
+   
+   public boolean containsQuadrant(RobotQuadrant robotQuadrant)
+   {
+      return quadrantDependentList.containsQuadrant(robotQuadrant);
    }
 }

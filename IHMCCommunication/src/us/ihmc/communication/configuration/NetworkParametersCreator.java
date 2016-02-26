@@ -13,11 +13,9 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Properties;
 
-import javax.sql.rowset.spi.SyncResolver;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -49,7 +47,7 @@ public class NetworkParametersCreator
       {
          JPanel panel = new JPanel();
          panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-         panel.setBorder(BorderFactory.createTitledBorder(key.toString() + (key.isRequired() ? "*" : "")));
+         panel.setBorder(BorderFactory.createTitledBorder(key.toString()));
          JLabel description = new JLabel(key.getDescription());
          JTextField host = new JTextField(64);
          host.setText(key.getDefaultValue());
@@ -146,14 +144,6 @@ public class NetworkParametersCreator
 
    private boolean isValid()
    {
-      for (NetworkParameterKeys key : NetworkParameterKeys.values())
-      {
-         if (key.isRequired() && entryBoxes.get(key).getText().length() == 0)
-         {
-            JOptionPane.showMessageDialog(frame, key.toString() + " is required.", "Missing required fields", JOptionPane.ERROR_MESSAGE);
-            return false;
-         }
-      }
       return true;
    }
 
