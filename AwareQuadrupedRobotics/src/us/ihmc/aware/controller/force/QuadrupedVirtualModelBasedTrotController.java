@@ -245,7 +245,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       params.setDefault(COM_HEIGHT_INTEGRAL_GAIN, 0);
       params.setDefault(COM_HEIGHT_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 0.95);
-      params.setDefault(COM_HEIGHT_NOMINAL, 0.60);
+      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
       params.setDefault(DOUBLE_SUPPORT_DURATION, 0.33);
       params.setDefault(STANCE_WIDTH_NOMINAL, 0.4);
