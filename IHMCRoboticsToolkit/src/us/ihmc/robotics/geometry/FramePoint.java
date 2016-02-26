@@ -21,8 +21,6 @@ public class FramePoint extends FrameTuple<Point3d>
 {
    private static final long serialVersionUID = -4831948077397801540L;
    
-   private FramePoint temporaryFramePointForMath;
-
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, Tuple3d position)
    {
@@ -282,42 +280,41 @@ public class FramePoint extends FrameTuple<Point3d>
     * yawAboutPoint
     *
     * @param pointToYawAbout FramePoint
-    * @param yaw             double
+    * @param FramePoint resultToPack
+    * @param FramePoint tempPointForMath
     * @return CartesianPositionFootstep
     */
    public void yawAboutPoint(FramePoint pointToYawAbout, FramePoint resultToPack, double yaw)
    {
-      if (temporaryFramePointForMath == null)
-         temporaryFramePointForMath = new FramePoint(this);
-      else
-         temporaryFramePointForMath.setIncludingFrame(this);
+      checkReferenceFrameMatch(pointToYawAbout);
       
-      temporaryFramePointForMath.sub(pointToYawAbout);
+      double thisToYawAboutX = getX() - pointToYawAbout.getX();
+      double thisToYawAboutY = getY() - pointToYawAbout.getY();
 
-      RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotZ(yaw);
+      double cosAngle = Math.cos(yaw);
+      double sinAngle = Math.sin(yaw);
 
-      temporaryFramePointForMath.applyTransform(transform3D);
+      double x = cosAngle * thisToYawAboutX + -sinAngle * thisToYawAboutY;
+      double y = sinAngle * thisToYawAboutX + cosAngle * thisToYawAboutY;
 
       resultToPack.setIncludingFrame(pointToYawAbout);
-      resultToPack.add(temporaryFramePointForMath);
+      resultToPack.add(x, y, getZ());
    }
 
    public void pitchAboutPoint(FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
    {
-      if (temporaryFramePointForMath == null)
-         temporaryFramePointForMath = new FramePoint(this);
-      else
-         temporaryFramePointForMath.setIncludingFrame(this);
+      checkReferenceFrameMatch(pointToPitchAbout);
       
-      temporaryFramePointForMath.sub(pointToPitchAbout);
+      double thisToPitchAboutX = getX() - pointToPitchAbout.getX();
+      double thisToPitchAboutZ = getZ() - pointToPitchAbout.getZ();
+      
+      double cosAngle = Math.cos(pitch);
+      double sinAngle = Math.sin(pitch);
 
-      RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotY(pitch);
-
-      temporaryFramePointForMath.applyTransform(transform3D);
+      double x = cosAngle * thisToPitchAboutX + sinAngle * thisToPitchAboutZ;
+      double z = -sinAngle * thisToPitchAboutX + cosAngle * thisToPitchAboutZ;
 
       resultToPack.setIncludingFrame(pointToPitchAbout);
-      resultToPack.add(temporaryFramePointForMath);
+      resultToPack.add(x, getY(), z);
    }
 }

@@ -14,7 +14,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.packets.wholebody.AtlasWholeBodyTrajectoryPacketTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
-   us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasFootstepSnapperTest.class,
+   us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class,
+   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
 })
 
 public class AtlasJFastTestSuite

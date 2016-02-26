@@ -15,7 +15,7 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
       {
          double xDifference = segmentPoints[i + 1].x - segmentPoints[i].x;
          double yDifference = segmentPoints[i + 1].y - segmentPoints[i].y;
-         if ((xDifference <= 0.0) || (yDifference <= 0.0))
+         if ((xDifference <= 0.0) || (yDifference < 0.0))
          {
             throw new RuntimeException("Slope of line must be greater than zero");
          }
@@ -55,11 +55,11 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
       //        new Point2d(0.5, 1.0),
       //    };
 
-      Point2d[] listOfPoints = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.1, 0.025), new Point2d(0.9, 0.1), new Point2d(1.1, 1.0)};
+      Point2d[] listOfPoints = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.5, 0.0), new Point2d(2.0, 1.0)};
 
       MultipleSegmentConstantSlope multipleSegmentConstantSlope = new MultipleSegmentConstantSlope(listOfPoints);
 
-      for (double i = 0; i < 1.3; i = i + 0.01)
+      for (double i = -1.0; i <= 3.0; i = i + 0.1)
       {
          System.out.println("alpha=" + i + ", alpha prime=" + multipleSegmentConstantSlope.getAlphaPrime(i));
       }
