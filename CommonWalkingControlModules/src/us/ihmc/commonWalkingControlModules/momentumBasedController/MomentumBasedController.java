@@ -567,7 +567,7 @@ public class MomentumBasedController
          antiGravityJointTorquesVisualizer.computeAntiGravityJointTorques();
 
       if (contactPointVisualizer != null)
-         contactPointVisualizer.update();
+         contactPointVisualizer.update(yoTime.getDoubleValue());
 
       updateMomentumBasedControllerSpy();
 
