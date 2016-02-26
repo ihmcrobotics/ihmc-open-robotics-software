@@ -1,4 +1,4 @@
-package us.ihmc.acsell.generatedTestSuites;
+package us.ihmc.tools.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.acsell.BonoFlatGroundWalkingTest.class
+   us.ihmc.tools.thread.ThreadToolsTest.class
 })
 
-public class AcsellAFastTestSuite
+public class IHMCJavaToolkitAInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

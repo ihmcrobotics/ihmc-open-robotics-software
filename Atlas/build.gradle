@@ -8,9 +8,9 @@ sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
-project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
-project.ext.licenseName = "GPLv3"
-project.ext.bintrayLicenseName = "GPL-3.0"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
 
 
 repositories ihmc.ihmcDefaultArtifactProxies()
@@ -28,7 +28,7 @@ repositories {
 }
 
 def strings = ['ihmc', 'robotics']
-ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"))
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("CommonWalkingControlModules"))
