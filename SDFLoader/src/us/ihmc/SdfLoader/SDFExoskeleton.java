@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 
@@ -44,6 +45,7 @@ public class SDFExoskeleton extends SDFRobot {
 				}
 			}
 		}
+			
 	}
 
 	public List<GroundContactPoint> getFootGroundContactPoints(RobotSide robotSide) {

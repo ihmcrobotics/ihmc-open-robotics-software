@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@DeployableTestClass(targets = TestPlanTarget.Flaky)
 public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private BonoRobotModel robotModel;

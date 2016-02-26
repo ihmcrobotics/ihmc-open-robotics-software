@@ -499,22 +499,27 @@ public class GeometryTools
       }
    };
    
-   public static void getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2)
    {
       tempDirectionsForIntersection.get()[0].sub(lineEnd1, lineStart1);
       tempDirectionsForIntersection.get()[1].sub(lineEnd2, lineStart2);
       
-      GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, lineStart1, tempDirectionsForIntersection.get()[0], lineStart2, tempDirectionsForIntersection.get()[1]);
+      return GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, lineStart1, tempDirectionsForIntersection.get()[0], lineStart2, tempDirectionsForIntersection.get()[1]);
    }
    
-   public static void getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint point1, FrameVector direction1, FramePoint point2, FrameVector direction2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint point1, FrameVector direction1, FramePoint point2, FrameVector direction2)
    {
       GeometryTools.intersection(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(), direction2.getY(), tempAlphaBeta.get());
       
       if (Double.isNaN(tempAlphaBeta.get()[0]) || Double.isNaN(tempAlphaBeta.get()[1]))
-         throw new UndefinedOperationException("Lines are parallel.");
+      {
+         intersectionToPack.set(Double.NaN, Double.NaN,Double.NaN);
+         return false;
+         //throw new UndefinedOperationException("Lines are parallel.");
+      }
       
       intersectionToPack.set(point1.getX() + direction1.getX() * tempAlphaBeta.get()[0], point1.getY() + direction1.getY() * tempAlphaBeta.get()[0], intersectionToPack.getZ());
+      return true;
    }
 
    /**

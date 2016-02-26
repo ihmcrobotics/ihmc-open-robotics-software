@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollTorqueActaulValue</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollTargetVelocity,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollVelocityActualValue,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollRawVelocityActualValue,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollTorqueActaulValue</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollTargetVelocity,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollVelocityActualValue,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollRawVelocityActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollTorqueActaulValue</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchTorqueActaulValue,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_MOTOR_FAULT</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_MOTOR_FAULT</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchTorqueActaulValue</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollTargetPosition</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_MOTOR_FAULT</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -168,24 +168,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-<Entry Boxes Tab Pane>
-</Entry Boxes Tab Pane>
-
-<Number of ViewPorts>1</Number of ViewPorts>
- <Main Viewport> 
-<Visible> true</Visible>
-</Main Viewport>
-
-<Graph Array Window Size>3</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>0</ScreenID>
-<WindowLocation>178.0, 125.0</WindowLocation>
-<WindowSize>1280.0, 776.0</WindowSize>
-<GraphGroup>
-	<Cols>4</Cols>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchControlWord,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchTorqueActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -197,7 +181,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollControlWord,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchTorqueActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -208,8 +192,24 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>6</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>2</ScreenID>
+<WindowLocation>178.0, 228.0</WindowLocation>
+<WindowSize>1280.0, 776.0</WindowSize>
+<GraphGroup>
+	<Cols>4</Cols>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollControlWord,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchControlWord,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -221,7 +221,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_rollControlWord,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_rollstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollControlWord,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -233,7 +233,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchControlWord,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollControlWord,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -245,7 +245,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchControlWord,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_rollControlWord,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_rollstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -257,7 +257,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchControlWord,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchControlWord,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -269,7 +269,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitchControlWord,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchControlWord,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -281,7 +281,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchControlWord,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchControlWord,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -293,7 +293,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchControlWord,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitchControlWord,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -305,7 +305,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchControlWord,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchControlWord,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -317,7 +317,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchControlWord,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchstatusWord</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchControlWord,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -328,15 +328,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window1><Graph Array Window2>
-<ScreenID>0</ScreenID>
-<WindowLocation>191.0, 118.0</WindowLocation>
-<WindowSize>804.0, 531.0</WindowSize>
-<GraphGroup>
-	<Cols>4</Cols>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchControlWord,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -348,7 +341,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchControlWord,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchstatusWord</Variables>
 		<GraphConfiguration>
 			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -359,8 +352,15 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>2</ScreenID>
+<WindowLocation>65.0, 118.0</WindowLocation>
+<WindowSize>1855.0, 1056.0</WindowSize>
+<GraphGroup>
+	<Cols>4</Cols>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -372,7 +372,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -384,7 +384,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -396,7 +396,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_STO_DISABLED,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_CURRENT_SHORT,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_MOTOR_FAULT,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -408,7 +408,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -420,7 +420,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -432,7 +432,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -444,7 +444,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -456,7 +456,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -468,7 +468,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_CURRENT_LIMITED</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -479,15 +479,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window2><Graph Array Window3>
-<ScreenID>0</ScreenID>
-<WindowLocation>379.0, 162.0</WindowLocation>
-<WindowSize>804.0, 533.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.BeastEtherCATOutputWriter.enableDrives</Variables>
+		<Variables>root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -499,9 +492,40 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollEnableDrive,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchEnableDrive,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchEnableDrive,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollEnableDrive,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchEnableDrive,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchEnableDrive</Variables>
+		<Variables>root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_UNDER_VOLTAGE,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_OVER_VOLTAGE,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_STO_DISABLED,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_CURRENT_SHORT,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_OVER_TEMPERATURE,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_MOTOR_ENABLED,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_MOTOR_FAULT,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_CURRENT_LIMITED</Variables>
 		<GraphConfiguration>
 			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>2</ScreenID>
+<WindowLocation>738.0, 494.0</WindowLocation>
+<WindowSize>804.0, 533.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BeastEtherCATOutputWriter.enableDrives</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollEnableDrive,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchEnableDrive,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchEnableDrive,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollEnableDrive,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchEnableDrive,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchEnableDrive</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -513,7 +537,7 @@
 	<Graph>
 		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollEnableDrive,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchEnableDrive,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchEnableDrive,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_rollEnableDrive,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitchEnableDrive,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchEnableDrive</Variables>
 		<GraphConfiguration>
-			<Name>config41</Name>
+			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -523,18 +547,423 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window3>
+</Graph Array Window3><Graph Array Window4>
+<ScreenID>1</ScreenID>
+<WindowLocation>3905.0, -4.0</WindowLocation>
+<WindowSize>1855.0, 1204.0</WindowSize>
+<GraphGroup>
+	<Cols>4</Cols>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_roll_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_roll_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_roll_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config46</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_roll_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config47</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config48</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config49</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config50</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config51</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config52</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config53</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config54</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitch_MOTOR_ENABLED</Variables>
+		<GraphConfiguration>
+			<Name>config55</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window4><Graph Array Window5>
+<ScreenID>2</ScreenID>
+<WindowLocation>65.0, -4.0</WindowLocation>
+<WindowSize>1855.0, 1204.0</WindowSize>
+<GraphGroup>
+	<Cols>4</Cols>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollTargetPosition,root.loggedmain.BabyBeast.front_left_hip_roll.front_left_hip_rollPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config56</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollTargetPosition,root.loggedmain.BabyBeast.front_right_hip_roll.front_right_hip_rollPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config57</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollTargetPosition,root.loggedmain.BabyBeast.hind_left_hip_roll.hind_left_hip_rollPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config58</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_rollTargetPosition,root.loggedmain.BabyBeast.hind_right_hip_roll.hind_right_hip_rollPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config59</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchTargetPosition,root.loggedmain.BabyBeast.front_left_hip_pitch.front_left_hip_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config60</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchTargetPosition,root.loggedmain.BabyBeast.front_right_hip_pitch.front_right_hip_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config61</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchTargetPosition,root.loggedmain.BabyBeast.hind_left_hip_pitch.hind_left_hip_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config62</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitchTargetPosition,root.loggedmain.BabyBeast.hind_right_hip_pitch.hind_right_hip_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config63</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchTargetPosition,root.loggedmain.BabyBeast.front_left_knee_pitch.front_left_knee_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config64</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchTargetPosition,root.loggedmain.BabyBeast.front_right_knee_pitch.front_right_knee_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config65</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchTargetPosition,root.loggedmain.BabyBeast.hind_left_knee_pitch.hind_left_knee_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config66</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchTargetPosition,root.loggedmain.BabyBeast.hind_right_knee_pitch.hind_right_knee_pitchPositionActualValue</Variables>
+		<GraphConfiguration>
+			<Name>config67</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window5><Graph Array Window6>
+<ScreenID>1</ScreenID>
+<WindowLocation>3905.0, -4.0</WindowLocation>
+<WindowSize>1855.0, 1204.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.desiredCoMPositionX,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.desiredCoMTargetX</Variables>
+		<GraphConfiguration>
+			<Name>config68</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.desiredCoMPositionY,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.desiredCoMTargetY</Variables>
+		<GraphConfiguration>
+			<Name>config69</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.userProvidedDesiredVelocityProvider.userProvidedDesiredVelocityX,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.desiredYawRate,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.desiredYawInPlace</Variables>
+		<GraphConfiguration>
+			<Name>config70</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.swingLeg,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.swingDuration,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.swingHeight,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.swingTimeRemaining,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.distanceInside</Variables>
+		<GraphConfiguration>
+			<Name>config71</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.QuadrupedCrawlState</Variables>
+		<GraphConfiguration>
+			<Name>config72</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.comTrajectoryTimeScaleFactor,root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.comTrajectoryTimeLastCalled</Variables>
+		<GraphConfiguration>
+			<Name>config73</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.currentSwingTargetX</Variables>
+		<GraphConfiguration>
+			<Name>config74</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.BabyBeast.BabyBeastModularController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.comTrajectoryTimeCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config75</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window6>
 
 <Extra Panels>
 <Main Viewport>
-
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>3.6118455631934334</Camera X>
+ <Camera Y>-1.12228321307174</Camera Y>
+ <Camera Z>1.9691730806104966</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
