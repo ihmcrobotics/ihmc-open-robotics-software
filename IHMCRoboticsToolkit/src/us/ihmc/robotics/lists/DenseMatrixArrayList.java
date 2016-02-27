@@ -22,9 +22,9 @@ public class DenseMatrixArrayList extends RecyclingArrayList<DenseMatrix64F>
          add().set(denseMatrixArrayList.get(i));
    }
 
-   private static Builder<DenseMatrix64F> createBuilder()
+   private static GenericTypeBuilder<DenseMatrix64F> createBuilder()
    {
-      Builder<DenseMatrix64F> builder = new Builder<DenseMatrix64F>()
+      GenericTypeBuilder<DenseMatrix64F> builder = new GenericTypeBuilder<DenseMatrix64F>()
       {
          @Override
          public DenseMatrix64F newInstance()
