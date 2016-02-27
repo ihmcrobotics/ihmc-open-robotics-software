@@ -9,8 +9,8 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
@@ -61,7 +61,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       positionTrajectoryGenerator.clear();
       orientationTrajectoryGenerator.clear();
 
-      if (footTrajectoryMessage.getWaypoint(0).getTime() > 1.0e-5)
+      if (footTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (initializeToCurrent)
          {
@@ -83,8 +83,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          orientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
 
-      positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getWaypoints());
-      orientationTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getWaypoints());
+      positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPoints());
+      orientationTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPoints());
    }
 
    @Override

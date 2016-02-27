@@ -14,17 +14,18 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class FeedbackControlCommandDataCopier
 {
-   private static final int INITIAL_CAPACITY = 20;
+   private static final int INITIAL_SIZE = 20;
 
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
 
-   private final RecyclingArrayList<JointspaceFeedbackControlCommand> jointspaceFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, JointspaceFeedbackControlCommand.class);
-   private final RecyclingArrayList<OrientationFeedbackControlCommand> orientationFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, OrientationFeedbackControlCommand.class);
-   private final RecyclingArrayList<PointFeedbackControlCommand> pointFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, PointFeedbackControlCommand.class);
-   private final RecyclingArrayList<SpatialFeedbackControlCommand> spatialFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, SpatialFeedbackControlCommand.class);
+   private final RecyclingArrayList<JointspaceFeedbackControlCommand> jointspaceFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_SIZE, JointspaceFeedbackControlCommand.class);
+   private final RecyclingArrayList<OrientationFeedbackControlCommand> orientationFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_SIZE, OrientationFeedbackControlCommand.class);
+   private final RecyclingArrayList<PointFeedbackControlCommand> pointFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_SIZE, PointFeedbackControlCommand.class);
+   private final RecyclingArrayList<SpatialFeedbackControlCommand> spatialFeedbackControlCommands = new RecyclingArrayList<>(INITIAL_SIZE, SpatialFeedbackControlCommand.class);
 
    public FeedbackControlCommandDataCopier()
    {
+      clear();
    }
 
    public void retrieveRigidBodiesFromName(Map<String, RigidBody> nameToRigidBodyMap)

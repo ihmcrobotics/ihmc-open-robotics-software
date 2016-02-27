@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -29,8 +29,8 @@ import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -823,14 +823,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
 
-      if (pelvisTrajectoryMessage.getWaypoint(0).getTime() > 1.0e-5)
+      if (pelvisTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
 
-      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SE3WaypointMessage waypoint = pelvisTrajectoryMessage.getWaypoint(i);
+         SE3TrajectoryPointMessage waypoint = pelvisTrajectoryMessage.getTrajectoryPoint(i);
          double time = waypoint.getTime();
          desiredPosition.setToZero(worldFrame);
          desiredVelocity.changeFrame(worldFrame);
@@ -861,14 +861,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
 
-      if (pelvisHeightTrajectoryMessage.getWaypoint(0).getTime() > 1.0e-5)
+      if (pelvisHeightTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
 
-      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         Waypoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getWaypoint(i);
+         TrajectoryPoint1DMessage waypoint = pelvisHeightTrajectoryMessage.getTrajectoryPoint(i);
          double time = waypoint.getTime();
          double z = waypoint.getPosition();
          double zDot = waypoint.getVelocity();

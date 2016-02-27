@@ -10,7 +10,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This packet controls the stiffness of LegJoints. i.e., the maximum force a joint puts out"
-      + "when it is (pushed) away from a desired position. This is useful to prevent robot from falling when leg hit things unexpectedly." 
+      + "when it is (pushed) away from a desired position. This is useful to prevent robot from falling when leg hit things unexpectedly."
       + "However, low stiffness (high compliance) can lead to poor joint tracking in the presence of natural joint stiction. Finding a "
       + "good balance is application specific. In our hybrid velocity+force controller, most force comes from velocity control, therefore, "
       + "only parameter related to velocity control is exposed.")
@@ -23,7 +23,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    public float[] maxVelocityDeltas; //values in the order of AtlasJointId.getLegJoints()
 
    @FieldDocumentation("LEFT or RIGHT leg")
-   public RobotSide robotSide; 
+   public RobotSide robotSide;
 
    public LegCompliancePacket()
    {
@@ -35,7 +35,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
 
       maxVelocityDeltas = new float[6];
 
-      for(int i = 0; i < 6; i++)
+      for (int i = 0; i < 6; i++)
       {
          maxVelocityDeltas[i] = Math.abs(random.nextFloat());
       }
@@ -44,27 +44,28 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    public LegCompliancePacket(float[] maxVelocityDeltas, RobotSide side)
    {
       this.maxVelocityDeltas = maxVelocityDeltas;
-      this.robotSide=side;
+      this.robotSide = side;
    }
 
    @Override
    public boolean epsilonEquals(LegCompliancePacket other, double epsilon)
    {
-      if(maxVelocityDeltas.length!=other.maxVelocityDeltas.length)
+      if (maxVelocityDeltas.length != other.maxVelocityDeltas.length)
          return false;
-      for(int i=0;i<maxVelocityDeltas.length;i++)
-         if(!MathTools.epsilonEquals(maxVelocityDeltas[i],other.maxVelocityDeltas[i],epsilon))
+      for (int i = 0; i < maxVelocityDeltas.length; i++)
+         if (!MathTools.epsilonEquals(maxVelocityDeltas[i], other.maxVelocityDeltas[i], epsilon))
             return false;
       return true;
    }
-   
+
+   @Override
    public String toString()
    {
       StringBuilder s = new StringBuilder();
-      s.append("LegCompliancePacket: side "+robotSide.name());
-      
+      s.append("LegCompliancePacket: side " + robotSide.name());
+
       s.append(" maxVelocityDeltas ");
-      for(int i=0;i<maxVelocityDeltas.length;i++)
+      for (int i = 0; i < maxVelocityDeltas.length; i++)
       {
          s.append(" " + maxVelocityDeltas[i]);
       }

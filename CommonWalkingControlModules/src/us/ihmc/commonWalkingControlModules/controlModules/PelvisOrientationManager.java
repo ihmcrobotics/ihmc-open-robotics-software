@@ -22,9 +22,9 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.SO3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -238,16 +238,16 @@ public class PelvisOrientationManager
 
    public void handlePelvisTrajectoryMessage(PelvisTrajectoryMessage message)
    {
-      handleSO3Waypoints(message.getWaypoints());
+      handleSO3Waypoints(message.getTrajectoryPoints());
    }
 
    private void handlePelvisOrientationTrajectoryMessages()
    {
       if (pelvisOrientationTrajectoryMessageSubscriber != null && pelvisOrientationTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
-         handleSO3Waypoints(pelvisOrientationTrajectoryMessageSubscriber.pollMessage().getWaypoints());
+         handleSO3Waypoints(pelvisOrientationTrajectoryMessageSubscriber.pollMessage().getTrajectoryPoints());
    }
 
-   public void handleSO3Waypoints(SO3WaypointInterface[] waypoints)
+   public void handleSO3Waypoints(SO3TrajectoryPointInterface<?>[] waypoints)
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
 

@@ -1,22 +1,24 @@
 package us.ihmc.robotics.math.trajectories;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.lists.RecyclingArrayList.Builder;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
 
 /**
  * This multi waypoint trajectory generator will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough
@@ -53,7 +55,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    private final RecyclingArrayList<double[]> parametersY;
    private final RecyclingArrayList<double[]> parametersZ;
 
-   private final ArrayList<YoFrameEuclideanWaypoint> waypoints;
+   private final ArrayList<YoFrameEuclideanTrajectoryPoint> waypoints;
 
    private final Matrix3d timeMatrix;
    private int numberOfWayPoints;
@@ -114,7 +116,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
       numberOfWayPoints = 0;
 
-      Builder<double[]> builder = new Builder<double[]>()
+      GenericTypeBuilder<double[]> builder = new GenericTypeBuilder<double[]>()
       {
          @Override public double[] newInstance()
          {
@@ -133,7 +135,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         YoFrameEuclideanWaypoint waypoint = new YoFrameEuclideanWaypoint(name, "AtWaypoint" + i, registry, referenceFrame);
+         YoFrameEuclideanTrajectoryPoint waypoint = new YoFrameEuclideanTrajectoryPoint(name, "AtWaypoint" + i, registry, referenceFrame);
          waypoints.add(waypoint);
          if (allowMultipleFrames)
             registerMultipleFramesHolders(waypoint);
@@ -141,7 +143,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
 
    }
 
-   private final ArrayList<YoFrameEuclideanWaypoint> subWayPoints = new ArrayList<>();
+   private final ArrayList<YoFrameEuclideanTrajectoryPoint> subWayPoints = new ArrayList<>();
 
    public void initialize()
    {
@@ -197,7 +199,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    private final Vector3d tempVectorForParameter = new Vector3d();
    private final Vector3d tempPositionVectorForParameter = new Vector3d();
 
-   private void updateParameters(ArrayList<YoFrameEuclideanWaypoint> waypoints, double[] parametersXToPack, double[] parametersYToPack,
+   private void updateParameters(ArrayList<YoFrameEuclideanTrajectoryPoint> waypoints, double[] parametersXToPack, double[] parametersYToPack,
          double[] parametersZToPack)
    {
       for (int i = 0; i < 3; i++)
@@ -397,7 +399,7 @@ public class PositionPathPlanningTrajectoryGenerator extends PositionTrajectoryG
    {
       numberOfWayPoints = 0;
 
-      for (YoFrameEuclideanWaypoint waypoint : waypoints)
+      for (YoFrameEuclideanTrajectoryPoint waypoint : waypoints)
       {
          waypoint.setToNaN();
       }

@@ -7,11 +7,11 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.humanoidRobotics.communication.packets.Waypoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified waypoints."
-      + " A third order polynomial function is used to interpolate between waypoints."
+@ClassDocumentation("This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points."
+      + " A third order polynomial function is used to interpolate between trajectory points."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
 public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage> implements VisualizablePacket
 {
@@ -19,7 +19,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    public RobotSide robotSide;
    @FieldDocumentation("List of points in the trajectory."
          + " The expected joint ordering is from the closest joint to the chest to the closest joint to the hand.")
-   public Trajectory1DMessage[] jointTrajectory1DMessages;
+   public ArmOneJointTrajectoryMessage[] jointTrajectoryMessages;
 
    /**
     * Empty constructor for serialization.
@@ -39,10 +39,10 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       setUniqueId(armTrajectoryMessage.getUniqueId());
       setDestination(armTrajectoryMessage.getDestination());
       robotSide = armTrajectoryMessage.robotSide;
-      jointTrajectory1DMessages = new Trajectory1DMessage[armTrajectoryMessage.getNumberOfJoints()];
+      jointTrajectoryMessages = new ArmOneJointTrajectoryMessage[armTrajectoryMessage.getNumberOfJoints()];
 
       for (int i = 0; i < getNumberOfJoints(); i++)
-         jointTrajectory1DMessages[i] = new Trajectory1DMessage(armTrajectoryMessage.jointTrajectory1DMessages[i]);
+         jointTrajectoryMessages[i] = new ArmOneJointTrajectoryMessage(armTrajectoryMessage.jointTrajectoryMessages[i]);
    }
 
    /**
@@ -56,27 +56,27 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      jointTrajectory1DMessages = new Trajectory1DMessage[desiredJointPositions.length];
+      jointTrajectoryMessages = new ArmOneJointTrajectoryMessage[desiredJointPositions.length];
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
-         jointTrajectory1DMessages[jointIndex] = new Trajectory1DMessage(trajectoryTime, desiredJointPositions[jointIndex]);
+         jointTrajectoryMessages[jointIndex] = new ArmOneJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
    }
 
    /**
-    * Create a message using the given joint trajectory waypoints.
+    * Create a message using the given joint trajectory points.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which arm is performing the trajectory.
-    * @param jointTrajectory1DMessages joint trajectory waypoints to be executed.
+    * @param jointTrajectory1DListMessages joint trajectory points to be executed.
     */
-   public ArmTrajectoryMessage(RobotSide robotSide, Trajectory1DMessage[] jointTrajectory1DMessages)
+   public ArmTrajectoryMessage(RobotSide robotSide, ArmOneJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      this.jointTrajectory1DMessages = jointTrajectory1DMessages;
+      this.jointTrajectoryMessages = jointTrajectory1DListMessages;
    }
 
    /**
-    * Use this constructor to build a message with more than one waypoint.
-    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, Trajectory1DMessage)} for each joint afterwards.
+    * Use this constructor to build a message with more than one trajectory point.
+    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, ArmOneJointTrajectoryMessage)} for each joint afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which arm is performing the trajectory.
     * @param numberOfJoints number of joints that will be executing the message.
@@ -85,60 +85,60 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      jointTrajectory1DMessages = new Trajectory1DMessage[numberOfJoints];
+      jointTrajectoryMessages = new ArmOneJointTrajectoryMessage[numberOfJoints];
    }
 
    /**
-    * Use this constructor to build a message with more than one waypoint.
-    * This constructor only allocates memory for the trajectories and their waypoints, you need to call {@link #setWaypoint(int, int, double, double, double)} for each joint and waypoint afterwards.
+    * Use this constructor to build a message with more than one trajectory points.
+    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectoryPoint(int, int, double, double, double)} for each joint and trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which arm is performing the trajectory.
     * @param numberOfJoints number of joints that will be executing the message.
-    * @param numberOfWaypoints number of waypoints that will be sent to the controller.
+    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */
-   public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints, int numberOfWaypoints)
+   public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints, int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      jointTrajectory1DMessages = new Trajectory1DMessage[numberOfJoints];
-      for (int i = 0; i < numberOfWaypoints; i++)
-         jointTrajectory1DMessages[i] = new Trajectory1DMessage(numberOfWaypoints);
+      jointTrajectoryMessages = new ArmOneJointTrajectoryMessage[numberOfJoints];
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         jointTrajectoryMessages[i] = new ArmOneJointTrajectoryMessage(numberOfTrajectoryPoints);
    }
 
    /**
-    * Set the trajectory waypoints to be executed by this joint.
-    * @param jointIndex index of the joint that will go through the waypoint.
-    * @param trajectory1DMessage joint trajectory waypoints to be executed.
+    * Set the trajectory points to be executed by this joint.
+    * @param jointIndex index of the joint that will go through the trajectory points.
+    * @param trajectory1DMessage joint trajectory points to be executed.
     */
-   public void setTrajectory1DMessage(int jointIndex, Trajectory1DMessage trajectory1DMessage)
+   public void setTrajectory1DMessage(int jointIndex, ArmOneJointTrajectoryMessage trajectory1DMessage)
    {
       rangeCheck(jointIndex);
-      jointTrajectory1DMessages[jointIndex] = trajectory1DMessage;
+      jointTrajectoryMessages[jointIndex] = trajectory1DMessage;
    }
 
    /**
-    * Create a waypoint.
-    * @param jointIndex index of the joint that will go through the waypoint.
-    * @param waypointIndex index of the waypoint to create.
-    * @param time time at which the waypoint has to be reached. The time is relative to when the trajectory starts.
-    * @param position define the desired 1D position to be reached at this waypoint.
-    * @param velocity define the desired 1D velocity to be reached at this waypoint.
+    * Create a trajectory point.
+    * @param jointIndex index of the joint that will go through the trajectory point.
+    * @param trajectoryPointIndex index of the trajectory point to create.
+    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * @param position define the desired 1D position to be reached at this trajectory point.
+    * @param velocity define the desired 1D velocity to be reached at this trajectory point.
     */
-   public void setWaypoint(int jointIndex, int waypointIndex, double time, double position, double velocity)
+   public void setTrajectoryPoint(int jointIndex, int trajectoryPointIndex, double time, double position, double velocity)
    {
       rangeCheck(jointIndex);
-      jointTrajectory1DMessages[jointIndex].setWaypoint(waypointIndex, time, position, velocity);
+      jointTrajectoryMessages[jointIndex].setTrajectoryPoint(trajectoryPointIndex, time, position, velocity);
    }
 
    public int getNumberOfJoints()
    {
-      return jointTrajectory1DMessages.length;
+      return jointTrajectoryMessages.length;
    }
 
-   public int getNumberOfWaypointsForJointTrajectory(int jointIndex)
+   public int getNumberOfJointTrajectoryPoints(int jointIndex)
    {
       rangeCheck(jointIndex);
-      return jointTrajectory1DMessages[jointIndex].getNumberOfWaypoints();
+      return jointTrajectoryMessages[jointIndex].getNumberOfTrajectoryPoints();
    }
 
    public RobotSide getRobotSide()
@@ -146,28 +146,28 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       return robotSide;
    }
 
-   public Trajectory1DMessage getJointTrajectory(int jointIndex)
+   public ArmOneJointTrajectoryMessage getJointTrajectoryPointList(int jointIndex)
    {
       rangeCheck(jointIndex);
-      return jointTrajectory1DMessages[jointIndex];
+      return jointTrajectoryMessages[jointIndex];
    }
 
-   public Trajectory1DMessage[] getJointTrajectory()
+   public ArmOneJointTrajectoryMessage[] getTrajectoryPointLists()
    {
-      return jointTrajectory1DMessages;
+      return jointTrajectoryMessages;
    }
 
-   public Waypoint1DMessage getJointTrajectoryWaypoint(int jointIndex, int waypointIndex)
+   public TrajectoryPoint1DMessage getJointTrajectoryPoint(int jointIndex, int trajectoryPointIndex)
    {
       rangeCheck(jointIndex);
-      return jointTrajectory1DMessages[jointIndex].getWaypoint(waypointIndex);
+      return jointTrajectoryMessages[jointIndex].getTrajectoryPoint(trajectoryPointIndex);
    }
 
    public void getFinalJointAngles(double[] finalJointAnglesToPack)
    {
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
-         finalJointAnglesToPack[i] = jointTrajectory1DMessages[i].getLastWaypoint().position;
+         finalJointAnglesToPack[i] = jointTrajectoryMessages[i].getLastTrajectoryPoint().position;
       }
    }
 
@@ -175,7 +175,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    {
       double trajectoryTime = 0.0;
       for (int i = 0; i < getNumberOfJoints(); i++)
-         trajectoryTime = Math.max(trajectoryTime, jointTrajectory1DMessages[i].getLastWaypoint().time);
+         trajectoryTime = Math.max(trajectoryTime, jointTrajectoryMessages[i].getLastTrajectoryPoint().time);
       return trajectoryTime;
    }
 
@@ -188,14 +188,14 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    @Override
    public boolean epsilonEquals(ArmTrajectoryMessage other, double epsilon)
    {
-      if (!this.robotSide.equals(other.robotSide) || this.jointTrajectory1DMessages.length != other.jointTrajectory1DMessages.length)
+      if (!this.robotSide.equals(other.robotSide) || this.jointTrajectoryMessages.length != other.jointTrajectoryMessages.length)
       {
          return false;
       }
 
-      for (int i = 0; i < this.jointTrajectory1DMessages.length; i++)
+      for (int i = 0; i < this.jointTrajectoryMessages.length; i++)
       {
-         if (!this.jointTrajectory1DMessages[i].epsilonEquals(other.jointTrajectory1DMessages[i], epsilon))
+         if (!this.jointTrajectoryMessages[i].epsilonEquals(other.jointTrajectoryMessages[i], epsilon))
          {
             return false;
          }
@@ -209,13 +209,13 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, random.nextInt(10) + 1);
 
       for (int i = 0; i < getNumberOfJoints(); i++)
-         setTrajectory1DMessage(i, new Trajectory1DMessage(random));
+         setTrajectory1DMessage(i, new ArmOneJointTrajectoryMessage(random));
    }
 
    @Override
    public String toString()
    {
-      if (jointTrajectory1DMessages != null)
+      if (jointTrajectoryMessages != null)
          return "Arm 1D trajectories: number of joints = " + getNumberOfJoints() + ", robotSide = " + robotSide;
       else
          return "Arm 1D trajectories: no joint trajectory, robotSide = " + robotSide;

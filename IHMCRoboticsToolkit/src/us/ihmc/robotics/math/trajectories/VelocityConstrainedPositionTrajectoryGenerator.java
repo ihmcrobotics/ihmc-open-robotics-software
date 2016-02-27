@@ -12,6 +12,8 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
@@ -168,18 +170,15 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setTrajectoryParameters(FrameEuclideanWaypoint initialFrameEuclideanWaypoint, FrameEuclideanWaypoint finalFrameEuclideanWaypoint)
+   public void setTrajectoryParameters(FrameEuclideanTrajectoryPoint initialFrameEuclideanWaypoint, FrameEuclideanTrajectoryPoint finalFrameEuclideanWaypoint)
    {
       setTrajectoryTime(finalFrameEuclideanWaypoint.getTime() - initialFrameEuclideanWaypoint.getTime());
 
-      initialPosition.set(initialFrameEuclideanWaypoint.getPosition());
-      initialVelocity.set(initialFrameEuclideanWaypoint.getLinearVelocity());
-
-      finalPosition.set(finalFrameEuclideanWaypoint.getPosition());
-      finalVelocity.set(finalFrameEuclideanWaypoint.getLinearVelocity());
+      initialFrameEuclideanWaypoint.get(initialPosition, initialVelocity);
+      finalFrameEuclideanWaypoint.get(finalPosition, finalVelocity);
    }
 
-   public void setTrajectoryParameters(YoFrameEuclideanWaypoint initialYoFrameEuclideanWaypoint, YoFrameEuclideanWaypoint finalYoFrameEuclideanWaypoint)
+   public void setTrajectoryParameters(YoFrameEuclideanTrajectoryPoint initialYoFrameEuclideanWaypoint, YoFrameEuclideanTrajectoryPoint finalYoFrameEuclideanWaypoint)
    {
       setTrajectoryTime(finalYoFrameEuclideanWaypoint.getTime() - initialYoFrameEuclideanWaypoint.getTime());
 
