@@ -5,12 +5,9 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 @ClassDocumentation("This message commands the controller to move in taskspace the pelvis to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -18,17 +15,15 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
       + " To excute a single straight line trajectory to reach a desired pelvis pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
       + " Note that the pelvis position is limited keep the robot's balance (center of mass has to remain inside the support polygon)."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class PelvisTrajectoryMessage extends IHMCRosApiMessage<PelvisTrajectoryMessage> implements TransformableDataObject<PelvisTrajectoryMessage>, VisualizablePacket
+public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<PelvisTrajectoryMessage> implements VisualizablePacket
 {
-   @FieldDocumentation("List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
-   public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
-
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public PelvisTrajectoryMessage()
    {
+      super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -38,11 +33,9 @@ public class PelvisTrajectoryMessage extends IHMCRosApiMessage<PelvisTrajectoryM
     */
    public PelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
+      super(pelvisTrajectoryMessage);
       setUniqueId(pelvisTrajectoryMessage.getUniqueId());
       setDestination(pelvisTrajectoryMessage.getDestination());
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[pelvisTrajectoryMessage.getNumberOfTrajectoryPoints()];
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(pelvisTrajectoryMessage.taskspaceTrajectoryPoints[i]);
    }
 
    /**
@@ -54,10 +47,8 @@ public class PelvisTrajectoryMessage extends IHMCRosApiMessage<PelvisTrajectoryM
     */
    public PelvisTrajectoryMessage(double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
    {
+      super(trajectoryTime, desiredPosition, desiredOrientation);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      Vector3d zeroLinearVelocity = new Vector3d();
-      Vector3d zeroAngularVelocity = new Vector3d();
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
    }
 
    /**
@@ -68,70 +59,21 @@ public class PelvisTrajectoryMessage extends IHMCRosApiMessage<PelvisTrajectoryM
     */
    public PelvisTrajectoryMessage(int numberOfTrajectoryPoints)
    {
+      super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfTrajectoryPoints];
-   }
-
-   /**
-    * Create a trajectory point.
-    * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    * @param position define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.
-    * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
-    */
-   public void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
-   {
-      rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
-   }
-
-   public int getNumberOfTrajectoryPoints()
-   {
-      return taskspaceTrajectoryPoints.length;
-   }
-
-   public SE3TrajectoryPointMessage getTrajectoryPoint(int trajectoryPointIndex)
-   {
-      rangeCheck(trajectoryPointIndex);
-      return taskspaceTrajectoryPoints[trajectoryPointIndex];
-   }
-
-   public SE3TrajectoryPointMessage[] getTrajectoryPoints()
-   {
-      return taskspaceTrajectoryPoints;
-   }
-
-   private void rangeCheck(int trajectoryPointIndex)
-   {
-      if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
    }
 
    @Override
    public boolean epsilonEquals(PelvisTrajectoryMessage other, double epsilon)
    {
-      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
-         return false;
-
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-      {
-         if (!taskspaceTrajectoryPoints[i].epsilonEquals(other.taskspaceTrajectoryPoints[i], epsilon))
-            return false;
-      }
-
-      return true;
+      return super.epsilonEquals(other, epsilon);
    }
 
    @Override
    public PelvisTrajectoryMessage transform(RigidBodyTransform transform)
    {
       PelvisTrajectoryMessage transformedPelvisTrajectoryMessage = new PelvisTrajectoryMessage(getNumberOfTrajectoryPoints());
-
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         transformedPelvisTrajectoryMessage.taskspaceTrajectoryPoints[i] = taskspaceTrajectoryPoints[i].transform(transform);
-
+      transformedPelvisTrajectoryMessage.applyTransform(transform);
       return transformedPelvisTrajectoryMessage;
    }
 

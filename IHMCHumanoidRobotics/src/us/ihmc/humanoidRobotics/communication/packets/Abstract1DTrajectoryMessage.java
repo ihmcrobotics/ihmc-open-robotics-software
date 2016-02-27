@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets.manipulation;
+package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
@@ -12,8 +12,8 @@ import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between trajectory points.")
-public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPoint1DListMessage>
-      implements TrajectoryPointListInterface<TrajectoryPoint1DMessage, TrajectoryPoint1DListMessage>
+public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T>> extends IHMCRosApiMessage<T>
+      implements TrajectoryPointListInterface<TrajectoryPoint1DMessage, T>
 {
    @FieldDocumentation("List of trajectory points to go through while executing the trajectory.")
    public TrajectoryPoint1DMessage[] trajectoryPoints;
@@ -21,11 +21,11 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
    /**
     * Empty constructor for serialization.
     */
-   public TrajectoryPoint1DListMessage()
+   public Abstract1DTrajectoryMessage()
    {
    }
 
-   public TrajectoryPoint1DListMessage(TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?> trajectory1dMessage)
+   public Abstract1DTrajectoryMessage(TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?> trajectory1dMessage)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[trajectory1dMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
@@ -37,7 +37,7 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
     * @param trajectoryTime how long it takes to reach the desired position.
     * @param desiredPosition desired end point position.
     */
-   public TrajectoryPoint1DListMessage(double trajectoryTime, double desiredPosition)
+   public Abstract1DTrajectoryMessage(double trajectoryTime, double desiredPosition)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[] {new TrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0)};
    }
@@ -47,19 +47,19 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */
-   public TrajectoryPoint1DListMessage(int numberOfTrajectoryPoints)
+   public Abstract1DTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[numberOfTrajectoryPoints];
    }
 
    @Override
-   public void clear()
+   public final void clear()
    {
       throw new RuntimeException("This cannot implement the method clear().");
    }
 
    @Override
-   public void addTrajectoryPoint(TrajectoryPoint1DMessage trajectoryPoint)
+   public final void addTrajectoryPoint(TrajectoryPoint1DMessage trajectoryPoint)
    {
       throw new RuntimeException("This cannot implement the method addTrajectoryPoint().");
    }
@@ -71,14 +71,14 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
     * @param position define the desired 1D position to be reached at this trajectory point.
     * @param velocity define the desired 1D velocity to be reached at this trajectory point.
     */
-   public void setTrajectoryPoint(int trajectoryPointIndex, double time, double position, double velocity)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, double position, double velocity)
    {
       rangeCheck(trajectoryPointIndex);
       trajectoryPoints[trajectoryPointIndex] = new TrajectoryPoint1DMessage(time, position, velocity);
    }
 
    @Override
-   public void set(TrajectoryPoint1DListMessage other)
+   public void set(T other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Trajectory messages do not have the same number of trajectory points.");
@@ -88,30 +88,30 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
    }
 
    @Override
-   public int getNumberOfTrajectoryPoints()
+   public final int getNumberOfTrajectoryPoints()
    {
       return trajectoryPoints.length;
    }
 
    @Override
-   public TrajectoryPoint1DMessage getTrajectoryPoint(int trajectoryPointIndex)
+   public final TrajectoryPoint1DMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
       return trajectoryPoints[trajectoryPointIndex];
    }
 
-   public TrajectoryPoint1DMessage[] getTrajectoryPoints()
+   public final TrajectoryPoint1DMessage[] getTrajectoryPoints()
    {
       return trajectoryPoints;
    }
 
    @Override
-   public TrajectoryPoint1DMessage getLastTrajectoryPoint()
+   public final TrajectoryPoint1DMessage getLastTrajectoryPoint()
    {
       return trajectoryPoints[getNumberOfTrajectoryPoints() - 1];
    }
 
    @Override
-   public double getTrajectoryTime()
+   public final double getTrajectoryTime()
    {
       return getLastTrajectoryPoint().getTime();
    }
@@ -119,11 +119,12 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException(
+               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
    }
 
    @Override
-   public boolean epsilonEquals(TrajectoryPoint1DListMessage other, double epsilon)
+   public boolean epsilonEquals(T other, double epsilon)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          return false;
@@ -137,7 +138,7 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
       return true;
    }
 
-   public TrajectoryPoint1DListMessage(Random random)
+   public Abstract1DTrajectoryMessage(Random random)
    {
       this(random.nextInt(16) + 1);
 

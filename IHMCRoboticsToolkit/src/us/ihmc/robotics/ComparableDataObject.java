@@ -1,4 +1,4 @@
-package us.ihmc.communication;
+package us.ihmc.robotics;
 
 public interface ComparableDataObject<T> 
 {

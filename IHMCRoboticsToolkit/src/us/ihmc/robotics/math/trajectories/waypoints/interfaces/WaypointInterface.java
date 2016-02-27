@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-public interface WaypointInterface<T extends WaypointInterface<T>>
+import us.ihmc.robotics.ComparableDataObject;
+
+public interface WaypointInterface<T extends WaypointInterface<T>> extends ComparableDataObject<T>
 {
    public abstract void set(T other);
 
@@ -9,6 +11,4 @@ public interface WaypointInterface<T extends WaypointInterface<T>>
    public abstract void setToNaN();
 
    public abstract boolean containsNaN();
-
-   public abstract boolean epsilonEquals(T other, double epsilon);
 }

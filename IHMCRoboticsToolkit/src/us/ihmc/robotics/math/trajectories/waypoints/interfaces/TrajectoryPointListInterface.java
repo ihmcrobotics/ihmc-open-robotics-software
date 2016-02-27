@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-public interface TrajectoryPointListInterface<P extends TrajectoryPointInterface<P>, T extends TrajectoryPointListInterface<P, T>>
+import us.ihmc.robotics.ComparableDataObject;
+
+public interface TrajectoryPointListInterface<P extends TrajectoryPointInterface<P>, T extends TrajectoryPointListInterface<P, T>> extends ComparableDataObject<T>
 {
    public abstract void clear();
 
@@ -15,6 +17,4 @@ public interface TrajectoryPointListInterface<P extends TrajectoryPointInterface
    public abstract P getLastTrajectoryPoint();
 
    public abstract double getTrajectoryTime();
-
-   public abstract boolean epsilonEquals(T other, double epsilon);
 }

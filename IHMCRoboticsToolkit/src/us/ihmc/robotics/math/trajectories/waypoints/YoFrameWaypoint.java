@@ -13,8 +13,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeom
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class YoFrameWaypoint<S extends TransformableGeometryObjectInterface<S> & WaypointInterface<S>, F extends FrameWaypoint<S, F>, Y extends YoFrameWaypoint<S, F, Y>>
-      extends ReferenceFrameHolder implements YoMultipleFramesHolder, TransformableGeometryObjectInterface<Y>, WaypointInterface<Y>
+public abstract class YoFrameWaypoint<S extends TransformableGeometryObjectInterface & WaypointInterface<S>, F extends FrameWaypoint<S, F>, Y extends YoFrameWaypoint<S, F, Y>>
+      extends ReferenceFrameHolder implements YoMultipleFramesHolder, TransformableGeometryObjectInterface, WaypointInterface<Y>
 {
    private final String namePrefix;
    private final String nameSuffix;

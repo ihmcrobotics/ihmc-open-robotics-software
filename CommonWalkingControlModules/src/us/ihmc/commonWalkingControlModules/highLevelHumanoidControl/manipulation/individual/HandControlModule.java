@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAcc
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.TrajectoryPoint1DListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGains;
@@ -581,7 +581,7 @@ public class HandControlModule
             appendFirstWaypointToWaypointJointspaceTrajectories(joint, trajectoryGenerator, false);
          }
 
-         TrajectoryPoint1DListMessage jointTrajectory = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
+         ArmOneJointTrajectoryMessage jointTrajectory = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
          trajectoryGenerator.appendWaypoints(jointTrajectory);
          trajectoryGenerator.initialize();
       }

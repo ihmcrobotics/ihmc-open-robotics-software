@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacke
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.TrajectoryPoint1DListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
@@ -526,7 +526,7 @@ public abstract class PacketValidityChecker
       
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         TrajectoryPoint1DListMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
+         ArmOneJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
          errorMessage = validateJointTrajectory1DMessage(jointTrajectory1DMessage, false);
          if (errorMessage != null)
          {
@@ -855,7 +855,7 @@ public abstract class PacketValidityChecker
 
    private final static double MAX_ACCEPTED_JOINT_VELOCITY = 100.0;
 
-   public static String validateJointTrajectory1DMessage(TrajectoryPoint1DListMessage jointTrajectory1DMessage, boolean checkId)
+   public static String validateJointTrajectory1DMessage(ArmOneJointTrajectoryMessage jointTrajectory1DMessage, boolean checkId)
    {
       String errorMessage = validatePacket(jointTrajectory1DMessage, checkId);
       if (errorMessage != null)

@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends TransformableGeometryObjectInterface<T>, WaypointInterface<T>
+public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends TransformableGeometryObjectInterface, WaypointInterface<T>
 {
    public abstract void setOrientation(Quat4d orientation);
 
