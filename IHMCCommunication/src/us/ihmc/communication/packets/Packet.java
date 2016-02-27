@@ -2,11 +2,11 @@ package us.ihmc.communication.packets;
 
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.ComparableDataObject;
+import us.ihmc.robotics.ComparableDataObject;
 
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
-public abstract class Packet<T> implements ComparableDataObject<T>
+public abstract class Packet<T extends Packet<T>> implements ComparableDataObject<T>
 {
    @FieldDocumentation("A unique id for the current message. This can be a timestamp or sequence number.\n"
          + "Only the unique id in the top level message is used, the unique id in nested messages is ignored.\n"

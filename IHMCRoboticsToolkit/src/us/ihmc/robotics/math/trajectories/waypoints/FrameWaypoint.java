@@ -6,8 +6,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeom
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class FrameWaypoint<S extends TransformableGeometryObjectInterface<S> & WaypointInterface<S>, F extends FrameWaypoint<S, F>>
-      extends ReferenceFrameHolder implements TransformableGeometryObjectInterface<F>, WaypointInterface<F>
+public abstract class FrameWaypoint<S extends TransformableGeometryObjectInterface & WaypointInterface<S>, F extends FrameWaypoint<S, F>>
+      extends ReferenceFrameHolder implements TransformableGeometryObjectInterface, WaypointInterface<F>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    protected final S simpleWaypoint;

@@ -92,7 +92,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.SpigotPosePac
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.TorusPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.TrajectoryPoint1DListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
@@ -241,7 +241,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       // Trajectory message fields
       registerPacketClass(BaseForControl.class);
-      registerPacketClass(TrajectoryPoint1DListMessage.class);
+      registerPacketClass(ArmOneJointTrajectoryMessage.class);
       registerPacketClass(TrajectoryPoint1DMessage.class);
       registerPacketClass(EuclideanTrajectoryPointMessage.class);
       registerPacketClass(SO3TrajectoryPointMessage.class);
@@ -249,8 +249,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(ArmControlMode.class);
       registerPacketField(BaseForControl.class);
-      registerPacketField(TrajectoryPoint1DListMessage.class);
-      registerPacketField(TrajectoryPoint1DListMessage[].class);
+      registerPacketField(ArmOneJointTrajectoryMessage.class);
+      registerPacketField(ArmOneJointTrajectoryMessage[].class);
       registerPacketField(TrajectoryPoint1DMessage.class);
       registerPacketField(TrajectoryPoint1DMessage[].class);
       registerPacketField(EuclideanTrajectoryPointMessage.class);

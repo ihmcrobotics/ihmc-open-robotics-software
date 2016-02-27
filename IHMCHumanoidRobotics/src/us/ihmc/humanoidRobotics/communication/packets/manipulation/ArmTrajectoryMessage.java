@@ -19,7 +19,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    public RobotSide robotSide;
    @FieldDocumentation("List of points in the trajectory."
          + " The expected joint ordering is from the closest joint to the chest to the closest joint to the hand.")
-   public TrajectoryPoint1DListMessage[] jointTrajectory1DListMessages;
+   public ArmOneJointTrajectoryMessage[] jointTrajectory1DListMessages;
 
    /**
     * Empty constructor for serialization.
@@ -39,10 +39,10 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       setUniqueId(armTrajectoryMessage.getUniqueId());
       setDestination(armTrajectoryMessage.getDestination());
       robotSide = armTrajectoryMessage.robotSide;
-      jointTrajectory1DListMessages = new TrajectoryPoint1DListMessage[armTrajectoryMessage.getNumberOfJoints()];
+      jointTrajectory1DListMessages = new ArmOneJointTrajectoryMessage[armTrajectoryMessage.getNumberOfJoints()];
 
       for (int i = 0; i < getNumberOfJoints(); i++)
-         jointTrajectory1DListMessages[i] = new TrajectoryPoint1DListMessage(armTrajectoryMessage.jointTrajectory1DListMessages[i]);
+         jointTrajectory1DListMessages[i] = new ArmOneJointTrajectoryMessage(armTrajectoryMessage.jointTrajectory1DListMessages[i]);
    }
 
    /**
@@ -56,9 +56,9 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      jointTrajectory1DListMessages = new TrajectoryPoint1DListMessage[desiredJointPositions.length];
+      jointTrajectory1DListMessages = new ArmOneJointTrajectoryMessage[desiredJointPositions.length];
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
-         jointTrajectory1DListMessages[jointIndex] = new TrajectoryPoint1DListMessage(trajectoryTime, desiredJointPositions[jointIndex]);
+         jointTrajectory1DListMessages[jointIndex] = new ArmOneJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
    }
 
    /**
@@ -67,7 +67,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
     * @param robotSide is used to define which arm is performing the trajectory.
     * @param jointTrajectory1DListMessages joint trajectory points to be executed.
     */
-   public ArmTrajectoryMessage(RobotSide robotSide, TrajectoryPoint1DListMessage[] jointTrajectory1DListMessages)
+   public ArmTrajectoryMessage(RobotSide robotSide, ArmOneJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
@@ -76,7 +76,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, TrajectoryPoint1DListMessage)} for each joint afterwards.
+    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, ArmOneJointTrajectoryMessage)} for each joint afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which arm is performing the trajectory.
     * @param numberOfJoints number of joints that will be executing the message.
@@ -85,7 +85,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      jointTrajectory1DListMessages = new TrajectoryPoint1DListMessage[numberOfJoints];
+      jointTrajectory1DListMessages = new ArmOneJointTrajectoryMessage[numberOfJoints];
    }
 
    /**
@@ -100,9 +100,9 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      jointTrajectory1DListMessages = new TrajectoryPoint1DListMessage[numberOfJoints];
+      jointTrajectory1DListMessages = new ArmOneJointTrajectoryMessage[numberOfJoints];
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         jointTrajectory1DListMessages[i] = new TrajectoryPoint1DListMessage(numberOfTrajectoryPoints);
+         jointTrajectory1DListMessages[i] = new ArmOneJointTrajectoryMessage(numberOfTrajectoryPoints);
    }
 
    /**
@@ -110,7 +110,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
     * @param jointIndex index of the joint that will go through the trajectory points.
     * @param trajectory1DMessage joint trajectory points to be executed.
     */
-   public void setTrajectory1DMessage(int jointIndex, TrajectoryPoint1DListMessage trajectory1DMessage)
+   public void setTrajectory1DMessage(int jointIndex, ArmOneJointTrajectoryMessage trajectory1DMessage)
    {
       rangeCheck(jointIndex);
       jointTrajectory1DListMessages[jointIndex] = trajectory1DMessage;
@@ -146,13 +146,13 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       return robotSide;
    }
 
-   public TrajectoryPoint1DListMessage getJointTrajectoryPointList(int jointIndex)
+   public ArmOneJointTrajectoryMessage getJointTrajectoryPointList(int jointIndex)
    {
       rangeCheck(jointIndex);
       return jointTrajectory1DListMessages[jointIndex];
    }
 
-   public TrajectoryPoint1DListMessage[] getTrajectoryPointLists()
+   public ArmOneJointTrajectoryMessage[] getTrajectoryPointLists()
    {
       return jointTrajectory1DListMessages;
    }
@@ -193,7 +193,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, random.nextInt(10) + 1);
 
       for (int i = 0; i < getNumberOfJoints(); i++)
-         setTrajectory1DMessage(i, new TrajectoryPoint1DListMessage(random));
+         setTrajectory1DMessage(i, new ArmOneJointTrajectoryMessage(random));
    }
 
    @Override
