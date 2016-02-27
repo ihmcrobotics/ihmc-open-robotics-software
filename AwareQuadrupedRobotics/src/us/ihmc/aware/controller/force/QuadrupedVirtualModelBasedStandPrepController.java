@@ -188,10 +188,11 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       }
 
       // Show the VMC visualizations.
-      vmc.setVisible(false);
+      vmc.setVisible(true);
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          vmc.setSoleVirtualForceVisible(quadrant, true);
+         vmc.setSoleContactForceVisible(quadrant, false);
       }
 
       trajectoryStartTime = environment.getRobotTimestamp().getDoubleValue();
