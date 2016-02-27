@@ -131,7 +131,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          HandTrajectoryMessage handTrajectoryMessage = (HandTrajectoryMessage) scriptObject;
          handTrajectoryMessageSubscriber.receivedPacket(handTrajectoryMessage);
 
-         setupTimesForNewScriptEvent(handTrajectoryMessage.getLastWaypoint().time);
+         setupTimesForNewScriptEvent(handTrajectoryMessage.getLastTrajectoryPoint().time);
       }
       else if (scriptObject instanceof ArmTrajectoryMessage)
       {

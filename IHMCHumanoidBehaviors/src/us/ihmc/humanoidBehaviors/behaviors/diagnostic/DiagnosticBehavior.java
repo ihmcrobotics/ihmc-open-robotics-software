@@ -44,8 +44,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.GraspCylinderPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.Trajectory1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -82,7 +82,7 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.math.trajectories.WaypointTrajectory1DCalculator;
+import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -1890,7 +1890,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       int numberOfHandPoses = 10;
       
-      WaypointTrajectory1DCalculator calculator = new WaypointTrajectory1DCalculator();
+      TrajectoryPoint1DCalculator calculator = new TrajectoryPoint1DCalculator();
 
       for (RobotSide flyingSide : RobotSide.values)
       {
@@ -1926,11 +1926,11 @@ public class DiagnosticBehavior extends BehaviorInterface
                default:
                   throw new RuntimeException("Should not get there!");
                }
-               calculator.appendWaypoint(desiredJointAngle);
+               calculator.appendTrajectoryPoint(desiredJointAngle);
             }
-            calculator.computeWaypointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
-            calculator.computeWaypointVelocities(true);
-            flyingMessage.setTrajectory1DMessage(jointIndex, new Trajectory1DMessage(calculator.getTrajectoryData()));
+            calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
+            calculator.computeTrajectoryPointVelocities(true);
+            flyingMessage.setTrajectory1DMessage(jointIndex, new ArmOneJointTrajectoryMessage(calculator.getTrajectoryData()));
          }
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),

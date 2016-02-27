@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -156,7 +156,7 @@ public class PelvisICPBasedTranslationManager
    {
       initialPelvisPositionTime.set(yoTime.getDoubleValue());
 
-      if (message.getWaypoint(0).getTime() > 1.0e-5)
+      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (isRunning.getBooleanValue())
             waypointPositionTrajectoryGenerator.getPosition(tempPosition);
@@ -175,7 +175,7 @@ public class PelvisICPBasedTranslationManager
          waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       }
 
-      waypointPositionTrajectoryGenerator.appendWaypoints(message.getWaypoints());
+      waypointPositionTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
       waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       waypointPositionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);

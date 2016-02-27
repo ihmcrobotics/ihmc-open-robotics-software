@@ -30,6 +30,7 @@ public class InverseDynamicsCommandDataCopier
 
    public InverseDynamicsCommandDataCopier()
    {
+      clear();
    }
 
    public void retrieveRigidBodiesFromName(Map<String, RigidBody> nameToRigidBodyMap)

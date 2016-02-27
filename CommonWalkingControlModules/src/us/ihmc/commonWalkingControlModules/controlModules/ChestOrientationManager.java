@@ -17,7 +17,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -137,7 +137,7 @@ public class ChestOrientationManager
 
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
-      if (message.getWaypoint(0).getTime() > 1.0e-5)
+      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
          desiredOrientation.changeFrame(worldFrame);
@@ -153,7 +153,7 @@ public class ChestOrientationManager
          waypointOrientationTrajectoryGenerator.clear();
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getWaypoints());
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
       waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isTrackingOrientation.set(true);

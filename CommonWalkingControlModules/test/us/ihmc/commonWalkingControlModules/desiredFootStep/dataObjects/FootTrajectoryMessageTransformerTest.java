@@ -11,7 +11,7 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.humanoidRobotics.communication.packets.SE3WaypointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -68,12 +68,12 @@ public class FootTrajectoryMessageTransformerTest
    {
       // RobotSide robotSide;
       assertTrue(starting.getRobotSide().equals(ending.getRobotSide()));
-      assertTrue(starting.getNumberOfWaypoints() == ending.getNumberOfWaypoints());
+      assertTrue(starting.getNumberOfTrajectoryPoints() == ending.getNumberOfTrajectoryPoints());
 
-      for (int i = 0; i < starting.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < starting.getNumberOfTrajectoryPoints(); i++)
       {
-         SE3WaypointMessage startingWaypoint = starting.getWaypoint(i);
-         SE3WaypointMessage endingWaypoint = ending.getWaypoint(i);
+         SE3TrajectoryPointMessage startingWaypoint = starting.getTrajectoryPoint(i);
+         SE3TrajectoryPointMessage endingWaypoint = ending.getTrajectoryPoint(i);
 
          // Point3d position;
          double distance = getDistanceBetweenPoints(startingWaypoint.position, transform3D, endingWaypoint.position);

@@ -25,7 +25,7 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
    {
       return image;
    }
-   
+
    public IntrinsicParameters getIntrinsicParameters()
    {
       return intrinsicParameters;

@@ -1,6 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;

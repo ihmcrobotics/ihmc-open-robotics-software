@@ -15,6 +15,8 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -273,18 +275,15 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       setFinalAngularVelocity(finalAngularVelocity);
    }
 
-   public void setTrajectoryParameters(FrameSO3Waypoint initialFrameSO3Waypoint, FrameSO3Waypoint finalFrameSO3Waypoint)
+   public void setTrajectoryParameters(FrameSO3TrajectoryPoint initialFrameSO3Waypoint, FrameSO3TrajectoryPoint finalFrameSO3Waypoint)
    {
       setTrajectoryTime(finalFrameSO3Waypoint.getTime() - initialFrameSO3Waypoint.getTime());
 
-      initialOrientation.set(initialFrameSO3Waypoint.getOrientation());
-      initialAngularVelocity.set(initialFrameSO3Waypoint.getAngularVelocity());
-
-      finalOrientation.set(finalFrameSO3Waypoint.getOrientation());
-      finalAngularVelocity.set(finalFrameSO3Waypoint.getAngularVelocity());
+      initialFrameSO3Waypoint.get(initialOrientation, initialAngularVelocity);
+      finalFrameSO3Waypoint.get(finalOrientation, finalAngularVelocity);
    }
 
-   public void setTrajectoryParameters(YoFrameSO3Waypoint initialYoFrameSO3Waypoint, YoFrameSO3Waypoint finalYoFrameSO3Waypoint)
+   public void setTrajectoryParameters(YoFrameSO3TrajectoryPoint initialYoFrameSO3Waypoint, YoFrameSO3TrajectoryPoint finalYoFrameSO3Waypoint)
    {
       setTrajectoryTime(finalYoFrameSO3Waypoint.getTime() - initialYoFrameSO3Waypoint.getTime());
 
