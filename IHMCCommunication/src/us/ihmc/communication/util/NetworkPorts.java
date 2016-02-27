@@ -37,6 +37,7 @@ public class NetworkPorts
    public static final NetworkPorts TEXT_TO_SPEECH = new NetworkPorts(6013);
    public static final NetworkPorts FACE_TRACKING = new NetworkPorts(6014);
    public static final NetworkPorts AUDIO_MODULE_PORT = new NetworkPorts(6015);
+   public static final NetworkPorts TOUCH_MODULE_PORT = new NetworkPorts(6016);
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);

@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -19,7 +20,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
  * @author twan
  *         Date: 5/28/13
  */
-public class ContactPointVisualizer
+public class ContactPointVisualizer implements Updatable
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -62,7 +63,8 @@ public class ContactPointVisualizer
    private final FramePoint tempFramePoint = new FramePoint(worldFrame);
    private final FrameVector tempFrameVector = new FrameVector(worldFrame);
 
-   public void update()
+   @Override
+   public void update(double time)
    {
       int i = 0;
       for (int j = 0; j < contactStates.size(); j++)
