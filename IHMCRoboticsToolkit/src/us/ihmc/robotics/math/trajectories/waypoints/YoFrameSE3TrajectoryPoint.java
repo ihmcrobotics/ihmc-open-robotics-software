@@ -1,114 +1,72 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
-
-import java.util.List;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSE3TrajectoryPoint extends ReferenceFrameHolder implements SE3TrajectoryPointInterface<YoFrameSE3TrajectoryPoint>, YoMultipleFramesHolder
+public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3TrajectoryPoint, FrameSE3TrajectoryPoint, YoFrameSE3TrajectoryPoint>
+      implements SE3TrajectoryPointInterface<YoFrameSE3TrajectoryPoint>
 {
-   private final String namePrefix;
-   private final String nameSuffix;
-
-   private final YoMultipleFramesHelper multipleFramesHelper;
-
-   private final DoubleYoVariable time;
    private final YoFramePoint position;
    private final YoFrameQuaternion orientation;
    private final YoFrameVector linearVelocity;
    private final YoFrameVector angularVelocity;
 
-   private final FrameSE3TrajectoryPoint frameSE3TrajectoryPoint = new FrameSE3TrajectoryPoint();
-
    public YoFrameSE3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
-      this.namePrefix = namePrefix;
-      this.nameSuffix = nameSuffix;
-      this.multipleFramesHelper = new YoMultipleFramesHelper(createName(namePrefix, nameSuffix, ""), registry, referenceFrames);
+      super(new FrameSE3TrajectoryPoint(), namePrefix, nameSuffix, registry, referenceFrames);
 
-      time = new DoubleYoVariable(createName(namePrefix, "time", nameSuffix), registry);
-      position = new YoFramePoint(createName(namePrefix, "position", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return multipleFramesHelper.getCurrentReferenceFrame();
-         }
-      };
-      orientation = new YoFrameQuaternion(createName(namePrefix, "orientation", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return multipleFramesHelper.getCurrentReferenceFrame();
-         }
-      };
-      linearVelocity = new YoFrameVector(createName(namePrefix, "linearVelocity", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return multipleFramesHelper.getCurrentReferenceFrame();
-         }
-      };
-      angularVelocity = new YoFrameVector(createName(namePrefix, "angularVelocity", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return multipleFramesHelper.getCurrentReferenceFrame();
-         }
-      };
+      position = YoFrameEuclideanWaypoint.createYoPosition(this, namePrefix, nameSuffix, registry);
+      orientation = YoFrameSO3Waypoint.createYoOrientation(this, namePrefix, nameSuffix, registry);
+      linearVelocity = YoFrameEuclideanWaypoint.createYoLinearVelocity(this, namePrefix, nameSuffix, registry);
+      angularVelocity = YoFrameSO3Waypoint.createYoAngularVelocity(this, namePrefix, nameSuffix, registry);
    }
 
    @Override
-   public void setTime(double time)
+   public void setPosition(Point3d position)
    {
-      this.time.set(time);
+      this.position.set(position);
+   }
+
+   @Override
+   public void setOrientation(Quat4d orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
+   @Override
+   public void setLinearVelocity(Vector3d linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
+   @Override
+   public void setAngularVelocity(Vector3d angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
    }
 
    public void set(SE3TrajectoryPointInterface<?> se3TrajectoryPoint)
    {
-      frameSE3TrajectoryPoint.setToZero(getReferenceFrame());
-      frameSE3TrajectoryPoint.set(se3TrajectoryPoint);
-      getYoValuesFromFrameSE3TrajectoryPoint();
-   }
-
-   public void set(FrameSE3TrajectoryPoint frameSE3TrajectoryPoint)
-   {
-      frameSE3TrajectoryPoint.setToZero(getReferenceFrame());
-      frameSE3TrajectoryPoint.set(frameSE3TrajectoryPoint);
-      getYoValuesFromFrameSE3TrajectoryPoint();
-   }
-
-   @Override
-   public void set(YoFrameSE3TrajectoryPoint yoFrameSE3TrajectoryPoint)
-   {
-      frameSE3TrajectoryPoint.setToZero(getReferenceFrame());
-      yoFrameSE3TrajectoryPoint.getFrameSE3TrajectoryPoint(frameSE3TrajectoryPoint);
-      getYoValuesFromFrameSE3TrajectoryPoint();
+      frameWaypoint.setToZero(getReferenceFrame());
+      frameWaypoint.set(se3TrajectoryPoint);
+      getYoValuesFromFrameTrajectoryPoint();
    }
 
    public void set(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
    {
-      this.time.set(time);
+      setTime(time);
       this.position.set(position);
       this.orientation.set(orientation);
       this.linearVelocity.set(linearVelocity);
@@ -117,16 +75,16 @@ public class YoFrameSE3TrajectoryPoint extends ReferenceFrameHolder implements S
 
    public void set(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
    {
-      this.time.set(time);
+      setTime(time);
       this.position.set(position);
       this.orientation.set(orientation);
       this.linearVelocity.set(linearVelocity);
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(double time, YoFramePoint position, YoFrameQuaternion orientation, YoFrameVector linearVelocity, YoFrameVector angularVelocity)
+   public void set(DoubleYoVariable time, YoFramePoint position, YoFrameQuaternion orientation, YoFrameVector linearVelocity, YoFrameVector angularVelocity)
    {
-      this.time.set(time);
+      setTime(time.getDoubleValue());
       this.position.set(position);
       this.orientation.set(orientation);
       this.linearVelocity.set(linearVelocity);
@@ -134,38 +92,77 @@ public class YoFrameSE3TrajectoryPoint extends ReferenceFrameHolder implements S
    }
 
    @Override
-   public void addTimeOffset(double timeOffsetToAdd)
+   public void setPositionToZero()
    {
-      time.add(timeOffsetToAdd);
+      position.setToZero();
    }
 
    @Override
-   public void subtractTimeOffset(double timeOffsetToSubtract)
+   public void setOrientationToZero()
    {
-      time.sub(timeOffsetToSubtract);
+      orientation.setToZero();
    }
 
    @Override
-   public boolean containsNaN()
+   public void setLinearVelocityToZero()
    {
-      if (time.isNaN())
-         return true;
-      if (position.containsNaN())
-         return true;
-      if (orientation.containsNaN())
-         return true;
-      if (linearVelocity.containsNaN())
-         return true;
-      if (angularVelocity.containsNaN())
-         return true;
-
-      return false;
+      linearVelocity.setToZero();
    }
 
    @Override
-   public double getTime()
+   public void setAngularVelocityToZero()
    {
-      return time.getDoubleValue();
+      angularVelocity.setToZero();
+   }
+
+   @Override
+   public void setPositionToNaN()
+   {
+      position.setToNaN();
+   }
+
+   @Override
+   public void setOrientationToNaN()
+   {
+      orientation.setToNaN();
+   }
+
+   @Override
+   public void setLinearVelocityToNaN()
+   {
+      linearVelocity.setToNaN();
+   }
+
+   @Override
+   public void setAngularVelocityToNaN()
+   {
+      angularVelocity.setToNaN();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      super.setToNaN();
+      setTimeToNaN();
+      setPositionToNaN();
+      setOrientationToNaN();
+      setLinearVelocityToNaN();
+      setAngularVelocityToNaN();
+   }
+
+   @Override
+   public void setToNaN(ReferenceFrame referenceFrame)
+   {
+      super.setToNaN(referenceFrame);
+      setToNaN();
+   }
+
+   @Override
+   public double positionDistance(YoFrameSE3TrajectoryPoint other)
+   {
+      putYoValuesIntoFrameTrajectoryPoint();
+      other.putYoValuesIntoFrameTrajectoryPoint();
+      return frameWaypoint.positionDistance(other.frameWaypoint);
    }
 
    @Override
@@ -284,148 +281,30 @@ public class YoFrameSE3TrajectoryPoint extends ReferenceFrameHolder implements S
       return angularVelocity;
    }
 
-   public void getFrameSE3TrajectoryPoint(FrameSE3TrajectoryPoint frameSE3TrajectoryPointToPack)
+   @Override
+   protected void putYoValuesIntoFrameTrajectoryPoint()
    {
-      putYoValuesIntoFrameSE3TrajectoryPoint();
-      frameSE3TrajectoryPointToPack.set(frameSE3TrajectoryPoint);
-   }
-
-   public void getFrameSE3TrajectoryPointIncludingFrame(FrameSE3TrajectoryPoint frameSE3TrajectoryPointToPack)
-   {
-      putYoValuesIntoFrameSE3TrajectoryPoint();
-      frameSE3TrajectoryPointToPack.setIncludingFrame(frameSE3TrajectoryPoint);
+      frameWaypoint.setToZero(getReferenceFrame());
+      frameWaypoint.set(this);
    }
 
    @Override
-   public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
+   protected void getYoValuesFromFrameTrajectoryPoint()
    {
-      multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
-   }
+      SimpleSE3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getSimpleWaypoint();
+      SimpleEuclideanWaypoint euclideanWaypoint = simpleTrajectoryPoint.getEuclideanWaypoint();
+      SimpleSO3Waypoint so3Waypoint = simpleTrajectoryPoint.getSO3Waypoint();
 
-   @Override
-   public void changeFrame(ReferenceFrame desiredReferenceFrame)
-   {
-      putYoValuesIntoFrameSE3TrajectoryPoint();
-      multipleFramesHelper.switchCurrentReferenceFrame(desiredReferenceFrame);
-      frameSE3TrajectoryPoint.changeFrame(desiredReferenceFrame);
-      getYoValuesFromFrameSE3TrajectoryPoint();
-   }
-
-   @Override
-   public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      ReferenceFrame previousReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(referenceFrame);
-      setToZero();
-      return previousReferenceFrame;
-   }
-
-   @Override
-   public boolean isReferenceFrameRegistered(ReferenceFrame referenceFrame)
-   {
-      return multipleFramesHelper.isReferenceFrameRegistered(referenceFrame);
-   }
-
-   @Override
-   public int getNumberOfReferenceFramesRegistered()
-   {
-      return multipleFramesHelper.getNumberOfReferenceFramesRegistered();
-   }
-
-   @Override
-   public void getRegisteredReferenceFrames(List<ReferenceFrame> referenceFramesToPack)
-   {
-      multipleFramesHelper.getRegisteredReferenceFrames(referenceFramesToPack);
-   }
-
-   @Override
-   public void setToNaN(ReferenceFrame desiredReferenceFrame)
-   {
-      multipleFramesHelper.switchCurrentReferenceFrame(desiredReferenceFrame);
-      setToNaN();
-   }
-
-   public void setToNaN()
-   {
-      time.set(Double.NaN);
-      position.setToNaN();
-      orientation.setToNaN();
-      linearVelocity.setToNaN();
-      angularVelocity.setToNaN();
-   }
-
-   public void setToZero()
-   {
-      time.set(0.0);
-      position.setToZero();
-      orientation.setToZero();
-      linearVelocity.setToZero();
-      angularVelocity.setToZero();
-   }
-
-   public FrameSE3TrajectoryPoint getFrameSE3TrajectoryPointCopy()
-   {
-      putYoValuesIntoFrameSE3TrajectoryPoint();
-      return new FrameSE3TrajectoryPoint(frameSE3TrajectoryPoint);
-   }
-
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return multipleFramesHelper.getCurrentReferenceFrame();
-   }
-
-   public String getNamePrefix()
-   {
-      return namePrefix;
-   }
-
-   public String getNameSuffix()
-   {
-      return nameSuffix;
-   }
-
-   private void putYoValuesIntoFrameSE3TrajectoryPoint()
-   {
-      frameSE3TrajectoryPoint.setToZero(getReferenceFrame());
-      frameSE3TrajectoryPoint.set(this);
-   }
-
-   private void getYoValuesFromFrameSE3TrajectoryPoint()
-   {
-      getYoValuesFromFrameTuple(true);
-   }
-
-   private void getYoValuesFromFrameTuple(boolean notifyListeners)
-   {
-      time.set(frameSE3TrajectoryPoint.getTime(), notifyListeners);
-      position.set(frameSE3TrajectoryPoint.getPosition(), notifyListeners);
-      orientation.set(frameSE3TrajectoryPoint.getOrientation(), notifyListeners);
-      linearVelocity.set(frameSE3TrajectoryPoint.getLinearVelocity(), notifyListeners);
-      angularVelocity.set(frameSE3TrajectoryPoint.getAngularVelocity(), notifyListeners);
+      position.set(euclideanWaypoint.getPosition());
+      orientation.set(so3Waypoint.getOrientation());
+      linearVelocity.set(euclideanWaypoint.getLinearVelocity());
+      angularVelocity.set(so3Waypoint.getAngularVelocity());
    }
 
    @Override
    public String toString()
    {
-      putYoValuesIntoFrameSE3TrajectoryPoint();
-      return frameSE3TrajectoryPoint.toString();
-   }
-
-   @Override
-   public boolean epsilonEquals(YoFrameSE3TrajectoryPoint other, double epsilon)
-   {
-      if (getReferenceFrame() != other.getReferenceFrame())
-         return false;
-      if (!MathTools.epsilonEquals(time.getDoubleValue(), other.time.getDoubleValue(), epsilon))
-         return false;
-      if (!position.epsilonEquals(other.position, epsilon))
-         return false;
-      if (!orientation.epsilonEquals(other.orientation, epsilon))
-         return false;
-      if (!linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
-         return false;
-      if (!angularVelocity.epsilonEquals(other.angularVelocity, epsilon))
-         return false;
-      return true;
+      putYoValuesIntoFrameTrajectoryPoint();
+      return frameWaypoint.toString();
    }
 }

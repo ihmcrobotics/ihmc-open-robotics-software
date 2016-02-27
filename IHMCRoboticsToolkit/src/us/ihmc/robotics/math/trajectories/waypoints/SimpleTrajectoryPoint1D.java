@@ -3,47 +3,30 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 
-public class SimpleTrajectoryPoint1D implements TrajectoryPoint1DInterface<SimpleTrajectoryPoint1D>
+public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<SimpleWaypoint1D, SimpleTrajectoryPoint1D>
+      implements TrajectoryPoint1DInterface<SimpleTrajectoryPoint1D>
 {
-   private double time;
-   private double position;
-   private double velocity;
-
-   @Override
-   public void setTime(double time)
+   public SimpleTrajectoryPoint1D()
    {
-      this.time = time;
-   }
-
-   @Override
-   public void addTimeOffset(double timeOffsetToAdd)
-   {
-      time += timeOffsetToAdd;
-   }
-
-   @Override
-   public void subtractTimeOffset(double timeOffsetToSubtract)
-   {
-      time -= timeOffsetToSubtract;
+      super(new SimpleWaypoint1D());
    }
 
    public void setPosition(double position)
    {
-      this.position = position;
+      waypointData.setPosition(position);
    }
 
    public void setVelocity(double velocity)
    {
-      this.velocity = velocity;
+      waypointData.setVelocity(velocity);
    }
 
    public void set(double time, double position, double velocity)
    {
       setTime(time);
-      setPosition(position);
-      setVelocity(velocity);
+      waypointData.set(position, velocity);
    }
 
    public void set(TrajectoryPoint1DInterface<?> other)
@@ -54,41 +37,15 @@ public class SimpleTrajectoryPoint1D implements TrajectoryPoint1DInterface<Simpl
    }
 
    @Override
-   public void set(SimpleTrajectoryPoint1D other)
-   {
-      time = other.time;
-      position = other.position;
-      velocity = other.velocity;
-   }
-
-   @Override
-   public double getTime()
-   {
-      return time;
-   }
-
-   @Override
    public double getPosition()
    {
-      return position;
+      return waypointData.getPosition();
    }
 
    @Override
    public double getVelocity()
    {
-      return velocity;
-   }
-
-   @Override
-   public boolean epsilonEquals(SimpleTrajectoryPoint1D other, double epsilon)
-   {
-      if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
-         return false;
-      if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
-         return false;
-      if (!MathTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon))
-         return false;
-      return true;
+      return waypointData.getPosition();
    }
 
    @Override
@@ -96,8 +53,6 @@ public class SimpleTrajectoryPoint1D implements TrajectoryPoint1DInterface<Simpl
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
       String timeString = "time = " + doubleFormat.format(getTime());
-      String positionString = "position = " + doubleFormat.format(getPosition());
-      String velocityString = "velocity = " + doubleFormat.format(getVelocity());
-      return "Trajectory point 1D: (" + timeString + ", " + positionString + ", " + velocityString + ")";
+      return "Trajectory point 1D: (" + timeString + ", " + waypointData + ")";
    }
 }

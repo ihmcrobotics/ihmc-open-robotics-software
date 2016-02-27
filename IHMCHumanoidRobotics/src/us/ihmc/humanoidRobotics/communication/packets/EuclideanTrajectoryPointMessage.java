@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the translational information for one trajectory point (position & linear velocity). "
       + "Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational)")
@@ -111,6 +111,76 @@ public class EuclideanTrajectoryPointMessage extends IHMCRosApiMessage<Euclidean
    }
 
    @Override
+   public void setTimeToZero()
+   {
+      time = 0.0;
+   }
+
+   @Override
+   public void setPositionToZero()
+   {
+      position.set(0.0, 0.0, 0.0);
+   }
+
+   @Override
+   public void setLinearVelocityToZero()
+   {
+      linearVelocity.set(0.0, 0.0, 0.0);
+   }
+
+   @Override
+   public void setToZero()
+   {
+      setTimeToZero();
+      setPositionToZero();
+      setLinearVelocityToZero();
+   }
+
+   @Override
+   public void setTimeToNaN()
+   {
+      time = Double.NaN;
+   }
+
+   @Override
+   public void setPositionToNaN()
+   {
+      position.set(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public void setLinearVelocityToNaN()
+   {
+      linearVelocity.set(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      setTimeToNaN();
+      setPositionToNaN();
+      setLinearVelocityToNaN();
+   }
+
+   @Override
+   public double positionDistance(EuclideanTrajectoryPointMessage other)
+   {
+      return position.distance(other.position);
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      if (Double.isNaN(time))
+         return true;
+      if (Double.isNaN(position.getX()) || Double.isNaN(position.getY()) || Double.isNaN(position.getZ()))
+         return true;
+      if (Double.isNaN(linearVelocity.getX()) || Double.isNaN(linearVelocity.getY()) || Double.isNaN(linearVelocity.getZ()))
+         return true;
+      return false;
+   }
+
+   @Override
    public boolean epsilonEquals(EuclideanTrajectoryPointMessage other, double epsilon)
    {
       if (position == null && other.position != null)
@@ -151,6 +221,13 @@ public class EuclideanTrajectoryPointMessage extends IHMCRosApiMessage<Euclidean
          transformedTrajectoryPointMessage.linearVelocity = null;
 
       return transformedTrajectoryPointMessage;
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      transform.transform(position);
+      transform.transform(linearVelocity);
    }
 
    @Override

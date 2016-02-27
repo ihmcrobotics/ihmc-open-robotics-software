@@ -8,6 +8,7 @@ import java.text.NumberFormat;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 
 public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTrajectoryPoint1D>
 {
@@ -15,8 +16,7 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
    private final String nameSuffix;
 
    private final DoubleYoVariable time;
-   private final DoubleYoVariable position;
-   private final DoubleYoVariable velocity;
+   private final YoWaypoint1D waypoint1d;
 
    public YoTrajectoryPoint1D(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
@@ -24,8 +24,7 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
       this.nameSuffix = nameSuffix;
 
       time = new DoubleYoVariable(createName(namePrefix, "time", nameSuffix), registry);
-      position = new DoubleYoVariable(createName(namePrefix, "position", nameSuffix), registry);
-      velocity = new DoubleYoVariable(createName(namePrefix, "velocity", nameSuffix), registry);
+      waypoint1d = new YoWaypoint1D(namePrefix, nameSuffix, registry);
    }
 
    @Override
@@ -34,33 +33,61 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
       this.time.set(time);
    }
 
-   public void set(TrajectoryPoint1DInterface<?> trajectoryPoint)
+   @Override
+   public void setPosition(double position)
    {
-      time.set(trajectoryPoint.getTime());
-      position.set(trajectoryPoint.getPosition());
-      velocity.set(trajectoryPoint.getVelocity());
+      waypoint1d.setPosition(position);
    }
 
    @Override
-   public void set(YoTrajectoryPoint1D trajectoryPoint)
+   public void setVelocity(double velocity)
+   {
+      waypoint1d.setVelocity(velocity);
+   }
+
+   public void set(TrajectoryPoint1DInterface<?> trajectoryPoint)
    {
       time.set(trajectoryPoint.getTime());
-      position.set(trajectoryPoint.getPosition());
-      velocity.set(trajectoryPoint.getVelocity());
+      waypoint1d.set(trajectoryPoint.getPosition(), trajectoryPoint.getVelocity());
+   }
+
+   @Override
+   public void set(YoTrajectoryPoint1D other)
+   {
+      time.set(other.getTime());
+      waypoint1d.set(other.waypoint1d);
    }
 
    public void set(double time, double position, double velocity)
    {
       this.time.set(time);
-      this.position.set(position);
-      this.velocity.set(velocity);
+      waypoint1d.set(position, velocity);
    }
 
-   public void setToNaN()
+   @Override
+   public void setTimeToZero()
+   {
+      time.set(0.0);
+   }
+
+   @Override
+   public void setToZero()
+   {
+      setTimeToZero();
+      waypoint1d.setToZero();
+   }
+
+   @Override
+   public void setTimeToNaN()
    {
       time.set(Double.NaN);
-      position.set(Double.NaN);
-      velocity.set(Double.NaN);
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      setTimeToNaN();
+      waypoint1d.setToNaN();
    }
 
    @Override
@@ -75,9 +102,10 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
       time.sub(timeOffsetToSubtract);
    }
 
+   @Override
    public boolean containsNaN()
    {
-      return time.isNaN() || position.isNaN() || velocity.isNaN();
+      return time.isNaN() || waypoint1d.containsNaN();
    }
 
    @Override
@@ -89,13 +117,13 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
    @Override
    public double getPosition()
    {
-      return position.getDoubleValue();
+      return waypoint1d.getPosition();
    }
 
    @Override
    public double getVelocity()
    {
-      return velocity.getDoubleValue();
+      return waypoint1d.getVelocity();
    }
 
    public String getNamePrefix()
@@ -113,9 +141,7 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
    {
       if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
          return false;
-      if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
-         return false;
-      if (!MathTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon))
+      if (!waypoint1d.epsilonEquals(other.waypoint1d, epsilon))
          return false;
       return true;
    }
@@ -125,8 +151,6 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
       String timeString = "time = " + doubleFormat.format(getTime());
-      String positionString = "position = " + doubleFormat.format(getPosition());
-      String velocityString = "velocity = " + doubleFormat.format(getVelocity());
-      return "Trajectory point 1D: (" + timeString + ", " + positionString + ", " + velocityString + ")";
+      return "Trajectory point 1D: (" + timeString + ", " + waypoint1d + ")";
    }
 }

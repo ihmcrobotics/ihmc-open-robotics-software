@@ -9,12 +9,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
+import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.math.trajectories.waypoints.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one trajectory point. "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and EuclideanTrajectoryPointMessage (rotational)")
@@ -84,12 +85,6 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
    }
 
    @Override
-   public double getTime()
-   {
-      return time;
-   }
-
-   @Override
    public void addTimeOffset(double timeOffsetToAdd)
    {
       time += timeOffsetToAdd;
@@ -108,11 +103,24 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
    }
 
    @Override
+   public double positionDistance(SE3TrajectoryPointMessage other)
+   {
+      return position.distance(other.position);
+   }
+
+   @Override
+   public double getTime()
+   {
+      return time;
+   }
+
+   @Override
    public void getPosition(Point3d positionToPack)
    {
       positionToPack.set(position);
    }
 
+   @Override
    public void setPosition(Point3d position)
    {
       this.position = position;
@@ -124,6 +132,7 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
       orientationToPack.set(orientation);
    }
 
+   @Override
    public void setOrientation(Quat4d orientation)
    {
       this.orientation = orientation;
@@ -135,6 +144,7 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
       linearVelocityToPack.set(linearVelocity);
    }
 
+   @Override
    public void setLinearVelocity(Vector3d linearVelocity)
    {
       this.linearVelocity = linearVelocity;
@@ -146,9 +156,106 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
       angularVelocityToPack.set(angularVelocity);
    }
 
+   @Override
    public void setAngularVelocity(Vector3d angularVelocity)
    {
       this.angularVelocity = angularVelocity;
+   }
+
+   @Override
+   public void setTimeToZero()
+   {
+      time = 0.0;
+   }
+
+   @Override
+   public void setPositionToZero()
+   {
+      position.set(0.0, 0.0, 0.0);
+   }
+
+   @Override
+   public void setOrientationToZero()
+   {
+      orientation.set(0.0, 0.0, 0.0, 1.0);
+   }
+
+   @Override
+   public void setLinearVelocityToZero()
+   {
+      linearVelocity.set(0.0, 0.0, 0.0);
+   }
+
+   @Override
+   public void setAngularVelocityToZero()
+   {
+      angularVelocity.set(0.0, 0.0, 0.0);
+   }
+
+   @Override
+   public void setToZero()
+   {
+      setTimeToZero();
+      setPositionToZero();
+      setOrientationToZero();
+      setLinearVelocityToZero();
+      setAngularVelocityToZero();
+   }
+
+   @Override
+   public void setTimeToNaN()
+   {
+      time = Double.NaN;
+   }
+
+   @Override
+   public void setPositionToNaN()
+   {
+      position.set(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public void setOrientationToNaN()
+   {
+      orientation.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public void setLinearVelocityToNaN()
+   {
+      linearVelocity.set(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public void setAngularVelocityToNaN()
+   {
+      angularVelocity.set(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      setTimeToNaN();
+      setPositionToNaN();
+      setOrientationToNaN();
+      setLinearVelocityToNaN();
+      setAngularVelocityToNaN();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      if (Double.isNaN(time))
+         return true;
+      if (Double.isNaN(position.getX()) || Double.isNaN(position.getY()) || Double.isNaN(position.getZ()))
+         return true;
+      if (Double.isNaN(orientation.getX()) || Double.isNaN(orientation.getY()) || Double.isNaN(orientation.getZ()) || Double.isNaN(orientation.getW()))
+         return true;
+      if (Double.isNaN(linearVelocity.getX()) || Double.isNaN(linearVelocity.getY()) || Double.isNaN(linearVelocity.getZ()))
+         return true;
+      if (Double.isNaN(angularVelocity.getX()) || Double.isNaN(angularVelocity.getY()) || Double.isNaN(angularVelocity.getZ()))
+         return true;
+      return false;
    }
 
    @Override
@@ -216,6 +323,21 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
          transformedTrajectoryPointMessage.angularVelocity = null;
 
       return transformedTrajectoryPointMessage;
+   }
+
+   @IgnoreField
+   private Quat4d tempQuaternionForTransform;
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      transform.transform(position);
+      if (tempQuaternionForTransform == null)
+         tempQuaternionForTransform = new Quat4d();
+      transform.get(tempQuaternionForTransform);
+      orientation.mul(tempQuaternionForTransform, orientation);
+      transform.transform(linearVelocity);
+      transform.transform(angularVelocity);
    }
 
    @Override

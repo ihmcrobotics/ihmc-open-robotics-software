@@ -279,11 +279,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    {
       setTrajectoryTime(finalFrameSO3Waypoint.getTime() - initialFrameSO3Waypoint.getTime());
 
-      initialOrientation.set(initialFrameSO3Waypoint.getOrientation());
-      initialAngularVelocity.set(initialFrameSO3Waypoint.getAngularVelocity());
-
-      finalOrientation.set(finalFrameSO3Waypoint.getOrientation());
-      finalAngularVelocity.set(finalFrameSO3Waypoint.getAngularVelocity());
+      initialFrameSO3Waypoint.get(initialOrientation, initialAngularVelocity);
+      finalFrameSO3Waypoint.get(finalOrientation, finalAngularVelocity);
    }
 
    public void setTrajectoryParameters(YoFrameSO3TrajectoryPoint initialYoFrameSO3Waypoint, YoFrameSO3TrajectoryPoint finalYoFrameSO3Waypoint)

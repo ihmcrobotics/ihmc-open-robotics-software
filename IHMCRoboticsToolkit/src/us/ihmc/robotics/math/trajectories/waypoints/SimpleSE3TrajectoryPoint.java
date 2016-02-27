@@ -7,139 +7,192 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
-public class SimpleSE3TrajectoryPoint implements SE3TrajectoryPointInterface<SimpleSE3TrajectoryPoint>
+public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SimpleSE3Waypoint, SimpleSE3TrajectoryPoint>
+      implements SE3TrajectoryPointInterface<SimpleSE3TrajectoryPoint>
 {
-   private double time = 0.0;
-   private final Point3d position = new Point3d();
-   private final Quat4d orientation = new Quat4d();
-   private final Vector3d linearVelocity = new Vector3d();
-   private final Vector3d angularVelocity = new Vector3d();
-
    public SimpleSE3TrajectoryPoint()
    {
+      super(new SimpleSE3Waypoint());
    }
 
    @Override
-   public void setTime(double time)
-   {
-      this.time = time;
-   }
-
    public void setPosition(Point3d position)
    {
-      this.position.set(position);
+      waypointData.setPosition(position);
    }
 
+   @Override
    public void setOrientation(Quat4d orientation)
    {
-      this.orientation.set(orientation);
+      waypointData.setOrientation(orientation);
    }
 
+   @Override
    public void setLinearVelocity(Vector3d linearVelocity)
    {
-      this.linearVelocity.set(linearVelocity);
+      waypointData.setLinearVelocity(linearVelocity);
    }
 
+   @Override
    public void setAngularVelocity(Vector3d angularVelocity)
    {
-      this.angularVelocity.set(angularVelocity);
+      waypointData.setAngularVelocity(angularVelocity);
+   }
+
+   public void set(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   {
+      setTime(time);
+      waypointData.set(position, orientation, linearVelocity, angularVelocity);
+   }
+
+   public void set(double time, EuclideanWaypointInterface<?> euclideanWaypoint, SO3WaypointInterface<?> so3Waypoint)
+   {
+      setTime(time);
+      waypointData.set(euclideanWaypoint, so3Waypoint);
+   }
+   
+   public void set(double time, SE3WaypointInterface<?> se3Waypoint)
+   {
+      setTime(time);
+      waypointData.set(se3Waypoint);
+   }
+
+   public void set(SE3TrajectoryPointInterface<?> se3TrajectoryPoint)
+   {
+      setTime(se3TrajectoryPoint.getTime());
+      waypointData.set(se3TrajectoryPoint);
    }
 
    @Override
-   public void set(SimpleSE3TrajectoryPoint other)
+   public void setPositionToZero()
    {
-      time = other.time;
-      position.set(other.position);
-      orientation.set(other.orientation);
-      linearVelocity.set(other.linearVelocity);
-      angularVelocity.set(other.angularVelocity);
+      waypointData.setPositionToZero();
    }
 
    @Override
-   public void addTimeOffset(double timeOffsetToAdd)
+   public void setOrientationToZero()
    {
-      time += timeOffsetToAdd;
+      waypointData.setOrientationToZero();
    }
 
    @Override
-   public void subtractTimeOffset(double timeOffsetToSubtract)
+   public void setLinearVelocityToZero()
    {
-      time -= timeOffsetToSubtract;
+      waypointData.setLinearVelocityToZero();
    }
 
    @Override
-   public double getTime()
+   public void setAngularVelocityToZero()
    {
-      return time;
+      waypointData.setAngularVelocityToZero();
+   }
+
+   @Override
+   public void setPositionToNaN()
+   {
+      waypointData.setPositionToNaN();
+   }
+
+   @Override
+   public void setOrientationToNaN()
+   {
+      waypointData.setOrientationToNaN();
+   }
+
+   @Override
+   public void setLinearVelocityToNaN()
+   {
+      waypointData.setLinearVelocityToNaN();
+   }
+
+   @Override
+   public void setAngularVelocityToNaN()
+   {
+      waypointData.setAngularVelocityToNaN();
+   }
+
+   @Override
+   public double positionDistance(SimpleSE3TrajectoryPoint other)
+   {
+      return waypointData.positionDistance(other.waypointData);
    }
 
    @Override
    public void getPosition(Point3d positionToPack)
    {
-      positionToPack.set(position);
+      waypointData.getPosition(positionToPack);
    }
 
    @Override
    public void getOrientation(Quat4d orientationToPack)
    {
-      orientationToPack.set(orientation);
+      waypointData.getOrientation(orientationToPack);
    }
 
    @Override
    public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      linearVelocityToPack.set(linearVelocity);
+      waypointData.getLinearVelocity(linearVelocityToPack);
    }
 
    @Override
    public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
-      angularVelocityToPack.set(angularVelocity);
+      waypointData.getAngularVelocity(angularVelocityToPack);
+   }
+
+   public double get(Point3d positionToPack, Quat4d orientationToPack, Vector3d linearVelocityToPack, Vector3d angularVelocityToPack)
+   {
+      waypointData.get(positionToPack, orientationToPack, linearVelocityToPack, angularVelocityToPack);
+      return getTime();
+   }
+
+   public double get(EuclideanWaypointInterface<?> euclideanWaypointToPack, SO3WaypointInterface<?> so3WaypointToPack)
+   {
+      waypointData.get(euclideanWaypointToPack, so3WaypointToPack);
+      return getTime();
+   }
+
+   public double get(SE3WaypointInterface<?> se3WaypointToPack)
+   {
+      SimpleEuclideanWaypoint euclideanWaypoint = waypointData.getEuclideanWaypoint();
+      SimpleSO3Waypoint so3Waypoint = waypointData.getSO3Waypoint();
+
+      se3WaypointToPack.setPosition(euclideanWaypoint.getPosition());
+      se3WaypointToPack.setLinearVelocity(euclideanWaypoint.getLinearVelocity());
+      se3WaypointToPack.setOrientation(so3Waypoint.getOrientation());
+      se3WaypointToPack.setAngularVelocity(so3Waypoint.getAngularVelocity());
+      return getTime();
    }
 
    @Override
-   public boolean epsilonEquals(SimpleSE3TrajectoryPoint other, double epsilon)
+   public void applyTransform(RigidBodyTransform transform)
    {
-      if (!MathTools.epsilonEquals(time, other.time, epsilon))
-         return false;
-      if (!position.epsilonEquals(other.position, epsilon))
-         return false;
-      if (!orientation.epsilonEquals(other.orientation, epsilon))
-         return false;
-      if (!linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
-         return false;
-      if (!angularVelocity.epsilonEquals(other.angularVelocity, epsilon))
-         return false;
-      return true;
+      waypointData.applyTransform(transform);
    }
 
    @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String xToString = doubleFormat.format(position.getX());
-      String yToString = doubleFormat.format(position.getY());
-      String zToString = doubleFormat.format(position.getZ());
-      String xDotToString = doubleFormat.format(linearVelocity.getX());
-      String yDotToString = doubleFormat.format(linearVelocity.getY());
-      String zDotToString = doubleFormat.format(linearVelocity.getZ());
-      String qxToString = doubleFormat.format(orientation.getX());
-      String qyToString = doubleFormat.format(orientation.getY());
-      String qzToString = doubleFormat.format(orientation.getZ());
-      String qsToString = doubleFormat.format(orientation.getW());
-      String wxToString = doubleFormat.format(angularVelocity.getX());
-      String wyToString = doubleFormat.format(angularVelocity.getY());
-      String wzToString = doubleFormat.format(angularVelocity.getZ());
+      String timeToString = "time = " + doubleFormat.format(getTime());
 
-      String timeToString = "time = " + doubleFormat.format(time);
-      String positionToString = "position = (" + xToString + ", " + yToString + ", " + zToString + ")";
-      String orientationToString = "orientation = (" + qxToString + ", " + qyToString + ", " + qzToString + ", " + qsToString + ")";
-      String linearVelocityToString = "linear velocity = (" + xDotToString + ", " + yDotToString + ", " + zDotToString + ")";
-      String angularVelocityToString = "angular velocity = (" + wxToString + ", " + wyToString + ", " + wzToString + ")";
+      return "SE3 trajectory point: (" + timeToString + ", " + waypointData + ")";
+   }
 
-      return "SE3 trajectory point: (" + timeToString + ", " + positionToString + ", " + orientationToString + ", " + linearVelocityToString + ", "
-            + angularVelocityToString + ")";
+   SimpleEuclideanWaypoint getEuclideanWaypoint()
+   {
+      return waypointData.getEuclideanWaypoint();
+   }
+
+   SimpleSO3Waypoint getSO3Waypoint()
+   {
+      return waypointData.getSO3Waypoint();
    }
 }

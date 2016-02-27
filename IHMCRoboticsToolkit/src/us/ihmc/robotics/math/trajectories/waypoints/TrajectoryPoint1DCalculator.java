@@ -4,6 +4,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 
 public class TrajectoryPoint1DCalculator
 {
@@ -217,7 +218,7 @@ public class TrajectoryPoint1DCalculator
       return trajectory.getTrajectoryPoints();
    }
 
-   public TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> getTrajectoryData()
+   public SimpleTrajectoryPoint1DList getTrajectoryData()
    {
       return trajectory;
    }

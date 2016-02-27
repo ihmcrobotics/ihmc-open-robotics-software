@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
