@@ -3,7 +3,9 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class FrameSO3TrajectoryPointList extends FrameTrajectoryPointList<FrameSO3TrajectoryPointList, FrameSO3TrajectoryPoint>
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+
+public class FrameSO3TrajectoryPointList extends FrameTrajectoryPointList<SimpleSO3TrajectoryPoint, FrameSO3TrajectoryPoint, FrameSO3TrajectoryPointList>
 {
    public FrameSO3TrajectoryPointList()
    {

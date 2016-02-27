@@ -6,336 +6,211 @@ import java.text.NumberFormat;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuclideanTrajectoryPoint>
+public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<SimpleEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint>
       implements EuclideanTrajectoryPointInterface<FrameEuclideanTrajectoryPoint>
 {
-   private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-
-   private double time;
-   private final FramePoint position = new FramePoint();
-   private final FrameVector linearVelocity = new FrameVector();
-
    public FrameEuclideanTrajectoryPoint()
    {
-      setToZero(ReferenceFrame.getWorldFrame());
+      super(new SimpleEuclideanTrajectoryPoint());
    }
 
    public FrameEuclideanTrajectoryPoint(ReferenceFrame referenceFrame)
    {
+      this();
       setToZero(referenceFrame);
    }
 
    public FrameEuclideanTrajectoryPoint(double time, FramePoint position, FrameVector linearVelocity)
    {
+      this();
       setIncludingFrame(time, position, linearVelocity);
    }
 
    public FrameEuclideanTrajectoryPoint(ReferenceFrame referenceFrame, EuclideanTrajectoryPointInterface<?> euclideanTrajectoryPointInterface)
    {
+      this();
       setIncludingFrame(referenceFrame, euclideanTrajectoryPointInterface);
    }
 
    public FrameEuclideanTrajectoryPoint(FrameEuclideanTrajectoryPoint other)
    {
+      this();
       setIncludingFrame(other);
    }
 
    @Override
-   public void setTime(double time)
-   {
-      this.time = time;
-   }
-
    public void setPosition(Point3d position)
    {
-      this.position.set(position);
+      simpleWaypoint.setPosition(position);
    }
 
    public void setPosition(FramePoint position)
    {
-      this.position.set(position);
+      checkReferenceFrameMatch(position);
+      simpleWaypoint.setPosition(position.getPoint());
    }
 
+   @Override
    public void setLinearVelocity(Vector3d linearVelocity)
    {
-      this.linearVelocity.set(linearVelocity);
+      simpleWaypoint.setLinearVelocity(linearVelocity);
    }
 
    public void setLinearVelocity(FrameVector linearVelocity)
    {
-      this.linearVelocity.set(linearVelocity);
+      checkReferenceFrameMatch(linearVelocity);
+      simpleWaypoint.setLinearVelocity(linearVelocity.getVector());
    }
 
    public void set(double time, Point3d position, Vector3d linearVelocity)
    {
-      // Ensuring frame consistency without crashing
-      setIncludingFrame(referenceFrame, time, position, linearVelocity);
-   }
-
-   public void set(double time, FramePoint position, FrameVector linearVelocity)
-   {
-      // Ensuring frame consistency without crashing
-      setToZero(referenceFrame);
-      this.time = time;
-      this.position.set(position);
-      this.linearVelocity.set(linearVelocity);
-   }
-
-   public void set(EuclideanTrajectoryPointInterface<?> euclideanTrajectoryPoint)
-   {
-      // Ensuring frame consistency without crashing
-      setIncludingFrame(referenceFrame, euclideanTrajectoryPoint);
-   }
-
-   @Override
-   public void set(FrameEuclideanTrajectoryPoint other)
-   {
-      checkReferenceFrameMatch(other);
-      other.checkFrameConsistency();
-
-      // Ensuring frame consistency without crashing
-      setToZero(referenceFrame);
-
-      time = other.time;
-      position.set(other.position);
-      linearVelocity.set(other.linearVelocity);
+      simpleWaypoint.set(time, position, linearVelocity);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, double time, Point3d position, Vector3d linearVelocity)
    {
       setToZero(referenceFrame);
+      simpleWaypoint.set(time, position, linearVelocity);
+   }
 
-      this.time = time;
-      this.position.set(position);
-      this.linearVelocity.set(linearVelocity);
+   public void set(double time, FramePoint position, FrameVector linearVelocity)
+   {
+      checkReferenceFrameMatch(position);
+      checkReferenceFrameMatch(linearVelocity);
+      simpleWaypoint.set(time, position.getPoint(), linearVelocity.getVector());
    }
 
    public void setIncludingFrame(double time, FramePoint position, FrameVector linearVelocity)
    {
       position.checkReferenceFrameMatch(linearVelocity);
-      referenceFrame = position.getReferenceFrame();
+      setToZero(position.getReferenceFrame());
+      simpleWaypoint.set(time, position.getPoint(), linearVelocity.getVector());
+   }
 
-      this.time = time;
-      this.position.setIncludingFrame(position);
-      this.linearVelocity.setIncludingFrame(linearVelocity);
+   public void set(double time, EuclideanWaypointInterface<?> euclideanWaypoint)
+   {
+      simpleWaypoint.set(time, euclideanWaypoint);
+   }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointInterface<?> euclideanWaypoint)
+   {
+      setToZero(referenceFrame);
+      simpleWaypoint.set(time, euclideanWaypoint);
+   }
+
+   public void set(EuclideanTrajectoryPointInterface<?> euclideanTrajectoryPoint)
+   {
+      simpleWaypoint.set(euclideanTrajectoryPoint);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanTrajectoryPointInterface<?> euclideanTrajectoryPoint)
    {
       setToZero(referenceFrame);
+      simpleWaypoint.set(euclideanTrajectoryPoint);
+   }
 
-      time = euclideanTrajectoryPoint.getTime();
-      euclideanTrajectoryPoint.getPosition(position.getPoint());
-      euclideanTrajectoryPoint.getLinearVelocity(linearVelocity.getVector());
+   public void set(double time, FrameEuclideanWaypoint frameEuclideanWaypoint)
+   {
+      checkReferenceFrameMatch(frameEuclideanWaypoint);
+      setTime(time);
+      frameEuclideanWaypoint.get(simpleWaypoint);
+   }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, double time, FrameEuclideanWaypoint frameEuclideanWaypoint)
+   {
+      setToZero(referenceFrame);
+      setTime(time);
+      frameEuclideanWaypoint.get(simpleWaypoint);
    }
 
    @Override
-   public void setIncludingFrame(FrameEuclideanTrajectoryPoint other)
-   {
-      other.checkFrameConsistency();
-
-      referenceFrame = other.referenceFrame;
-      time = other.time;
-      position.setIncludingFrame(other.position);
-      linearVelocity.setIncludingFrame(other.linearVelocity);
-   }
-
-   public void setTimeToZero()
-   {
-      time = 0.0;
-   }
-
    public void setPositionToZero()
    {
-      position.setToZero();
+      simpleWaypoint.setPositionToZero();
    }
 
+   @Override
    public void setLinearVelocityToZero()
    {
-      linearVelocity.setToZero();
+      simpleWaypoint.setLinearVelocityToZero();
    }
 
    @Override
-   public void setToZero()
-   {
-      time = 0.0;
-      position.setToZero();
-      linearVelocity.setToZero();
-   }
-
-   @Override
-   public void setToZero(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      time = 0.0;
-      position.setToZero(referenceFrame);
-      linearVelocity.setToZero(referenceFrame);
-   }
-
-   public void setTimeToNaN()
-   {
-      time = Double.NaN;
-   }
-
    public void setPositionToNaN()
    {
-      position.setToNaN();
+      simpleWaypoint.setPositionToNaN();
    }
 
+   @Override
    public void setLinearVelocityToNaN()
    {
-      linearVelocity.setToNaN();
+      simpleWaypoint.setLinearVelocityToNaN();
    }
 
-   @Override
-   public void setToNaN()
+   public double positionDistance(FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint)
    {
-      time = Double.NaN;
-      position.setToNaN();
-      linearVelocity.setToNaN();
-   }
-
-   @Override
-   public void setToNaN(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      time = Double.NaN;
-      position.setToNaN(referenceFrame);
-      linearVelocity.setToNaN(referenceFrame);
-   }
-
-   @Override
-   public void addTimeOffset(double timeOffsetToAdd)
-   {
-      time += timeOffsetToAdd;
-   }
-
-   @Override
-   public void subtractTimeOffset(double timeOffsetToSubtract)
-   {
-      time -= timeOffsetToSubtract;
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      return Double.isNaN(time) || position.containsNaN() || linearVelocity.containsNaN();
-   }
-
-   public void checkFrameConsistency()
-   {
-      if (referenceFrame != position.getReferenceFrame())
-         throwFrameInconsistencyException();
-      if (referenceFrame != linearVelocity.getReferenceFrame())
-         throwFrameInconsistencyException();
-   }
-
-   @Override
-   public double getTime()
-   {
-      return time;
+      checkReferenceFrameMatch(frameEuclideanTrajectoryPoint);
+      return simpleWaypoint.positionDistance(frameEuclideanTrajectoryPoint.simpleWaypoint);
    }
 
    @Override
    public void getPosition(Point3d positionToPack)
    {
-      position.get(positionToPack);
+      simpleWaypoint.getPosition(positionToPack);
    }
 
    @Override
    public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      linearVelocity.get(linearVelocityToPack);
+      simpleWaypoint.getLinearVelocity(linearVelocityToPack);
    }
 
    public void getPosition(FramePoint positionToPack)
    {
-      positionToPack.set(position);
-   }
-
-   public void getLinearVelocity(FrameVector linearVelocityToPack)
-   {
-      linearVelocityToPack.set(linearVelocity);
+      checkReferenceFrameMatch(positionToPack);
+      simpleWaypoint.getPosition(positionToPack.getPoint());
    }
 
    public void getPositionIncludingFrame(FramePoint positionToPack)
    {
-      positionToPack.setIncludingFrame(position);
+      positionToPack.setToZero(getReferenceFrame());
+      simpleWaypoint.getPosition(positionToPack.getPoint());
+   }
+
+   public void getLinearVelocity(FrameVector linearVelocityToPack)
+   {
+      checkReferenceFrameMatch(linearVelocityToPack);
+      simpleWaypoint.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
    public void getLinearVelocityIncludingFrame(FrameVector linearVelocityToPack)
    {
-      linearVelocityToPack.setIncludingFrame(linearVelocity);
+      linearVelocityToPack.setToZero(getReferenceFrame());
+      simpleWaypoint.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
-   /**
-    * Return the original position held by this trajectory point.
-    */
-   public FramePoint getPosition()
+   public double get(YoFramePoint positionToPack, YoFrameVector linearVelocityToPack)
    {
-      return position;
-   }
-
-   /**
-    * Return the original linearVelocity held by this trajectory point.
-    */
-   public FrameVector getLinearVelocity()
-   {
-      return linearVelocity;
-   }
-
-   @Override
-   public void changeFrame(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      position.changeFrame(referenceFrame);
-      linearVelocity.changeFrame(referenceFrame);
-   }
-
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
-   }
-
-   @Override
-   public boolean epsilonEquals(FrameEuclideanTrajectoryPoint other, double epsilon)
-   {
-      checkFrameConsistency();
-      other.checkFrameConsistency();
-
-      if (referenceFrame != other.referenceFrame)
-         return false;
-      if (!MathTools.epsilonEquals(time, other.time, epsilon))
-         return false;
-      if (!position.epsilonEquals(other.position, epsilon))
-         return false;
-      if (!linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
-         return false;
-      return true;
+      checkReferenceFrameMatch(positionToPack);
+      checkReferenceFrameMatch(linearVelocityToPack);
+      positionToPack.set(simpleWaypoint.getPosition());
+      linearVelocityToPack.set(simpleWaypoint.getLinearVelocity());
+      return getTime();
    }
 
    @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String xToString = doubleFormat.format(position.getX());
-      String yToString = doubleFormat.format(position.getY());
-      String zToString = doubleFormat.format(position.getZ());
-      String xDotToString = doubleFormat.format(linearVelocity.getX());
-      String yDotToString = doubleFormat.format(linearVelocity.getY());
-      String zDotToString = doubleFormat.format(linearVelocity.getZ());
-
-      String timeToString = "time = " + doubleFormat.format(time);
-      String positionToString = "position = (" + xToString + ", " + yToString + ", " + zToString + ")";
-      String linearVelocityToString = "linear velocity = (" + xDotToString + ", " + yDotToString + ", " + zDotToString + ")";
-      String referenceFrameToString = "reference frame = " + referenceFrame.getName();
-
-      return "Euclidean trajectory point: (" + timeToString + ", " + positionToString + ", " + linearVelocityToString + ", " + referenceFrameToString + ")";
+      String timeToString = "time = " + doubleFormat.format(getTime());
+      return "Euclidean trajectory point: (" + timeToString + ", " + simpleWaypoint + ")";
    }
 }

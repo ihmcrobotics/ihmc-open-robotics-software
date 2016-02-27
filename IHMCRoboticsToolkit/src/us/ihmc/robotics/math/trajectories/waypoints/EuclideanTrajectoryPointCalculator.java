@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class EuclideanTrajectoryPointCalculator
@@ -86,9 +87,7 @@ public class EuclideanTrajectoryPointCalculator
 
       for (int i = 0; i < numberOfTrajectoryPoints - 1; i++)
       {
-         FramePoint position = trajectoryPoints.get(i).getPosition();
-         FramePoint nextPosition = trajectoryPoints.get(i + 1).getPosition();
-         totalLength += position.distance(nextPosition);
+         totalLength += trajectoryPoints.get(i).positionDistance(trajectoryPoints.get(i + 1));
       }
 
       trajectoryPoints.get(0).setTime(firstTrajectoryPointTime);
@@ -97,9 +96,7 @@ public class EuclideanTrajectoryPointCalculator
 
       for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
       {
-         FramePoint position = trajectoryPoints.get(i).getPosition();
-         FramePoint previousPosition = trajectoryPoints.get(i - 1).getPosition();
-         double subLength = position.distance(previousPosition);
+         double subLength = trajectoryPoints.get(i).positionDistance(trajectoryPoints.get(i - 1));
          time += trajectoryTime * (subLength / totalLength);
          trajectoryPoints.get(i).setTime(time);
       }

@@ -4,7 +4,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameSE3TrajectoryPointList, FrameSE3TrajectoryPoint>
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
+
+public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<SimpleSE3TrajectoryPoint, FrameSE3TrajectoryPoint, FrameSE3TrajectoryPointList>
 {
    public FrameSE3TrajectoryPointList()
    {

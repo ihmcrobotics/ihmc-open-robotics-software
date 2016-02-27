@@ -2,17 +2,20 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeometryObjectInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, P>, P extends FrameTrajectoryPoint<P>> extends ReferenceFrameHolder
-      implements TrajectoryPointListInterface<T, P>
+public class FrameTrajectoryPointList<S extends TransformableGeometryObjectInterface<S> & TrajectoryPointInterface<S>, F extends FrameTrajectoryPoint<S, F>, T extends FrameTrajectoryPointList<S, F, T>>
+      extends ReferenceFrameHolder implements TrajectoryPointListInterface<F, T>
 {
    protected ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-   protected final RecyclingArrayList<P> trajectoryPoints;
+   protected final RecyclingArrayList<F> trajectoryPoints;
 
-   public FrameTrajectoryPointList(Class<P> trajectoryPointClass)
+   public FrameTrajectoryPointList(Class<F> frameTrajectoryPointClass)
    {
-      trajectoryPoints = new RecyclingArrayList<>(trajectoryPointClass);
+      trajectoryPoints = new RecyclingArrayList<>(frameTrajectoryPointClass);
    }
 
    @Override
@@ -28,15 +31,15 @@ public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, P>, 
    }
 
    @Override
-   public void addTrajectoryPoint(P trajectoryPoint)
+   public void addTrajectoryPoint(F trajectoryPoint)
    {
-      P newTrajectoryPoint = addAndInitializeTrajectoryPoint();
+      F newTrajectoryPoint = addAndInitializeTrajectoryPoint();
       newTrajectoryPoint.set(trajectoryPoint);
    }
 
-   public void addTrajectoryPointAndMatchFrame(P trajectoryPoint)
+   public void addTrajectoryPointAndMatchFrame(F trajectoryPoint)
    {
-      P newTrajectoryPoint = addAndInitializeTrajectoryPoint();
+      F newTrajectoryPoint = addAndInitializeTrajectoryPoint();
       newTrajectoryPoint.setIncludingFrame(trajectoryPoint);
       newTrajectoryPoint.changeFrame(referenceFrame);
    }
@@ -48,7 +51,7 @@ public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, P>, 
       clear();
       for (int i = 0; i < other.getNumberOfTrajectoryPoints(); i++)
       {
-         P newTrajectoryPoint = addAndInitializeTrajectoryPoint();
+         F newTrajectoryPoint = addAndInitializeTrajectoryPoint();
          newTrajectoryPoint.set(other.trajectoryPoints.get(i));
       }
    }
@@ -58,15 +61,15 @@ public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, P>, 
       clear(other.referenceFrame);
       for (int i = 0; i < other.getNumberOfTrajectoryPoints(); i++)
       {
-         P newTrajectoryPoint = addAndInitializeTrajectoryPoint();
+         F newTrajectoryPoint = addAndInitializeTrajectoryPoint();
          // Here we don't want to do setIncludingFrame() in case there is inconsistency in other.
          newTrajectoryPoint.set(other.trajectoryPoints.get(i));
       }
    }
 
-   protected P addAndInitializeTrajectoryPoint()
+   protected F addAndInitializeTrajectoryPoint()
    {
-      P newTrajectoryPoint = trajectoryPoints.add();
+      F newTrajectoryPoint = trajectoryPoints.add();
       newTrajectoryPoint.setToZero(referenceFrame);
       return newTrajectoryPoint;
    }
@@ -88,13 +91,13 @@ public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, P>, 
    }
 
    @Override
-   public P getTrajectoryPoint(int trajectoryPointIndex)
+   public F getTrajectoryPoint(int trajectoryPointIndex)
    {
       return trajectoryPoints.get(trajectoryPointIndex);
    }
 
    @Override
-   public P getLastTrajectoryPoint()
+   public F getLastTrajectoryPoint()
    {
       return trajectoryPoints.getLast();
    }
@@ -120,8 +123,8 @@ public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, P>, 
          return false;
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
-         P thisTrajectoryPoint = trajectoryPoints.get(i);
-         P otherTrajectoryPoint = other.trajectoryPoints.get(i);
+         F thisTrajectoryPoint = trajectoryPoints.get(i);
+         F otherTrajectoryPoint = other.trajectoryPoints.get(i);
          if (!thisTrajectoryPoint.epsilonEquals(otherTrajectoryPoint, epsilon))
             return false;
       }

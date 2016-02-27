@@ -1,6 +1,6 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-public interface TrajectoryPointListInterface<T extends TrajectoryPointListInterface<T, P>, P extends TrajectoryPointInterface<P>>
+public interface TrajectoryPointListInterface<P extends TrajectoryPointInterface<P>, T extends TrajectoryPointListInterface<P, T>>
 {
    public abstract void clear();
 

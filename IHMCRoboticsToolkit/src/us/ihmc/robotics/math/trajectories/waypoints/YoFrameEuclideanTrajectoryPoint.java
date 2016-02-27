@@ -1,141 +1,103 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
-
-import java.util.List;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
-import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameEuclideanTrajectoryPoint extends ReferenceFrameHolder
-      implements EuclideanTrajectoryPointInterface<YoFrameEuclideanTrajectoryPoint>, YoMultipleFramesHolder
+public class YoFrameEuclideanTrajectoryPoint
+      extends YoFrameTrajectoryPoint<SimpleEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint, YoFrameEuclideanTrajectoryPoint>
+      implements EuclideanTrajectoryPointInterface<YoFrameEuclideanTrajectoryPoint>
 {
-   private final String namePrefix;
-   private final String nameSuffix;
-
-   private final YoMultipleFramesHelper multipleFramesHelper;
-
-   private final DoubleYoVariable time;
    private final YoFramePoint position;
    private final YoFrameVector linearVelocity;
 
-   private final FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
-
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
-      this.namePrefix = namePrefix;
-      this.nameSuffix = nameSuffix;
-      this.multipleFramesHelper = new YoMultipleFramesHelper(createName(namePrefix, nameSuffix, ""), registry, referenceFrames);
-
-      time = new DoubleYoVariable(createName(namePrefix, "time", nameSuffix), registry);
-      position = new YoFramePoint(createName(namePrefix, "position", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return multipleFramesHelper.getCurrentReferenceFrame();
-         }
-      };
-      linearVelocity = new YoFrameVector(createName(namePrefix, "linearVelocity", ""), nameSuffix, null, registry)
-      {
-         @Override
-         public ReferenceFrame getReferenceFrame()
-         {
-            return multipleFramesHelper.getCurrentReferenceFrame();
-         }
-      };
+      super(new FrameEuclideanTrajectoryPoint(), namePrefix, nameSuffix, registry, referenceFrames);
+      position = YoFrameEuclideanWaypoint.createYoPosition(this, namePrefix, nameSuffix, registry);
+      linearVelocity = YoFrameEuclideanWaypoint.createYoLinearVelocity(this, namePrefix, nameSuffix, registry);
    }
 
    @Override
-   public void setTime(double time)
+   public void setPosition(Point3d position)
    {
-      this.time.set(time);
+      this.position.set(position);
+   }
+
+   @Override
+   public void setLinearVelocity(Vector3d linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
    }
 
    public void set(EuclideanTrajectoryPointInterface<?> euclideanTrajectoryPoint)
    {
-      frameEuclideanTrajectoryPoint.setToZero(getReferenceFrame());
-      frameEuclideanTrajectoryPoint.set(euclideanTrajectoryPoint);
-      getYoValuesFromFrameEuclideanTrajectoryPoint();
-   }
-
-   public void set(FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint)
-   {
-      frameEuclideanTrajectoryPoint.setToZero(getReferenceFrame());
-      frameEuclideanTrajectoryPoint.set(frameEuclideanTrajectoryPoint);
-      getYoValuesFromFrameEuclideanTrajectoryPoint();
-   }
-
-   @Override
-   public void set(YoFrameEuclideanTrajectoryPoint yoFrameEuclideanTrajectoryPoint)
-   {
-      frameEuclideanTrajectoryPoint.setToZero(getReferenceFrame());
-      yoFrameEuclideanTrajectoryPoint.getFrameEuclideanTrajectoryPoint(frameEuclideanTrajectoryPoint);
-      getYoValuesFromFrameEuclideanTrajectoryPoint();
+      frameWaypoint.setToZero(getReferenceFrame());
+      frameWaypoint.set(euclideanTrajectoryPoint);
+      getYoValuesFromFrameTrajectoryPoint();
    }
 
    public void set(double time, Point3d position, Vector3d linearVelocity)
    {
-      this.time.set(time);
+      setTime(time);
       this.position.set(position);
       this.linearVelocity.set(linearVelocity);
    }
 
    public void set(double time, FramePoint position, FrameVector linearVelocity)
    {
-      this.time.set(time);
+      setTime(time);
       this.position.set(position);
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void set(double time, YoFramePoint position, YoFrameVector linearVelocity)
+   public void set(DoubleYoVariable time, YoFramePoint position, YoFrameVector linearVelocity)
    {
-      this.time.set(time);
+      setTime(time.getDoubleValue());
       this.position.set(position);
       this.linearVelocity.set(linearVelocity);
    }
 
    @Override
-   public void addTimeOffset(double timeOffsetToAdd)
+   public void setPositionToZero()
    {
-      time.add(timeOffsetToAdd);
+      frameWaypoint.setPositionToZero();
+      getYoValuesFromFrameTrajectoryPoint();
    }
 
    @Override
-   public void subtractTimeOffset(double timeOffsetToSubtract)
+   public void setLinearVelocityToZero()
    {
-      time.sub(timeOffsetToSubtract);
+      frameWaypoint.setLinearVelocityToZero();
+      getYoValuesFromFrameTrajectoryPoint();
    }
 
    @Override
-   public boolean containsNaN()
+   public void setPositionToNaN()
    {
-      if (time.isNaN())
-         return true;
-      if (position.containsNaN())
-         return true;
-      if (linearVelocity.containsNaN())
-         return true;
-
-      return false;
+      frameWaypoint.setPositionToNaN();
+      getYoValuesFromFrameTrajectoryPoint();
    }
 
    @Override
-   public double getTime()
+   public void setLinearVelocityToNaN()
    {
-      return time.getDoubleValue();
+      frameWaypoint.setLinearVelocityToNaN();
+      getYoValuesFromFrameTrajectoryPoint();
+   }
+
+   @Override
+   public double positionDistance(YoFrameEuclideanTrajectoryPoint other)
+   {
+      return frameWaypoint.positionDistance(other.frameWaypoint);
    }
 
    @Override
@@ -196,138 +158,19 @@ public class YoFrameEuclideanTrajectoryPoint extends ReferenceFrameHolder
       return linearVelocity;
    }
 
-   public void getFrameEuclideanTrajectoryPoint(FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPointToPack)
+   @Override
+   protected void getYoValuesFromFrameTrajectoryPoint()
    {
-      putYoValuesIntoFrameEuclideanTrajectoryPoint();
-      frameEuclideanTrajectoryPointToPack.set(frameEuclideanTrajectoryPoint);
-   }
-
-   public void getFrameEuclideanTrajectoryPointIncludingFrame(FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPointToPack)
-   {
-      putYoValuesIntoFrameEuclideanTrajectoryPoint();
-      frameEuclideanTrajectoryPointToPack.setIncludingFrame(frameEuclideanTrajectoryPoint);
+      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      position.set(simpleWaypoint.getPosition());
+      linearVelocity.set(simpleWaypoint.getLinearVelocity());
    }
 
    @Override
-   public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
+   protected void putYoValuesIntoFrameTrajectoryPoint()
    {
-      multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
-   }
-
-   @Override
-   public void changeFrame(ReferenceFrame desiredReferenceFrame)
-   {
-      putYoValuesIntoFrameEuclideanTrajectoryPoint();
-      multipleFramesHelper.switchCurrentReferenceFrame(desiredReferenceFrame);
-      frameEuclideanTrajectoryPoint.changeFrame(desiredReferenceFrame);
-      getYoValuesFromFrameEuclideanTrajectoryPoint();
-   }
-
-   @Override
-   public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      ReferenceFrame previousReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(referenceFrame);
-      setToZero();
-      return previousReferenceFrame;
-   }
-
-   @Override
-   public boolean isReferenceFrameRegistered(ReferenceFrame referenceFrame)
-   {
-      return multipleFramesHelper.isReferenceFrameRegistered(referenceFrame);
-   }
-
-   @Override
-   public int getNumberOfReferenceFramesRegistered()
-   {
-      return multipleFramesHelper.getNumberOfReferenceFramesRegistered();
-   }
-
-   @Override
-   public void getRegisteredReferenceFrames(List<ReferenceFrame> referenceFramesToPack)
-   {
-      multipleFramesHelper.getRegisteredReferenceFrames(referenceFramesToPack);
-   }
-
-   @Override
-   public void setToNaN(ReferenceFrame desiredReferenceFrame)
-   {
-      multipleFramesHelper.switchCurrentReferenceFrame(desiredReferenceFrame);
-      setToNaN();
-   }
-
-   public void setToNaN()
-   {
-      time.set(Double.NaN);
-      position.setToNaN();
-      linearVelocity.setToNaN();
-   }
-
-   public void setToZero()
-   {
-      time.set(0.0);
-      position.setToZero();
-      linearVelocity.setToZero();
-   }
-
-   public FrameEuclideanTrajectoryPoint getFrameEuclideanTrajectoryPointCopy()
-   {
-      putYoValuesIntoFrameEuclideanTrajectoryPoint();
-      return new FrameEuclideanTrajectoryPoint(frameEuclideanTrajectoryPoint);
-   }
-
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return multipleFramesHelper.getCurrentReferenceFrame();
-   }
-
-   public String getNamePrefix()
-   {
-      return namePrefix;
-   }
-
-   public String getNameSuffix()
-   {
-      return nameSuffix;
-   }
-
-   private void putYoValuesIntoFrameEuclideanTrajectoryPoint()
-   {
-      frameEuclideanTrajectoryPoint.setToZero(getReferenceFrame());
-      frameEuclideanTrajectoryPoint.set(this);
-   }
-
-   private void getYoValuesFromFrameEuclideanTrajectoryPoint()
-   {
-      getYoValuesFromFrameTuple(true);
-   }
-
-   private void getYoValuesFromFrameTuple(boolean notifyListeners)
-   {
-      time.set(frameEuclideanTrajectoryPoint.getTime(), notifyListeners);
-      position.set(frameEuclideanTrajectoryPoint.getPosition(), notifyListeners);
-      linearVelocity.set(frameEuclideanTrajectoryPoint.getLinearVelocity(), notifyListeners);
-   }
-
-   @Override
-   public boolean epsilonEquals(YoFrameEuclideanTrajectoryPoint other, double epsilon)
-   {
-      if (getReferenceFrame() != other.getReferenceFrame())
-         return false;
-      if (!MathTools.epsilonEquals(time.getDoubleValue(), other.time.getDoubleValue(), epsilon))
-         return false;
-      if (!position.epsilonEquals(other.position, epsilon))
-         return false;
-      if (!linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
-         return false;
-      return true;
-   }
-
-   @Override
-   public String toString()
-   {
-      putYoValuesIntoFrameEuclideanTrajectoryPoint();
-      return frameEuclideanTrajectoryPoint.toString();
+      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      position.get(simpleWaypoint.getPosition());
+      linearVelocity.get(simpleWaypoint.getLinearVelocity());
    }
 }

@@ -7,7 +7,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 
 @ClassDocumentation("This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).")
@@ -93,6 +93,40 @@ public class TrajectoryPoint1DMessage extends IHMCRosApiMessage<TrajectoryPoint1
    public void setVelocity(double velocity)
    {
       this.velocity = velocity;
+   }
+
+   @Override
+   public void setTimeToZero()
+   {
+      time = 0.0;
+   }
+
+   @Override
+   public void setToZero()
+   {
+      time = 0.0;
+      position = 0.0;
+      velocity = 0.0;
+   }
+
+   @Override
+   public void setTimeToNaN()
+   {
+      time = Double.NaN;
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      time = Double.NaN;
+      position = Double.NaN;
+      velocity = Double.NaN;
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return Double.isNaN(time) || Double.isNaN(position) || Double.isNaN(velocity);
    }
 
    @Override

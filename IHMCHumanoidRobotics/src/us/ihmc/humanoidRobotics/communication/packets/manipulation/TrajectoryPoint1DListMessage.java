@@ -6,14 +6,14 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointListInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between trajectory points.")
 public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPoint1DListMessage>
-      implements TrajectoryPointListInterface<TrajectoryPoint1DListMessage, TrajectoryPoint1DMessage>
+      implements TrajectoryPointListInterface<TrajectoryPoint1DMessage, TrajectoryPoint1DListMessage>
 {
    @FieldDocumentation("List of trajectory points to go through while executing the trajectory.")
    public TrajectoryPoint1DMessage[] trajectoryPoints;
@@ -25,7 +25,7 @@ public class TrajectoryPoint1DListMessage extends IHMCRosApiMessage<TrajectoryPo
    {
    }
 
-   public TrajectoryPoint1DListMessage(TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectory1dMessage)
+   public TrajectoryPoint1DListMessage(TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?> trajectory1dMessage)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[trajectory1dMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
