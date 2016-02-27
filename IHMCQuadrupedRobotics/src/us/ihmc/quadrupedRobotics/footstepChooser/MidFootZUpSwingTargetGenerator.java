@@ -51,6 +51,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint tempFootPositionSameSideOppositeEnd = new FramePoint();
    private final FramePoint tempFootPositionOppositeSideSameEnd = new FramePoint();
    
+   private final FrameOrientation2d tempOppositeSideOrientation = new FrameOrientation2d();
+   
    private final GlobalTimer getSwingTargetTimer = new GlobalTimer("getSwingTargetTimer", registry);
 
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
@@ -354,10 +356,9 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
    private double calculateOppositeSideOrientationWithRespectToBody(ReferenceFrame oppositeSideZUpFrame)
    {
-      FrameOrientation2d oppositeSideOrientation = new FrameOrientation2d(oppositeSideZUpFrame);
-      oppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
-      double orientationDeltaWithBody = oppositeSideOrientation.getYaw() - Math.PI / 2.0;
-      return orientationDeltaWithBody;
+      tempOppositeSideOrientation.setIncludingFrame(oppositeSideZUpFrame, 0.0);
+      tempOppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
+      return tempOppositeSideOrientation.getYaw() - Math.PI / 2.0;
    }
 
    private void updateFeetPositions()
