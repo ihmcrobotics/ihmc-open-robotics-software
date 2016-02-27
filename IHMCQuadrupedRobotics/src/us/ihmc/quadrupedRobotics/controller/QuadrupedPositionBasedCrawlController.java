@@ -1144,6 +1144,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       double yawRate = desiredYawRate.getDoubleValue();
       swingTargetGenerator.getSwingTarget(swingLeg, feedForwardReferenceFrames.getLegAttachmentFrame(swingLeg), expectedAverageVelocity, swingDuration.getDoubleValue(), framePointToPack, yawRate);
+      framePointToPack.setZ(0.0);
    }
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
