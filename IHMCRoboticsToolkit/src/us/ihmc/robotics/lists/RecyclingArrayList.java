@@ -1,7 +1,5 @@
 package us.ihmc.robotics.lists;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 public class RecyclingArrayList<T>
@@ -12,33 +10,32 @@ public class RecyclingArrayList<T>
    private static final int DEFAULT_INITIAL_SIZE = 0;
 
    private T[] elementData;
-   private final Builder<T> builder;
+   private final GenericTypeBuilder<T> builder;
    protected int size = 0;
 
    public RecyclingArrayList(Class<T> clazz)
    {
-      this(DEFAULT_INITIAL_SIZE, createBuilderWithEmptyConstructor(clazz));
+      this(DEFAULT_INITIAL_SIZE, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
    }
 
-   public RecyclingArrayList(Builder<T> builder)
+   public RecyclingArrayList(GenericTypeBuilder<T> builder)
    {
       this(DEFAULT_INITIAL_SIZE, builder);
    }
 
-   public RecyclingArrayList(int initialCapacity, Class<T> clazz)
+   public RecyclingArrayList(int initialSize, Class<T> clazz)
    {
-      this(initialCapacity, createBuilderWithEmptyConstructor(clazz));
+      this(initialSize, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
    }
 
    @SuppressWarnings("unchecked")
-   public RecyclingArrayList(int initialCapacity, Builder<T> builder)
+   public RecyclingArrayList(int initialSize, GenericTypeBuilder<T> builder)
    {
-      elementData = (T[]) new Object[initialCapacity];
-      size = initialCapacity;
+      elementData = (T[]) new Object[initialSize];
+      size = initialSize;
       this.builder = builder;
 
       fillElementDataIfNeeded();
-      clear();
    }
 
    public int size()
@@ -233,11 +230,6 @@ public class RecyclingArrayList<T>
          throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
    }
 
-   public static abstract class Builder<V>
-   {
-      public abstract V newInstance();
-   }
-
    @Override
    public String toString()
    {
@@ -251,41 +243,5 @@ public class RecyclingArrayList<T>
       ret += unsafeGet(size - 1).toString();
 
       return ret;
-   }
-
-   private static <U> Builder<U> createBuilderWithEmptyConstructor(Class<U> clazz)
-   {
-      final Constructor<U> emptyConstructor;
-      // Trying to get an empty constructor from clazz
-      try
-      {
-         emptyConstructor = clazz.getConstructor();
-      }
-      catch (NoSuchMethodException | SecurityException e)
-      {
-         throw new RuntimeException("Could not find a visible empty constructor in the class: " + clazz.getSimpleName());
-      }
-
-      Builder<U> builder = new Builder<U>()
-      {
-         @Override
-         public U newInstance()
-         {
-            U newInstance = null;
-
-            try
-            {
-               newInstance = emptyConstructor.newInstance();
-            }
-            catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-            {
-               e.printStackTrace();
-               throw new RuntimeException("Something went wrong the empty constructor implemented in the class: " + emptyConstructor.getDeclaringClass().getSimpleName());
-            }
-
-            return newInstance;
-         }
-      };
-      return builder;
    }
 }

@@ -20,7 +20,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.simulationconstructionset.DataFileWriterTest.class,
    us.ihmc.simulationconstructionset.DataProcessingFunctionTest.class,
    us.ihmc.simulationconstructionset.gui.actions.ActionsTest.class,
-   us.ihmc.simulationconstructionset.gui.BodePlotConstructorTest.class,
    us.ihmc.simulationconstructionset.gui.config.VarGroupTest.class,
    us.ihmc.simulationconstructionset.JointWrenchSensorTest.class,
    us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListenerTest.class,
