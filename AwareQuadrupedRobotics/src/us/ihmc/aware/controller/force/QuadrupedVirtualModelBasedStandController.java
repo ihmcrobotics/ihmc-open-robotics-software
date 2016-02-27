@@ -546,10 +546,11 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       yoGraphicsListRegistry.hideArtifacts();
       yoGraphicsList.setVisible(true);
       artifactList.setVisible(true);
-      virtualModelController.setVisible(false);
+      virtualModelController.setVisible(true);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
+         virtualModelController.setSoleVirtualForceVisible(robotQuadrant, false);
       }
 
       // initialize desired values (provider inputs)

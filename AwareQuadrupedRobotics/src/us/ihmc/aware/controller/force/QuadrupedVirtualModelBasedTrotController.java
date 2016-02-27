@@ -635,7 +635,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       yoGraphicsListRegistry.hideArtifacts();
       yoGraphicsList.setVisible(true);
       artifactList.setVisible(true);
-      virtualModelController.setVisible(false);
+      virtualModelController.setVisible(true);
 
       // initialize desired values (provider inputs)
       yoBodyOrientationInput.setYawPitchRoll(0.0, 0.0, 0.0);
