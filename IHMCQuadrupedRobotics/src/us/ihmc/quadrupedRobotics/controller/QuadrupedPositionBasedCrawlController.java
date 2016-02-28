@@ -332,7 +332,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private DesiredVelocityProvider desiredVelocityProvider;
    private DesiredYawRateProvider desiredYawRateProvider;
    private DesiredYawInPlaceProvider desiredYawInPlaceProvider;
-   
+
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
          QuadrupedStateEstimator stateEstimator, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
@@ -555,6 +555,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       filterDesiredsToMatchCrawlControllerOnTransitionIn.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, filterToQuadrupleCondition));
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
+
+      BooleanYoVariable applyJoystickInput = new BooleanYoVariable("applyJoystickInput", registry);
+      applyJoystickInput.set(true);
+
       parentRegistry.addChild(registry);
    }
 
