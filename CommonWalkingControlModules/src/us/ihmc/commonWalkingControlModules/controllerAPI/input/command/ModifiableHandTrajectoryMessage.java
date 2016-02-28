@@ -5,7 +5,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableHandTrajectoryMessage extends ModifiableAbstractSE3TrajectoryMessage<HandTrajectoryMessage>
+public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMessage<HandTrajectoryMessage>
 {
    private RobotSide robotSide;
    private BaseForControl baseForControl;

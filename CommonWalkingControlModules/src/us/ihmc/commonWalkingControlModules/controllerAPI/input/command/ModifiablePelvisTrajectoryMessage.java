@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 
-public class ModifiablePelvisTrajectoryMessage extends ModifiableAbstractSE3TrajectoryMessage<PelvisTrajectoryMessage>
+public class ModifiablePelvisTrajectoryMessage extends ModifiableSE3TrajectoryMessage<PelvisTrajectoryMessage>
 {
    public ModifiablePelvisTrajectoryMessage()
    {

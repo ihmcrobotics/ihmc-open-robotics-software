@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableFootTrajectoryMessage extends ModifiableAbstractSE3TrajectoryMessage<FootTrajectoryMessage>
+public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMessage<FootTrajectoryMessage>
 {
    private RobotSide robotSide;
 
