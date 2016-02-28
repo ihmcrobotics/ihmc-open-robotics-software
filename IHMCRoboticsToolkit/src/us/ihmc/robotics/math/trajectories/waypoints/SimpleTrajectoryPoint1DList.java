@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
 public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<SimpleTrajectoryPoint1D>
 {
@@ -17,6 +18,13 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
       {
          addTrajectoryPoint(trajectory.trajectoryPoints.get(i));
       }
+   }
+
+   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, T>> void set(T trajectory)
+   {
+      clear();
+      for (int i = 0; i < trajectory.getNumberOfTrajectoryPoints(); i++)
+         addTrajectoryPoint(trajectory.getTrajectoryPoint(i));
    }
 
    public void addTrajectoryPoint(TrajectoryPoint1DInterface<?> trajectoryPoint)
