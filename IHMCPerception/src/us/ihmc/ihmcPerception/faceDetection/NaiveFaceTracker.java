@@ -1,25 +1,23 @@
 package us.ihmc.ihmcPerception.faceDetection;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.imageio.ImageIO;
-
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
-
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.*;
 
 public class NaiveFaceTracker
 {
@@ -27,38 +25,55 @@ public class NaiveFaceTracker
 
    private final ArrayList<Rect> trackedFaces = new ArrayList<>();
    private final Set<Rect> unmatchedFaces = new HashSet<>();
+   private final HashMultiset<Rect> newFaces = HashMultiset.create();
 
    public ArrayList<Rect> matchTrackedFaces(Rect[] faces)
    {
       unmatchedFaces.clear();
 
-      for(int i = 0; i < trackedFaces.size(); i++)
+      for (int i = 0; i < faces.length; i++)
       {
-         int oldFaceX = trackedFaces.get(i).x;
-         int oldFaceY = trackedFaces.get(i).y;
          boolean matched = false;
 
-         for(int j = 0; j < faces.length; j++)
+         // compare each face to tracked faces
+         for (int j = 0; j < trackedFaces.size(); j++)
          {
-            if(!matched && faces[j] != null)
+            if(!matched && isSameFace(faces[i], trackedFaces.get(j)))
             {
-               int newFaceX = faces[j].x;
-               int newFaceY = faces[j].y;
-
-               double faceShift = Math.sqrt(Math.pow(newFaceX - oldFaceX, 2) + Math.pow(newFaceY - oldFaceY, 2));
-
-               if(faceShift < SHIFT_DELTA)
-               {
-                  matched = true;
-                  trackedFaces.get(i).set(new double[]{faces[j].x, faces[j].y, faces[j].width, faces[j].height});
-                  faces[j] = null;
-               }
+               matched = true;
+               trackedFaces.get(j).set(new double[]{faces[i].x, faces[i].y, faces[i].width, faces[i].height});
+               faces[i] = null;
             }
          }
 
-         if(!matched)
+         if(matched) continue;
+
+         // compare each face to new faces that might have been false positives
+         Iterator<Rect> iterator = newFaces.iterator();
+         while(iterator.hasNext())
          {
-            unmatchedFaces.add(trackedFaces.get(i));
+            Rect newFace = iterator.next();
+            if(!matched && isSameFace(faces[i], newFace))
+            {
+               matched = true;
+               newFaces.add(newFace);
+               newFace.set(new double[]{faces[i].x, faces[i].y, faces[i].width, faces[i].height});
+               faces[i] = null;
+            }
+
+            if(newFaces.count(newFace) > 5)
+            {
+               trackedFaces.add(newFace);
+               newFaces.remove(newFace, newFaces.count(newFace));
+            }
+         }
+
+         if(matched) continue;
+
+         // if still unmatched, add to newFaces
+         if(faces[i] != null)
+         {
+            newFaces.add(faces[i]);
          }
       }
 
@@ -67,10 +82,27 @@ public class NaiveFaceTracker
       for(int j = 0; j < faces.length; j++)
       {
          if(faces[j] != null)
-            trackedFaces.add(faces[j]);
+         {
+            newFaces.add(faces[j]);
+         }
       }
 
       return trackedFaces;
+   }
+
+   private boolean isSameFace(Rect newFace, Rect oldFace)
+   {
+      if(oldFace.equals(newFace)) return true;
+
+      double newFaceX = newFace.x;
+      double newFaceY = newFace.y;
+
+      double oldFaceX = oldFace.x;
+      double oldFaceY = oldFace.y;
+
+      double faceShift = Math.sqrt(Math.pow(newFaceX - oldFaceX, 2) + Math.pow(newFaceY - oldFaceY, 2));
+
+      return faceShift < SHIFT_DELTA;
    }
 
    public static void main(String[] arg) throws IOException
