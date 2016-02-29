@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PacketValidityChecker;
@@ -12,7 +11,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 
 /**
  * User: Matt
@@ -26,7 +24,7 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataListMess
    private final HumanoidGlobalDataProducer globalDataProducer;
 
    public FootstepPathConsumer(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FootstepPathCoordinator footstepPathCoordinator,
-         HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, HumanoidGlobalDataProducer globalDataProducer)
+         HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
       this.footstepPathCoordinator = footstepPathCoordinator;
