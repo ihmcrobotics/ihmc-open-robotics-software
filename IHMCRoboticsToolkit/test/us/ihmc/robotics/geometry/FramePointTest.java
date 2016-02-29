@@ -21,6 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
  * <p>Title: </p>
@@ -533,13 +534,130 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertTrue(aFrame == pointToBeTested.getReferenceFrame());
       assertTrue(pointToBeTested.getPoint().epsilonEquals(point3dExpected, epsilon));
    }
+	
+	@DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testYawAboutPointRegression()
+   {
+	   // Do not change value! For regression.
+      Random r = new Random(2899234L);
+      
+	   ReferenceFrame referenceFrame;
+	   FramePoint pointToYawAbout;
+	   FramePoint point;
+	   double yaw;
+	   FramePoint result;
+	   
+      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToYawAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      yaw = randomAngle(r);
+      result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point.yawAboutPoint(pointToYawAbout, result, yaw);
+      System.out.println(result);
+      assertEquals("not equal", -2681.624165883151, result.getX(), epsilon);
+      assertEquals("not equal", -1528.2007328131492, result.getY(), epsilon);
+      assertEquals("not equal", 2998.298763316407, result.getZ(), epsilon);
+      
+      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToYawAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      yaw = randomAngle(r);
+      result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point.yawAboutPoint(pointToYawAbout, result, yaw);
+      System.out.println(result);
+      assertEquals("not equal", 2868.1077772133904, result.getX(), epsilon);
+      assertEquals("not equal", -3773.703916968001, result.getY(), epsilon);
+      assertEquals("not equal", -3313.247345650209, result.getZ(), epsilon);
+      
+      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToYawAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      yaw = randomAngle(r);
+      result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point.yawAboutPoint(pointToYawAbout, result, yaw);
+      System.out.println(result);
+      assertEquals("not equal", 9865.290784196699, result.getX(), epsilon);
+      assertEquals("not equal", 1276.040690119471, result.getY(), epsilon);
+      assertEquals("not equal", -3096.5574256022164, result.getZ(), epsilon);
+   }
+	
+	@DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testPitchAboutPointRegression()
+   {
+	   // Do not change value! For regression.
+	   Random r = new Random(689291994L);
+	   
+      ReferenceFrame referenceFrame;
+      FramePoint pointToPitchAbout;
+      FramePoint point;
+      double pitch;
+      FramePoint result;
+      
+      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToPitchAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      pitch = randomAngle(r);
+      result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point.pitchAboutPoint(pointToPitchAbout, result, pitch);
+      System.out.println(result);
+      assertEquals("not equal", -256.24551976827297, result.getX(), epsilon);
+      assertEquals("not equal", 1443.7013411938358, result.getY(), epsilon);
+      assertEquals("not equal", 11103.259343203952, result.getZ(), epsilon);
+      
+      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToPitchAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      pitch = randomAngle(r);
+      result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point.pitchAboutPoint(pointToPitchAbout, result, pitch);
+      System.out.println(result);
+      assertEquals("not equal", -2273.346187036131, result.getX(), epsilon);
+      assertEquals("not equal", 3010.5651766598717, result.getY(), epsilon);
+      assertEquals("not equal", -3513.344540982049, result.getZ(), epsilon);
+      
+      referenceFrame = ReferenceFrame.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToPitchAbout = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      pitch = randomAngle(r);
+      result = new FramePoint(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point.pitchAboutPoint(pointToPitchAbout, result, pitch);
+      System.out.println(result);
+      assertEquals("not equal", 3978.4131392851787, result.getX(), epsilon);
+      assertEquals("not equal", 682.5708442089929, result.getY(), epsilon);
+      assertEquals("not equal", 8214.605434738955, result.getZ(), epsilon);
+   }
+	
+	private double randomScalar(Random random)
+	{
+	   return (random.nextDouble() - 0.5) * 10000.0;
+	}
+	
+	private double randomAngle(Random random)
+	{
+	   return (random.nextDouble() - 0.5) * 2.0 * Math.PI;
+	}
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
-   public void testYawAboutPoint() //Brett
+	@Test(timeout = 30000)
+   public void testYawAboutPoint()
    {
-      FramePoint pointToYawAbout = new FramePoint(theFrame, 0, 0, 0);
-      FramePoint point = new FramePoint(theFrame, 1, 1, 1);
+	   final FramePoint pointToYawAboutException = new FramePoint(theFrame, 0.0, 0.0, 0.0);
+      final FramePoint pointException = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+      final FramePoint resultException = new FramePoint();
+      final double yawException = Math.PI;
+	   JUnitTools.assertExceptionThrown(ReferenceFrameMismatchException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            pointException.yawAboutPoint(pointToYawAboutException, resultException, yawException);
+         }
+      });
+	   
+      FramePoint pointToYawAbout = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
       double yaw = Math.PI;
 
       FramePoint result = new FramePoint();
@@ -550,14 +668,38 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
 
       //Check for reference frame mismatch
-      FramePoint point2 = new FramePoint(aFrame, 1, 1, 1);
+      FramePoint point2 = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
       point2.yawAboutPoint(pointToYawAbout, point2, yaw);
+      
+      pointToYawAbout = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      point = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 0.0, 1.0);
+      yaw = Math.PI / 2;
+
+      result = new FramePoint();
+      point.yawAboutPoint(pointToYawAbout, result, yaw);
+      //      System.out.println(result);
+      assertEquals("These should be equal", 0.0, result.getX(), epsilon);
+      assertEquals("These should be equal", 1.0, result.getY(), epsilon);
+      assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
-   public void testPitchAboutPoint() //Brett
+	@Test(timeout = 30000)
+   public void testPitchAboutPoint()
    {
+	   final FramePoint pointToPitchAboutException= new FramePoint(theFrame, 0.0, 0.0, 0.0);
+      final FramePoint pointException = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+      final FramePoint resultException = new FramePoint();
+      final double pitchException = Math.PI;
+      JUnitTools.assertExceptionThrown(ReferenceFrameMismatchException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            pointException.yawAboutPoint(pointToPitchAboutException, resultException, pitchException);
+         }
+      });
+	   
       FramePoint pointToPitchAbout = new FramePoint(theFrame, 0, 0, 0);
       FramePoint point = new FramePoint(theFrame, 1, 1, 1);
       double pitch = Math.PI;
@@ -568,10 +710,6 @@ public class FramePointTest extends FrameTupleTest<Point3d>
       assertEquals("These should be equal", -1.0, result.getX(), epsilon);
       assertEquals("These should be equal", 1.0, result.getY(), epsilon);
       assertEquals("These should be equal", -1.0, result.getZ(), epsilon);
-
-      //Check for reference frame mismatch
-      FramePoint point2 = new FramePoint(aFrame, 1, 1, 1);
-      point2.pitchAboutPoint(pointToPitchAbout, point2, pitch);
    }
 
    public static void assertFramePointEquals(FramePoint expected, FramePoint actual, double delta)
