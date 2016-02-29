@@ -67,6 +67,7 @@ public abstract class YoFrameWaypoint<S extends TransformableGeometryObjectInter
 
    public void setIncludingFrame(Y other)
    {
+      multipleFramesHelper.switchCurrentReferenceFrame(other.getReferenceFrame());
       other.getIncludingFrame(frameWaypoint);
       getYoValuesFromFrameWaypoint();
    }
