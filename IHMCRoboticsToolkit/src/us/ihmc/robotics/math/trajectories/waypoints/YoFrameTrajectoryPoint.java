@@ -12,7 +12,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public abstract class YoFrameTrajectoryPoint<S extends TransformableGeometryObjectInterface & TrajectoryPointInterface<S>, F extends FrameTrajectoryPoint<S, F>, Y extends YoFrameTrajectoryPoint<S, F, Y>>
       extends YoFrameWaypoint<S, F, Y> implements TrajectoryPointInterface<Y>, TransformableGeometryObjectInterface
 {
-   private final DoubleYoVariable time;
+   protected final DoubleYoVariable time;
 
    public YoFrameTrajectoryPoint(F frameTrajectoryPoint, String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
@@ -100,46 +100,6 @@ public abstract class YoFrameTrajectoryPoint<S extends TransformableGeometryObje
    {
       return time.getDoubleValue();
    }
-
-   @Override
-   public final void get(S simpleTrajectoryPoint)
-   {
-      simpleTrajectoryPoint.setTime(getTime());
-      super.get(simpleTrajectoryPoint);
-   }
-
-   @Override
-   public final void get(F frameWaypoint)
-   {
-      frameWaypoint.setTime(getTime());
-      super.get(frameWaypoint);
-   }
-
-   @Override
-   public final void getIncludingFrame(F frameWaypoint)
-   {
-      frameWaypoint.setTime(getTime());
-      super.getIncludingFrame(frameWaypoint);
-   }
-
-   @Override
-   protected final void getYoValuesFromFrameWaypoint()
-   {
-      getYoValuesFromFrameTrajectoryPoint();
-      time.set(frameWaypoint.getTime());
-   }
-
-   protected abstract void getYoValuesFromFrameTrajectoryPoint();
-
-   @Override
-   protected final void putYoValuesIntoFrameWaypoint()
-   {
-      frameWaypoint.setToZero(getReferenceFrame());
-      putYoValuesIntoFrameTrajectoryPoint();
-      frameWaypoint.setTime(getTime());
-   }
-
-   protected abstract void putYoValuesIntoFrameTrajectoryPoint();
 
    @Override
    public final boolean epsilonEquals(Y other, double epsilon)

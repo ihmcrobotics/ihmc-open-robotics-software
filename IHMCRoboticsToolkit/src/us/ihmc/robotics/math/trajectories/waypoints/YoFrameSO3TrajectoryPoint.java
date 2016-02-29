@@ -40,29 +40,29 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSO3T
 
    public void set(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
    {
-      setTime(so3TrajectoryPoint.getTime());
       frameWaypoint.set(so3TrajectoryPoint);
+      getYoValuesFromFrameWaypoint();
    }
 
    public void set(double time, Quat4d orientation, Vector3d angularVelocity)
    {
-      setTime(time);
+      this.time.set(time);
       this.orientation.set(orientation);
       this.angularVelocity.set(angularVelocity);
    }
 
    public void set(double time, FrameOrientation orientation, FrameVector angularVelocity)
    {
-      setTime(time);
       checkReferenceFrameMatch(orientation);
       checkReferenceFrameMatch(angularVelocity);
+      this.time.set(time);
       this.orientation.set(orientation.getQuaternion());
       this.angularVelocity.set(angularVelocity.getVector());
    }
 
    public void set(DoubleYoVariable time, YoFrameQuaternion orientation, YoFrameVector angularVelocity)
    {
-      setTime(time.getDoubleValue());
+      this.time.set(time.getDoubleValue());
       this.orientation.set(orientation);
       this.angularVelocity.set(angularVelocity);
    }
@@ -166,18 +166,18 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSO3T
    }
 
    @Override
-   protected void putYoValuesIntoFrameTrajectoryPoint()
+   protected void getYoValuesFromFrameWaypoint()
    {
       SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getSimpleWaypoint();
-      orientation.get(simpleTrajectoryPoint.getOrientation());
-      angularVelocity.get(simpleTrajectoryPoint.getAngularVelocity());
+      time.set(simpleTrajectoryPoint.getTime());
+      orientation.set(simpleTrajectoryPoint.getOrientation());
+      angularVelocity.set(simpleTrajectoryPoint.getAngularVelocity());
    }
 
    @Override
-   protected void getYoValuesFromFrameTrajectoryPoint()
+   protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getSimpleWaypoint();
-      orientation.set(simpleTrajectoryPoint.getOrientation());
-      angularVelocity.set(simpleTrajectoryPoint.getAngularVelocity());
+      frameWaypoint.setToZero(getReferenceFrame());
+      frameWaypoint.set(this);
    }
 }
