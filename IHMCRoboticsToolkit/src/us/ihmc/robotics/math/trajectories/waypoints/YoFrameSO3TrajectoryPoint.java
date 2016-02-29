@@ -42,6 +42,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSO3T
    {
       setTime(so3TrajectoryPoint.getTime());
       frameWaypoint.set(so3TrajectoryPoint);
+      getYoValuesFromFrameTrajectoryPoint();
    }
 
    public void set(double time, Quat4d orientation, Vector3d angularVelocity)
