@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
@@ -135,6 +136,11 @@ public class ChestOrientationManager
 
       ChestTrajectoryMessage message = chestTrajectoryMessageSubscriber.pollMessage();
 
+      handleChestTrajectoryMessage(message);
+   }
+
+   private void handleChestTrajectoryMessage(ChestTrajectoryMessage message)
+   {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
       if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
@@ -153,7 +159,34 @@ public class ChestOrientationManager
          waypointOrientationTrajectoryGenerator.clear();
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message);
+      waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
+      waypointOrientationTrajectoryGenerator.initialize();
+      isTrackingOrientation.set(true);
+      isTrajectoryStopped.set(false);
+   }
+
+   public void handleChestTrajectoryMessage(ModifiableChestTrajectoryMessage message)
+   {
+      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+
+      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      {
+         waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
+         desiredOrientation.changeFrame(worldFrame);
+         desiredAngularVelocity.setToZero(worldFrame);
+
+         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         waypointOrientationTrajectoryGenerator.clear();
+         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
+      }
+      else
+      {
+         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         waypointOrientationTrajectoryGenerator.clear();
+      }
+
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message);
       waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isTrackingOrientation.set(true);

@@ -7,6 +7,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -254,6 +256,18 @@ public class ManipulationControlModule
                   forceDeadzone, torqueDeadzone);
          }
       }
+   }
+
+   public void handleHandTrajectoryMessage(ModifiableHandTrajectoryMessage handTrajectoryMessage)
+   {
+      RobotSide robotSide = handTrajectoryMessage.getRobotSide();
+      handControlModules.get(robotSide).handleHandTrajectoryMessage(handTrajectoryMessage);
+   }
+
+   public void handleArmTrajectoryMessage(ModifiableArmTrajectoryMessage armTrajectoryMessage)
+   {
+      RobotSide robotSide = armTrajectoryMessage.getRobotSide();
+      handControlModules.get(robotSide).handleArmTrajectoryMessage(armTrajectoryMessage);
    }
 
    public void goToDefaultState()

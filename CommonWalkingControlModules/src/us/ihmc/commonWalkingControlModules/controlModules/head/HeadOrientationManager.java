@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
@@ -127,6 +128,11 @@ public class HeadOrientationManager
          return;
 
       HeadTrajectoryMessage message = headTrajectoryMessageSubscriber.pollMessage();
+      handleHeadTrajectoryMessage(message);
+   }
+
+   public void handleHeadTrajectoryMessage(HeadTrajectoryMessage message)
+   {
       receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
 
       if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
@@ -145,7 +151,33 @@ public class HeadOrientationManager
          waypointOrientationTrajectoryGenerator.clear();
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message);
+      waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
+      waypointOrientationTrajectoryGenerator.initialize();
+      isTrackingOrientation.set(true);
+   }
+   
+   public void handleHeadTrajectoryMessage(ModifiableHeadTrajectoryMessage message)
+   {
+      receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
+      
+      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      {
+         waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
+         desiredOrientation.changeFrame(worldFrame);
+         desiredAngularVelocity.setToZero(worldFrame);
+         
+         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         waypointOrientationTrajectoryGenerator.clear();
+         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
+      }
+      else
+      {
+         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         waypointOrientationTrajectoryGenerator.clear();
+      }
+      
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message);
       waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isTrackingOrientation.set(true);
