@@ -311,7 +311,7 @@ public class Footstep
 
    public void setPositionChangeOnlyXY(FramePoint2d position2d)
    {
-      ankleReferenceFrame.getParent().checkReferenceFrameMatch(position2d);
+      ankleReferenceFrame.getParent().checkReferenceFrameMatch(position2d.getReferenceFrame());
       setX(position2d.getX());
       setY(position2d.getY());
    }

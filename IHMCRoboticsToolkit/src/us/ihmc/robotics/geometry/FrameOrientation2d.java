@@ -5,7 +5,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Vector3d;
 
-public class FrameOrientation2d extends ReferenceFrameHolder
+public class FrameOrientation2d extends AbstractReferenceFrameHolder implements FrameObject
 {
    private ReferenceFrame referenceFrame;
    private double yaw = 0.0;
@@ -119,6 +119,7 @@ public class FrameOrientation2d extends ReferenceFrameHolder
 
    private RigidBodyTransform temporaryTransformHToDesiredFrame;
 
+   @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       // this is in the correct frame already
@@ -129,14 +130,28 @@ public class FrameOrientation2d extends ReferenceFrameHolder
          temporaryTransformHToDesiredFrame = new RigidBodyTransform();
 
       referenceFrame.getTransformToDesiredFrame(temporaryTransformHToDesiredFrame, desiredFrame);
-      checkIsTransformationInPlane(temporaryTransformHToDesiredFrame);
+      
+      applyTransform(temporaryTransformHToDesiredFrame);
+      this.referenceFrame = desiredFrame;
+   }
+   
+   @Override
+   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   {
+      this.referenceFrame = desiredFrame;
+      applyTransform(transformToNewFrame);
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      checkIsTransformationInPlane(transform);
       Vector3d xVector = new Vector3d(1.0, 0.0, 0.0);
-      temporaryTransformHToDesiredFrame.transform(xVector);
+      transform.transform(xVector);
       double deltaYaw = Math.atan2(xVector.getY(), xVector.getX());
       if (Double.isNaN(deltaYaw) || Double.isInfinite(deltaYaw))
          deltaYaw = 0.0;
-      this.yaw = AngleTools.trimAngleMinusPiToPi(this.yaw + deltaYaw);
-      this.referenceFrame = desiredFrame;
+      this.yaw = AngleTools.trimAngleMinusPiToPi(this.yaw + deltaYaw);      
    }
 
    public boolean epsilonEquals(FrameOrientation2d orientation, double epsilon)
@@ -158,4 +173,5 @@ public class FrameOrientation2d extends ReferenceFrameHolder
    {
       return AngleTools.trimAngleMinusPiToPi(this.yaw - orientationToSubtract.yaw);
    }
+
 }
