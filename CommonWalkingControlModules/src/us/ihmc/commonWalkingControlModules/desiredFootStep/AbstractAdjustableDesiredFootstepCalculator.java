@@ -45,6 +45,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void initialize()
    {
    }
