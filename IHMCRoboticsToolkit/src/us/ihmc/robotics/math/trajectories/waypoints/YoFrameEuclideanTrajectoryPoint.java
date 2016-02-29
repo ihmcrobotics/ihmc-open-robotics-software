@@ -42,26 +42,26 @@ public class YoFrameEuclideanTrajectoryPoint
    {
       frameWaypoint.setToZero(getReferenceFrame());
       frameWaypoint.set(euclideanTrajectoryPoint);
-      getYoValuesFromFrameTrajectoryPoint();
+      getYoValuesFromFrameWaypoint();
    }
 
    public void set(double time, Point3d position, Vector3d linearVelocity)
    {
-      setTime(time);
+      this.time.set(time);
       this.position.set(position);
       this.linearVelocity.set(linearVelocity);
    }
 
    public void set(double time, FramePoint position, FrameVector linearVelocity)
    {
-      setTime(time);
+      this.time.set(time);
       this.position.set(position);
       this.linearVelocity.set(linearVelocity);
    }
 
    public void set(DoubleYoVariable time, YoFramePoint position, YoFrameVector linearVelocity)
    {
-      setTime(time.getDoubleValue());
+      this.time.set(time.getDoubleValue());
       this.position.set(position);
       this.linearVelocity.set(linearVelocity);
    }
@@ -70,28 +70,28 @@ public class YoFrameEuclideanTrajectoryPoint
    public void setPositionToZero()
    {
       frameWaypoint.setPositionToZero();
-      getYoValuesFromFrameTrajectoryPoint();
+      getYoValuesFromFrameWaypoint();
    }
 
    @Override
    public void setLinearVelocityToZero()
    {
       frameWaypoint.setLinearVelocityToZero();
-      getYoValuesFromFrameTrajectoryPoint();
+      getYoValuesFromFrameWaypoint();
    }
 
    @Override
    public void setPositionToNaN()
    {
       frameWaypoint.setPositionToNaN();
-      getYoValuesFromFrameTrajectoryPoint();
+      getYoValuesFromFrameWaypoint();
    }
 
    @Override
    public void setLinearVelocityToNaN()
    {
       frameWaypoint.setLinearVelocityToNaN();
-      getYoValuesFromFrameTrajectoryPoint();
+      getYoValuesFromFrameWaypoint();
    }
 
    @Override
@@ -159,18 +159,18 @@ public class YoFrameEuclideanTrajectoryPoint
    }
 
    @Override
-   protected void getYoValuesFromFrameTrajectoryPoint()
+   protected void getYoValuesFromFrameWaypoint()
    {
       SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      time.set(frameWaypoint.getTime());
       position.set(simpleWaypoint.getPosition());
       linearVelocity.set(simpleWaypoint.getLinearVelocity());
    }
 
    @Override
-   protected void putYoValuesIntoFrameTrajectoryPoint()
+   protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
-      position.get(simpleWaypoint.getPosition());
-      linearVelocity.get(simpleWaypoint.getLinearVelocity());
+      frameWaypoint.setToZero(getReferenceFrame());
+      frameWaypoint.set(this);
    }
 }
