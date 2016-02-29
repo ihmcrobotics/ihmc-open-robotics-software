@@ -17,12 +17,10 @@ import us.ihmc.simulationconstructionset.UniversalJoint;
 
 public class M2Robot extends Robot
 {
-   private static final long serialVersionUID = -6290950634743332455L;
-
-   YoVariableRegistry registry = new YoVariableRegistry("Orientation");
-   public DoubleYoVariable q_yaw = new DoubleYoVariable("q_yaw", registry);
-   public DoubleYoVariable q_roll = new DoubleYoVariable("q_roll", registry);
-   public DoubleYoVariable q_pitch = new DoubleYoVariable("q_pitch", registry);
+   private final YoVariableRegistry registry = new YoVariableRegistry("Orientation");
+   private final DoubleYoVariable q_yaw = new DoubleYoVariable("q_yaw", registry);
+   private final  DoubleYoVariable q_roll = new DoubleYoVariable("q_roll", registry);
+   private final  DoubleYoVariable q_pitch = new DoubleYoVariable("q_pitch", registry);
 
    protected FloatingJoint bodyJoint;
    private final M2Parameters m2Parameters;

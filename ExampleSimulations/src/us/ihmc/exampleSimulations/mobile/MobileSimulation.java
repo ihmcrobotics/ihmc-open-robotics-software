@@ -8,29 +8,28 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
  */
 public class MobileSimulation
 {
-   private SimulationConstructionSet sim;
+   private SimulationConstructionSet simulationConstructionSet;
 
    public MobileSimulation()
    {
-	  // Create an instance of MobileRobot
+      // Create an instance of MobileRobot
       MobileRobot mobile = new MobileRobot();
 
       // Instantiate a SCS object using the MobileRobot object reference
-      sim = new SimulationConstructionSet(mobile);
-      sim.setGroundVisible(false);
+      simulationConstructionSet = new SimulationConstructionSet(mobile);
+      simulationConstructionSet.setGroundVisible(false);
 
-      sim.setCameraTracking(false, false, false, false);
-      sim.setCameraDolly(false, false, false, false);
+      simulationConstructionSet.setCameraTracking(false, false, false, false);
+      simulationConstructionSet.setCameraDolly(false, false, false, false);
 
       // set camera to a convenient viewing angle
-      sim.setCameraPosition(1.0, 1.0, 0.5);
-      sim.setCameraFix(0.0, 0.0, 0.8);
+      simulationConstructionSet.setCameraPosition(1.0, 1.0, 0.5);
+      simulationConstructionSet.setCameraFix(0.0, 0.0, 0.8);
 
-      sim.setCameraTrackingVars("ef_track00_x", "ef_track00_y", "ef_track00_z");
+      simulationConstructionSet.setCameraTrackingVars("ef_track00_x", "ef_track00_y", "ef_track00_z");
 
-      sim.setDT(0.02, 1);
-      Thread myThread = new Thread(sim);
-      myThread.start();
+      simulationConstructionSet.setDT(0.02, 1);
+      simulationConstructionSet.startOnAThread();
    }
 
    public static void main(String[] args)
