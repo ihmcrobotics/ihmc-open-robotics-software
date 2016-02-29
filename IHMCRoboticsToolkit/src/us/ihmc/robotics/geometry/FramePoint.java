@@ -286,38 +286,38 @@ public class FramePoint extends FrameTuple<Point3d>
     * @return CartesianPositionFootstep
     */
    public void yawAboutPoint(FramePoint pointToYawAbout, FramePoint resultToPack, double yaw)
-   {
-      if (temporaryFramePointForMath == null)
-         temporaryFramePointForMath = new FramePoint(this);
-      else
-         temporaryFramePointForMath.setIncludingFrame(this);
+   {  
+      checkReferenceFrameMatch(pointToYawAbout);
+      double tempX = getX() - pointToYawAbout.getX();
+      double tempY = getY() - pointToYawAbout.getY();
+      double tempZ = getZ() - pointToYawAbout.getZ();
       
-      temporaryFramePointForMath.sub(pointToYawAbout);
-
-      RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotZ(yaw);
-
-      temporaryFramePointForMath.applyTransform(transform3D);
+      double cosAngle = Math.cos(yaw);
+      double sinAngle = Math.sin(yaw);
+      
+      double x = cosAngle * tempX + -sinAngle * tempY;
+      tempY = sinAngle * tempX + cosAngle * tempY;
+      tempX = x;
 
       resultToPack.setIncludingFrame(pointToYawAbout);
-      resultToPack.add(temporaryFramePointForMath);
+      resultToPack.add(tempX, tempY, tempZ);
    }
 
    public void pitchAboutPoint(FramePoint pointToPitchAbout, FramePoint resultToPack, double pitch)
    {
-      if (temporaryFramePointForMath == null)
-         temporaryFramePointForMath = new FramePoint(this);
-      else
-         temporaryFramePointForMath.setIncludingFrame(this);
+      checkReferenceFrameMatch(pointToPitchAbout);
+      double tempX = getX() - pointToPitchAbout.getX();
+      double tempY = getY() - pointToPitchAbout.getY();
+      double tempZ = getZ() - pointToPitchAbout.getZ();
       
-      temporaryFramePointForMath.sub(pointToPitchAbout);
+      double cosAngle = Math.cos(pitch);
+      double sinAngle = Math.sin(pitch);
 
-      RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotY(pitch);
-
-      temporaryFramePointForMath.applyTransform(transform3D);
+      double x = cosAngle * tempX + sinAngle * tempZ;
+      tempZ = -sinAngle * tempX + cosAngle * tempZ;
+      tempX = x;
 
       resultToPack.setIncludingFrame(pointToPitchAbout);
-      resultToPack.add(temporaryFramePointForMath);
+      resultToPack.add(tempX, tempY, tempZ);
    }
 }
