@@ -16,15 +16,15 @@ public class ModifiableFootstepDataMessage
 {
    private RobotSide robotSide;
    private FootstepOrigin origin;
-   public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   public double swingHeight = 0;
+   private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
+   private double swingHeight = 0;
    private final Point3d position = new Point3d();
    private final Quat4d orientation = new Quat4d();
    private final RecyclingArrayList<Point2d> predictedContactPoints = new RecyclingArrayList<>(4, Point2d.class);
 
    public ModifiableFootstepDataMessage()
    {
-      predictedContactPoints.clear();
+      clearPredictedContactPoints();
    }
 
    public void set(FootstepDataMessage footstepDataMessage)
@@ -42,6 +42,27 @@ public class ModifiableFootstepDataMessage
          for (int i = 0; i < originalPredictedContactPoints.size(); i++)
             predictedContactPoints.add().set(originalPredictedContactPoints.get(i));
       }
+   }
+
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
+   }
+
+   public void setPose(Point3d position, Quat4d orientation)
+   {
+      this.position.set(position);
+      this.orientation.set(orientation);
+   }
+
+   public void setSwingHeight(double swingHeight)
+   {
+      this.swingHeight = swingHeight;
+   }
+
+   public void clearPredictedContactPoints()
+   {
+      predictedContactPoints.clear();
    }
 
    public RobotSide getRobotSide()
