@@ -57,7 +57,7 @@ public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMess
       this.robotSide = robotSide;
    }
 
-   public void setBaseForControl(BaseForControl baseForControl)
+   public void setBase(BaseForControl baseForControl)
    {
       this.baseForControl = baseForControl;
    }
@@ -67,7 +67,7 @@ public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMess
       return robotSide;
    }
 
-   public BaseForControl getBaseForControl()
+   public BaseForControl getBase()
    {
       return baseForControl;
    }
