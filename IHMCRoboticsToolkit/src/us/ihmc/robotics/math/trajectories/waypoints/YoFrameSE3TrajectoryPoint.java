@@ -61,12 +61,12 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3T
    {
       frameWaypoint.setToZero(getReferenceFrame());
       frameWaypoint.set(se3TrajectoryPoint);
-      getYoValuesFromFrameTrajectoryPoint();
+      getYoValuesFromFrameWaypoint();
    }
 
    public void set(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
    {
-      setTime(time);
+      this.time.set(time);
       this.position.set(position);
       this.orientation.set(orientation);
       this.linearVelocity.set(linearVelocity);
@@ -75,7 +75,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3T
 
    public void set(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
    {
-      setTime(time);
+      this.time.set(time);
       this.position.set(position);
       this.orientation.set(orientation);
       this.linearVelocity.set(linearVelocity);
@@ -84,7 +84,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3T
 
    public void set(DoubleYoVariable time, YoFramePoint position, YoFrameQuaternion orientation, YoFrameVector linearVelocity, YoFrameVector angularVelocity)
    {
-      setTime(time.getDoubleValue());
+      this.time.set(time.getDoubleValue());
       this.position.set(position);
       this.orientation.set(orientation);
       this.linearVelocity.set(linearVelocity);
@@ -160,8 +160,8 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3T
    @Override
    public double positionDistance(YoFrameSE3TrajectoryPoint other)
    {
-      putYoValuesIntoFrameTrajectoryPoint();
-      other.putYoValuesIntoFrameTrajectoryPoint();
+      putYoValuesIntoFrameWaypoint();
+      other.putYoValuesIntoFrameWaypoint();
       return frameWaypoint.positionDistance(other.frameWaypoint);
    }
 
@@ -282,19 +282,13 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3T
    }
 
    @Override
-   protected void putYoValuesIntoFrameTrajectoryPoint()
-   {
-      frameWaypoint.setToZero(getReferenceFrame());
-      frameWaypoint.set(this);
-   }
-
-   @Override
-   protected void getYoValuesFromFrameTrajectoryPoint()
+   protected void getYoValuesFromFrameWaypoint()
    {
       SimpleSE3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getSimpleWaypoint();
       SimpleEuclideanWaypoint euclideanWaypoint = simpleTrajectoryPoint.getEuclideanWaypoint();
       SimpleSO3Waypoint so3Waypoint = simpleTrajectoryPoint.getSO3Waypoint();
 
+      time.set(simpleTrajectoryPoint.getTime());
       position.set(euclideanWaypoint.getPosition());
       orientation.set(so3Waypoint.getOrientation());
       linearVelocity.set(euclideanWaypoint.getLinearVelocity());
@@ -302,9 +296,16 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3T
    }
 
    @Override
+   protected void putYoValuesIntoFrameWaypoint()
+   {
+      frameWaypoint.setToZero(getReferenceFrame());
+      frameWaypoint.set(this);
+   }
+
+   @Override
    public String toString()
    {
-      putYoValuesIntoFrameTrajectoryPoint();
+      putYoValuesIntoFrameWaypoint();
       return frameWaypoint.toString();
    }
 }
