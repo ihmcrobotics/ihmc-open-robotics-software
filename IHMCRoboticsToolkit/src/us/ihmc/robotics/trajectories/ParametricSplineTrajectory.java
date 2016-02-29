@@ -61,7 +61,7 @@ public class ParametricSplineTrajectory
     */
    public void setSplineCoefficients(int splineIndex, double[][] splineCoefficients)
    {
-      if (splineIndex < 0 || splineIndex >= splineCoefficients.length)
+      if (splineIndex < 0 || splineIndex >= this.splineCoefficients.length)
          throw new RuntimeException(this.getClass().getSimpleName() + ": Invalid Spline Number");
 
       for (int i = 0; i < splineCoefficients.length; i++){
