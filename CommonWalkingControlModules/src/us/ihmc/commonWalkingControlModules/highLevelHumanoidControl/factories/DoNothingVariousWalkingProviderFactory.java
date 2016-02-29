@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
@@ -58,7 +58,7 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
       PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber = null;
       GoHomeMessageSubscriber goHomeMessageSubscriber = null;
 
-      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = null;
+      ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = null;
 
       HighLevelStateMessageSubscriber highLevelStateProvider = null;
 

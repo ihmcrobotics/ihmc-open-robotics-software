@@ -184,7 +184,7 @@ public class FootstepProviderTestHelper
             desiredHeadingControlModule, desiredVelocityControlModule, registry);
       updatables.add(headingAndVelocityEvaluationScript);
 
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(0.084, null, ankleZUpFrames, ankleFrames,
+      ObsoleteComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ObsoleteComponentBasedDesiredFootstepCalculator(0.084, null, ankleZUpFrames, ankleFrames,
             contactableFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       double inPlaceWidth = 0.25;
@@ -199,7 +199,7 @@ public class FootstepProviderTestHelper
       desiredFootstepCalculator.setMaxStepWidth(maxStepWidth);
       desiredFootstepCalculator.setStepPitch(stepPitch);
 
-      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
+      ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
             registry);
       footstepProvider.setWalk(true);
 

@@ -12,8 +12,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteComponentBasedDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepConsumer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -380,7 +380,7 @@ public class DesiredFootstepVisualizer
       Vector3d trans = new Vector3d();
       transformFromFootBodyFrameToFootPlaneFrame.get(trans);
       double ankleHeight = trans.getZ();
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight, null,
+      ObsoleteComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ObsoleteComponentBasedDesiredFootstepCalculator(ankleHeight, null,
             desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getFootFrames(), desiredFootstepVisualizer.getContactableFeet(),
             desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
       desiredFootstepCalculator.setInPlaceWidth(0.4);
@@ -393,7 +393,7 @@ public class DesiredFootstepVisualizer
       HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, controlDT,
             desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
 
-      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
+      ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
             parentRegistry);
       footstepProvider.setWalk(true);
       desiredFootstepVisualizer.setFootstepProvider(footstepProvider);

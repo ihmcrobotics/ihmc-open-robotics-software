@@ -25,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
+public class ObsoleteComponentBasedDesiredFootstepCalculator extends ObsoleteAbstractAdjustableDesiredFootstepCalculator
 {
    private final BooleanYoVariable matchSupportFootPlane = new BooleanYoVariable("matchSupportFootPlane", registry);
 
@@ -53,7 +53,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
    private final FrameOrientation2d pelvisOrientation2d = new FrameOrientation2d();
 
-   public ComponentBasedDesiredFootstepCalculator(double ankleHeight, ReferenceFrame pelvisZUpFrame, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+   public ObsoleteComponentBasedDesiredFootstepCalculator(double ankleHeight, ReferenceFrame pelvisZUpFrame, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
          SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
    {

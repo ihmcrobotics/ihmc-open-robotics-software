@@ -26,7 +26,7 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class BlindWalkingToDestinationDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
+public class ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator extends ObsoleteAbstractAdjustableDesiredFootstepCalculator
 {
    private static final double DISTANCE_TO_DESTINATION_FOR_STEP_IN_PLACE = 0.2;
 
@@ -52,7 +52,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
    private SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
    private SideDependentList<? extends ReferenceFrame> ankleFrames;
 
-   public BlindWalkingToDestinationDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+   public ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
          SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          YoVariableRegistry parentRegistry)
    {

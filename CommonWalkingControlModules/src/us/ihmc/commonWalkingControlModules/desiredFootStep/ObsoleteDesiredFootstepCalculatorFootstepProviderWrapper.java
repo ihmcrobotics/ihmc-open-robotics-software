@@ -9,15 +9,15 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class DesiredFootstepCalculatorFootstepProviderWrapper implements FootstepProvider
+public class ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper implements FootstepProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DesiredFootstepCalculator desiredFootstepCalculator;
+   private final ObsoleteDesiredFootstepCalculator desiredFootstepCalculator;
    private final EnumYoVariable<RobotSide> nextSwingLeg = EnumYoVariable.create("nextSwingLeg", RobotSide.class, registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
    private Footstep lastPolledFootstep;
 
-   public DesiredFootstepCalculatorFootstepProviderWrapper(final DesiredFootstepCalculator desiredFootstepCalculator, YoVariableRegistry parentRegistry)
+   public ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper(final ObsoleteDesiredFootstepCalculator desiredFootstepCalculator, YoVariableRegistry parentRegistry)
    {
       this.desiredFootstepCalculator = desiredFootstepCalculator;
       parentRegistry.addChild(registry);

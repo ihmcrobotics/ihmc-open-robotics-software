@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -12,18 +10,15 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
-public abstract class AbstractAdjustableDesiredFootstepCalculator implements DesiredFootstepCalculator
+public abstract class ObsoleteAbstractAdjustableDesiredFootstepCalculator implements ObsoleteDesiredFootstepCalculator
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    protected final SideDependentList<YoFramePoint> footstepPositions = new SideDependentList<YoFramePoint>();
    protected final SideDependentList<YoFrameOrientation> footstepOrientations = new SideDependentList<YoFrameOrientation>();
    protected final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
-   private DesiredFootstepAdjustor desiredFootstepAdjustor;
-
-   public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
+   public ObsoleteAbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
          SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
@@ -64,31 +59,6 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       boolean trustHeight = true;
       Footstep desiredFootstep = new Footstep(foot.getRigidBody(), swingLegSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
 
-      if (desiredFootstepAdjustor != null)
-      {
-         ContactablePlaneBody stanceFoot = contactableBodies.get(supportLegSide);
-         RigidBody stanceFootBody = stanceFoot.getRigidBody();
-         FramePose stanceFootPose = new FramePose(stanceFootBody.getBodyFixedFrame());
-         stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-         PoseReferenceFrame stanceFootPoseFrame = new PoseReferenceFrame("desiredFootstep", stanceFootPose);
-
-         Footstep stanceFootstep = new Footstep(stanceFoot.getRigidBody(), supportLegSide, stanceFoot.getSoleFrame(), stanceFootPoseFrame, trustHeight);
-         desiredFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(stanceFootstep, desiredFootstep);
-
-         desiredFootstep.getPose(footstepPose);
-         YoFramePoint yoFramePoint = footstepPositions.get(swingLegSide);
-         FramePoint footstepPosition = new FramePoint();
-         footstepPose.getPositionIncludingFrame(footstepPosition);
-         footstepPosition.changeFrame(yoFramePoint.getReferenceFrame());
-         yoFramePoint.set(footstepPosition);
-         YoFrameOrientation yoFrameOrientation = footstepOrientations.get(swingLegSide);
-         FrameOrientation footstepOrientation = new FrameOrientation();
-         footstepPose.getOrientationIncludingFrame(footstepOrientation);
-         footstepOrientation.changeFrame(yoFrameOrientation.getReferenceFrame());
-         yoFrameOrientation.set(footstepOrientation);
-      }
-
       return desiredFootstep;
    }
 
@@ -96,10 +66,5 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
    {
       return null;
-   }
-
-   public void setDesiredFootstepAdjustor(DesiredFootstepAdjustor desiredFootstepAdjustor)
-   {
-      this.desiredFootstepAdjustor = desiredFootstepAdjustor;
    }
 }
