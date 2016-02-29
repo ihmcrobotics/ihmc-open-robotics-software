@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -14,8 +15,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author not attributable
  * @version 1.0
  */
-public abstract class FrameGeometry2d extends ReferenceFrameHolder
+public abstract class FrameGeometry2d<T extends TransformableDataObject> extends AbstractFrameObject<T>
 {
+   public FrameGeometry2d(ReferenceFrame referenceFrame, T transformableDataObject)
+   {
+      super(referenceFrame, transformableDataObject);
+   }
+
    // Orthogonal projection:
    public abstract void orthogonalProjection(FramePoint2d point);
 
@@ -38,17 +44,13 @@ public abstract class FrameGeometry2d extends ReferenceFrameHolder
    public abstract double distance(FrameConvexPolygon2d convexPolygon);
 
    // Transformations:
-   public abstract void applyTransform(RigidBodyTransform transform);
-
    public abstract void applyTransformAndProjectToXYPlane(RigidBodyTransform transform);
 
-   public abstract FrameGeometry2d applyTransformCopy(RigidBodyTransform transform);
+   public abstract FrameGeometry2d<T> applyTransformCopy(RigidBodyTransform transform);
 
-   public abstract FrameGeometry2d applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform);
-
-   public abstract void changeFrame(ReferenceFrame desiredFrame);
+   public abstract FrameGeometry2d<T> applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform);
 
    public abstract void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame);
 
-   public abstract FrameGeometry2d changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame);
+   public abstract FrameGeometry2d<T> changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame);
 }

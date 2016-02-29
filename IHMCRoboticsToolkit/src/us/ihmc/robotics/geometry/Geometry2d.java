@@ -2,6 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
+
 /**
  * <p>Title: </p>
  *
@@ -14,7 +16,7 @@ import javax.vecmath.Point2d;
  * @author Twan Koolen
  * @version 1.0
  */
-public interface Geometry2d
+public interface Geometry2d extends TransformableDataObject
 {
    // Orthogonal projection:
    public void orthogonalProjection(Point2d tuple);

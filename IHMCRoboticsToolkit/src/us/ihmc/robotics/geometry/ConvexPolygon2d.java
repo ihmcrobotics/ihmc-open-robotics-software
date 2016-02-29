@@ -2563,4 +2563,10 @@ public class ConvexPolygon2d implements Geometry2d
       else
          return (rightEdgeIndex + leftEdgeIndex + 1) / 2;
    }
+
+   @Override
+   public void transform(RigidBodyTransform transform)
+   {
+      this.applyTransform(transform);
+   }
 }
