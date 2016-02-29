@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MultipleWaypointsOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
@@ -149,6 +150,27 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       for (int i = 0; i < so3Waypoints.length; i++)
       {
          appendWaypointUnsafe(so3Waypoints[i]);
+      }
+   }
+
+   public void appendWaypoints(TrajectoryPointListInterface<? extends SO3TrajectoryPointInterface<?>, ?> trajectoryPointList)
+   {
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
+
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
+         appendWaypointUnsafe(trajectoryPointList.getTrajectoryPoint(i));
+   }
+
+   public void appendWaypoints(FrameSO3TrajectoryPointList trajectoryPointList)
+   {
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
+      trajectoryPointList.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
+      {
+         FrameSO3TrajectoryPoint trajectoryPoint = trajectoryPointList.getTrajectoryPoint(i);
+         trajectoryPoint.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+         appendWaypointUnsafe(trajectoryPoint);
       }
    }
 

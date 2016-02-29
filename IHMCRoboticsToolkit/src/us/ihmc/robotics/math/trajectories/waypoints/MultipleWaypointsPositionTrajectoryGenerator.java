@@ -14,6 +14,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /*
@@ -159,6 +160,14 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
       for (int i = 0; i < euclideanWaypoint.size(); i++)
          appendWaypointUnsafe(euclideanWaypoint.get(i));
+   }
+
+   public void appendWaypoints(TrajectoryPointListInterface<? extends EuclideanTrajectoryPointInterface<?>, ?> trajectoryPointList)
+   {
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
+
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
+         appendWaypointUnsafe(trajectoryPointList.getTrajectoryPoint(i));
    }
 
    private void checkNumberOfWaypoints(int length)
