@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import java.util.List;
-
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -104,7 +102,4 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    {
       this.desiredFootstepAdjustor = desiredFootstepAdjustor;
    }
-
-   protected abstract List<FramePoint> getContactPoints(RobotSide swingSide);
-
 }

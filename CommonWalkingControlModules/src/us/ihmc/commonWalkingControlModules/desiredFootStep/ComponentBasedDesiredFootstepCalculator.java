@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import java.util.List;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -337,27 +335,6 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private static SideDependentList<ReferenceFrame> getFramesToStoreFootstepsIn()
    {
       return new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-   }
-
-   @Override
-   protected List<FramePoint> getContactPoints(RobotSide swingSide)
-   {
-      double stepPitch = this.stepPitch.getDoubleValue();
-      List<FramePoint> allContactPoints = contactableBodies.get(swingSide).getContactPointsCopy();
-      if (stepPitch == 0.0)
-      {
-         return allContactPoints;
-      }
-      else
-      {
-         FrameVector forwardInFootFrame = new FrameVector(contactableBodies.get(swingSide).getFrameAfterParentJoint());
-         ReferenceFrame frame = allContactPoints.get(0).getReferenceFrame();
-         forwardInFootFrame.changeFrame(frame);
-         forwardInFootFrame.scale(Math.signum(stepPitch));
-         int nPoints = 2;
-
-         return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(allContactPoints, forwardInFootFrame, nPoints);
-      }
    }
 
    @Override
