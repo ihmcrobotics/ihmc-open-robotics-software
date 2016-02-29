@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
@@ -91,7 +91,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber = new HandComplianceControlParametersSubscriber();
 
-      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
+      ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
             .getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, feet, registry);
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = new CapturabilityBasedStatusProducer(closeableAndDisposeableRegistry, scheduler,

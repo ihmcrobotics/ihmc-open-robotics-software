@@ -6,8 +6,8 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteComponentBasedDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
@@ -54,14 +54,14 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
          ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
          YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
+      ObsoleteComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
             .getDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, feet, controlDT, registry, updatables, useHeadingAndVelocityScript);
       if (heightMapForCheatingOnStepHeight != null)
       {
          desiredFootstepCalculator.setGroundProfile(heightMapForCheatingOnStepHeight);
       }
 
-      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
+      ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
             registry);
       HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber = null;
       ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber = null;

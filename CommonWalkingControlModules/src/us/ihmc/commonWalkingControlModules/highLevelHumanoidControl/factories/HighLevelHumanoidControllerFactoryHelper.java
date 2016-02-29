@@ -7,8 +7,8 @@ import java.util.List;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteComponentBasedDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingUpdater;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
@@ -28,11 +28,11 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
-   public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
+   public static ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
    {
-      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = new BlindWalkingToDestinationDesiredFootstepCalculator(
+      ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = new ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator(
             referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getFootReferenceFrames(), bipedFeet, registry);
 
       desiredFootstepCalculator.setDesiredStepWidth(walkingControllerParameters.getInPlaceWidth());
@@ -45,11 +45,11 @@ public class HighLevelHumanoidControllerFactoryHelper
       return desiredFootstepCalculator;
    }
 
-   public static ComponentBasedDesiredFootstepCalculator getDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
+   public static ObsoleteComponentBasedDesiredFootstepCalculator getDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
          ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript)
    {
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator;
+      ObsoleteComponentBasedDesiredFootstepCalculator desiredFootstepCalculator;
       ManualDesiredVelocityControlModule desiredVelocityControlModule;
 
       DesiredHeadingControlModule desiredHeadingControlModule;
@@ -79,7 +79,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       SideDependentList<ReferenceFrame> ankleZUpReferenceFrames = referenceFrames.getAnkleZUpReferenceFrames();
       SideDependentList<ReferenceFrame> footReferenceFrames = referenceFrames.getFootReferenceFrames();
-      desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight, pelvisZUpFrame, ankleZUpReferenceFrames, footReferenceFrames,
+      desiredFootstepCalculator = new ObsoleteComponentBasedDesiredFootstepCalculator(ankleHeight, pelvisZUpFrame, ankleZUpReferenceFrames, footReferenceFrames,
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());

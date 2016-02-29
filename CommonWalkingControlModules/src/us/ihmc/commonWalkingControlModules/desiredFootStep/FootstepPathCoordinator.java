@@ -38,8 +38,8 @@ public class FootstepPathCoordinator implements FootstepProvider
 
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
 
-   private final BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator;
-   private final DesiredFootstepCalculatorFootstepProviderWrapper desiredFootstepCalculatorFootstepProviderWrapper;
+   private final ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator;
+   private final ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper desiredFootstepCalculatorFootstepProviderWrapper;
    private final ConstantSwingTimeCalculator constantSwingTimeCalculator;
    private final ConstantTransferTimeCalculator constantTransferTimeCalculator;
 
@@ -47,7 +47,7 @@ public class FootstepPathCoordinator implements FootstepProvider
    private final Quat4d actualFootOrientationInWorld;
 
    public FootstepPathCoordinator(FootstepTimingParameters footstepTimingParameters, HumanoidGlobalDataProducer objectCommunicator,
-         BlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
+         ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator blindWalkingToDestinationDesiredFootstepCalculator,
          ConstantSwingTimeCalculator constantSwingTimeCalculator, ConstantTransferTimeCalculator constantTransferTimeCalculator,
          YoVariableRegistry parentRegistry)
    {
@@ -61,7 +61,7 @@ public class FootstepPathCoordinator implements FootstepProvider
 
       footstepStatusDataProducer = objectCommunicator;
 
-      desiredFootstepCalculatorFootstepProviderWrapper = new DesiredFootstepCalculatorFootstepProviderWrapper(
+      desiredFootstepCalculatorFootstepProviderWrapper = new ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper(
             blindWalkingToDestinationDesiredFootstepCalculator, registry);
       desiredFootstepCalculatorFootstepProviderWrapper.setWalk(true);
       currentFootstepIndex.set(-1);
