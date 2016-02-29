@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
@@ -89,5 +90,20 @@ public class ModifiableArmTrajectoryMessage
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public RecyclingArrayList<SimpleTrajectoryPoint1DList> getTrajectoryPointLists()
+   {
+      return jointTrajectoryInputs;
+   }
+
+   public SimpleTrajectoryPoint1D getJointTrajectoryPoint(int jointIndex, int trajectoryPointIndex)
+   {
+      return jointTrajectoryInputs.get(jointIndex).getTrajectoryPoint(trajectoryPointIndex);
+   }
+
+   public SimpleTrajectoryPoint1DList getJointTrajectoryPointList(int jointIndex)
+   {
+      return jointTrajectoryInputs.get(jointIndex);
    }
 }
