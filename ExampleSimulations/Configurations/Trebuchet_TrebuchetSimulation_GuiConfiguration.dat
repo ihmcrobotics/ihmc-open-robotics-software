@@ -37,7 +37,20 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
 <Entry Boxes>q_x</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>q_x</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -54,9 +67,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-65.9693016186661</Camera X>
- <Camera Y>191.275427409868</Camera Y>
- <Camera Z>16.03038784555353</Camera Z>
+ <Camera X>-64.0</Camera X>
+ <Camera Y>100.0</Camera Y>
+ <Camera Z>8.0</Camera Z>
  <Dolly data> 
  <Position X>-30.0</Position X>
  <Position Y>-0.0</Position Y>
