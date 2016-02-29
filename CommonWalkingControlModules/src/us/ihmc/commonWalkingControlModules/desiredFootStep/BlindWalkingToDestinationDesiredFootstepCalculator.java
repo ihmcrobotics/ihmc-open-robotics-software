@@ -65,6 +65,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       this.ankleFrames = ankleFrames;
    }
 
+   @Override
    public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       return super.updateAndGetDesiredFootstep(supportLegSide);
@@ -81,6 +82,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       this.desiredDestination.set(desiredDestinationInWorld);
    }
 
+   @Override
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
@@ -382,6 +384,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       return new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
    }
 
+   @Override
    protected List<FramePoint> getContactPoints(RobotSide swingSide)
    {
       double stepPitch = this.stepPitch.getDoubleValue();
@@ -402,8 +405,9 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       }
    }
 
+   @Override
    public boolean isDone()
    {
-      return (numberBlindStepsInPlace.getIntegerValue() >= 2);
+      return numberBlindStepsInPlace.getIntegerValue() >= 2;
    }
 }
