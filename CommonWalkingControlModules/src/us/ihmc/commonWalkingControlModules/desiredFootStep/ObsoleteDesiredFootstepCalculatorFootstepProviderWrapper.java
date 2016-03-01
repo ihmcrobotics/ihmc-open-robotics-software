@@ -36,11 +36,6 @@ public class ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper implements
       });
    }
 
-   public void setNextSwingLeg(RobotSide nextSwingLeg)
-   {
-      this.nextSwingLeg.set(nextSwingLeg);
-   }
-
    @Override
    public Footstep poll()
    {

@@ -30,6 +30,39 @@ public class ModifiableFootstepDataListMessage
       }
    }
 
+   public void set(ModifiableFootstepDataListMessage other)
+   {
+      swingTime = other.swingTime;
+      transferTime = other.transferTime;
+      RecyclingArrayList<ModifiableFootstepDataMessage> otherFootsteps = other.getFootsteps();
+      footsteps.clear();
+      if (otherFootsteps != null)
+      {
+         for (int i = 0; i < otherFootsteps.size(); i++)
+            footsteps.add().set(otherFootsteps.get(i));
+      }
+   }
+
+   public void clearFoosteps()
+   {
+      footsteps.clear();
+   }
+
+   public void addFootstep(ModifiableFootstepDataMessage footstep)
+   {
+      footsteps.add().set(footstep);
+   }
+
+   public void setSwingTime(double swingTime)
+   {
+      this.swingTime = swingTime;
+   }
+
+   public void setTransferTime(double transferTime)
+   {
+      this.transferTime = transferTime;
+   }
+
    public double getSwingTime()
    {
       return swingTime;

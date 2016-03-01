@@ -52,9 +52,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    private final FrameOrientation2d pelvisOrientation2d = new FrameOrientation2d();
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
-   public ComponentBasedDesiredFootstepCalculator(ReferenceFrame pelvisZUpFrame, SideDependentList<? extends ReferenceFrame> ankleFrames,
-         SideDependentList<? extends ContactablePlaneBody> bipedFeet, DesiredHeadingControlModule desiredHeadingControlModule,
-         DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
+   public ComponentBasedDesiredFootstepCalculator(ReferenceFrame pelvisZUpFrame, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
+         DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+         YoVariableRegistry parentRegistry)
    {
       super(parentRegistry);
 

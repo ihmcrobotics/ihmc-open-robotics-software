@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
@@ -14,6 +16,10 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.status.MessageStatusListener;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.status.MessageStatusListener.Status;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -32,6 +38,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ControllerCommandInputManager
 {
+   private final int buffersCapacity = 8;
+
    private final SideDependentList<ConcurrentRingBuffer<ModifiableArmTrajectoryMessage>> armTrajectoryMessageBuffers = new SideDependentList<>();
    private final SideDependentList<ConcurrentRingBuffer<ModifiableHandTrajectoryMessage>> handTrajectoryMessageBuffers = new SideDependentList<>();
    private final SideDependentList<ConcurrentRingBuffer<ModifiableFootTrajectoryMessage>> footTrajectoryMessageBuffers = new SideDependentList<>();
@@ -46,9 +54,10 @@ public class ControllerCommandInputManager
    private final ConcurrentRingBuffer<ModifiableEndEffectorLoadBearingMessage> endEffectorLoadBearingMessageBuffer;
    private final ConcurrentRingBuffer<ModifiableStopAllTrajectoryMessage> stopAllTrajectoryMessageBuffer;
 
+   private final List<MessageStatusListener> messageStatusListeners = new ArrayList<>();
+
    public ControllerCommandInputManager()
    {
-      int buffersCapacity = 8;
       for (RobotSide robotSide : RobotSide.values)
       {
          armTrajectoryMessageBuffers.put(robotSide, new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableArmTrajectoryMessage.class), buffersCapacity));
@@ -146,6 +155,15 @@ public class ControllerCommandInputManager
    }
 
    public void submitFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
+   {
+      ModifiableFootstepDataListMessage nextModifiableMessage = footstepDataListMessageBuffer.next();
+      if (nextModifiableMessage == null)
+         return;
+      nextModifiableMessage.set(footstepDataListMessage);
+      footstepDataListMessageBuffer.commit();
+   }
+
+   public void submitFootstepDataListMessage(ModifiableFootstepDataListMessage footstepDataListMessage)
    {
       ModifiableFootstepDataListMessage nextModifiableMessage = footstepDataListMessageBuffer.next();
       if (nextModifiableMessage == null)
@@ -280,6 +298,24 @@ public class ControllerCommandInputManager
    public ModifiableStopAllTrajectoryMessage pollStopAllTrajectoryMessage()
    {
       return pollNewestMessage(stopAllTrajectoryMessageBuffer);
+   }
+   
+   public void reportMessageStatus(Status status, Class<? extends IHMCRosApiMessage<?>> messageClass)
+   {
+      reportMessageStatus(status, messageClass, Packet.VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public void reportMessageStatus(Status status, Class<? extends IHMCRosApiMessage<?>> messageClass, long id)
+   {
+      for (int i = 0; i < messageStatusListeners.size(); i++)
+      {
+         messageStatusListeners.get(i).receivedNewMessageStatus(status, messageClass, id);
+      }
+   }
+
+   public void subscribeToMessageStatus(MessageStatusListener messageStatusListener)
+   {
+      messageStatusListeners.add(messageStatusListener);
    }
 
    private static <T> T pollNewestMessage(ConcurrentRingBuffer<T> buffer)
