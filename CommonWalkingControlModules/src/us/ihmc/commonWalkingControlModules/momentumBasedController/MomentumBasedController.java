@@ -593,6 +593,12 @@ public class MomentumBasedController
       updatables.add(updatable);
    }
 
+   public void addUpdatables(List<Updatable> updatables)
+   {
+      for (int i = 0; i < updatables.size(); i++)
+         this.updatables.add(updatables.get(i));
+   }
+
    public void initialize()
    {
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state

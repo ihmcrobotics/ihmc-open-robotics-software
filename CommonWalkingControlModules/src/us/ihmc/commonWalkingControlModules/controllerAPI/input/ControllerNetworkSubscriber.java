@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 
 public class ControllerNetworkSubscriber
@@ -35,6 +36,7 @@ public class ControllerNetworkSubscriber
       setupFootstepDataListMessageSubscriber();
       setupEndEffectorLoadBearingMessageSubscriber();
       setupStopAllTrajectoryMessageSubscriber();
+      setupWholeBodyTrajectoryMessageSubscriber();
    }
 
    private void setupHandTrajectoryMessageSubscriber()
@@ -163,6 +165,27 @@ public class ControllerNetworkSubscriber
          }
       };
       globalDataProducer.attachListener(PelvisOrientationTrajectoryMessage.class, messageSubscriber);
+   }
+   
+   private void setupWholeBodyTrajectoryMessageSubscriber()
+   {
+      PacketConsumer<WholeBodyTrajectoryMessage> messageSubscriber = new PacketConsumer<WholeBodyTrajectoryMessage>()
+      {
+         @Override
+         public void receivedPacket(WholeBodyTrajectoryMessage message)
+         {
+            if (PacketValidityChecker.validatePacket(message, true) != null)
+               return;
+            if (!message.checkRobotSideConsistency())
+            {
+               globalDataProducer.notifyInvalidPacketReceived(message.getClass(), "The robotSide of a field is inconsistent with its name.");
+               return;
+            }
+            
+            controllerCommandInputManager.submitWholeBodyTrajectoryMessage(message);
+         }
+      };
+      globalDataProducer.attachListener(WholeBodyTrajectoryMessage.class, messageSubscriber);
    }
 
    private void setupFootstepDataListMessageSubscriber()

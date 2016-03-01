@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -54,9 +55,10 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public static final AtomicReference<HighLevelState> currentStateForOpenSource = new AtomicReference<HighLevelState>(HighLevelState.DO_NOTHING_BEHAVIOR);
 
-   public HighLevelHumanoidControllerManager(WholeBodyControllerCore controllerCore, HighLevelState initialBehavior,
-         ArrayList<HighLevelBehavior> highLevelBehaviors, MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOuput controllerCoreOuput, HumanoidGlobalDataProducer dataProducer)
+   public HighLevelHumanoidControllerManager(ControllerCommandInputManager commandInputManager, WholeBodyControllerCore controllerCore,
+         HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors, MomentumBasedController momentumBasedController,
+         VariousWalkingProviders variousWalkingProviders, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+         ControllerCoreOuput controllerCoreOuput, HumanoidGlobalDataProducer dataProducer)
    {
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       this.controllerCoreOuput = controllerCoreOuput;
@@ -102,11 +104,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
       fallbackControllerForFailureReference.set(fallbackController);
    }
 
-   private GenericStateMachine<HighLevelState, HighLevelBehavior> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry,
-         final HumanoidGlobalDataProducer dataProducer)
+   private GenericStateMachine<HighLevelState, HighLevelBehavior> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime,
+         YoVariableRegistry registry, final HumanoidGlobalDataProducer dataProducer)
    {
-      GenericStateMachine<HighLevelState, HighLevelBehavior> highLevelStateMachine = new GenericStateMachine<>("highLevelState", "switchTimeName", HighLevelState.class, yoTime,
-            registry);
+      GenericStateMachine<HighLevelState, HighLevelBehavior> highLevelStateMachine = new GenericStateMachine<>("highLevelState", "switchTimeName",
+            HighLevelState.class, yoTime, registry);
 
       // Enable transition between every existing state of the state machine
       for (int i = 0; i < highLevelBehaviors.size(); i++)

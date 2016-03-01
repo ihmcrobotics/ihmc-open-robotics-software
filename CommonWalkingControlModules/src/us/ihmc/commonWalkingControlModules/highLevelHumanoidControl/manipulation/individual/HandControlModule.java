@@ -29,8 +29,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.MathTools;
@@ -477,38 +475,7 @@ public class HandControlModule
          trajectoryGenerator.initialize();
       }
 
-      executeJointspaceTrajectory(jointTrajectoryGenerators);
-   }
-
-   public void handleArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
-   {
-      if (armTrajectoryMessage.getRobotSide() != robotSide)
-      {
-         PrintTools.warn(this, "Received a " + armTrajectoryMessage.getClass().getSimpleName() + " for the wrong side.");
-         return;
-      }
-
-      if (!checkJointspaceTrajectoryPointLists(armTrajectoryMessage.getTrajectoryPointLists()))
-         return;
-
-      int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
-
-      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
-      {
-         OneDoFJoint joint = oneDoFJoints[jointIndex];
-         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = jointTrajectoryGenerators.get(joint);
-         trajectoryGenerator.clear();
-
-         if (armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, 0).getTime() > 1.0e-5)
-         {
-            appendFirstWaypointToWaypointJointspaceTrajectories(joint, trajectoryGenerator, false);
-         }
-
-         ArmOneJointTrajectoryMessage jointTrajectory = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         trajectoryGenerator.appendWaypoints(jointTrajectory);
-         trajectoryGenerator.initialize();
-      }
-
+      System.out.println();
       executeJointspaceTrajectory(jointTrajectoryGenerators);
    }
 
@@ -544,20 +511,6 @@ public class HandControlModule
       for (int jointIndex = 0; jointIndex < trajectoryPointLists.size(); jointIndex++)
       {
          if (!checkJointspaceTrajectoryPointList(oneDoFJoints[jointIndex], trajectoryPointLists.get(jointIndex)))
-            return false;
-      }
-
-      return true;
-   }
-
-   private <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> boolean checkJointspaceTrajectoryPointLists(T[] trajectoryPointLists)
-   {
-      if (trajectoryPointLists.length != oneDoFJoints.length)
-         return false;
-
-      for (int jointIndex = 0; jointIndex < trajectoryPointLists.length; jointIndex++)
-      {
-         if (!checkJointspaceTrajectoryPointList(oneDoFJoints[jointIndex], trajectoryPointLists[jointIndex]))
             return false;
       }
 

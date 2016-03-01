@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModu
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -220,16 +221,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
+   private final ControllerCommandInputManager commandInputManager;
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(true);
    private ControllerCoreOuput controllerCoreOuput;
 
-   public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-         LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
-         SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
-         ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
-         MomentumBasedController momentumBasedController)
+   public WalkingHighLevelHumanoidController(ControllerCommandInputManager commandInputManager, VariousWalkingProviders variousWalkingProviders,
+         VariousWalkingManagers variousWalkingManagers, LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
+         TransferTimeCalculationProvider transferTimeCalculationProvider, SwingTimeCalculationProvider swingTimeCalculationProvider,
+         WalkingControllerParameters walkingControllerParameters, ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner,
+         ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
+
+      this.commandInputManager = commandInputManager;
 
       hasWalkingControllerBeenInitialized.set(false);
 
@@ -558,7 +562,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          feetManager.updateContactStatesInDoubleSupport(transferToSide);
 
          if (transferToSide == null)
+         {
             upcomingFootstepList.checkForFootsteps();
+            consumeManipulationMessages();
+         }
 
          desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
          desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
@@ -1335,7 +1342,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public boolean checkCondition()
       {
          boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getValue();
-         boolean hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber != null && footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+         boolean hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber != null
+               && footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
          boolean transferringToThisRobotSide = hasNewFootTrajectoryMessage;
 
          return transferringToThisRobotSide && doubleSupportTimeHasPassed;
@@ -1430,7 +1438,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          boolean hasNewFootLoadBearingRequest = endEffectorLoadBearingMessageSubscriber != null
-                  && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide) == LoadBearingRequest.LOAD;
+               && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide) == LoadBearingRequest.LOAD;
 
          if (isInFlamingoStance.getBooleanValue() && hasNewFootLoadBearingRequest)
          {
@@ -1483,8 +1491,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean noMoreFootstepsForThisSide = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull;
          boolean noMoreFootTrajectoryMessages = footTrajectoryMessageSubscriber == null
                || !footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide.getOppositeSide());
-         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootTrajectoryMessages
-               && (isSupportLegNull || super.checkCondition());
+         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootTrajectoryMessages && (isSupportLegNull || super.checkCondition());
          return readyToStopWalking;
       }
    }
@@ -1855,6 +1862,22 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void reinitializePelvisOrientation(boolean reinitialize)
    {
       hasWalkingControllerBeenInitialized.set(!reinitialize);
+   }
+
+   private void consumeManipulationMessages()
+   {
+      if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
+      {
+         commandInputManager.clearManipulationMessagesInQueue();
+         return;
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (commandInputManager.isNewArmTrajectoryMessageAvailable(robotSide))
+            manipulationControlModule.handleArmTrajectoryMessage(commandInputManager.pollArmTrajectoryMessage(robotSide));
+      }
+
    }
 
    @Override

@@ -16,14 +16,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -58,7 +56,6 @@ public class ManipulationControlModule
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
-   private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
    private final ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber;
    private final EndEffectorLoadBearingMessageSubscriber effectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
@@ -81,7 +78,6 @@ public class ManipulationControlModule
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handTrajectoryMessageSubscriber = variousWalkingProviders.getHandTrajectoryMessageSubscriber();
-      armTrajectoryMessageSubscriber = variousWalkingProviders.geArmTrajectoryMessageSubscriber();
       armDesiredAccelerationsMessageSubscriber = variousWalkingProviders.getArmDesiredAccelerationsMessageSubscriber();
       effectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
@@ -147,7 +143,6 @@ public class ManipulationControlModule
       {
          isIgnoringInputs.set(true);
          handTrajectoryMessageSubscriber.clearMessagesInQueue();
-         armTrajectoryMessageSubscriber.clearMessagesInQueue();
          goHomeMessageSubscriber.clearMessagesInQueue();
       }
       else
@@ -159,7 +154,7 @@ public class ManipulationControlModule
       {
          handleLoadBearing(robotSide);
          handleHandTrajectoryMessages(robotSide);
-         handleArmTrajectoryMessages(robotSide);
+//         handleArmTrajectoryMessages(robotSide);
          handleArmDesiredAccelerationsMessages(robotSide);
          handleStopAllTrajectoryMessages(robotSide);
          handleGoHomeMessages(robotSide);
@@ -197,15 +192,6 @@ public class ManipulationControlModule
 
       HandTrajectoryMessage message = handTrajectoryMessageSubscriber.pollMessage(robotSide);
       handControlModules.get(robotSide).handleHandTrajectoryMessage(message);
-   }
-
-   private void handleArmTrajectoryMessages(RobotSide robotSide)
-   {
-      if (armTrajectoryMessageSubscriber == null || !armTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide))
-         return;
-
-      ArmTrajectoryMessage message = armTrajectoryMessageSubscriber.pollMessage(robotSide);
-      handControlModules.get(robotSide).handleArmTrajectoryMessage(message);
    }
 
    private void handleArmDesiredAccelerationsMessages(RobotSide robotSide)
