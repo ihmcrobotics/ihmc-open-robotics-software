@@ -21,7 +21,7 @@ public class TransformableMatrix3d extends Matrix3d implements TransformableData
    }
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransform transform)
    {
       transform.get(temporaryMatrix);
       this.mul(temporaryMatrix, this);

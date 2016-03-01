@@ -25,7 +25,7 @@ public class TransformableQuat4d extends Quat4d implements TransformableDataObje
    }
 
    @Override
-   public void transform(RigidBodyTransform transform3D)
+   public void applyTransform(RigidBodyTransform transform3D)
    {
       transform3D.get(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);

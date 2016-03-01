@@ -4,5 +4,5 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public interface TransformableDataObject
 {
-   public abstract void transform(RigidBodyTransform transform);
+   public abstract void applyTransform(RigidBodyTransform transform);
 }

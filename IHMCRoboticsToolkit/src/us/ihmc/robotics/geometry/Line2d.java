@@ -651,9 +651,4 @@ public class Line2d implements Geometry2d
       }
    }
 
-   @Override
-   public void transform(RigidBodyTransform transform)
-   {
-      this.applyTransform(transform);
-   }
 }

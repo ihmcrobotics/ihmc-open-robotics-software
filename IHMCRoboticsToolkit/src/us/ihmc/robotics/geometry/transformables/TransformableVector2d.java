@@ -35,7 +35,7 @@ public class TransformableVector2d extends Vector2d implements TransformableData
    }
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransform transform)
    {
       applyTransform(transform, true);
    }

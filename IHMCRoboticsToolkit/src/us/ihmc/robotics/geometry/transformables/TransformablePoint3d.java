@@ -30,7 +30,7 @@ public class TransformablePoint3d extends Point3d implements TransformableDataOb
    }
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransform transform)
    {
       transform.transform(this);
    }

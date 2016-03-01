@@ -707,9 +707,4 @@ public class LineSegment2d implements Geometry2d
       perpendicularBisectorToPack.scale(bisectorLengthDesired);
    }
 
-   @Override
-   public void transform(RigidBodyTransform transform)
-   {
-      this.applyTransform(transform);
-   }
 }

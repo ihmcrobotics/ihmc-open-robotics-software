@@ -30,12 +30,12 @@ public abstract class AbstractFrameObject<T extends TransformableDataObject> ext
 
          if ((referenceTf = referenceFrame.getTransformToRoot()) != null)
          {
-            transformableDataObject.transform(referenceTf);
+            transformableDataObject.applyTransform(referenceTf);
          }
 
          if ((desiredTf = desiredFrame.getInverseTransformToRoot()) != null)
          {
-            transformableDataObject.transform(desiredTf);
+            transformableDataObject.applyTransform(desiredTf);
          }
 
          referenceFrame = desiredFrame;
@@ -47,13 +47,13 @@ public abstract class AbstractFrameObject<T extends TransformableDataObject> ext
    @Override
    public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
    {
-      transformableDataObject.transform(transformToNewFrame);
+      transformableDataObject.applyTransform(transformToNewFrame);
       referenceFrame = desiredFrame;
    }
 
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
-      transformableDataObject.transform(transform);
+      transformableDataObject.applyTransform(transform);
    }
 }

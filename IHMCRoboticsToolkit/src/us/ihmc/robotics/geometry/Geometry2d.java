@@ -39,8 +39,7 @@ public interface Geometry2d extends TransformableDataObject
 
    public double distance(ConvexPolygon2d convexPolygon);
 
-   // Transformations:
-   public void applyTransform(RigidBodyTransform transform);
+   // Extra Transformations for being 2d:
 
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform);
 
