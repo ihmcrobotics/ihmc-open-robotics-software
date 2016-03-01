@@ -6,7 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class FramePose2d extends ReferenceFrameHolder
+public class FramePose2d extends AbstractReferenceFrameHolder implements FrameObject
 {
    private final FramePoint2d position;
    private final FrameOrientation2d orientation;
@@ -143,6 +143,7 @@ public class FramePose2d extends ReferenceFrameHolder
       orientation.interpolate(framePose1.orientation, framePose2.orientation, alpha);
    }
 
+   @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       if (desiredFrame == referenceFrame)
@@ -152,6 +153,23 @@ public class FramePose2d extends ReferenceFrameHolder
       orientation.changeFrame(desiredFrame);
       referenceFrame = desiredFrame;
    }
+   
+   @Override
+   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   {
+      position.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+      orientation.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+      
+      referenceFrame = desiredFrame;
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      position.applyTransform(transform);
+      orientation.applyTransform(transform);
+   }
+   
    
    private final FramePoint2d otherPosition = new FramePoint2d();
    public double getPositionDistance(FramePose2d framePose)

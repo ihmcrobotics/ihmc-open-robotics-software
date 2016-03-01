@@ -5,7 +5,7 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
@@ -14,7 +14,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class YoFrameWaypoint<S extends TransformableGeometryObjectInterface & WaypointInterface<S>, F extends FrameWaypoint<S, F>, Y extends YoFrameWaypoint<S, F, Y>>
-      extends ReferenceFrameHolder implements YoMultipleFramesHolder, TransformableGeometryObjectInterface, WaypointInterface<Y>
+      extends AbstractReferenceFrameHolder implements YoMultipleFramesHolder, TransformableGeometryObjectInterface, WaypointInterface<Y>
 {
    private final String namePrefix;
    private final String nameSuffix;

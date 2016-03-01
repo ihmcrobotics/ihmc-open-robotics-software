@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple2d<T extends FrameTuple2d<?>> extends ReferenceFrameHolder
+public abstract class YoFrameTuple2d<T extends FrameTuple2d<?>> extends AbstractReferenceFrameHolder
 {
    private final DoubleYoVariable x, y; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple2d; // This is only for assistance. The data is stored in the YoVariables, not in here!

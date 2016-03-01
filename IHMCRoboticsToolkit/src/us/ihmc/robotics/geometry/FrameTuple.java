@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -21,18 +22,19 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder implements Serializable
+public abstract class FrameTuple<T extends Tuple3d & TransformableDataObject> extends AbstractFrameObject<T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
    private static final boolean DEBUG = false;
 
-   protected ReferenceFrame referenceFrame;
    protected final T tuple;
    protected String name;
 
    public FrameTuple(ReferenceFrame referenceFrame, T tuple, String name)
    {
+      super(referenceFrame, tuple);
+      
       if (DEBUG)
       {
          if (referenceFrame == null)
@@ -42,8 +44,7 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
          }
       }
 
-      this.referenceFrame = referenceFrame;
-      this.tuple = tuple;
+      this.tuple = transformableDataObject;
       this.name = name;
    }
 
@@ -655,13 +656,13 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
       return referenceFrame;
    }
 
-   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract FrameTuple<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract void applyTransform(RigidBodyTransform transform);
-
-   public abstract void changeFrame(ReferenceFrame desiredFrame);
+//   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract FrameTuple<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract void applyTransform(RigidBodyTransform transform);
+//
+//   public abstract void changeFrame(ReferenceFrame desiredFrame);
 
    public final double[] toArray()
    {
