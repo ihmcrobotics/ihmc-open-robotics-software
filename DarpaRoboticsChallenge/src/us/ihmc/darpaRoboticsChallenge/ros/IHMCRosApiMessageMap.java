@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
@@ -50,7 +50,7 @@ public class IHMCRosApiMessageMap
       AtlasWristSensorCalibrationRequestPacket.class,
       AtlasDesiredPumpPSIPacket.class,
       MultiJointAnglePacket.class,
-      HandComplianceControlParametersPacket.class,
+      HandComplianceControlParametersMessage.class,
       LegCompliancePacket.class,
       WholeBodyTrajectoryMessage.class,
       StopAllTrajectoryMessage.class,
@@ -73,7 +73,7 @@ public class IHMCRosApiMessageMap
       AtlasWristSensorCalibrationRequestPacket.class,
       AtlasDesiredPumpPSIPacket.class,
       MultiJointAnglePacket.class,
-      HandComplianceControlParametersPacket.class,
+      HandComplianceControlParametersMessage.class,
       LegCompliancePacket.class,
       WholeBodyTrajectoryMessage.class,
       StopAllTrajectoryMessage.class
@@ -115,7 +115,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(AtlasWristSensorCalibrationRequestPacket.class, "/control/wrist_sensor_calibration");
       PACKET_TO_TOPIC_MAP.put(AtlasDesiredPumpPSIPacket.class, "/control/desired_pump_psi");
       PACKET_TO_TOPIC_MAP.put(MultiJointAnglePacket.class, "/control/multi_joint_angles");
-      PACKET_TO_TOPIC_MAP.put(HandComplianceControlParametersPacket.class, "/control/hand_compliance_control_parameters");
+      PACKET_TO_TOPIC_MAP.put(HandComplianceControlParametersMessage.class, "/control/hand_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(LegCompliancePacket.class, "/control/leg_compliance_control_parameters");
       PACKET_TO_TOPIC_MAP.put(WholeBodyTrajectoryMessage.class, "/control/whole_body_trajectory");
       PACKET_TO_TOPIC_MAP.put(StopAllTrajectoryMessage.class, "/control/stop_motion");

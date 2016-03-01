@@ -8,11 +8,11 @@ import javax.vecmath.Vector3d;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class HandComplianceControlParametersSubscriber implements PacketConsumer<HandComplianceControlParametersPacket>
+public class HandComplianceControlParametersSubscriber implements PacketConsumer<HandComplianceControlParametersMessage>
 {
    public final SideDependentList<AtomicBoolean> hasNewRequest = new SideDependentList<AtomicBoolean>(new AtomicBoolean(false), new AtomicBoolean(false));
    public final SideDependentList<AtomicBoolean> isResetRequested = new SideDependentList<AtomicBoolean>(new AtomicBoolean(false), new AtomicBoolean(false));
@@ -74,7 +74,7 @@ public class HandComplianceControlParametersSubscriber implements PacketConsumer
    }
 
    @Override
-   public void receivedPacket(HandComplianceControlParametersPacket packet)
+   public void receivedPacket(HandComplianceControlParametersMessage packet)
    {
       if (packet == null || packet.getRobotSide() == null)
          return;

@@ -60,7 +60,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -118,8 +118,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((HighLevelStateChangeMessage) packet);
       else if (packet instanceof MultiJointAnglePacket)
          return convertToRosMessage((MultiJointAnglePacket) packet);
-      else if (packet instanceof HandComplianceControlParametersPacket)
-         return convertToRosMessage((HandComplianceControlParametersPacket) packet);
+      else if (packet instanceof HandComplianceControlParametersMessage)
+         return convertToRosMessage((HandComplianceControlParametersMessage) packet);
       else if (packet instanceof LegCompliancePacket)
          return convertToRosMessage((LegCompliancePacket) packet);
       else if (packet instanceof WholeBodyTrajectoryMessage)
@@ -281,9 +281,9 @@ public class DRCROSMessageConverter
 
    }
 
-   public static HandComplianceControlParametersPacket convertToPacket(HandComplianceControlParametersPacketMessage message)
+   public static HandComplianceControlParametersMessage convertToPacket(HandComplianceControlParametersPacketMessage message)
    {
-      HandComplianceControlParametersPacket ret = new HandComplianceControlParametersPacket();ret.setUniqueId(message.getUniqueId());
+      HandComplianceControlParametersMessage ret = new HandComplianceControlParametersMessage();ret.setUniqueId(message.getUniqueId());
 
       ret.setEnableLinearCompliance(message.getEnableLinearCompliance());
       ret.setEnableAngularCompliance(message.getEnableAngularCompliance());
@@ -305,7 +305,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HandComplianceControlParametersPacketMessage convertToRosMessage(HandComplianceControlParametersPacket packet)
+   public static HandComplianceControlParametersPacketMessage convertToRosMessage(HandComplianceControlParametersMessage packet)
    {
       HandComplianceControlParametersPacketMessage ret = messageFactory.newFromType("ihmc_msgs/HandComplianceControlParametersPacketMessage");
       ret.setUniqueId(packet.getUniqueId());

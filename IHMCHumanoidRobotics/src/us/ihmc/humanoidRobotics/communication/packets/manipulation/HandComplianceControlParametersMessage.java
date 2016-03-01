@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
                                   + "Once activated, an integrator is used on the error in force/torque measured to keep adjusting the desired hand pose until the desired\n"
                                   + "force/torque are achieved or until the maximum correction is reached (set to 5cm for translation and 0.2rad for the orientation).\n"
                                   + "As it uses the measurements from wrist force sensors, a calibration of these is preferred prior to activation of compliance.")
-public class HandComplianceControlParametersPacket extends Packet<HandComplianceControlParametersPacket>
+public class HandComplianceControlParametersMessage extends Packet<HandComplianceControlParametersMessage>
 {
    
    public RobotSide robotSide;
@@ -61,11 +61,11 @@ public class HandComplianceControlParametersPacket extends Packet<HandCompliance
                                      + "We have found that wrenchDeadzones = {10.0, 0.5} does not affect much the position control accuracy of the hand but still gives good compliance.")
    public float[] wrenchDeadzones;
 
-   public HandComplianceControlParametersPacket()
+   public HandComplianceControlParametersMessage()
    {
    }
 
-   public HandComplianceControlParametersPacket(Random random)
+   public HandComplianceControlParametersMessage(Random random)
    {
       robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
       enableLinearCompliance = new boolean[3];
@@ -89,7 +89,7 @@ public class HandComplianceControlParametersPacket extends Packet<HandCompliance
    }
 
    // Send a packet with only robotSide to deactivate the compliant control.
-   public HandComplianceControlParametersPacket(RobotSide robotSide)
+   public HandComplianceControlParametersMessage(RobotSide robotSide)
    {
       this.robotSide = robotSide;
    }
@@ -155,7 +155,7 @@ public class HandComplianceControlParametersPacket extends Packet<HandCompliance
    }
 
    @Override
-   public boolean epsilonEquals(HandComplianceControlParametersPacket other, double epsilon)
+   public boolean epsilonEquals(HandComplianceControlParametersMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)
          return false;
