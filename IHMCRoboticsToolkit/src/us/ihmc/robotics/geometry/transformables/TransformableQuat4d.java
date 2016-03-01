@@ -4,7 +4,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class TransformableQuat4d extends Quat4d implements TransformableDataObject<TransformableQuat4d>
+public class TransformableQuat4d extends Quat4d implements Transformable<TransformableQuat4d>
 {
    private static final long serialVersionUID = -3751421971526302255L;
    private final Quat4d tempQuaternionForTransform = new Quat4d();

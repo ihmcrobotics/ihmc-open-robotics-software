@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
+import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -22,7 +22,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<T extends Tuple3d & TransformableDataObject> extends AbstractFrameObject<T> implements Serializable
+public abstract class FrameTuple<T extends Tuple3d & Transformable> extends AbstractFrameObject<T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 

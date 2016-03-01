@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry.transformables;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class TransformableLine3d implements TransformableDataObject<TransformableLine3d>
+public class TransformableLine3d implements Transformable<TransformableLine3d>
 {
    private final TransformablePoint3d origin = new TransformablePoint3d();
    private final TransformableVector3d direction = new TransformableVector3d();
