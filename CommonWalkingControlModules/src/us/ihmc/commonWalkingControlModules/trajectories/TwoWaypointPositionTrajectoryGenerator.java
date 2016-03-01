@@ -86,12 +86,22 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
 
    private boolean waypointsAreTheSamePoint = false;
-   WalkingControllerParameters walkingControllerParameters;
+   private final double maxSwingHeightFromStanceFoot;
+
+   public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider, PositionProvider initialPositionProvider,
+         VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
+         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
+   {
+      this(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, stancePositionProvider,
+            finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry,
+            walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), visualize);
+   }
 
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
            VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
+           YoGraphicsListRegistry yoGraphicsListRegistry, double maxSwingHeightFromStanceFoot, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       if (REGISTER_YOVARIABLES) 
@@ -126,7 +136,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       positionSources[0] = initialPositionProvider;
       positionSources[1] = finalPositionProvider;
       stancePositionSource = stancePositionProvider;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.maxSwingHeightFromStanceFoot = maxSwingHeightFromStanceFoot;
 
       velocitySources[0] = initialVelocityProvider;
       velocitySources[1] = finalDesiredVelocityProvider;
@@ -485,7 +495,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       if (stancePositionSource != null)
       {
          double stanceHeight = stancePosition.getZ();
-         double maxWorldHeightForSwing = stanceHeight + walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
+         double maxWorldHeightForSwing = stanceHeight + maxSwingHeightFromStanceFoot;
          if (initialHeight + swingHeight > maxWorldHeightForSwing)
          {
             swingHeight = maxWorldHeightForSwing - initialHeight;
