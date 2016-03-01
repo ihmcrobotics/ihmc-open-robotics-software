@@ -650,4 +650,5 @@ public class Line2d implements Geometry2d
          throw new RuntimeException("Tried to create a line from two coincidal points");
       }
    }
+
 }

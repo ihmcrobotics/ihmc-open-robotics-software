@@ -1,19 +1,21 @@
 package us.ihmc.robotics.referenceFrames;
 
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
+import java.io.Serializable;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
-import java.io.Serializable;
-import java.util.Random;
+
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FrameObject;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
 
 /**
  * <p>ReferenceFrame </p>
@@ -610,7 +612,7 @@ public abstract class ReferenceFrame implements Serializable
       return ret;
    }
 
-   public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
+   public void checkReferenceFrameMatch(AbstractReferenceFrameHolder referenceFrameHolder) throws ReferenceFrameMismatchException
    {
       checkReferenceFrameMatch(referenceFrameHolder.getReferenceFrame());
    }

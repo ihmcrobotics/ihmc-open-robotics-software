@@ -7,6 +7,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -17,11 +18,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple<Point3d>
+public class FramePoint extends FrameTuple<TransformablePoint3d>
 {
    private static final long serialVersionUID = -4831948077397801540L;
-   
-   private FramePoint temporaryFramePointForMath;
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, Tuple3d position)
@@ -32,7 +31,7 @@ public class FramePoint extends FrameTuple<Point3d>
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, Tuple3d position, String name)
    {
-      super(referenceFrame, new Point3d(position), name);
+      super(referenceFrame, new TransformablePoint3d(position), name);
    }
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
@@ -44,7 +43,7 @@ public class FramePoint extends FrameTuple<Point3d>
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, double[] position, String name)
    {
-      super(referenceFrame, new Point3d(position), name);
+      super(referenceFrame, new TransformablePoint3d(position), name);
    }
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
@@ -56,25 +55,25 @@ public class FramePoint extends FrameTuple<Point3d>
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new Point3d(), null);
+      super(referenceFrame, new TransformablePoint3d(), null);
    }
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, String name)
    {
-      super(referenceFrame, new Point3d(), name);
+      super(referenceFrame, new TransformablePoint3d(), name);
    }
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(FrameTuple<?> frameTuple)
    {
-      super(frameTuple.referenceFrame, new Point3d(frameTuple.tuple), frameTuple.name);
+      super(frameTuple.referenceFrame, new TransformablePoint3d(frameTuple.tuple), frameTuple.name);
    }
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(FrameTuple2d<?> frameTuple2d)
    {
-      super(frameTuple2d.referenceFrame, new Point3d(), frameTuple2d.name);
+      super(frameTuple2d.referenceFrame, new TransformablePoint3d(), frameTuple2d.name);
       setXY(frameTuple2d);
    }
 
@@ -87,7 +86,7 @@ public class FramePoint extends FrameTuple<Point3d>
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, double x, double y, double z, String name)
    {
-      super(referenceFrame, new Point3d(x, y, z), name);
+      super(referenceFrame, new TransformablePoint3d(x, y, z), name);
    }
 
    public static FramePoint average(List<? extends FramePoint> framePoints)
@@ -109,17 +108,16 @@ public class FramePoint extends FrameTuple<Point3d>
 
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomTools.generateRandomDouble(random, xMaxAbsoluteX), RandomTools
-            .generateRandomDouble(random, yMaxAbsoluteY),
-            RandomTools.generateRandomDouble(random, zMaxAbsoluteZ));
+      FramePoint randomPoint = new FramePoint(frame, RandomTools.generateRandomDouble(random, xMaxAbsoluteX),
+            RandomTools.generateRandomDouble(random, yMaxAbsoluteY), RandomTools.generateRandomDouble(random, zMaxAbsoluteZ));
       return randomPoint;
    }
 
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
          double zMax)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomTools.generateRandomDouble(random, xMin, xMax), RandomTools.generateRandomDouble(random, yMin, yMax), RandomTools
-            .generateRandomDouble(random, zMin, zMax));
+      FramePoint randomPoint = new FramePoint(frame, RandomTools.generateRandomDouble(random, xMin, xMax), RandomTools.generateRandomDouble(random, yMin, yMax),
+            RandomTools.generateRandomDouble(random, zMin, zMax));
       return randomPoint;
    }
 
@@ -171,7 +169,7 @@ public class FramePoint extends FrameTuple<Point3d>
    {
       return new FramePoint2d(this.getReferenceFrame(), this.getX(), this.getY());
    }
-   
+
    /**
     * Makes the pointToPack a FramePoint2d version of this FramePoint
     * 
@@ -181,13 +179,13 @@ public class FramePoint extends FrameTuple<Point3d>
    {
       pointToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }
-   
+
    public void getPoint2d(Point2d pointToPack)
    {
       pointToPack.setX(this.getX());
       pointToPack.setY(this.getY());
    }
-   
+
    /**
     * Makes the tupleToPack a FrameTuple2d version of this FramePoint
     * 
@@ -206,68 +204,6 @@ public class FramePoint extends FrameTuple<Point3d>
    public Point3d getPoint()
    {
       return this.tuple;
-   }
-
-   /**
-    * Changes frame of this FramePoint to the given ReferenceFrame, using the given Transform3D and returns a copy.
-    *
-    * @param desiredFrame        ReferenceFrame to change the FramePoint into.
-    * @param transformToNewFrame Transform3D from the current frame to the new desiredFrame
-    * @return Copied FramePoint in the new reference frame.
-    */
-   public FramePoint changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      FramePoint ret = new FramePoint(this);
-      ret.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
-      return ret;
-   }
-
-   /**
-    * Changes frame of this FramePoint to the given ReferenceFrame.
-    *
-    * @param desiredFrame ReferenceFrame to change the FramePoint into.
-    */
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      if (desiredFrame != referenceFrame)
-      {
-         referenceFrame.verifySameRoots(desiredFrame);
-         RigidBodyTransform referenceTf, desiredTf;
-         
-         if ((referenceTf = referenceFrame.getTransformToRoot()) != null)
-         {
-           referenceTf.transform(tuple);
-         }
-
-         if ((desiredTf = desiredFrame.getInverseTransformToRoot()) != null)
-         {
-            desiredTf.transform(tuple);
-         }
-         
-         referenceFrame = desiredFrame;
-      }
-
-      // otherwise: in the right frame already, so do nothing
-   }
-
-   /**
-    * Changes frame of this FramePoint to the given ReferenceFrame, using the given Transform3D.
-    *
-    * @param desiredFrame        ReferenceFrame to change the FramePoint into.
-    * @param transformToNewFrame Transform3D from the current frame to the new desiredFrame
-    */
-   @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      transformToNewFrame.transform(tuple);
-      referenceFrame = desiredFrame;
-   }
-
-   @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      transform.transform(this.tuple);
    }
 
    public static FramePoint getMidPoint(FramePoint point1, FramePoint point2)
@@ -294,7 +230,7 @@ public class FramePoint extends FrameTuple<Point3d>
       
       double cosAngle = Math.cos(yaw);
       double sinAngle = Math.sin(yaw);
-      
+
       double x = cosAngle * tempX + -sinAngle * tempY;
       tempY = sinAngle * tempX + cosAngle * tempY;
       tempX = x;
@@ -309,7 +245,7 @@ public class FramePoint extends FrameTuple<Point3d>
       double tempX = getX() - pointToPitchAbout.getX();
       double tempY = getY() - pointToPitchAbout.getY();
       double tempZ = getZ() - pointToPitchAbout.getZ();
-      
+
       double cosAngle = Math.cos(pitch);
       double sinAngle = Math.sin(pitch);
 
