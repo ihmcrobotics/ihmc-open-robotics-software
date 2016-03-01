@@ -2563,4 +2563,5 @@ public class ConvexPolygon2d implements Geometry2d
       else
          return (rightEdgeIndex + leftEdgeIndex + 1) / 2;
    }
+
 }

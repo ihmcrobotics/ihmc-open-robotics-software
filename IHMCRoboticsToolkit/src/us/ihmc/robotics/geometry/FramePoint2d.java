@@ -3,10 +3,9 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -22,19 +21,17 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint2d extends FrameTuple2d<Point2d>
+public class FramePoint2d extends FrameTuple2d<TransformablePoint2d>
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-   private final Point3d temporaryTransformedPoint = new Point3d();
-   private final Vector3d temporaryTranslation = new Vector3d();
    private FrameVector2d temporaryPointForYawing;
 
    /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
    public FramePoint2d(ReferenceFrame referenceFrame, double x, double y, String name)
    {
-      super(referenceFrame, new Point2d(x, y), name);
+      super(referenceFrame, new TransformablePoint2d(x, y), name);
    }
 
    /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
@@ -131,50 +128,6 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
       return new FramePoint(this.getReferenceFrame(), this.getX(), this.getY(), 0.0);
    }
 
-//   public static FramePoint2d morph(FramePoint2d point1, FramePoint2d point2, double alpha)
-//   {
-//      FramePoint2d ret = new FramePoint2d();
-//      ret.interpolate(point1, point2, alpha);
-//      return ret;
-//   }
-
-   public void applyTransform(RigidBodyTransform transform, boolean requireTransformInPlane)
-   {
-      temporaryTransformedPoint.set(tuple.x, tuple.y, 0.0);
-      transform.transform(temporaryTransformedPoint);
-
-      if (requireTransformInPlane)
-         checkIsTransformationInPlane(transform, temporaryTransformedPoint);
-
-      this.tuple.set(temporaryTransformedPoint.x, temporaryTransformedPoint.y);
-   }
-
-   @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      applyTransform(transform, true);
-   }
-
-   @Override
-   public FramePoint2d applyTransformCopy(RigidBodyTransform transform3D)
-   {
-      FramePoint2d ret = new FramePoint2d(this);
-      ret.applyTransform(transform3D);
-      return ret;
-   }
-
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // this is in the correct frame already
-      if (desiredFrame == referenceFrame)
-         return;
-
-      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
-      applyTransform(temporaryTransformToDesiredFrame);
-      this.referenceFrame = desiredFrame;
-   }
-
    /**
     * Changes frame of this FramePoint2d to the given ReferenceFrame, projects into xy plane.
     *
@@ -203,27 +156,10 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
       ret.changeFrameAndProjectToXYPlane(desiredFrame);
       return ret;
    }
-
-   /**
-    * Changes frame of this FramePoint2d to the given ReferenceFrame, using the given Transform3D and returns a copy.
-    *
-    * @param desiredFrame ReferenceFrame to change the FramePoint2d into.
-    * @param transformToNewFrame Transform3D from the current frame to the new desiredFrame
-    * @return Copied FramePoint2d in the new reference frame.
-    */
-   @Override
-   public FramePoint2d changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   
+   public void applyTransform(RigidBodyTransform transform, boolean requireTransformInXYPlane)
    {
-      FramePoint2d ret = new FramePoint2d(this);
-      ret.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
-      return ret;
-   }
-
-   @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      applyTransform(transformToNewFrame);
-      referenceFrame = desiredFrame;
+      this.transformableDataObject.applyTransform(transform, requireTransformInXYPlane);
    }
 
    /**
@@ -250,11 +186,5 @@ public class FramePoint2d extends FrameTuple2d<Point2d>
       pointToPack.setIncludingFrame(pointToYawAbout);
       pointToPack.add(temporaryPointForYawing);
    }
-
-   private void checkIsTransformationInPlane(RigidBodyTransform transformToNewFrame, Point3d transformedPoint)
-   {
-      transformToNewFrame.get(temporaryTranslation);
-      if (Math.abs(temporaryTranslation.z - transformedPoint.z) > epsilon)
-         throw new RuntimeException("Cannot transform FramePoint2d to a plane with a different surface normal");
-   }
+   
 }

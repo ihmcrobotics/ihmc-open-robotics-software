@@ -9,56 +9,57 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameOrientation extends ReferenceFrameHolder
+public class FrameOrientation extends AbstractFrameObject<TransformableQuat4d>
 {
-   private ReferenceFrame referenceFrame;
-   private final Quat4d quaternion = new Quat4d();
-   private final Quat4d tempQuaternionForTransform = new Quat4d();
+   private final TransformableQuat4d quaternion;
    private final Matrix3d tempMatrixForYawPitchRollConversion = new Matrix3d();
 
    public FrameOrientation(FrameOrientation orientation)
    {
-      referenceFrame = orientation.referenceFrame;
-      quaternion.set(orientation.quaternion);
+      super(orientation.getReferenceFrame(), new TransformableQuat4d(orientation.quaternion));
+      this.quaternion = this.transformableDataObject;
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame)
    {
+      super(referenceFrame, new TransformableQuat4d());
+      this.quaternion = this.transformableDataObject;
       setToZero(referenceFrame);
    }
 
    public FrameOrientation()
    {
-      setToZero(ReferenceFrame.getWorldFrame());
+      this(ReferenceFrame.getWorldFrame());
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, RigidBodyTransform transform3D)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
       transform3D.get(quaternion);
       normalize();
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, Quat4d quaternion)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
       this.quaternion.set(quaternion);
       this.normalize();
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, Quat4f quaternion)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
       this.quaternion.set(quaternion);
       this.normalize();
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, double qx, double qy, double qz, double qs)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
 
       quaternion.set(qx, qy, qz, qs);
       normalize();
@@ -66,27 +67,27 @@ public class FrameOrientation extends ReferenceFrameHolder
 
    public FrameOrientation(ReferenceFrame referenceFrame, double yaw, double pitch, double roll)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
       setYawPitchRoll(yaw, pitch, roll);
       normalize();
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, double[] yawPitchRoll)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
       setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, Matrix3d rotation)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
       RotationTools.convertMatrixToQuaternion(rotation, quaternion);
       normalize();
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame, AxisAngle4d orientation)
    {
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
       quaternion.set(orientation);
       normalize();
    }
@@ -227,12 +228,6 @@ public class FrameOrientation extends ReferenceFrameHolder
       quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
    }
 
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
-   }
-
    public void getQuaternion(Quat4d quat4d)
    {
       quat4d.set(quaternion);
@@ -324,37 +319,6 @@ public class FrameOrientation extends ReferenceFrameHolder
       frameOrientation2dToPack.setIncludingFrame(referenceFrame, getYaw());
    }
 
-   public void applyTransform(RigidBodyTransform transform3D)
-   {
-      transform3D.get(tempQuaternionForTransform);
-      quaternion.mul(tempQuaternionForTransform, quaternion);
-   }
-
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // this is in the correct frame already
-      if (desiredFrame == referenceFrame)
-      {
-         return;
-      }
-
-      referenceFrame.verifySameRoots(desiredFrame);
-      RigidBodyTransform referenceTf, desiredTf;
-
-      if ((referenceTf = referenceFrame.getTransformToRoot()) != null)
-      {
-         applyTransform(referenceTf);
-      }
-
-      if ((desiredTf = desiredFrame.getInverseTransformToRoot()) != null)
-      {
-         applyTransform(desiredTf);
-      }
-
-      referenceFrame = desiredFrame;
-      normalize();
-   }
-
    public void interpolate(FrameOrientation orientationOne, FrameOrientation orientationTwo, double alpha)
    {
       orientationOne.checkReferenceFrameMatch(orientationTwo);
@@ -416,14 +380,7 @@ public class FrameOrientation extends ReferenceFrameHolder
     */
    public void normalize()
    {
-      if (normSquared() < 1.0e-7)
-         setToZero();
-      else
-      {
-         quaternion.normalize();
-         if (quaternion.getW() < 0.0)
-            negateQuaternion();
-      }
+      quaternion.normalizeAndLimitToPiMinusPi();
    }
 
    public double getQx()

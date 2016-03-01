@@ -16,6 +16,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
@@ -38,7 +39,7 @@ import us.ihmc.tools.thread.RunnableThatThrows;
  * FIXME: don't use scales in test...
  *
  */
-public class FramePointTest extends FrameTupleTest<Point3d>
+public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
 {
    public static double epsilon = 1e-10;
 
@@ -390,10 +391,10 @@ public class FramePointTest extends FrameTupleTest<Point3d>
    {
       FramePoint framePoint = new FramePoint(theFrame);
       Transform3d transform3d = new Transform3d();
-      FramePoint result = new FramePoint();
+      FramePoint result = new FramePoint(framePoint);
       
-    //TODO deprecate method FramePoint.changeFrameUsingTransformCopy() or convert to abstract
-      result = framePoint.changeFrameUsingTransformCopy(childFrame, transform3d);
+      
+      result.changeFrameUsingTransform(childFrame, transform3d);
       result.checkReferenceFrameMatch(childFrame);
       
       result = new FramePoint(framePoint);

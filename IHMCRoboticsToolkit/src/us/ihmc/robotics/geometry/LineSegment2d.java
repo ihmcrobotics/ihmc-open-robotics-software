@@ -706,4 +706,5 @@ public class LineSegment2d implements Geometry2d
       perpendicularBisectorToPack.normalize();
       perpendicularBisectorToPack.scale(bisectorLengthDesired);
    }
+
 }
