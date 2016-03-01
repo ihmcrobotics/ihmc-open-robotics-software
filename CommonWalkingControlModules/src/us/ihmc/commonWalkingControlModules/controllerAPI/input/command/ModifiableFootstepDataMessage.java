@@ -44,6 +44,20 @@ public class ModifiableFootstepDataMessage
       }
    }
 
+   public void set(ModifiableFootstepDataMessage other)
+   {
+      robotSide = other.robotSide;
+      origin = other.origin;
+      trajectoryType = other.trajectoryType;
+      swingHeight = other.swingHeight;
+      position.set(other.position);
+      orientation.set(other.orientation);
+      RecyclingArrayList<Point2d> otherPredictedContactPoints = other.predictedContactPoints;
+      predictedContactPoints.clear();
+      for (int i = 0; i < otherPredictedContactPoints.size(); i++)
+         predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
+   }
+
    public void setRobotSide(RobotSide robotSide)
    {
       this.robotSide = robotSide;

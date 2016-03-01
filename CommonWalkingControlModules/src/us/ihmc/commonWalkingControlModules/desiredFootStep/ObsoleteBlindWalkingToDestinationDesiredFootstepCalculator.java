@@ -74,6 +74,11 @@ public class ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator extends 
    }
 
    @Override
+   public void initialize()
+   {
+   }
+
+   @Override
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();

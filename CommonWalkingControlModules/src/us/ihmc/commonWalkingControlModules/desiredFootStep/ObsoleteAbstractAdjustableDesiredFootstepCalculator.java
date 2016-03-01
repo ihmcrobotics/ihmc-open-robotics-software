@@ -39,11 +39,6 @@ public abstract class ObsoleteAbstractAdjustableDesiredFootstepCalculator implem
    }
 
    @Override
-   public void initialize()
-   {
-   }
-
-   @Override
    public final Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
