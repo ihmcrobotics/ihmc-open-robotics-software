@@ -1,0 +1,268 @@
+package us.ihmc.robotics.geometry.transformables;
+
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+
+public class Pose implements Transformable<Pose>
+{
+   private final TransformablePoint3d position;
+   private final TransformableQuat4d orientation;
+
+   public Pose()
+   {
+      this.position = new TransformablePoint3d();
+      this.orientation = new TransformableQuat4d();
+   }
+   
+   public Pose(Point3d position, Quat4d orientation)
+   {
+      this.position = new TransformablePoint3d(position);
+      this.orientation = new TransformableQuat4d(orientation);
+   }
+   
+   public Pose(TransformablePoint3d position, TransformableQuat4d orientation)
+   {
+      this.position = new TransformablePoint3d(position);
+      this.orientation = new TransformableQuat4d(orientation);
+   }
+
+   public Pose(Pose pose)
+   {
+      this(pose.position, pose.orientation);
+   }
+   
+   public void setX(double x)
+   {
+      position.setX(x);
+   }
+   
+   public void setY(double y)
+   {
+      position.setY(y);
+   }
+   
+   public void setZ(double z)
+   {
+      position.setZ(z);
+   }
+   
+   public double getX()
+   {
+      return position.getX();
+   }
+
+   public double getY()
+   {
+      return position.getY();
+   }
+
+   public double getZ()
+   {
+      return position.getZ();
+   }
+   
+   public void setPosition(double x, double y, double z)
+   {
+      position.set(x, y, z);
+   }
+
+   public void translate(Tuple3d translation)
+   {
+      position.add(translation);
+   }
+
+   public void translate(double x, double y, double z)
+   {
+      position.setX(position.getX() + x);
+      position.setY(position.getY() + y);
+      position.setZ(position.getZ() + z);
+   }
+   
+   //TODO: Remove method in favor of a getPoint(pointToPack) method.
+   public TransformablePoint3d getPoint()
+   {
+      return position;
+   }
+
+   //TODO: Remove method in favor of a getOrientation(orientationToPack) method.
+   public TransformableQuat4d getOrientation()
+   {
+      return orientation;
+   }
+
+   @Override
+   public void set(Pose other)
+   {
+      this.position.set(other.position);
+      this.orientation.set(other.orientation);
+   }
+
+   @Override
+   public void setToZero()
+   {
+      this.position.setToZero();
+      this.orientation.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      this.position.setToNaN();
+      this.orientation.setToNaN();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      if (this.position.containsNaN())
+         return true;
+      if (this.orientation.containsNaN())
+         return true;
+
+      return false;
+   }
+
+   @Override
+   public boolean epsilonEquals(Pose other, double epsilon)
+   {
+      return (this.position.epsilonEquals(other.position, epsilon)) && (this.orientation.epsilonEquals(other.orientation, epsilon));
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      this.position.applyTransform(transform);
+      this.orientation.applyTransform(transform);
+   }
+
+   public void interpolate(Pose pose1, Pose pose2, double alpha)
+   {
+      position.interpolate(pose1.position, pose2.position, alpha);
+      orientation.interpolate(pose1.orientation, pose2.orientation, alpha);
+   }
+
+   public String printOutPosition()
+   {
+      return position.toString();
+   }
+
+   public String printOutOrientation()
+   {
+      return orientation.toString();
+   }
+
+   public void setPose(Tuple3d position, Quat4d orientation)
+   {
+      this.position.set(position);
+      this.orientation.set(orientation);
+   }
+
+   public void setPose(Tuple3d position, AxisAngle4d orientation)
+   {
+      this.position.set(position);
+      this.orientation.set(orientation);
+   }
+
+   public void setPosition(Tuple3d position)
+   {
+      this.position.set(position);
+   }
+
+   public void setXY(Point2d point)
+   {
+      setX(point.getX());
+      setY(point.getY());     
+   }
+   
+   private final Vector3d tempVector = new Vector3d();
+
+   public void getPose(RigidBodyTransform transformToPack)
+   {
+      position.get(tempVector);
+      transformToPack.set(orientation, tempVector);
+   }
+   
+   public void getPosition(Tuple3d tupleToPack)
+   {
+      tupleToPack.set(position); 
+   }
+
+   public void getRigidBodyTransform(RigidBodyTransform transformToPack)
+   {
+      getPose(transformToPack);
+   }
+
+   public void setOrientation(Quat4d quat4d)
+   {
+      this.orientation.set(quat4d);
+   }
+   
+   public void setOrientation(Matrix3d matrix3d)
+   {
+      this.orientation.set(matrix3d);
+   }
+
+   public void setOrientation(AxisAngle4d axisAngle4d)
+   {
+      this.orientation.set(axisAngle4d);
+   }
+
+   public void getOrientation(Matrix3d matrixToPack)
+   {
+      matrixToPack.set(orientation);    
+   }
+
+   public void getOrientation(Quat4d quaternionToPack)
+   {
+      quaternionToPack.set(orientation);
+   }
+   
+   public void getOrientation(AxisAngle4d axisAngleToPack)
+   {
+      axisAngleToPack.set(orientation);
+   }
+
+   public void setYawPitchRoll(double[] yawPitchRoll)
+   {
+      this.orientation.setYawPitchRoll(yawPitchRoll);
+   }
+
+   public void setYawPitchRoll(double yaw, double pitch, double roll)
+   {
+      this.orientation.setYawPitchRoll(yaw, pitch, roll);
+   }
+
+   public void getYawPitchRoll(double[] yawPitchRollToPack)
+   {
+      this.orientation.getYawPitchRoll(yawPitchRollToPack);
+   }
+
+   public double getYaw()
+   {
+      return orientation.getYaw();
+   }
+
+   public double getPitch()
+   {
+      return orientation.getPitch();
+   }
+
+   public double getRoll()
+   {
+      return orientation.getRoll();
+   }
+
+   public boolean epsilonEquals(Pose other, double positionErrorMargin, double orientationErrorMargin)
+   {
+      return (this.position.epsilonEquals(other.position, positionErrorMargin)) && (this.orientation.epsilonEquals(other.orientation, orientationErrorMargin));
+   }
+
+
+}
