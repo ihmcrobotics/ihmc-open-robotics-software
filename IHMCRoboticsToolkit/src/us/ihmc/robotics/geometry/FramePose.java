@@ -197,7 +197,7 @@ public class FramePose extends AbstractFrameObject<Pose>
       this.pose.setOrientation(orientation);
    }
 
-   public void setOrientation(double[] yawPitchRoll)
+   public void setYawPitchRoll(double[] yawPitchRoll)
    {
       this.pose.setYawPitchRoll(yawPitchRoll);
    }
