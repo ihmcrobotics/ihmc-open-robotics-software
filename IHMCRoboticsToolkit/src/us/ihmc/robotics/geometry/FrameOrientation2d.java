@@ -5,7 +5,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Vector3d;
 
-public class FrameOrientation2d extends AbstractReferenceFrameHolder implements FrameObject
+public class FrameOrientation2d extends AbstractReferenceFrameHolder implements FrameObject<FrameOrientation2d>
 {
    private ReferenceFrame referenceFrame;
    private double yaw = 0.0;
@@ -71,6 +71,7 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
       return this.yaw;
    }
 
+   @Override
    public void set(FrameOrientation2d orientation)
    {
       referenceFrame.checkReferenceFrameMatch(orientation.referenceFrame);
@@ -154,6 +155,7 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
       this.yaw = AngleTools.trimAngleMinusPiToPi(this.yaw + deltaYaw);      
    }
 
+   @Override
    public boolean epsilonEquals(FrameOrientation2d orientation, double epsilon)
    {
       checkReferenceFrameMatch(orientation);
@@ -172,6 +174,38 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
    public double sub(FrameOrientation2d orientationToSubtract)
    {
       return AngleTools.trimAngleMinusPiToPi(this.yaw - orientationToSubtract.yaw);
+   }
+
+   @Override
+   public void setToZero()
+   {
+      this.yaw = 0.0;
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      this.yaw = Double.NaN;
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return Double.isNaN(yaw);
+   }
+
+   @Override
+   public void setToZero(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      this.setToZero();
+   }
+
+   @Override
+   public void setToNaN(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      this.setToNaN();
    }
 
 }

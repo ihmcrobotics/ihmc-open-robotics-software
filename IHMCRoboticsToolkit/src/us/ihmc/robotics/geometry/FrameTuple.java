@@ -22,7 +22,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<T extends Tuple3d & Transformable> extends AbstractFrameObject<T> implements Serializable
+public abstract class FrameTuple<T extends Tuple3d & Transformable<T>> extends AbstractFrameObject<T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
@@ -71,6 +71,7 @@ public abstract class FrameTuple<T extends Tuple3d & Transformable> extends Abst
       set(x, y, z);
    }
 
+   @Override
    public final void set(Tuple3d tuple)
    {
       this.tuple.set(tuple);
@@ -213,6 +214,7 @@ public abstract class FrameTuple<T extends Tuple3d & Transformable> extends Abst
       tuple3fToPack.set(tuple);
    }
 
+   @Override
    public final void setToZero()
    {
       tuple.set(0.0, 0.0, 0.0);
@@ -224,6 +226,7 @@ public abstract class FrameTuple<T extends Tuple3d & Transformable> extends Abst
       this.referenceFrame = referenceFrame;
    }
 
+   @Override
    public final void setToNaN()
    {
       this.tuple.set(Double.NaN, Double.NaN, Double.NaN);
@@ -241,6 +244,7 @@ public abstract class FrameTuple<T extends Tuple3d & Transformable> extends Abst
          throw new RuntimeException(getClass().getSimpleName() + " " + this + " has a NaN!");
    }
 
+   @Override
    public final boolean containsNaN()
    {
       return Double.isNaN(tuple.x) || Double.isNaN(tuple.y) || Double.isNaN(tuple.z);
@@ -646,14 +650,6 @@ public abstract class FrameTuple<T extends Tuple3d & Transformable> extends Abst
    {
       return referenceFrame;
    }
-
-//   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-//
-//   public abstract FrameTuple<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-//
-//   public abstract void applyTransform(RigidBodyTransform transform);
-//
-//   public abstract void changeFrame(ReferenceFrame desiredFrame);
 
    public final double[] toArray()
    {

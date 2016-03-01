@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry.transformables;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
 
 public class TransformableQuat4d extends Quat4d implements Transformable<TransformableQuat4d>
 {
@@ -17,6 +18,7 @@ public class TransformableQuat4d extends Quat4d implements Transformable<Transfo
    public TransformableQuat4d()
    {
       super();
+      this.setToZero();
    }
 
    public TransformableQuat4d(double[] quaternion)
@@ -94,6 +96,47 @@ public class TransformableQuat4d extends Quat4d implements Transformable<Transfo
       if (Math.abs(getZ() - other.getZ()) > epsilon) return false;
       
       return true;
+   }
+
+   public void setYawPitchRoll(double[] yawPitchRoll)
+   {
+      RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, this);
+   }
+
+   public void setYawPitchRoll(double yaw, double pitch, double roll)
+   {
+      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, this);    
+   }
+
+   public void getYawPitchRoll(double[] yawPitchRollToPack)
+   {
+      RotationTools.convertQuaternionToYawPitchRoll(this, yawPitchRollToPack);
+   }
+
+   public String toStringAsYawPitchRoll()
+   {
+      double[] yawPitchRoll = new double[3];
+      getYawPitchRoll(yawPitchRoll);
+      return "yaw-pitch-roll: (" + yawPitchRoll[0] + ", " + yawPitchRoll[1] + ", " + yawPitchRoll[2] + ")";
+   }
+
+   private double[] tempYawPitchRoll = new double[3];
+   public double getYaw()
+   {
+      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
+      return tempYawPitchRoll[0];
+   }
+
+   public double getPitch()
+   {
+      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
+      return tempYawPitchRoll[1];
+   }
+
+   public double getRoll()
+   {
+      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
+      return tempYawPitchRoll[2];
    }
 
 }
