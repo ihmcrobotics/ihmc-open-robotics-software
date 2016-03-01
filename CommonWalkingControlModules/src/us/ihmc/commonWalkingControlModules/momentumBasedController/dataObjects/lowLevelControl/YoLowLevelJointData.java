@@ -35,6 +35,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredTorque.set(Double.NaN);
       desiredPosition.set(Double.NaN);
       desiredVelocity.set(Double.NaN);
+      desiredAcceleration.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -179,5 +180,16 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    public boolean peekResetIntegratorsRequest()
    {
       return resetIntegrators.getBooleanValue();
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = "controlMode = " + getControlMode() + "\n";
+      ret += "desiredTorque = " + getDesiredTorque() + "\n";
+      ret += "desiredPosition = " + getDesiredPosition() + "\n";
+      ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
+      ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
+      return ret;
    }
 }
