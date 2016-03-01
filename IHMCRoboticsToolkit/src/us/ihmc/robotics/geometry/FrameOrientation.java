@@ -255,20 +255,7 @@ public class FrameOrientation extends AbstractFrameObject<TransformableQuat4d>
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)
    {
-      tempMatrixForYawPitchRollConversion.set(quaternion);
-      yawPitchRollToPack[0] = Math.atan2(tempMatrixForYawPitchRollConversion.m10, tempMatrixForYawPitchRollConversion.m00);
-
-      if (Math.abs(tempMatrixForYawPitchRollConversion.m20) < 1.0 - 1e-10)
-         yawPitchRollToPack[1] = Math.asin(-tempMatrixForYawPitchRollConversion.m20);
-      else
-         yawPitchRollToPack[1] = -Math.signum(tempMatrixForYawPitchRollConversion.m20) * Math.PI / 2.0;
-
-      yawPitchRollToPack[2] = Math.atan2(tempMatrixForYawPitchRollConversion.m21, tempMatrixForYawPitchRollConversion.m22);
-
-      if (Double.isNaN(yawPitchRollToPack[0]) || Double.isNaN(yawPitchRollToPack[1]) || Double.isNaN(yawPitchRollToPack[2]))
-      {
-         throw new RuntimeException("yaw, pitch, or roll are NaN! rotationMatrix = " + tempMatrixForYawPitchRollConversion);
-      }
+      RotationTools.convertQuaternionToYawPitchRoll(quaternion, yawPitchRollToPack);
    }
 
    public double[] getYawPitchRoll()
