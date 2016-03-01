@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearin
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
@@ -44,7 +43,6 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
          ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
          YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
-      HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber = null;
       ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber = null;
       HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = null;
       ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = null;
@@ -68,11 +66,11 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, armDesiredAccelerationsMessageSubscriber,
-            headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, pelvisOrientationTrajectoryMessageSubscriber,
-            footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
-            pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepProvider, handComplianceControlParametersProvider, automaticManipulationAbortCommunicator,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(armDesiredAccelerationsMessageSubscriber, headTrajectoryMessageSubscriber,
+            chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber,
+            endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber,
+            footstepProvider, handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }

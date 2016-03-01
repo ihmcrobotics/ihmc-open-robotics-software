@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.StatusPacket;
 
-public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
+public class ManipulationAbortedStatus extends StatusPacket<ManipulationAbortedStatus>
 {
    public ManipulationAbortedStatus()
    {

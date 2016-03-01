@@ -20,7 +20,7 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
       }
    }
 
-   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, T>> void set(T trajectory)
+   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> void set(T trajectory)
    {
       clear();
       for (int i = 0; i < trajectory.getNumberOfTrajectoryPoints(); i++)

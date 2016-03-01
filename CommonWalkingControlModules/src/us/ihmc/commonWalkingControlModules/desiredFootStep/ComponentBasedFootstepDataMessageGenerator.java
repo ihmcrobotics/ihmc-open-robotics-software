@@ -7,7 +7,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.status.MessageStatusListener;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingUpdater;
@@ -15,10 +16,9 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndV
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class ComponentBasedFootstepDataMessageGenerator implements MessageStatusListener
+public class ComponentBasedFootstepDataMessageGenerator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final EnumYoVariable<RobotSide> nextSwingLeg = EnumYoVariable.create("nextSwingLeg", RobotSide.class, registry);
@@ -38,14 +38,16 @@ public class ComponentBasedFootstepDataMessageGenerator implements MessageStatus
 
    private final ComponentBasedDesiredFootstepCalculator componentBasedDesiredFootstepCalculator;
    private final ControllerCommandInputManager commandInputManager;
+   private final ControllerStatusOutputManager statusOutputManager;
 
    private final List<Updatable> updatables = new ArrayList<>();
 
-   public ComponentBasedFootstepDataMessageGenerator(ControllerCommandInputManager commandInputManager, WalkingControllerParameters walkingControllerParameters,
+   public ComponentBasedFootstepDataMessageGenerator(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager, WalkingControllerParameters walkingControllerParameters,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT,
          boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
    {
       this.commandInputManager = commandInputManager;
+      this.statusOutputManager = statusOutputManager;
       componentBasedDesiredFootstepCalculator = createComponentBasedDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet,
             controlDT, useHeadingAndVelocityScript);
 
@@ -59,31 +61,50 @@ public class ComponentBasedFootstepDataMessageGenerator implements MessageStatus
          }
       });
 
+      createFootstepStatusListener();
+
       parentRegistry.addChild(registry);
    }
 
-   @Override
-   public void receivedNewMessageStatus(Status status, Class<? extends IHMCRosApiMessage<?>> messageClass, long messageId)
+   public void createFootstepStatusListener()
    {
-      if (messageClass == FootstepDataMessage.class || messageClass == FootstepDataListMessage.class)
+      StatusMessageListener<FootstepStatus> footstepStatusListener = new StatusMessageListener<FootstepStatus>()
       {
-         switch (status)
+         @Override
+         public void receivedNewMessageStatus(FootstepStatus footstepStatus)
          {
-         case ABORTED:
-            walk.set(false);
-            break;
-         case COMPLETED:
-            RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
-            componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
+            switch (footstepStatus.status)
+            {
+            case COMPLETED:
+               RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
+               componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-            ModifiableFootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
-            commandInputManager.submitFootstepDataListMessage(footsteps);
+               ModifiableFootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
+               commandInputManager.submitFootstepDataListMessage(footsteps);
 
-            nextSwingLeg.set(supportLeg);
-         default:
-            break;
+               nextSwingLeg.set(supportLeg);
+            default:
+               break;
+            }
          }
-      }
+      };
+      statusOutputManager.attachStatusMessageListener(FootstepStatus.class, footstepStatusListener);
+
+      StatusMessageListener<WalkingStatusMessage> walkingStatusListener = new StatusMessageListener<WalkingStatusMessage>()
+      {
+         @Override
+         public void receivedNewMessageStatus(WalkingStatusMessage walkingStatusListener)
+         {
+            switch (walkingStatusListener.getWalkingStatus())
+            {
+            case ABORT_REQUESTED:
+               walk.set(false);
+            default:
+               break;
+            }
+         }
+      };
+      statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusListener);
    }
 
    private ModifiableFootstepDataListMessage computeNextFootsteps(RobotSide supportLeg)

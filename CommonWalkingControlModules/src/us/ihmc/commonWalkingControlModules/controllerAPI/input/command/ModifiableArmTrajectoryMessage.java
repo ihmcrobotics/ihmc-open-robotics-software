@@ -61,6 +61,11 @@ public class ModifiableArmTrajectoryMessage
       set(armTrajectoryMessage.getRobotSide(), armTrajectoryMessage.getTrajectoryPointLists());
    }
 
+   public void set(ModifiableArmTrajectoryMessage armTrajectoryMessage)
+   {
+      set(robotSide, armTrajectoryMessage.getTrajectoryPointLists());
+   }
+
    public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, T>> void set(RobotSide robotSide, T[] trajectoryPointListArray)
    {
       clear(robotSide);
@@ -71,7 +76,17 @@ public class ModifiableArmTrajectoryMessage
       }
    }
 
-   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, T>> void set(int jointIndex, T otherTrajectoryPointList)
+   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> void set(RobotSide robotSide, RecyclingArrayList<T> trajectoryPointListArray)
+   {
+      clear(robotSide);
+      for (int i = 0; i < trajectoryPointListArray.size(); i++)
+      {
+         jointTrajectoryInputs.add().set(trajectoryPointListArray.get(i));
+         set(i, trajectoryPointListArray.get(i));
+      }
+   }
+
+   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> void set(int jointIndex, T otherTrajectoryPointList)
    {
       SimpleTrajectoryPoint1DList thisJointTrajectoryPointList = jointTrajectoryInputs.get(jointIndex);
       thisJointTrajectoryPointList.set(otherTrajectoryPointList);

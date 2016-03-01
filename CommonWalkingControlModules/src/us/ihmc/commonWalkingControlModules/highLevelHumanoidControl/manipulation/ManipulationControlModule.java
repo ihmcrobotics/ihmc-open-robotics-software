@@ -19,10 +19,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAcceleratio
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -55,7 +53,6 @@ public class ManipulationControlModule
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
    private final ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber;
    private final EndEffectorLoadBearingMessageSubscriber effectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
@@ -77,7 +74,6 @@ public class ManipulationControlModule
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
-      handTrajectoryMessageSubscriber = variousWalkingProviders.getHandTrajectoryMessageSubscriber();
       armDesiredAccelerationsMessageSubscriber = variousWalkingProviders.getArmDesiredAccelerationsMessageSubscriber();
       effectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
@@ -142,7 +138,6 @@ public class ManipulationControlModule
       if (yoTime.getDoubleValue() - startTimeForIgnoringInputs.getDoubleValue() < durationForIgnoringInputs.getDoubleValue())
       {
          isIgnoringInputs.set(true);
-         handTrajectoryMessageSubscriber.clearMessagesInQueue();
          goHomeMessageSubscriber.clearMessagesInQueue();
       }
       else
@@ -153,8 +148,6 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handleLoadBearing(robotSide);
-         handleHandTrajectoryMessages(robotSide);
-//         handleArmTrajectoryMessages(robotSide);
          handleArmDesiredAccelerationsMessages(robotSide);
          handleStopAllTrajectoryMessages(robotSide);
          handleGoHomeMessages(robotSide);
@@ -183,15 +176,6 @@ public class ManipulationControlModule
             handControlModules.get(robotSide).holdPositionInBase();
          }
       }
-   }
-
-   private void handleHandTrajectoryMessages(RobotSide robotSide)
-   {
-      if (handTrajectoryMessageSubscriber == null || !handTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide))
-         return;
-
-      HandTrajectoryMessage message = handTrajectoryMessageSubscriber.pollMessage(robotSide);
-      handControlModules.get(robotSide).handleHandTrajectoryMessage(message);
    }
 
    private void handleArmDesiredAccelerationsMessages(RobotSide robotSide)

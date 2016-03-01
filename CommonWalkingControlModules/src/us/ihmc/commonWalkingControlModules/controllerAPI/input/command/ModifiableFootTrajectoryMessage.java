@@ -18,6 +18,12 @@ public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMess
       robotSide = trajectoryMessage.getRobotSide();
    }
 
+   public void set(ModifiableFootTrajectoryMessage footTrajectoryMessage)
+   {
+      super.set(footTrajectoryMessage);
+      robotSide = footTrajectoryMessage.robotSide;
+   }
+
    public void setRobotSide(RobotSide robotSide)
    {
       this.robotSide = robotSide;

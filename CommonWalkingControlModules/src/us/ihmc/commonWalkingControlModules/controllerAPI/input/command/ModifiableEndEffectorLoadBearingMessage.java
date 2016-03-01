@@ -46,4 +46,37 @@ public class ModifiableEndEffectorLoadBearingMessage
          otherEndEffectorRequestMap.put(endEffector, request);
       }
    }
+
+   public void set(ModifiableEndEffectorLoadBearingMessage other)
+   {
+      for (EndEffector endEffector : EndEffector.values)
+      {
+         if (endEffector.isRobotSideNeeded())
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               sideDependentEndEffectorRequestMap.get(robotSide).put(endEffector, other.getRequest(robotSide, endEffector));
+            }
+         }
+         else
+         {
+            otherEndEffectorRequestMap.put(endEffector, other.getRequest(endEffector));
+         }
+      }
+   }
+
+   private LoadBearingRequest getRequest(EndEffector endEffector)
+   {
+      if (endEffector.isRobotSideNeeded())
+         throw new RuntimeException("Need to provide robotSide for the endEffector: " + endEffector);
+      return otherEndEffectorRequestMap.get(endEffector);
+   }
+
+   public LoadBearingRequest getRequest(RobotSide robotSide, EndEffector endEffector)
+   {
+      if (endEffector.isRobotSideNeeded())
+         return sideDependentEndEffectorRequestMap.get(robotSide).get(endEffector);
+      else
+         return getRequest(endEffector);
+   }
 }
