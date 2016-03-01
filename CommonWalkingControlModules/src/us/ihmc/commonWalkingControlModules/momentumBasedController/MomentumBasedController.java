@@ -118,10 +118,6 @@ public class MomentumBasedController
    // private final YoFrameVector groundReactionTorqueCheck;
    // private final YoFrameVector groundReactionForceCheck;
 
-   private final ArrayList<OneDoFJoint> jointsWithDesiredAcceleration = new ArrayList<>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredTorqueYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-
    private final ContactPointVisualizer contactPointVisualizer;
 
    private final GeometricJacobianHolder robotJacobianHolder;
@@ -255,16 +251,6 @@ public class MomentumBasedController
       walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
 
       controlledJoints = momentumOptimizationSettings.getJointsToOptimizeFor();
-
-      for (InverseDynamicsJoint joint : controlledJoints)
-      {
-         if (joint instanceof OneDoFJoint)
-         {
-            jointsWithDesiredAcceleration.add((OneDoFJoint) joint);
-            desiredAccelerationYoVariables.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
-            desiredTorqueYoVariables.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "tau_d", registry));
-         }
-      }
 
       contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry, registry);
 
