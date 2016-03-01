@@ -1,11 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
+
+import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * <p>Title: </p>
@@ -19,35 +20,35 @@ import javax.vecmath.Vector2d;
  * @author Twan Koolen
  * @version 1.0
  */
-public class LineSegment2d implements Geometry2d
+public class LineSegment2d implements Geometry2d<LineSegment2d>
 {
-   protected Point2d[] endpoints = new Point2d[2];
+   protected TransformablePoint2d[] endpoints = new TransformablePoint2d[2];
 
    public LineSegment2d()
    {
-      endpoints[0] = new Point2d(Double.MIN_VALUE, Double.MIN_VALUE);
-      endpoints[1] = new Point2d(Double.MAX_VALUE, Double.MAX_VALUE);
+      endpoints[0] = new TransformablePoint2d(Double.MIN_VALUE, Double.MIN_VALUE);
+      endpoints[1] = new TransformablePoint2d(Double.MAX_VALUE, Double.MAX_VALUE);
    }
 
    public LineSegment2d(double x0, double y0, double x1, double y1)
    {
-      endpoints[0] = new Point2d(x0, y0);
-      endpoints[1] = new Point2d(x1, y1);
+      endpoints[0] = new TransformablePoint2d(x0, y0);
+      endpoints[1] = new TransformablePoint2d(x1, y1);
       checkEndpointsDistinct(endpoints);
    }
 
    public LineSegment2d(Point2d[] endpoints)
    {
       checkEndpointsDistinct(endpoints);
-      this.endpoints[0] = new Point2d(endpoints[0]);
-      this.endpoints[1] = new Point2d(endpoints[1]);
+      this.endpoints[0] = new TransformablePoint2d(endpoints[0]);
+      this.endpoints[1] = new TransformablePoint2d(endpoints[1]);
    }
 
    public LineSegment2d(Point2d endpoint1, Point2d endpoint2)
    {
       checkEndpointsDistinct(new Point2d[] {endpoint1, endpoint2});
-      endpoints[0] = new Point2d(endpoint1);
-      endpoints[1] = new Point2d(endpoint2);
+      endpoints[0] = new TransformablePoint2d(endpoint1);
+      endpoints[1] = new TransformablePoint2d(endpoint2);
    }
 
    public LineSegment2d(LineSegment2d lineSegment2d)
@@ -55,9 +56,9 @@ public class LineSegment2d implements Geometry2d
       endpoints = lineSegment2d.getEndpointsCopy();
    }
 
-   public Point2d[] getEndpointsCopy()
+   public TransformablePoint2d[] getEndpointsCopy()
    {
-      return new Point2d[] {new Point2d(endpoints[0]), new Point2d(endpoints[1])};
+      return new TransformablePoint2d[] {new TransformablePoint2d(endpoints[0]), new TransformablePoint2d(endpoints[1])};
    }
 
    public void getEndpoints(Point2d endpoint0, Point2d endpoint1)
@@ -708,8 +709,35 @@ public class LineSegment2d implements Geometry2d
    }
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void setToZero()
    {
-      this.applyTransform(transform);
+      endpoints[0].setToZero();
+      endpoints[1].setToZero();
    }
+
+   @Override
+   public void setToNaN()
+   {
+      endpoints[0].setToNaN();
+      endpoints[1].setToNaN();      
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      if (endpoints[0].containsNaN()) return true;
+      if (endpoints[1].containsNaN()) return true;
+      
+      return false;
+   }
+
+   @Override
+   public boolean epsilonEquals(LineSegment2d other, double epsilon)
+   {
+      if (endpoints[0].epsilonEquals(other.endpoints[0], epsilon) && endpoints[1].epsilonEquals(other.endpoints[1], epsilon)) return true;
+      if (endpoints[0].epsilonEquals(other.endpoints[1], epsilon) && endpoints[1].epsilonEquals(other.endpoints[0], epsilon)) return true;
+
+      return false;
+   }
+
 }

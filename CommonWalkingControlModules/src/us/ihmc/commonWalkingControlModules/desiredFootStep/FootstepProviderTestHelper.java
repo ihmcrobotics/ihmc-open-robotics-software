@@ -155,7 +155,7 @@ public class FootstepProviderTestHelper
    {
       FramePose footstepPose = new FramePose();
       footstepPose.setPosition(position);
-      footstepPose.setOrientation(orientationYawPitchRoll);
+      footstepPose.setYawPitchRoll(orientationYawPitchRoll);
 
       return createFootstep(robotSide, footstepPose);
    }

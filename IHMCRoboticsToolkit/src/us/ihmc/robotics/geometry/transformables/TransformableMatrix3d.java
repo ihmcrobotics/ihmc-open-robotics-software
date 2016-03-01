@@ -4,7 +4,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class TransformableMatrix3d extends Matrix3d implements TransformableDataObject
+public class TransformableMatrix3d extends Matrix3d implements Transformable<TransformableMatrix3d>
 {
    private static final long serialVersionUID = -4556753983259636892L;
 
@@ -21,10 +21,58 @@ public class TransformableMatrix3d extends Matrix3d implements TransformableData
    }
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransform transform)
    {
       transform.get(temporaryMatrix);
       this.mul(temporaryMatrix, this);
       this.mulTransposeRight(this, temporaryMatrix);
    }
+
+   @Override
+   public void setToZero()
+   {
+      this.setZero();
+   }
+
+   @Override
+   public void set(TransformableMatrix3d other)
+   {
+      super.set(other);
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      super.setIdentity();
+      super.mul(Double.NaN);
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      for (int i = 0; i<3; i++)
+      {
+         for (int j = 0; j<3; j++)
+         {
+            if (Double.isNaN(getElement(i,  j))) return true;
+         }
+      }
+
+      return false;
+   }
+
+   @Override
+   public boolean epsilonEquals(TransformableMatrix3d other, double epsilon)
+   {      
+      for (int i = 0; i<3; i++)
+      {
+         for (int j = 0; j<3; j++)
+         {
+            if (Math.abs(this.getElement(i, j) - other.getElement(i,  j)) > epsilon) return false;
+         }
+      }
+
+      return true;
+   }
+
 }

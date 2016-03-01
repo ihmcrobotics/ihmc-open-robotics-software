@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
+import us.ihmc.robotics.geometry.transformables.Transformable;
 
 /**
  * <p>Title: </p>
@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
  * @author Twan Koolen
  * @version 1.0
  */
-public interface Geometry2d extends TransformableDataObject
+public interface Geometry2d<T> extends Transformable<T>
 {
    // Orthogonal projection:
    public void orthogonalProjection(Point2d tuple);
@@ -39,8 +39,7 @@ public interface Geometry2d extends TransformableDataObject
 
    public double distance(ConvexPolygon2d convexPolygon);
 
-   // Transformations:
-   public void applyTransform(RigidBodyTransform transform);
+   // Extra Transformations for being 2d:
 
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform);
 

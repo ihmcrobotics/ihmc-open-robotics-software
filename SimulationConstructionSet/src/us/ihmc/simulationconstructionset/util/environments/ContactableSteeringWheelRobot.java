@@ -66,7 +66,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    {
       FramePose steeringWheelPoseInWorld = new FramePose(worldFrame);
       steeringWheelPoseInWorld.setPosition(x, y, z);
-      steeringWheelPoseInWorld.setOrientation(yaw, pitch, 0.0);
+      steeringWheelPoseInWorld.setYawPitchRoll(yaw, pitch, 0.0);
       double steeringWheelRadius = 0.175;
       double steerigColunmLength = 0.20;
       double steeringWheelThickness = 0.03;

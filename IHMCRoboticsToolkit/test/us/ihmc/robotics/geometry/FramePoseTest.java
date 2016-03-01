@@ -119,7 +119,7 @@ public class FramePoseTest
          double handCalculatedDistance = positionDistance + rotationDistance * radiusForRotation;
          assertEquals(combinedDistance, distanceFromTansformTools, 1e-9);
          
-         assertEquals(combinedDistance, handCalculatedDistance, 1e-9);
+         assertEquals(combinedDistance, handCalculatedDistance, 1e-7);
          
          ReferenceFrame framePose1Frame ;
          {
@@ -136,8 +136,8 @@ public class FramePoseTest
          transform.getRotation(axisAngle);
          double rotation = Math.abs(axisAngle.getAngle());
 
-         assertEquals(rotation, rotationDistance, 1e-9);
-         assertEquals(positionDistance, framePose2.getFramePointCopy().getPoint().distance(new Point3d()), 1e-9);
+         assertEquals(rotation, rotationDistance, 1e-7);
+         assertEquals(positionDistance, framePose2.getFramePointCopy().getPoint().distance(new Point3d()), 1e-7);
       }
 
    }
@@ -451,7 +451,7 @@ public class FramePoseTest
 
       FramePose initialPose = new FramePose();
       initialPose.setPosition(RandomTools.generateRandomVector(random));
-      initialPose.setOrientation(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+      initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
       FramePose rotatedPose = new FramePose();
 
@@ -493,7 +493,7 @@ public class FramePoseTest
 
       FramePose initialPose = new FramePose();
       initialPose.setPosition(RandomTools.generateRandomVector(random));
-      initialPose.setOrientation(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+      initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
       FramePose rotatedPose = new FramePose();
 
@@ -548,7 +548,7 @@ public class FramePoseTest
          String rotationAngleMsg = "\n  Tested rotation angle = " + Math.toDegrees(rotationAngle) + " degrees \n";
 
          initialPose.setPosition(RandomTools.generateRandomVector(random));
-         initialPose.setOrientation(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+         initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
          rotatedPose.setPose(initialPose);
          rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
@@ -590,7 +590,7 @@ public class FramePoseTest
          String rotationAngleMsg = "\n Tested rotation angle = " + Math.toDegrees(rotationAngle) + " degrees \n";
 
          initialPose.setPosition(RandomTools.generateRandomVector(random));
-         initialPose.setOrientation(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+         initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
          rotatedPose.setPose(initialPose);
          rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
