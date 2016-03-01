@@ -1,38 +1,42 @@
 package us.ihmc.robotics.geometry;
 
+import javax.vecmath.Matrix3d;
+
 import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.geometry.transformables.TransformableMatrix3d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on matrices occur within the same Frame.
  * This method checks for one matrix argument.
  *
  */
-public class FrameMatrix3D extends ReferenceFrameHolder
+public class FrameMatrix3D extends AbstractFrameObject<TransformableMatrix3d>
 {
-   private ReferenceFrame referenceFrame;
-   private final Matrix3d matrix = new Matrix3d();
+   private final Matrix3d matrix;
 
    public FrameMatrix3D()
    {
-      referenceFrame = ReferenceFrame.getWorldFrame();
+      this(ReferenceFrame.getWorldFrame());
    }
 
    public FrameMatrix3D(ReferenceFrame referenceFrame)
    {
-      this.referenceFrame = referenceFrame;
+      super(referenceFrame, new TransformableMatrix3d());
+      this.matrix = this.transformableDataObject;
    }
 
    public FrameMatrix3D(FrameMatrix3D frameMatrix3D)
    {
+      this();
       setIncludingFrame(frameMatrix3D);
    }
 
    public FrameMatrix3D(ReferenceFrame referenceFrame, Matrix3d matrix)
    {
+      this();
       setIncludingFrame(referenceFrame, matrix);
    }
 
@@ -206,36 +210,6 @@ public class FrameMatrix3D extends ReferenceFrameHolder
       matrix.transform(frameTupleToPack.tuple);
    }
 
-   private final Matrix3d temporaryMatrix = new Matrix3d();
-
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // this is in the correct frame already
-      if (desiredFrame == referenceFrame)
-      {
-         return;
-      }
-
-      referenceFrame.verifySameRoots(desiredFrame);
-      RigidBodyTransform referenceTf, desiredTf;
-
-      if ((referenceTf = referenceFrame.getTransformToRoot()) != null)
-      {
-         referenceTf.get(temporaryMatrix);
-         matrix.mul(temporaryMatrix, matrix);
-         matrix.mulTransposeRight(matrix, temporaryMatrix);
-      }
-
-      if ((desiredTf = desiredFrame.getInverseTransformToRoot()) != null)
-      {
-         desiredTf.get(temporaryMatrix);
-         matrix.mul(temporaryMatrix, matrix);
-         matrix.mulTransposeRight(matrix, temporaryMatrix);
-      }
-
-      referenceFrame = desiredFrame;
-   }
-
    public boolean containsNaN()
    {
       if (Double.isNaN(matrix.getElement(0, 0))) return true;
@@ -248,12 +222,6 @@ public class FrameMatrix3D extends ReferenceFrameHolder
       if (Double.isNaN(matrix.getElement(2, 1))) return true;
       if (Double.isNaN(matrix.getElement(2, 2))) return true;
       return false;
-   }
-
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
    }
 
    @Override
