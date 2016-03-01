@@ -169,4 +169,15 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    {
       return resetIntegrators.get();
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = "controlMode = " + getControlMode() + "\n";
+      ret += "desiredTorque = " + getDesiredTorque() + "\n";
+      ret += "desiredPosition = " + getDesiredPosition() + "\n";
+      ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
+      ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
+      return ret;
+   }
 }
