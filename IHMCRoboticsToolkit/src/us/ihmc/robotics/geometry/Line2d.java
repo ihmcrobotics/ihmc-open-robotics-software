@@ -1,11 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.robotSide.RobotSide;
-
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
+import us.ihmc.robotics.geometry.transformables.TransformableVector2d;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * <p>Title: </p>
@@ -19,13 +21,13 @@ import javax.vecmath.Vector3d;
  * @author Twan Koolen
  * @version 1.0
  */
-public class Line2d implements Geometry2d
+public class Line2d implements Geometry2d<Line2d>
 {
    // TODO: think about usage of epsilons in the methods.
 
 
-   protected final Point2d point = new Point2d();
-   protected final Vector2d normalizedVector = new Vector2d();
+   protected final TransformablePoint2d point = new TransformablePoint2d();
+   protected final TransformableVector2d normalizedVector = new TransformableVector2d();
    private final static double doubleMinNormal;    // Double.MIN_NORMAL is not available in JRE 1.5
 
    private final Point2d tempPoint2d = new Point2d();
@@ -253,6 +255,7 @@ public class Line2d implements Geometry2d
       this.set(endpoints[0], endpoints[1]);
    }
 
+   @Override
    public void set(Line2d line2d)
    {
       point.set(line2d.point);
@@ -551,6 +554,7 @@ public class Line2d implements Geometry2d
       this.point.set(point);
    }
 
+   @Override
    public boolean containsNaN()
    {
       if (Double.isNaN(point.x))
@@ -649,6 +653,29 @@ public class Line2d implements Geometry2d
       {
          throw new RuntimeException("Tried to create a line from two coincidal points");
       }
+   }
+
+   @Override
+   public void setToZero()
+   {
+      this.point.setToZero();
+      this.normalizedVector.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      this.point.setToNaN();
+      this.normalizedVector.setToNaN();
+   }
+
+   @Override
+   public boolean epsilonEquals(Line2d other, double epsilon)
+   {
+      if (!this.point.epsilonEquals(other.point, epsilon)) return false;
+      if (!this.normalizedVector.epsilonEquals(other.normalizedVector, epsilon)) return false;
+      
+      return true;
    }
 
 }
