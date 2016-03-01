@@ -204,29 +204,29 @@ public class FrameOrientation extends AbstractFrameObject<TransformableQuat4d>
       normalize();
    }
 
-   // TODO Find a better. I chose setToZero() as in FrameTuple.
-   public void setToZero(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      setToZero();
-   }
+//   // TODO Find a better. I chose setToZero() as in FrameTuple.
+//   public void setToZero(ReferenceFrame referenceFrame)
+//   {
+//      this.referenceFrame = referenceFrame;
+//      setToZero();
+//   }
 
-   // TODO Find a better. I chose setToZero() as in FrameTuple.
-   public void setToZero()
-   {
-      quaternion.set(0.0, 0.0, 0.0, 1.0);
-   }
+//   // TODO Find a better. I chose setToZero() as in FrameTuple.
+//   public void setToZero()
+//   {
+//      quaternion.set(0.0, 0.0, 0.0, 1.0);
+//   }
 
-   public void setToNaN(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      setToNaN();
-   }
+//   public void setToNaN(ReferenceFrame referenceFrame)
+//   {
+//      this.referenceFrame = referenceFrame;
+//      setToNaN();
+//   }
 
-   public void setToNaN()
-   {
-      quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   }
+//   public void setToNaN()
+//   {
+//      quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+//   }
 
    public void getQuaternion(Quat4d quat4d)
    {
