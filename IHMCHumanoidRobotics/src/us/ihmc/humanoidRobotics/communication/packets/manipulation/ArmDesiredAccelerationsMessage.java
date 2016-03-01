@@ -67,7 +67,10 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
 
    public int getNumberOfJoints()
    {
-      return armDesiredJointAccelerations.length;
+      if (armDesiredJointAccelerations == null)
+         return 0;
+      else
+         return armDesiredJointAccelerations.length;
    }
 
    public RobotSide getRobotSide()

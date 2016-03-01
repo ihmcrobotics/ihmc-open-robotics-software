@@ -13,6 +13,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
@@ -27,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
@@ -479,7 +479,7 @@ public class HandControlModule
       executeJointspaceTrajectory(jointTrajectoryGenerators);
    }
 
-   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   public void handleArmDesiredAccelerationsMessage(ModifiableArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
    {
       if (!checkArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage))
          return;
@@ -530,11 +530,11 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   private boolean checkArmDesiredAccelerationsMessage(ModifiableArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
    {
       if (armDesiredAccelerationsMessage.getRobotSide() != robotSide)
       {
-         PrintTools.warn(this, "Received a " + ArmDesiredAccelerationsMessage.class.getSimpleName() + " for the wrong side.");
+         PrintTools.warn(this, "Received a " + armDesiredAccelerationsMessage.getClass().getSimpleName() + " for the wrong side.");
          return false;
       }
 

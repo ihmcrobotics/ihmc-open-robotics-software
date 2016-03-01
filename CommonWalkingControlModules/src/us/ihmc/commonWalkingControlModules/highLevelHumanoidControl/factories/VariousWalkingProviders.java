@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -19,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessage
 
 public class VariousWalkingProviders
 {
-   private final ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber;
    private final HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber;
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
@@ -42,18 +40,16 @@ public class VariousWalkingProviders
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
-   public VariousWalkingProviders(ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
-         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber, PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
-         PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber,
+   public VariousWalkingProviders(HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber, ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber,
+         PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber, PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber,
          FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber,
-         EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
-         PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber, GoHomeMessageSubscriber goHomeMessageSubscriber,
-         FootstepProvider footstepProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
-         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
-         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
-         AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
+         EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
+         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
+         GoHomeMessageSubscriber goHomeMessageSubscriber, FootstepProvider footstepProvider,
+         HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber, AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
+         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
+         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
-      this.armDesiredAccelerationsMessageSubscriber = armDesiredAccelerationsMessageSubscriber;
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       this.chestTrajectoryMessageSubscriber = chestTrajectoryMessageSubscriber;
       this.pelvisTrajectoryMessageSubscriber = pelvisTrajectoryMessageSubscriber;
@@ -84,8 +80,6 @@ public class VariousWalkingProviders
 
    public void clearPoseProviders()
    {
-      if (armDesiredAccelerationsMessageSubscriber != null)
-         armDesiredAccelerationsMessageSubscriber.clearMessagesInQueue();
       if (headTrajectoryMessageSubscriber != null)
          headTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (chestTrajectoryMessageSubscriber != null)
@@ -104,11 +98,6 @@ public class VariousWalkingProviders
          pelvisHeightTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (goHomeMessageSubscriber != null)
          goHomeMessageSubscriber.clearMessagesInQueue();
-   }
-
-   public ArmDesiredAccelerationsMessageSubscriber getArmDesiredAccelerationsMessageSubscriber()
-   {
-      return armDesiredAccelerationsMessageSubscriber;
    }
 
    public HeadTrajectoryMessageSubscriber getHeadTrajectoryMessageSubscriber()
