@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class TransformableVector2d extends Vector2d implements TransformableDataObject<TransformableVector2d>
+public class TransformableVector2d extends Vector2d implements Transformable<TransformableVector2d>
 {
    private static final long serialVersionUID = -7311591841945085693L;
 

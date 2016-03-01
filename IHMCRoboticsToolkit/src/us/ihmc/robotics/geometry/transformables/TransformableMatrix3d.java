@@ -4,7 +4,7 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class TransformableMatrix3d extends Matrix3d implements TransformableDataObject<TransformableMatrix3d>
+public class TransformableMatrix3d extends Matrix3d implements Transformable<TransformableMatrix3d>
 {
    private static final long serialVersionUID = -4556753983259636892L;
 

@@ -5,7 +5,7 @@ import javax.vecmath.Tuple3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class TransformablePoint3d extends Point3d implements TransformableDataObject<TransformablePoint3d>
+public class TransformablePoint3d extends Point3d implements Transformable<TransformablePoint3d>
 {
    private static final long serialVersionUID = 3215925974643446454L;
 

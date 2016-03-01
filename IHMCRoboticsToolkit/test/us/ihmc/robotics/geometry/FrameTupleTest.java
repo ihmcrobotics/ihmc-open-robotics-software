@@ -18,7 +18,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
+import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,7 +28,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 //import us.ihmc.robotics.MathTools;
 //import MatrixTools;
 
-public abstract class FrameTupleTest<T extends Tuple3d & TransformableDataObject>
+public abstract class FrameTupleTest<T extends Tuple3d & Transformable>
 {
    private static final boolean VERBOSE = false;
 
