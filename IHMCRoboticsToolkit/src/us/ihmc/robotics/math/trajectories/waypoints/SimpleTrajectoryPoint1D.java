@@ -45,7 +45,7 @@ public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<SimpleWaypoin
    @Override
    public double getVelocity()
    {
-      return waypointData.getPosition();
+      return waypointData.getVelocity();
    }
 
    @Override

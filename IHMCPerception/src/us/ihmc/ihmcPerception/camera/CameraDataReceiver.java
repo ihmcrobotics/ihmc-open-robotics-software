@@ -7,7 +7,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -21,9 +20,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
-import us.ihmc.tools.io.printing.PrintTools;
 
-public abstract class CameraDataReceiver extends Thread
+public class CameraDataReceiver extends Thread
 {
    private static final boolean DEBUG = false;
    private final VideoDataServer compressedVideoDataServer;

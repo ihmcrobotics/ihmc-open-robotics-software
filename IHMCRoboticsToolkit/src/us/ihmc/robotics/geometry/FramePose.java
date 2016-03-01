@@ -13,7 +13,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FramePose extends ReferenceFrameHolder
+public class FramePose extends AbstractReferenceFrameHolder implements FrameObject
 {
    private final FramePoint position;
    private final FrameOrientation orientation;
@@ -418,6 +418,7 @@ public class FramePose extends ReferenceFrameHolder
       orientation.interpolate(framePose1.orientation, framePose2.orientation, alpha);
    }
 
+   @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       // this is in the correct frame already
@@ -429,6 +430,22 @@ public class FramePose extends ReferenceFrameHolder
       position.changeFrame(desiredFrame);
       orientation.changeFrame(desiredFrame);
       referenceFrame = desiredFrame;
+   }
+   
+   @Override
+   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   {
+      position.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+      orientation.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+      
+      referenceFrame = desiredFrame;
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      position.applyTransform(transform);
+      orientation.applyTransform(transform);
    }
 
    public boolean epsilonEquals(FramePose framePose, double epsilon)
@@ -602,6 +619,5 @@ public class FramePose extends ReferenceFrameHolder
       orientation.getYawPitchRoll(yawPitchRoll);
       return "Position: " + position.toString() + "\n" + orientation.toStringAsYawPitchRoll();
    }
-
 
 }

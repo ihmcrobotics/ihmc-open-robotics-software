@@ -12,6 +12,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.dataProviders.DesiredVelocityProvider;
+import us.ihmc.quadrupedRobotics.dataProviders.DesiredYawInPlaceProvider;
 import us.ihmc.quadrupedRobotics.dataProviders.DesiredYawRateProvider;
 import us.ihmc.quadrupedRobotics.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.footstepChooser.SwingTargetGenerator;
@@ -41,7 +42,6 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
@@ -331,7 +331,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private DesiredVelocityProvider desiredVelocityProvider;
    private DesiredYawRateProvider desiredYawRateProvider;
-   
+   private DesiredYawInPlaceProvider desiredYawInPlaceProvider;
+
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
          QuadrupedStateEstimator stateEstimator, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
@@ -397,6 +398,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       this.stateEstimator = stateEstimator;
       desiredVelocityProvider = new DesiredVelocityProvider(dataProducer, "userProvided", registry);
       desiredYawRateProvider = new DesiredYawRateProvider(dataProducer, "userProvided", registry);
+      desiredYawInPlaceProvider = new DesiredYawInPlaceProvider(dataProducer, "userProvided", registry);
 
       desiredVelocity = new YoFrameVector("desiredVelocity", feedForwardBodyFrame, registry);
       lastDesiredVelocity = new YoFrameVector("lastDesiredVelocity", feedForwardBodyFrame, registry); 
@@ -553,6 +555,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       filterDesiredsToMatchCrawlControllerOnTransitionIn.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, filterToQuadrupleCondition));
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
+
+      BooleanYoVariable applyJoystickInput = new BooleanYoVariable("applyJoystickInput", registry);
+      applyJoystickInput.set(true);
+
       parentRegistry.addChild(registry);
    }
 
@@ -849,6 +855,20 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
             lastProvidedDesiredYawRate = providedDesiredYawRate;
          }
       }
+      
+      if(desiredYawInPlaceProvider != null)
+      {
+         double providedDesiredYawInPlace = desiredYawInPlaceProvider.getValue();
+         providedDesiredYawInPlace = MathTools.clipToMinMax(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
+         if (isDesiredVelocityAndYawRateZero())
+         {
+            desiredYawInPlace.set(providedDesiredYawInPlace);
+         } 
+         else
+         {
+            desiredYawInPlaceProvider.setToZero();
+         }
+      }
    }
    
    private final Point3d centerOfMassOffset = new Point3d();
@@ -1124,6 +1144,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       double yawRate = desiredYawRate.getDoubleValue();
       swingTargetGenerator.getSwingTarget(swingLeg, feedForwardReferenceFrames.getLegAttachmentFrame(swingLeg), expectedAverageVelocity, swingDuration.getDoubleValue(), framePointToPack, yawRate);
+      framePointToPack.setZ(0.0);
    }
    
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
