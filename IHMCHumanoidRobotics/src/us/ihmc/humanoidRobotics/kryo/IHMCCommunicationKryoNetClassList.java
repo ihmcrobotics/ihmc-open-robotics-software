@@ -74,7 +74,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.CalibrateArmP
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListPacket;
@@ -213,7 +213,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Vector3d.class);
       registerPacketClass(DesiredSteeringAnglePacket.class);
 
-      registerPacketClass(HandComplianceControlParametersPacket.class);
+      registerPacketClass(HandComplianceControlParametersMessage.class);
       registerPacketField(Vector3f.class);
       registerPacketField(boolean[].class);
 
