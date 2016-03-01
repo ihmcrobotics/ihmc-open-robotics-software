@@ -1,13 +1,13 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeometryObjectInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class FrameWaypoint<S extends TransformableGeometryObjectInterface & WaypointInterface<S>, F extends FrameWaypoint<S, F>>
-      extends ReferenceFrameHolder implements TransformableGeometryObjectInterface, WaypointInterface<F>
+      extends AbstractReferenceFrameHolder implements TransformableGeometryObjectInterface, WaypointInterface<F>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    protected final S simpleWaypoint;

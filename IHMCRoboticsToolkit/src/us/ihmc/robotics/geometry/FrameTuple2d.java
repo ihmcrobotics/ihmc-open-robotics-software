@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Point2d;
@@ -8,20 +9,19 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import java.io.Serializable;
 
-public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHolder implements Serializable
+public abstract class FrameTuple2d<T extends Tuple2d & TransformableDataObject> extends AbstractFrameObject<T> implements Serializable
 {
    private static final long serialVersionUID = 6275308250031489785L;
 
-   protected static final double epsilon = 1e-10;
-
    private static final boolean DEBUG = false;
 
-   protected ReferenceFrame referenceFrame;
    protected final T tuple;
    protected String name;
    
    public FrameTuple2d(ReferenceFrame referenceFrame, T tuple, String name)
    {
+      super(referenceFrame, tuple);
+      
       if (DEBUG)
       {
          if (referenceFrame == null)
@@ -31,8 +31,7 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
          }
       }
 
-      this.referenceFrame = referenceFrame;
-      this.tuple = tuple;
+      this.tuple = transformableDataObject;
       this.name = name;
    }
 
@@ -458,15 +457,15 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
       return referenceFrame;
    }
 
-   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract FrameTuple2d<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract void applyTransform(RigidBodyTransform transform);
-
-   public abstract FrameTuple2d<T> applyTransformCopy(RigidBodyTransform transform);
-
-   public abstract void changeFrame(ReferenceFrame desiredFrame);
+//   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract FrameTuple2d<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract void applyTransform(RigidBodyTransform transform);
+//
+//   public abstract FrameTuple2d<T> applyTransformCopy(RigidBodyTransform transform);
+//
+//   public abstract void changeFrame(ReferenceFrame desiredFrame);
 
    public final double[] toArray()
    {

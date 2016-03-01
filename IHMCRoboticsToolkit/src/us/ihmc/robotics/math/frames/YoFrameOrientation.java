@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameOrientation extends ReferenceFrameHolder
+public class YoFrameOrientation extends AbstractReferenceFrameHolder
 {
    private final DoubleYoVariable yaw, pitch, roll; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;
