@@ -1,12 +1,13 @@
 package us.ihmc.robotics.math.trajectories;
 
 
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
-public abstract class FrameNDoFTrapezoidalVelocityTrajectory extends ReferenceFrameHolder
+public abstract class FrameNDoFTrapezoidalVelocityTrajectory extends AbstractReferenceFrameHolder
 {
    private final ReferenceFrame referenceFrame;
    private final NDoFTrapezoidalVelocityTrajectory nDoFTrapezoidalVelocityTrajectory;
@@ -118,19 +119,19 @@ public abstract class FrameNDoFTrapezoidalVelocityTrajectory extends ReferenceFr
       return nDoFTrapezoidalVelocityTrajectory.size();
    }
 
-   public abstract ReferenceFrameHolder getPosition(double t);
+   public abstract AbstractReferenceFrameHolder getPosition(double t);
 
-   public abstract ReferenceFrameHolder getVelocity(double t);
+   public abstract AbstractReferenceFrameHolder getVelocity(double t);
 
-   public abstract ReferenceFrameHolder getAcceleration(double t);
+   public abstract AbstractReferenceFrameHolder getAcceleration(double t);
 
-   public abstract ReferenceFrameHolder getMaximumVelocity();
+   public abstract AbstractReferenceFrameHolder getMaximumVelocity();
 
-   public abstract ReferenceFrameHolder getMaximumAcceleration();
+   public abstract AbstractReferenceFrameHolder getMaximumAcceleration();
 
-   public abstract ReferenceFrameHolder getInitialPosition();
+   public abstract AbstractReferenceFrameHolder getInitialPosition();
 
-   public abstract ReferenceFrameHolder getInitialVelocity();
+   public abstract AbstractReferenceFrameHolder getInitialVelocity();
 
    @Override
    public ReferenceFrame getReferenceFrame()
@@ -148,8 +149,8 @@ public abstract class FrameNDoFTrapezoidalVelocityTrajectory extends ReferenceFr
       }
    }
 
-   protected static void doReferenceFrameChecks(ReferenceFrameHolder x0, ReferenceFrameHolder xF, ReferenceFrameHolder v0, ReferenceFrameHolder vF,
-           ReferenceFrameHolder vMax, ReferenceFrameHolder aMax)
+   protected static void doReferenceFrameChecks(AbstractReferenceFrameHolder x0, AbstractReferenceFrameHolder xF, AbstractReferenceFrameHolder v0, AbstractReferenceFrameHolder vF,
+         AbstractReferenceFrameHolder vMax, AbstractReferenceFrameHolder aMax)
    {
       x0.checkReferenceFrameMatch(xF.getReferenceFrame());
       x0.checkReferenceFrameMatch(v0.getReferenceFrame());
