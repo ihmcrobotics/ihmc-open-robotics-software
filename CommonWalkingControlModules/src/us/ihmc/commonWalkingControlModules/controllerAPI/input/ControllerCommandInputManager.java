@@ -33,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -54,15 +55,25 @@ public class ControllerCommandInputManager
    private final ConcurrentRingBuffer<ModifiableEndEffectorLoadBearingMessage> endEffectorLoadBearingMessageBuffer;
    private final ConcurrentRingBuffer<ModifiableStopAllTrajectoryMessage> stopAllTrajectoryMessageBuffer;
 
+   private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
+
    private final List<MessageStatusListener> messageStatusListeners = new ArrayList<>();
 
    public ControllerCommandInputManager()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         armTrajectoryMessageBuffers.put(robotSide, new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableArmTrajectoryMessage.class), buffersCapacity));
-         handTrajectoryMessageBuffers.put(robotSide, new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableHandTrajectoryMessage.class), buffersCapacity));
-         footTrajectoryMessageBuffers.put(robotSide, new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableFootTrajectoryMessage.class), buffersCapacity));
+         ConcurrentRingBuffer<ModifiableArmTrajectoryMessage> armTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableArmTrajectoryMessage.class), buffersCapacity);
+         ConcurrentRingBuffer<ModifiableHandTrajectoryMessage> handTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableHandTrajectoryMessage.class), buffersCapacity);
+         ConcurrentRingBuffer<ModifiableFootTrajectoryMessage> footTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableFootTrajectoryMessage.class), buffersCapacity);
+
+         armTrajectoryMessageBuffers.put(robotSide, armTrajectoryMessageBuffer);
+         handTrajectoryMessageBuffers.put(robotSide, handTrajectoryMessageBuffer);
+         footTrajectoryMessageBuffers.put(robotSide, footTrajectoryMessageBuffer);
+
+         allBuffers.add(armTrajectoryMessageBuffer);
+         allBuffers.add(handTrajectoryMessageBuffer);
+         allBuffers.add(footTrajectoryMessageBuffer);
       }
       headTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableHeadTrajectoryMessage.class), buffersCapacity);
       chestTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableChestTrajectoryMessage.class), buffersCapacity);
@@ -74,6 +85,15 @@ public class ControllerCommandInputManager
 
       endEffectorLoadBearingMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableEndEffectorLoadBearingMessage.class), buffersCapacity);
       stopAllTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableStopAllTrajectoryMessage.class), buffersCapacity);
+
+      allBuffers.add(headTrajectoryMessageBuffer);
+      allBuffers.add(chestTrajectoryMessageBuffer);
+      allBuffers.add(pelvisTrajectoryMessageBuffer);
+      allBuffers.add(pelvisOrientationTrajectoryMessageBuffer);
+      allBuffers.add(pelvisHeightTrajectoryMessageBuffer);
+      allBuffers.add(footstepDataListMessageBuffer);
+      allBuffers.add(endEffectorLoadBearingMessageBuffer);
+      allBuffers.add(stopAllTrajectoryMessageBuffer);
    }
 
    public void submitArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
@@ -152,6 +172,29 @@ public class ControllerCommandInputManager
          return;
       nextModifiableMessage.set(pelvisHeightTrajectoryMessage);
       pelvisHeightTrajectoryMessageBuffer.commit();
+   }
+
+   public void submitWholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ArmTrajectoryMessage armTrajectoryMessage = wholeBodyTrajectoryMessage.getArmTrajectoryMessage(robotSide);
+         if (armTrajectoryMessage != null && armTrajectoryMessage.getUniqueId() != Packet.INVALID_MESSAGE_ID)
+            submitArmTrajectoryMessage(armTrajectoryMessage);
+         HandTrajectoryMessage handTrajectoryMessage = wholeBodyTrajectoryMessage.getHandTrajectoryMessage(robotSide);
+         if (handTrajectoryMessage != null && handTrajectoryMessage.getUniqueId() != Packet.INVALID_MESSAGE_ID)
+            submitHandTrajectoryMessage(handTrajectoryMessage);
+         FootTrajectoryMessage footTrajectoryMessage = wholeBodyTrajectoryMessage.getFootTrajectoryMessage(robotSide);
+         if (footTrajectoryMessage != null && footTrajectoryMessage.getUniqueId() != Packet.INVALID_MESSAGE_ID)
+            submitFootTrajectoryMessage(footTrajectoryMessage);
+      }
+
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage();
+      if (pelvisTrajectoryMessage != null && pelvisTrajectoryMessage.getUniqueId() != Packet.INVALID_MESSAGE_ID)
+         submitPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+      ChestTrajectoryMessage chestTrajectoryMessage = wholeBodyTrajectoryMessage.getChestTrajectoryMessage();
+      if (chestTrajectoryMessage != null && chestTrajectoryMessage.getUniqueId() != Packet.INVALID_MESSAGE_ID)
+         submitChestTrajectoryMessage(chestTrajectoryMessage);
    }
 
    public void submitFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
@@ -316,6 +359,21 @@ public class ControllerCommandInputManager
    public void subscribeToMessageStatus(MessageStatusListener messageStatusListener)
    {
       messageStatusListeners.add(messageStatusListener);
+   }
+
+   public void clearManipulationMessagesInQueue()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handTrajectoryMessageBuffers.get(robotSide).flush();
+         armTrajectoryMessageBuffers.get(robotSide).flush();
+      }
+   }
+
+   public void clearMessagesInQueue()
+   {
+      for (int i = 0; i < allBuffers.size(); i++)
+         allBuffers.get(i).flush();
    }
 
    private static <T> T pollNewestMessage(ConcurrentRingBuffer<T> buffer)

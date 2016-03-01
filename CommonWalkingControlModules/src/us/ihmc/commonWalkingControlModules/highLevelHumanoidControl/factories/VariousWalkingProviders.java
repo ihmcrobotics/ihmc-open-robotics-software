@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -22,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessage
 public class VariousWalkingProviders
 {
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
-   private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
    private final ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber;
    private final HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber;
    private final ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber;
@@ -47,19 +45,18 @@ public class VariousWalkingProviders
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
    public VariousWalkingProviders(HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber,
-         ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber, ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber,
-         HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber, ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber,
-         PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
+         ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
+         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber, PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
          PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber,
-         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
-         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
-         GoHomeMessageSubscriber goHomeMessageSubscriber, FootstepProvider footstepProvider,
-         HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
-         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
+         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber,
+         EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
+         PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber, GoHomeMessageSubscriber goHomeMessageSubscriber,
+         FootstepProvider footstepProvider, HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber,
+         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
+         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
+         AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
       this.handTrajectoryMessageSubscriber = handTrajectoryMessageSubscriber;
-      this.armTrajectoryMessageSubscriber = armTrajectoryMessageSubscriber;
       this.armDesiredAccelerationsMessageSubscriber = armDesiredAccelerationsMessageSubscriber;
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       this.chestTrajectoryMessageSubscriber = chestTrajectoryMessageSubscriber;
@@ -93,8 +90,6 @@ public class VariousWalkingProviders
    {
       if (handTrajectoryMessageSubscriber != null)
          handTrajectoryMessageSubscriber.clearMessagesInQueue();
-      if (armTrajectoryMessageSubscriber != null)
-         armTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (armDesiredAccelerationsMessageSubscriber != null)
          armDesiredAccelerationsMessageSubscriber.clearMessagesInQueue();
       if (headTrajectoryMessageSubscriber != null)
@@ -120,11 +115,6 @@ public class VariousWalkingProviders
    public HandTrajectoryMessageSubscriber getHandTrajectoryMessageSubscriber()
    {
       return handTrajectoryMessageSubscriber;
-   }
-
-   public ArmTrajectoryMessageSubscriber geArmTrajectoryMessageSubscriber()
-   {
-      return armTrajectoryMessageSubscriber;
    }
 
    public ArmDesiredAccelerationsMessageSubscriber getArmDesiredAccelerationsMessageSubscriber()

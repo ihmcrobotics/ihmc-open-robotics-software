@@ -9,7 +9,6 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ArmTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
@@ -17,9 +16,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessa
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -53,7 +50,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
    private final HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber;
-   private final ArmTrajectoryMessageSubscriber armTrajectoryMessageSubscriber;
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
 
    private final DoubleYoVariable time;
@@ -76,7 +72,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       pelvisHeightTrajectoryMessageSubscriber = new PelvisHeightTrajectoryMessageSubscriber(null);
 
       handTrajectoryMessageSubscriber = new HandTrajectoryMessageSubscriber(null);
-      armTrajectoryMessageSubscriber = new ArmTrajectoryMessageSubscriber(null);
       footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(null);
    }
 
@@ -133,13 +128,13 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
          setupTimesForNewScriptEvent(handTrajectoryMessage.getLastTrajectoryPoint().time);
       }
-      else if (scriptObject instanceof ArmTrajectoryMessage)
-      {
-         ArmTrajectoryMessage armTrajectoryMessage = (ArmTrajectoryMessage) scriptObject;
-         armTrajectoryMessageSubscriber.receivedPacket(armTrajectoryMessage);
-         
-         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
-      }
+//      else if (scriptObject instanceof ArmTrajectoryMessage)
+//      {
+//         ArmTrajectoryMessage armTrajectoryMessage = (ArmTrajectoryMessage) scriptObject;
+//         armTrajectoryMessageSubscriber.receivedPacket(armTrajectoryMessage);
+//         
+//         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
+//      }
       else if (scriptObject instanceof PelvisTrajectoryMessage)
       {
          PelvisTrajectoryMessage pelvisPosePacket = (PelvisTrajectoryMessage) scriptObject;

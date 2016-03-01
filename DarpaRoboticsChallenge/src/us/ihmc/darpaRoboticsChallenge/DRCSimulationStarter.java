@@ -86,6 +86,8 @@ public class DRCSimulationStarter
    /** The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.) and is used as input of the network processor. */
    private LocalObjectCommunicator scsSensorOutputPacketCommunicator;
 
+   private boolean setupControllerNetworkSubscriber = true;
+
    private final WalkingControllerParameters walkingControllerParameters;
    private final ArmControllerParameters armControllerParameters;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
@@ -179,6 +181,11 @@ public class DRCSimulationStarter
    public void setRunMultiThreaded(boolean runMultiThreaded)
    {
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
+   }
+
+   public void setupControllerNetworkSubscriber(boolean setup)
+   {
+      setupControllerNetworkSubscriber = setup;
    }
 
    /**
@@ -362,6 +369,8 @@ public class DRCSimulationStarter
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
             walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
+      if (setupControllerNetworkSubscriber)
+         controllerFactory.createControllerNetworkSubscriber();
       
       for (int i = 0; i < highLevelBehaviorFactories.size(); i++)
          controllerFactory.addHighLevelBehaviorFactory(highLevelBehaviorFactories.get(i));

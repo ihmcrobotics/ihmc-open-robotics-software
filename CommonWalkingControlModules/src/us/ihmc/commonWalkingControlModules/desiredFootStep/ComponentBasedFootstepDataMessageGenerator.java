@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
@@ -38,13 +39,15 @@ public class ComponentBasedFootstepDataMessageGenerator implements MessageStatus
    private final ComponentBasedDesiredFootstepCalculator componentBasedDesiredFootstepCalculator;
    private final ControllerCommandInputManager commandInputManager;
 
+   private final List<Updatable> updatables = new ArrayList<>();
+
    public ComponentBasedFootstepDataMessageGenerator(ControllerCommandInputManager commandInputManager, WalkingControllerParameters walkingControllerParameters,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT,
-         ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
+         boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
    {
       this.commandInputManager = commandInputManager;
       componentBasedDesiredFootstepCalculator = createComponentBasedDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet,
-            controlDT, updatables, useHeadingAndVelocityScript);
+            controlDT, useHeadingAndVelocityScript);
 
       walk.addVariableChangedListener(new VariableChangedListener()
       {
@@ -101,7 +104,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements MessageStatus
 
    public ComponentBasedDesiredFootstepCalculator createComponentBasedDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT,
-         ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript)
+         boolean useHeadingAndVelocityScript)
    {
       ManualDesiredVelocityControlModule desiredVelocityControlModule;
 
@@ -138,5 +141,10 @@ public class ComponentBasedFootstepDataMessageGenerator implements MessageStatus
       desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
       desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
       return desiredFootstepCalculator;
+   }
+
+   public List<Updatable> getModulesToUpdate()
+   {
+      return updatables;
    }
 }
