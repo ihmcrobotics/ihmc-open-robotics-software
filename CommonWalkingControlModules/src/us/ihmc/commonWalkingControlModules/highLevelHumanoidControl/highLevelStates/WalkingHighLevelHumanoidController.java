@@ -252,6 +252,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       icpErrorThresholdToAbortManipulation.set(0.04);
       minimumDurationBetweenTwoManipulationAborts.set(5.0);
       manipulationIgnoreInputsDurationAfterAbort.set(2.0);
+      timeOfLastManipulationAbortRequest.set(Double.NEGATIVE_INFINITY);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(momentumBasedController.getContactableFeet(), registry);
 
@@ -1870,7 +1871,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       hasWalkingControllerBeenInitialized.set(!reinitialize);
    }
 
-   private void consumeManipulationMessages()
+   void consumeManipulationMessages()
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {
@@ -1884,6 +1885,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             manipulationControlModule.handleArmTrajectoryMessage(commandInputManager.pollArmTrajectoryMessage(robotSide));
          if (commandInputManager.isNewHandTrajectoryMessageAvailable(robotSide))
             manipulationControlModule.handleHandTrajectoryMessage(commandInputManager.pollHandTrajectoryMessage(robotSide));
+         if (commandInputManager.isNewArmDesiredAccelerationsMessageAvailable(robotSide))
+            manipulationControlModule.handleArmDesiredAccelerationsMessage(commandInputManager.pollArmDesiredAccelerationsMessage(robotSide));
       }
 
    }

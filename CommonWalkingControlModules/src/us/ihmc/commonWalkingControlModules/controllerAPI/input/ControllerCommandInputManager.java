@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableEndEffectorLoadBearingMessage;
@@ -19,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -68,6 +70,9 @@ public class ControllerCommandInputManager
 
    private final ConcurrentRingBuffer<StopAllTrajectoryMessage> stopAllTrajectoryMessageBuffer;
 
+   private final SideDependentList<ConcurrentRingBuffer<ModifiableArmDesiredAccelerationsMessage>> armDesiredAccelerationsMessageBuffers = new SideDependentList<>();
+   private final ModifiableArmDesiredAccelerationsMessage controllerArmDesiredAccelerationsMessage = new ModifiableArmDesiredAccelerationsMessage();
+
    private final ConcurrentRingBuffer<AutomaticManipulationAbortMessage> automaticManipulationAbortMessageBuffer;
    private final AutomaticManipulationAbortMessage controllerAutomaticManipulationAbortMessage = new AutomaticManipulationAbortMessage();
 
@@ -77,42 +82,32 @@ public class ControllerCommandInputManager
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ConcurrentRingBuffer<ModifiableArmTrajectoryMessage> armTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableArmTrajectoryMessage.class), buffersCapacity);
-         ConcurrentRingBuffer<ModifiableHandTrajectoryMessage> handTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableHandTrajectoryMessage.class), buffersCapacity);
-         ConcurrentRingBuffer<ModifiableFootTrajectoryMessage> footTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableFootTrajectoryMessage.class), buffersCapacity);
-
-         armTrajectoryMessageBuffers.put(robotSide, armTrajectoryMessageBuffer);
-         handTrajectoryMessageBuffers.put(robotSide, handTrajectoryMessageBuffer);
-         footTrajectoryMessageBuffers.put(robotSide, footTrajectoryMessageBuffer);
-
-         allBuffers.add(armTrajectoryMessageBuffer);
-         allBuffers.add(handTrajectoryMessageBuffer);
-         allBuffers.add(footTrajectoryMessageBuffer);
+         armTrajectoryMessageBuffers.put(robotSide, createBuffer(ModifiableArmTrajectoryMessage.class));
+         handTrajectoryMessageBuffers.put(robotSide, createBuffer(ModifiableHandTrajectoryMessage.class));
+         footTrajectoryMessageBuffers.put(robotSide, createBuffer(ModifiableFootTrajectoryMessage.class));
+         armDesiredAccelerationsMessageBuffers.put(robotSide, createBuffer(ModifiableArmDesiredAccelerationsMessage.class)); 
       }
-      headTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableHeadTrajectoryMessage.class), buffersCapacity);
-      chestTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableChestTrajectoryMessage.class), buffersCapacity);
-      pelvisTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiablePelvisTrajectoryMessage.class), buffersCapacity);
-      pelvisOrientationTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiablePelvisOrientationTrajectoryMessage.class), buffersCapacity);
-      pelvisHeightTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiablePelvisHeightTrajectoryMessage.class), buffersCapacity);
+      headTrajectoryMessageBuffer = createBuffer(ModifiableHeadTrajectoryMessage.class);
+      chestTrajectoryMessageBuffer = createBuffer(ModifiableChestTrajectoryMessage.class);
+      pelvisTrajectoryMessageBuffer = createBuffer(ModifiablePelvisTrajectoryMessage.class);
+      pelvisOrientationTrajectoryMessageBuffer = createBuffer(ModifiablePelvisOrientationTrajectoryMessage.class);
+      pelvisHeightTrajectoryMessageBuffer = createBuffer(ModifiablePelvisHeightTrajectoryMessage.class);
 
-      goHomeMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableGoHomeMessage.class), buffersCapacity);
+      goHomeMessageBuffer = createBuffer(ModifiableGoHomeMessage.class);
 
-      footstepDataListMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableFootstepDataListMessage.class), buffersCapacity);
+      footstepDataListMessageBuffer = createBuffer(ModifiableFootstepDataListMessage.class);
 
-      endEffectorLoadBearingMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableEndEffectorLoadBearingMessage.class), buffersCapacity);
-      stopAllTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(StopAllTrajectoryMessage.class), buffersCapacity);
+      endEffectorLoadBearingMessageBuffer = createBuffer(ModifiableEndEffectorLoadBearingMessage.class);
+      stopAllTrajectoryMessageBuffer = createBuffer(StopAllTrajectoryMessage.class);
 
-      automaticManipulationAbortMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(AutomaticManipulationAbortMessage.class), buffersCapacity);
+      automaticManipulationAbortMessageBuffer = createBuffer(AutomaticManipulationAbortMessage.class);
+   }
 
-      allBuffers.add(headTrajectoryMessageBuffer);
-      allBuffers.add(chestTrajectoryMessageBuffer);
-      allBuffers.add(pelvisTrajectoryMessageBuffer);
-      allBuffers.add(pelvisOrientationTrajectoryMessageBuffer);
-      allBuffers.add(pelvisHeightTrajectoryMessageBuffer);
-      allBuffers.add(footstepDataListMessageBuffer);
-      allBuffers.add(endEffectorLoadBearingMessageBuffer);
-      allBuffers.add(stopAllTrajectoryMessageBuffer);
-      allBuffers.add(automaticManipulationAbortMessageBuffer);
+   private <T> ConcurrentRingBuffer<T> createBuffer(Class<T> clazz)
+   {
+      ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(clazz), buffersCapacity);
+      allBuffers.add(newBuffer);
+      return newBuffer;
    }
 
    public void submitArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
@@ -259,6 +254,17 @@ public class ControllerCommandInputManager
       stopAllTrajectoryMessageBuffer.commit();
    }
 
+   public void submitArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   {
+      RobotSide robotSide = armDesiredAccelerationsMessage.getRobotSide();
+      ConcurrentRingBuffer<ModifiableArmDesiredAccelerationsMessage> buffer = armDesiredAccelerationsMessageBuffers.get(robotSide);
+      ModifiableArmDesiredAccelerationsMessage nextModifiableMessage = buffer.next();
+      if (nextModifiableMessage == null)
+         return;
+      nextModifiableMessage.set(armDesiredAccelerationsMessage);
+      buffer.commit();
+   }
+
    public void submitAutomaticManipulationAbortMessage(AutomaticManipulationAbortMessage automaticManipulationAbortMessage)
    {
       AutomaticManipulationAbortMessage nextModifiableMessage = automaticManipulationAbortMessageBuffer.next();
@@ -325,6 +331,11 @@ public class ControllerCommandInputManager
    public boolean isNewStopAllTrajectoryMessageAvailable()
    {
       return stopAllTrajectoryMessageBuffer.poll();
+   }
+
+   public boolean isNewArmDesiredAccelerationsMessageAvailable(RobotSide robotSide)
+   {
+      return armDesiredAccelerationsMessageBuffers.get(robotSide).poll();
    }
 
    public boolean isNewAutomaticManipulationAbortMessageAvailable()
@@ -403,6 +414,12 @@ public class ControllerCommandInputManager
       return pollNewestMessage(stopAllTrajectoryMessageBuffer);
    }
 
+   public ModifiableArmDesiredAccelerationsMessage pollArmDesiredAccelerationsMessage(RobotSide robotSide)
+   {
+      controllerArmDesiredAccelerationsMessage.set(pollNewestMessage(armDesiredAccelerationsMessageBuffers.get(robotSide)));
+      return controllerArmDesiredAccelerationsMessage;
+   }
+
    public AutomaticManipulationAbortMessage pollAutomaticManipulationAbortMessage()
    {
       controllerAutomaticManipulationAbortMessage.set(pollNewestMessage(automaticManipulationAbortMessageBuffer));
@@ -415,6 +432,7 @@ public class ControllerCommandInputManager
       {
          handTrajectoryMessageBuffers.get(robotSide).flush();
          armTrajectoryMessageBuffers.get(robotSide).flush();
+         armDesiredAccelerationsMessageBuffers.get(robotSide).flush();
       }
    }
 

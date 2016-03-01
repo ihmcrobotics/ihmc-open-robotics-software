@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.UserControlModeState;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.WholeBodyInverseDynamicsSolver;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -107,7 +107,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       double[] qdd_ds = new double[armJoints.length];
       for (int i = 0; i < armJoints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(MomentumBasedController.class.getSimpleName(), armJoints[i].getName() + "qdd_d").getValueAsDouble();
+         qdd_ds[i] = scs.getVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "qdd_qp_" + armJoints[i].getName()).getValueAsDouble();
       }
       return qdd_ds;
    }

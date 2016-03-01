@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.PacketValidityChecker;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -36,6 +37,7 @@ public class ControllerNetworkSubscriber
       setupFootstepDataListMessageSubscriber();
       setupEndEffectorLoadBearingMessageSubscriber();
       setupStopAllTrajectoryMessageSubscriber();
+      setupArmDesiredAccelerationsMessageSubscriber();
       setupWholeBodyTrajectoryMessageSubscriber();
    }
 
@@ -238,5 +240,21 @@ public class ControllerNetworkSubscriber
          }
       };
       globalDataProducer.attachListener(StopAllTrajectoryMessage.class, messageSubscriber);
+   }
+
+   private void setupArmDesiredAccelerationsMessageSubscriber()
+   {
+      PacketConsumer<ArmDesiredAccelerationsMessage> messageSubscriber = new PacketConsumer<ArmDesiredAccelerationsMessage>()
+      {
+         @Override
+         public void receivedPacket(ArmDesiredAccelerationsMessage message)
+         {
+            if (!PacketValidityChecker.validateArmDesiredAccelerationsMessage(message, globalDataProducer))
+               return;
+
+            controllerCommandInputManager.submitArmDesiredAccelerationsMessage(message);
+         }
+      };
+      globalDataProducer.attachListener(ArmDesiredAccelerationsMessage.class, messageSubscriber);
    }
 }

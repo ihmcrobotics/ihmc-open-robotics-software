@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -31,6 +33,7 @@ public class WholeBodyInverseDynamicsSolver
    private final OptimizationMomentumControlModule optimizationMomentumControlModule;
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+   private final Map<OneDoFJoint, DoubleYoVariable> jointAccelerationsSolution = new HashMap<>();
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
@@ -53,6 +56,13 @@ public class WholeBodyInverseDynamicsSolver
       controlledOneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFors, OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
+
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = controlledOneDoFJoints[i];
+         DoubleYoVariable jointAccelerationSolution = new DoubleYoVariable("qdd_qp_" + joint.getName(), registry);
+         jointAccelerationsSolution.put(joint, jointAccelerationSolution);
+      }
 
       planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
 
@@ -104,6 +114,13 @@ public class WholeBodyInverseDynamicsSolver
       inverseDynamicsCalculator.compute();
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
+
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = controlledOneDoFJoints[i];
+         jointAccelerationsSolution.get(joint).set(joint.getQddDesired());
+      }
+
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       wrenchVisualizer.visualize(externalWrenchSolution);
    }

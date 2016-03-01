@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
@@ -15,12 +16,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -53,7 +52,6 @@ public class ManipulationControlModule
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber;
    private final EndEffectorLoadBearingMessageSubscriber effectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber;
@@ -74,7 +72,6 @@ public class ManipulationControlModule
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
-      armDesiredAccelerationsMessageSubscriber = variousWalkingProviders.getArmDesiredAccelerationsMessageSubscriber();
       effectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
       handComplianceControlParametersSubscriber = variousWalkingProviders.getHandComplianceControlParametersSubscriber();
@@ -148,7 +145,6 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handleLoadBearing(robotSide);
-         handleArmDesiredAccelerationsMessages(robotSide);
          handleStopAllTrajectoryMessages(robotSide);
          handleGoHomeMessages(robotSide);
 
@@ -176,15 +172,6 @@ public class ManipulationControlModule
             handControlModules.get(robotSide).holdPositionInBase();
          }
       }
-   }
-
-   private void handleArmDesiredAccelerationsMessages(RobotSide robotSide)
-   {
-      if (armDesiredAccelerationsMessageSubscriber == null || !armDesiredAccelerationsMessageSubscriber.isNewControlMessageAvailable(robotSide))
-         return;
-
-      ArmDesiredAccelerationsMessage message = armDesiredAccelerationsMessageSubscriber.pollMessage(robotSide);
-      handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(message);
    }
 
    private void handleStopAllTrajectoryMessages(RobotSide robotSide)
@@ -238,6 +225,12 @@ public class ManipulationControlModule
    {
       RobotSide robotSide = armTrajectoryMessage.getRobotSide();
       handControlModules.get(robotSide).handleArmTrajectoryMessage(armTrajectoryMessage);
+   }
+
+   public void handleArmDesiredAccelerationsMessage(ModifiableArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   {
+      RobotSide robotSide = armDesiredAccelerationsMessage.getRobotSide();
+      handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage);
    }
 
    public void goToDefaultState()

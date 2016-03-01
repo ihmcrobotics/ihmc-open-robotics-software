@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ArmDesiredAccelerationsMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
@@ -40,7 +39,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
          ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
          YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
-      ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber = null;
       HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = null;
       ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = null;
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
@@ -63,11 +61,11 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(armDesiredAccelerationsMessageSubscriber,
-            headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, pelvisOrientationTrajectoryMessageSubscriber,
-            footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
-            pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPovider, handComplianceControlParametersProvider, automaticManipulationAbortCommunicator,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(headTrajectoryMessageSubscriber,
+            chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber,
+            endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber,
+            goHomeMessageSubscriber, footstepPovider, handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }
