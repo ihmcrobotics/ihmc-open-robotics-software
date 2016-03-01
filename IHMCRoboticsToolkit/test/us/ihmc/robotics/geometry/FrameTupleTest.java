@@ -28,7 +28,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 //import us.ihmc.robotics.MathTools;
 //import MatrixTools;
 
-public abstract class FrameTupleTest<T extends Tuple3d & Transformable>
+public abstract class FrameTupleTest<T extends Tuple3d & Transformable<T>>
 {
    private static final boolean VERBOSE = false;
 

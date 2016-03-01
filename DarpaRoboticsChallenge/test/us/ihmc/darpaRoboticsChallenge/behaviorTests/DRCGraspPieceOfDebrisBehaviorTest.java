@@ -191,7 +191,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
     }
     FramePose chestExpectedPose = new FramePose(worldFrame);
     chestExpectedPose.setPosition(-0.16, -0.02, 1.29);
-    chestExpectedPose.setOrientation(0.0, 0.0, 0.0);
+    chestExpectedPose.setYawPitchRoll(0.0, 0.0, 0.0);
     assertTrue(chestPose.epsilonEquals(chestExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
     //pelvis pose
@@ -206,7 +206,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
     FramePose pelvisExpectedPose = new FramePose(worldFrame);
     pelvisExpectedPose.setPosition(-0.09, -0.01, 0.79);
-    pelvisExpectedPose.setOrientation(0.0, 0.0, 0.0);
+    pelvisExpectedPose.setYawPitchRoll(0.0, 0.0, 0.0);
     assertTrue(pelvisPose.epsilonEquals(pelvisExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
    }
 
@@ -223,7 +223,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
     }
     FramePose testSideHandExpectedPose = new FramePose(worldFrame);
     testSideHandExpectedPose.setPosition(0.47, testedSide.negateIfRightSide(0.21), 1.20);
-    testSideHandExpectedPose.setOrientation(1.56, 0.0, 0.13);
+    testSideHandExpectedPose.setYawPitchRoll(1.56, 0.0, 0.13);
     assertTrue(testedSideHandPose.epsilonEquals(testSideHandExpectedPose, POSITION_ERROR_MARGIN, 2 * Math.PI)); // here orientation doesnt matter
 
     //oppositeSide wrist Position
@@ -237,7 +237,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
     }
     FramePose oppositeSideHandExpectedPose = new FramePose(worldFrame);
     oppositeSideHandExpectedPose.setPosition(0.33, testedSide.getOppositeSide().negateIfRightSide(0.24), 1.06);
-    oppositeSideHandExpectedPose.setOrientation(-1.78, 0.0, 0.0);
+    oppositeSideHandExpectedPose.setYawPitchRoll(-1.78, 0.0, 0.0);
     assertTrue(oppositeSideHandPose.epsilonEquals(oppositeSideHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
    }
 

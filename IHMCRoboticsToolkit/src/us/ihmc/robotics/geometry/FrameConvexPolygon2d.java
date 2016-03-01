@@ -1329,4 +1329,37 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<ConvexPolygon2d>
    {
       return convexPolygon.isEmpty();
    }
+
+   @Override
+   public void set(ConvexPolygon2d other)
+   {
+      convexPolygon.set(other);
+      update();
+   }
+
+   @Override
+   public void setToZero()
+   {
+      convexPolygon.setToZero();
+      update();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      convexPolygon.setToNaN();
+      update();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return convexPolygon.containsNaN();
+   }
+
+   @Override
+   public boolean epsilonEquals(ConvexPolygon2d other, double epsilon)
+   {
+      return convexPolygon.epsilonEquals(other, epsilon);
+   }
 }

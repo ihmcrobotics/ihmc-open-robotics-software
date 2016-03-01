@@ -302,8 +302,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetErrorPose.setPoseIncludingFrame(goalOffsetError);
       if (!isRotationCorrectionEnabled.getBooleanValue())
       {
-         startOffsetErrorPose.setOrientation(0.0, 0.0, 0.0);
-         goalOffsetErrorPose.setOrientation(0.0, 0.0, 0.0);
+         startOffsetErrorPose.setYawPitchRoll(0.0, 0.0, 0.0);
+         goalOffsetErrorPose.setYawPitchRoll(0.0, 0.0, 0.0);
       }
       //scs feedback only
       yoStartOffsetErrorPose_InWorldFrame.set(startOffsetErrorPose);

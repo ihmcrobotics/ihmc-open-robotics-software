@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author not attributable
  * @version 1.0
  */
-public abstract class FrameGeometry2d<T extends Transformable> extends AbstractFrameObject<T>
+public abstract class FrameGeometry2d<T extends Transformable<T>> extends AbstractFrameObject<T>
 {
    public FrameGeometry2d(ReferenceFrame referenceFrame, T transformableDataObject)
    {

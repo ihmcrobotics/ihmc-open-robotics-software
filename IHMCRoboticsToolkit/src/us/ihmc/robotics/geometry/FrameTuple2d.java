@@ -9,7 +9,7 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import java.io.Serializable;
 
-public abstract class FrameTuple2d<T extends Tuple2d & Transformable> extends AbstractFrameObject<T> implements Serializable
+public abstract class FrameTuple2d<T extends Tuple2d & Transformable<T>> extends AbstractFrameObject<T> implements Serializable
 {
    private static final long serialVersionUID = 6275308250031489785L;
 
