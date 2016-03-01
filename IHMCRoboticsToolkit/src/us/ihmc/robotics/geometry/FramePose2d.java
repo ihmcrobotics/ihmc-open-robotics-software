@@ -6,7 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class FramePose2d extends AbstractReferenceFrameHolder implements FrameObject
+public class FramePose2d extends AbstractReferenceFrameHolder implements FrameObject<FramePose2d>
 {
    private final FramePoint2d position;
    private final FrameOrientation2d orientation;
@@ -193,6 +193,7 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
       return TransformTools.getMagnitudeOfAngleOfRotation(TransformTools.getTransformFromA2toA1(transformThis, transformThat));
    }
 
+   @Override
    public boolean epsilonEquals(FramePose2d framePose, double epsilon)
    {
       if (!position.epsilonEquals(framePose.position, epsilon))
@@ -205,8 +206,42 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
    }
 
    @Override
+   public void setToZero()
+   {
+      position.setToZero();
+      orientation.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      position.setToNaN();
+      orientation.setToNaN();      
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return (position.containsNaN() || orientation.containsNaN());
+   }
+
+   @Override
    public String toString()
    {
       return position + ", " + orientation.toString();
+   }
+
+   @Override
+   public void setToZero(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      this.setToZero();
+   }
+
+   @Override
+   public void setToNaN(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      this.setToNaN();
    }
 }

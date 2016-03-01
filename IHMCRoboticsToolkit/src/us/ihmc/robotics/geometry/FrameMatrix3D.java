@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class FrameMatrix3D extends AbstractFrameObject<TransformableMatrix3d>
 {
-   private final Matrix3d matrix;
+   private final TransformableMatrix3d matrix;
 
    public FrameMatrix3D()
    {
@@ -125,7 +125,7 @@ public class FrameMatrix3D extends AbstractFrameObject<TransformableMatrix3d>
 
    public void setToZero()
    {
-      matrix.setZero();
+      matrix.setToZero();
    }
 
    public void setToZero(ReferenceFrame referenceFrame)
