@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
  * @author Twan Koolen
  * @version 1.0
  */
-public interface Geometry2d extends TransformableDataObject
+public interface Geometry2d<T> extends TransformableDataObject<T>
 {
    // Orthogonal projection:
    public void orthogonalProjection(Point2d tuple);
