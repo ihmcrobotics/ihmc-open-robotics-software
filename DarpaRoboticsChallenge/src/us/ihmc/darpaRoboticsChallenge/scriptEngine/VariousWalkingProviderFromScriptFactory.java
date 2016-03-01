@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearin
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
@@ -77,7 +76,6 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       updatables.add(footstepProvider);
 
-      HandTrajectoryMessageSubscriber handTrajectoryMessageSubscriber = null;
       ArmDesiredAccelerationsMessageSubscriber armDesiredAccelerationsMessageSubscriber = null;
       HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber = null;
       ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber = null;
@@ -99,7 +97,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(handTrajectoryMessageSubscriber, armDesiredAccelerationsMessageSubscriber,
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(armDesiredAccelerationsMessageSubscriber,
             headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber, pelvisTrajectoryMessageSubscriber, pelvisOrientationTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
             pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepProvider, handComplianceControlParametersProvider, automaticManipulationAbortCommunicator,

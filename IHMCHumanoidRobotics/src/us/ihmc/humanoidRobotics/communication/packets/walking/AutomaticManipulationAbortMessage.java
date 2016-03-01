@@ -15,6 +15,11 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       this.enable = enable;
    }
 
+   public void set(AutomaticManipulationAbortMessage other)
+   {
+      enable = other.enable;
+   }
+
    public boolean getEnable()
    {
       return enable;

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
@@ -71,6 +72,7 @@ public class MomentumBasedControllerFactory
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControllerCommandInputManager commandInputManager = new ControllerCommandInputManager();
+   private final ControllerStatusOutputManager statusOutputManager = new ControllerStatusOutputManager();
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
    private boolean createControllerNetworkSubscriber = false;
@@ -169,7 +171,7 @@ public class MomentumBasedControllerFactory
          SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
          double controlDT = momentumBasedController.getControlDT();
-         ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager,
+         ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager, statusOutputManager,
                walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, registry);
          momentumBasedController.addUpdatables(footstepGenerator.getModulesToUpdate());
       }
@@ -293,9 +295,9 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
-      walkingBehavior = new WalkingHighLevelHumanoidController(commandInputManager, variousWalkingProviders, variousWalkingManagers, centerOfMassHeightTrajectoryGenerator,
-            transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters, instantaneousCapturePointPlanner,
-            icpAndMomentumBasedController, momentumBasedController);
+      walkingBehavior = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager,  variousWalkingProviders, variousWalkingManagers,
+            centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters,
+            instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -222,18 +223,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
    private final ControllerCommandInputManager commandInputManager;
+   private final ControllerStatusOutputManager statusOutputManager;
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(true);
    private ControllerCoreOuput controllerCoreOuput;
 
-   public WalkingHighLevelHumanoidController(ControllerCommandInputManager commandInputManager, VariousWalkingProviders variousWalkingProviders,
-         VariousWalkingManagers variousWalkingManagers, LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-         TransferTimeCalculationProvider transferTimeCalculationProvider, SwingTimeCalculationProvider swingTimeCalculationProvider,
-         WalkingControllerParameters walkingControllerParameters, ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner,
-         ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController)
+   public WalkingHighLevelHumanoidController(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+         VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
+         LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
+         SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
+         ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
+         MomentumBasedController momentumBasedController)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
       this.commandInputManager = commandInputManager;
+      this.statusOutputManager = statusOutputManager;
 
       hasWalkingControllerBeenInitialized.set(false);
 
@@ -447,6 +451,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void initialize()
    {
       super.initialize();
+
+      commandInputManager.clearMessagesInQueue();
 
       initializeContacts();
 
@@ -1876,6 +1882,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          if (commandInputManager.isNewArmTrajectoryMessageAvailable(robotSide))
             manipulationControlModule.handleArmTrajectoryMessage(commandInputManager.pollArmTrajectoryMessage(robotSide));
+         if (commandInputManager.isNewHandTrajectoryMessageAvailable(robotSide))
+            manipulationControlModule.handleHandTrajectoryMessage(commandInputManager.pollHandTrajectoryMessage(robotSide));
       }
 
    }

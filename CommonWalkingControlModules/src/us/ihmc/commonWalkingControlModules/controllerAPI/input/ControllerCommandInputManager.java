@@ -10,25 +10,24 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableEndEffectorLoadBearingMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataListMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.status.MessageStatusListener;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.status.MessageStatusListener.Status;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
@@ -42,22 +41,37 @@ public class ControllerCommandInputManager
    private final int buffersCapacity = 8;
 
    private final SideDependentList<ConcurrentRingBuffer<ModifiableArmTrajectoryMessage>> armTrajectoryMessageBuffers = new SideDependentList<>();
+   private final ModifiableArmTrajectoryMessage controllerArmTrajectoryMessage = new ModifiableArmTrajectoryMessage();
    private final SideDependentList<ConcurrentRingBuffer<ModifiableHandTrajectoryMessage>> handTrajectoryMessageBuffers = new SideDependentList<>();
+   private final ModifiableHandTrajectoryMessage controllerHandTrajectoryMessage = new ModifiableHandTrajectoryMessage();
    private final SideDependentList<ConcurrentRingBuffer<ModifiableFootTrajectoryMessage>> footTrajectoryMessageBuffers = new SideDependentList<>();
+   private final ModifiableFootTrajectoryMessage controllerFootTrajectoryMessage = new ModifiableFootTrajectoryMessage();
    private final ConcurrentRingBuffer<ModifiableHeadTrajectoryMessage> headTrajectoryMessageBuffer;
+   private final ModifiableHeadTrajectoryMessage controllerHeadTrajectoryMessage = new ModifiableHeadTrajectoryMessage();
    private final ConcurrentRingBuffer<ModifiableChestTrajectoryMessage> chestTrajectoryMessageBuffer;
+   private final ModifiableChestTrajectoryMessage controllerChestTrajectoryMessage = new ModifiableChestTrajectoryMessage();
    private final ConcurrentRingBuffer<ModifiablePelvisTrajectoryMessage> pelvisTrajectoryMessageBuffer;
+   private final ModifiablePelvisTrajectoryMessage controllerPelvisTrajectoryMessage = new ModifiablePelvisTrajectoryMessage();
    private final ConcurrentRingBuffer<ModifiablePelvisOrientationTrajectoryMessage> pelvisOrientationTrajectoryMessageBuffer;
+   private final ModifiablePelvisOrientationTrajectoryMessage controllerPelvisOrientationTrajectoryMessage = new ModifiablePelvisOrientationTrajectoryMessage();
    private final ConcurrentRingBuffer<ModifiablePelvisHeightTrajectoryMessage> pelvisHeightTrajectoryMessageBuffer;
+   private final ModifiablePelvisHeightTrajectoryMessage controllerPelvisHeightTrajectoryMessage = new ModifiablePelvisHeightTrajectoryMessage();
+
+   private final ConcurrentRingBuffer<ModifiableGoHomeMessage> goHomeMessageBuffer;
+   private final ModifiableGoHomeMessage controllerGoHomeMessage = new ModifiableGoHomeMessage();
 
    private final ConcurrentRingBuffer<ModifiableFootstepDataListMessage> footstepDataListMessageBuffer;
+   private final ModifiableFootstepDataListMessage controllerFootstepDataListMessage = new ModifiableFootstepDataListMessage();
 
    private final ConcurrentRingBuffer<ModifiableEndEffectorLoadBearingMessage> endEffectorLoadBearingMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableStopAllTrajectoryMessage> stopAllTrajectoryMessageBuffer;
+   private final ModifiableEndEffectorLoadBearingMessage controllerEndEffectorLoadBearingMessage = new ModifiableEndEffectorLoadBearingMessage();
+
+   private final ConcurrentRingBuffer<StopAllTrajectoryMessage> stopAllTrajectoryMessageBuffer;
+
+   private final ConcurrentRingBuffer<AutomaticManipulationAbortMessage> automaticManipulationAbortMessageBuffer;
+   private final AutomaticManipulationAbortMessage controllerAutomaticManipulationAbortMessage = new AutomaticManipulationAbortMessage();
 
    private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
-
-   private final List<MessageStatusListener> messageStatusListeners = new ArrayList<>();
 
    public ControllerCommandInputManager()
    {
@@ -81,10 +95,14 @@ public class ControllerCommandInputManager
       pelvisOrientationTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiablePelvisOrientationTrajectoryMessage.class), buffersCapacity);
       pelvisHeightTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiablePelvisHeightTrajectoryMessage.class), buffersCapacity);
 
+      goHomeMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableGoHomeMessage.class), buffersCapacity);
+
       footstepDataListMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableFootstepDataListMessage.class), buffersCapacity);
 
       endEffectorLoadBearingMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableEndEffectorLoadBearingMessage.class), buffersCapacity);
-      stopAllTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(ModifiableStopAllTrajectoryMessage.class), buffersCapacity);
+      stopAllTrajectoryMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(StopAllTrajectoryMessage.class), buffersCapacity);
+
+      automaticManipulationAbortMessageBuffer = new ConcurrentRingBuffer<>(createBuilderWithEmptyConstructor(AutomaticManipulationAbortMessage.class), buffersCapacity);
 
       allBuffers.add(headTrajectoryMessageBuffer);
       allBuffers.add(chestTrajectoryMessageBuffer);
@@ -94,6 +112,7 @@ public class ControllerCommandInputManager
       allBuffers.add(footstepDataListMessageBuffer);
       allBuffers.add(endEffectorLoadBearingMessageBuffer);
       allBuffers.add(stopAllTrajectoryMessageBuffer);
+      allBuffers.add(automaticManipulationAbortMessageBuffer);
    }
 
    public void submitArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
@@ -197,6 +216,14 @@ public class ControllerCommandInputManager
          submitChestTrajectoryMessage(chestTrajectoryMessage);
    }
 
+   public void submitGoHomeMessage(GoHomeMessage goHomeMessage)
+   {
+      ModifiableGoHomeMessage nextModifiableMessage = goHomeMessageBuffer.next();
+      if (nextModifiableMessage == null)
+         return;
+      goHomeMessageBuffer.commit();
+   }
+
    public void submitFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
    {
       ModifiableFootstepDataListMessage nextModifiableMessage = footstepDataListMessageBuffer.next();
@@ -226,11 +253,18 @@ public class ControllerCommandInputManager
 
    public void submitStopAllTrajectoryMessage(StopAllTrajectoryMessage stopAllTrajectoryMessage)
    {
-      ModifiableStopAllTrajectoryMessage nextModifiableMessage = stopAllTrajectoryMessageBuffer.next();
+      StopAllTrajectoryMessage nextModifiableMessage = stopAllTrajectoryMessageBuffer.next();
       if (nextModifiableMessage == null)
          return;
-      nextModifiableMessage.set(stopAllTrajectoryMessage);
       stopAllTrajectoryMessageBuffer.commit();
+   }
+
+   public void submitAutomaticManipulationAbortMessage(AutomaticManipulationAbortMessage automaticManipulationAbortMessage)
+   {
+      AutomaticManipulationAbortMessage nextModifiableMessage = automaticManipulationAbortMessageBuffer.next();
+      if (nextModifiableMessage == null)
+         return;
+      automaticManipulationAbortMessageBuffer.commit();
    }
 
    public boolean isNewHandTrajectoryMessageAvailable(RobotSide robotSide)
@@ -273,6 +307,11 @@ public class ControllerCommandInputManager
       return pelvisHeightTrajectoryMessageBuffer.poll();
    }
 
+   public boolean isNewGoHomeMessageAvailable()
+   {
+      return goHomeMessageBuffer.poll();
+   }
+
    public boolean isNewFootstepDataListMessageAvailable()
    {
       return footstepDataListMessageBuffer.poll();
@@ -288,77 +327,86 @@ public class ControllerCommandInputManager
       return stopAllTrajectoryMessageBuffer.poll();
    }
 
+   public boolean isNewAutomaticManipulationAbortMessageAvailable()
+   {
+      return automaticManipulationAbortMessageBuffer.poll();
+   }
+
    public ModifiableHandTrajectoryMessage pollHandTrajectoryMessage(RobotSide robotSide)
    {
-      return pollNewestMessage(handTrajectoryMessageBuffers.get(robotSide));
+      controllerHandTrajectoryMessage.set(pollNewestMessage(handTrajectoryMessageBuffers.get(robotSide)));
+      return controllerHandTrajectoryMessage;
    }
 
    public ModifiableArmTrajectoryMessage pollArmTrajectoryMessage(RobotSide robotSide)
    {
-      return pollNewestMessage(armTrajectoryMessageBuffers.get(robotSide));
+      controllerArmTrajectoryMessage.set(pollNewestMessage(armTrajectoryMessageBuffers.get(robotSide)));
+      return controllerArmTrajectoryMessage;
    }
 
    public ModifiableFootTrajectoryMessage pollFootTrajectoryMessage(RobotSide robotSide)
    {
-      return pollNewestMessage(footTrajectoryMessageBuffers.get(robotSide));
+      controllerFootTrajectoryMessage.set(pollNewestMessage(footTrajectoryMessageBuffers.get(robotSide)));
+      return controllerFootTrajectoryMessage;
    }
 
    public ModifiableHeadTrajectoryMessage pollHeadTrajectoryMessage()
    {
-      return pollNewestMessage(headTrajectoryMessageBuffer);
+      controllerHeadTrajectoryMessage.set(pollNewestMessage(headTrajectoryMessageBuffer));
+      return controllerHeadTrajectoryMessage;
    }
 
    public ModifiableChestTrajectoryMessage pollChestTrajectoryMessage()
    {
-      return pollNewestMessage(chestTrajectoryMessageBuffer);
+      controllerChestTrajectoryMessage.set(pollNewestMessage(chestTrajectoryMessageBuffer));
+      return controllerChestTrajectoryMessage;
    }
 
    public ModifiablePelvisTrajectoryMessage pollPelvisTrajectoryMessage()
    {
-      return pollNewestMessage(pelvisTrajectoryMessageBuffer);
+      controllerPelvisTrajectoryMessage.set(pollNewestMessage(pelvisTrajectoryMessageBuffer));
+      return controllerPelvisTrajectoryMessage;
    }
 
    public ModifiablePelvisOrientationTrajectoryMessage pollPelvisOrientationTrajectoryMessage()
    {
-      return pollNewestMessage(pelvisOrientationTrajectoryMessageBuffer);
+      controllerPelvisOrientationTrajectoryMessage.set(pollNewestMessage(pelvisOrientationTrajectoryMessageBuffer));
+      return controllerPelvisOrientationTrajectoryMessage;
    }
 
    public ModifiablePelvisHeightTrajectoryMessage pollPelvisHeightTrajectoryMessage()
    {
-      return pollNewestMessage(pelvisHeightTrajectoryMessageBuffer);
+      controllerPelvisHeightTrajectoryMessage.set(pollNewestMessage(pelvisHeightTrajectoryMessageBuffer));
+      return controllerPelvisHeightTrajectoryMessage;
+   }
+
+   public ModifiableGoHomeMessage pollGoHomeMessage()
+   {
+      controllerGoHomeMessage.set(pollNewestMessage(goHomeMessageBuffer));
+      return controllerGoHomeMessage;
    }
 
    public ModifiableFootstepDataListMessage pollFootstepDataListMessage()
    {
-      return pollNewestMessage(footstepDataListMessageBuffer);
+      controllerFootstepDataListMessage.set(pollNewestMessage(footstepDataListMessageBuffer));
+      return controllerFootstepDataListMessage;
    }
 
    public ModifiableEndEffectorLoadBearingMessage pollEndEffectorLoadBearingMessage()
    {
-      return pollNewestMessage(endEffectorLoadBearingMessageBuffer);
+      controllerEndEffectorLoadBearingMessage.set(pollNewestMessage(endEffectorLoadBearingMessageBuffer));
+      return controllerEndEffectorLoadBearingMessage;
    }
 
-   public ModifiableStopAllTrajectoryMessage pollStopAllTrajectoryMessage()
+   public StopAllTrajectoryMessage pollStopAllTrajectoryMessage()
    {
       return pollNewestMessage(stopAllTrajectoryMessageBuffer);
    }
-   
-   public void reportMessageStatus(Status status, Class<? extends IHMCRosApiMessage<?>> messageClass)
-   {
-      reportMessageStatus(status, messageClass, Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
 
-   public void reportMessageStatus(Status status, Class<? extends IHMCRosApiMessage<?>> messageClass, long id)
+   public AutomaticManipulationAbortMessage pollAutomaticManipulationAbortMessage()
    {
-      for (int i = 0; i < messageStatusListeners.size(); i++)
-      {
-         messageStatusListeners.get(i).receivedNewMessageStatus(status, messageClass, id);
-      }
-   }
-
-   public void subscribeToMessageStatus(MessageStatusListener messageStatusListener)
-   {
-      messageStatusListeners.add(messageStatusListener);
+      controllerAutomaticManipulationAbortMessage.set(pollNewestMessage(automaticManipulationAbortMessageBuffer));
+      return controllerAutomaticManipulationAbortMessage;
    }
 
    public void clearManipulationMessagesInQueue()
