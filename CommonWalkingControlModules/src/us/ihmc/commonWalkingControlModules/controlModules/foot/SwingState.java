@@ -110,9 +110,14 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
             finalConfigurationProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingTimeProvider, registry);
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
+      double maxSwingHeightFromStanceFoot;
+      if (walkingControllerParameters != null)
+         maxSwingHeightFromStanceFoot = walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
+      else
+         maxSwingHeightFromStanceFoot = 0.0;
       swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
-            registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
+            registry, yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, visualizeSwingTrajectory);
 
       pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
             pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);

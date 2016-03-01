@@ -88,16 +88,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private boolean waypointsAreTheSamePoint = false;
    private final double maxSwingHeightFromStanceFoot;
 
-   public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider, PositionProvider initialPositionProvider,
-         VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
-         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
-   {
-      this(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, stancePositionProvider,
-            finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry,
-            walkingControllerParameters.getMaxSwingHeightFromStanceFoot(), visualize);
-   }
-
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
            VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
@@ -136,7 +126,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       positionSources[0] = initialPositionProvider;
       positionSources[1] = finalPositionProvider;
       stancePositionSource = stancePositionProvider;
-      this.maxSwingHeightFromStanceFoot = maxSwingHeightFromStanceFoot;
 
       velocitySources[0] = initialVelocityProvider;
       velocitySources[1] = finalDesiredVelocityProvider;
@@ -167,6 +156,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
       this.visualize.set(visualize);
+      this.maxSwingHeightFromStanceFoot = maxSwingHeightFromStanceFoot;
    }
 
    public void compute(double time)
