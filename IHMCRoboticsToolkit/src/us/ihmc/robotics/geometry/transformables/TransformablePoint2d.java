@@ -37,7 +37,7 @@ public class TransformablePoint2d extends Point2d implements TransformableDataOb
    }
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransform transform)
    {
       applyTransform(transform, true);
    }

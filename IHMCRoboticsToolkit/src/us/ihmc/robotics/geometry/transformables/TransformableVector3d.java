@@ -30,7 +30,7 @@ public class TransformableVector3d extends Vector3d implements TransformableData
    }
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransform transform)
    {
       transform.transform(this);
    }

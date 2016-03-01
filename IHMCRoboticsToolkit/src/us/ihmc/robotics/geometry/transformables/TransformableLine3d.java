@@ -8,10 +8,10 @@ public class TransformableLine3d implements TransformableDataObject
    private final TransformableVector3d direction = new TransformableVector3d();
 
    @Override
-   public void transform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransform transform)
    {
-      origin.transform(transform);
-      direction.transform(transform);
+      origin.applyTransform(transform);
+      direction.applyTransform(transform);
    }
 
    public TransformablePoint3d getOrigin()
