@@ -22,8 +22,6 @@ public class FramePoint extends FrameTuple<TransformablePoint3d>
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
-   private FramePoint temporaryFramePointForMath;
-
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
    public FramePoint(ReferenceFrame referenceFrame, Tuple3d position)
    {
