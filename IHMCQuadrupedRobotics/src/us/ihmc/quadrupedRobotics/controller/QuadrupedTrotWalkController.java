@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine;
 
-public class TrotWalkController extends QuadrupedController
+public class QuadrupedTrotWalkController extends QuadrupedController
 {
    private static final double GRAVITY = 9.81;
    private final double dt;
@@ -201,7 +201,7 @@ public class TrotWalkController extends QuadrupedController
 
    private final StateMachine<QuadrupedWalkingState> stateMachine;
 
-   public TrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrupedStateEstimator stateEstimator, double DT,
+   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrupedStateEstimator stateEstimator, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.TROT_WALK);
