@@ -2,6 +2,7 @@ package us.ihmc.aware.planning;
 
 import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.aware.util.QuadrupedTimedStep;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
@@ -20,7 +21,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 /**
  * A footstep planner capable of planning pace, amble, and trot gaits.
  */
-public class QuadrupedXGaitFootstepPlanner
+public class XGaitStepPlanner
 {
    /**
     * The number of footsteps to generate for each foot. The total number of steps in a plan is 4 times this number.
@@ -33,12 +34,12 @@ public class QuadrupedXGaitFootstepPlanner
    /**
     * The time a foot should spend in the air during its swing state in s.
     */
-   private double swingDuration = 0.8;
+   private double swingDuration = 0.5;
 
    /**
     * The time during which both feet of a front or back pair are in support in s.
     */
-   private double endPairSupportDuration = 0.8;
+   private double endPairSupportDuration = 0.0;
 
    /**
     * The phase offset of the front and back feet pairs in deg.
@@ -53,7 +54,7 @@ public class QuadrupedXGaitFootstepPlanner
    /**
     * The distance between same-end legs during stance.
     */
-   private double stanceWidth = 0.5;
+   private double stanceWidth = 0.35;
 
    /**
     * The forward distance at which a footstep is placed from the previous step.
@@ -66,7 +67,13 @@ public class QuadrupedXGaitFootstepPlanner
    private double strideWidth = 0.0;
 
    // TODO: Compute conversion of arbitrary yaw rate units to rad/s.
-   private double yawRate = 0.05;
+   private double yawRate = 0.0;
+
+   /**
+    * The appearance of the footstep visualization markers for each robot quadrant.
+    */
+   private static final QuadrantDependentList<AppearanceDefinition> footstepAppearance = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Blue(),
+         YoAppearance.Salmon(), YoAppearance.LightBlue());
 
    private final QuadrupedReferenceFrames referenceFrames;
    private final BagOfBalls footstepVisualization;
@@ -79,7 +86,7 @@ public class QuadrupedXGaitFootstepPlanner
 
    private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
-   public QuadrupedXGaitFootstepPlanner(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry,
+   public XGaitStepPlanner(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry,
          QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames = referenceFrames;
@@ -129,7 +136,7 @@ public class QuadrupedXGaitFootstepPlanner
 
             step.getGoalPosition().changeFrame(referenceFrames.getWorldFrame());
             footstepVisualization
-                  .setBallLoop(step.getGoalPosition(), YoAppearance.getStandardRoyGBivRainbow()[quadrant.ordinal()]);
+                  .setBallLoop(step.getGoalPosition(), footstepAppearance.get(quadrant));
          }
       }
 

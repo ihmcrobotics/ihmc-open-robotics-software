@@ -10,7 +10,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class PiecewiseForwardDcmTrajectory
 {
    private boolean initialized;
-   private final int numberOfSteps;
+   private final int maxSteps;
+   private int numSteps;
    private double gravity;
    private double comHeight;
    private final double[] timeAtSoS;
@@ -22,19 +23,20 @@ public class PiecewiseForwardDcmTrajectory
    private final FramePoint[] temporaryFramePoint;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public PiecewiseForwardDcmTrajectory(int numberOfSteps, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public PiecewiseForwardDcmTrajectory(int maxSteps, double gravity, double comHeight, YoVariableRegistry parentRegistry)
    {
-      if (numberOfSteps < 1)
-         throw new RuntimeException("numberOfSteps must be greater than 0");
+      if (maxSteps < 1)
+         throw new RuntimeException("maxSteps must be greater than 0");
 
       this.initialized = false;
-      this.numberOfSteps = numberOfSteps;
+      this.maxSteps = maxSteps;
+      this.numSteps = maxSteps;
       this.gravity = gravity;
       this.comHeight = comHeight;
-      this.timeAtSoS = new double[numberOfSteps];
-      this.dcmPositionAtSoS = new FramePoint[numberOfSteps];
-      this.vrpPositionAtSoS = new FramePoint[numberOfSteps];
-      for (int i = 0; i < numberOfSteps; i++)
+      this.timeAtSoS = new double[maxSteps];
+      this.dcmPositionAtSoS = new FramePoint[maxSteps];
+      this.vrpPositionAtSoS = new FramePoint[maxSteps];
+      for (int i = 0; i < maxSteps; i++)
       {
          this.dcmPositionAtSoS[i] = new FramePoint(ReferenceFrame.getWorldFrame());
          this.vrpPositionAtSoS[i] = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -54,22 +56,24 @@ public class PiecewiseForwardDcmTrajectory
     * Computes a piecewise DCM trajectory assuming a constant CMP during each step. The DCM dynamics
     * are integrated in forward time given the initial DCM position at the start of the first step.
     *
+    * @param numSteps number of steps
     * @param timeAtSoS time at the start of each step
     * @param cmpPositionAtSoS centroidal moment pivot position at the start of each step
     * @param dcmPositionAtSoS divergent component of motion position at the start of the first step
     */
-   public void initializeTrajectory(double[] timeAtSoS, FramePoint[] cmpPositionAtSoS, FramePoint dcmPositionAtSoS)
+   public void initializeTrajectory(int numSteps, double[] timeAtSoS, FramePoint[] cmpPositionAtSoS, FramePoint dcmPositionAtSoS)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double naturalFrequency = Math.sqrt(gravity / comHeight);
 
-      if ((timeAtSoS.length != numberOfSteps) || (cmpPositionAtSoS.length != numberOfSteps))
+      if ((maxSteps < numSteps) || (timeAtSoS.length < numSteps) || (cmpPositionAtSoS.length < numSteps))
       {
-         throw new RuntimeException("length of input vector must be equal to the number of steps");
+         throw new RuntimeException("number of steps exceeds the maximum buffer size");
       }
+      this.numSteps = numSteps;
 
       // compute dcm position at start of each step assuming a piecewise constant vrp trajectory
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 0; i < numSteps; i++)
       {
          this.timeAtSoS[i] = timeAtSoS[i];
          this.vrpPositionAtSoS[i].setIncludingFrame(cmpPositionAtSoS[i]);
@@ -79,7 +83,7 @@ public class PiecewiseForwardDcmTrajectory
 
       this.dcmPositionAtSoS[0].setIncludingFrame(dcmPositionAtSoS);
       this.dcmPositionAtSoS[0].changeFrame(worldFrame);
-      for (int i = 0; i < numberOfSteps - 1; i++)
+      for (int i = 0; i < numSteps - 1; i++)
       {
          this.dcmPositionAtSoS[i + 1].set(this.dcmPositionAtSoS[i]);
          this.dcmPositionAtSoS[i + 1].sub(this.vrpPositionAtSoS[i]);
@@ -93,7 +97,7 @@ public class PiecewiseForwardDcmTrajectory
    {
       this.temporaryDouble[0] = timeAtSoS;
       this.temporaryFramePoint[0].setIncludingFrame(cmpPositionAtSoS);
-      this.initializeTrajectory(temporaryDouble, temporaryFramePoint, dcmPositionAtSoS);
+      this.initializeTrajectory(1, temporaryDouble, temporaryFramePoint, dcmPositionAtSoS);
    }
 
    public void computeTrajectory(double currentTime)
@@ -104,7 +108,7 @@ public class PiecewiseForwardDcmTrajectory
       // compute constant virtual repellent point trajectory between steps
       currentTime = Math.max(currentTime, timeAtSoS[0]);
       double naturalFrequency = Math.sqrt(gravity / comHeight);
-      for (int i = numberOfSteps - 1; i >= 0; i--)
+      for (int i = numSteps - 1; i >= 0; i--)
       {
          if (currentTime >= timeAtSoS[i])
          {
@@ -139,7 +143,7 @@ public class PiecewiseForwardDcmTrajectory
    {
       double comHeight = 1.0;
       double gravity = 9.81;
-      PiecewiseForwardDcmTrajectory dcmTrajectory = new PiecewiseForwardDcmTrajectory(2, gravity, comHeight, null);
+      PiecewiseForwardDcmTrajectory dcmTrajectory = new PiecewiseForwardDcmTrajectory(10, gravity, comHeight, null);
 
       double[] timeAtSoS = new double[] {0.0, 0.4};
       FramePoint[] cmpPositionAtSoS = new FramePoint[2];
@@ -150,7 +154,7 @@ public class PiecewiseForwardDcmTrajectory
 
       FramePoint dcmPositionAtSoS = new FramePoint(ReferenceFrame.getWorldFrame());
       dcmPositionAtSoS.set(0.0, -0.05, comHeight);
-      dcmTrajectory.initializeTrajectory(timeAtSoS, cmpPositionAtSoS, dcmPositionAtSoS);
+      dcmTrajectory.initializeTrajectory(2, timeAtSoS, cmpPositionAtSoS, dcmPositionAtSoS);
 
       FramePoint dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       for (int i = 0; i < timeAtSoS.length; i++)
