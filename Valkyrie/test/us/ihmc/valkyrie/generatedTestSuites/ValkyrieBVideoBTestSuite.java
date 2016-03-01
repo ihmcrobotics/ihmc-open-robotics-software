@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.VideoB)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class
+   us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class
 })
 
 public class ValkyrieBVideoBTestSuite
