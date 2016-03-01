@@ -1,13 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * <p>Title: FrameConvexPolygon2d </p>
@@ -23,11 +23,10 @@ import java.util.List;
  * @author IHMC-Yobotics Biped Team
  * @version 1.0
  */
-public class FrameConvexPolygon2d extends FrameGeometry2d
+public class FrameConvexPolygon2d extends FrameGeometry2d<ConvexPolygon2d>
 {
-   protected ReferenceFrame referenceFrame;
    private final FramePoint2d centroid = new FramePoint2d();
-   protected final ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+   protected final ConvexPolygon2d convexPolygon;
    private final List<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
    
@@ -40,8 +39,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d()
    {
-      referenceFrame = ReferenceFrame.getWorldFrame();
-      update();
+      this(ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -50,7 +48,8 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame)
    {
-      this.referenceFrame = referenceFrame;
+      super(referenceFrame, new ConvexPolygon2d());
+      this.convexPolygon = this.transformableDataObject;
       update();
    }
 
@@ -63,11 +62,13 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, List<Point2d> vertices)
    {
+      this(referenceFrame);
       setIncludingFrameAndUpdate(referenceFrame, vertices);
    }
 
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, Point2d[] vertices)
    {
+      this(referenceFrame);
       setIncludingFrameAndUpdate(referenceFrame, vertices);
    }
 
@@ -79,6 +80,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, double[][] vertices)
    {
+      this(referenceFrame);
       setIncludingFrameAndUpdate(referenceFrame, vertices);
    }
 
@@ -91,6 +93,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(List<FramePoint2d> frameVertices)
    {
+      this();
       setIncludingFrameAndUpdate(frameVertices);
    }
 
@@ -103,6 +106,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(FrameTuple2dArrayList<FramePoint2d> frameVertices)
    {
+      this();
       setIncludingFrameAndUpdate(frameVertices);
    }
 
@@ -113,6 +117,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, ConvexPolygon2d otherPolygon)
    {
+      super(referenceFrame, new ConvexPolygon2d());
+      this.convexPolygon = this.transformableDataObject;
+
       setIncludingFrameAndUpdate(referenceFrame, otherPolygon);
    }
 
@@ -122,6 +129,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(FrameConvexPolygon2d otherPolygon)
    {
+      this();
       setIncludingFrameAndUpdate(otherPolygon);
    }
 
@@ -136,6 +144,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(FrameConvexPolygon2d firstPolygon, FrameConvexPolygon2d secondPolygon)
    {
+      this();
       setIncludingFrameAndUpdate(firstPolygon, secondPolygon);
    }
 
@@ -1000,12 +1009,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       point.checkReferenceFrameMatch(referenceFrame);
 
       return convexPolygon.distanceToClosestVertex(point.getPoint());
-   }
-
-   @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
    }
 
    @Override

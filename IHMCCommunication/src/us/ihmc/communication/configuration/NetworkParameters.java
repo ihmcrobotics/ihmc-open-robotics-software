@@ -116,4 +116,9 @@ public class NetworkParameters
          }
       }
    }
+
+   public static boolean hasKey(NetworkParameterKeys key)
+   {
+      return getInstance().parameters.containsKey(key);
+   }
 }

@@ -4,14 +4,14 @@ import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-public class FramePlane3d extends ReferenceFrameHolder
+public class FramePlane3d extends AbstractReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
    private Plane3d plane3d;

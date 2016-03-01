@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -15,32 +16,32 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple<Vector3d>
+public class FrameVector extends FrameTuple<TransformableVector3d>
 {
    private static final long serialVersionUID = -4475317718392284548L;
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(ReferenceFrame referenceFrame, Tuple3d tuple)
    {
-      super(referenceFrame, new Vector3d(tuple), null);
+      super(referenceFrame, new TransformableVector3d(tuple), null);
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(ReferenceFrame referenceFrame, Tuple3d tuple, String name)
    {
-      super(referenceFrame, new Vector3d(tuple), name);
+      super(referenceFrame, new TransformableVector3d(tuple), name);
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(ReferenceFrame referenceFrame, double[] vector)
    {
-      super(referenceFrame, new Vector3d(vector), null);
+      super(referenceFrame, new TransformableVector3d(vector), null);
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(ReferenceFrame referenceFrame, double[] vector, String name)
    {
-      super(referenceFrame, new Vector3d(vector), name);
+      super(referenceFrame, new TransformableVector3d(vector), name);
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
@@ -52,19 +53,19 @@ public class FrameVector extends FrameTuple<Vector3d>
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new Vector3d(), null);
+      super(referenceFrame, new TransformableVector3d(), null);
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(ReferenceFrame referenceFrame, String name)
    {
-      super(referenceFrame, new Vector3d(), name);
+      super(referenceFrame, new TransformableVector3d(), name);
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(FrameTuple<?> frameTuple)
    {
-      super(frameTuple.referenceFrame, new Vector3d(frameTuple.tuple), frameTuple.name);
+      super(frameTuple.referenceFrame, new TransformableVector3d(frameTuple.tuple), frameTuple.name);
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
@@ -76,7 +77,7 @@ public class FrameVector extends FrameTuple<Vector3d>
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
    public FrameVector(ReferenceFrame referenceFrame, double x, double y, double z, String name)
    {
-      super(referenceFrame, new Vector3d(x, y, z), name);
+      super(referenceFrame, new TransformableVector3d(x, y, z), name);
    }
 
    public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame)
@@ -95,33 +96,6 @@ public class FrameVector extends FrameTuple<Vector3d>
    }
 
    /**
-    * Changes frame of this FramePoint to the given ReferenceFrame, using the given Transform3D.
-    *
-    * @param desiredFrame        ReferenceFrame to change the FramePoint into.
-    * @param transformToNewFrame Transform3D from the current frame to the new desiredFrame
-    */
-   @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      transformToNewFrame.transform(tuple);
-      referenceFrame = desiredFrame;
-   }
-
-   /**
-    * Changes frame of this FrameVector to the given ReferenceFrame, using the given Transform3D and returns a copy.
-    *
-    * @param desiredFrame        ReferenceFrame to change the FrameVector into.
-    * @param transformToNewFrame Transform3D from the current frame to the new desiredFrame
-    * @return Copied FrameVector in the new reference frame.
-    */
-   public FrameVector changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      FrameVector ret = new FrameVector(this);
-      ret.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
-      return ret;
-   }
-
-   /**
     * Retrieves the vector inside this FrameVector
     *
     * @return Vector3d
@@ -129,35 +103,6 @@ public class FrameVector extends FrameTuple<Vector3d>
    public Vector3d getVector()
    {
       return this.tuple;
-   }
-
-   /**
-    * Changes frame of this FrameVector to the given ReferenceFrame.
-    *
-    * @param desiredFrame ReferenceFrame to change the FrameVector into.
-    */
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      if (desiredFrame != referenceFrame)
-      {
-         referenceFrame.verifySameRoots(desiredFrame);
-         RigidBodyTransform referenceTf, desiredTf;
-         
-         if ((referenceTf = referenceFrame.getTransformToRoot()) != null)
-         {
-           referenceTf.transform(tuple);
-         }
-
-         if ((desiredTf = desiredFrame.getInverseTransformToRoot()) != null)
-         {
-            desiredTf.transform(tuple);
-         }
-         
-         referenceFrame = desiredFrame;
-      }
-      
-      // otherwise: in the right frame already, so do nothing
    }
 
    /**

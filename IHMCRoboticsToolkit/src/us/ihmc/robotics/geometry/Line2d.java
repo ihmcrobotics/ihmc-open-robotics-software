@@ -650,4 +650,10 @@ public class Line2d implements Geometry2d
          throw new RuntimeException("Tried to create a line from two coincidal points");
       }
    }
+
+   @Override
+   public void transform(RigidBodyTransform transform)
+   {
+      this.applyTransform(transform);
+   }
 }

@@ -359,7 +359,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
 
       try
       {
-         vectorToTest.applyTransformCopy(transform);
+         vectorToTest.applyTransform(transform);
          fail("Should have thrown RuntimeException");
       }
       catch(RuntimeException re)
@@ -374,7 +374,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d vectorToTest2 = new FrameVector2d(null, matrix);
 
       transform2.transform(vectorToTransform2);
-      vectorToTest2 = vectorToTest2.applyTransformCopy(transform2);
+      vectorToTest2.applyTransform(transform2);
 
       assertEquals("Should be equal", vectorToTransform2.getX(), vectorToTest2.getX(), epsilon);
       assertEquals("Should be equal", vectorToTransform2.getY(), vectorToTest2.getY(), epsilon);
@@ -397,25 +397,6 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       assertEquals("Should be equal", vectorToTransform.getY(), vectorToTest.getY(), epsilon);
       vectorToTest.checkReferenceFrameMatch(theFrame);
    }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-      public void testChangeFrameUsingTransformCopy_ReferenceFrame_Transform3D()
-      {
-         double[] matrix = {6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0};
-         RigidBodyTransform transform = new RigidBodyTransform(matrix);
-
-         Vector3d vectorToTransform = new Vector3d(matrix);
-         FrameVector2d vectorToTest = new FrameVector2d(aFrame, matrix);
-         FrameVector2d copy = new FrameVector2d();
-
-         transform.transform(vectorToTransform);
-         copy = vectorToTest.changeFrameUsingTransformCopy(theFrame, transform);
-
-         assertEquals("Should be equal", vectorToTransform.getX(), copy.getX(), epsilon);
-         assertEquals("Should be equal", vectorToTransform.getY(), copy.getY(), epsilon);
-         copy.checkReferenceFrameMatch(theFrame);
-      }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -442,28 +423,16 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
 
    }
 
-   // NaN was found in beta, commented out for further testing
-
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckForNaN()
    {
       FrameVector alpha = new FrameVector(ReferenceFrame.getWorldFrame(), 6.0, 50.0, 2.0);
 
-      // FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), Math.sqrt(1.0), 2.0, 3.0);
+      FrameVector beta = new FrameVector(ReferenceFrame.getWorldFrame(), Math.sqrt(1.0), 2.0, 3.0);
       alpha.checkForNaN();
-
-      // beta.checkForNaN();
+      beta.checkForNaN();
    }
-
-   /*
-    * public void test() { ReferenceFrame worldFrame =
-    * ReferenceFrame.getWorldFrame(); FrameVector vWorld = new
-    * FrameVector(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
-    * 
-    * ArrayList<ReferenceFrame> frames = new ArrayList<ReferenceFrame>();
-    * frames.add(worldFrame); frames.clear(); }
-    */
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)

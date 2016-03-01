@@ -1,16 +1,19 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.io.Serializable;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
-import java.io.Serializable;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on tuples occur within the same Frame.
@@ -19,18 +22,19 @@ import java.io.Serializable;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder implements Serializable
+public abstract class FrameTuple<T extends Tuple3d & TransformableDataObject> extends AbstractFrameObject<T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
    private static final boolean DEBUG = false;
 
-   protected ReferenceFrame referenceFrame;
    protected final T tuple;
    protected String name;
 
    public FrameTuple(ReferenceFrame referenceFrame, T tuple, String name)
    {
+      super(referenceFrame, tuple);
+      
       if (DEBUG)
       {
          if (referenceFrame == null)
@@ -40,8 +44,7 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
          }
       }
 
-      this.referenceFrame = referenceFrame;
-      this.tuple = tuple;
+      this.tuple = transformableDataObject;
       this.name = name;
    }
 
@@ -644,13 +647,13 @@ public abstract class FrameTuple<T extends Tuple3d> extends ReferenceFrameHolder
       return referenceFrame;
    }
 
-   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract FrameTuple<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract void applyTransform(RigidBodyTransform transform);
-
-   public abstract void changeFrame(ReferenceFrame desiredFrame);
+//   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract FrameTuple<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract void applyTransform(RigidBodyTransform transform);
+//
+//   public abstract void changeFrame(ReferenceFrame desiredFrame);
 
    public final double[] toArray()
    {
