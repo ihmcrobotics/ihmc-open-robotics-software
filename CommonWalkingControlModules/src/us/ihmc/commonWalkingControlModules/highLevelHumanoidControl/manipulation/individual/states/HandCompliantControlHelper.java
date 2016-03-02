@@ -4,6 +4,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -289,6 +290,15 @@ public class HandCompliantControlHelper
 
       desiredPosition.changeFrame(originalFrame);
       desiredOrientation.changeFrame(originalFrame);
+   }
+
+   public void handleHandComplianceControlParametersMessage(ModifiableHandComplianceControlParametersMessage message)
+   {
+      setEnableLinearCompliance(message.getEnableLinearCompliance());
+      setEnableAngularCompliance(message.getEnableAngularCompliance());
+      setDesiredForceOfHandOntoExternalEnvironment(message.getDesiredForce());
+      setDesiredTorqueOfHandOntoExternalEnvironment(message.getDesiredTorque());
+      setMeasuredWrenchDeadzoneSize(message.getForceDeadZone(), message.getTorqueDeadZone());
    }
 
    public void disableLinearCompliance()

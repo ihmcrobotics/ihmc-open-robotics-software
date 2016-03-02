@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PacketValidityChecker
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -39,6 +40,7 @@ public class ControllerNetworkSubscriber
       setupStopAllTrajectoryMessageSubscriber();
       setupArmDesiredAccelerationsMessageSubscriber();
       setupWholeBodyTrajectoryMessageSubscriber();
+      setupHandComplianceControlParametersMessageSubscriber();
    }
 
    private void setupHandTrajectoryMessageSubscriber()
@@ -256,5 +258,21 @@ public class ControllerNetworkSubscriber
          }
       };
       globalDataProducer.attachListener(ArmDesiredAccelerationsMessage.class, messageSubscriber);
+   }
+
+   private void setupHandComplianceControlParametersMessageSubscriber()
+   {
+      PacketConsumer<HandComplianceControlParametersMessage> messageSubscriber = new PacketConsumer<HandComplianceControlParametersMessage>()
+      {
+         @Override
+         public void receivedPacket(HandComplianceControlParametersMessage message)
+         {
+            if (message == null || message.getRobotSide() == null)
+               return;
+
+            controllerCommandInputManager.submitHandComplianceControlParametersMessage(message);
+         }
+      };
+      globalDataProducer.attachListener(HandComplianceControlParametersMessage.class, messageSubscriber);
    }
 }

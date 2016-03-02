@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessag
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
@@ -76,15 +75,12 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
 
-      HandComplianceControlParametersSubscriber handComplianceControlParametersProvider = null;
-
       AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(headTrajectoryMessageSubscriber, chestTrajectoryMessageSubscriber,
             pelvisTrajectoryMessageSubscriber, pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber,
             stopAllTrajectoryMessageSubscriber, pelvisHeightTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepProvider,
-            handComplianceControlParametersProvider, automaticManipulationAbortCommunicator, highLevelStateProvider, capturabilityBasedStatusProducer,
-            abortWalkingProvider);
+            automaticManipulationAbortCommunicator, highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }

@@ -1887,6 +1887,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             manipulationControlModule.handleHandTrajectoryMessage(commandInputManager.pollHandTrajectoryMessage(robotSide));
          if (commandInputManager.isNewArmDesiredAccelerationsMessageAvailable(robotSide))
             manipulationControlModule.handleArmDesiredAccelerationsMessage(commandInputManager.pollArmDesiredAccelerationsMessage(robotSide));
+         if (commandInputManager.isNewHandComplianceControlParametersMessageAvailable(robotSide))
+            manipulationControlModule.handleHandComplianceControlParametersMessage(commandInputManager.pollHandComplianceControlParametersMessage(robotSide));
       }
 
    }

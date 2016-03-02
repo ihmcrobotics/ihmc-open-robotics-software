@@ -15,6 +15,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
@@ -503,6 +504,14 @@ public class HandControlModule
       }
    }
 
+   public void handleHandComplianceControlParametersMessage(ModifiableHandComplianceControlParametersMessage message)
+   {
+      if (taskSpacePositionControlState instanceof TaskspaceToJointspaceHandPositionControlState)
+      {
+         ((TaskspaceToJointspaceHandPositionControlState) taskSpacePositionControlState).handleHandComplianceControlParametersMessage(message);
+      }
+   }
+
    private <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<T> trajectoryPointLists)
    {
       if (trajectoryPointLists.size() != oneDoFJoints.length)
@@ -787,16 +796,5 @@ public class HandControlModule
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
-   }
-
-   public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce,
-         Vector3d desiredTorque, double forceDeadzone, double torqueDeadzone)
-   {
-      if (taskSpacePositionControlState instanceof TaskspaceToJointspaceHandPositionControlState)
-      {
-         TaskspaceToJointspaceHandPositionControlState taskspaceToJointspaceHandPositionControlState = (TaskspaceToJointspaceHandPositionControlState) taskSpacePositionControlState;
-         taskspaceToJointspaceHandPositionControlState.setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce,
-               desiredTorque, forceDeadzone, torqueDeadzone);
-      }
    }
 }

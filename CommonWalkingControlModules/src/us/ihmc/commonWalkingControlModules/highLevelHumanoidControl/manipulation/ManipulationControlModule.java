@@ -3,12 +3,11 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
@@ -18,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -54,7 +52,6 @@ public class ManipulationControlModule
 
    private final EndEffectorLoadBearingMessageSubscriber effectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
-   private final HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber;
    private final GoHomeMessageSubscriber goHomeMessageSubscriber;
 
    private final BooleanYoVariable isIgnoringInputs = new BooleanYoVariable("isManipulationIgnoringInputs", registry);
@@ -74,7 +71,6 @@ public class ManipulationControlModule
 
       effectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
-      handComplianceControlParametersSubscriber = variousWalkingProviders.getHandComplianceControlParametersSubscriber();
       goHomeMessageSubscriber = variousWalkingProviders.getGoHomeMessageSubscriber();
 
       handControlModules = new SideDependentList<HandControlModule>();
@@ -147,8 +143,6 @@ public class ManipulationControlModule
          handleLoadBearing(robotSide);
          handleStopAllTrajectoryMessages(robotSide);
          handleGoHomeMessages(robotSide);
-
-         handleCompliantControlRequests(robotSide);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -193,28 +187,6 @@ public class ManipulationControlModule
          goToDefaultState(robotSide, goHomeMessageSubscriber.pollMessage(BodyPart.ARM, robotSide));
    }
 
-   private void handleCompliantControlRequests(RobotSide robotSide)
-   {
-      if (handComplianceControlParametersSubscriber != null && handComplianceControlParametersSubscriber.checkForNewRequest(robotSide))
-      {
-         if (handComplianceControlParametersSubscriber.isResetRequested(robotSide))
-         {
-            handControlModules.get(robotSide).setEnableCompliantControl(false, null, null, null, null, Double.NaN, Double.NaN);
-         }
-         else
-         {
-            boolean[] enableLinearCompliance = handComplianceControlParametersSubscriber.getEnableLinearCompliance(robotSide);
-            boolean[] enableAngularCompliance = handComplianceControlParametersSubscriber.getEnableAngularCompliance(robotSide);
-            Vector3d desiredForce = handComplianceControlParametersSubscriber.getDesiredForce(robotSide);
-            Vector3d desiredTorque = handComplianceControlParametersSubscriber.getDesiredTorque(robotSide);
-            double forceDeadzone = handComplianceControlParametersSubscriber.getForceDeadzone(robotSide);
-            double torqueDeadzone = handComplianceControlParametersSubscriber.getTorqueDeadzone(robotSide);
-            handControlModules.get(robotSide).setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce, desiredTorque,
-                  forceDeadzone, torqueDeadzone);
-         }
-      }
-   }
-
    public void handleHandTrajectoryMessage(ModifiableHandTrajectoryMessage handTrajectoryMessage)
    {
       RobotSide robotSide = handTrajectoryMessage.getRobotSide();
@@ -231,6 +203,12 @@ public class ManipulationControlModule
    {
       RobotSide robotSide = armDesiredAccelerationsMessage.getRobotSide();
       handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage);
+   }
+
+   public void handleHandComplianceControlParametersMessage(ModifiableHandComplianceControlParametersMessage message)
+   {
+      RobotSide robotSide = message.getRobotSide();
+      handControlModules.get(robotSide).handleHandComplianceControlParametersMessage(message);
    }
 
    public void goToDefaultState()
