@@ -453,7 +453,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       super.initialize();
 
-      commandInputManager.clearMessagesInQueue();
+      commandInputManager.flushBuffers();
 
       initializeContacts();
 
@@ -1875,7 +1875,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {
-         commandInputManager.clearManipulationMessagesInQueue();
+         commandInputManager.flushManipulationBuffers();
          return;
       }
 

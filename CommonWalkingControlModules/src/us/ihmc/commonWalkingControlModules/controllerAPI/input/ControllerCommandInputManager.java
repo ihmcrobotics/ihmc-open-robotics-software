@@ -368,94 +368,94 @@ public class ControllerCommandInputManager
 
    public ModifiableHandTrajectoryMessage pollHandTrajectoryMessage(RobotSide robotSide)
    {
-      controllerHandTrajectoryMessage.set(pollNewestMessage(handTrajectoryMessageBuffers.get(robotSide)));
+      controllerHandTrajectoryMessage.set(pollMessage(handTrajectoryMessageBuffers.get(robotSide)));
       return controllerHandTrajectoryMessage;
    }
 
    public ModifiableArmTrajectoryMessage pollArmTrajectoryMessage(RobotSide robotSide)
    {
-      controllerArmTrajectoryMessage.set(pollNewestMessage(armTrajectoryMessageBuffers.get(robotSide)));
+      controllerArmTrajectoryMessage.set(pollMessage(armTrajectoryMessageBuffers.get(robotSide)));
       return controllerArmTrajectoryMessage;
    }
 
    public ModifiableFootTrajectoryMessage pollFootTrajectoryMessage(RobotSide robotSide)
    {
-      controllerFootTrajectoryMessage.set(pollNewestMessage(footTrajectoryMessageBuffers.get(robotSide)));
+      controllerFootTrajectoryMessage.set(pollMessage(footTrajectoryMessageBuffers.get(robotSide)));
       return controllerFootTrajectoryMessage;
    }
 
    public ModifiableHeadTrajectoryMessage pollHeadTrajectoryMessage()
    {
-      controllerHeadTrajectoryMessage.set(pollNewestMessage(headTrajectoryMessageBuffer));
+      controllerHeadTrajectoryMessage.set(pollMessage(headTrajectoryMessageBuffer));
       return controllerHeadTrajectoryMessage;
    }
 
    public ModifiableChestTrajectoryMessage pollChestTrajectoryMessage()
    {
-      controllerChestTrajectoryMessage.set(pollNewestMessage(chestTrajectoryMessageBuffer));
+      controllerChestTrajectoryMessage.set(pollMessage(chestTrajectoryMessageBuffer));
       return controllerChestTrajectoryMessage;
    }
 
    public ModifiablePelvisTrajectoryMessage pollPelvisTrajectoryMessage()
    {
-      controllerPelvisTrajectoryMessage.set(pollNewestMessage(pelvisTrajectoryMessageBuffer));
+      controllerPelvisTrajectoryMessage.set(pollMessage(pelvisTrajectoryMessageBuffer));
       return controllerPelvisTrajectoryMessage;
    }
 
    public ModifiablePelvisOrientationTrajectoryMessage pollPelvisOrientationTrajectoryMessage()
    {
-      controllerPelvisOrientationTrajectoryMessage.set(pollNewestMessage(pelvisOrientationTrajectoryMessageBuffer));
+      controllerPelvisOrientationTrajectoryMessage.set(pollMessage(pelvisOrientationTrajectoryMessageBuffer));
       return controllerPelvisOrientationTrajectoryMessage;
    }
 
    public ModifiablePelvisHeightTrajectoryMessage pollPelvisHeightTrajectoryMessage()
    {
-      controllerPelvisHeightTrajectoryMessage.set(pollNewestMessage(pelvisHeightTrajectoryMessageBuffer));
+      controllerPelvisHeightTrajectoryMessage.set(pollMessage(pelvisHeightTrajectoryMessageBuffer));
       return controllerPelvisHeightTrajectoryMessage;
    }
 
    public ModifiableGoHomeMessage pollGoHomeMessage()
    {
-      controllerGoHomeMessage.set(pollNewestMessage(goHomeMessageBuffer));
+      controllerGoHomeMessage.set(pollMessage(goHomeMessageBuffer));
       return controllerGoHomeMessage;
    }
 
    public ModifiableFootstepDataListMessage pollFootstepDataListMessage()
    {
-      controllerFootstepDataListMessage.set(pollNewestMessage(footstepDataListMessageBuffer));
+      controllerFootstepDataListMessage.set(pollMessage(footstepDataListMessageBuffer));
       return controllerFootstepDataListMessage;
    }
 
    public ModifiableEndEffectorLoadBearingMessage pollEndEffectorLoadBearingMessage()
    {
-      controllerEndEffectorLoadBearingMessage.set(pollNewestMessage(endEffectorLoadBearingMessageBuffer));
+      controllerEndEffectorLoadBearingMessage.set(pollMessage(endEffectorLoadBearingMessageBuffer));
       return controllerEndEffectorLoadBearingMessage;
    }
 
    public StopAllTrajectoryMessage pollStopAllTrajectoryMessage()
    {
-      return pollNewestMessage(stopAllTrajectoryMessageBuffer);
+      return pollMessage(stopAllTrajectoryMessageBuffer);
    }
 
    public ModifiableArmDesiredAccelerationsMessage pollArmDesiredAccelerationsMessage(RobotSide robotSide)
    {
-      controllerArmDesiredAccelerationsMessage.set(pollNewestMessage(armDesiredAccelerationsMessageBuffers.get(robotSide)));
+      controllerArmDesiredAccelerationsMessage.set(pollMessage(armDesiredAccelerationsMessageBuffers.get(robotSide)));
       return controllerArmDesiredAccelerationsMessage;
    }
 
    public AutomaticManipulationAbortMessage pollAutomaticManipulationAbortMessage()
    {
-      controllerAutomaticManipulationAbortMessage.set(pollNewestMessage(automaticManipulationAbortMessageBuffer));
+      controllerAutomaticManipulationAbortMessage.set(pollMessage(automaticManipulationAbortMessageBuffer));
       return controllerAutomaticManipulationAbortMessage;
    }
 
    public ModifiableHandComplianceControlParametersMessage pollHandComplianceControlParametersMessage(RobotSide robotSide)
    {
-      controllerHandComplianceControlParametersMessage.set(pollNewestMessage(handComplianceControlParametersMessageBuffers.get(robotSide)));
+      controllerHandComplianceControlParametersMessage.set(pollMessage(handComplianceControlParametersMessageBuffers.get(robotSide)));
       return controllerHandComplianceControlParametersMessage;
    }
 
-   public void clearManipulationMessagesInQueue()
+   public void flushManipulationBuffers()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -466,13 +466,13 @@ public class ControllerCommandInputManager
       }
    }
 
-   public void clearMessagesInQueue()
+   public void flushBuffers()
    {
       for (int i = 0; i < allBuffers.size(); i++)
          allBuffers.get(i).flush();
    }
 
-   private static <T> T pollNewestMessage(ConcurrentRingBuffer<T> buffer)
+   private static <T> T pollMessage(ConcurrentRingBuffer<T> buffer)
    {
       if (buffer.poll())
       {
