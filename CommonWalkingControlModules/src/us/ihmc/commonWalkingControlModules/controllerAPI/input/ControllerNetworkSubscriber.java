@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
@@ -50,7 +49,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(HandTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateHandTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -71,7 +70,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(ArmTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateArmTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -92,7 +91,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(FootTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateFootTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -113,7 +112,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(HeadTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateHeadTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -134,7 +133,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(ChestTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateChestTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -155,7 +154,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(PelvisTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validatePelvisTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -176,7 +175,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(PelvisHeightTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validatePelvisHeightTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -197,7 +196,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(PelvisOrientationTrajectoryMessage message)
          {
-            String errorMessage = PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -218,11 +217,11 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(WholeBodyTrajectoryMessage message)
          {
-            if (PacketValidityChecker.validatePacket(message, true) != null)
-               return;
-            if (!message.checkRobotSideConsistency())
+            String errorMessage = message.validateMessage();
+            if (errorMessage != null)
             {
-               globalDataProducer.notifyInvalidPacketReceived(message.getClass(), "The robotSide of a field is inconsistent with its name.");
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
             }
             
@@ -239,7 +238,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(FootstepDataListMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateFootstepDataListMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                globalDataProducer.notifyInvalidPacketReceived(FootstepDataListMessage.class, errorMessage);
@@ -259,7 +258,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(EndEffectorLoadBearingMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateEndEffectorLoadBearingMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -296,7 +295,7 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(ArmDesiredAccelerationsMessage message)
          {
-            String errorMessage = PacketValidityChecker.validateArmDesiredAccelerationsMessage(message);
+            String errorMessage = message.validateMessage();
             if (errorMessage != null)
             {
                if (globalDataProducer != null)
@@ -317,8 +316,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(HandComplianceControlParametersMessage message)
          {
-            if (message == null || message.getRobotSide() == null)
+            String errorMessage = message.validateMessage();
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }

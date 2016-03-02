@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -251,5 +252,20 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
          transformedWholeBodyTrajectoryMessage.rightFootTrajectoryMessage = rightFootTrajectoryMessage.transform(transform);
 
       return transformedWholeBodyTrajectoryMessage;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      String errorMessage = PacketValidityChecker.validatePacket(this, true);
+      if (errorMessage != null)
+         return errorMessage;
+      if (!checkRobotSideConsistency())
+      {
+         errorMessage = "The robotSide of a field is inconsistent with its name.";
+         return errorMessage;
+      }
+      return null;
    }
 }
