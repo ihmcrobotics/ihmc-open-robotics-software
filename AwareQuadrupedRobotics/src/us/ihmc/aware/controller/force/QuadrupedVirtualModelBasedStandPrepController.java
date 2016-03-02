@@ -104,7 +104,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
       params.setDefault(PARAM_STANCE_LENGTH, 1.0);
       params.setDefault(PARAM_STANCE_WIDTH, 0.5);
-      params.setDefault(PARAM_STANCE_HEIGHT, 0.65);
+      params.setDefault(PARAM_STANCE_HEIGHT, 0.60);
       params.setDefault(PARAM_STANCE_X_OFFSET, 0.05);
       params.setDefault(PARAM_STANCE_Y_OFFSET, 0.0);
 
@@ -188,10 +188,11 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       }
 
       // Show the VMC visualizations.
-      vmc.setVisible(false);
+      vmc.setVisible(true);
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          vmc.setSoleVirtualForceVisible(quadrant, true);
+         vmc.setSoleContactForceVisible(quadrant, false);
       }
 
       trajectoryStartTime = environment.getRobotTimestamp().getDoubleValue();

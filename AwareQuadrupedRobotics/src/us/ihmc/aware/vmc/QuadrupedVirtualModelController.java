@@ -10,6 +10,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -50,8 +51,12 @@ public class QuadrupedVirtualModelController
    private final DenseMatrix64F virtualForceVector;
 
    private final YoGraphicsList yoGraphicsList;
-   private final QuadrantDependentList<YoGraphicVector> yoSoleVirtualForceViz;
-   private final QuadrantDependentList<YoGraphicVector> yoSoleContactForceViz;
+   private final QuadrantDependentList<YoGraphicVector> yoSoleVirtualForceGraphic;
+   private final QuadrantDependentList<YoFramePoint> yoSoleVirtualForceGraphicPosition;
+   private final QuadrantDependentList<BooleanYoVariable> yoSoleVirtualForceGraphicVisible;
+   private final QuadrantDependentList<YoGraphicVector> yoSoleContactForceGraphic;
+   private final QuadrantDependentList<YoFramePoint> yoSoleContactForceGraphicPosition;
+   private final QuadrantDependentList<BooleanYoVariable> yoSoleContactForceGraphicVisible;
 
    public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -82,10 +87,10 @@ public class QuadrupedVirtualModelController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SolePosition", worldFrame, registry));
-         yoSoleVirtualForce.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleVirtualForce", worldFrame, registry));
-         yoSoleContactForce.set(robotQuadrant,
-               new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleContactForce", worldFrame, registry));
+         yoSoleVirtualForce
+               .set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleVirtualForce", worldFrame, registry));
+         yoSoleContactForce
+               .set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseNameForStartOfExpression() + "SoleContactForce", worldFrame, registry));
       }
 
       // initialize jacobian variables
@@ -108,19 +113,23 @@ public class QuadrupedVirtualModelController
 
       // initialize graphics
       yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
-      yoSoleVirtualForceViz = new QuadrantDependentList<>();
-      yoSoleContactForceViz = new QuadrantDependentList<>();
+      yoSoleVirtualForceGraphic = new QuadrantDependentList<>();
+      yoSoleVirtualForceGraphicPosition = new QuadrantDependentList<>();
+      yoSoleVirtualForceGraphicVisible = new QuadrantDependentList<>();
+      yoSoleContactForceGraphic = new QuadrantDependentList<>();
+      yoSoleContactForceGraphicPosition = new QuadrantDependentList<>();
+      yoSoleContactForceGraphicVisible = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {
-         String prefix = parentRegistry.getName();
-         yoSoleVirtualForceViz.set(robotQuadrant,
-               new YoGraphicVector(prefix + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + "SoleVirtualForce", yoSolePosition.get(robotQuadrant),
-                     yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.Blue()));
-         yoSoleContactForceViz.set(robotQuadrant,
-               new YoGraphicVector(prefix + robotQuadrant.getCamelCaseNameForMiddleOfExpression() + "SoleContactForce", yoSolePosition.get(robotQuadrant),
-                     yoSoleContactForce.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
-         yoGraphicsList.add(yoSoleVirtualForceViz.get(robotQuadrant));
-         yoGraphicsList.add(yoSoleContactForceViz.get(robotQuadrant));
+         String prefix = parentRegistry.getName() + robotQuadrant.getCamelCaseNameForMiddleOfExpression();
+         yoSoleVirtualForceGraphicPosition.set(robotQuadrant, new YoFramePoint(prefix + "SoleVirtualForceGraphicPosition", worldFrame, registry));
+         yoSoleVirtualForceGraphicVisible.set(robotQuadrant, new BooleanYoVariable(prefix + "SoleVirtualForceGraphicVisible", registry));
+         yoSoleVirtualForceGraphic.set(robotQuadrant, new YoGraphicVector(prefix + "SoleVirtualForce", yoSoleVirtualForceGraphicPosition.get(robotQuadrant), yoSoleVirtualForce.get(robotQuadrant), 0.002, YoAppearance.Blue()));
+         yoSoleContactForceGraphicPosition.set(robotQuadrant, new YoFramePoint(prefix + "SoleContactForceGraphicPosition", worldFrame, registry));
+         yoSoleContactForceGraphicVisible.set(robotQuadrant, new BooleanYoVariable(prefix + "SoleContactForceGraphicVisible", registry));
+         yoSoleContactForceGraphic.set(robotQuadrant, new YoGraphicVector(prefix + "SoleContactForce", yoSoleContactForceGraphicPosition.get(robotQuadrant), yoSoleContactForce.get(robotQuadrant), 0.002, YoAppearance.Chartreuse()));
+         yoGraphicsList.add(yoSoleVirtualForceGraphic.get(robotQuadrant));
+         yoGraphicsList.add(yoSoleContactForceGraphic.get(robotQuadrant));
       }
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
@@ -203,33 +212,43 @@ public class QuadrupedVirtualModelController
          }
       }
 
+      // update yo variables
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         soleVirtualForce.get(robotQuadrant).changeFrame(yoSoleVirtualForce.get(robotQuadrant).getReferenceFrame());
-         yoSoleVirtualForce.get(robotQuadrant).set(soleVirtualForce.get(robotQuadrant));
-         soleContactForce.get(robotQuadrant).changeFrame(yoSoleContactForce.get(robotQuadrant).getReferenceFrame());
-         yoSoleContactForce.get(robotQuadrant).set(soleContactForce.get(robotQuadrant));
-         solePosition.get(robotQuadrant).changeFrame(yoSolePosition.get(robotQuadrant).getReferenceFrame());
-         yoSolePosition.get(robotQuadrant).set(solePosition.get(robotQuadrant));
+         yoSoleVirtualForce.get(robotQuadrant).setAndMatchFrame(soleVirtualForce.get(robotQuadrant));
+         yoSoleContactForce.get(robotQuadrant).setAndMatchFrame(soleContactForce.get(robotQuadrant));
+         yoSolePosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+      }
+
+      // update yo graphics
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         // move graphics off screen if visible is set to false
+         if (yoSoleVirtualForceGraphicVisible.get(robotQuadrant).getBooleanValue())
+            yoSoleVirtualForceGraphicPosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+         else
+            yoSoleVirtualForceGraphicPosition.get(robotQuadrant).set(1E6, 1E6, 1E6);
+
+         if (yoSoleContactForceGraphicVisible.get(robotQuadrant).getBooleanValue())
+            yoSoleContactForceGraphicPosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+         else
+            yoSoleContactForceGraphicPosition.get(robotQuadrant).set(1E6, 1E6, 1E6);
       }
    }
 
    public void setVisible(boolean visible)
    {
-      if (visible == false)
-      {
-         yoGraphicsList.setVisible(false);
-      }
+      yoGraphicsList.setVisible(visible);
    }
 
    public void setSoleVirtualForceVisible(RobotQuadrant robotQuadrant, boolean visible)
    {
-      yoSoleVirtualForceViz.get(robotQuadrant).setVisible(visible);
+      yoSoleVirtualForceGraphicVisible.get(robotQuadrant).set(visible);
    }
 
    public void setSoleContactForceVisible(RobotQuadrant robotQuadrant, boolean visible)
    {
-      yoSoleContactForceViz.get(robotQuadrant).setVisible(visible);
+      yoSoleContactForceGraphicVisible.get(robotQuadrant).set(visible);
    }
 
    public YoVariableRegistry getRegistry()
