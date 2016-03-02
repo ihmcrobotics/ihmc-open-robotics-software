@@ -31,7 +31,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public abstract class PacketValidityChecker
@@ -315,134 +314,111 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static boolean validateSteeringWheelInformationPacket(SteeringWheelInformationPacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic,
-         HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateSteeringWheelInformationPacket(SteeringWheelInformationPacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic)
    {
-      boolean packetIsValid = true;
-
       if (packet.getRobotSide() == null)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering hand side missing");
+         String errorMessage = "Steering hand side missing";
+         return errorMessage;
       }
 
       if (packet.getSteeringWheelCenter() == null)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel center missing");
+         String errorMessage = "Steering wheel center missing";
+         return errorMessage;
       }
 
       if (packet.getSteeringWheelRotationAxis() == null)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel rotation axis missing");
+         String errorMessage = "Steering wheel rotation axis missing";
+         return errorMessage;
       }
 
       if (packet.getSteeringWheelZeroAxis() == null)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel zero axis missing");
+         String errorMessage = "Steering wheel zero axis missing";
+         return errorMessage;
       }
 
       if (Double.isNaN(packet.getSteeringWheelRadius()))
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel radius missing");
+         String errorMessage = "Steering wheel radius missing";
+         return errorMessage;
       }
 
       if (packet.getSteeringWheelId() <= 0)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class,
-                  "Invalid steering wheel ID, must be greater than or equal to 1");
+         String errorMessage = "Invalid steering wheel ID, must be greater than or equal to 1";
+         return errorMessage;
       }
 
       if (packet.getSteeringWheelId() == steeringWheelIdAtomic.get(packet.getRobotSide()).get())
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class,
-                  "Invalid steering wheel ID, must be different than the previous ID");
+         String errorMessage = "Invalid steering wheel ID, must be different than the previous ID";
+         return errorMessage;
       }
 
       ObjectErrorType errorType = ObjectValidityChecker.validateTuple3d(packet.getSteeringWheelCenter());
 
       if (errorType != null)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel center " + errorType.getMessage());
+         String errorMessage = "Steering wheel center " + errorType.getMessage();
+         return errorMessage;
       }
 
       errorType = ObjectValidityChecker.validateTuple3d(packet.getSteeringWheelRotationAxis());
 
       if (errorType != null)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel rotation axis " + errorType.getMessage());
+         String errorMessage = "Steering wheel rotation axis " + errorType.getMessage();
+         return errorMessage;
       }
 
       errorType = ObjectValidityChecker.validateTuple3d(packet.getSteeringWheelCenter());
 
       if (errorType != null)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel zero axis " + errorType.getMessage());
+         String errorMessage = "Steering wheel zero axis " + errorType.getMessage();
+         return errorMessage;
       }
 
-      return packetIsValid;
+      return null;
    }
 
-   public static boolean validateDesiredSteeringAnglePacket(DesiredSteeringAnglePacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic,
-         HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateDesiredSteeringAnglePacket(DesiredSteeringAnglePacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic)
    {
-      boolean packetIsValid = true;
-
       if (Double.isNaN(packet.getDesiredAbsoluteSteeringAngle()))
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Desired steering angle missing");
+         String errorMessage = "Desired steering angle missing";
+         return errorMessage;
       }
 
       if (steeringWheelIdAtomic.get(packet.getRobotSide()).get() == -1)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Never received SteeringWheelInformationPacket");
+         String errorMessage = "Never received SteeringWheelInformationPacket";
+         return errorMessage;
       }
 
       if (packet.getSteeringWheelId() <= 0)
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Invalid steering wheel ID, must be greater than or equal to 1");
+         String errorMessage = "Invalid steering wheel ID, must be greater than or equal to 1";
+         return errorMessage;
       }
 
       if (packet.getSteeringWheelId() != steeringWheelIdAtomic.get(packet.getRobotSide()).get())
       {
-         packetIsValid = false;
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class,
-                  "Unexpected steering wheel ID, probably dropped the last SteeringWheelInformationPacket");
+         String errorMessage = "Unexpected steering wheel ID, probably dropped the last SteeringWheelInformationPacket";
+         return errorMessage;
       }
 
-      return packetIsValid;
+      return null;
    }
 
-   public static boolean validateHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
       String errorMessage = validatePacket(handTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
@@ -450,9 +426,7 @@ public abstract class PacketValidityChecker
       if (handTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int i = 0; i < handTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
@@ -462,9 +436,7 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
@@ -472,44 +444,36 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          errorMessage = "robotSide field " + errorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(handTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validateArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
       String errorMessage = validatePacket(armTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(armTrajectoryMessage.robotSide);
       if (packetFieldErrorType != null)
       {
          errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       if (armTrajectoryMessage.jointTrajectoryMessages == null)
       {
          errorMessage = "Trajectory points are empty.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
       if (numberOfJoints == 0)
       {
          errorMessage = "ArmJointTrajectoryPacket does not contain any points";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
@@ -519,29 +483,25 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "Error with the " + jointIndex + " jointTrajectory1DMessage: " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(armTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validateHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
       String errorMessage = validatePacket(headTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
       if (headTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int i = 0; i < headTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
@@ -551,29 +511,25 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(headTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validateChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
       String errorMessage = validatePacket(chestTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
       if (chestTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int i = 0; i < chestTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
@@ -583,29 +539,25 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(chestTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validatePelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validatePelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
    {
       String errorMessage = validatePacket(pelvisOrientationTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
       if (pelvisOrientationTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(pelvisOrientationTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int i = 0; i < pelvisOrientationTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
@@ -615,29 +567,25 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(pelvisOrientationTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validatePelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validatePelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
       String errorMessage = validatePacket(pelvisTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
 
       if (pelvisTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
@@ -647,20 +595,18 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validateFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
       String errorMessage = validatePacket(footTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
@@ -668,9 +614,7 @@ public abstract class PacketValidityChecker
       if (footTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int i = 0; i < footTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
@@ -680,9 +624,7 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
@@ -690,20 +632,17 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          errorMessage = "robotSide field " + errorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validateEndEffectorLoadBearingMessage(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage,
-         HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateEndEffectorLoadBearingMessage(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
    {
       String errorMessage = validatePacket(endEffectorLoadBearingMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       ObjectErrorType errorType;
 
@@ -711,18 +650,14 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          errorMessage = "endEffector field " + errorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRequest());
       if (errorType != null)
       {
          errorMessage = "request field " + errorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       if (endEffectorLoadBearingMessage.getEndEffector().isRobotSideNeeded())
@@ -731,20 +666,18 @@ public abstract class PacketValidityChecker
          if (endEffectorLoadBearingMessage.getRobotSide() == null)
          {
             errorMessage = "robotSide field is null. It is required for the endEffector " + endEffectorLoadBearingMessage.getEndEffector();
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validateGoHomeMessage(GoHomeMessage goHomeMessage, HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateGoHomeMessage(GoHomeMessage goHomeMessage)
    {
       String errorMessage = validatePacket(goHomeMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       ObjectErrorType errorType;
 
@@ -752,9 +685,7 @@ public abstract class PacketValidityChecker
       if (errorType != null)
       {
          errorMessage = "endEffector field " + errorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(goHomeMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       if (goHomeMessage.getBodyPart().isRobotSideNeeded())
@@ -763,30 +694,25 @@ public abstract class PacketValidityChecker
          if (goHomeMessage.getRobotSide() == null)
          {
             errorMessage = "robotSide field is null. It is required for the bodyPart " + goHomeMessage.getBodyPart();
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(goHomeMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validatePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage,
-         HumanoidGlobalDataProducer globalDataProducer)
+   public static String validatePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
       String errorMessage = validatePacket(pelvisHeightTrajectoryMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       TrajectoryPoint1DMessage previousTrajectoryPoint = null;
 
       if (pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
       {
          errorMessage = "Received trajectory message with no waypoint.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
-         return false;
+         return errorMessage;
       }
 
       for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
@@ -796,61 +722,51 @@ public abstract class PacketValidityChecker
          if (errorMessage != null)
          {
             errorMessage = "The " + i + "th " + errorMessage;
-            if (globalDataProducer != null)
-               globalDataProducer.notifyInvalidPacketReceived(pelvisHeightTrajectoryMessage.getClass(), errorMessage);
-            return false;
+            return errorMessage;
          }
       }
 
-      return true;
+      return null;
    }
 
-   public static boolean validateArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage,
-         HumanoidGlobalDataProducer globalDataProducer)
+   public static String validateArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
    {
       String errorMessage = validatePacket(armDesiredAccelerationsMessage, true);
       if (errorMessage != null)
-         return false;
+         return errorMessage;
 
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.robotSide);
       if (packetFieldErrorType != null)
       {
          errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
-         return false;
+         return errorMessage;
       }
 
       packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.armControlMode);
       if (packetFieldErrorType != null)
       {
          errorMessage = "armControlMode field" + packetFieldErrorType.getMessage();
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
-         return false;
+         return errorMessage;
       }
 
       boolean isInUserControlMode = armDesiredAccelerationsMessage.armControlMode == ArmControlMode.USER_CONTROL_MODE;
       if (isInUserControlMode && armDesiredAccelerationsMessage.armDesiredJointAccelerations == null)
       {
          errorMessage = "The field with desired joint acceleration is empty.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
-         return false;
+         return errorMessage;
       }
 
       if (isInUserControlMode && armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
       {
          errorMessage = "The field with desired joint acceleration is empty.";
-         if (globalDataProducer != null)
-            globalDataProducer.notifyInvalidPacketReceived(ArmDesiredAccelerationsMessage.class, errorMessage);
-         return false;
+         return errorMessage;
       }
 
-      return true;
+      return null;
    }
 
-   private static String validateSE3TrajectoryPointMessage(SE3TrajectoryPointMessage se3TrajectoryPoint, SE3TrajectoryPointMessage previousSE3TrajectoryPoint, boolean checkId)
+   private static String validateSE3TrajectoryPointMessage(SE3TrajectoryPointMessage se3TrajectoryPoint, SE3TrajectoryPointMessage previousSE3TrajectoryPoint,
+         boolean checkId)
    {
       String errorMessage = validatePacket(se3TrajectoryPoint, checkId);
       if (errorMessage != null)
@@ -886,7 +802,8 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   private static String validateSO3TrajectoryPointMessage(SO3TrajectoryPointMessage so3TrajectoryPoint, SO3TrajectoryPointMessage previousSO3TrajectoryPoint, boolean checkId)
+   private static String validateSO3TrajectoryPointMessage(SO3TrajectoryPointMessage so3TrajectoryPoint, SO3TrajectoryPointMessage previousSO3TrajectoryPoint,
+         boolean checkId)
    {
       String errorMessage = validatePacket(so3TrajectoryPoint, checkId);
       if (errorMessage != null)
@@ -913,7 +830,8 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   private static String validateTrajectoryPoint1DMessage(TrajectoryPoint1DMessage waypoint1D, TrajectoryPoint1DMessage previousTrajectoryPoint1D, boolean checkId)
+   private static String validateTrajectoryPoint1DMessage(TrajectoryPoint1DMessage waypoint1D, TrajectoryPoint1DMessage previousTrajectoryPoint1D,
+         boolean checkId)
    {
       String errorMessage = validatePacket(waypoint1D, checkId);
       if (errorMessage != null)

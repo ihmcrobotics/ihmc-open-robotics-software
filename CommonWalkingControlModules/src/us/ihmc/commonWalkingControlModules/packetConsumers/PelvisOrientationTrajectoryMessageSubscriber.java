@@ -37,8 +37,13 @@ public class PelvisOrientationTrajectoryMessageSubscriber implements PacketConsu
    @Override
    public void receivedPacket(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
    {
-      if (!PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(pelvisOrientationTrajectoryMessage, globalDataProducer))
+      String errorMessage = PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(pelvisOrientationTrajectoryMessage);
+      if (errorMessage != null)
+      {
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(pelvisOrientationTrajectoryMessage.getClass(), errorMessage);
          return;
+      }
 
       latestMessageReference.set(pelvisOrientationTrajectoryMessage);
    }

@@ -50,8 +50,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(HandTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validateHandTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateHandTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -66,8 +71,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(ArmTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validateArmTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateArmTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -82,8 +92,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(FootTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validateFootTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateFootTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -98,8 +113,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(HeadTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validateHeadTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateHeadTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -114,8 +134,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(ChestTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validateChestTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateChestTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -130,8 +155,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(PelvisTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validatePelvisTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validatePelvisTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -146,8 +176,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(PelvisHeightTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validatePelvisHeightTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validatePelvisHeightTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -162,8 +197,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(PelvisOrientationTrajectoryMessage message)
          {
-            if (!PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -219,8 +259,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(EndEffectorLoadBearingMessage message)
          {
-            if (!PacketValidityChecker.validateEndEffectorLoadBearingMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateEndEffectorLoadBearingMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -251,8 +296,13 @@ public class ControllerNetworkSubscriber
          @Override
          public void receivedPacket(ArmDesiredAccelerationsMessage message)
          {
-            if (!PacketValidityChecker.validateArmDesiredAccelerationsMessage(message, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateArmDesiredAccelerationsMessage(message);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(message.getClass(), errorMessage);
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }

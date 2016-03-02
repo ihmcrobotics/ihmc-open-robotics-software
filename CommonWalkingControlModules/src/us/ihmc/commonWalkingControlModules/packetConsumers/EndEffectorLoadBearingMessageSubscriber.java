@@ -91,8 +91,13 @@ public class EndEffectorLoadBearingMessageSubscriber implements PacketConsumer<E
    @Override
    public void receivedPacket(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
    {
-      if (!PacketValidityChecker.validateEndEffectorLoadBearingMessage(endEffectorLoadBearingMessage, globalDataProducer))
+      String errorMessage = PacketValidityChecker.validateEndEffectorLoadBearingMessage(endEffectorLoadBearingMessage);
+      if (errorMessage != null)
+      {
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(endEffectorLoadBearingMessage.getClass(), errorMessage);
          return;
+      }
 
       EndEffector endEffector = endEffectorLoadBearingMessage.getEndEffector();
       LoadBearingRequest request = endEffectorLoadBearingMessage.getRequest();

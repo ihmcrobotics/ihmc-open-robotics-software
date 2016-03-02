@@ -49,8 +49,13 @@ public class FootTrajectoryMessageSubscriber implements PacketConsumer<FootTraje
    @Override
    public void receivedPacket(FootTrajectoryMessage footTrajectoryMessage)
    {
-      if (!PacketValidityChecker.validateFootTrajectoryMessage(footTrajectoryMessage, globalDataProducer))
+      String errorMessage = PacketValidityChecker.validateFootTrajectoryMessage(footTrajectoryMessage);
+      if (errorMessage != null)
+      {
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(footTrajectoryMessage.getClass(), errorMessage);
          return;
+      }
 
       RobotSide robotSide = footTrajectoryMessage.getRobotSide();
       latestMessageReferences.get(robotSide).set(footTrajectoryMessage);
