@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameTuple2dArrayList<T extends FrameTuple2d<?>> extends RecyclingArrayList<T>
+public class FrameTuple2dArrayList<T extends FrameTuple2d<?, ?>> extends RecyclingArrayList<T>
 {
    private FrameTuple2dArrayList(Class<T> clazz)
    {
@@ -21,7 +21,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2d<?>> extends RecyclingA
       super(initialCapacity, clazz);
    }
 
-   public void setOrCreate(int i, FrameTuple2d<?> frameTuple2d)
+   public void setOrCreate(int i, FrameTuple2d<?, ?> frameTuple2d)
    {
       if (i >= size)
       {
@@ -31,12 +31,12 @@ public class FrameTuple2dArrayList<T extends FrameTuple2d<?>> extends RecyclingA
       unsafeGet(i).setIncludingFrame(frameTuple2d);
    }
 
-   public void set(int i, FrameTuple2d<?> frameTuple2d)
+   public void set(int i, FrameTuple2d<?, ?> frameTuple2d)
    {
       get(i).setIncludingFrame(frameTuple2d);
    }
 
-   private void unsafeSet(int i, FrameTuple2d<?> frameTuple2d)
+   private void unsafeSet(int i, FrameTuple2d<?, ?> frameTuple2d)
    {
       unsafeGet(i).setIncludingFrame(frameTuple2d);
    }
@@ -57,7 +57,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2d<?>> extends RecyclingA
       }
    }
 
-   public void copyFromListAndTrimSize(List<? extends FrameTuple2d<?>> otherList)
+   public void copyFromListAndTrimSize(List<? extends FrameTuple2d<?, ?>> otherList)
    {
       ensureCapacity(otherList.size());
       size = otherList.size();

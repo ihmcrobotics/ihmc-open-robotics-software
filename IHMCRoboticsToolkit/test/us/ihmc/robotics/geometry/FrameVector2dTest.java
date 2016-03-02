@@ -120,7 +120,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testFrameVector2d_FrameTuple2d()
    {
       double x = 5.7, y = 56.3;
-      FrameTuple2d<?> frameTuple = createFrameTuple(theFrame, x, y);
+      FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, x, y);
       FrameVector2d frame = new FrameVector2d(frameTuple);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);

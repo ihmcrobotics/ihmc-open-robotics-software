@@ -27,7 +27,7 @@ public class YoSE3OffsetFrame extends ReferenceFrame
       rotationToParent = new YoFrameQuaternion(frameName, parentFrame, registry);
    }
 
-   public void setOffsetToParent(FrameTuple<?> translationToParent, FrameOrientation rotationToParent)
+   public void setOffsetToParent(FrameTuple<?, ?> translationToParent, FrameOrientation rotationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.set(rotationToParent);

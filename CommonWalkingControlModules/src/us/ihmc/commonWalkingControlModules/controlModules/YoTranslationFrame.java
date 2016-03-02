@@ -22,7 +22,7 @@ public class YoTranslationFrame extends ReferenceFrame
       translationToParent = new YoFrameVector(frameName, parentFrame, registry);
    }
 
-   public void setTranslationToParent(FrameTuple<?> translationToParent)
+   public void setTranslationToParent(FrameTuple<?, ?> translationToParent)
    {
       this.translationToParent.set(translationToParent);
       update();

@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.transformables.TransformableLine3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameLine extends AbstractFrameObject<TransformableLine3d>
+public class FrameLine extends AbstractFrameObject<FrameLine, TransformableLine3d>
 {
    private static final Vector3d zero = new Vector3d(0.0, 0.0, 0.0);
 
