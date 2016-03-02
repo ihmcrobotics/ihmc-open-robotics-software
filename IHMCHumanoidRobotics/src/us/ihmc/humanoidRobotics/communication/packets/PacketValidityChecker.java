@@ -1,13 +1,10 @@
-package us.ihmc.commonWalkingControlModules.packetConsumers;
+package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
+import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
+import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
