@@ -304,6 +304,23 @@ public class ControllerCommandInputManager
       handComplianceControlParametersMessageBuffer.flush();
    }
 
+   public void flushPelvisBuffers()
+   {
+      pelvisHeightTrajectoryMessageBuffer.flush();
+      pelvisTrajectoryMessageBuffer.flush();
+      pelvisOrientationTrajectoryMessageBuffer.flush();
+   }
+
+   public void flushFootstepBuffers()
+   {
+      footstepDataListMessageBuffer.flush();
+   }
+
+   public void flushFlamingoBuffers()
+   {
+      footTrajectoryMessageBuffer.flush();
+   }
+
    public void flushBuffers()
    {
       for (int i = 0; i < allBuffers.size(); i++)
