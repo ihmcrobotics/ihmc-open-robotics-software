@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -16,7 +17,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple<FrameVector, TransformableVector3d>
+public class FrameVector extends FrameTuple<FrameVector, TransformableVector3d> implements VectorInterface
 {
    private static final long serialVersionUID = -4475317718392284548L;
 
@@ -206,5 +207,22 @@ public class FrameVector extends FrameTuple<FrameVector, TransformableVector3d>
    {
       transform.transform(this.tuple);
    }
-   
+ 
+   @Override
+   public void getVector(Vector3d vectorToPack)
+   {
+      this.get(vectorToPack);
+   }
+
+   @Override
+   public void setVector(VectorInterface vectorInterface)
+   {
+      vectorInterface.getVector(this.getVector());
+   }
+
+   @Override
+   public void setVector(Vector3d vector)
+   {
+      this.set(vector);
+   }
 }

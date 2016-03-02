@@ -1,9 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T extends Transformable<T>> extends AbstractReferenceFrameHolder implements FrameObject<S>
+public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T extends GeometryObject<T>> extends AbstractReferenceFrameHolder implements FrameObject<S>
 {
    protected final T transformableDataObject;
    protected ReferenceFrame referenceFrame;
