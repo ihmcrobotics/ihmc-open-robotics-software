@@ -55,41 +55,25 @@ public class ControllerCommandInputManager
    private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends ControllerMessage<?, ?>>> messageClassToBufferMap = new HashMap<>();
    private final Map<Class<? extends ControllerMessage<?, ?>>, RecyclingArrayList<? extends ControllerMessage<?, ?>>> controllerMessagesMap = new HashMap<>();
 
-   private final ConcurrentRingBuffer<ModifiableArmTrajectoryMessage> armTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableHandTrajectoryMessage> handTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableFootTrajectoryMessage> footTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableHeadTrajectoryMessage> headTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableChestTrajectoryMessage> chestTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiablePelvisTrajectoryMessage> pelvisTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiablePelvisOrientationTrajectoryMessage> pelvisOrientationTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiablePelvisHeightTrajectoryMessage> pelvisHeightTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableGoHomeMessage> goHomeMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableFootstepDataListMessage> footstepDataListMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableEndEffectorLoadBearingMessage> endEffectorLoadBearingMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableStopAllTrajectoryMessage> stopAllTrajectoryMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableArmDesiredAccelerationsMessage> armDesiredAccelerationsMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableAutomaticManipulationAbortMessage> automaticManipulationAbortMessageBuffer;
-   private final ConcurrentRingBuffer<ModifiableHandComplianceControlParametersMessage> handComplianceControlParametersMessageBuffer;
-
    private final List<Class<? extends Packet<?>>> listOfSupportedMessages;
 
    public ControllerCommandInputManager()
    {
-      armTrajectoryMessageBuffer = createBuffer(ModifiableArmTrajectoryMessage.class);
-      handTrajectoryMessageBuffer = createBuffer(ModifiableHandTrajectoryMessage.class);
-      footTrajectoryMessageBuffer = createBuffer(ModifiableFootTrajectoryMessage.class);
-      headTrajectoryMessageBuffer = createBuffer(ModifiableHeadTrajectoryMessage.class);
-      chestTrajectoryMessageBuffer = createBuffer(ModifiableChestTrajectoryMessage.class);
-      pelvisTrajectoryMessageBuffer = createBuffer(ModifiablePelvisTrajectoryMessage.class);
-      pelvisOrientationTrajectoryMessageBuffer = createBuffer(ModifiablePelvisOrientationTrajectoryMessage.class);
-      pelvisHeightTrajectoryMessageBuffer = createBuffer(ModifiablePelvisHeightTrajectoryMessage.class);
-      goHomeMessageBuffer = createBuffer(ModifiableGoHomeMessage.class);
-      footstepDataListMessageBuffer = createBuffer(ModifiableFootstepDataListMessage.class);
-      endEffectorLoadBearingMessageBuffer = createBuffer(ModifiableEndEffectorLoadBearingMessage.class);
-      stopAllTrajectoryMessageBuffer = createBuffer(ModifiableStopAllTrajectoryMessage.class);
-      armDesiredAccelerationsMessageBuffer = createBuffer(ModifiableArmDesiredAccelerationsMessage.class);
-      automaticManipulationAbortMessageBuffer = createBuffer(ModifiableAutomaticManipulationAbortMessage.class);
-      handComplianceControlParametersMessageBuffer = createBuffer(ModifiableHandComplianceControlParametersMessage.class);
+      createBuffer(ModifiableArmTrajectoryMessage.class);
+      createBuffer(ModifiableHandTrajectoryMessage.class);
+      createBuffer(ModifiableFootTrajectoryMessage.class);
+      createBuffer(ModifiableHeadTrajectoryMessage.class);
+      createBuffer(ModifiableChestTrajectoryMessage.class);
+      createBuffer(ModifiablePelvisTrajectoryMessage.class);
+      createBuffer(ModifiablePelvisOrientationTrajectoryMessage.class);
+      createBuffer(ModifiablePelvisHeightTrajectoryMessage.class);
+      createBuffer(ModifiableStopAllTrajectoryMessage.class);
+      createBuffer(ModifiableFootstepDataListMessage.class);
+      createBuffer(ModifiableGoHomeMessage.class);
+      createBuffer(ModifiableEndEffectorLoadBearingMessage.class);
+      createBuffer(ModifiableArmDesiredAccelerationsMessage.class);
+      createBuffer(ModifiableAutomaticManipulationAbortMessage.class);
+      createBuffer(ModifiableHandComplianceControlParametersMessage.class);
 
       listOfSupportedMessages = new ArrayList<>(messageClassToBufferMap.keySet());
       // This message has to be added manually as it is handled in a different way to the others.
@@ -314,33 +298,38 @@ public class ControllerCommandInputManager
 
    public void flushManipulationBuffers()
    {
-      handTrajectoryMessageBuffer.flush();
-      armTrajectoryMessageBuffer.flush();
-      armDesiredAccelerationsMessageBuffer.flush();
-      handComplianceControlParametersMessageBuffer.flush();
+      flushMessages(ModifiableHandTrajectoryMessage.class);
+      flushMessages(ModifiableArmTrajectoryMessage.class);
+      flushMessages(ModifiableArmDesiredAccelerationsMessage.class);
+      flushMessages(ModifiableHandComplianceControlParametersMessage.class);
    }
 
    public void flushPelvisBuffers()
    {
-      pelvisHeightTrajectoryMessageBuffer.flush();
-      pelvisTrajectoryMessageBuffer.flush();
-      pelvisOrientationTrajectoryMessageBuffer.flush();
+      flushMessages(ModifiablePelvisTrajectoryMessage.class);
+      flushMessages(ModifiablePelvisOrientationTrajectoryMessage.class);
+      flushMessages(ModifiablePelvisHeightTrajectoryMessage.class);
    }
 
    public void flushFootstepBuffers()
    {
-      footstepDataListMessageBuffer.flush();
+      flushMessages(ModifiableFootstepDataListMessage.class);
    }
 
    public void flushFlamingoBuffers()
    {
-      footTrajectoryMessageBuffer.flush();
+      flushMessages(ModifiableFootTrajectoryMessage.class);
    }
 
    public void flushBuffers()
    {
       for (int i = 0; i < allBuffers.size(); i++)
          allBuffers.get(i).flush();
+   }
+
+   public <T extends ControllerMessage<T, ?>> void flushMessages(Class<T> messageToFlushClass)
+   {
+      modifiableMessageClassToBufferMap.get(messageToFlushClass).flush();
    }
 
    public <T extends ControllerMessage<T, ?>> T pollNewestMessage(Class<T> messageToPollClass)
