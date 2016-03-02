@@ -9,6 +9,7 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
@@ -168,5 +169,12 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
          ret = "Hand SE3 trajectory: no SE3 trajectory points";
 
       return ret + ", robotSide = " + robotSide + ", base for control = " + base;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateHandTrajectoryMessage(this);
    }
 }

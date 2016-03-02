@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
@@ -183,5 +184,12 @@ public class FootstepDataListMessage extends IHMCRosApiMessage<FootstepDataListM
 
       this.swingTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
       this.transferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateFootstepDataListMessage(this);
    }
 }

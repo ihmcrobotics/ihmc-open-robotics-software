@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
@@ -68,5 +69,12 @@ public class ArmOneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<Ar
          return "Trajectory 1D: number of 1D trajectory points = " + getNumberOfTrajectoryPoints() + ".";
       else
          return "Trajectory 1D: no 1D trajectory point.";
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateArmOneJointTrajectoryMessage(this, false);
    }
 }

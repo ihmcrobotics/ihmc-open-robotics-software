@@ -3,27 +3,22 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.communication.packets.ObjectValidityChecker;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
@@ -32,104 +27,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public abstract class PacketValidityChecker
 {
-
-   /**
-    * Checks the validity of a {@link ComHeightPacket}.
-    * @param packetToCheck
-    * @return null if the packet is valid, or the error message.
-    */
-   public static String validateCoMHeightPacket(ComHeightPacket packetToCheck)
-   {
-      if (packetToCheck == null)
-         return null;
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.getHeightOffset());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "heightOffset field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      return null;
-   }
-
-   /**
-    * Checks the validity of a {@link HandPosePacket}.
-    * @param packetToCheck
-    * @param numberOfArmJoints
-    * @return null if the packet is valid, or the error message.
-    */
-   public static String validateHandPosePacket(HandPosePacket packetToCheck, int numberOfArmJoints)
-   {
-      if (packetToCheck == null)
-         return null;
-
-      if (!packetToCheck.isToHomePosition())
-      {
-         ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getDataType());
-         if (packetFieldErrorType != null)
-         {
-            String errorMessage = "dataType field" + packetFieldErrorType.getMessage();
-            return errorMessage;
-         }
-
-         if (packetToCheck.getDataType() == DataType.HAND_POSE)
-         {
-            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getPosition());
-            if (packetFieldErrorType != null)
-            {
-               String errorMessage = "position field " + packetFieldErrorType.getMessage();
-               return errorMessage;
-            }
-
-            packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
-            if (packetFieldErrorType != null)
-            {
-               String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
-               return errorMessage;
-            }
-
-            packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getReferenceFrame());
-            if (packetFieldErrorType != null)
-            {
-               String errorMessage = "frame field" + packetFieldErrorType.getMessage();
-               return errorMessage;
-            }
-         }
-         else
-         {
-            packetFieldErrorType = ObjectValidityChecker.validateArrayOfDouble(packetToCheck.getJointAngles(), numberOfArmJoints);
-            if (packetFieldErrorType != null)
-            {
-               String errorMessage = "jointAngles field " + packetFieldErrorType.getMessage();
-               return errorMessage;
-            }
-         }
-      }
-
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      return null;
-   }
-
    /**
     * Checks the validity of a {@link FootstepDataMessage}.
     * @param packetToCheck
@@ -255,58 +152,6 @@ public abstract class PacketValidityChecker
 
       if (packetToCheck.getFootstepIndex() < 0)
          return "footstepIndex field should be non-negative";
-
-      return null;
-   }
-
-   /**
-    * Checks the validity of a {@link ChestOrientationPacket}.
-    * @param packetToCheck
-    * @return null if the packet is valid, or the error message.
-    */
-   public static String validateChestOrientationPacket(ChestOrientationPacket packetToCheck)
-   {
-      // In this case the controller doesn't read the orientation
-      if (!packetToCheck.isToHomeOrientation())
-      {
-         ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
-         if (packetFieldErrorType != null)
-         {
-            String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
-            return errorMessage;
-         }
-      }
-
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      return null;
-   }
-
-   /**
-    * Checks the validity of a {@link HeadOrientationPacket}.
-    * @param packetToCheck
-    * @return null if the packet is valid, or the error message.
-    */
-   public static String validateHeadOrientationPacket(HeadOrientationPacket packetToCheck)
-   {
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "quaternion field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
-      if (packetFieldErrorType != null)
-      {
-         String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
 
       return null;
    }
@@ -476,7 +321,7 @@ public abstract class PacketValidityChecker
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          ArmOneJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         errorMessage = validateJointTrajectory1DMessage(jointTrajectory1DMessage, false);
+         errorMessage = validateArmOneJointTrajectoryMessage(jointTrajectory1DMessage, false);
          if (errorMessage != null)
          {
             errorMessage = "Error with the " + jointIndex + " jointTrajectory1DMessage: " + errorMessage;
@@ -857,28 +702,28 @@ public abstract class PacketValidityChecker
 
    private final static double MAX_ACCEPTED_JOINT_VELOCITY = 100.0;
 
-   public static String validateJointTrajectory1DMessage(Abstract1DTrajectoryMessage<?> abstract1dTrajectoryMessage, boolean checkId)
+   public static String validateArmOneJointTrajectoryMessage(ArmOneJointTrajectoryMessage armOneJointTrajectoryMessage, boolean checkId)
    {
-      String errorMessage = validatePacket(abstract1dTrajectoryMessage, checkId);
+      String errorMessage = validatePacket(armOneJointTrajectoryMessage, checkId);
       if (errorMessage != null)
          return errorMessage;
 
       TrajectoryPoint1DMessage previousTrajectoryPoint = null;
 
-      if (abstract1dTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
+      if (armOneJointTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
          return "The joint trajectory message has no waypoint.";
 
-      for (int i = 0; i < abstract1dTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < armOneJointTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         TrajectoryPoint1DMessage waypoint = abstract1dTrajectoryMessage.getTrajectoryPoint(i);
+         TrajectoryPoint1DMessage waypoint = armOneJointTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateTrajectoryPoint1DMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
             return "The " + i + "th " + errorMessage;
       }
 
-      for (int waypointIndex = 0; waypointIndex < abstract1dTrajectoryMessage.getNumberOfTrajectoryPoints(); waypointIndex++)
+      for (int waypointIndex = 0; waypointIndex < armOneJointTrajectoryMessage.getNumberOfTrajectoryPoints(); waypointIndex++)
       {
-         TrajectoryPoint1DMessage waypoint = abstract1dTrajectoryMessage.getTrajectoryPoint(waypointIndex);
+         TrajectoryPoint1DMessage waypoint = armOneJointTrajectoryMessage.getTrajectoryPoint(waypointIndex);
          double waypointPosition = waypoint.getPosition();
 
          if (Math.abs(waypointPosition) > Math.PI)

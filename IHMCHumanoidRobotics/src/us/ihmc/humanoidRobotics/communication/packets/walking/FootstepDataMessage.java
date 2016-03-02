@@ -13,6 +13,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -358,5 +359,12 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       }
       this.trajectoryType = trajectoryTypes[randomOrdinal];
       this.swingHeight = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.05);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateFootstepDataMessage(this);
    }
 }
