@@ -6,7 +6,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMessage<ModifiableHandTrajectoryMessage, HandTrajectoryMessage>
-      implements ControllerSideDependentMessage<ModifiableHandTrajectoryMessage, HandTrajectoryMessage>
 {
    private RobotSide robotSide;
    private BaseForControl baseForControl;
@@ -57,7 +56,6 @@ public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMess
       this.baseForControl = baseForControl;
    }
 
-   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;

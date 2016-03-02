@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianc
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ModifiableHandComplianceControlParametersMessage
-      implements ControllerSideDependentMessage<ModifiableHandComplianceControlParametersMessage, HandComplianceControlParametersMessage>
+      implements ControllerMessage<ModifiableHandComplianceControlParametersMessage, HandComplianceControlParametersMessage>
 {
    private RobotSide robotSide;
    private boolean enable = false;
@@ -95,7 +95,6 @@ public class ModifiableHandComplianceControlParametersMessage
       torqueDeadZone = other.torqueDeadZone;
    }
 
-   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
