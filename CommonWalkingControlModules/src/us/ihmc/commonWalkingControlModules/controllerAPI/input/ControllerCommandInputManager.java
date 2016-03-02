@@ -92,6 +92,8 @@ public class ControllerCommandInputManager
       handComplianceControlParametersMessageBuffer = createBuffer(ModifiableHandComplianceControlParametersMessage.class);
 
       listOfSupportedMessages = new ArrayList<>(messageClassToBufferMap.keySet());
+      // This message has to be added manually as it is handled in a different way to the others.
+      listOfSupportedMessages.add(WholeBodyTrajectoryMessage.class);
    }
 
    private <T extends ControllerMessage<T, M>, M extends Packet<M>> ConcurrentRingBuffer<T> createBuffer(Class<T> clazz)
