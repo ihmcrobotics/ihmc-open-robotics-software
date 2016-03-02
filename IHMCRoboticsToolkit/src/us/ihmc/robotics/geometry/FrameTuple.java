@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -22,7 +22,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d & Transformable<T>> extends AbstractFrameObject<S, T> implements Serializable
+public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d & GeometryObject<T>> extends AbstractFrameObject<S, T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
@@ -89,6 +89,16 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    }
    
    /**
+    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
+    * @param tuple2d
+    */
+   public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2d tuple)
+   {
+      this.referenceFrame = referenceFrame;
+      setXY(tuple);
+   }
+
+   /**
     * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y respectively, and sets the z component to zero.
     * Changes the referenceFrame of this frameTuple to frameTuple2d.getReferenceFrame().
     * @param frameTuple2d
@@ -99,20 +109,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       setXY(frameTuple2d);
    }
 
-   /**
-    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
-    * @param tuple2d
-    */
-   public void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2d tuple2d)
-   {
-      this.referenceFrame = referenceFrame;
-      setXY(tuple2d);
-   }
-
-   /**
-    * 
-    * @throws ReferenceFrameMismatchException
-    */
    public final void setIncludingFrame(FrameTuple<?, ?> frameTuple)
    {
       setIncludingFrame(frameTuple.referenceFrame, frameTuple.tuple);

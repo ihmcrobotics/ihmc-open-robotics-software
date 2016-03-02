@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author not attributable
  * @version 1.0
  */
-public abstract class FrameGeometry2d<S extends FrameGeometry2d<S, T>, T extends Transformable<T>> extends AbstractFrameObject<S, T>
+public abstract class FrameGeometry2d<S extends FrameGeometry2d<S, T>, T extends GeometryObject<T>> extends AbstractFrameObject<S, T>
 {
    public FrameGeometry2d(ReferenceFrame referenceFrame, T transformableDataObject)
    {

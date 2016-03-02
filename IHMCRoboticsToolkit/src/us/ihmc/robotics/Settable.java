@@ -1,6 +1,6 @@
 package us.ihmc.robotics;
 
-public interface Settable<T> extends EpsilonComparable<T>
+public interface Settable<T>
 {
    public abstract void set(T other);
 

@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -18,7 +17,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,7 +27,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 //import us.ihmc.robotics.MathTools;
 //import MatrixTools;
 
-public abstract class FrameTupleTest<T extends Tuple3d & Transformable<T>>
+public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
 {
    private static final boolean VERBOSE = false;
 
