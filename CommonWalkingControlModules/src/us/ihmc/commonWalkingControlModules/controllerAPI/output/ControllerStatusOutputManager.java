@@ -11,49 +11,66 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAborte
 
 public class ControllerStatusOutputManager
 {
-   private final Map<Class<? extends StatusPacket<?>>, List<StatusMessageListener<?>>> allStatusMessageListenerMap = new HashMap<>();
+   private final Map<Class<? extends StatusPacket<?>>, List<StatusMessageListener<?>>> specificStatusMessageListenerMap = new HashMap<>();
+   private final List<GlobalStatusMessageListener> globalStatusMessageListeners = new ArrayList<>();
 
    public ControllerStatusOutputManager()
    {
    }
 
+   public void attachGlobalStatusMessageListener(GlobalStatusMessageListener globalStatusMessageListener)
+   {
+      globalStatusMessageListeners.add(globalStatusMessageListener);
+   }
+
+   public void detachGlobalStatusMessageListener(GlobalStatusMessageListener globalStatusMessageListener)
+   {
+      globalStatusMessageListeners.remove(globalStatusMessageListener);
+   }
+
    public <T extends StatusPacket<T>> void attachStatusMessageListener(Class<T> statusMessageClass, StatusMessageListener<T> statusMessageListener)
    {
-      List<StatusMessageListener<?>> statusMessageListenerList = allStatusMessageListenerMap.get(statusMessageClass);
-      if (statusMessageListenerList == null)
+      List<StatusMessageListener<?>> specificStatusMessageListenerList = specificStatusMessageListenerMap.get(statusMessageClass);
+      if (specificStatusMessageListenerList == null)
       {
-         statusMessageListenerList = new ArrayList<>();
-         allStatusMessageListenerMap.put(statusMessageClass, statusMessageListenerList);
+         specificStatusMessageListenerList = new ArrayList<>();
+         specificStatusMessageListenerMap.put(statusMessageClass, specificStatusMessageListenerList);
       }
 
-      statusMessageListenerList.add(statusMessageListener);
+      specificStatusMessageListenerList.add(statusMessageListener);
    }
 
    public <T extends StatusPacket<T>> void detachStatusMessageListener(Class<T> statusMessageClass, StatusMessageListener<T> statusMessageListener)
    {
-      List<StatusMessageListener<?>> statusMessageListenerList = allStatusMessageListenerMap.get(statusMessageClass);
-      if (statusMessageListenerList != null)
+      List<StatusMessageListener<?>> specificStatusMessageListenerList = specificStatusMessageListenerMap.get(statusMessageClass);
+      if (specificStatusMessageListenerList != null)
       {
-         statusMessageListenerList.remove(statusMessageListener);
+         specificStatusMessageListenerList.remove(statusMessageListener);
       }
    }
 
    public <T extends StatusPacket<T>> void reportStatusMessage(T statusMessage)
    {
-      List<StatusMessageListener<?>> statusMessageListeners = allStatusMessageListenerMap.get(statusMessage.getClass());
+      List<StatusMessageListener<?>> specificStatusMessageListeners = specificStatusMessageListenerMap.get(statusMessage.getClass());
 
-      if (statusMessageListeners == null)
-         return;
-
-      for (int i = 0; i < statusMessageListeners.size(); i++)
+      if (specificStatusMessageListeners != null)
       {
-         @SuppressWarnings("unchecked")
-         StatusMessageListener<T> statusMessageListener = (StatusMessageListener<T>) statusMessageListeners.get(i);
-         statusMessageListener.receivedNewMessageStatus(statusMessage);
+         for (int i = 0; i < specificStatusMessageListeners.size(); i++)
+         {
+            @SuppressWarnings("unchecked")
+            StatusMessageListener<T> statusMessageListener = (StatusMessageListener<T>) specificStatusMessageListeners.get(i);
+            statusMessageListener.receivedNewMessageStatus(statusMessage);
+         }
+      }
+
+      for (int i = 0; i < globalStatusMessageListeners.size(); i++)
+      {
+         GlobalStatusMessageListener globalStatusMessageListener = globalStatusMessageListeners.get(i);
+         globalStatusMessageListener.receivedNewMessageStatus(statusMessage);
       }
    }
 
-   public void reportManipulationAbortedStatus()
+   public void reportManipulationAborted()
    {
       reportStatusMessage(new ManipulationAbortedStatus());
    }
@@ -66,5 +83,10 @@ public class ControllerStatusOutputManager
    public static interface StatusMessageListener<T extends StatusPacket<T>>
    {
       public abstract void receivedNewMessageStatus(T statusMessage);
+   }
+
+   public static interface GlobalStatusMessageListener
+   {
+      public abstract void receivedNewMessageStatus(StatusPacket<?> statusMessage);
    }
 }

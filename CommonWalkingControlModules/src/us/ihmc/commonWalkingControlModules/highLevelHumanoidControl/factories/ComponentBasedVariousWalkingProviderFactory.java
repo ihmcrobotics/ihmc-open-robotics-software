@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteComponentBasedDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
-import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
@@ -69,12 +68,9 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
 
-      AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
-
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber, pelvisOrientationTrajectoryMessageSubscriber,
             footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, goHomeMessageSubscriber,
-            footstepProvider, automaticManipulationAbortCommunicator, highLevelStateProvider, capturabilityBasedStatusProducer,
-            abortWalkingProvider);
+            footstepProvider, highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }

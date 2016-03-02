@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAutomaticManipulationAbortMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
@@ -35,7 +36,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
-import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
@@ -217,7 +217,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable enablePushRecoveryOnFailure = new BooleanYoVariable("enablePushRecoveryOnFailure", registry);
 
-   private final AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator;
    private final BooleanYoVariable isAutomaticManipulationAbortEnabled = new BooleanYoVariable("isAutomaticManipulationAbortEnabled", registry);
    private final BooleanYoVariable hasManipulationBeenAborted = new BooleanYoVariable("hasManipulationBeenAborted", registry);
    private final DoubleYoVariable icpErrorThresholdToAbortManipulation = new DoubleYoVariable("icpErrorThresholdToAbortManipulation", registry);
@@ -250,7 +249,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(true);
 
-      automaticManipulationAbortCommunicator = variousWalkingProviders.getAutomaticManipulationAbortCommunicator();
       isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
       icpErrorThresholdToAbortManipulation.set(0.04);
       minimumDurationBetweenTwoManipulationAborts.set(5.0);
@@ -667,9 +665,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return;
          }
 
-         if (automaticManipulationAbortCommunicator != null && automaticManipulationAbortCommunicator.isNewMessageAvailable())
+         if (commandInputManager.isNewMessageAvailable(ModifiableAutomaticManipulationAbortMessage.class))
          {
-            isAutomaticManipulationAbortEnabled.set(automaticManipulationAbortCommunicator.isAutomaticManipulationAbortRequested());
+            ModifiableAutomaticManipulationAbortMessage message = commandInputManager.pollNewestMessage(ModifiableAutomaticManipulationAbortMessage.class);
+            isAutomaticManipulationAbortEnabled.set(message.isEnable());
          }
 
          if (!isAutomaticManipulationAbortEnabled.getBooleanValue())
@@ -687,10 +686,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             manipulationControlModule.ignoreInputsForGivenDuration(manipulationIgnoreInputsDurationAfterAbort.getDoubleValue());
             timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
 
-            if (automaticManipulationAbortCommunicator != null)
-            {
-               automaticManipulationAbortCommunicator.reportManipulationAborted();
-            }
+            statusOutputManager.reportManipulationAborted();
          }
          else
          {
