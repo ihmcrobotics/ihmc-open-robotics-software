@@ -16,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector extends FrameTuple<TransformableVector3d>
+public class FrameVector extends FrameTuple<FrameVector, TransformableVector3d>
 {
    private static final long serialVersionUID = -4475317718392284548L;
 
@@ -63,7 +63,7 @@ public class FrameVector extends FrameTuple<TransformableVector3d>
    }
 
    /** FrameVector <p/> A normal vector associated with a specific reference frame. */
-   public FrameVector(FrameTuple<?> frameTuple)
+   public FrameVector(FrameTuple<?, ?> frameTuple)
    {
       super(frameTuple.referenceFrame, new TransformableVector3d(frameTuple.tuple), frameTuple.name);
    }
@@ -152,7 +152,7 @@ public class FrameVector extends FrameTuple<TransformableVector3d>
       return isEpsilonParallel(frameVector, 1e-7);
    }
 
-   public void cross(FrameTuple<?> frameTuple1)
+   public void cross(FrameTuple<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       cross(this.tuple, this.tuple, frameTuple1.tuple);
@@ -168,7 +168,7 @@ public class FrameVector extends FrameTuple<TransformableVector3d>
       cross(this.tuple, tuple1, tuple2);
    }
 
-   public void cross(FrameTuple<?> frameTuple1, FrameTuple<?> frameTuple2)
+   public void cross(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -206,4 +206,5 @@ public class FrameVector extends FrameTuple<TransformableVector3d>
    {
       transform.transform(this.tuple);
    }
+   
 }
