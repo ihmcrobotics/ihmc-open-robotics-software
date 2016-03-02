@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -456,45 +457,15 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       return taskspaceToJointspaceCalculator.getControlFrame();
    }
 
-   public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce,
-         Vector3d desiredTorque, double forceDeadzone, double torqueDeadzone)
+   public void handleHandComplianceControlParametersMessage(ModifiableHandComplianceControlParametersMessage message)
    {
-      setEnableCompliantControl(enable);
-      setEnableLinearCompliance(enableLinearCompliance);
-      setEnableAngularCompliance(enableAngularCompliance);
-      setDesiredForceOfHandOntoExternalEnvironment(desiredForce);
-      setDesiredTorqueOfHandOntoExternalEnvironment(desiredForce);
-      setMeasuredWrenchDeadzoneSize(forceDeadzone, torqueDeadzone);
+      setEnableCompliantControl(message.isEnable());
+      handCompliantControlHelper.handleHandComplianceControlParametersMessage(message);
    }
 
    public void setEnableCompliantControl(boolean enable)
    {
       enableCompliantControl.set(enable);
-   }
-
-   public void setEnableLinearCompliance(boolean[] enableLinearCompliance)
-   {
-      handCompliantControlHelper.setEnableLinearCompliance(enableLinearCompliance);
-   }
-
-   public void setEnableAngularCompliance(boolean[] enableAngularCompliance)
-   {
-      handCompliantControlHelper.setEnableAngularCompliance(enableAngularCompliance);
-   }
-
-   public void setDesiredForceOfHandOntoExternalEnvironment(Vector3d desiredForce)
-   {
-      handCompliantControlHelper.setDesiredForceOfHandOntoExternalEnvironment(desiredForce);
-   }
-
-   public void setDesiredTorqueOfHandOntoExternalEnvironment(Vector3d desiredTorque)
-   {
-      handCompliantControlHelper.setDesiredTorqueOfHandOntoExternalEnvironment(desiredTorque);
-   }
-
-   public void setMeasuredWrenchDeadzoneSize(double forceDeadzone, double torqueDeadzone)
-   {
-      handCompliantControlHelper.setMeasuredWrenchDeadzoneSize(forceDeadzone, torqueDeadzone);
    }
 
    public void resetCompliantControl()

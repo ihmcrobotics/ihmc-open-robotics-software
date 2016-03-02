@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ChestTrajectoryMessag
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
@@ -27,7 +26,6 @@ public class VariousWalkingProviders
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber;
 
-   private final HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber;
    private final GoHomeMessageSubscriber goHomeMessageSubscriber;
 
    private final FootstepProvider footstepProvider;
@@ -40,14 +38,13 @@ public class VariousWalkingProviders
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
-   public VariousWalkingProviders(HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber, ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber,
-         PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber, PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber,
-         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber,
-         EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
+   public VariousWalkingProviders(HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber,
+         ChestTrajectoryMessageSubscriber chestTrajectoryMessageSubscriber, PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
+         PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber,
+         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
          StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber,
          GoHomeMessageSubscriber goHomeMessageSubscriber, FootstepProvider footstepProvider,
-         HandComplianceControlParametersSubscriber handComplianceControlParametersSubscriber, AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator,
-         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
+         AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
          CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
       this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
@@ -62,7 +59,6 @@ public class VariousWalkingProviders
 
       this.highLevelStateMessageSubscriber = highLevelStateMessageSubscriber;
       this.footstepProvider = footstepProvider;
-      this.handComplianceControlParametersSubscriber = handComplianceControlParametersSubscriber;
 
       this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
 
@@ -153,11 +149,6 @@ public class VariousWalkingProviders
    public FootstepProvider getFootstepProvider()
    {
       return footstepProvider;
-   }
-
-   public HandComplianceControlParametersSubscriber getHandComplianceControlParametersSubscriber()
-   {
-      return handComplianceControlParametersSubscriber;
    }
 
    public CapturabilityBasedStatusProducer getCapturabilityBasedStatusProducer()

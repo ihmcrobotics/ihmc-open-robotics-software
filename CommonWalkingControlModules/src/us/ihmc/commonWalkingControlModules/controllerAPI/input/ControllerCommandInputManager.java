@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
@@ -22,6 +23,7 @@ import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
@@ -76,6 +78,9 @@ public class ControllerCommandInputManager
    private final ConcurrentRingBuffer<AutomaticManipulationAbortMessage> automaticManipulationAbortMessageBuffer;
    private final AutomaticManipulationAbortMessage controllerAutomaticManipulationAbortMessage = new AutomaticManipulationAbortMessage();
 
+   private final SideDependentList<ConcurrentRingBuffer<ModifiableHandComplianceControlParametersMessage>> handComplianceControlParametersMessageBuffers = new SideDependentList<>();
+   private final ModifiableHandComplianceControlParametersMessage controllerHandComplianceControlParametersMessage = new ModifiableHandComplianceControlParametersMessage();
+
    private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
 
    public ControllerCommandInputManager()
@@ -86,6 +91,7 @@ public class ControllerCommandInputManager
          handTrajectoryMessageBuffers.put(robotSide, createBuffer(ModifiableHandTrajectoryMessage.class));
          footTrajectoryMessageBuffers.put(robotSide, createBuffer(ModifiableFootTrajectoryMessage.class));
          armDesiredAccelerationsMessageBuffers.put(robotSide, createBuffer(ModifiableArmDesiredAccelerationsMessage.class)); 
+         handComplianceControlParametersMessageBuffers.put(robotSide, createBuffer(ModifiableHandComplianceControlParametersMessage.class));
       }
       headTrajectoryMessageBuffer = createBuffer(ModifiableHeadTrajectoryMessage.class);
       chestTrajectoryMessageBuffer = createBuffer(ModifiableChestTrajectoryMessage.class);
@@ -101,6 +107,7 @@ public class ControllerCommandInputManager
       stopAllTrajectoryMessageBuffer = createBuffer(StopAllTrajectoryMessage.class);
 
       automaticManipulationAbortMessageBuffer = createBuffer(AutomaticManipulationAbortMessage.class);
+
    }
 
    private <T> ConcurrentRingBuffer<T> createBuffer(Class<T> clazz)
@@ -273,6 +280,17 @@ public class ControllerCommandInputManager
       automaticManipulationAbortMessageBuffer.commit();
    }
 
+   public void submitHandComplianceControlParametersMessage(HandComplianceControlParametersMessage handComplianceControlParametersMessage)
+   {
+      RobotSide robotSide = handComplianceControlParametersMessage.getRobotSide();
+      ConcurrentRingBuffer<ModifiableHandComplianceControlParametersMessage> buffer = handComplianceControlParametersMessageBuffers.get(robotSide);
+      ModifiableHandComplianceControlParametersMessage nextModifiableMessage = buffer.next();
+      if (nextModifiableMessage == null)
+         return;
+      nextModifiableMessage.set(handComplianceControlParametersMessage);
+      buffer.commit();
+   }
+
    public boolean isNewHandTrajectoryMessageAvailable(RobotSide robotSide)
    {
       return handTrajectoryMessageBuffers.get(robotSide).poll();
@@ -341,6 +359,11 @@ public class ControllerCommandInputManager
    public boolean isNewAutomaticManipulationAbortMessageAvailable()
    {
       return automaticManipulationAbortMessageBuffer.poll();
+   }
+
+   public boolean isNewHandComplianceControlParametersMessageAvailable(RobotSide robotSide)
+   {
+      return handComplianceControlParametersMessageBuffers.get(robotSide).poll();
    }
 
    public ModifiableHandTrajectoryMessage pollHandTrajectoryMessage(RobotSide robotSide)
@@ -426,6 +449,12 @@ public class ControllerCommandInputManager
       return controllerAutomaticManipulationAbortMessage;
    }
 
+   public ModifiableHandComplianceControlParametersMessage pollHandComplianceControlParametersMessage(RobotSide robotSide)
+   {
+      controllerHandComplianceControlParametersMessage.set(pollNewestMessage(handComplianceControlParametersMessageBuffers.get(robotSide)));
+      return controllerHandComplianceControlParametersMessage;
+   }
+
    public void clearManipulationMessagesInQueue()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -433,6 +462,7 @@ public class ControllerCommandInputManager
          handTrajectoryMessageBuffers.get(robotSide).flush();
          armTrajectoryMessageBuffers.get(robotSide).flush();
          armDesiredAccelerationsMessageBuffers.get(robotSide).flush();
+         handComplianceControlParametersMessageBuffers.get(robotSide).flush();
       }
    }
 
