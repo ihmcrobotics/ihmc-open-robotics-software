@@ -9,6 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianc
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ModifiableHandComplianceControlParametersMessage
+      implements ControllerSideDependentMessage<ModifiableHandComplianceControlParametersMessage, HandComplianceControlParametersMessage>
 {
    private RobotSide robotSide;
    private boolean enable = false;
@@ -26,11 +27,12 @@ public class ModifiableHandComplianceControlParametersMessage
    {
    }
 
-   public void set(HandComplianceControlParametersMessage handComplianceControlParametersMessage)
+   @Override
+   public void set(HandComplianceControlParametersMessage message)
    {
-      robotSide = handComplianceControlParametersMessage.getRobotSide();
+      robotSide = message.getRobotSide();
 
-      if (handComplianceControlParametersMessage.isEmpty())
+      if (message.isEmpty())
       {
          enable = false;
          Arrays.fill(enableLinearCompliance, false);
@@ -41,17 +43,17 @@ public class ModifiableHandComplianceControlParametersMessage
       else
       {
          enable = true;
-         boolean[] newEnableLinearCompliance = handComplianceControlParametersMessage.getEnableLinearCompliance();
-         boolean[] newEnableAngularCompliance = handComplianceControlParametersMessage.getEnableAngularCompliance();
-         Vector3f newDesiredForce = handComplianceControlParametersMessage.getDesiredForce();
-         Vector3f newDesiredTorque = handComplianceControlParametersMessage.getDesiredTorque();
-         float[] newWrenchDeadzones = handComplianceControlParametersMessage.getWrenchDeadzones();
+         boolean[] newEnableLinearCompliance = message.getEnableLinearCompliance();
+         boolean[] newEnableAngularCompliance = message.getEnableAngularCompliance();
+         Vector3f newDesiredForce = message.getDesiredForce();
+         Vector3f newDesiredTorque = message.getDesiredTorque();
+         float[] newWrenchDeadzones = message.getWrenchDeadzones();
 
          if (newEnableLinearCompliance == null)
             Arrays.fill(enableLinearCompliance, false);
          else
             System.arraycopy(newEnableLinearCompliance, 0, enableLinearCompliance, 0, 3);
-         
+
          if (newEnableAngularCompliance == null)
             Arrays.fill(enableAngularCompliance, false);
          else
@@ -80,6 +82,7 @@ public class ModifiableHandComplianceControlParametersMessage
       }
    }
 
+   @Override
    public void set(ModifiableHandComplianceControlParametersMessage other)
    {
       robotSide = other.robotSide;
@@ -92,6 +95,7 @@ public class ModifiableHandComplianceControlParametersMessage
       torqueDeadZone = other.torqueDeadZone;
    }
 
+   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -130,5 +134,11 @@ public class ModifiableHandComplianceControlParametersMessage
    public double getTorqueDeadZone()
    {
       return torqueDeadZone;
+   }
+
+   @Override
+   public Class<HandComplianceControlParametersMessage> getMessageClass()
+   {
+      return HandComplianceControlParametersMessage.class;
    }
 }

@@ -5,7 +5,8 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMessage<HandTrajectoryMessage>
+public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMessage<ModifiableHandTrajectoryMessage, HandTrajectoryMessage>
+      implements ControllerSideDependentMessage<ModifiableHandTrajectoryMessage, HandTrajectoryMessage>
 {
    private RobotSide robotSide;
    private BaseForControl baseForControl;
@@ -30,6 +31,7 @@ public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMess
       baseForControl = null;
    }
 
+   @Override
    public void set(ModifiableHandTrajectoryMessage other)
    {
       super.set(other);
@@ -37,19 +39,12 @@ public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMess
       baseForControl = other.baseForControl;
    }
 
-   public void setIncludingFrame(ModifiableHandTrajectoryMessage other)
-   {
-      super.setIncludingFrame(other);
-      robotSide = other.robotSide;
-      baseForControl = other.baseForControl;
-   }
-
    @Override
-   public void set(HandTrajectoryMessage trajectoryMessage)
+   public void set(HandTrajectoryMessage message)
    {
-      super.set(trajectoryMessage);
-      this.robotSide = trajectoryMessage.getRobotSide();
-      this.baseForControl = trajectoryMessage.getBase();
+      super.set(message);
+      this.robotSide = message.getRobotSide();
+      this.baseForControl = message.getBase();
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -62,6 +57,7 @@ public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMess
       this.baseForControl = baseForControl;
    }
 
+   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -70,5 +66,11 @@ public class ModifiableHandTrajectoryMessage extends ModifiableSE3TrajectoryMess
    public BaseForControl getBase()
    {
       return baseForControl;
+   }
+
+   @Override
+   public Class<HandTrajectoryMessage> getMessageClass()
+   {
+      return HandTrajectoryMessage.class;
    }
 }

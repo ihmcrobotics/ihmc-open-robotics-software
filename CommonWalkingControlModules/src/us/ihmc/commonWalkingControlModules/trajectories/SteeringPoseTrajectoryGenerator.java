@@ -178,14 +178,10 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
          {
             steeringWheelRotationAxis.get(localZAxis);
             steeringWheelZeroAxis.get(localXAxis);
-            if (steeringWheelZeroAxis.containsNaN())
-               System.out.println();
             localYAxis.cross(localZAxis, localXAxis);
             localYAxis.normalize();
             localXAxis.cross(localYAxis, localZAxis);
             steeringWheelZeroAxis.set(localXAxis);
-            if (steeringWheelZeroAxis.containsNaN())
-               System.out.println();
 
             steeringWheelCenter.get(localTranslation);
             localRotation.setColumn(0, localXAxis);

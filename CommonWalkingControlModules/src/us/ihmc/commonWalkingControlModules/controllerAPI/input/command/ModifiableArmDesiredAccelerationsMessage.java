@@ -6,6 +6,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAcc
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ModifiableArmDesiredAccelerationsMessage
+      implements ControllerSideDependentMessage<ModifiableArmDesiredAccelerationsMessage, ArmDesiredAccelerationsMessage>
 {
    private RobotSide robotSide;
    private ArmControlMode armControlMode;
@@ -15,15 +16,17 @@ public class ModifiableArmDesiredAccelerationsMessage
    {
    }
 
-   public void set(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   @Override
+   public void set(ArmDesiredAccelerationsMessage message)
    {
-      robotSide = armDesiredAccelerationsMessage.getRobotSide();
-      armControlMode = armDesiredAccelerationsMessage.getArmControlMode();
+      robotSide = message.getRobotSide();
+      armControlMode = message.getArmControlMode();
       armDesiredJointAccelerations.reset();
-      for (int i = 0; i < armDesiredAccelerationsMessage.getNumberOfJoints(); i++)
-         armDesiredJointAccelerations.add(armDesiredAccelerationsMessage.getArmDesiredJointAcceleration(i));
+      for (int i = 0; i < message.getNumberOfJoints(); i++)
+         armDesiredJointAccelerations.add(message.getArmDesiredJointAcceleration(i));
    }
 
+   @Override
    public void set(ModifiableArmDesiredAccelerationsMessage other)
    {
       robotSide = other.robotSide;
@@ -53,6 +56,7 @@ public class ModifiableArmDesiredAccelerationsMessage
       this.armControlMode = armControlMode;
    }
 
+   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -66,5 +70,11 @@ public class ModifiableArmDesiredAccelerationsMessage
    public TDoubleArrayList getArmDesiredJointAccelerations()
    {
       return armDesiredJointAccelerations;
+   }
+
+   @Override
+   public Class<ArmDesiredAccelerationsMessage> getMessageClass()
+   {
+      return ArmDesiredAccelerationsMessage.class;
    }
 }

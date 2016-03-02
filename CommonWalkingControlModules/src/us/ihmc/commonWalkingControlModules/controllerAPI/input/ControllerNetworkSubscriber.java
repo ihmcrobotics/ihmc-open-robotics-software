@@ -53,7 +53,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validateHandTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitHandTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(HandTrajectoryMessage.class, messageSubscriber);
@@ -69,7 +69,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validateArmTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitArmTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(ArmTrajectoryMessage.class, messageSubscriber);
@@ -85,7 +85,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validateFootTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitFootTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(FootTrajectoryMessage.class, messageSubscriber);
@@ -101,7 +101,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validateHeadTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitHeadTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(HeadTrajectoryMessage.class, messageSubscriber);
@@ -117,7 +117,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validateChestTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitChestTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(ChestTrajectoryMessage.class, messageSubscriber);
@@ -133,7 +133,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validatePelvisTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitPelvisTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(PelvisTrajectoryMessage.class, messageSubscriber);
@@ -149,7 +149,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validatePelvisHeightTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitPelvisHeightTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(PelvisHeightTrajectoryMessage.class, messageSubscriber);
@@ -165,7 +165,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitPelvisOrientationTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(PelvisOrientationTrajectoryMessage.class, messageSubscriber);
@@ -186,7 +186,7 @@ public class ControllerNetworkSubscriber
                return;
             }
             
-            controllerCommandInputManager.submitWholeBodyTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(WholeBodyTrajectoryMessage.class, messageSubscriber);
@@ -206,7 +206,7 @@ public class ControllerNetworkSubscriber
                return;
             }
 
-            controllerCommandInputManager.submitFootstepDataListMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(FootstepDataListMessage.class, messageSubscriber);
@@ -222,7 +222,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validateEndEffectorLoadBearingMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitEndEffectorLoadBearingMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(EndEffectorLoadBearingMessage.class, messageSubscriber);
@@ -238,7 +238,7 @@ public class ControllerNetworkSubscriber
             if (message == null)
                return;
 
-            controllerCommandInputManager.submitStopAllTrajectoryMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(StopAllTrajectoryMessage.class, messageSubscriber);
@@ -254,7 +254,7 @@ public class ControllerNetworkSubscriber
             if (!PacketValidityChecker.validateArmDesiredAccelerationsMessage(message, globalDataProducer))
                return;
 
-            controllerCommandInputManager.submitArmDesiredAccelerationsMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(ArmDesiredAccelerationsMessage.class, messageSubscriber);
@@ -270,7 +270,7 @@ public class ControllerNetworkSubscriber
             if (message == null || message.getRobotSide() == null)
                return;
 
-            controllerCommandInputManager.submitHandComplianceControlParametersMessage(message);
+            controllerCommandInputManager.submitMessage(message);
          }
       };
       globalDataProducer.attachListener(HandComplianceControlParametersMessage.class, messageSubscriber);

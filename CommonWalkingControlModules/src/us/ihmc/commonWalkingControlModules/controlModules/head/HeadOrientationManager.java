@@ -7,8 +7,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HeadTrajectoryMessageSubscriber;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -25,7 +23,6 @@ public class HeadOrientationManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
-   private final HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable receivedNewHeadOrientationTime;
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
@@ -45,8 +42,7 @@ public class HeadOrientationManager
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoOrientationPIDGainsInterface gains, HeadTrajectoryMessageSubscriber headTrajectoryMessageSubscriber, double[] initialDesiredHeadYawPitchRoll,
-         YoVariableRegistry parentRegistry)
+         YoOrientationPIDGainsInterface gains, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -61,7 +57,6 @@ public class HeadOrientationManager
       chestFrame = chest.getBodyFixedFrame();
       headFrame = head.getBodyFixedFrame();
 
-      this.headTrajectoryMessageSubscriber = headTrajectoryMessageSubscriber;
       parentRegistry.addChild(registry);
 
       receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
@@ -108,8 +103,6 @@ public class HeadOrientationManager
 
    public void compute()
    {
-      handleHeadTrajectoryMessages();
-
       if (isTrackingOrientation.getBooleanValue())
       {
          double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
@@ -122,43 +115,10 @@ public class HeadOrientationManager
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
    }
 
-   private void handleHeadTrajectoryMessages()
-   {
-      if (headTrajectoryMessageSubscriber == null || !headTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
-         return;
-
-      HeadTrajectoryMessage message = headTrajectoryMessageSubscriber.pollMessage();
-      handleHeadTrajectoryMessage(message);
-   }
-
-   public void handleHeadTrajectoryMessage(HeadTrajectoryMessage message)
-   {
-      receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-
-      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
-      {
-         waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         desiredOrientation.changeFrame(worldFrame);
-         desiredAngularVelocity.setToZero(worldFrame);
-
-         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-         waypointOrientationTrajectoryGenerator.clear();
-         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
-      }
-      else
-      {
-         waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-         waypointOrientationTrajectoryGenerator.clear();
-      }
-
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message);
-      waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
-      waypointOrientationTrajectoryGenerator.initialize();
-      isTrackingOrientation.set(true);
-   }
-   
    public void handleHeadTrajectoryMessage(ModifiableHeadTrajectoryMessage message)
    {
+      if (message == null)
+         return;
       receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
       
       if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)

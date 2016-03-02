@@ -3,7 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMessage<FootTrajectoryMessage>
+public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMessage<ModifiableFootTrajectoryMessage, FootTrajectoryMessage>
+      implements ControllerSideDependentMessage<ModifiableFootTrajectoryMessage, FootTrajectoryMessage>
 {
    private RobotSide robotSide;
 
@@ -12,16 +13,17 @@ public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMess
    }
 
    @Override
-   public void set(FootTrajectoryMessage trajectoryMessage)
+   public void set(FootTrajectoryMessage message)
    {
-      super.set(trajectoryMessage);
-      robotSide = trajectoryMessage.getRobotSide();
+      super.set(message);
+      robotSide = message.getRobotSide();
    }
 
-   public void set(ModifiableFootTrajectoryMessage footTrajectoryMessage)
+   @Override
+   public void set(ModifiableFootTrajectoryMessage other)
    {
-      super.set(footTrajectoryMessage);
-      robotSide = footTrajectoryMessage.robotSide;
+      super.set(other);
+      robotSide = other.robotSide;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -29,8 +31,15 @@ public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMess
       this.robotSide = robotSide;
    }
 
+   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   @Override
+   public Class<FootTrajectoryMessage> getMessageClass()
+   {
+      return FootTrajectoryMessage.class;
    }
 }

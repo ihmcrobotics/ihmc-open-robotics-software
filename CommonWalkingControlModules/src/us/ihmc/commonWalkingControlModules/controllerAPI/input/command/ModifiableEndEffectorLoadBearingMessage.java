@@ -8,9 +8,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBea
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ModifiableEndEffectorLoadBearingMessage
+public class ModifiableEndEffectorLoadBearingMessage implements ControllerMessage<ModifiableEndEffectorLoadBearingMessage, EndEffectorLoadBearingMessage>
 {
-   private final SideDependentList<EnumMap<EndEffector, LoadBearingRequest>> sideDependentEndEffectorRequestMap = SideDependentList.createListOfEnumMaps(EndEffector.class);
+   private final SideDependentList<EnumMap<EndEffector, LoadBearingRequest>> sideDependentEndEffectorRequestMap = SideDependentList
+         .createListOfEnumMaps(EndEffector.class);
    private final EnumMap<EndEffector, LoadBearingRequest> otherEndEffectorRequestMap = new EnumMap<>(EndEffector.class);
 
    public ModifiableEndEffectorLoadBearingMessage()
@@ -31,14 +32,15 @@ public class ModifiableEndEffectorLoadBearingMessage
       }
    }
 
-   public void set(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
+   @Override
+   public void set(EndEffectorLoadBearingMessage message)
    {
-      LoadBearingRequest request = endEffectorLoadBearingMessage.getRequest();
-      EndEffector endEffector = endEffectorLoadBearingMessage.getEndEffector();
+      LoadBearingRequest request = message.getRequest();
+      EndEffector endEffector = message.getEndEffector();
 
       if (endEffector.isRobotSideNeeded())
       {
-         RobotSide robotSide = endEffectorLoadBearingMessage.getRobotSide();
+         RobotSide robotSide = message.getRobotSide();
          sideDependentEndEffectorRequestMap.get(robotSide).put(endEffector, request);
       }
       else
@@ -47,6 +49,7 @@ public class ModifiableEndEffectorLoadBearingMessage
       }
    }
 
+   @Override
    public void set(ModifiableEndEffectorLoadBearingMessage other)
    {
       for (EndEffector endEffector : EndEffector.values)
@@ -78,5 +81,11 @@ public class ModifiableEndEffectorLoadBearingMessage
          return sideDependentEndEffectorRequestMap.get(robotSide).get(endEffector);
       else
          return getRequest(endEffector);
+   }
+
+   @Override
+   public Class<EndEffectorLoadBearingMessage> getMessageClass()
+   {
+      return EndEffectorLoadBearingMessage.class;
    }
 }

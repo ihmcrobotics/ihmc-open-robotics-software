@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ModifiableGoHomeMessage
+public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHomeMessage, GoHomeMessage>
 {
    private final SideDependentList<EnumMap<BodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(BodyPart.class);
    private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
@@ -32,12 +32,13 @@ public class ModifiableGoHomeMessage
       }
    }
 
-   public void set(GoHomeMessage goHomeMessage)
+   @Override
+   public void set(GoHomeMessage message)
    {
-      BodyPart bodyPart = goHomeMessage.getBodyPart();
+      BodyPart bodyPart = message.getBodyPart();
       if (bodyPart.isRobotSideNeeded())
       {
-         RobotSide robotSide = goHomeMessage.getRobotSide();
+         RobotSide robotSide = message.getRobotSide();
          sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setTrue();
       }
       else
@@ -46,6 +47,7 @@ public class ModifiableGoHomeMessage
       }
    }
 
+   @Override
    public void set(ModifiableGoHomeMessage other)
    {
       for (BodyPart bodyPart : BodyPart.values)
@@ -63,7 +65,7 @@ public class ModifiableGoHomeMessage
          }
       }
    }
-   
+
    private boolean getRequest(BodyPart bodyPart)
    {
       if (bodyPart.isRobotSideNeeded())
@@ -77,5 +79,11 @@ public class ModifiableGoHomeMessage
          return sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).booleanValue();
       else
          return getRequest(bodyPart);
+   }
+
+   @Override
+   public Class<GoHomeMessage> getMessageClass()
+   {
+      return GoHomeMessage.class;
    }
 }
