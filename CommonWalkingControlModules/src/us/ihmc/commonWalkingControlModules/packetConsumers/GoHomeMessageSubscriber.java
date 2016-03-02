@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;

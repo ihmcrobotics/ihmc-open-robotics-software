@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.packetConsumers;
+package us.ihmc.communication.packets;
 
 import static java.lang.Double.isInfinite;
 import static java.lang.Double.isNaN;

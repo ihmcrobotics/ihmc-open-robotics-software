@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PacketValidityChecker;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
