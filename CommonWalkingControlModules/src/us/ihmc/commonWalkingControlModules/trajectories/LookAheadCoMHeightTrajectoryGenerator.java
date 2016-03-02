@@ -9,11 +9,10 @@ import javax.vecmath.Quat4d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -28,6 +27,7 @@ import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -810,7 +810,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
+   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
@@ -822,7 +822,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         SE3TrajectoryPointMessage waypoint = pelvisTrajectoryMessage.getTrajectoryPoint(i);
+         FrameSE3TrajectoryPoint waypoint = pelvisTrajectoryMessage.getTrajectoryPoint(i);
          double time = waypoint.getTime();
          desiredPosition.setToZero(worldFrame);
          desiredVelocity.changeFrame(worldFrame);

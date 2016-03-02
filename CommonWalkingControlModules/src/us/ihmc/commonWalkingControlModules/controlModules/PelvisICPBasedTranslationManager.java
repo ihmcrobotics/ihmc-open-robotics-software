@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -156,7 +156,7 @@ public class PelvisICPBasedTranslationManager
       enable();
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryMessage message)
+   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
    {
       initialPelvisPositionTime.set(yoTime.getDoubleValue());
 
@@ -179,7 +179,7 @@ public class PelvisICPBasedTranslationManager
          waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       }
 
-      waypointPositionTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
+      waypointPositionTrajectoryGenerator.appendWaypoints(message);
       waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       waypointPositionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);

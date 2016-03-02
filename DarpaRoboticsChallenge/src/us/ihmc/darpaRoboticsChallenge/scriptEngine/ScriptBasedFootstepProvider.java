@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -18,7 +17,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -41,7 +39,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private boolean loadedScriptFile = false;
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
-   private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
@@ -62,7 +59,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       this.scriptEventDuration = new DoubleYoVariable("scriptEventDuration", registry);
 
       this.scriptFileLoader = scriptFileLoader;
-      pelvisTrajectoryMessageSubscriber = new PelvisTrajectoryMessageSubscriber(null);
 
       footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(null);
    }
@@ -127,13 +123,13 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 //         
 //         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
 //      }
-      else if (scriptObject instanceof PelvisTrajectoryMessage)
-      {
-         PelvisTrajectoryMessage pelvisPosePacket = (PelvisTrajectoryMessage) scriptObject;
-         pelvisTrajectoryMessageSubscriber.receivedPacket(pelvisPosePacket);
-
-         setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
-      }
+//      else if (scriptObject instanceof PelvisTrajectoryMessage)
+//      {
+//         PelvisTrajectoryMessage pelvisPosePacket = (PelvisTrajectoryMessage) scriptObject;
+//         pelvisTrajectoryMessageSubscriber.receivedPacket(pelvisPosePacket);
+//
+//         setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
+//      }
       else if (scriptObject instanceof PauseWalkingMessage)
       {
          PauseWalkingMessage pauseCommand = (PauseWalkingMessage) scriptObject;
@@ -239,11 +235,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    public boolean isBlindWalking()
    {
       return false;
-   }
-
-   public PelvisTrajectoryMessageSubscriber getPelvisTrajectorySubscriber()
-   {
-      return pelvisTrajectoryMessageSubscriber;
    }
 
    public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()

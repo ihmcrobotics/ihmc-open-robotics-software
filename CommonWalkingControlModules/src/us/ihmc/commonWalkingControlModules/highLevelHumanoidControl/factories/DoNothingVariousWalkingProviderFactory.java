@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -33,7 +32,6 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
          ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
          YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
-      PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
 
       ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = null;
@@ -44,8 +42,8 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber,
-            footstepProvider, highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footTrajectoryMessageSubscriber, footstepProvider,
+            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }
