@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author not attributable
  * @version 1.0
  */
-public abstract class FrameGeometry2d<T extends Transformable<T>> extends AbstractFrameObject<T>
+public abstract class FrameGeometry2d<S extends FrameGeometry2d<S, T>, T extends GeometryObject<T>> extends AbstractFrameObject<S, T>
 {
    public FrameGeometry2d(ReferenceFrame referenceFrame, T transformableDataObject)
    {
@@ -46,11 +46,11 @@ public abstract class FrameGeometry2d<T extends Transformable<T>> extends Abstra
    // Transformations:
    public abstract void applyTransformAndProjectToXYPlane(RigidBodyTransform transform);
 
-   public abstract FrameGeometry2d<T> applyTransformCopy(RigidBodyTransform transform);
+   public abstract FrameGeometry2d<S, T> applyTransformCopy(RigidBodyTransform transform);
 
-   public abstract FrameGeometry2d<T> applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform);
+   public abstract FrameGeometry2d<S, T> applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform);
 
    public abstract void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame);
 
-   public abstract FrameGeometry2d<T> changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame);
+   public abstract FrameGeometry2d<S, T> changeFrameAndProjectToXYPlaneCopy(ReferenceFrame desiredFrame);
 }

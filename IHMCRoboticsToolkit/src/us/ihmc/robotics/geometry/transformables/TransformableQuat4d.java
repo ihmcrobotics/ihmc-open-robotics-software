@@ -1,11 +1,14 @@
 package us.ihmc.robotics.geometry.transformables;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
-public class TransformableQuat4d extends Quat4d implements Transformable<TransformableQuat4d>
+public class TransformableQuat4d extends Quat4d implements GeometryObject<TransformableQuat4d>
 {
    private static final long serialVersionUID = -3751421971526302255L;
    private final Quat4d tempQuaternionForTransform = new Quat4d();
@@ -31,10 +34,9 @@ public class TransformableQuat4d extends Quat4d implements Transformable<Transfo
    {
       transform3D.get(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);
-
       normalizeAndLimitToPiMinusPi();
    }
-
+   
    /**
     * Normalize the quaternion and also limits the described angle magnitude in [-Pi, Pi].
     * The latter prevents some controllers to poop their pants.
@@ -45,7 +47,7 @@ public class TransformableQuat4d extends Quat4d implements Transformable<Transfo
          setToZero();
       else
       {
-         this.normalize();
+         super.normalize();
          if (this.getW() < 0.0)
             this.negate();
       }
@@ -66,6 +68,25 @@ public class TransformableQuat4d extends Quat4d implements Transformable<Transfo
    public void set(TransformableQuat4d other)
    {
       super.set(other);
+      normalizeAndLimitToPiMinusPi();
+   }
+   
+   public void setOrientation(Quat4d quat4d)
+   {
+      super.set(quat4d);
+      normalizeAndLimitToPiMinusPi();
+   }
+   
+   public void setOrientation(Matrix3d matrix3d)
+   {
+      super.set(matrix3d);
+      normalizeAndLimitToPiMinusPi();
+   }
+
+   public void setOrientation(AxisAngle4d axisAngle4d)
+   {
+      super.set(axisAngle4d);
+      normalizeAndLimitToPiMinusPi();
    }
 
    @Override
@@ -101,11 +122,13 @@ public class TransformableQuat4d extends Quat4d implements Transformable<Transfo
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
       RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, this);
+      normalizeAndLimitToPiMinusPi();
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, this);    
+      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, this);
+      normalizeAndLimitToPiMinusPi();
    }
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)

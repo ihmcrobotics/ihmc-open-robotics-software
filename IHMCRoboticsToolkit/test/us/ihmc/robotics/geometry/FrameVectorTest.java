@@ -52,7 +52,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
    }
 
    @Override
-   public FrameTuple<TransformableVector3d> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
+   public FrameTuple<FrameVector, TransformableVector3d> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
    {
       return new FrameVector(referenceFrame, x, y, z, name);
    }

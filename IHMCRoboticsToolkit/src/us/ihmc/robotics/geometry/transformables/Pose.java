@@ -9,8 +9,9 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
-public class Pose implements Transformable<Pose>
+public class Pose implements GeometryObject<Pose>
 {
    private final TransformablePoint3d position;
    private final TransformableQuat4d orientation;
@@ -84,14 +85,12 @@ public class Pose implements Transformable<Pose>
       position.setY(position.getY() + y);
       position.setZ(position.getZ() + z);
    }
-   
-   //TODO: Remove method in favor of a getPoint(pointToPack) method.
+
    public TransformablePoint3d getPoint()
    {
       return position;
    }
 
-   //TODO: Remove method in favor of a getOrientation(orientationToPack) method.
    public TransformableQuat4d getOrientation()
    {
       return orientation;
@@ -146,6 +145,7 @@ public class Pose implements Transformable<Pose>
    {
       position.interpolate(pose1.position, pose2.position, alpha);
       orientation.interpolate(pose1.orientation, pose2.orientation, alpha);
+      orientation.normalizeAndLimitToPiMinusPi();
    }
 
    public String printOutPosition()
@@ -160,14 +160,14 @@ public class Pose implements Transformable<Pose>
 
    public void setPose(Tuple3d position, Quat4d orientation)
    {
-      this.position.set(position);
-      this.orientation.set(orientation);
+      setPosition(position);
+      setOrientation(orientation);
    }
 
    public void setPose(Tuple3d position, AxisAngle4d orientation)
    {
-      this.position.set(position);
-      this.orientation.set(orientation);
+      setPosition(position);
+      setOrientation(orientation);
    }
 
    public void setPosition(Tuple3d position)
@@ -201,17 +201,17 @@ public class Pose implements Transformable<Pose>
 
    public void setOrientation(Quat4d quat4d)
    {
-      this.orientation.set(quat4d);
+      this.orientation.setOrientation(quat4d);
    }
    
    public void setOrientation(Matrix3d matrix3d)
    {
-      this.orientation.set(matrix3d);
+      this.orientation.setOrientation(matrix3d);
    }
 
    public void setOrientation(AxisAngle4d axisAngle4d)
    {
-      this.orientation.set(axisAngle4d);
+      this.orientation.setOrientation(axisAngle4d);
    }
 
    public void getOrientation(Matrix3d matrixToPack)
