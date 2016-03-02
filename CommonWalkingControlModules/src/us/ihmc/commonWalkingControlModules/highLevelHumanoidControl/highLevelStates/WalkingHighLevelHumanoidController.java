@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -573,6 +574,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             upcomingFootstepList.checkForFootsteps();
             consumeManipulationMessages();
+            consumePelvisMessages();
          }
 
          desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
@@ -1029,6 +1031,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             pelvisICPBasedTranslationManager.compute(supportSide, capturePoint2d);
             pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal, bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide));
+            consumePelvisMessages();
          }
          else
          {
@@ -1886,15 +1889,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          chestOrientationManager.handleChestTrajectoryMessage(commandInputManager.pollNewestChestTrajectoryMessage());
    }
 
+   private void consumePelvisMessages()
+   {
+      if (commandInputManager.isNewMessageAvailable(ModifiablePelvisOrientationTrajectoryMessage.class))
+         pelvisOrientationManager.handlePelvisOrientationTrajectoryMessages(commandInputManager.pollNewestMessage(ModifiablePelvisOrientationTrajectoryMessage.class));
+   }
+
    private void consumePelvisHeightMessages()
    {
       if (commandInputManager.isNewMessageAvailable(ModifiablePelvisHeightTrajectoryMessage.class))
          centerOfMassHeightTrajectoryGenerator.handlePelvisHeightTrajectoryMessage(commandInputManager.pollNewestPelvisHeightTrajectoryMessage());
    }
 
-   // Somehow this one cannot be private because it is called from the nested classes (DoubleSupport & SingleSupport).
-   // When private, there is no compilation error, but it is simply "skipped".
-   void consumeManipulationMessages()
+   private void consumeManipulationMessages()
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {

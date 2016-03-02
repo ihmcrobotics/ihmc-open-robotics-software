@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -14,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessage
 public class VariousWalkingProviders
 {
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
-   private final PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber;
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
    private final EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
@@ -30,14 +28,13 @@ public class VariousWalkingProviders
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
    public VariousWalkingProviders(PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
-         PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber, FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber,
-         EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
-         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, GoHomeMessageSubscriber goHomeMessageSubscriber,
-         FootstepProvider footstepProvider, HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
+         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
+         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
+         GoHomeMessageSubscriber goHomeMessageSubscriber, FootstepProvider footstepProvider,
+         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
+         AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
       this.pelvisTrajectoryMessageSubscriber = pelvisTrajectoryMessageSubscriber;
-      this.pelvisOrientationTrajectoryMessageSubscriber = pelvisOrientationTrajectoryMessageSubscriber;
       this.footTrajectoryMessageSubscriber = footTrajectoryMessageSubscriber;
       this.endEffectorLoadBearingMessageSubscriber = endEffectorLoadBearingMessageSubscriber;
       this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
@@ -62,8 +59,6 @@ public class VariousWalkingProviders
    {
       if (pelvisTrajectoryMessageSubscriber != null)
          pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
-      if (pelvisOrientationTrajectoryMessageSubscriber != null)
-         pelvisOrientationTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (footTrajectoryMessageSubscriber != null)
          footTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (endEffectorLoadBearingMessageSubscriber != null)
@@ -77,11 +72,6 @@ public class VariousWalkingProviders
    public PelvisTrajectoryMessageSubscriber getPelvisTrajectoryMessageSubscriber()
    {
       return pelvisTrajectoryMessageSubscriber;
-   }
-
-   public PelvisOrientationTrajectoryMessageSubscriber getPelvisOrientationTrajectoryMessageSubscriber()
-   {
-      return pelvisOrientationTrajectoryMessageSubscriber;
    }
 
    public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()
