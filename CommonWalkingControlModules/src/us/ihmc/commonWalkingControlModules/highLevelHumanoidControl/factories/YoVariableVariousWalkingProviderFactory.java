@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepPr
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisOrientationTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -35,7 +34,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
          YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
-      PelvisOrientationTrajectoryMessageSubscriber pelvisOrientationTrajectoryMessageSubscriber = null;
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
       EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber = null;
       StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = null;
@@ -50,9 +48,9 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber,
-            pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
-            goHomeMessageSubscriber, footstepPovider, highLevelStateProvider,
-            capturabilityBasedStatusProducer, abortWalkingProvider);
+            footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, goHomeMessageSubscriber,
+            footstepPovider, highLevelStateProvider, capturabilityBasedStatusProducer,
+            abortWalkingProvider);
 
       return variousProviders;
    }
