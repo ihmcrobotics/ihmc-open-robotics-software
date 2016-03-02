@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAcc
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ModifiableArmDesiredAccelerationsMessage
-      implements ControllerSideDependentMessage<ModifiableArmDesiredAccelerationsMessage, ArmDesiredAccelerationsMessage>
+      implements ControllerMessage<ModifiableArmDesiredAccelerationsMessage, ArmDesiredAccelerationsMessage>
 {
    private RobotSide robotSide;
    private ArmControlMode armControlMode;
@@ -56,7 +56,6 @@ public class ModifiableArmDesiredAccelerationsMessage
       this.armControlMode = armControlMode;
    }
 
-   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;

@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1D
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableArmTrajectoryMessage implements ControllerSideDependentMessage<ModifiableArmTrajectoryMessage, ArmTrajectoryMessage>
+public class ModifiableArmTrajectoryMessage implements ControllerMessage<ModifiableArmTrajectoryMessage, ArmTrajectoryMessage>
 {
    private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
    private RobotSide robotSide;
@@ -105,7 +105,6 @@ public class ModifiableArmTrajectoryMessage implements ControllerSideDependentMe
       return jointTrajectoryInputs.get(jointIndex).getNumberOfTrajectoryPoints();
    }
 
-   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;

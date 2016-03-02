@@ -4,7 +4,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMessage<ModifiableFootTrajectoryMessage, FootTrajectoryMessage>
-      implements ControllerSideDependentMessage<ModifiableFootTrajectoryMessage, FootTrajectoryMessage>
 {
    private RobotSide robotSide;
 
@@ -31,7 +30,6 @@ public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMess
       this.robotSide = robotSide;
    }
 
-   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
