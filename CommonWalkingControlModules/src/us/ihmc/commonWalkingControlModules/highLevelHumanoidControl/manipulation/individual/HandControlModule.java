@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -476,7 +474,6 @@ public class HandControlModule
          trajectoryGenerator.initialize();
       }
 
-      System.out.println();
       executeJointspaceTrajectory(jointTrajectoryGenerators);
    }
 

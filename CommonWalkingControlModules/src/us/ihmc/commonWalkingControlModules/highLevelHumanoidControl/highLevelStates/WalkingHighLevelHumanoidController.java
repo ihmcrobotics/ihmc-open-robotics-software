@@ -14,6 +14,9 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -1552,6 +1555,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public void doMotionControl()
    {
+      consumeHeadMessages();
+      consumeChestMessages();
+      consumePelvisHeightMessages();
+
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
       if (failureDetectionControlModule.isRobotFalling())
       {
@@ -1871,6 +1878,26 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       hasWalkingControllerBeenInitialized.set(!reinitialize);
    }
 
+   private void consumeHeadMessages()
+   {
+      if (commandInputManager.isNewMessageAvailable(ModifiableHeadTrajectoryMessage.class))
+         headOrientationManager.handleHeadTrajectoryMessage(commandInputManager.pollNewestHeadTrajectoryMessage());
+   }
+
+   private void consumeChestMessages()
+   {
+      if (commandInputManager.isNewMessageAvailable(ModifiableChestTrajectoryMessage.class))
+         chestOrientationManager.handleChestTrajectoryMessage(commandInputManager.pollNewestChestTrajectoryMessage());
+   }
+
+   private void consumePelvisHeightMessages()
+   {
+      if (commandInputManager.isNewMessageAvailable(ModifiablePelvisHeightTrajectoryMessage.class))
+         centerOfMassHeightTrajectoryGenerator.handlePelvisHeightTrajectoryMessage(commandInputManager.pollNewestPelvisHeightTrajectoryMessage());
+   }
+
+   // Somehow this one cannot be private because it is called from the nested classes (DoubleSupport & SingleSupport).
+   // When private, there is no compilation error, but it is simply "skipped".
    void consumeManipulationMessages()
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
@@ -1878,19 +1905,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          commandInputManager.flushManipulationBuffers();
          return;
       }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (commandInputManager.isNewArmTrajectoryMessageAvailable(robotSide))
-            manipulationControlModule.handleArmTrajectoryMessage(commandInputManager.pollArmTrajectoryMessage(robotSide));
-         if (commandInputManager.isNewHandTrajectoryMessageAvailable(robotSide))
-            manipulationControlModule.handleHandTrajectoryMessage(commandInputManager.pollHandTrajectoryMessage(robotSide));
-         if (commandInputManager.isNewArmDesiredAccelerationsMessageAvailable(robotSide))
-            manipulationControlModule.handleArmDesiredAccelerationsMessage(commandInputManager.pollArmDesiredAccelerationsMessage(robotSide));
-         if (commandInputManager.isNewHandComplianceControlParametersMessageAvailable(robotSide))
-            manipulationControlModule.handleHandComplianceControlParametersMessage(commandInputManager.pollHandComplianceControlParametersMessage(robotSide));
-      }
-
+      
+      manipulationControlModule.handleHandTrajectoryMessages(commandInputManager.pollHandTrajectoryMessages());
+      manipulationControlModule.handleArmTrajectoryMessages(commandInputManager.pollArmTrajectoryMessages());
+      manipulationControlModule.handleArmDesiredAccelerationsMessages(commandInputManager.pollArmDesiredAccelerationsMessages());
+      manipulationControlModule.handleHandComplianceControlParametersMessages(commandInputManager.pollHandComplianceControlParametersMessages());
    }
 
    @Override

@@ -26,6 +26,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -187,28 +188,44 @@ public class ManipulationControlModule
          goToDefaultState(robotSide, goHomeMessageSubscriber.pollMessage(BodyPart.ARM, robotSide));
    }
 
-   public void handleHandTrajectoryMessage(ModifiableHandTrajectoryMessage handTrajectoryMessage)
+   public void handleHandTrajectoryMessages(RecyclingArrayList<ModifiableHandTrajectoryMessage> messages)
    {
-      RobotSide robotSide = handTrajectoryMessage.getRobotSide();
-      handControlModules.get(robotSide).handleHandTrajectoryMessage(handTrajectoryMessage);
+      for (int i = 0; i < messages.size(); i++)
+      {
+         ModifiableHandTrajectoryMessage message = messages.get(i);
+         RobotSide robotSide = message.getRobotSide();
+         handControlModules.get(robotSide).handleHandTrajectoryMessage(message);
+      }
    }
 
-   public void handleArmTrajectoryMessage(ModifiableArmTrajectoryMessage armTrajectoryMessage)
+   public void handleArmTrajectoryMessages(RecyclingArrayList<ModifiableArmTrajectoryMessage> messages)
    {
-      RobotSide robotSide = armTrajectoryMessage.getRobotSide();
-      handControlModules.get(robotSide).handleArmTrajectoryMessage(armTrajectoryMessage);
+      for (int i = 0; i < messages.size(); i++)
+      {
+         ModifiableArmTrajectoryMessage message = messages.get(i);
+         RobotSide robotSide = message.getRobotSide();
+         handControlModules.get(robotSide).handleArmTrajectoryMessage(message);
+      }
    }
 
-   public void handleArmDesiredAccelerationsMessage(ModifiableArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   public void handleArmDesiredAccelerationsMessages(RecyclingArrayList<ModifiableArmDesiredAccelerationsMessage> messages)
    {
-      RobotSide robotSide = armDesiredAccelerationsMessage.getRobotSide();
-      handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage);
+      for (int i = 0; i < messages.size(); i++)
+      {
+         ModifiableArmDesiredAccelerationsMessage message = messages.get(i);
+         RobotSide robotSide = message.getRobotSide();
+         handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(message);
+      }
    }
 
-   public void handleHandComplianceControlParametersMessage(ModifiableHandComplianceControlParametersMessage message)
+   public void handleHandComplianceControlParametersMessages(RecyclingArrayList<ModifiableHandComplianceControlParametersMessage> messages)
    {
-      RobotSide robotSide = message.getRobotSide();
-      handControlModules.get(robotSide).handleHandComplianceControlParametersMessage(message);
+      for (int i = 0; i < messages.size(); i++)
+      {
+         ModifiableHandComplianceControlParametersMessage message = messages.get(i);
+         RobotSide robotSide = message.getRobotSide();
+         handControlModules.get(robotSide).handleHandComplianceControlParametersMessage(message);
+      }
    }
 
    public void goToDefaultState()

@@ -4,15 +4,23 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessa
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class ModifiableSE3TrajectoryMessage<CorrespondingMessageType extends AbstractSE3TrajectoryMessage<CorrespondingMessageType>> extends FrameSE3TrajectoryPointList
+public abstract class ModifiableSE3TrajectoryMessage<T extends ModifiableSE3TrajectoryMessage<T, M>, M extends AbstractSE3TrajectoryMessage<M>>
+      extends FrameSE3TrajectoryPointList implements ControllerMessage<T, M>
 {
 
    public ModifiableSE3TrajectoryMessage()
    {
    }
 
-   public void set(CorrespondingMessageType trajectoryMessage)
+   @Override
+   public void set(T other)
    {
-      setIncludingFrame(ReferenceFrame.getWorldFrame(), trajectoryMessage);
+      setIncludingFrame(other);
+   }
+
+   @Override
+   public void set(M message)
+   {
+      setIncludingFrame(ReferenceFrame.getWorldFrame(), message);
    }
 }

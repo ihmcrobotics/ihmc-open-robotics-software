@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1D
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableArmTrajectoryMessage
+public class ModifiableArmTrajectoryMessage implements ControllerSideDependentMessage<ModifiableArmTrajectoryMessage, ArmTrajectoryMessage>
 {
    private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
    private RobotSide robotSide;
@@ -56,14 +56,16 @@ public class ModifiableArmTrajectoryMessage
       }
    }
 
-   public void set(ArmTrajectoryMessage armTrajectoryMessage)
+   @Override
+   public void set(ArmTrajectoryMessage message)
    {
-      set(armTrajectoryMessage.getRobotSide(), armTrajectoryMessage.getTrajectoryPointLists());
+      set(message.getRobotSide(), message.getTrajectoryPointLists());
    }
 
-   public void set(ModifiableArmTrajectoryMessage armTrajectoryMessage)
+   @Override
+   public void set(ModifiableArmTrajectoryMessage other)
    {
-      set(robotSide, armTrajectoryMessage.getTrajectoryPointLists());
+      set(other.robotSide, other.getTrajectoryPointLists());
    }
 
    public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, T>> void set(RobotSide robotSide, T[] trajectoryPointListArray)
@@ -76,7 +78,8 @@ public class ModifiableArmTrajectoryMessage
       }
    }
 
-   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> void set(RobotSide robotSide, RecyclingArrayList<T> trajectoryPointListArray)
+   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> void set(RobotSide robotSide,
+         RecyclingArrayList<T> trajectoryPointListArray)
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
@@ -102,6 +105,7 @@ public class ModifiableArmTrajectoryMessage
       return jointTrajectoryInputs.get(jointIndex).getNumberOfTrajectoryPoints();
    }
 
+   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -120,5 +124,11 @@ public class ModifiableArmTrajectoryMessage
    public SimpleTrajectoryPoint1DList getJointTrajectoryPointList(int jointIndex)
    {
       return jointTrajectoryInputs.get(jointIndex);
+   }
+
+   @Override
+   public Class<ArmTrajectoryMessage> getMessageClass()
+   {
+      return ArmTrajectoryMessage.class;
    }
 }

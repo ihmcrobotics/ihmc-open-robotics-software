@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisHeightTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
@@ -19,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -44,7 +42,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
-   private final PelvisHeightTrajectoryMessageSubscriber pelvisHeightTrajectoryMessageSubscriber;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
@@ -66,7 +63,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
       this.scriptFileLoader = scriptFileLoader;
       pelvisTrajectoryMessageSubscriber = new PelvisTrajectoryMessageSubscriber(null);
-      pelvisHeightTrajectoryMessageSubscriber = new PelvisHeightTrajectoryMessageSubscriber(null);
 
       footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(null);
    }
@@ -144,12 +140,12 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          setupTimesForNewScriptEvent(0.5);
       }
 
-      else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
-      {
-         PelvisHeightTrajectoryMessage comHeightPacket = (PelvisHeightTrajectoryMessage) scriptObject;
-         pelvisHeightTrajectoryMessageSubscriber.receivedPacket(comHeightPacket);
-         setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
-      }
+//      else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
+//      {
+//         PelvisHeightTrajectoryMessage comHeightPacket = (PelvisHeightTrajectoryMessage) scriptObject;
+//         pelvisHeightTrajectoryMessageSubscriber.receivedPacket(comHeightPacket);
+//         setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
+//      }
    }
 
    private void setupTimesForNewScriptEvent(double scriptEventDuration)
@@ -248,11 +244,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    public PelvisTrajectoryMessageSubscriber getPelvisTrajectorySubscriber()
    {
       return pelvisTrajectoryMessageSubscriber;
-   }
-
-   public PelvisHeightTrajectoryMessageSubscriber getPelvisHeightTrajectoryMessageSubscriber()
-   {
-      return pelvisHeightTrajectoryMessageSubscriber;
    }
 
    public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()

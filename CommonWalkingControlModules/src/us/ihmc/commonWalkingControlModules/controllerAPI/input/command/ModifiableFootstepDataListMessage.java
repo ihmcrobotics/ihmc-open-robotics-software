@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class ModifiableFootstepDataListMessage
+public class ModifiableFootstepDataListMessage implements ControllerMessage<ModifiableFootstepDataListMessage, FootstepDataListMessage>
 {
    private double swingTime;
    private double transferTime = 0.0;
@@ -17,11 +17,12 @@ public class ModifiableFootstepDataListMessage
       footsteps.clear();
    }
 
-   public void set(FootstepDataListMessage footstepDataListMessage)
+   @Override
+   public void set(FootstepDataListMessage message)
    {
-      swingTime = footstepDataListMessage.swingTime;
-      transferTime = footstepDataListMessage.transferTime;
-      ArrayList<FootstepDataMessage> dataList = footstepDataListMessage.getDataList();
+      swingTime = message.swingTime;
+      transferTime = message.transferTime;
+      ArrayList<FootstepDataMessage> dataList = message.getDataList();
       footsteps.clear();
       if (dataList != null)
       {
@@ -30,6 +31,7 @@ public class ModifiableFootstepDataListMessage
       }
    }
 
+   @Override
    public void set(ModifiableFootstepDataListMessage other)
    {
       swingTime = other.swingTime;
@@ -76,5 +78,11 @@ public class ModifiableFootstepDataListMessage
    public RecyclingArrayList<ModifiableFootstepDataMessage> getFootsteps()
    {
       return footsteps;
+   }
+
+   @Override
+   public Class<FootstepDataListMessage> getMessageClass()
+   {
+      return FootstepDataListMessage.class;
    }
 }

@@ -12,7 +12,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-public class ModifiableFootstepDataMessage
+public class ModifiableFootstepDataMessage implements ControllerMessage<ModifiableFootstepDataMessage, FootstepDataMessage>
 {
    private RobotSide robotSide;
    private FootstepOrigin origin;
@@ -27,15 +27,16 @@ public class ModifiableFootstepDataMessage
       clearPredictedContactPoints();
    }
 
-   public void set(FootstepDataMessage footstepDataMessage)
+   @Override
+   public void set(FootstepDataMessage message)
    {
-      robotSide = footstepDataMessage.getRobotSide();
-      origin = footstepDataMessage.getOrigin();
-      trajectoryType = footstepDataMessage.getTrajectoryType();
-      swingHeight = footstepDataMessage.getSwingHeight();
-      position.set(footstepDataMessage.getLocation());
-      orientation.set(footstepDataMessage.getOrientation());
-      ArrayList<Point2d> originalPredictedContactPoints = footstepDataMessage.getPredictedContactPoints();
+      robotSide = message.getRobotSide();
+      origin = message.getOrigin();
+      trajectoryType = message.getTrajectoryType();
+      swingHeight = message.getSwingHeight();
+      position.set(message.getLocation());
+      orientation.set(message.getOrientation());
+      ArrayList<Point2d> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {
@@ -44,6 +45,7 @@ public class ModifiableFootstepDataMessage
       }
    }
 
+   @Override
    public void set(ModifiableFootstepDataMessage other)
    {
       robotSide = other.robotSide;
@@ -112,5 +114,11 @@ public class ModifiableFootstepDataMessage
    public RecyclingArrayList<Point2d> getPredictedContactPoints()
    {
       return predictedContactPoints;
+   }
+
+   @Override
+   public Class<FootstepDataMessage> getMessageClass()
+   {
+      return FootstepDataMessage.class;
    }
 }
