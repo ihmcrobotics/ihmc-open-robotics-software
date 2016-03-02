@@ -105,7 +105,7 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector
       zDot.update(tuple.getZ());
    }
 
-   public void update(FrameTuple<?> frameTuple)
+   public void update(FrameTuple<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
       xDot.update(frameTuple.getX());
@@ -113,7 +113,7 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector
       zDot.update(frameTuple.getZ());
    }
 
-   public void update(YoFrameTuple<?> yoFrameTuple)
+   public void update(YoFrameTuple<?, ?> yoFrameTuple)
    {
       checkReferenceFrameMatch(yoFrameTuple.getReferenceFrame());
       xDot.update(yoFrameTuple.getX());

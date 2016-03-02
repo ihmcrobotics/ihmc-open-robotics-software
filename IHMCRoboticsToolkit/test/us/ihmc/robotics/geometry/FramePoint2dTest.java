@@ -67,7 +67,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testFramePoint2d_FrameTuple2d()
    {
-      FrameTuple2d<?> frameTuple = createFrameTuple(theFrame, 1.0, 2.0, "testPointOne");
+      FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 1.0, 2.0, "testPointOne");
       FramePoint2d point = new FramePoint2d(frameTuple);
 
       point.checkReferenceFrameMatch(theFrame);

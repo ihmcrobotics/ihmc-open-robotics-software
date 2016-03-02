@@ -2,11 +2,12 @@ package us.ihmc.robotics.geometry.shapes;
 
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.robotics.dataStructures.Pose;
+
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;

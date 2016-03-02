@@ -13,9 +13,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * This method checks for one matrix argument.
  *
  */
-public class FrameMatrix3D extends AbstractFrameObject<TransformableMatrix3d>
+public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, TransformableMatrix3d>
 {
-   private final Matrix3d matrix;
+   private final TransformableMatrix3d matrix;
 
    public FrameMatrix3D()
    {
@@ -125,7 +125,7 @@ public class FrameMatrix3D extends AbstractFrameObject<TransformableMatrix3d>
 
    public void setToZero()
    {
-      matrix.setZero();
+      matrix.setToZero();
    }
 
    public void setToZero(ReferenceFrame referenceFrame)
@@ -190,7 +190,7 @@ public class FrameMatrix3D extends AbstractFrameObject<TransformableMatrix3d>
      * @param frameTupleToPack the frameTuple to be multiplied by this frameMatrix3D and then replaced
      * @throws ReferenceFrameMismatchException
      */
-   public void transform(FrameTuple<?> frameTupleToPack)
+   public void transform(FrameTuple<?, ?> frameTupleToPack)
    {
       checkReferenceFrameMatch(frameTupleToPack);
       matrix.transform(frameTupleToPack.tuple);
@@ -203,7 +203,7 @@ public class FrameMatrix3D extends AbstractFrameObject<TransformableMatrix3d>
      * @param frameTupleToPack the FrameTuple into which the product is placed
      * @throws ReferenceFrameMismatchException
      */
-   public void transform(FrameTuple<?> frameTupleOriginal, FrameTuple<?> frameTupleToPack)
+   public void transform(FrameTuple<?, ?> frameTupleOriginal, FrameTuple<?, ?> frameTupleToPack)
    {
       checkReferenceFrameMatch(frameTupleOriginal);
       frameTupleToPack.setIncludingFrame(frameTupleOriginal);

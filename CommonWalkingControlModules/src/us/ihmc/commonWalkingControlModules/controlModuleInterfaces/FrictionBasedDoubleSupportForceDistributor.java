@@ -48,9 +48,11 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
          FramePoint2d vtp = virtualToePoints.get(robotSide);
 
          FrameConvexPolygon2d footPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(robotSide);
+         FramePoint2d point = new FramePoint2d();
+
          for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
          {
-            FramePoint2d point = footPolygon.getFrameVertex(i);
+            footPolygon.getFrameVertex(i, point);
             point.changeFrame(vtp.getReferenceFrame());
 
             double dist = point.distance(vtp);
