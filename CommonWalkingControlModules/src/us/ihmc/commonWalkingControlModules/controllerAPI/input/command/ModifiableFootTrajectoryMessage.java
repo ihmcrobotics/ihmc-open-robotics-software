@@ -12,6 +12,13 @@ public class ModifiableFootTrajectoryMessage extends ModifiableSE3TrajectoryMess
    }
 
    @Override
+   public void clear()
+   {
+      robotSide = null;
+      super.clear();
+   }
+
+   @Override
    public void set(FootTrajectoryMessage message)
    {
       super.set(message);

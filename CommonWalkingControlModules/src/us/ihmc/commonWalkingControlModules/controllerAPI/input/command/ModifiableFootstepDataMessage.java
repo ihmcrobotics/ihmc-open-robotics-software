@@ -17,14 +17,26 @@ public class ModifiableFootstepDataMessage implements ControllerMessage<Modifiab
    private RobotSide robotSide;
    private FootstepOrigin origin;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   private double swingHeight = 0;
+   private double swingHeight = 0.0;
    private final Point3d position = new Point3d();
    private final Quat4d orientation = new Quat4d();
    private final RecyclingArrayList<Point2d> predictedContactPoints = new RecyclingArrayList<>(4, Point2d.class);
 
    public ModifiableFootstepDataMessage()
    {
-      clearPredictedContactPoints();
+      clear();
+   }
+
+   @Override
+   public void clear()
+   {
+      robotSide = null;
+      origin = null;
+      trajectoryType = TrajectoryType.DEFAULT;
+      swingHeight = 0.0;
+      position.set(0.0, 0.0, 0.0);
+      orientation.set(0.0, 0.0, 0.0, 1.0);
+      predictedContactPoints.clear();
    }
 
    @Override
@@ -74,11 +86,6 @@ public class ModifiableFootstepDataMessage implements ControllerMessage<Modifiab
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
-   }
-
-   public void clearPredictedContactPoints()
-   {
-      predictedContactPoints.clear();
    }
 
    public RobotSide getRobotSide()

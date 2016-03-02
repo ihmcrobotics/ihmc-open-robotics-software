@@ -34,6 +34,25 @@ public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHo
    }
 
    @Override
+   public void clear()
+   {
+      for (BodyPart bodyPart : BodyPart.values)
+      {
+         if (bodyPart.isRobotSideNeeded())
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setFalse();
+            }
+         }
+         else
+         {
+            otherBodyPartRequestMap.get(bodyPart).setFalse();
+         }
+      }
+   }
+
+   @Override
    public void set(GoHomeMessage message)
    {
       trajectoryTime = message.getTrajectoryTime();

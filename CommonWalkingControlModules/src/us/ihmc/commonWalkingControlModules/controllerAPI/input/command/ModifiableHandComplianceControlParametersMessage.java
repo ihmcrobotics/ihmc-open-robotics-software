@@ -25,6 +25,20 @@ public class ModifiableHandComplianceControlParametersMessage
 
    public ModifiableHandComplianceControlParametersMessage()
    {
+      clear();
+   }
+
+   @Override
+   public void clear()
+   {
+      robotSide = null;
+      enable = false;
+      Arrays.fill(enableLinearCompliance, false);
+      Arrays.fill(enableAngularCompliance, false);
+      desiredForce.set(0.0, 0.0, 0.0);
+      desiredTorque.set(0.0, 0.0, 0.0);
+      forceDeadZone = Double.NaN;
+      torqueDeadZone = Double.NaN;
    }
 
    @Override
