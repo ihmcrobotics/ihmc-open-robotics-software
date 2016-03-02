@@ -4,8 +4,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.PointInterface;
 
-public class TransformablePoint3d extends Point3d implements Transformable<TransformablePoint3d>
+public class TransformablePoint3d extends Point3d implements Transformable<TransformablePoint3d>, PointInterface
 {
    private static final long serialVersionUID = 3215925974643446454L;
 
@@ -85,6 +86,24 @@ public class TransformablePoint3d extends Point3d implements Transformable<Trans
          return false;
 
       return true;
+   }
+
+   @Override
+   public void getPoint(Point3d pointToPack)
+   {
+      this.get(pointToPack);
+   }
+
+   @Override
+   public void setPoint(PointInterface pointInterface)
+   {
+      pointInterface.getPoint(this);
+   }
+
+   @Override
+   public void setPoint(Point3d point)
+   {
+      this.set(point);
    }
 
 }

@@ -1,14 +1,17 @@
 package us.ihmc.robotics.math.frames;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector>
+public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> implements VectorInterface
 {
    public YoFrameVector(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -55,4 +58,26 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector>
       getFrameTuple().normalize();
       getYoValuesFromFrameTuple();
    }
+
+   @Override
+   public void getVector(Vector3d VectorToPack)
+   {
+      this.get(VectorToPack);
+   }
+
+   private final Vector3d tempVector = new Vector3d();
+
+   @Override
+   public void setVector(VectorInterface vectorInterface)
+   {
+      vectorInterface.getVector(tempVector);
+      this.set(tempVector);
+   }
+
+   @Override
+   public void setVector(Vector3d vector)
+   {
+      this.set(vector);
+   }
+
 }
