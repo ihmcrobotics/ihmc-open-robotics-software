@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAbortWalkingMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAutomaticManipulationAbortMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableEndEffectorLoadBearingMessage;
@@ -25,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
@@ -152,6 +152,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner;
 
    private final UpcomingFootstepList upcomingFootstepList;
+   private final BooleanYoVariable abortWalkingRequested = new BooleanYoVariable("requestAbortWalking", registry);
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
 
@@ -381,7 +382,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          transferStates.put(robotSide, transferState);
 
-         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide, variousWalkingProviders.getAbortWalkingMessageSubscriber());
+         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide);
          DoneWithTransferCondition doneWithTransferCondition = new DoneWithTransferCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide.getOppositeSide());
@@ -549,11 +550,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doAction()
       {
          //abort walk and clear if should abort
-         if (variousWalkingProviders.getAbortWalkingMessageSubscriber().shouldAbortWalking())
+         if (abortWalkingRequested.getBooleanValue())
          {
             upcomingFootstepList.clearCurrentFootsteps();
             upcomingFootstepList.requestCancelPlanToProvider();
-            variousWalkingProviders.getAbortWalkingMessageSubscriber().walkingAborted();
+            abortWalkingRequested.set(false);
          }
 
          if (!alwaysIntegrateAnkleAcceleration.getBooleanValue())
@@ -1457,19 +1458,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private class StopWalkingCondition extends DoneWithSingleSupportCondition
    {
       private final RobotSide robotSide;
-      private final AbortWalkingMessageSubscriber abortWalkingMessageSubscriber;
 
-      public StopWalkingCondition(RobotSide robotSide, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
+      public StopWalkingCondition(RobotSide robotSide)
       {
          super();
 
          this.robotSide = robotSide;
-         this.abortWalkingMessageSubscriber = abortWalkingMessageSubscriber;
       }
 
       public boolean checkCondition()
       {
-         if (abortWalkingMessageSubscriber.shouldAbortWalking())
+         if (abortWalkingRequested.getBooleanValue())
          {
             return true;
          }
@@ -1539,6 +1538,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       consumeEndEffectorLoadBearingMessages();
       consumeStopAllTrajectoryMessages();
       consumeFootTrajectoryMessages();
+      consumeAbortWalkingMessages();
 
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
       if (failureDetectionControlModule.isRobotFalling())
@@ -1953,6 +1953,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       ModifiableFootTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiableFootTrajectoryMessage.class);
       upcomingFootstepList.handleFootTrajectoryMessage(message);
+   }
+
+   private void consumeAbortWalkingMessages()
+   {
+      if (!commandInputManager.isNewMessageAvailable(ModifiableAbortWalkingMessage.class))
+         return;
+      abortWalkingRequested.set(commandInputManager.pollNewestMessage(ModifiableAbortWalkingMessage.class).isAbortWalkingRequested());
    }
 
    @Override
