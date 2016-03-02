@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAnd
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAutomaticManipulationAbortMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableEndEffectorLoadBearingMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
@@ -38,7 +39,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
-import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -153,7 +153,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final UpcomingFootstepList upcomingFootstepList;
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
-   private final EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber;
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
@@ -307,7 +306,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
-      endEffectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       pelvisTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisTrajectoryMessageSubscriber();
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
@@ -1063,6 +1061,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
+      private void handleEndEffectorLoadBearingRequest(ModifiableEndEffectorLoadBearingMessage message)
+      {
+         if (isInFlamingoStance.getBooleanValue() && message.getRequest(swingSide, EndEffector.FOOT) == LoadBearingRequest.LOAD)
+            initiateFootLoadingProcedure(swingSide);
+      }
+
       private final FramePoint nextExitCMP = new FramePoint();
       private final FramePoint2d toeOffContactPoint = new FramePoint2d();
 
@@ -1166,9 +1170,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
             centerOfMassHeightTrajectoryGenerator.setSupportLeg(supportSide);
          }
-
-         if (endEffectorLoadBearingMessageSubscriber != null)
-            endEffectorLoadBearingMessageSubscriber.clearMessageInQueue(EndEffector.FOOT, swingSide);
 
          loadFoot.set(false);
          upcomingFootstepList.checkForFootsteps();
@@ -1437,14 +1438,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                return true;
          }
 
-         boolean hasNewFootLoadBearingRequest = endEffectorLoadBearingMessageSubscriber != null
-               && endEffectorLoadBearingMessageSubscriber.pollMessage(EndEffector.FOOT, swingSide) == LoadBearingRequest.LOAD;
-
-         if (isInFlamingoStance.getBooleanValue() && hasNewFootLoadBearingRequest)
-         {
-            initiateFootLoadingProcedure(swingSide);
-         }
-
          if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
          {
             loadFoot.set(false);
@@ -1549,6 +1542,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       consumeChestMessages();
       consumePelvisHeightMessages();
       consumeGoHomeMessages();
+      consumeEndEffectorLoadBearingMessages();
 
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
       if (failureDetectionControlModule.isRobotFalling())
@@ -1919,6 +1913,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       pelvisOrientationManager.handleGoHomeMessage(message);
       pelvisICPBasedTranslationManager.handleGoHomeMessage(message);
       chestOrientationManager.handleGoHomeMessage(message);
+   }
+
+   private void consumeEndEffectorLoadBearingMessages()
+   {
+      if (!commandInputManager.isNewMessageAvailable(ModifiableEndEffectorLoadBearingMessage.class))
+         return;
+
+      ModifiableEndEffectorLoadBearingMessage message = commandInputManager.pollAndCompileEndEffectorLoadBearingMessages();
+      manipulationControlModule.handleEndEffectorLoadBearingMessage(message);
+      State<WalkingState> currentState = stateMachine.getCurrentState();
+      if (currentState instanceof SingleSupportState)
+         ((SingleSupportState) currentState).handleEndEffectorLoadBearingRequest(message);
    }
 
    @Override

@@ -7,6 +7,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableEndEffectorLoadBearingMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
@@ -16,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -50,7 +50,6 @@ public class ManipulationControlModule
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final EndEffectorLoadBearingMessageSubscriber effectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
 
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
@@ -61,7 +60,6 @@ public class ManipulationControlModule
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
-      effectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
 
       handControlModules = new SideDependentList<HandControlModule>();
@@ -121,7 +119,6 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         handleLoadBearing(robotSide);
          handleStopAllTrajectoryMessages(robotSide);
       }
 
@@ -131,20 +128,15 @@ public class ManipulationControlModule
       }
    }
 
-   private void handleLoadBearing(RobotSide robotSide)
+   public void handleEndEffectorLoadBearingMessage(ModifiableEndEffectorLoadBearingMessage message)
    {
-      if (effectorLoadBearingMessageSubscriber != null)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         LoadBearingRequest request = effectorLoadBearingMessageSubscriber.pollMessage(EndEffector.HAND, robotSide);
-
+         LoadBearingRequest request = message.getRequest(robotSide, EndEffector.HAND);
          if (request == LoadBearingRequest.LOAD)
-         {
             handControlModules.get(robotSide).requestLoadBearing();
-         }
          else if (request == LoadBearingRequest.UNLOAD)
-         {
             handControlModules.get(robotSide).holdPositionInBase();
-         }
       }
    }
 

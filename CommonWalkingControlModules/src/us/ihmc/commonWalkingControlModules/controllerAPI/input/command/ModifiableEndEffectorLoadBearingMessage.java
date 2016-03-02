@@ -16,6 +16,11 @@ public class ModifiableEndEffectorLoadBearingMessage implements ControllerMessag
 
    public ModifiableEndEffectorLoadBearingMessage()
    {
+      clear();
+   }
+
+   public void clear()
+   {
       for (EndEffector endEffector : EndEffector.values)
       {
          if (endEffector.isRobotSideNeeded())

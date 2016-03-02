@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
@@ -34,7 +33,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
    {
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
-      EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber = null;
       StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = null;
 
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters,
@@ -46,8 +44,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber,
-            footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, footstepPovider,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
+            footTrajectoryMessageSubscriber, stopAllTrajectoryMessageSubscriber, footstepPovider, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }
