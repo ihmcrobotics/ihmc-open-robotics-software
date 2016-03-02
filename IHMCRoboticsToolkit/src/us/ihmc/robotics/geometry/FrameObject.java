@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public interface FrameObject<T> extends ReferenceFrameHolder, GeometryObject<T>
+public interface FrameObject<T extends FrameObject<T>> extends ReferenceFrameHolder, GeometryObject<T>
 {
    public abstract void changeFrame(ReferenceFrame desiredFrame);
 
