@@ -45,10 +45,10 @@ public class IHMCPacketToMsgPublisher<T extends Message, U extends Packet> exten
    }
 
    public static <T extends Message, U extends Packet> IHMCPacketToMsgPublisher<T, U> createIHMCPacketToMsgPublisher(Message message, boolean latched,
-         PacketCommunicator gfe_communicator, Class<U> clazz)
+         PacketCommunicator rosAPI_communicator, Class<U> clazz)
    {
       IHMCPacketToMsgPublisher<T, U> pub = new IHMCPacketToMsgPublisher<T, U>(message.toRawMessage().getType(), latched);
-      gfe_communicator.attachListener(clazz, pub);
+      rosAPI_communicator.attachListener(clazz, pub);
       return pub;
    }
 }
