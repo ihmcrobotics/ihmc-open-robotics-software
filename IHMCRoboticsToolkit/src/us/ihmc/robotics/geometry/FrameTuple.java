@@ -87,6 +87,12 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       this.referenceFrame = referenceFrame;
       set(tuple);
    }
+   
+   public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2d tuple)
+   {
+      this.referenceFrame = referenceFrame;
+      setXY(tuple);
+   }
 
    /**
     * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y respectively, and sets the z component to zero.

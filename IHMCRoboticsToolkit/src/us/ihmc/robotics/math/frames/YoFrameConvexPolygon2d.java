@@ -252,7 +252,8 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       {
          for (int i = 0; i < numVertices.getIntegerValue(); i++)
          {
-            yoFramePoints.get(i).set(convexPolygon2dForWriting.getFrameVertex(i));
+            yoFramePoints.get(i).checkReferenceFrameMatch(convexPolygon2dForWriting);
+            yoFramePoints.get(i).set(convexPolygon2dForWriting.getVertex(i));
          }
       }
       catch (Exception e)
