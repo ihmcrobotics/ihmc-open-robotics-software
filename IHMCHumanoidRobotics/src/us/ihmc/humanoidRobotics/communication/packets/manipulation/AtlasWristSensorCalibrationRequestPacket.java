@@ -45,6 +45,5 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
    public AtlasWristSensorCalibrationRequestPacket(Random random)
    {
       this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT);
-
    }
 }

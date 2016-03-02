@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 @ClassDocumentation("This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
@@ -73,5 +74,12 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
          return "Chest SO3 trajectory: number of SO3 trajectory points = " + getNumberOfTrajectoryPoints();
       else
          return "Chest SO3 trajectory: no SO3 trajectory points";
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateChestTrajectoryMessage(this);
    }
 }

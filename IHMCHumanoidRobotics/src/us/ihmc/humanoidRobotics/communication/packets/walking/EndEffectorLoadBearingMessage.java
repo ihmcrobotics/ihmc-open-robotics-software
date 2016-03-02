@@ -4,6 +4,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
@@ -145,5 +146,12 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
    public String toString()
    {
       return "End effector load bearing: end-effector = " + endEffector + ", robotSide = " + robotSide;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateEndEffectorLoadBearingMessage(this);
    }
 }

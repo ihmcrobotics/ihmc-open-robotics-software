@@ -6,6 +6,7 @@ import java.text.NumberFormat;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.DocumentedEnum;
@@ -126,5 +127,12 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
       default:
          return "Invalid ArmControlMode: " + armControlMode;
       }
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateArmDesiredAccelerationsMessage(this);
    }
 }

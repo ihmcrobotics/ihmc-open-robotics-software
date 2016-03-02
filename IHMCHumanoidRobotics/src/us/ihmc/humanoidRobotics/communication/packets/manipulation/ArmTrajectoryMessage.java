@@ -7,6 +7,7 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -219,5 +220,12 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
          return "Arm 1D trajectories: number of joints = " + getNumberOfJoints() + ", robotSide = " + robotSide;
       else
          return "Arm 1D trajectories: no joint trajectory, robotSide = " + robotSide;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateArmTrajectoryMessage(this);
    }
 }
