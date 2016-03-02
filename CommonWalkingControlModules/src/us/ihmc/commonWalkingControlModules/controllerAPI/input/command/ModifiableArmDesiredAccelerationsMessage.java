@@ -17,6 +17,14 @@ public class ModifiableArmDesiredAccelerationsMessage
    }
 
    @Override
+   public void clear()
+   {
+      robotSide = null;
+      armControlMode = null;
+      armDesiredJointAccelerations.reset();
+   }
+
+   @Override
    public void set(ArmDesiredAccelerationsMessage message)
    {
       robotSide = message.getRobotSide();

@@ -14,6 +14,14 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
 
    public ModifiableFootstepDataListMessage()
    {
+      clear();
+   }
+
+   @Override
+   public void clear()
+   {
+      swingTime = 0.0;
+      transferTime = 0.0;
       footsteps.clear();
    }
 
@@ -23,7 +31,7 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
       swingTime = message.swingTime;
       transferTime = message.transferTime;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
-      footsteps.clear();
+      clear();
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)
@@ -37,7 +45,7 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
       swingTime = other.swingTime;
       transferTime = other.transferTime;
       RecyclingArrayList<ModifiableFootstepDataMessage> otherFootsteps = other.getFootsteps();
-      footsteps.clear();
+      clear();
       if (otherFootsteps != null)
       {
          for (int i = 0; i < otherFootsteps.size(); i++)
@@ -47,7 +55,7 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
 
    public void clearFoosteps()
    {
-      footsteps.clear();
+      clear();
    }
 
    public void addFootstep(ModifiableFootstepDataMessage footstep)

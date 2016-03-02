@@ -7,6 +7,12 @@ public class ModifiableStopAllTrajectoryMessage implements ControllerMessage<Mod
    private boolean stopAllTrajectory = false;
 
    @Override
+   public void clear()
+   {
+      stopAllTrajectory = false;
+   }
+
+   @Override
    public void set(ModifiableStopAllTrajectoryMessage other)
    {
       stopAllTrajectory = other.stopAllTrajectory;

@@ -355,6 +355,7 @@ public class ControllerCommandInputManager
          while ((message = buffer.read()) != null)
          {
             messagesToPack.add().set(message);
+            message.clear();
          }
          buffer.flush();
       }

@@ -11,6 +11,11 @@ public class ModifiableAutomaticManipulationAbortMessage implements ControllerMe
    }
 
    @Override
+   public void clear()
+   {
+   }
+
+   @Override
    public void set(ModifiableAutomaticManipulationAbortMessage other)
    {
       enable = other.enable;

@@ -19,6 +19,7 @@ public class ModifiableEndEffectorLoadBearingMessage implements ControllerMessag
       clear();
    }
 
+   @Override
    public void clear()
    {
       for (EndEffector endEffector : EndEffector.values)
