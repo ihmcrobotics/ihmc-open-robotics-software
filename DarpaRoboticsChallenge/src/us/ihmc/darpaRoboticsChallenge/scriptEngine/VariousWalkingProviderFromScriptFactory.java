@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSu
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -66,7 +65,6 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       updatables.add(footstepProvider);
 
-      PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
 
       HighLevelStateMessageSubscriber highLevelStateProvider = null;
@@ -75,9 +73,8 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
 
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber,
-            footTrajectoryMessageSubscriber, footstepProvider, highLevelStateProvider, capturabilityBasedStatusProducer,
-            abortWalkingProvider);
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footTrajectoryMessageSubscriber,
+            footstepProvider, highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }

@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
@@ -41,7 +42,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
@@ -57,7 +57,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
@@ -72,7 +71,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -155,7 +153,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final UpcomingFootstepList upcomingFootstepList;
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
-   private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
 
@@ -308,7 +305,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
-      pelvisTrajectoryMessageSubscriber = variousWalkingProviders.getPelvisTrajectoryMessageSubscriber();
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
       DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
@@ -639,17 +635,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // Do it only when standing
          if (transferToSide == null)
             handleAutomaticManipulationAbortOnICPError();
+      }
 
-         if (transferToSide == null)
-         {
-            if (pelvisTrajectoryMessageSubscriber != null && pelvisTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
-            {
-               PelvisTrajectoryMessage pelvisTrajectoryMessage = pelvisTrajectoryMessageSubscriber.pollMessage();
-               pelvisOrientationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-               pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-               centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-            }
-         }
+      private void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+      {
+         if (transferToSide != null)
+            return;
+
+         pelvisOrientationManager.handlePelvisTrajectoryMessage(message);
+         pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
+         centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(message);
       }
 
       private void handleAutomaticManipulationAbortOnICPError()
@@ -770,8 +765,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          timeICPPlannerFinishedAt.set(Double.NaN);
          desiredICPVelocityRedutionFactor.set(Double.NaN);
 
-         if (pelvisTrajectoryMessageSubscriber != null)
-            pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
+         commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
 
          boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
          if (isInDoubleSupport && !upcomingFootstepList.hasNextFootsteps() && !upcomingFootstepList.isPaused())
@@ -888,8 +882,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          feetManager.reset();
          ecmpBasedToeOffHasBeenInitialized.set(false);
 
-         if (pelvisTrajectoryMessageSubscriber != null)
-            pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
+         commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
 
          if (transferToSide == null)
          {
@@ -973,13 +966,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
                }
             }
-            else if (pelvisTrajectoryMessageSubscriber != null && pelvisTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable())
-            {
-               PelvisTrajectoryMessage pelvisTrajectoryMessage = pelvisTrajectoryMessageSubscriber.pollMessage();
-               pelvisOrientationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-               pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-               centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(pelvisTrajectoryMessage);
-            }
          }
          else if (pushRecoveryModule.isEnabled())
          {
@@ -1061,6 +1047,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                feetManager.requestToeOff(supportSide, predictedToeOffDuration);
             }
          }
+      }
+
+      private void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+      {
+         if (!isInFlamingoStance.getBooleanValue() || loadFoot.getBooleanValue())
+            return;
+
+         pelvisOrientationManager.handlePelvisTrajectoryMessage(message);
+         pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
+         centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(message);
       }
 
       private void handleEndEffectorLoadBearingRequest(ModifiableEndEffectorLoadBearingMessage message)
@@ -1545,6 +1541,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       consumePelvisHeightMessages();
       consumeGoHomeMessages();
       consumeEndEffectorLoadBearingMessages();
+      consumeStopAllTrajectoryMessages();
 
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
       if (failureDetectionControlModule.isRobotFalling())
@@ -1881,6 +1878,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       if (commandInputManager.isNewMessageAvailable(ModifiablePelvisOrientationTrajectoryMessage.class))
          pelvisOrientationManager.handlePelvisOrientationTrajectoryMessages(commandInputManager.pollNewestMessage(ModifiablePelvisOrientationTrajectoryMessage.class));
+
+      if (commandInputManager.isNewMessageAvailable(ModifiablePelvisTrajectoryMessage.class))
+      {
+         ModifiablePelvisTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiablePelvisTrajectoryMessage.class);
+         State<WalkingState> currentState = stateMachine.getCurrentState();
+         if (currentState instanceof DoubleSupportState)
+            ((DoubleSupportState) currentState).handlePelvisTrajectoryMessage(message);
+         else if (currentState instanceof SingleSupportState)
+            ((SingleSupportState) currentState).handlePelvisTrajectoryMessage(message);
+      }
    }
 
    private void consumePelvisHeightMessages()
@@ -1929,7 +1936,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          ((SingleSupportState) currentState).handleEndEffectorLoadBearingRequest(message);
    }
 
-   private void handleStopAllTrajectoryMessages()
+   private void consumeStopAllTrajectoryMessages()
    {
       if (!commandInputManager.isNewMessageAvailable(ModifiableStopAllTrajectoryMessage.class))
          return;

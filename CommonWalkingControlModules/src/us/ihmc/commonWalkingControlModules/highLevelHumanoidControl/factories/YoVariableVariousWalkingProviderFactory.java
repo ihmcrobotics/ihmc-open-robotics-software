@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSu
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -30,7 +29,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
          ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry,
          YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
-      PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
 
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters,
@@ -41,9 +39,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber,
-            footTrajectoryMessageSubscriber, footstepPovider, highLevelStateProvider, capturabilityBasedStatusProducer,
-            abortWalkingProvider);
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footTrajectoryMessageSubscriber,
+            footstepPovider, highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }
