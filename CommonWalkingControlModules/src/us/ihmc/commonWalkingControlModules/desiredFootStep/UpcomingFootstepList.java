@@ -3,12 +3,14 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class UpcomingFootstepList
 {
@@ -26,10 +28,17 @@ public class UpcomingFootstepList
 
    private final YoFramePose nextFootstepPose = new YoFramePose("nextFootstep", "", worldFrame, registry);
 
+   private ModifiableFootTrajectoryMessage nextFootTrajectoryForFlamingoStance;
+
    public UpcomingFootstepList(FootstepProvider footstepProvider, YoVariableRegistry parentRegistry)
    {
       this.footstepProvider = footstepProvider;
       parentRegistry.addChild(registry);
+   }
+
+   public void handleFootTrajectoryMessage(ModifiableFootTrajectoryMessage message)
+   {
+      nextFootTrajectoryForFlamingoStance = message;
    }
 
    public void checkForFootsteps()
@@ -96,6 +105,11 @@ public class UpcomingFootstepList
    public void requestCancelPlanToProvider()
    {
       footstepProvider.cancelPlan();
+   }
+
+   public void clearFootTrajectory()
+   {
+      nextFootTrajectoryForFlamingoStance = null;
    }
 
    public void clearCurrentFootsteps()
@@ -178,5 +192,30 @@ public class UpcomingFootstepList
          return false;
 
       return footstepProvider.isPaused();
+   }
+
+   public boolean hasFootTrajectoryForFlamingoStance()
+   {
+      return nextFootTrajectoryForFlamingoStance != null;
+   }
+
+   public boolean hasFootTrajectoryForFlamingoStance(RobotSide swingSide)
+   {
+      return hasFootTrajectoryForFlamingoStance() && nextFootTrajectoryForFlamingoStance.getRobotSide() == swingSide;
+   }
+
+   public ModifiableFootTrajectoryMessage pollFootTrajectoryForFlamingoStance()
+   {
+      ModifiableFootTrajectoryMessage ret = nextFootTrajectoryForFlamingoStance;
+      nextFootTrajectoryForFlamingoStance = null;
+      return ret;
+   }
+
+   public ModifiableFootTrajectoryMessage pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
+   {
+      if (!hasFootTrajectoryForFlamingoStance(swingSide))
+         return null;
+      else
+         return pollFootTrajectoryForFlamingoStance();
    }
 }
