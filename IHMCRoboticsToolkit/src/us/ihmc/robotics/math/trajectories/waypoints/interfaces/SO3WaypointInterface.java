@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.geometry.transformables.Transformable;
 
-public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends Transformable, GeometryObject<T>
+public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends GeometryObject<T>
 {
    public abstract void setOrientation(Quat4d orientation);
 

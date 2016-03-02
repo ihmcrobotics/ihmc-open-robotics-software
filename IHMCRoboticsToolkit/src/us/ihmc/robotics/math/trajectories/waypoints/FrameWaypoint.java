@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class FrameWaypoint<S extends Transformable & GeometryObject<S>, F extends FrameWaypoint<S, F>>
-      extends AbstractReferenceFrameHolder implements Transformable, GeometryObject<F>
+      extends AbstractReferenceFrameHolder implements GeometryObject<F>
 {
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    protected final S simpleWaypoint;
