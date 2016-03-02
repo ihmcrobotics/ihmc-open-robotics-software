@@ -44,7 +44,7 @@ public class HeadOrientationManager
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
          YoOrientationPIDGainsInterface gains, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(getClass().getSimpleName());
+      registry = new YoVariableRegistry(getClass().getSimpleName()); 
 
       this.yoTime = momentumBasedController.getYoTime();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
@@ -120,13 +120,13 @@ public class HeadOrientationManager
       if (message == null)
          return;
       receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-      
+
       if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
          desiredOrientation.changeFrame(worldFrame);
          desiredAngularVelocity.setToZero(worldFrame);
-         
+
          waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
          waypointOrientationTrajectoryGenerator.clear();
          waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
@@ -136,7 +136,7 @@ public class HeadOrientationManager
          waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
          waypointOrientationTrajectoryGenerator.clear();
       }
-      
+
       waypointOrientationTrajectoryGenerator.appendWaypoints(message);
       waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
       waypointOrientationTrajectoryGenerator.initialize();
