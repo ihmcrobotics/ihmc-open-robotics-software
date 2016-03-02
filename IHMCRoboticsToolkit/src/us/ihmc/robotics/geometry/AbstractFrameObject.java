@@ -85,6 +85,7 @@ public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T
    @Override
    public boolean epsilonEquals(S other, double epsilon)
    {
+      if (other == null) return false;
       if (referenceFrame != other.referenceFrame) return false;
       return this.transformableDataObject.epsilonEquals(other.transformableDataObject, epsilon);
    }
