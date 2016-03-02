@@ -199,4 +199,14 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
 
       return true;
    }
+
+   @Override
+   public String validateMessage()
+   {
+      if (robotSide == null)
+      {
+         return "The robotSide is missing.";
+      }
+      return null;
+   }
 }
