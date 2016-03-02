@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
@@ -70,7 +69,6 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
-      EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber = null;
       StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = null;
 
       HighLevelStateMessageSubscriber highLevelStateProvider = null;
@@ -80,8 +78,8 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
 
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber,
-            footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, footstepProvider,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
+            footTrajectoryMessageSubscriber, stopAllTrajectoryMessageSubscriber, footstepProvider, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }

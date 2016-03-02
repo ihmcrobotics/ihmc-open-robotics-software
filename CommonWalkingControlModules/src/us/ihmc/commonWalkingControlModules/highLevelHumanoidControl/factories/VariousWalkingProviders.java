@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
@@ -13,7 +12,6 @@ public class VariousWalkingProviders
 {
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
-   private final EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
 
    private final FootstepProvider footstepProvider;
@@ -25,14 +23,13 @@ public class VariousWalkingProviders
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
    public VariousWalkingProviders(PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
-         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber,
-         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
-         FootstepProvider footstepProvider, HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
+         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
+         FootstepProvider footstepProvider,
+         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
+         AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
       this.pelvisTrajectoryMessageSubscriber = pelvisTrajectoryMessageSubscriber;
       this.footTrajectoryMessageSubscriber = footTrajectoryMessageSubscriber;
-      this.endEffectorLoadBearingMessageSubscriber = endEffectorLoadBearingMessageSubscriber;
       this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       this.highLevelStateMessageSubscriber = highLevelStateMessageSubscriber;
@@ -56,8 +53,6 @@ public class VariousWalkingProviders
          pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (footTrajectoryMessageSubscriber != null)
          footTrajectoryMessageSubscriber.clearMessagesInQueue();
-      if (endEffectorLoadBearingMessageSubscriber != null)
-         endEffectorLoadBearingMessageSubscriber.clearMessagesInQueue();
       if (stopAllTrajectoryMessageSubscriber != null)
          stopAllTrajectoryMessageSubscriber.clearMessagesInQueue();
    }
@@ -70,11 +65,6 @@ public class VariousWalkingProviders
    public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()
    {
       return footTrajectoryMessageSubscriber;
-   }
-
-   public EndEffectorLoadBearingMessageSubscriber getEndEffectorLoadBearingMessageSubscriber()
-   {
-      return endEffectorLoadBearingMessageSubscriber;
    }
 
    public StopAllTrajectoryMessageSubscriber getStopAllTrajectoryMessageSubscriber()
