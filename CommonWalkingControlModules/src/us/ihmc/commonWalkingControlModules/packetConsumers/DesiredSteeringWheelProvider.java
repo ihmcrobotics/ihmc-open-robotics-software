@@ -60,8 +60,13 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
             if (packet == null)
                return;
 
-            if (!PacketValidityChecker.validateDesiredSteeringAnglePacket(packet, steeringWheelIdAtomic, globalDataProducer))
+            String errorMessage = PacketValidityChecker.validateDesiredSteeringAnglePacket(packet, steeringWheelIdAtomic);
+            if (errorMessage != null)
+            {
+               if (globalDataProducer != null)
+                  globalDataProducer.notifyInvalidPacketReceived(packet.getClass(), errorMessage);
                return;
+            }
 
             RobotSide robotSide = packet.getRobotSide();
 
@@ -83,8 +88,13 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
       if (packet == null)
          return;
 
-      if (!PacketValidityChecker.validateSteeringWheelInformationPacket(packet, steeringWheelIdAtomic, globalDataProducer))
+      String errorMessage = PacketValidityChecker.validateSteeringWheelInformationPacket(packet, steeringWheelIdAtomic);
+      if (errorMessage != null)
+      {
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(packet.getClass(), errorMessage);
          return;
+      }
 
       RobotSide robotSide = packet.getRobotSide();
       steeringWheelCenterAtomic.get(robotSide).set(packet.getSteeringWheelCenter());

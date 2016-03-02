@@ -109,8 +109,13 @@ public class GoHomeMessageSubscriber implements PacketConsumer<GoHomeMessage>
    @Override
    public void receivedPacket(GoHomeMessage goHomeMessage)
    {
-      if (!PacketValidityChecker.validateGoHomeMessage(goHomeMessage, globalDataProducer))
+      String errorMessage = PacketValidityChecker.validateGoHomeMessage(goHomeMessage);
+      if (errorMessage != null)
+      {
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(goHomeMessage.getClass(), errorMessage);
          return;
+      }
 
       BodyPart bodyPart = goHomeMessage.getBodyPart();
       double trajectoryTime = goHomeMessage.trajectoryTime;

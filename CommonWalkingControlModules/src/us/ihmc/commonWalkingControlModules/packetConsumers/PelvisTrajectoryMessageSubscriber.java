@@ -37,8 +37,13 @@ public class PelvisTrajectoryMessageSubscriber implements PacketConsumer<PelvisT
    @Override
    public void receivedPacket(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
-      if (!PacketValidityChecker.validatePelvisTrajectoryMessage(pelvisTrajectoryMessage, globalDataProducer))
+      String errorMessage = PacketValidityChecker.validatePelvisTrajectoryMessage(pelvisTrajectoryMessage);
+      if (errorMessage != null)
+      {
+         if (globalDataProducer != null)
+            globalDataProducer.notifyInvalidPacketReceived(pelvisTrajectoryMessage.getClass(), errorMessage);
          return;
+      }
 
       latestMessageReference.set(pelvisTrajectoryMessage);
    }
