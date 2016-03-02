@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
-import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -33,14 +32,12 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
    {
       ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = null;
 
-      HighLevelStateMessageSubscriber highLevelStateProvider = null;
-
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, highLevelStateProvider,
-            capturabilityBasedStatusProducer, abortWalkingProvider);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, capturabilityBasedStatusProducer,
+            abortWalkingProvider);
 
       return variousWalkingProviders;
    }

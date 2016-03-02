@@ -5,13 +5,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHighLevelStateMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
-import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -44,10 +44,10 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
 
-   private final HighLevelStateMessageSubscriber highLevelStateMessageSubscriber;
    private final BooleanYoVariable isListeningToHighLevelStateMessage = new BooleanYoVariable("isListeningToHighLevelStateMessage", registry);
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
+   private final ControllerCommandInputManager commandInputManager;
    private final ControllerCoreOuput controllerCoreOuput;
    private final WholeBodyControllerCore controllerCore;
 
@@ -60,6 +60,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
          VariousWalkingProviders variousWalkingProviders, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
          ControllerCoreOuput controllerCoreOuput, HumanoidGlobalDataProducer dataProducer)
    {
+      this.commandInputManager = commandInputManager;
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       this.controllerCoreOuput = controllerCoreOuput;
       this.controllerCore = controllerCore;
@@ -67,16 +68,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry, dataProducer);
       requestedHighLevelState.set(initialBehavior);
 
-      if (variousWalkingProviders != null)
-      {
-         this.highLevelStateMessageSubscriber = variousWalkingProviders.getHighLevelStateMessageSubscriber();
-         isListeningToHighLevelStateMessage.set(true);
-      }
-      else
-      {
-         this.highLevelStateMessageSubscriber = null;
-         isListeningToHighLevelStateMessage.set(false);
-      }
+      isListeningToHighLevelStateMessage.set(true);
 
       for (int i = 0; i < highLevelBehaviors.size(); i++)
       {
@@ -170,9 +162,9 @@ public class HighLevelHumanoidControllerManager implements RobotController
    {
       if (isListeningToHighLevelStateMessage.getBooleanValue())
       {
-         if (highLevelStateMessageSubscriber != null && highLevelStateMessageSubscriber.isNewMessageAvailable())
+         if (commandInputManager.isNewMessageAvailable(ModifiableHighLevelStateMessage.class))
          {
-            requestedHighLevelState.set(highLevelStateMessageSubscriber.pollMessage());
+            requestedHighLevelState.set(commandInputManager.pollNewestMessage(ModifiableHighLevelStateMessage.class).getHighLevelState());
          }
       }
 

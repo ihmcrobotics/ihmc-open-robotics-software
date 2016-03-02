@@ -482,4 +482,9 @@ public class MomentumBasedControllerFactory
    {
       return registry;
    }
+
+   public ControllerCommandInputManager getCommandInputManager()
+   {
+      return commandInputManager;
+   }
 }
