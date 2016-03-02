@@ -7,6 +7,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
@@ -16,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -25,7 +25,6 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -53,26 +52,17 @@ public class ManipulationControlModule
 
    private final EndEffectorLoadBearingMessageSubscriber effectorLoadBearingMessageSubscriber;
    private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
-   private final GoHomeMessageSubscriber goHomeMessageSubscriber;
-
-   private final BooleanYoVariable isIgnoringInputs = new BooleanYoVariable("isManipulationIgnoringInputs", registry);
-   private final DoubleYoVariable startTimeForIgnoringInputs = new DoubleYoVariable("startTimeForIgnoringManipulationInputs", registry);
-   private final DoubleYoVariable durationForIgnoringInputs = new DoubleYoVariable("durationForIgnoringManipulationInputs", registry);
-
-   private final DoubleYoVariable yoTime;
 
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       fullRobotModel = momentumBasedController.getFullRobotModel();
-      this.yoTime = momentumBasedController.getYoTime();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       effectorLoadBearingMessageSubscriber = variousWalkingProviders.getEndEffectorLoadBearingMessageSubscriber();
       stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
-      goHomeMessageSubscriber = variousWalkingProviders.getGoHomeMessageSubscriber();
 
       handControlModules = new SideDependentList<HandControlModule>();
 
@@ -129,21 +119,10 @@ public class ManipulationControlModule
 
       updateGraphics();
 
-      if (yoTime.getDoubleValue() - startTimeForIgnoringInputs.getDoubleValue() < durationForIgnoringInputs.getDoubleValue())
-      {
-         isIgnoringInputs.set(true);
-         goHomeMessageSubscriber.clearMessagesInQueue();
-      }
-      else
-      {
-         isIgnoringInputs.set(false);
-      }
-
       for (RobotSide robotSide : RobotSide.values)
       {
          handleLoadBearing(robotSide);
          handleStopAllTrajectoryMessages(robotSide);
-         handleGoHomeMessages(robotSide);
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -179,13 +158,13 @@ public class ManipulationControlModule
          handControlModule.holdPositionInJointSpace();
    }
 
-   private void handleGoHomeMessages(RobotSide robotSide)
+   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
    {
-      if (goHomeMessageSubscriber == null)
-         return;
-
-      if (goHomeMessageSubscriber.isNewMessageAvailable(BodyPart.ARM, robotSide))
-         goToDefaultState(robotSide, goHomeMessageSubscriber.pollMessage(BodyPart.ARM, robotSide));
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (message.getRequest(robotSide, BodyPart.ARM))
+            goToDefaultState(robotSide, message.getTrajectoryTime());
+      }
    }
 
    public void handleHandTrajectoryMessages(RecyclingArrayList<ModifiableHandTrajectoryMessage> messages)
@@ -263,12 +242,6 @@ public class ManipulationControlModule
          handControlModule.holdPositionInJointSpace();
          handControlModule.resetJointIntegrators();
       }
-   }
-
-   public void ignoreInputsForGivenDuration(double duration)
-   {
-      startTimeForIgnoringInputs.set(yoTime.getDoubleValue());
-      durationForIgnoringInputs.set(duration);
    }
 
    public void holdCurrentArmConfiguration()

@@ -296,6 +296,22 @@ public class ControllerCommandInputManager
       return pollNewestMessage(ModifiablePelvisHeightTrajectoryMessage.class);
    }
 
+   public ModifiableEndEffectorLoadBearingMessage pollAndCompileEndEffectorLoadBearingMessages()
+   {
+      RecyclingArrayList<ModifiableEndEffectorLoadBearingMessage> messages = pollNewMessages(ModifiableEndEffectorLoadBearingMessage.class);
+      for (int i = 1; i < messages.size(); i++)
+         messages.get(0).set(messages.get(i));
+      return messages.get(0);
+   }
+
+   public ModifiableGoHomeMessage pollAndCompileGoHomeMessages()
+   {
+      RecyclingArrayList<ModifiableGoHomeMessage> messages = pollNewMessages(ModifiableGoHomeMessage.class);
+      for (int i = 1; i < messages.size(); i++)
+         messages.get(0).set(messages.get(i));
+      return messages.get(0);
+   }
+
    public void flushManipulationBuffers()
    {
       handTrajectoryMessageBuffer.flush();

@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteBlindWalkingT
 import us.ihmc.commonWalkingControlModules.desiredFootStep.PauseWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -61,7 +60,6 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(objectCommunicator);
       EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber = new EndEffectorLoadBearingMessageSubscriber(objectCommunicator);
       StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = new StopAllTrajectoryMessageSubscriber(objectCommunicator);
-      GoHomeMessageSubscriber goHomeMessageSubscriber = new GoHomeMessageSubscriber(objectCommunicator);
 
       // This guy will redirect the messages contained in the WholeBodyTrajectoryMessage to the other subscribers. No need to hold on it.
 
@@ -88,8 +86,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(AbortWalkingMessage.class, abortWalkingMessageSubscriber);
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber,
-            endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepPathCoordinator,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingMessageSubscriber);
+            endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, footstepPathCoordinator, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingMessageSubscriber);
 
       return variousWalkingProviders;
    }
