@@ -28,7 +28,7 @@ public class NetworkPorts
    public static final NetworkPorts LEFT_HAND_MANAGER_PORT = new NetworkPorts(6004);
    public static final NetworkPorts RIGHT_HAND_MANAGER_PORT = new NetworkPorts(6005); 
    public static final NetworkPorts ROS_MODULE = new NetworkPorts(6006);
-   public static final NetworkPorts GFE_COMMUNICATOR = new NetworkPorts(6007);
+   public static final NetworkPorts ROS_API_COMMUNICATOR = new NetworkPorts(6007);
    public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
    public static final NetworkPorts MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE = new NetworkPorts(6009);
    public static final NetworkPorts ROS_AUXILIARY_ROBOT_DATA_PUBLISHER = new NetworkPorts(6010);
