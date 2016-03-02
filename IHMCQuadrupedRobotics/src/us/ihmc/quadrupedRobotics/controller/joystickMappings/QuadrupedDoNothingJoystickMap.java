@@ -6,7 +6,7 @@ import net.java.games.input.Component;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.simulationconstructionset.joystick.EnumDependentJoystickMapping;
-import us.ihmc.simulationconstructionset.joystick.EnumYoVariableDependentJoystickInputManager;
+import us.ihmc.simulationconstructionset.joystick.EnumYoVariableDependentInputManager;
 import us.ihmc.simulationconstructionset.joystick.JoystickToYoVariableMapper;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -14,7 +14,7 @@ import us.ihmc.tools.inputDevices.joystick.mapping.LogitechExtreme3DMapping;
 import us.ihmc.tools.inputDevices.joystick.mapping.MadCatzFLY5StickMapping;
 import us.ihmc.tools.inputDevices.joystick.mapping.MadCatzV1StickMapping;
 
-public class QuadrupedDoNothingJoystickMap implements EnumDependentJoystickMapping
+public class QuadrupedDoNothingJoystickMap implements EnumDependentJoystickMapping<QuadrupedControllerState>
 {
    private final ArrayList<JoystickEventListener> eventListeners = new ArrayList<>();
    private final QuadrupedControllerState controllerEnum = QuadrupedControllerState.DO_NOTHING;
@@ -26,7 +26,7 @@ public class QuadrupedDoNothingJoystickMap implements EnumDependentJoystickMappi
    private final Component rightButton9;
    
    public QuadrupedDoNothingJoystickMap(final YoVariableHolder yoVariableHolder,
-         EnumYoVariableDependentJoystickInputManager<QuadrupedControllerState> joystickManager)
+         EnumYoVariableDependentInputManager<QuadrupedControllerState> joystickManager)
    {
       joystickToYoVariableMapper = new JoystickToYoVariableMapper(yoVariableHolder, eventListeners);
       
@@ -83,7 +83,7 @@ public class QuadrupedDoNothingJoystickMap implements EnumDependentJoystickMappi
    }
 
    @Override
-   public Enum<?> getEnum()
+   public QuadrupedControllerState getEnum()
    {
       return controllerEnum;
    }

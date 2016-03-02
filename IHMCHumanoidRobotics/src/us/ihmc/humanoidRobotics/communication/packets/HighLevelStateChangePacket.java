@@ -23,7 +23,7 @@ public class HighLevelStateChangePacket extends Packet<HighLevelStateChangePacke
 
    public HighLevelStateChangePacket(HighLevelState initialState, HighLevelState endState)
    {
-      this.destination = (byte) PacketDestination.GFE.ordinal();
+      this.destination = (byte)PacketDestination.ROS_API.ordinal();
       this.initialState = initialState;
       this.endState = endState;
    }
