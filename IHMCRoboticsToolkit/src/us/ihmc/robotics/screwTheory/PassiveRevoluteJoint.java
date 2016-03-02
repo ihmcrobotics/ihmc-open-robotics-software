@@ -8,7 +8,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {
-   private boolean hasBeenInitialized = false;
    private final boolean isPartOfClosedKinematicLoop;
 
    /**
@@ -21,7 +20,6 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     *    2) getTau() should always return a zero because, since the joint is NOT actuated,
     *    there is no torque.
     */
-
    public PassiveRevoluteJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, FrameVector jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       super(name, predecessor, beforeJointFrame, jointAxis);
