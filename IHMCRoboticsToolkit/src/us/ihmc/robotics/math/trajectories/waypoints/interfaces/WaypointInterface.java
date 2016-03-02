@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-import us.ihmc.robotics.ComparableDataObject;
+import us.ihmc.robotics.EpsilonComparable;
 
-public interface WaypointInterface<T extends WaypointInterface<T>> extends ComparableDataObject<T>
+public interface WaypointInterface<T extends WaypointInterface<T>> extends EpsilonComparable<T>
 {
    public abstract void set(T other);
 
