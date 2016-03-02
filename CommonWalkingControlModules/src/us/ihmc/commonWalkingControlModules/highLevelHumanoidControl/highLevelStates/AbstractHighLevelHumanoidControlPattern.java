@@ -19,10 +19,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -213,7 +211,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       momentumBasedController.initialize();
       variousWalkingManagers.initializeManagers();
-      variousWalkingProviders.clearPoseProviders();
       callUpdatables();
    }
 
@@ -288,16 +285,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       }
 
       return unconstrainedJointsCommand;
-   }
-
-   protected boolean handleFootTrajectoryMessage(RobotSide robotSide)
-   {
-      FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
-      if (footTrajectoryMessageSubscriber == null || !footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide))
-         return false;
-
-      feetManager.handleFootTrajectoryMessage(footTrajectoryMessageSubscriber.pollMessage(robotSide));
-      return true;
    }
 
    // TODO: New methods coming from extending State class

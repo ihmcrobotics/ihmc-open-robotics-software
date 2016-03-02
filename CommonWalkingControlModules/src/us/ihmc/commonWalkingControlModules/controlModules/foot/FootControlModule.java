@@ -8,6 +8,7 @@ import java.util.List;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
@@ -16,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -355,7 +355,7 @@ public class FootControlModule
       swingState.setFootstep(footstep);
    }
 
-   public void setFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
+   public void setFootTrajectoryMessage(ModifiableFootTrajectoryMessage footTrajectoryMessage)
    {
       boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
       moveViaWaypointsState.handleFootTrajectoryMessage(footTrajectoryMessage, initializeToCurrent);

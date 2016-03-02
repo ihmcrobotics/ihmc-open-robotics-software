@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinat
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.PauseWalkingMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -53,8 +52,6 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
          YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposeableRegistry)
    {
 
-      FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = new FootTrajectoryMessageSubscriber(objectCommunicator);
-
       // This guy will redirect the messages contained in the WholeBodyTrajectoryMessage to the other subscribers. No need to hold on it.
 
       ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
@@ -79,8 +76,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(HighLevelStateMessage.class, highLevelStateProvider);
       objectCommunicator.attachListener(AbortWalkingMessage.class, abortWalkingMessageSubscriber);
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footTrajectoryMessageSubscriber, footstepPathCoordinator,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingMessageSubscriber);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepPathCoordinator, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingMessageSubscriber);
 
       return variousWalkingProviders;
    }

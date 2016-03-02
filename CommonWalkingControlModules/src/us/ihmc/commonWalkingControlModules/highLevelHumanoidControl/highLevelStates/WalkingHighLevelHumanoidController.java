@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommand
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAutomaticManipulationAbortMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableEndEffectorLoadBearingMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
@@ -41,7 +42,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
@@ -152,7 +152,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner;
 
    private final UpcomingFootstepList upcomingFootstepList;
-   private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
 
@@ -304,7 +303,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
-      footTrajectoryMessageSubscriber = variousWalkingProviders.getFootTrajectoryMessageSubscriber();
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
       DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
@@ -804,7 +802,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (transferToSideToUseInFootstepData == null)
             transferToSideToUseInFootstepData = lastPlantedLeg.getEnumValue();
 
-         boolean hasFootTrajectoryMessage = footTrajectoryMessageSubscriber != null && footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable();
+         boolean hasFootTrajectoryMessage = upcomingFootstepList.hasFootTrajectoryForFlamingoStance();
          if (!hasFootTrajectoryMessage && !centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
          {
             boolean inInitialize = true;
@@ -945,7 +943,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (isInFlamingoStance.getBooleanValue())
          {
-            handleFootTrajectoryMessage(swingSide);
+            feetManager.handleFootTrajectoryMessage(upcomingFootstepList.pollFootTrajectoryForFlamingoStance(swingSide));
          }
 
          RobotSide supportSide = swingSide.getOppositeSide();
@@ -1012,8 +1010,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            if (footTrajectoryMessageSubscriber != null)
-               footTrajectoryMessageSubscriber.clearMessagesInQueue();
+            upcomingFootstepList.clearFootTrajectory();
          }
 
          desiredICP.set(desiredICPLocal);
@@ -1131,8 +1128,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             feetManager.requestSwing(swingSide, nextFootstep);
          }
-         else if (handleFootTrajectoryMessage(swingSide))
+         else if (upcomingFootstepList.hasFootTrajectoryForFlamingoStance(swingSide))
          {
+            feetManager.handleFootTrajectoryMessage(upcomingFootstepList.pollFootTrajectoryForFlamingoStance(swingSide));
             isInFlamingoStance.set(true);
             pelvisICPBasedTranslationManager.enable();
          }
@@ -1341,8 +1339,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public boolean checkCondition()
       {
          boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getValue();
-         boolean hasNewFootTrajectoryMessage = footTrajectoryMessageSubscriber != null
-               && footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(transferToSide.getOppositeSide());
+         boolean hasNewFootTrajectoryMessage = upcomingFootstepList.hasFootTrajectoryForFlamingoStance(transferToSide.getOppositeSide());
          boolean transferringToThisRobotSide = hasNewFootTrajectoryMessage;
 
          return transferringToThisRobotSide && doubleSupportTimeHasPassed;
@@ -1480,8 +1477,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean isNextFootstepNull = upcomingFootstepList.getNextFootstep() == null;
          boolean isSupportLegNull = supportLeg.getEnumValue() == null;
          boolean noMoreFootstepsForThisSide = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull;
-         boolean noMoreFootTrajectoryMessages = footTrajectoryMessageSubscriber == null
-               || !footTrajectoryMessageSubscriber.isNewTrajectoryMessageAvailable(robotSide.getOppositeSide());
+         boolean noMoreFootTrajectoryMessages = !upcomingFootstepList.hasFootTrajectoryForFlamingoStance(robotSide.getOppositeSide());
          boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootTrajectoryMessages && (isSupportLegNull || super.checkCondition());
          return readyToStopWalking;
       }
@@ -1542,6 +1538,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       consumeGoHomeMessages();
       consumeEndEffectorLoadBearingMessages();
       consumeStopAllTrajectoryMessages();
+      consumeFootTrajectoryMessages();
 
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
       if (failureDetectionControlModule.isRobotFalling())
@@ -1947,6 +1944,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       centerOfMassHeightTrajectoryGenerator.handleStopAllTrajectoryMessage(message);
       pelvisICPBasedTranslationManager.handleStopAllTrajectoryMessage(message);
       pelvisOrientationManager.handleStopAllTrajectoryMessage(message);
+   }
+
+   private void consumeFootTrajectoryMessages()
+   {
+      if (!commandInputManager.isNewMessageAvailable(ModifiableFootTrajectoryMessage.class))
+         return;
+
+      ModifiableFootTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiableFootTrajectoryMessage.class);
+      upcomingFootstepList.handleFootTrajectoryMessage(message);
    }
 
    @Override

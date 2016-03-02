@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -56,7 +56,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
             touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
    }
 
-   public void handleFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage, boolean initializeToCurrent)
+   public void handleFootTrajectoryMessage(ModifiableFootTrajectoryMessage footTrajectoryMessage, boolean initializeToCurrent)
    {
       positionTrajectoryGenerator.clear();
       orientationTrajectoryGenerator.clear();
@@ -83,8 +83,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          orientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
 
-      positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPoints());
-      orientationTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPoints());
+      positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage);
+      orientationTrajectoryGenerator.appendWaypoints(footTrajectoryMessage);
    }
 
    @Override
