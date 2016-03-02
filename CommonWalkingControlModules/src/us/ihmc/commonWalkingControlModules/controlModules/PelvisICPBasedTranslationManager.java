@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -59,7 +59,6 @@ public class PelvisICPBasedTranslationManager
    private final DoubleYoVariable yoTime;
    private final double controlDT;
 
-   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isPelvisTranslationalTrajectoryStopped", registry);
 
    private ReferenceFrame supportFrame;
@@ -74,8 +73,7 @@ public class PelvisICPBasedTranslationManager
    private final FrameVector2d tempICPOffset = new FrameVector2d();
    private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
 
-   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
-         YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
       frozenOffsetDecayAlpha.set(0.998);
@@ -85,8 +83,6 @@ public class PelvisICPBasedTranslationManager
       pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
       midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
       ankleZUpFrames = momentumBasedController.getReferenceFrames().getAnkleZUpReferenceFrames();
-
-      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       boolean allowMultipleFrames = true;
       waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", 15, allowMultipleFrames, worldFrame, registry);
@@ -125,8 +121,6 @@ public class PelvisICPBasedTranslationManager
 
       if (manualMode.getBooleanValue())
          return;
-
-      handleStopAllTrajectoryMessage();
 
       if (isRunning.getBooleanValue())
       {
@@ -192,12 +186,9 @@ public class PelvisICPBasedTranslationManager
       isRunning.set(true);
    }
 
-   private void handleStopAllTrajectoryMessage()
+   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
    {
-      if (stopAllTrajectoryMessageSubscriber == null || !stopAllTrajectoryMessageSubscriber.pollMessage(this))
-         return;
-
-      isTrajectoryStopped.set(true);
+      isTrajectoryStopped.set(message.isStopAllTrajectory());
    }
 
    private void computeDesiredICPOffset()

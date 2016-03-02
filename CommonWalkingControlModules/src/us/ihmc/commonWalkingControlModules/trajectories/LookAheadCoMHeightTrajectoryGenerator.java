@@ -9,8 +9,8 @@ import javax.vecmath.Quat4d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
@@ -53,7 +53,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FourPointSpline1D spline = new FourPointSpline1D(registry);
 
-   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isPelvisOffsetHeightTrajectoryStopped", registry);
 
    private final BooleanYoVariable hasBeenInitializedWithNextStep = new BooleanYoVariable("hasBeenInitializedWithNextStep", registry);
@@ -106,12 +105,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final ReferenceFrame pelvisFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
-   public LookAheadCoMHeightTrajectoryGenerator(StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
-         double minimumHeightAboveGround, double nominalHeightAboveGround,
-         double maximumHeightAboveGround, double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame pelvisFrame,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
+         double nominalHeightAboveGround, double maximumHeightAboveGround,
+         double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame pelvisFrame, SideDependentList<ReferenceFrame> ankleZUpFrames,
+         final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
       this.pelvisFrame = pelvisFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
@@ -753,7 +751,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
 
-      handleStopAllTrajectoryMessage();
       handleInitializeToCurrent();
 
       if (!isTrajectoryOffsetStopped.getBooleanValue())
@@ -876,12 +873,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
       isTrajectoryOffsetStopped.set(false);
    }
 
-   private void handleStopAllTrajectoryMessage()
+   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
    {
-      if (stopAllTrajectoryMessageSubscriber == null || !stopAllTrajectoryMessageSubscriber.pollMessage(this))
-         return;
-
-      isTrajectoryOffsetStopped.set(true);
+      isTrajectoryOffsetStopped.set(message.isStopAllTrajectory());
    }
 
    public void initializeDesiredHeightToCurrent()

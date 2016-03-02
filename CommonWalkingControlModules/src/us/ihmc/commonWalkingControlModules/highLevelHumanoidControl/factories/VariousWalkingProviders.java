@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSu
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 
@@ -12,7 +11,6 @@ public class VariousWalkingProviders
 {
    private final PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber;
    private final FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber;
-   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
 
    private final FootstepProvider footstepProvider;
    private final AbortWalkingMessageSubscriber abortWalkingMessageSubscriber;
@@ -23,14 +21,12 @@ public class VariousWalkingProviders
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
    public VariousWalkingProviders(PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber,
-         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber,
-         FootstepProvider footstepProvider,
-         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
-         AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
+         FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber, FootstepProvider footstepProvider,
+         HighLevelStateMessageSubscriber highLevelStateMessageSubscriber,
+         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, AbortWalkingMessageSubscriber abortWalkingMessageSubscriber)
    {
       this.pelvisTrajectoryMessageSubscriber = pelvisTrajectoryMessageSubscriber;
       this.footTrajectoryMessageSubscriber = footTrajectoryMessageSubscriber;
-      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       this.highLevelStateMessageSubscriber = highLevelStateMessageSubscriber;
       this.footstepProvider = footstepProvider;
@@ -53,8 +49,6 @@ public class VariousWalkingProviders
          pelvisTrajectoryMessageSubscriber.clearMessagesInQueue();
       if (footTrajectoryMessageSubscriber != null)
          footTrajectoryMessageSubscriber.clearMessagesInQueue();
-      if (stopAllTrajectoryMessageSubscriber != null)
-         stopAllTrajectoryMessageSubscriber.clearMessagesInQueue();
    }
 
    public PelvisTrajectoryMessageSubscriber getPelvisTrajectoryMessageSubscriber()
@@ -65,11 +59,6 @@ public class VariousWalkingProviders
    public FootTrajectoryMessageSubscriber getFootTrajectoryMessageSubscriber()
    {
       return footTrajectoryMessageSubscriber;
-   }
-
-   public StopAllTrajectoryMessageSubscriber getStopAllTrajectoryMessageSubscriber()
-   {
-      return stopAllTrajectoryMessageSubscriber;
    }
 
    public HighLevelStateMessageSubscriber getHighLevelStateMessageSubscriber()

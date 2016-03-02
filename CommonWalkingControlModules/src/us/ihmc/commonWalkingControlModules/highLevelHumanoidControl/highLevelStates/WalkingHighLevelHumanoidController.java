@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -71,6 +72,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -1925,6 +1927,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       State<WalkingState> currentState = stateMachine.getCurrentState();
       if (currentState instanceof SingleSupportState)
          ((SingleSupportState) currentState).handleEndEffectorLoadBearingRequest(message);
+   }
+
+   private void handleStopAllTrajectoryMessages()
+   {
+      if (!commandInputManager.isNewMessageAvailable(ModifiableStopAllTrajectoryMessage.class))
+         return;
+
+      ModifiableStopAllTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiableStopAllTrajectoryMessage.class);
+      chestOrientationManager.handleStopAllTrajectoryMessage(message);
+      feetManager.handleStopAllTrajectoryMessage(message);
+      centerOfMassHeightTrajectoryGenerator.handleStopAllTrajectoryMessage(message);
+      pelvisICPBasedTranslationManager.handleStopAllTrajectoryMessage(message);
+      pelvisOrientationManager.handleStopAllTrajectoryMessage(message);
    }
 
    @Override
