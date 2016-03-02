@@ -42,7 +42,7 @@ public class YoLinearAccelerationWeights
    public void setLinearAccelerationWeights(double xWeight, double yWeight, double zAccelerationWeight)
    {
       xAccelerationWeights.set(xWeight);
-      xAccelerationWeights.set(yWeight);
+      yAccelerationWeights.set(yWeight);
       this.zAccelerationWeight.set(zAccelerationWeight);
    }
 
