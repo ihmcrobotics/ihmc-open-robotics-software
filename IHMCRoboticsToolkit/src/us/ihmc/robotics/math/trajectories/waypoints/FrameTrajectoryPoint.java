@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeometryObjectInterface;
 
-public abstract class FrameTrajectoryPoint<S extends TransformableGeometryObjectInterface & TrajectoryPointInterface<S>, T extends FrameTrajectoryPoint<S, T>>
-      extends FrameWaypoint<S, T> implements TrajectoryPointInterface<T>, TransformableGeometryObjectInterface
+public abstract class FrameTrajectoryPoint<S extends Transformable & TrajectoryPointInterface<S>, T extends FrameTrajectoryPoint<S, T>>
+      extends FrameWaypoint<S, T> implements TrajectoryPointInterface<T>, Transformable
 {
    protected FrameTrajectoryPoint(S simpleTrajectoryPoint)
    {
