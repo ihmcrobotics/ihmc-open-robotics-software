@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteComponentBase
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -58,7 +57,6 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
       EndEffectorLoadBearingMessageSubscriber endEffectorLoadBearingMessageSubscriber = null;
       StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = null;
-      GoHomeMessageSubscriber goHomeMessageSubscriber = null;
 
       HighLevelStateMessageSubscriber highLevelStateProvider = null;
 
@@ -67,8 +65,8 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber,
-            endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, goHomeMessageSubscriber, footstepProvider,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
+            endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber, footstepProvider, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousWalkingProviders;
    }

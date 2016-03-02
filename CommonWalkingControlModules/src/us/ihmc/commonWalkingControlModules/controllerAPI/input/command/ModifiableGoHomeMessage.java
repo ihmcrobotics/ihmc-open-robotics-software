@@ -13,6 +13,7 @@ public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHo
 {
    private final SideDependentList<EnumMap<BodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(BodyPart.class);
    private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
+   private double trajectoryTime = 1.0;
 
    public ModifiableGoHomeMessage()
    {
@@ -35,6 +36,8 @@ public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHo
    @Override
    public void set(GoHomeMessage message)
    {
+      trajectoryTime = message.getTrajectoryTime();
+
       BodyPart bodyPart = message.getBodyPart();
       if (bodyPart.isRobotSideNeeded())
       {
@@ -50,6 +53,8 @@ public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHo
    @Override
    public void set(ModifiableGoHomeMessage other)
    {
+      trajectoryTime = other.trajectoryTime;
+
       for (BodyPart bodyPart : BodyPart.values)
       {
          if (bodyPart.isRobotSideNeeded())
@@ -66,7 +71,12 @@ public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHo
       }
    }
 
-   private boolean getRequest(BodyPart bodyPart)
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime;
+   }
+
+   public boolean getRequest(BodyPart bodyPart)
    {
       if (bodyPart.isRobotSideNeeded())
          throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);

@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -144,6 +146,14 @@ public class PelvisICPBasedTranslationManager
       }
 
       computeDesiredICPOffset();
+   }
+
+   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
+   {
+      if (isEnabled.getBooleanValue() && message.getRequest(BodyPart.PELVIS))
+      {
+         goToHome();
+      }
    }
 
    public void goToHome()
