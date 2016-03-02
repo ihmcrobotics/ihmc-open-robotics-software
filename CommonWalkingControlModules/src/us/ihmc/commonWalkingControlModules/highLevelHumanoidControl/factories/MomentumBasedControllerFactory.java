@@ -158,7 +158,7 @@ public class MomentumBasedControllerFactory
    public void createControllerNetworkSubscriber()
    {
       if (globalDataProducer != null)
-         new ControllerNetworkSubscriber(commandInputManager, globalDataProducer);
+         new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, globalDataProducer);
       else
          createControllerNetworkSubscriber = true;
    }

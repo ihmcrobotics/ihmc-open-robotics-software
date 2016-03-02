@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.EndEffectorLoadBearingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.GoHomeMessageSubscriber;
@@ -50,12 +49,10 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
-      AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = null;
-
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber,
             pelvisOrientationTrajectoryMessageSubscriber, footTrajectoryMessageSubscriber, endEffectorLoadBearingMessageSubscriber, stopAllTrajectoryMessageSubscriber,
-            goHomeMessageSubscriber, footstepPovider, automaticManipulationAbortCommunicator,
-            highLevelStateProvider, capturabilityBasedStatusProducer, abortWalkingProvider);
+            goHomeMessageSubscriber, footstepPovider, highLevelStateProvider,
+            capturabilityBasedStatusProducer, abortWalkingProvider);
 
       return variousProviders;
    }
