@@ -1,15 +1,16 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.transformables.Transformable;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.io.Serializable;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
-import java.io.Serializable;
 
-public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple2d & Transformable<T>> extends AbstractFrameObject<S, T> implements Serializable
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple2d & GeometryObject<T>> extends AbstractFrameObject<S, T> implements Serializable
 {
    private static final long serialVersionUID = 6275308250031489785L;
 

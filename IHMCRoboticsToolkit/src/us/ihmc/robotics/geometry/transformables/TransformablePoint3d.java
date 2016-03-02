@@ -4,9 +4,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
 
-public class TransformablePoint3d extends Point3d implements Transformable<TransformablePoint3d>, PointInterface
+public class TransformablePoint3d extends Point3d implements GeometryObject<TransformablePoint3d>, PointInterface
 {
    private static final long serialVersionUID = 3215925974643446454L;
 

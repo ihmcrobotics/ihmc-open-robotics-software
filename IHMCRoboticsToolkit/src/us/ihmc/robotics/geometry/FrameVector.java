@@ -2,11 +2,9 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.geometry.interfaces.PointInterface;
 import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.random.RandomTools;
