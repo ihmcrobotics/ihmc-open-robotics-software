@@ -3,8 +3,9 @@ package us.ihmc.robotics.geometry.transformables;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
-public class TransformableMatrix3d extends Matrix3d implements Transformable<TransformableMatrix3d>
+public class TransformableMatrix3d extends Matrix3d implements GeometryObject<TransformableMatrix3d>
 {
    private static final long serialVersionUID = -4556753983259636892L;
 
