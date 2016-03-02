@@ -21,7 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint2d extends FrameTuple2d<TransformablePoint2d>
+public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2d>
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
@@ -35,7 +35,7 @@ public class FramePoint2d extends FrameTuple2d<TransformablePoint2d>
    }
 
    /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
-   public FramePoint2d(FrameTuple2d<?> frameTuple2d)
+   public FramePoint2d(FrameTuple2d<?, ?> frameTuple2d)
    {
       this(frameTuple2d.referenceFrame, frameTuple2d.tuple.x, frameTuple2d.tuple.y, frameTuple2d.name);
    }

@@ -23,7 +23,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author IHMC-Yobotics Biped Team
  * @version 1.0
  */
-public class FrameConvexPolygon2d extends FrameGeometry2d<ConvexPolygon2d>
+public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, ConvexPolygon2d>
 {
    private final FramePoint2d centroid = new FramePoint2d();
    protected final ConvexPolygon2d convexPolygon;
@@ -1331,9 +1331,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<ConvexPolygon2d>
    }
 
    @Override
-   public void set(ConvexPolygon2d other)
+   public void set(FrameConvexPolygon2d other)
    {
-      convexPolygon.set(other);
+      convexPolygon.set(other.convexPolygon);
       update();
    }
 
@@ -1351,15 +1351,15 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<ConvexPolygon2d>
       update();
    }
 
-   @Override
-   public boolean containsNaN()
-   {
-      return convexPolygon.containsNaN();
-   }
+//   @Override
+//   public boolean containsNaN()
+//   {
+//      return convexPolygon.containsNaN();
+//   }
 
-   @Override
-   public boolean epsilonEquals(ConvexPolygon2d other, double epsilon)
-   {
-      return convexPolygon.epsilonEquals(other, epsilon);
-   }
+//   @Override
+//   public boolean epsilonEquals(FrameConvexPolygon2d other, double epsilon)
+//   {
+//      return convexPolygon.epsilonEquals(other.convexPolygon, epsilon);
+//   }
 }
