@@ -42,7 +42,7 @@ public class DRCNetworkProcessor
          setupBehaviorModule(robotModel, params);
          setupHandModules(robotModel, params);
          setupRosModule(robotModel, params);
-         setupGFEModule(params);
+         setupROSAPIModule(params);
          setupMocapModule(params);
          setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
          setupMultisenseManualTestModule(robotModel, params);
@@ -268,15 +268,15 @@ public class DRCNetworkProcessor
       }
    }
 
-   private void setupGFEModule(DRCNetworkModuleParameters params) throws IOException
+   private void setupROSAPIModule(DRCNetworkModuleParameters params) throws IOException
    {
-      if(params.isGFECommunicatorEnabled())
+      if(params.isROSAPICommunicatorEnabled())
       {
-         PacketCommunicator gfeCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, NET_CLASS_LIST);
-         packetRouter.attachPacketCommunicator(PacketDestination.GFE, gfeCommunicator);
-         gfeCommunicator.connect();
-         String methodName = "setupGFEModule ";
-         printModuleConnectedDebugStatement(PacketDestination.GFE, methodName);
+         PacketCommunicator rosAPICommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.ROS_API, rosAPICommunicator);
+         rosAPICommunicator.connect();
+         String methodName = "setupROSAPIModule ";
+         printModuleConnectedDebugStatement(PacketDestination.ROS_API, methodName);
       }
    }
 
