@@ -15,7 +15,8 @@ import us.ihmc.robotics.screwTheory.Momentum;
 public class MomentumOptimizationSettings
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable linearMomentumXYWeight = new DoubleYoVariable("linearMomentumXYWeight", registry);
+   private final DoubleYoVariable linearMomentumXWeight = new DoubleYoVariable("linearMomentumXWeight", registry);
+   private final DoubleYoVariable linearMomentumYWeight = new DoubleYoVariable("linearMomentumYWeight", registry);
    private final DoubleYoVariable linearMomentumZWeight = new DoubleYoVariable("linearMomentumZWeight", registry);
    private final DoubleYoVariable angularMomentumXYWeight = new DoubleYoVariable("angularMomentumXYWeight", registry);
    private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
@@ -45,12 +46,18 @@ public class MomentumOptimizationSettings
       parentRegistry.addChild(registry);
    }
 
-   public void setMomentumWeight(double linearMomentumXYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
+   public void setMomentumWeight(double linearMomentumXWeight, double linearMomentumYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
    {
-      this.linearMomentumXYWeight.set(linearMomentumXYWeight);
+      this.linearMomentumXWeight.set(linearMomentumXWeight);
+      this.linearMomentumYWeight.set(linearMomentumYWeight);
       this.linearMomentumZWeight.set(linearMomentumZWeight);
       this.angularMomentumXYWeight.set(angularMomentumXYWeight);
       this.angularMomentumZWeight.set(angularMomentumZWeight);
+   }
+
+   public void setMomentumWeight(double linearMomentumXYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
+   {
+      setMomentumWeight(linearMomentumXYWeight, linearMomentumXYWeight, linearMomentumZWeight, angularMomentumXYWeight, angularMomentumZWeight);
    }
 
    public void setRhoPlaneContactRegularization(double wRho)
@@ -72,8 +79,8 @@ public class MomentumOptimizationSettings
    {
       CommonOps.multOuter(momentumSubspace, momentumSubspaceProjector);
 
-      tempMomentum.setLinearPartX(linearMomentumXYWeight.getDoubleValue());
-      tempMomentum.setLinearPartY(linearMomentumXYWeight.getDoubleValue());
+      tempMomentum.setLinearPartX(linearMomentumXWeight.getDoubleValue());
+      tempMomentum.setLinearPartY(linearMomentumYWeight.getDoubleValue());
       tempMomentum.setLinearPartZ(linearMomentumZWeight.getDoubleValue());
 
       tempMomentum.setAngularPartX(angularMomentumXYWeight.getDoubleValue());

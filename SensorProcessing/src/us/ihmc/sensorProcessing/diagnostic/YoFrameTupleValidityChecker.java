@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.frames.YoFrameTuple;
 public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
-   private final YoFrameTuple<?> input;
+   private final YoFrameTuple<?, ?> input;
 
    private final EnumMap<Direction, DoubleYoVariableValidityChecker> validityCheckers = new EnumMap<>(Direction.class);
 
@@ -20,12 +20,12 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
       this(inputName, null, parentRegistry);
    }
    
-   public YoFrameTupleValidityChecker(YoFrameTuple<?> input, YoVariableRegistry parentRegistry)
+   public YoFrameTupleValidityChecker(YoFrameTuple<?, ?> input, YoVariableRegistry parentRegistry)
    {
       this(input.getNamePrefix() + input.getNameSuffix(), input, parentRegistry);
    }
 
-   private YoFrameTupleValidityChecker(String inputName, YoFrameTuple<?> input, YoVariableRegistry parentRegistry)
+   private YoFrameTupleValidityChecker(String inputName, YoFrameTuple<?, ?> input, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(inputName + "ValidityChecker");
       parentRegistry.addChild(registry);

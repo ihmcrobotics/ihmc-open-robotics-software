@@ -10,14 +10,15 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FramePose extends AbstractReferenceFrameHolder implements FrameObject
+public class FramePose extends AbstractFrameObject<FramePose, Pose>
 {
-   private final FramePoint position;
-   private final FrameOrientation orientation;
-   private ReferenceFrame referenceFrame;
+   private final Pose pose;
+
    private final Vector3d tempVector = new Vector3d();
    private final Matrix3d tempMatrix = new Matrix3d();
 
@@ -28,50 +29,47 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
 
    public FramePose(ReferenceFrame referenceFrame)
    {
-      position = new FramePoint(referenceFrame);
-      orientation = new FrameOrientation(referenceFrame);
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame, new Pose());
+   }
+   
+   public FramePose(ReferenceFrame referenceFrame, Pose pose)
+   {
+      super(referenceFrame, pose);
+      this.pose = transformableDataObject;
    }
 
    public FramePose(FramePoint position, FrameOrientation orientation)
    {
+      this(position.getReferenceFrame(), new Pose(position.transformableDataObject, orientation.transformableDataObject));
+      
       if (position.getReferenceFrame() != orientation.getReferenceFrame())
       {
          throw new ReferenceFrameMismatchException("FramePose: The position frame (" + position.getReferenceFrame()
                + ") does not match the orientation frame (" + orientation.getReferenceFrame() + ")");
       }
-      this.position = new FramePoint(position);
-      this.orientation = new FrameOrientation(orientation);
-      referenceFrame = position.getReferenceFrame();
    }
 
-   public FramePose(ReferenceFrame referenceFrame, Point3d position, AxisAngle4d orientation)
+   public FramePose(ReferenceFrame referenceFrame, Tuple3d position, Quat4d orientation)
    {
-      this.position = new FramePoint(referenceFrame, position);
-      this.orientation = new FrameOrientation(referenceFrame, orientation);
-      this.referenceFrame = referenceFrame;
-   }
-
-   public FramePose(ReferenceFrame referenceFrame, Point3d position, Quat4d orientation)
-   {
-      this.position = new FramePoint(referenceFrame, position);
-      this.orientation = new FrameOrientation(referenceFrame, orientation);
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame, new Pose());
+      setPose(position, orientation);
    }
 
    public FramePose(FramePose framePose)
    {
-      position = new FramePoint(framePose.position);
-      orientation = new FrameOrientation(framePose.orientation);
-      referenceFrame = framePose.referenceFrame;
+      this(framePose.getReferenceFrame(), new Pose(framePose.transformableDataObject));
    }
 
    public FramePose(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
-      transform.get(tempMatrix, tempVector);
-      position = new FramePoint(referenceFrame, tempVector);
-      orientation = new FrameOrientation(referenceFrame, tempMatrix);
-      this.referenceFrame = referenceFrame;
+      this(referenceFrame);
+      setPose(transform);
+   }
+
+   public FramePose(ReferenceFrame referenceFrame, Tuple3d point3d, AxisAngle4d axisAngle4d)
+   {
+      this(referenceFrame);
+      setPose(point3d, axisAngle4d);
    }
 
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double maxAbsoluteX, double maxAbsoluteY, double maxAbsoluteZ)
@@ -97,23 +95,22 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
 
    public void setX(double x)
    {
-      position.setX(x);
+      pose.setX(x);
    }
 
    public void setY(double y)
    {
-      position.setY(y);
+      pose.setY(y);
    }
 
    public void setZ(double z)
    {
-      position.setZ(z);
+      pose.setZ(z);
    }
 
    public void setPose(FramePose pose)
    {
-      position.set(pose.position);
-      orientation.set(pose.orientation);
+      set(pose);
    }
 
    public void setPose(FramePoint position, FrameOrientation orientation)
@@ -121,112 +118,109 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
       setPosition(position);
       setOrientation(orientation);
    }
-
-   public void setPose(Point3d point, Quat4d orientation)
-   {
-      this.position.set(point);
-      this.orientation.set(orientation);
-   }
    
-   public void setPose(Vector3d position, Quat4d orientation)
+   public void setPose(Tuple3d position, Quat4d orientation)
    {
-      this.position.set(position);
-      this.orientation.set(orientation);
+      pose.setPose(position, orientation);
+   }
+
+   private void setPose(Tuple3d position, AxisAngle4d orientation)
+   {
+      pose.setPose(position, orientation);
    }
 
    public void setPose(RigidBodyTransform transform)
    {
       transform.get(tempVector);
-      position.set(tempVector);
+      pose.setPosition(tempVector);
       transform.get(tempMatrix);
-      orientation.set(tempMatrix);
+      pose.setOrientation(tempMatrix);
    }
 
-   public void setPoseIncludingFrame(FramePose pose)
+   public void setPoseIncludingFrame(FramePose framePose)
    {
-      position.setIncludingFrame(pose.position);
-      orientation.setIncludingFrame(pose.orientation);
-      referenceFrame = pose.referenceFrame;
+      this.pose.set(framePose.pose);
+      referenceFrame = framePose.referenceFrame;
    }
 
    public void setPoseIncludingFrame(FramePoint position, FrameOrientation orientation)
    {
       position.checkReferenceFrameMatch(orientation);
-      this.position.setIncludingFrame(position);
-      this.orientation.setIncludingFrame(orientation);
       referenceFrame = position.referenceFrame;
+      setPose(position.getPoint(), orientation.getQuaternion());
    }
 
-   public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3d point, Quat4d orientation)
+   public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3d position, Quat4d orientation)
    {
-      position.setIncludingFrame(referenceFrame, point);
-      this.orientation.setIncludingFrame(referenceFrame, orientation);
+      setPose(position, orientation);
       this.referenceFrame = referenceFrame;
    }
 
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
       transform.get(tempVector);
-      position.setIncludingFrame(referenceFrame, tempVector);
+      pose.setPosition(tempVector);
       transform.get(tempMatrix);
-      orientation.setIncludingFrame(referenceFrame, tempMatrix);
+      pose.setOrientation(tempMatrix);
+      
       this.referenceFrame = referenceFrame;
    }
 
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint framePoint)
    {
-      this.position.set(position);
+      checkReferenceFrameMatch(framePoint);
+      pose.setPosition(framePoint.getPoint());
    }
 
    public void setPosition(Tuple3d position)
    {
-      this.position.set(position);
+      pose.setPosition(position);
    }
    
    public void setPosition(double x, double y, double z)
    {
-      this.position.set(x, y, z);
+      this.pose.setPosition(x, y, z);
    }
 
    public void setOrientation(Quat4d orientation)
    {
-      this.orientation.set(orientation);
+      this.pose.setOrientation(orientation);
    }
 
    public void setOrientation(Matrix3d orientation)
    {
-      this.orientation.set(orientation);
+      this.pose.setOrientation(orientation);
    }
 
    public void setOrientation(AxisAngle4d orientation)
    {
-      this.orientation.set(orientation);
+      this.pose.setOrientation(orientation);
    }
 
-   public void setOrientation(double[] yawPitchRoll)
+   public void setYawPitchRoll(double[] yawPitchRoll)
    {
-      orientation.setYawPitchRoll(yawPitchRoll);
+      this.pose.setYawPitchRoll(yawPitchRoll);
    }
 
-   public void setOrientation(double yaw, double pitch, double roll)
+   public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      orientation.setYawPitchRoll(yaw, pitch, roll);
+      this.pose.setYawPitchRoll(yaw, pitch, roll);
    }
 
-   public void setOrientation(FrameOrientation orientation)
+   public void setOrientation(FrameOrientation frameOrientation)
    {
-      this.orientation.set(orientation);
+      checkReferenceFrameMatch(frameOrientation);
+      pose.setOrientation(frameOrientation.getQuaternion());
    }
 
    public void setXYFromPosition2d(FramePoint2d position2d)
    {
-      position.setXY(position2d);
+      pose.setXY(position2d.getPoint());
    }
 
    public void setToZero(ReferenceFrame referenceFrame)
    {
-      position.setToZero(referenceFrame);
-      orientation.setToZero(referenceFrame);
+      super.setToZero();
       this.referenceFrame = referenceFrame;
    }
 
@@ -250,9 +244,7 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
 
    public void getPose(RigidBodyTransform transformToPack)
    {
-      orientation.getTransform3D(transformToPack);
-      position.get(tempVector);
-      transformToPack.setTranslation(tempVector);
+      pose.getPose(transformToPack);
    }
 
    public void getPoseIncludingFrame(FramePoint framePointToPack, FrameOrientation orientationToPack)
@@ -263,55 +255,42 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
 
    public void getPosition(Tuple3d tupleToPack)
    {
-      position.changeFrame(referenceFrame);
-      position.get(tupleToPack);
+      pose.getPosition(tupleToPack);
    }
 
-   public void getPositionIncludingFrame(FrameTuple<?> frameTupleToPack)
+   public void getPositionIncludingFrame(FrameTuple<?, ?> frameTupleToPack)
    {
-      position.changeFrame(referenceFrame);
-      frameTupleToPack.setIncludingFrame(position);
+      frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPoint());
    }
 
    public void getRigidBodyTransform(RigidBodyTransform transformToPack)
    {
-      orientation.changeFrame(referenceFrame);
-      position.changeFrame(referenceFrame);
-      
-      position.get(tempVector);
-      orientation.getMatrix3d(tempMatrix);
-      
-      transformToPack.setTranslation(tempVector);
-      transformToPack.setRotation(tempMatrix);
+      pose.getRigidBodyTransform(transformToPack);
    }
    
    public void getOrientation(Matrix3d matrixToPack)
    {
-      orientation.changeFrame(referenceFrame);
-      orientation.getMatrix3d(matrixToPack);
+      pose.getOrientation(matrixToPack);
    }
 
    public void getOrientation(Quat4d quaternionToPack)
    {
-      orientation.changeFrame(referenceFrame);
-      orientation.getQuaternion(quaternionToPack);
+      pose.getOrientation(quaternionToPack);
    }
 
    public void getOrientation(double[] yawPitchRoll)
    {
-      orientation.getYawPitchRoll(yawPitchRoll);
+      pose.getYawPitchRoll(yawPitchRoll);
    }
    
    public void getOrientation(AxisAngle4d axisAngleToPack)
    {
-      orientation.getAxisAngle(axisAngleToPack);
+      pose.getOrientation(axisAngleToPack);
    }
-   
 
    public void getOrientationIncludingFrame(FrameOrientation orientationToPack)
    {
-      orientation.changeFrame(referenceFrame);
-      orientationToPack.setIncludingFrame(orientation);
+      orientationToPack.setIncludingFrame(referenceFrame, pose.getOrientation());
    }
 
    public void getPose2dIncludingFrame(FramePose2d framePose2dToPack)
@@ -321,14 +300,13 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
 
    public void getPosition2dIncludingFrame(FramePoint2d framePoint2dToPack)
    {
-      position.getFramePoint2d(framePoint2dToPack);
+      framePoint2dToPack.setIncludingFrame(referenceFrame, pose.getPoint().getX(), pose.getPoint().getY());
    }
 
    public void getOrientation2dIncludingFrame(FrameOrientation2d frameOrientation2dToPack)
    {
-      orientation.getFrameOrientation2dIncludingFrame(frameOrientation2dToPack);
+      frameOrientation2dToPack.setIncludingFrame(referenceFrame, pose.getYaw());
    }
-   
    
    public void rotatePoseAboutAxis(FrameVector rotatationAxis, FramePoint rotationAxisOrigin, double angle)
    {
@@ -367,128 +345,129 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
       }
       
       if(!lockOrientation)
-         this.orientation.applyTransform(axisRotationTransform);
+         this.pose.getOrientation().applyTransform(axisRotationTransform);
 
       this.changeFrame(initialFrame);
    }
    
    public void translate(Tuple3d translation)
    {
-      position.add(translation);
+      pose.translate(translation);
    }
 
    public void translate(double x, double y, double z)
    {
-      position.add(x, y, z);
+      pose.translate(x, y, z);
    }
 
    public double getX()
    {
-      return position.getX();
+      return pose.getX();
    }
 
    public double getY()
    {
-      return position.getY();
+      return pose.getY();
    }
 
    public double getZ()
    {
-      return position.getZ();
+      return pose.getZ();
    }
 
    public double getYaw()
    {
-      return orientation.getYaw();
+      return pose.getYaw();
    }
 
    public double getPitch()
    {
-      return orientation.getPitch();
+      return pose.getPitch();
    }
 
    public double getRoll()
    {
-      return orientation.getRoll();
+      return pose.getRoll();
    }
 
    public void interpolate(FramePose framePose1, FramePose framePose2, double alpha)
    {
-      position.interpolate(framePose1.position, framePose2.position, alpha);
-      orientation.interpolate(framePose1.orientation, framePose2.orientation, alpha);
+      checkReferenceFrameMatch(framePose1);
+      framePose1.checkReferenceFrameMatch(framePose2);
+      this.pose.interpolate(framePose1.pose, framePose2.pose, alpha);
    }
 
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // this is in the correct frame already
-      if (desiredFrame == referenceFrame)
-      {
-         return;
-      }
+//   @Override
+//   public void changeFrame(ReferenceFrame desiredFrame)
+//   {
+//      // this is in the correct frame already
+//      if (desiredFrame == referenceFrame)
+//      {
+//         return;
+//      }
+//
+//      position.changeFrame(desiredFrame);
+//      orientation.changeFrame(desiredFrame);
+//      referenceFrame = desiredFrame;
+//   }
+//   
+//   @Override
+//   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+//   {
+//      position.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+//      orientation.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+//      
+//      referenceFrame = desiredFrame;
+//   }
+//
+//   @Override
+//   public void applyTransform(RigidBodyTransform transform)
+//   {
+//      position.applyTransform(transform);
+//      orientation.applyTransform(transform);
+//   }
 
-      position.changeFrame(desiredFrame);
-      orientation.changeFrame(desiredFrame);
-      referenceFrame = desiredFrame;
-   }
-   
-   @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      position.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
-      orientation.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
-      
-      referenceFrame = desiredFrame;
-   }
-
-   @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      position.applyTransform(transform);
-      orientation.applyTransform(transform);
-   }
-
-   public boolean epsilonEquals(FramePose framePose, double epsilon)
-   {
-      if (!position.epsilonEquals(framePose.position, epsilon))
-         return false;
-
-      if (!orientation.epsilonEquals(framePose.orientation, epsilon))
-         return false;
-
-      return true;
-   }
-   
-   public boolean epsilonEquals(FramePose framePose, double positionEpsilon, double orientationEpsilon)
-   {
-      if (!position.epsilonEquals(framePose.position, positionEpsilon))
-         return false;
-      
-      if (!orientation.epsilonEquals(framePose.orientation, orientationEpsilon))
-         return false;
-      
-      return true;
-   }
+//   public boolean epsilonEquals(FramePose framePose, double epsilon)
+//   {
+//      if (!position.epsilonEquals(framePose.position, epsilon))
+//         return false;
+//
+//      if (!orientation.epsilonEquals(framePose.orientation, epsilon))
+//         return false;
+//
+//      return true;
+//   }
+//   
+//   public boolean epsilonEquals(FramePose framePose, double positionEpsilon, double orientationEpsilon)
+//   {
+//      if (!position.epsilonEquals(framePose.position, positionEpsilon))
+//         return false;
+//      
+//      if (!orientation.epsilonEquals(framePose.orientation, orientationEpsilon))
+//         return false;
+//      
+//      return true;
+//   }
 
    public String printOutPosition()
    {
-      return position.toString();
+      return pose.printOutPosition();
    }
 
    public String printOutOrientation()
    {
-      return orientation.toString();
+      return pose.printOutOrientation();
    }
    
    public FramePoint getFramePointCopy()
    {
-      FramePoint ret = new FramePoint(position.getReferenceFrame(), position.getPoint());
+      FramePoint ret = new FramePoint(getReferenceFrame(), pose.getPoint());
       return ret;
    }
    
    public FrameOrientation getFrameOrientationCopy()
    {
-      FrameOrientation ret = new FrameOrientation(orientation.getReferenceFrame(), orientation.getQuaternionCopy());
+      FrameOrientation ret = new FrameOrientation(getReferenceFrame(), pose.getOrientation());
       return ret;
    }
 
@@ -497,7 +476,7 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
       checkReferenceFrameMatch(otherPose);
 
       FrameVector ret = new FrameVector(referenceFrame);
-      ret.sub(otherPose.position, this.position);
+      ret.sub(otherPose.pose.getPoint(), this.pose.getPoint());
 
       return ret;
    }
@@ -526,7 +505,7 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
    {
       checkReferenceFrameMatch(framePose);
       
-      return position.distance(framePose.getFramePointCopy());
+      return this.pose.getPoint().distance(framePose.pose.getPoint());
    }
    
    public RigidBodyTransform getTransformFromThisToThat(FramePose thatPose)
@@ -553,6 +532,9 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
 
    private void getOriginOfSpatialAxisOfRotationToOtherPose(FramePose otherPose, FrameVector rotationAxis, double rotationAngle, FramePoint originToPack)
    {
+      otherPose.checkReferenceFrameMatch(rotationAxis);
+      otherPose.checkReferenceFrameMatch(originToPack);
+      
       double epsilon = 1e-7;
       boolean rotationAngleEpsilonEqualsZero = Math.abs(rotationAngle) < epsilon;
       boolean rotationAngleEpsilonEqualsPlusOrMinusPi = Math.abs(Math.abs(rotationAngle) - Math.PI) < epsilon;
@@ -564,11 +546,11 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
       else if (rotationAngleEpsilonEqualsPlusOrMinusPi)
       {
          originToPack.setToZero(referenceFrame);
-         originToPack.interpolate(this.position, otherPose.position, 0.5);
+         originToPack.interpolate(this.pose.getPoint(), otherPose.pose.getPoint(), 0.5);
       }
       else
       {
-         GeometryTools.getTopVertexOfIsoscelesTriangle(position, otherPose.position, rotationAxis, rotationAngle, originToPack);
+         GeometryTools.getTopVertexOfIsoscelesTriangle(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle, originToPack.getPoint());
       }
    }
 
@@ -615,9 +597,17 @@ public class FramePose extends AbstractReferenceFrameHolder implements FrameObje
    @Override
    public String toString()
    {
-      double[] yawPitchRoll = new double[3];
-      orientation.getYawPitchRoll(yawPitchRoll);
-      return "Position: " + position.toString() + "\n" + orientation.toStringAsYawPitchRoll();
+      return "Position: " + pose.getPoint().toString() + "\n" + pose.getOrientation().toStringAsYawPitchRoll() + "  -- " + referenceFrame.getName();
    }
 
+   public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)
+   {
+      return pose.epsilonEquals(other.pose, positionErrorMargin, orientationErrorMargin);
+   }
+
+   public boolean epsilonEquals(FramePose other, double epsilon)
+   {
+      return pose.epsilonEquals(other.pose, epsilon);
+   }
+   
 }

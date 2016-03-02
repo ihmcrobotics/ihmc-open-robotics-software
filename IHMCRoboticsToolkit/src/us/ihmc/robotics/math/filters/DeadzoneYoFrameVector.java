@@ -37,12 +37,12 @@ public class DeadzoneYoFrameVector extends YoFrameVector implements ProcessingYo
       return ret;
    }
 
-   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, YoVariableRegistry registry, DoubleYoVariable deadzoneSize, YoFrameTuple<?> rawTuple)
+   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, YoVariableRegistry registry, DoubleYoVariable deadzoneSize, YoFrameTuple<?, ?> rawTuple)
    {
       return createDeadzoneYoFrameVector(namePrefix, "", registry, deadzoneSize, rawTuple);
    }
 
-   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable deadzoneSize, YoFrameTuple<?> rawTuple)
+   public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleYoVariable deadzoneSize, YoFrameTuple<?, ?> rawTuple)
    {
       DeadzoneYoVariable x = new DeadzoneYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), rawTuple.getYoX(), deadzoneSize, registry);
       DeadzoneYoVariable y = new DeadzoneYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), rawTuple.getYoY(), deadzoneSize, registry);
@@ -61,7 +61,7 @@ public class DeadzoneYoFrameVector extends YoFrameVector implements ProcessingYo
       z.update();
    }
 
-   public void update(FrameTuple<?> frameTuple)
+   public void update(FrameTuple<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
 

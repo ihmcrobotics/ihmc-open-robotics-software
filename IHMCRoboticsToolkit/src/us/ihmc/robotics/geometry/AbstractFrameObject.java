@@ -1,9 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.transformables.TransformableDataObject;
+import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractFrameObject<T extends TransformableDataObject> extends AbstractReferenceFrameHolder implements FrameObject
+public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T extends Transformable<T>> extends AbstractReferenceFrameHolder implements FrameObject<S>
 {
    protected final T transformableDataObject;
    protected ReferenceFrame referenceFrame;
@@ -30,12 +30,12 @@ public abstract class AbstractFrameObject<T extends TransformableDataObject> ext
 
          if ((referenceTf = referenceFrame.getTransformToRoot()) != null)
          {
-            transformableDataObject.transform(referenceTf);
+            transformableDataObject.applyTransform(referenceTf);
          }
 
          if ((desiredTf = desiredFrame.getInverseTransformToRoot()) != null)
          {
-            transformableDataObject.transform(desiredTf);
+            transformableDataObject.applyTransform(desiredTf);
          }
 
          referenceFrame = desiredFrame;
@@ -47,13 +47,72 @@ public abstract class AbstractFrameObject<T extends TransformableDataObject> ext
    @Override
    public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
    {
-      transformableDataObject.transform(transformToNewFrame);
+      transformableDataObject.applyTransform(transformToNewFrame);
       referenceFrame = desiredFrame;
    }
 
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
-      transformableDataObject.transform(transform);
+      transformableDataObject.applyTransform(transform);
    }
+   
+   @Override
+   public void set(S other)
+   {
+      checkReferenceFrameMatch(other);
+      this.transformableDataObject.set(other.transformableDataObject);
+   }
+
+   @Override
+   public void setToZero()
+   {
+      this.transformableDataObject.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      this.transformableDataObject.setToNaN();      
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return this.transformableDataObject.containsNaN();
+   }
+
+   @Override
+   public boolean epsilonEquals(S other, double epsilon)
+   {
+      if (other == null) return false;
+      if (referenceFrame != other.referenceFrame) return false;
+      return this.transformableDataObject.epsilonEquals(other.transformableDataObject, epsilon);
+   }
+
+   @Override
+   public void setToZero(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      setToZero();
+   }
+
+   @Override
+   public void setToNaN(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      setToNaN();
+   }
+   
+   public void set(T other)
+   {
+      this.transformableDataObject.set(other);
+   }
+   
+   public void set(ReferenceFrame referenceFrame, T other)
+   {
+      this.referenceFrame = referenceFrame;
+      this.transformableDataObject.set(other);
+   }
+
 }

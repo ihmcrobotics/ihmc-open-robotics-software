@@ -7,7 +7,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameVector2d extends YoFrameTuple2d<FrameVector2d>
+public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector2d>
 {
    public YoFrameVector2d(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {

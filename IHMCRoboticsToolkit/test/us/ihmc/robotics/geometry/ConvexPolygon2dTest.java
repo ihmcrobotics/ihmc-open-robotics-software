@@ -528,7 +528,7 @@ public class ConvexPolygon2dTest
 
       for (int i = 0; i < square.getNumberOfVertices(); i++)
       {
-         FramePoint2d point = square.getFrameVertex(i);
+         FramePoint2d point = square.getFrameVertexCopy(i);
          assertFalse("frontmostLeft wrong, frontMostLeft = " + frontmostLeft + ", point = " + point,
                ((point.getX() < frontmostLeft.getX()) || ((point.getX() == frontmostLeft.getX()) && (point.getY() > frontmostLeft.getY()))));
          assertFalse("frontmostRight wrong, frontmostRight = " + frontmostRight + ", point = " + point,
@@ -731,7 +731,7 @@ public class ConvexPolygon2dTest
 
       for (int i = 0; i < randomPolygon.getNumberOfVertices(); i++)
       {
-         FramePoint2d point = randomPolygon.getFrameVertex(i);
+         FramePoint2d point = randomPolygon.getFrameVertexCopy(i);
          assertFalse("frontmostLeft wrong, frontMostLeft = " + frontmostLeft + ", point = " + point,
                ((point.getX() < frontmostLeft.getX()) || ((point.getX() == frontmostLeft.getX()) && (point.getY() > frontmostLeft.getY()))));
          assertFalse("frontmostRight wrong, frontmostRight = " + frontmostRight + ", point = " + point,

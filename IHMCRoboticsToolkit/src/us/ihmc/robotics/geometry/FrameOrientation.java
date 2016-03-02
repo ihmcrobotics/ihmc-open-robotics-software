@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameOrientation extends AbstractFrameObject<TransformableQuat4d>
+public class FrameOrientation extends AbstractFrameObject<FrameOrientation, TransformableQuat4d>
 {
    private final TransformableQuat4d quaternion;
    private final Matrix3d tempMatrixForYawPitchRollConversion = new Matrix3d();
@@ -204,29 +204,29 @@ public class FrameOrientation extends AbstractFrameObject<TransformableQuat4d>
       normalize();
    }
 
-   // TODO Find a better. I chose setToZero() as in FrameTuple.
-   public void setToZero(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      setToZero();
-   }
+//   // TODO Find a better. I chose setToZero() as in FrameTuple.
+//   public void setToZero(ReferenceFrame referenceFrame)
+//   {
+//      this.referenceFrame = referenceFrame;
+//      setToZero();
+//   }
 
-   // TODO Find a better. I chose setToZero() as in FrameTuple.
-   public void setToZero()
-   {
-      quaternion.set(0.0, 0.0, 0.0, 1.0);
-   }
+//   // TODO Find a better. I chose setToZero() as in FrameTuple.
+//   public void setToZero()
+//   {
+//      quaternion.set(0.0, 0.0, 0.0, 1.0);
+//   }
 
-   public void setToNaN(ReferenceFrame referenceFrame)
-   {
-      this.referenceFrame = referenceFrame;
-      setToNaN();
-   }
+//   public void setToNaN(ReferenceFrame referenceFrame)
+//   {
+//      this.referenceFrame = referenceFrame;
+//      setToNaN();
+//   }
 
-   public void setToNaN()
-   {
-      quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   }
+//   public void setToNaN()
+//   {
+//      quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+//   }
 
    public boolean containsNaN()
    {
@@ -260,20 +260,7 @@ public class FrameOrientation extends AbstractFrameObject<TransformableQuat4d>
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)
    {
-      tempMatrixForYawPitchRollConversion.set(quaternion);
-      yawPitchRollToPack[0] = Math.atan2(tempMatrixForYawPitchRollConversion.m10, tempMatrixForYawPitchRollConversion.m00);
-
-      if (Math.abs(tempMatrixForYawPitchRollConversion.m20) < 1.0 - 1e-10)
-         yawPitchRollToPack[1] = Math.asin(-tempMatrixForYawPitchRollConversion.m20);
-      else
-         yawPitchRollToPack[1] = -Math.signum(tempMatrixForYawPitchRollConversion.m20) * Math.PI / 2.0;
-
-      yawPitchRollToPack[2] = Math.atan2(tempMatrixForYawPitchRollConversion.m21, tempMatrixForYawPitchRollConversion.m22);
-
-      if (Double.isNaN(yawPitchRollToPack[0]) || Double.isNaN(yawPitchRollToPack[1]) || Double.isNaN(yawPitchRollToPack[2]))
-      {
-         throw new RuntimeException("yaw, pitch, or roll are NaN! rotationMatrix = " + tempMatrixForYawPitchRollConversion);
-      }
+      RotationTools.convertQuaternionToYawPitchRoll(quaternion, yawPitchRollToPack);
    }
 
    public double[] getYawPitchRoll()
