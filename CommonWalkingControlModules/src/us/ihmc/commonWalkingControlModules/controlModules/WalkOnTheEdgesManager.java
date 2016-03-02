@@ -507,7 +507,8 @@ public class WalkOnTheEdgesManager
 
    private final FramePoint[] toePoints = new FramePoint[]{new FramePoint(), new FramePoint()};
    private final FramePoint middleToePoint = new FramePoint();
-
+   private final FramePoint2d footPoint = new FramePoint2d();
+   
    private void computeToePoints(RobotSide supportSide)
    {
       FrameConvexPolygon2d footDefaultPolygon = footDefaultPolygons.get(supportSide);
@@ -516,7 +517,7 @@ public class WalkOnTheEdgesManager
       
       for (int i = 0; i < footDefaultPolygon.getNumberOfVertices(); i++)
       {
-         FramePoint2d footPoint = footDefaultPolygon.getFrameVertex(i);
+         footDefaultPolygon.getFrameVertex(i, footPoint);
          if (footPoint.getX() > toePoints[0].getX())
          {
             toePoints[1].set(toePoints[0]);

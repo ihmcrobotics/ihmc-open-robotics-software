@@ -139,6 +139,7 @@ public class ConvexPolygonShrinker
       framePolygonToPack.update();
       ConvexPolygon2d polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
       shrinkConstantDistanceInto(polygonQ.getConvexPolygon2dCopy(), distance, polygon2dToPack);
-      framePolygonToPack.updateFramePoints();
+//      framePolygonToPack.updateFramePoints();
+      framePolygonToPack.update();
    }
 }
