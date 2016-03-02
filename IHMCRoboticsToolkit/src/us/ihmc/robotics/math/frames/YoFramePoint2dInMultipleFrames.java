@@ -49,7 +49,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
       set(point2d);
    }
 
-   public void setIncludingFrame(FrameTuple2d<?> frameTuple2d)
+   public void setIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
       set(frameTuple2d);

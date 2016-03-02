@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import javax.vecmath.Point2d;
@@ -8,20 +9,19 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import java.io.Serializable;
 
-public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHolder implements Serializable
+public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple2d & Transformable<T>> extends AbstractFrameObject<S, T> implements Serializable
 {
    private static final long serialVersionUID = 6275308250031489785L;
 
-   protected static final double epsilon = 1e-10;
-
    private static final boolean DEBUG = false;
 
-   protected ReferenceFrame referenceFrame;
    protected final T tuple;
    protected String name;
    
    public FrameTuple2d(ReferenceFrame referenceFrame, T tuple, String name)
    {
+      super(referenceFrame, tuple);
+      
       if (DEBUG)
       {
          if (referenceFrame == null)
@@ -31,8 +31,7 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
          }
       }
 
-      this.referenceFrame = referenceFrame;
-      this.tuple = tuple;
+      this.tuple = transformableDataObject;
       this.name = name;
    }
 
@@ -73,7 +72,7 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
     * 
     * @throws ReferenceFrameMismatchException
     */
-   public final void set(FrameTuple2d<?> frameTuple2d)
+   public final void set(FrameTuple2d<?, ?> frameTuple2d)
    {
       checkReferenceFrameMatch(frameTuple2d);
       set(frameTuple2d.tuple);
@@ -83,7 +82,7 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
     * Set this frameTuple2d using the x and y coordinate the frameTuple passed in.
     * @throws ReferenceFrameMismatchException
     */
-   public final void setByProjectionOntoXYPlane(FrameTuple<?> frameTuple)
+   public final void setByProjectionOntoXYPlane(FrameTuple<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
       set(frameTuple.getX(), frameTuple.getY());
@@ -93,12 +92,12 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
     * Set this frameTuple2d using the x and y coordinate the frameTuple passed in.
     * @throws ReferenceFrameMismatchException
     */
-   public final void setByProjectionOntoXYPlaneIncludingFrame(FrameTuple<?> frameTuple)
+   public final void setByProjectionOntoXYPlaneIncludingFrame(FrameTuple<?, ?> frameTuple)
    {
       setIncludingFrame(frameTuple.getReferenceFrame(), frameTuple.getX(), frameTuple.getY());
    }
 
-   public final void setIncludingFrame(FrameTuple2d<?> frameTuple2d)
+   public final void setIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
    {
       setIncludingFrame(frameTuple2d.referenceFrame, frameTuple2d.tuple);
    }
@@ -255,10 +254,10 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
     * Checks if reference frames match.
     *
     * @param scaleFactor double
-    * @param frameTuple1 FrameTuple2d<?>
+    * @param frameTuple1 FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scale(double scaleFactor, FrameTuple2d<?> frameTuple1)
+   public final void scale(double scaleFactor, FrameTuple2d<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       scale(scaleFactor, frameTuple1.tuple);
@@ -269,11 +268,11 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
     * Checks if reference frames match.
     *
     * @param scaleFactor double
-    * @param frameTuple1 FrameTuple2d<?>
-    * @param frameTuple2 FrameTuple2d<?>
+    * @param frameTuple1 FrameTuple2d<?, ?>
+    * @param frameTuple2 FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple2d<?> frameTuple1, FrameTuple2d<?> frameTuple2)
+   public final void scaleAdd(double scaleFactor, FrameTuple2d<?, ?> frameTuple1, FrameTuple2d<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -285,10 +284,10 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
     * Checks if reference frames match.
     *
     * @param scaleFactor double
-    * @param frameTuple1 FrameTuple2d<?>
+    * @param frameTuple1 FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple2d<?> frameTuple1)
+   public final void scaleAdd(double scaleFactor, FrameTuple2d<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       scaleAdd(scaleFactor, frameTuple1.tuple);
@@ -325,7 +324,7 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
     * @param frameTuple1 the other Tuple2d
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple2d<?> frameTuple1)
+   public final void add(FrameTuple2d<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       add(frameTuple1.tuple);
@@ -333,11 +332,11 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
 
    /**
     * Sets the value of this frameTuple to the sum of frameTuple1 and frameTuple2 (this = frameTuple1 + frameTuple2).
-    * @param frameTuple1 the first FrameTuple2d<?>
-    * @param frameTuple2 the second FrameTuple2d<?>
+    * @param frameTuple1 the first FrameTuple2d<?, ?>
+    * @param frameTuple2 the second FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void add(FrameTuple2d<?> frameTuple1, FrameTuple2d<?> frameTuple2)
+   public final void add(FrameTuple2d<?, ?> frameTuple1, FrameTuple2d<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -365,10 +364,10 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
 
    /**  
     * Sets the value of this frameTuple to the difference of itself and frameTuple1 (this -= frameTuple1).
-    * @param frameTuple1 the first FrameTuple2d<?>
+    * @param frameTuple1 the first FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple2d<?> frameTuple1)
+   public final void sub(FrameTuple2d<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
       sub(frameTuple1.tuple);
@@ -376,11 +375,11 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
 
    /**  
     * Sets the value of this frameTuple to the difference of frameTuple1 and frameTuple2 (this = frameTuple1 - frameTuple2).
-    * @param frameTuple1 the first FrameTuple2d<?>
-    * @param frameTuple2 the second FrameTuple2d<?>
+    * @param frameTuple1 the first FrameTuple2d<?, ?>
+    * @param frameTuple2 the second FrameTuple2d<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void sub(FrameTuple2d<?> frameTuple1, FrameTuple2d<?> frameTuple2)
+   public final void sub(FrameTuple2d<?, ?> frameTuple1, FrameTuple2d<?, ?> frameTuple2)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -405,7 +404,7 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
      *  @param alpha  the alpha interpolation parameter
     * @throws ReferenceFrameMismatchException
     */
-   public final void interpolate(FrameTuple2d<?> frameTuple1, FrameTuple2d<?> frameTuple2, double alpha)
+   public final void interpolate(FrameTuple2d<?, ?> frameTuple1, FrameTuple2d<?, ?> frameTuple2, double alpha)
    {
       frameTuple1.checkReferenceFrameMatch(frameTuple2);
 
@@ -437,11 +436,11 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
    /**
      * Returns true if the L-infinite distance between this frameTuple and frameTuple1 is less than or equal to the epsilon parameter, otherwise returns false.
      * The L-infinite distance is equal to MAX[abs(x1-x2), abs(y1-y2)].
-    * @param frameTuple1 FrameTuple2d<?>
+    * @param frameTuple1 FrameTuple2d<?, ?>
     * @param threshold double
     * @throws ReferenceFrameMismatchException
     */
-   public final boolean epsilonEquals(FrameTuple2d<?> frameTuple1, double threshold)
+   public final boolean epsilonEquals(FrameTuple2d<?, ?> frameTuple1, double threshold)
    {
       checkReferenceFrameMatch(frameTuple1);
 
@@ -458,15 +457,15 @@ public abstract class FrameTuple2d<T extends Tuple2d> extends ReferenceFrameHold
       return referenceFrame;
    }
 
-   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract FrameTuple2d<T> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
-
-   public abstract void applyTransform(RigidBodyTransform transform);
-
-   public abstract FrameTuple2d<T> applyTransformCopy(RigidBodyTransform transform);
-
-   public abstract void changeFrame(ReferenceFrame desiredFrame);
+//   public abstract void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract FrameTuple2d<?, ?> changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame);
+//
+//   public abstract void applyTransform(RigidBodyTransform transform);
+//
+//   public abstract FrameTuple2d<?, ?> applyTransformCopy(RigidBodyTransform transform);
+//
+//   public abstract void changeFrame(ReferenceFrame desiredFrame);
 
    public final double[] toArray()
    {

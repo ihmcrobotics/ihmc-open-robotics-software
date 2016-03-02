@@ -91,7 +91,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       FramePose handPose = handTargets.get(side);
       handPose.setToZero(chestFrame);
       handPose.setPosition(fistHandPosition.get(side));
-      handPose.setOrientation(0.0, Math.PI / 2.0, 0.0);
+      handPose.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
@@ -111,7 +111,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       handPose.setToZero(chestFrame);
 
       handPose.setPosition(0.1, side.negateIfLeftSide(0.25), 0.0);
-      handPose.setOrientation(side.negateIfLeftSide(Math.PI / 2.0), 0.0, 0.0);
+      handPose.setYawPitchRoll(side.negateIfLeftSide(Math.PI / 2.0), 0.0, 0.0);
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
@@ -194,7 +194,7 @@ public class TalkAndMoveHandsBehavior extends BehaviorInterface implements Varia
       FramePose handPose = handTargets.get(side);
       handPose.setToZero(chestFrame);
       handPose.setPosition(fistHandPosition.get(side));
-      handPose.setOrientation(0.0, Math.PI / 2.0, 0.0);
+      handPose.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, 1.0, handPose, Frame.CHEST, handPoseBehavior, yoTime));
 
       switch(numberOfFingers)

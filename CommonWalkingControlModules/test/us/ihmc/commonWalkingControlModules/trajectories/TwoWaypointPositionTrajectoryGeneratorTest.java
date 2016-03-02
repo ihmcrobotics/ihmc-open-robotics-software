@@ -69,7 +69,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 		
 		TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider,
 				initialPositionProvider, initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""),
-				null, null, false);
+				null, 0.0, false);
 		
 		List<Point3d> points = new ArrayList<Point3d>();
 		points.add(firstIntermediatePosition);

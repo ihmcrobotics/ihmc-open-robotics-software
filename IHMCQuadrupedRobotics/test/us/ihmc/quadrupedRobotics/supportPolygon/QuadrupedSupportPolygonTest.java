@@ -334,6 +334,12 @@ public class QuadrupedSupportPolygonTest
       assertEquals("1 legs don't match", 1, match1.getNumberOfEqualFootsteps(match2));
       match1.getFootstep(RobotQuadrant.HIND_RIGHT).add(2.0, -3.0, 1.0);
       assertEquals("0 legs don't match", 0, match1.getNumberOfEqualFootsteps(match2));
+      
+      match1 = createSimplePolygon();
+      match2 = createSimplePolygon();
+      
+      match2.removeFootstep(RobotQuadrant.HIND_RIGHT);
+      assertEquals("0 legs don't match", 3, match1.getNumberOfEqualFootsteps(match2));
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
