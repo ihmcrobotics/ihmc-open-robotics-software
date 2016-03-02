@@ -98,13 +98,13 @@ public class FourBarKinematicLoop
       if (DEBUG)
       {
          System.out.println("\nLink length debugging: \n");
-         System.out.println("masterL L1 L2 L3 : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
+         System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
 
       verifyMasterJointLimits();
       setInteriorAngleOffsets();
 
-      fourBarCalculator = new FourBarCalculatorFromFastRunner(masterLinkAB, BC, CD, DA);
+      fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD);
       updateAnglesAndVelocities();
       
       if (DEBUG)
@@ -235,7 +235,7 @@ public class FourBarKinematicLoop
       }
    }
 
-   public void updateAnglesAndVelocities() //TODO solve problem with this method
+   public void updateAnglesAndVelocities() 
    {
       fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ() + interiorAnglesAtZeroConfiguration[0], masterJointA.getQd());
       passiveJointB.setQ(fourBarCalculator.getAngleABC() + interiorAnglesAtZeroConfiguration[1]);
