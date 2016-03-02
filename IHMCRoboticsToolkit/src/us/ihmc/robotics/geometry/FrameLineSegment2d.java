@@ -19,7 +19,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Twan Koolen
  * @version 1.0
  */
-public class FrameLineSegment2d extends FrameGeometry2d<LineSegment2d>
+public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, LineSegment2d>
 {
    protected final LineSegment2d lineSegment;
 

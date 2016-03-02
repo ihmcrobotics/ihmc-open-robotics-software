@@ -18,14 +18,14 @@ public class ConvexPolygon2dTestHelpers
    public static void verifyPointsAreClockwise(FrameConvexPolygon2d polygon)
    {
       // Make sure points are clockwise, by taking the cross of each edge and the next clockwise edge and making sure its negative:
-
+      
       int numPoints = polygon.getNumberOfVertices();
 
       for (int i = 0; i < numPoints; i++)
       {
-         FramePoint2d point1 = polygon.getFrameVertex(i);
-         FramePoint2d point2 = polygon.getFrameVertex((i + 1) % numPoints);
-         FramePoint2d point3 = polygon.getFrameVertex((i + 2) % numPoints);
+         FramePoint2d point1 = polygon.getFrameVertexCopy(i);
+         FramePoint2d point2 = polygon.getFrameVertexCopy((i + 1) % numPoints);
+         FramePoint2d point3 = polygon.getFrameVertexCopy((i + 2) % numPoints);
 
          FrameVector2d vector1 = new FrameVector2d(point2);
          vector1.sub(point1);
@@ -80,7 +80,7 @@ public class ConvexPolygon2dTestHelpers
    {
       for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
       {
-         if (convexPolygon2d.getFrameVertex(i).epsilonEquals(framePointToTest, epsilon))
+         if (convexPolygon2d.getFrameVertexCopy(i).epsilonEquals(framePointToTest, epsilon))
             return;
       }
 
@@ -517,11 +517,11 @@ public class ConvexPolygon2dTestHelpers
 
    public static boolean doesLineIntersectPolygon(FrameConvexPolygon2d polygon, FrameLine2d line)
    {
-      boolean onLeft = line.isPointOnLeftSideOfLine(polygon.getFrameVertex(0));
+      boolean onLeft = line.isPointOnLeftSideOfLine(polygon.getFrameVertexCopy(0));
 
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         if (onLeft != line.isPointOnLeftSideOfLine(polygon.getFrameVertex(i)))
+         if (onLeft != line.isPointOnLeftSideOfLine(polygon.getFrameVertexCopy(i)))
          {
             return true;
          }

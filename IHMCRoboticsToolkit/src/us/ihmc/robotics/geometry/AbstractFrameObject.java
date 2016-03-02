@@ -1,9 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractFrameObject<T extends Transformable<T>> extends AbstractReferenceFrameHolder implements FrameObject<T>
+public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T extends GeometryObject<T>> extends AbstractReferenceFrameHolder implements FrameObject<S>
 {
    protected final T transformableDataObject;
    protected ReferenceFrame referenceFrame;
@@ -58,9 +58,10 @@ public abstract class AbstractFrameObject<T extends Transformable<T>> extends Ab
    }
    
    @Override
-   public void set(T other)
+   public void set(S other)
    {
-      this.transformableDataObject.set(other);
+      checkReferenceFrameMatch(other);
+      this.transformableDataObject.set(other.transformableDataObject);
    }
 
    @Override
@@ -82,9 +83,11 @@ public abstract class AbstractFrameObject<T extends Transformable<T>> extends Ab
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(S other, double epsilon)
    {
-      return this.transformableDataObject.epsilonEquals(other, epsilon);
+      if (other == null) return false;
+      if (referenceFrame != other.referenceFrame) return false;
+      return this.transformableDataObject.epsilonEquals(other.transformableDataObject, epsilon);
    }
 
    @Override
@@ -99,6 +102,17 @@ public abstract class AbstractFrameObject<T extends Transformable<T>> extends Ab
    {
       this.referenceFrame = referenceFrame;
       setToNaN();
+   }
+   
+   public void set(T other)
+   {
+      this.transformableDataObject.set(other);
+   }
+   
+   public void set(ReferenceFrame referenceFrame, T other)
+   {
+      this.referenceFrame = referenceFrame;
+      this.transformableDataObject.set(other);
    }
 
 }

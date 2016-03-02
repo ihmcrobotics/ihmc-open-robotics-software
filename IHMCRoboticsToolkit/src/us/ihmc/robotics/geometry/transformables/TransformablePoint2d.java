@@ -6,8 +6,9 @@ import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
-public class TransformablePoint2d extends Point2d implements Transformable<TransformablePoint2d>
+public class TransformablePoint2d extends Point2d implements GeometryObject<TransformablePoint2d>
 {
    private static final long serialVersionUID = -7311591841945085693L;
 
