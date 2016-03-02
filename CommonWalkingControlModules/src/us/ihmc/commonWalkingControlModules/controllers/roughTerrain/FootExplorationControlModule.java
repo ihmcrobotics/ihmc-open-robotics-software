@@ -798,9 +798,15 @@ public class FootExplorationControlModule
          double ret = Double.POSITIVE_INFINITY;
          FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(points);
 
+         FramePoint2d frameVertex = new FramePoint2d();
+         FramePoint2d nextFrameVertex = new FramePoint2d();
+         
          for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          {
-            FrameLine2d line = new FrameLine2d(polygon.getFrameVertex(i), polygon.getNextFrameVertex(i));
+            polygon.getFrameVertex(i, frameVertex);
+            polygon.getNextFrameVertex(i, nextFrameVertex);
+            
+            FrameLine2d line = new FrameLine2d(frameVertex, nextFrameVertex);
             double distance = line.distance(pointToCheck);
             if (distance < ret)
                ret = distance;
@@ -1237,10 +1243,12 @@ public class FootExplorationControlModule
       FramePoint2d centroid = polygon.getCentroid();
       polygon.scale(centroid, factor);
 
+      FramePoint2d scaledPoint = new FramePoint2d();
+
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
          ContactPointInterface contactPoint = currentPlaneContactState.getContactPoints().get(i);
-         FramePoint2d scaledPoint = polygon.getFrameVertex(i);
+         polygon.getFrameVertex(i, scaledPoint);
          contactPoint.setPosition2d(scaledPoint);
       }
    }

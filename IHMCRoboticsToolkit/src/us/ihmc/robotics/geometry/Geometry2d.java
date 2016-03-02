@@ -2,6 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.robotics.geometry.transformables.Transformable;
+
 /**
  * <p>Title: </p>
  *
@@ -14,7 +16,7 @@ import javax.vecmath.Point2d;
  * @author Twan Koolen
  * @version 1.0
  */
-public interface Geometry2d
+public interface Geometry2d<T> extends Transformable<T>
 {
    // Orthogonal projection:
    public void orthogonalProjection(Point2d tuple);
@@ -37,8 +39,7 @@ public interface Geometry2d
 
    public double distance(ConvexPolygon2d convexPolygon);
 
-   // Transformations:
-   public void applyTransform(RigidBodyTransform transform);
+   // Extra Transformations for being 2d:
 
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform);
 

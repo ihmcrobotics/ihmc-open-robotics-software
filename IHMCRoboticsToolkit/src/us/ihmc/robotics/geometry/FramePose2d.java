@@ -6,7 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class FramePose2d extends ReferenceFrameHolder
+public class FramePose2d extends AbstractReferenceFrameHolder implements FrameObject<FramePose2d>
 {
    private final FramePoint2d position;
    private final FrameOrientation2d orientation;
@@ -143,6 +143,7 @@ public class FramePose2d extends ReferenceFrameHolder
       orientation.interpolate(framePose1.orientation, framePose2.orientation, alpha);
    }
 
+   @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       if (desiredFrame == referenceFrame)
@@ -152,6 +153,23 @@ public class FramePose2d extends ReferenceFrameHolder
       orientation.changeFrame(desiredFrame);
       referenceFrame = desiredFrame;
    }
+   
+   @Override
+   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   {
+      position.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+      orientation.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
+      
+      referenceFrame = desiredFrame;
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      position.applyTransform(transform);
+      orientation.applyTransform(transform);
+   }
+   
    
    private final FramePoint2d otherPosition = new FramePoint2d();
    public double getPositionDistance(FramePose2d framePose)
@@ -175,6 +193,7 @@ public class FramePose2d extends ReferenceFrameHolder
       return TransformTools.getMagnitudeOfAngleOfRotation(TransformTools.getTransformFromA2toA1(transformThis, transformThat));
    }
 
+   @Override
    public boolean epsilonEquals(FramePose2d framePose, double epsilon)
    {
       if (!position.epsilonEquals(framePose.position, epsilon))
@@ -187,8 +206,42 @@ public class FramePose2d extends ReferenceFrameHolder
    }
 
    @Override
+   public void setToZero()
+   {
+      position.setToZero();
+      orientation.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      position.setToNaN();
+      orientation.setToNaN();      
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return (position.containsNaN() || orientation.containsNaN());
+   }
+
+   @Override
    public String toString()
    {
       return position + ", " + orientation.toString();
+   }
+
+   @Override
+   public void setToZero(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      this.setToZero();
+   }
+
+   @Override
+   public void setToNaN(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      this.setToNaN();
    }
 }

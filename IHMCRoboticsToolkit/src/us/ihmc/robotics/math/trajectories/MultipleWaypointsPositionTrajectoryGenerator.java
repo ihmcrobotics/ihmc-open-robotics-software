@@ -98,8 +98,8 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements PositionTra
 
       for (int i = 0; i < timeAtWaypoints.length; i++)
       {
-         referenceFrame.checkReferenceFrameMatch(positions[i]);
-         referenceFrame.checkReferenceFrameMatch(velocities[i]);
+         referenceFrame.checkReferenceFrameMatch(positions[i].getReferenceFrame());
+         referenceFrame.checkReferenceFrameMatch(velocities[i].getReferenceFrame());
          appendWaypoint(timeAtWaypoints[i], positions[i], velocities[i]);
       }
    }

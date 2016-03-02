@@ -182,8 +182,7 @@ public class PartialFootholdControlModule
 
       for (int i = 0; i < shrunkFootPolygon.getNumberOfVertices(); i++)
       {
-         FramePoint2d vertex = shrunkFootPolygon.getFrameVertex(i);
-         tempPosition.setIncludingFrame(vertex.getReferenceFrame(), vertex.getX(), vertex.getY(), 0.0);
+         shrunkFootPolygon.getFrameVertexXY(i, tempPosition);
          contactPoints.get(i).setPosition(tempPosition);
       }
 

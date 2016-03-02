@@ -129,7 +129,7 @@ public class FootstepGeneratorsTest
    private Visualization allowVisualization = Visualization.NO_VISUALIZATION; // No visualizations for any tests for committing tests
 
    private boolean forceVisualizeAll = false;
-   private double endPositionTolerance = 1e-14;
+   private double endPositionTolerance = 1e-13;
 
    @Before
    public void showMemoryUsageBeforeTest()
