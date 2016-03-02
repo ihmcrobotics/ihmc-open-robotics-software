@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHighLevelStateMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
@@ -74,6 +75,7 @@ public class ControllerCommandInputManager
       createBuffer(ModifiableArmDesiredAccelerationsMessage.class);
       createBuffer(ModifiableAutomaticManipulationAbortMessage.class);
       createBuffer(ModifiableHandComplianceControlParametersMessage.class);
+      createBuffer(ModifiableHighLevelStateMessage.class);
 
       listOfSupportedMessages = new ArrayList<>(messageClassToBufferMap.keySet());
       // This message has to be added manually as it is handled in a different way to the others.
