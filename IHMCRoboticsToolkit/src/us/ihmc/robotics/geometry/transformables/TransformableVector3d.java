@@ -1,14 +1,13 @@
 package us.ihmc.robotics.geometry.transformables;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.interfaces.PointInterface;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 
-public class TransformableVector3d extends Vector3d implements Transformable<TransformableVector3d>, VectorInterface
+public class TransformableVector3d extends Vector3d implements GeometryObject<TransformableVector3d>, VectorInterface
 {
    private static final long serialVersionUID = 3215925974643446454L;
 

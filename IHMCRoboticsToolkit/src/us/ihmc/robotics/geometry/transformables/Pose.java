@@ -9,8 +9,9 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
-public class Pose implements Transformable<Pose>
+public class Pose implements GeometryObject<Pose>
 {
    private final TransformablePoint3d position;
    private final TransformableQuat4d orientation;
