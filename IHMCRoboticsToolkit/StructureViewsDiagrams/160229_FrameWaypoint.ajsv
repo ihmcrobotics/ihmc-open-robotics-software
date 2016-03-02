@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
-    <diagram creationDate="2016-Feb-29 10:07" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
+    <diagram creationDate="2016-Mar-02 14:21" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
         <filterScript>
 
 // no filter script yet defined for this class diagram
@@ -12,13 +12,21 @@ hide all fields
         <class className="us.ihmc.robotics.math.trajectories.waypoints.YoFrameWaypoint" project="IHMCRoboticsToolkit" xLocation="1068" yLocation="395"/>
         <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameTrajectoryPoint" project="IHMCRoboticsToolkit" xLocation="855" yLocation="293"/>
         <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameWaypoint" project="IHMCRoboticsToolkit" xLocation="-273" yLocation="464"/>
-        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface" project="IHMCRoboticsToolkit" xLocation="1265" yLocation="639"/>
-        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeometryObjectInterface" project="IHMCRoboticsToolkit" xLocation="778" yLocation="636"/>
+        <class className="us.ihmc.robotics.geometry.interfaces.GeometryTrajectoryObject" project="IHMCRoboticsToolkit" xLocation="2014" yLocation="324"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface" project="IHMCRoboticsToolkit" xLocation="1217" yLocation="603"/>
         <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanWaypoint" project="IHMCRoboticsToolkit" xLocation="284" yLocation="297"/>
+        <class className="us.ihmc.robotics.EpsilonComparable" project="IHMCRoboticsToolkit" xLocation="1143" yLocation="821"/>
+        <class className="us.ihmc.humanoidRobotics.communication.TransformableDataObject" project="IHMCHumanoidRobotics" xLocation="822" yLocation="825"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.YoFrameSE3TrajectoryPoint" project="IHMCRoboticsToolkit" xLocation="693" yLocation="-139"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint" project="IHMCRoboticsToolkit" xLocation="963" yLocation="-151"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint" project="IHMCRoboticsToolkit" xLocation="1269" yLocation="-102"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.YoFrameSE3Waypoint" project="IHMCRoboticsToolkit" xLocation="-224" yLocation="-13"/>
         <class className="us.ihmc.robotics.geometry.ReferenceFrameHolder" project="IHMCRoboticsToolkit" xLocation="-68" yLocation="642"/>
-        <class className="us.ihmc.robotics.geometry.RigidBodyTransform" project="IHMCRoboticsToolkit" xLocation="283" yLocation="818"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3Waypoint" project="IHMCRoboticsToolkit" xLocation="301" yLocation="-39"/>
         <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameSO3Waypoint" project="IHMCRoboticsToolkit" xLocation="582" yLocation="305"/>
-        <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameSE3Waypoint" project="IHMCRoboticsToolkit" xLocation="135" yLocation="100"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameSE3Waypoint" project="IHMCRoboticsToolkit" xLocation="60" yLocation="-20"/>
+        <class className="us.ihmc.robotics.geometry.RigidBodyTransform" project="IHMCRoboticsToolkit" xLocation="283" yLocation="818"/>
         <class className="us.ihmc.robotics.referenceFrames.ReferenceFrame" project="IHMCRoboticsToolkit" xLocation="307" yLocation="652"/>
+        <class className="us.ihmc.robotics.geometry.interfaces.GeometryObject" project="IHMCRoboticsToolkit" xLocation="1645" yLocation="605"/>
     </diagram>
 </ajsv>
