@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisTrajectoryMessageSubscriber;
-import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.HighLevelStateMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
@@ -33,7 +32,6 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
    {
       PelvisTrajectoryMessageSubscriber pelvisTrajectoryMessageSubscriber = null;
       FootTrajectoryMessageSubscriber footTrajectoryMessageSubscriber = null;
-      StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = null;
 
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters,
             registry);
@@ -44,8 +42,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       AbortWalkingMessageSubscriber abortWalkingProvider = null;
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(pelvisTrajectoryMessageSubscriber,
-            footTrajectoryMessageSubscriber, stopAllTrajectoryMessageSubscriber, footstepPovider, highLevelStateProvider,
-            capturabilityBasedStatusProducer, abortWalkingProvider);
+            footTrajectoryMessageSubscriber, footstepPovider, highLevelStateProvider, capturabilityBasedStatusProducer,
+            abortWalkingProvider);
 
       return variousProviders;
    }

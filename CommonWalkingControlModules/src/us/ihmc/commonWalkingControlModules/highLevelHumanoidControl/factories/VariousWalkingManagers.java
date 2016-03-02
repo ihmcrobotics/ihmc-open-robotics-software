@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationMa
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -57,8 +56,6 @@ public class VariousWalkingManagers
       }
 
       ChestOrientationManager chestOrientationManager = null;
-      StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
-
       if (fullRobotModel.getChest() != null)
       {
          YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
@@ -75,15 +72,14 @@ public class VariousWalkingManagers
          manipulationControlModule = new ManipulationControlModule(variousWalkingProviders, armControlParameters, momentumBasedController, registry);
       }
 
-      FeetManager feetManager = new FeetManager(momentumBasedController, stopAllTrajectoryMessageSubscriber, walkingControllerParameters, swingTimeProvider,
-            registry);
+      FeetManager feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, swingTimeProvider, registry);
 
       PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController,
-            stopAllTrajectoryMessageSubscriber, registry);
+            registry);
 
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
       PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController,
-            stopAllTrajectoryMessageSubscriber, pelvisXYControlGains, registry);
+            pelvisXYControlGains, registry);
 
       VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(headOrientationManager, chestOrientationManager, manipulationControlModule,
             feetManager, pelvisOrientationManager, pelvisICPBasedTranslationManager);

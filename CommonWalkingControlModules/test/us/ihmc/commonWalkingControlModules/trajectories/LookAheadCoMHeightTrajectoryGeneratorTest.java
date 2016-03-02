@@ -86,9 +86,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       DoubleYoVariable yoTime = robot.getYoTime();
 
       setupStuff(yoGraphicsListRegistry, registry);
-      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(null, minimumHeightAboveGround,
-            nominalHeightAboveGround, maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry,
-            registry);
+      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround, nominalHeightAboveGround,
+            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
 
       lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(true);
 

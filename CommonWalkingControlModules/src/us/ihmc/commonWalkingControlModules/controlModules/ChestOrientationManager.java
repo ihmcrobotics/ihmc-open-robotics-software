@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -27,7 +27,6 @@ public class ChestOrientationManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
-   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
 
@@ -50,7 +49,6 @@ public class ChestOrientationManager
          VariousWalkingProviders variousWalkingProviders, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.yoTime = momentumBasedController.getYoTime();
-      this.stopAllTrajectoryMessageSubscriber = variousWalkingProviders.getStopAllTrajectoryMessageSubscriber();
       this.pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
 
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
@@ -82,8 +80,6 @@ public class ChestOrientationManager
 
    public void compute()
    {
-      handleStopAllTrajectoryMessage();
-
       if (isTrackingOrientation.getBooleanValue())
       {
          if (!isTrajectoryStopped.getBooleanValue())
@@ -148,12 +144,9 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   private void handleStopAllTrajectoryMessage()
+   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
    {
-      if (stopAllTrajectoryMessageSubscriber == null || !stopAllTrajectoryMessageSubscriber.pollMessage(this))
-         return;
-
-      isTrajectoryStopped.set(true);
+      isTrajectoryStopped.set(message.isStopAllTrajectory());
    }
 
    public void handleGoHomeMessage(ModifiableGoHomeMessage message)

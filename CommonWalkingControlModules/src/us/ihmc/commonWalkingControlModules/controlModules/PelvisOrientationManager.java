@@ -6,10 +6,10 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetConsumers.StopAllTrajectoryMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -74,18 +74,16 @@ public class PelvisOrientationManager
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame desiredPelvisFrame;
 
-   private final StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber;
    private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isPelvisOrientationOffsetTrajectoryStopped", registry);
 
    public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
-         StopAllTrajectoryMessageSubscriber stopAllTrajectoryMessageSubscriber, YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       pelvisFrame = referenceFrames.getPelvisFrame();
-      this.stopAllTrajectoryMessageSubscriber = stopAllTrajectoryMessageSubscriber;
 
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
       double defaultStepTime = walkingControllerParameters.getDefaultSwingTime();
@@ -173,8 +171,6 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
       desiredPelvisFrame.update();
 
-      handleStopAllTrajectoryMessage();
-
       if (isTrajectoryStopped.getBooleanValue())
       {
          waypointOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
@@ -234,11 +230,9 @@ public class PelvisOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   private void handleStopAllTrajectoryMessage()
+   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
    {
-      if (stopAllTrajectoryMessageSubscriber == null || !stopAllTrajectoryMessageSubscriber.pollMessage(this))
-         return;
-      isTrajectoryStopped.set(true);
+      isTrajectoryStopped.set(message.isStopAllTrajectory());
    }
 
    public void handlePelvisTrajectoryMessage(PelvisTrajectoryMessage message)
