@@ -15,7 +15,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FramePose extends AbstractFrameObject<Pose>
+public class FramePose extends AbstractFrameObject<FramePose, Pose>
 {
    private final Pose pose;
 
@@ -110,7 +110,7 @@ public class FramePose extends AbstractFrameObject<Pose>
 
    public void setPose(FramePose pose)
    {
-      set(pose.transformableDataObject);
+      set(pose);
    }
 
    public void setPose(FramePoint position, FrameOrientation orientation)
@@ -258,7 +258,7 @@ public class FramePose extends AbstractFrameObject<Pose>
       pose.getPosition(tupleToPack);
    }
 
-   public void getPositionIncludingFrame(FrameTuple<?> frameTupleToPack)
+   public void getPositionIncludingFrame(FrameTuple<?, ?> frameTupleToPack)
    {
       frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPoint());
    }

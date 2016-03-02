@@ -1,11 +1,14 @@
 package us.ihmc.robotics.geometry.transformables;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.PointInterface;
+import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 
-public class TransformableVector3d extends Vector3d implements Transformable<TransformableVector3d>
+public class TransformableVector3d extends Vector3d implements Transformable<TransformableVector3d>, VectorInterface
 {
    private static final long serialVersionUID = 3215925974643446454L;
 
@@ -87,4 +90,21 @@ public class TransformableVector3d extends Vector3d implements Transformable<Tra
       return true;
    }
 
+   @Override
+   public void getVector(Vector3d vectorToPack)
+   {
+      this.get(vectorToPack);
+   }
+
+   @Override
+   public void setVector(VectorInterface vectorInterface)
+   {
+      vectorInterface.getVector(this);
+   }
+
+   @Override
+   public void setVector(Vector3d vector)
+   {
+      this.set(vector);
+   }
 }

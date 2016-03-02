@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameOrientation extends AbstractFrameObject<TransformableQuat4d>
+public class FrameOrientation extends AbstractFrameObject<FrameOrientation, TransformableQuat4d>
 {
    private final TransformableQuat4d quaternion;
    private final Matrix3d tempMatrixForYawPitchRollConversion = new Matrix3d();

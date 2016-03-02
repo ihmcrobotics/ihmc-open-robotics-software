@@ -653,7 +653,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         desiredPelvisOffset.set(supportPolygon.getFrameVertex(i));
+         supportPolygon.getFrameVertex(i, desiredPelvisOffset);
          desiredPelvisOffset.sub(center);
          submitDesiredPelvisPositionOffset(false, shiftScaleVector.getX() * desiredPelvisOffset.getX(), shiftScaleVector.getY() * desiredPelvisOffset.getY(),
                0.0);
@@ -662,7 +662,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          sequencePelvisRotations(0.3); //TODO increase/decrease limit?
       }
       // Get back to the first vertex again
-      desiredPelvisOffset.set(supportPolygon.getFrameVertex(0));
+      supportPolygon.getFrameVertex(0, desiredPelvisOffset);
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
             pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
@@ -670,6 +670,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitChestHomeCommand(false);
       submitPelvisHomeCommand(false);
    }
+
+   private final FramePoint2d frameVertexBefore = new FramePoint2d();
+   private final FramePoint2d frameVertexCurrentlyChecked = new FramePoint2d();
+   private final FramePoint2d frameVertexAfter = new FramePoint2d();
 
    private void sequenceHardWarmup()
    {
@@ -687,9 +691,9 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       for (int i = 0; i < numberOfVertices; i++)
       {
-         FramePoint2d frameVertexBefore = supportPolygon.getFrameVertex(i);
-         FramePoint2d frameVertexCurrentlyChecked = supportPolygon.getFrameVertex((i + 1) % numberOfVertices);
-         FramePoint2d frameVertexAfter = supportPolygon.getFrameVertex((i + 2) % numberOfVertices);
+         supportPolygon.getFrameVertex(i, frameVertexBefore);
+         supportPolygon.getFrameVertex((i + 1) % numberOfVertices, frameVertexCurrentlyChecked);
+         supportPolygon.getFrameVertex((i + 2) % numberOfVertices, frameVertexAfter);
 
          FrameVector2d frameVector1 = new FrameVector2d(midFeetZUpFrame);
          frameVector1.sub(frameVertexCurrentlyChecked, frameVertexBefore);
@@ -1116,13 +1120,13 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         desiredPelvisOffset.set(supportPolygon.getFrameVertex(i));
+         supportPolygon.getFrameVertex(i, desiredPelvisOffset);
          desiredPelvisOffset.sub(center);
          submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
                pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
       }
       // Get back to the first vertex again
-      desiredPelvisOffset.set(supportPolygon.getFrameVertex(0));
+      supportPolygon.getFrameVertex(0, desiredPelvisOffset);
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
             pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);

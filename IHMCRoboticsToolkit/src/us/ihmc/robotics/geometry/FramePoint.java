@@ -7,6 +7,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
+import us.ihmc.robotics.geometry.interfaces.PointInterface;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -18,7 +19,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint extends FrameTuple<TransformablePoint3d>
+public class FramePoint extends FrameTuple<FramePoint, TransformablePoint3d> implements PointInterface
 {
    private static final long serialVersionUID = -4831948077397801540L;
 
@@ -65,13 +66,13 @@ public class FramePoint extends FrameTuple<TransformablePoint3d>
    }
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
-   public FramePoint(FrameTuple<?> frameTuple)
+   public FramePoint(FrameTuple<?, ?> frameTuple)
    {
       super(frameTuple.referenceFrame, new TransformablePoint3d(frameTuple.tuple), frameTuple.name);
    }
 
    /** FramePoint <p/> A normal point associated with a specific reference frame. */
-   public FramePoint(FrameTuple2d<?> frameTuple2d)
+   public FramePoint(FrameTuple2d<?, ?> frameTuple2d)
    {
       super(frameTuple2d.referenceFrame, new TransformablePoint3d(), frameTuple2d.name);
       setXY(frameTuple2d);
@@ -191,7 +192,7 @@ public class FramePoint extends FrameTuple<TransformablePoint3d>
     * 
     * @param tupleToPack
     */
-   public void getFrameTuple2d(FrameTuple2d<?> tupleToPack)
+   public void getFrameTuple2d(FrameTuple2d<?, ?> tupleToPack)
    {
       tupleToPack.setIncludingFrame(this.getReferenceFrame(), this.getX(), this.getY());
    }
@@ -256,4 +257,23 @@ public class FramePoint extends FrameTuple<TransformablePoint3d>
       resultToPack.setIncludingFrame(pointToPitchAbout);
       resultToPack.add(tempX, tempY, tempZ);
    }
+
+   @Override
+   public void getPoint(Point3d pointToPack)
+   {
+      this.get(pointToPack);
+   }
+
+   @Override
+   public void setPoint(PointInterface pointInterface)
+   {
+      pointInterface.getPoint(this.getPoint());
+   }
+
+   @Override
+   public void setPoint(Point3d point)
+   {
+      this.set(point);
+   }
+
 }
