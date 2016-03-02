@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinator;
@@ -65,15 +64,11 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
       PauseWalkingMessageSubscriber pauseWalkingMessageSubscriber = new PauseWalkingMessageSubscriber(footstepPathCoordinator);
 
-      AbortWalkingMessageSubscriber abortWalkingMessageSubscriber = new AbortWalkingMessageSubscriber();
-
       objectCommunicator.attachListener(FootstepDataListMessage.class, footstepPathConsumer);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
       objectCommunicator.attachListener(PauseWalkingMessage.class, pauseWalkingMessageSubscriber);
-      objectCommunicator.attachListener(AbortWalkingMessage.class, abortWalkingMessageSubscriber);
 
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepPathCoordinator, capturabilityBasedStatusProducer,
-            abortWalkingMessageSubscriber);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepPathCoordinator, capturabilityBasedStatusProducer);
 
       return variousWalkingProviders;
    }

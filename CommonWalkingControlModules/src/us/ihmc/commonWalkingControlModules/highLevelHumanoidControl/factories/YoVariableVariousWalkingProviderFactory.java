@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingMessageSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -32,9 +31,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
 
-      AbortWalkingMessageSubscriber abortWalkingProvider = null;
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepPovider,
-            capturabilityBasedStatusProducer, abortWalkingProvider);
+            capturabilityBasedStatusProducer);
 
       return variousProviders;
    }

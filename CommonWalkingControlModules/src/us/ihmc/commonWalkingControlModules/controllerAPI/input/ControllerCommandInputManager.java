@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAbortWalkingMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAutomaticManipulationAbortMessage;
@@ -76,6 +77,7 @@ public class ControllerCommandInputManager
       createBuffer(ModifiableAutomaticManipulationAbortMessage.class);
       createBuffer(ModifiableHandComplianceControlParametersMessage.class);
       createBuffer(ModifiableHighLevelStateMessage.class);
+      createBuffer(ModifiableAbortWalkingMessage.class);
 
       listOfSupportedMessages = new ArrayList<>(messageClassToBufferMap.keySet());
       // This message has to be added manually as it is handled in a different way to the others.
