@@ -88,6 +88,16 @@ public class ModifiableFootstepDataMessage implements ControllerMessage<Modifiab
       this.swingHeight = swingHeight;
    }
 
+   public void setOrigin(FootstepOrigin origin)
+   {
+      this.origin = origin;
+   }
+
+   public void setTrajectoryType(TrajectoryType trajectoryType)
+   {
+      this.trajectoryType = trajectoryType;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;

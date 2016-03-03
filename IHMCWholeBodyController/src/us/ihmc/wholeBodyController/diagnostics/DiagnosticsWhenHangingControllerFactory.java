@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -55,8 +54,8 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
    }
 
    @Override
-   public HighLevelBehavior createHighLevelBehavior(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-         MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
+   public HighLevelBehavior createHighLevelBehavior(VariousWalkingManagers variousWalkingManagers, MomentumBasedController momentumBasedController,
+         ICPAndMomentumBasedController icpAndMomentumBasedController)
    {
       BipedSupportPolygons bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
       controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, bipedSupportPolygons, useArms, robotIsHanging, momentumBasedController, this.torqueOffsetPrinter);

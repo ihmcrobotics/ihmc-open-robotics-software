@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -56,6 +57,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
       ModifiableFootstepDataMessage footstep = new ModifiableFootstepDataMessage();
       footstep.setRobotSide(swingLegSide);
       footstep.setPose(framePosition.getPoint(), frameOrientation.getQuaternion());
+      footstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
       return footstep;
    }

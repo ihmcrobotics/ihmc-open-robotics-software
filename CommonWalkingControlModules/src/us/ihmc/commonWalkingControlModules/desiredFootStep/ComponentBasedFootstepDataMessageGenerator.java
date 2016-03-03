@@ -42,28 +42,47 @@ public class ComponentBasedFootstepDataMessageGenerator
 
    private final List<Updatable> updatables = new ArrayList<>();
 
-   public ComponentBasedFootstepDataMessageGenerator(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager, WalkingControllerParameters walkingControllerParameters,
-         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT,
-         boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
+   public ComponentBasedFootstepDataMessageGenerator(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
+         SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
    {
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
       componentBasedDesiredFootstepCalculator = createComponentBasedDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet,
             controlDT, useHeadingAndVelocityScript);
 
-      walk.addVariableChangedListener(new VariableChangedListener()
+      walk.addVariableChangedListener(createVariableChangedListener());
+
+      createFootstepStatusListener();
+
+      parentRegistry.addChild(registry);
+   }
+
+   public VariableChangedListener createVariableChangedListener()
+   {
+      return new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
             if (walk.getBooleanValue())
+            {
                componentBasedDesiredFootstepCalculator.initialize();
+               computeAndSubmitFootsteps();
+            }
          }
-      });
+      };
+   }
 
-      createFootstepStatusListener();
+   public void computeAndSubmitFootsteps()
+   {
+      RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
+      componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-      parentRegistry.addChild(registry);
+      ModifiableFootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
+      commandInputManager.submitFootstepDataListMessage(footsteps);
+
+      nextSwingLeg.set(supportLeg);
    }
 
    public void createFootstepStatusListener()
@@ -76,13 +95,7 @@ public class ComponentBasedFootstepDataMessageGenerator
             switch (footstepStatus.status)
             {
             case COMPLETED:
-               RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
-               componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
-
-               ModifiableFootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
-               commandInputManager.submitFootstepDataListMessage(footsteps);
-
-               nextSwingLeg.set(supportLeg);
+               computeAndSubmitFootsteps();
             default:
                break;
             }
@@ -111,7 +124,7 @@ public class ComponentBasedFootstepDataMessageGenerator
    {
       ModifiableFootstepDataListMessage footsteps = new ModifiableFootstepDataListMessage();
       ModifiableFootstepDataMessage footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      ModifiableFootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), footstep);
+      ModifiableFootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep);
       ModifiableFootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep);
 
       footsteps.addFootstep(footstep);

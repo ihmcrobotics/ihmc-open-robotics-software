@@ -32,7 +32,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class FootControlModule
 {
@@ -69,8 +68,8 @@ public class FootControlModule
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
-         YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains, YoSE3PIDGainsInterface edgeTouchdownFootControlGains,
-         DoubleProvider swingTimeProvider, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+         YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
+         YoSE3PIDGainsInterface edgeTouchdownFootControlGains, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
@@ -117,8 +116,7 @@ public class FootControlModule
       holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(holdPositionState);
 
-      swingState = new SwingState(footControlHelper, swingTimeProvider, touchdownVelocityProvider, touchdownAccelerationProvider,
-            swingFootControlGains, registry);
+      swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
       states.add(swingState);
 
       moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, swingFootControlGains, registry);
@@ -187,9 +185,9 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
-   public void replanTrajectory(Footstep footstep)
+   public void replanTrajectory(Footstep footstep, double swingTime)
    {
-      swingState.replanTrajectory(footstep);
+      swingState.replanTrajectory(footstep, swingTime);
    }
 
    public void requestTouchdownForDisturbanceRecovery()
@@ -342,7 +340,7 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
    }
 
-   public void setFootstep(Footstep footstep)
+   public void setFootstep(Footstep footstep, double swingTime)
    {
       // TODO Used to pass the desireds from the toe off state to swing state. Clean that up.
       if (stateMachine.getCurrentStateEnum() == ConstraintType.TOES)
@@ -352,7 +350,7 @@ public class FootControlModule
          onToesState.getDesireds(initialOrientation, initialAngularVelocity);
          swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
       }
-      swingState.setFootstep(footstep);
+      swingState.setFootstep(footstep, swingTime);
    }
 
    public void setFootTrajectoryMessage(ModifiableFootTrajectoryMessage footTrajectoryMessage)
