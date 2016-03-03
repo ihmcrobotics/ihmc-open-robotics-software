@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.packetConsumers;
+package us.ihmc.humanoidRobotics.communication.subscribers;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
