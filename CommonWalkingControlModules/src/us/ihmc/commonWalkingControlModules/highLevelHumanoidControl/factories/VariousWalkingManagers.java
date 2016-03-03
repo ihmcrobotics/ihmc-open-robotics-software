@@ -43,8 +43,6 @@ public class VariousWalkingManagers
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
       HeadOrientationManager headOrientationManager = null;
-
-      double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
       if (fullRobotModel.getHead() != null)
       {
          YoOrientationPIDGainsInterface headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
@@ -56,8 +54,8 @@ public class VariousWalkingManagers
       ChestOrientationManager chestOrientationManager = null;
       if (fullRobotModel.getChest() != null)
       {
+         double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
          YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
-
          chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, trajectoryTimeHeadOrientation, registry);
       }
 
