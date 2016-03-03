@@ -133,6 +133,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
@@ -289,6 +290,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       // Footstep data
       registerPacketClass(FootstepDataMessage.class);
+      registerPacketField(FootstepOrigin.class);
       registerPacketField(ArrayList.class);
 
       registerPacketClass(FootstepDataListMessage.class);

@@ -31,11 +31,11 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
+import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -56,13 +56,12 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
-public abstract class GFERosPacketTest implements MultiRobotTestInterface
+public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 {
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -120,8 +119,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       PacketCommunicator controllerCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       PacketCommunicator controllerCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       
-      PacketCommunicator gfe_communicator_server = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
-      PacketCommunicator gfe_communicator_client = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator rosAPI_communicator_server = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator rosAPI_communicator_client = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
       
       
       try
@@ -129,8 +128,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
          controllerCommunicatorServer.connect();
          controllerCommunicatorClient.connect();
          
-         gfe_communicator_server.connect();
-         gfe_communicator_client.connect();
+         rosAPI_communicator_server.connect();
+         rosAPI_communicator_client.connect();
       }
       catch(IOException e)
       {
@@ -139,7 +138,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       
       
       PacketRouter<PacketDestination> packetRouter = new PacketRouter<>(PacketDestination.class);
-      packetRouter.attachPacketCommunicator(PacketDestination.GFE, gfe_communicator_client);
+      packetRouter.attachPacketCommunicator(PacketDestination.ROS_API, rosAPI_communicator_client);
       packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicatorClient);
       
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
@@ -156,14 +155,14 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       robotController.doControl();
       controllerCommunicatorServer.send(new HighLevelStateMessage(HighLevelState.WALKING));
       
-      new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator_server, packetRouter, "/ihmc_ros/atlas");
+      new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPI_communicator_server, packetRouter, "/ihmc_ros/atlas");
       
       try
       {
          SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
          String nameSpace = "/ihmc_ros/atlas";
          String tfPrefix = null;
-         new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix);
+         new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix);
       }
       catch (IOException e)
       {
@@ -175,7 +174,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
          robotController.doControl();
       }
       
-      Class[] gfePacketList = IHMCRosApiMessageMap.PACKET_LIST;
+      Class[] rosAPIPacketList = IHMCRosApiMessageMap.PACKET_LIST;
       
       int randomModulus = random.nextInt(250) + 1;
       
@@ -199,20 +198,20 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
          if(iteration % randomModulus == 0)
          {
             randomModulus = random.nextInt(250) + 1;
-            int randomIndex = random.nextInt(gfePacketList.length);
-            Class randomClazz = gfePacketList[randomIndex];
+            int randomIndex = random.nextInt(rosAPIPacketList.length);
+            Class randomClazz = rosAPIPacketList[randomIndex];
             
             Packet randomPacket = createRandomPacket(randomClazz, random);
             System.out.println(randomPacket.getClass() + " " + randomPacket);
-            gfe_communicator_server.send(randomPacket);
+            rosAPI_communicator_server.send(randomPacket);
          }
          iteration++;
       }
       
       controllerCommunicatorClient.close();
       controllerCommunicatorServer.close();
-      gfe_communicator_client.close();
-      gfe_communicator_server.close();
+      rosAPI_communicator_client.close();
+      rosAPI_communicator_server.close();
    }
 
    private DRCSimulationFactory drcSimulation;
@@ -352,7 +351,6 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       VariousWalkingProviderFactory variousWalkingProviderFactory;
       variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
       controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
 
       return controllerFactory;
    }

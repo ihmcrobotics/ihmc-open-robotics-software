@@ -3,7 +3,10 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface<T>> extends TransformableGeometryObjectInterface, WaypointInterface<T>
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.geometry.transformables.Transformable;
+
+public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface<T>> extends GeometryObject<T>
 {
    public abstract void setPosition(Point3d position);
 

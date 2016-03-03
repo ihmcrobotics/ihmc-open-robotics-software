@@ -38,7 +38,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    public FrameLine2d(ReferenceFrame referenceFrame, Line2d line2d)
    {
       super(referenceFrame, line2d);
-      this.line = transformableDataObject;
+      this.line = getGeometryObject();
    }
 
    public FrameLine2d(ReferenceFrame referenceFrame, Point2d point2d, Vector2d vector2d)

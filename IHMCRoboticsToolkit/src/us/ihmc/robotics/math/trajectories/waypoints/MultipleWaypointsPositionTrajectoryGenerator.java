@@ -162,7 +162,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          appendWaypointUnsafe(euclideanWaypoint.get(i));
    }
 
-   public void appendWaypoints(TrajectoryPointListInterface<? extends EuclideanTrajectoryPointInterface<?>, ?> trajectoryPointList)
+   public void appendWaypoints(TrajectoryPointListInterface<?, ? extends EuclideanTrajectoryPointInterface<?>> trajectoryPointList)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
 

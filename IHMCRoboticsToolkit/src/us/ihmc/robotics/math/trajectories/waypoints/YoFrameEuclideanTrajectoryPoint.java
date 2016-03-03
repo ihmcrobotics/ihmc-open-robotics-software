@@ -13,7 +13,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajecto
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFrameEuclideanTrajectoryPoint
-      extends YoFrameTrajectoryPoint<SimpleEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint, YoFrameEuclideanTrajectoryPoint>
+      extends YoFrameTrajectoryPoint<YoFrameEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint, SimpleEuclideanTrajectoryPoint>
       implements EuclideanTrajectoryPointInterface<YoFrameEuclideanTrajectoryPoint>
 {
    private final YoFramePoint position;
@@ -161,7 +161,7 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getGeometryObject();
       time.set(frameWaypoint.getTime());
       position.set(simpleWaypoint.getPosition());
       linearVelocity.set(simpleWaypoint.getLinearVelocity());

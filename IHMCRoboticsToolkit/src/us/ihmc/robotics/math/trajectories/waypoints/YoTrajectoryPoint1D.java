@@ -8,6 +8,7 @@ import java.text.NumberFormat;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 
 public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTrajectoryPoint1D>
@@ -152,5 +153,11 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
       String timeString = "time = " + doubleFormat.format(getTime());
       return "Trajectory point 1D: (" + timeString + ", " + waypoint1d + ")";
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      waypoint1d.applyTransform(transform);
    }
 }

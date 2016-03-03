@@ -21,7 +21,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
@@ -55,9 +55,9 @@ abstract public class ROSAPISimulator
       URI rosUri = NetworkParameters.getROSURI();
       networkProcessorParameters.setRosUri(rosUri);
 
-      PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator rosAPI_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
 
-      networkProcessorParameters.enableGFECommunicator(true);
+      networkProcessorParameters.enableROSAPICommunicator(true);
       if (runAutomaticDiagnosticRoutine)
       {
          networkProcessorParameters.enableBehaviorModule(true);
@@ -84,13 +84,13 @@ abstract public class ROSAPISimulator
       if (REDIRECT_UI_PACKETS_TO_ROS)
       {
          PacketRouter<PacketDestination> packetRouter = simulationStarter.getPacketRouter();
-         new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator, packetRouter, DEFAULT_PREFIX + "/" + robotModel.getSimpleRobotName().toLowerCase());
+         new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPI_communicator, packetRouter, DEFAULT_PREFIX + "/" + robotModel.getSimpleRobotName().toLowerCase());
       }
       
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
-      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix,
-            createCustomSubscribers(nameSpace, gfe_communicator), createCustomPublishers(nameSpace, gfe_communicator));
+      new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix,
+            createCustomSubscribers(nameSpace, rosAPI_communicator), createCustomPublishers(nameSpace, rosAPI_communicator));
    }
 
    protected static Options parseArguments(String[] args) throws JSAPException, IOException

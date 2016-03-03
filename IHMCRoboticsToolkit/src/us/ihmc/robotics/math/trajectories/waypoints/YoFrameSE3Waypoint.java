@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSE3Waypoint extends YoFrameWaypoint<SimpleSE3Waypoint, FrameSE3Waypoint, YoFrameSE3Waypoint>
+public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, FrameSE3Waypoint, SimpleSE3Waypoint>
       implements SE3WaypointInterface<YoFrameSE3Waypoint>
 {
    private final YoFramePoint position;
@@ -135,7 +135,7 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<SimpleSE3Waypoint, Frame
    @Override
    protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       SimpleEuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
       SimpleSO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
 
@@ -148,7 +148,7 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<SimpleSE3Waypoint, Frame
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       SimpleEuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
       SimpleSO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
 

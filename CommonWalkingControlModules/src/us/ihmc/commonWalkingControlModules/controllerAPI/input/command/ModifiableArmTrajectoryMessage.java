@@ -68,7 +68,7 @@ public class ModifiableArmTrajectoryMessage implements ControllerMessage<Modifia
       set(other.robotSide, other.getTrajectoryPointLists());
    }
 
-   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, T>> void set(RobotSide robotSide, T[] trajectoryPointListArray)
+   public <T extends TrajectoryPointListInterface<T, ? extends TrajectoryPoint1DInterface<?>>> void set(RobotSide robotSide, T[] trajectoryPointListArray)
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.length; i++)
@@ -78,7 +78,7 @@ public class ModifiableArmTrajectoryMessage implements ControllerMessage<Modifia
       }
    }
 
-   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> void set(RobotSide robotSide,
+   public <T extends TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>>> void set(RobotSide robotSide,
          RecyclingArrayList<T> trajectoryPointListArray)
    {
       clear(robotSide);
@@ -89,7 +89,7 @@ public class ModifiableArmTrajectoryMessage implements ControllerMessage<Modifia
       }
    }
 
-   public <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> void set(int jointIndex, T otherTrajectoryPointList)
+   public <T extends TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>>> void set(int jointIndex, T otherTrajectoryPointList)
    {
       SimpleTrajectoryPoint1DList thisJointTrajectoryPointList = jointTrajectoryInputs.get(jointIndex);
       thisJointTrajectoryPointList.set(otherTrajectoryPointList);
