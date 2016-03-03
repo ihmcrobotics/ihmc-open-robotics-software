@@ -8,14 +8,14 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<SimpleSE3TrajectoryPoint, FrameSE3TrajectoryPoint, FrameSE3TrajectoryPointList>
+public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameSE3TrajectoryPointList, FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
 {
    public FrameSE3TrajectoryPointList()
    {
       super(FrameSE3TrajectoryPoint.class);
    }
 
-   public <T extends TrajectoryPointListInterface<? extends SE3TrajectoryPointInterface<?>, T>> void setIncludingFrame(ReferenceFrame referenceFrame, T trajectoryPointList)
+   public <T extends TrajectoryPointListInterface<T, ? extends SE3TrajectoryPointInterface<?>>> void setIncludingFrame(ReferenceFrame referenceFrame, T trajectoryPointList)
    {
       clear(referenceFrame);
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)

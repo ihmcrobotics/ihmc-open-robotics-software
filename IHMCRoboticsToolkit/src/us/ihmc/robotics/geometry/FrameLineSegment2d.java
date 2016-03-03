@@ -35,14 +35,14 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
    {
       super(referenceFrame, new LineSegment2d());
       
-      this.lineSegment = this.transformableDataObject;
+      this.lineSegment = this.getGeometryObject();
    }
 
    public FrameLineSegment2d(ReferenceFrame referenceFrame, LineSegment2d lineSegment2d)
    {
       super(referenceFrame, lineSegment2d);
       
-      this.lineSegment = this.transformableDataObject;
+      this.lineSegment = this.getGeometryObject();
    }
 
    public FrameLineSegment2d(ReferenceFrame referenceFrame, Point2d[] endpoints)

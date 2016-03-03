@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<SimpleEuclideanWaypoint, FrameEuclideanWaypoint, YoFrameEuclideanWaypoint>
+public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWaypoint, FrameEuclideanWaypoint, SimpleEuclideanWaypoint>
       implements EuclideanWaypointInterface<YoFrameEuclideanWaypoint>
 {
    private final YoFramePoint position;
@@ -107,7 +107,7 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<SimpleEuclideanWay
    @Override
    protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleEuclideanWaypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleEuclideanWaypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       position.get(simpleWaypoint.getPosition());
       linearVelocity.get(simpleWaypoint.getLinearVelocity());
    }
@@ -115,7 +115,7 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<SimpleEuclideanWay
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleEuclideanWaypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleEuclideanWaypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       position.set(simpleWaypoint.getPosition());
       linearVelocity.set(simpleWaypoint.getLinearVelocity());
    }

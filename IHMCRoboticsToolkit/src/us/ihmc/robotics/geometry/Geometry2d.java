@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
  * @author Twan Koolen
  * @version 1.0
  */
-public interface Geometry2d<T> extends GeometryObject<T>
+public interface Geometry2d<T extends Geometry2d<T>> extends GeometryObject<T>
 {
    // Orthogonal projection:
    public void orthogonalProjection(Point2d tuple);

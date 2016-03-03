@@ -406,7 +406,7 @@ public class HandControlModule
       handleHandTrajectoryMessage(handTrajectoryMessage.getBase(), handTrajectoryMessage);
    }
 
-   private void handleHandTrajectoryMessage(BaseForControl base, TrajectoryPointListInterface<? extends SE3TrajectoryPointInterface<?>, ?> trajectoryPointList)
+   private void handleHandTrajectoryMessage(BaseForControl base, TrajectoryPointListInterface<?, ? extends SE3TrajectoryPointInterface<?>> trajectoryPointList)
    {
       positionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       orientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
@@ -509,7 +509,7 @@ public class HandControlModule
       }
    }
 
-   private <T extends TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?>> boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<T> trajectoryPointLists)
+   private <T extends TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>>> boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<T> trajectoryPointLists)
    {
       if (trajectoryPointLists.size() != oneDoFJoints.length)
          return false;
@@ -523,7 +523,7 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?> trajectoryPointList)
+   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectoryPointList)
    {
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
       {

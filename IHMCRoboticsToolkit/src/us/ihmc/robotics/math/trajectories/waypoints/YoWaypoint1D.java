@@ -8,6 +8,7 @@ import java.text.NumberFormat;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.Waypoint1DInterface;
 
 public class YoWaypoint1D implements Waypoint1DInterface<YoWaypoint1D>
@@ -123,5 +124,11 @@ public class YoWaypoint1D implements Waypoint1DInterface<YoWaypoint1D>
       String positionString = "position = " + doubleFormat.format(getPosition());
       String velocityString = "velocity = " + doubleFormat.format(getVelocity());
       return "Waypoint 1D: (" + positionString + ", " + velocityString + ")";
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      // Do nothing since simple numbers here.
    }
 }

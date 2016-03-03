@@ -20,7 +20,7 @@ public class ArmOneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<Ar
       super();
    }
 
-   public ArmOneJointTrajectoryMessage(TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?> trajectory1dMessage)
+   public ArmOneJointTrajectoryMessage(TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectory1dMessage)
    {
       super(trajectory1dMessage);
    }

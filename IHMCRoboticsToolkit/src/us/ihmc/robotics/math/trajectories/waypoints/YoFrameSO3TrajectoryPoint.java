@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSO3TrajectoryPoint, FrameSO3TrajectoryPoint, YoFrameSO3TrajectoryPoint>
+public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3TrajectoryPoint, FrameSO3TrajectoryPoint, SimpleSO3TrajectoryPoint>
       implements SO3TrajectoryPointInterface<YoFrameSO3TrajectoryPoint>
 {
    private final YoFrameQuaternion orientation;
@@ -168,7 +168,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSO3T
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getGeometryObject();
       time.set(simpleTrajectoryPoint.getTime());
       orientation.set(simpleTrajectoryPoint.getOrientation());
       angularVelocity.set(simpleTrajectoryPoint.getAngularVelocity());

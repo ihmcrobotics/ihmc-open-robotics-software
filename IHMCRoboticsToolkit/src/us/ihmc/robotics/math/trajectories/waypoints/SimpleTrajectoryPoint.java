@@ -1,10 +1,11 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface;
 
-public class SimpleTrajectoryPoint<W extends WaypointInterface<W>, T extends SimpleTrajectoryPoint<W, T>> implements TrajectoryPointInterface<T>
+public class SimpleTrajectoryPoint<W extends GeometryObject<W>, T extends SimpleTrajectoryPoint<W, T>> implements TrajectoryPointInterface<T>
 {
    private double time;
    protected final W waypointData;
@@ -89,5 +90,11 @@ public class SimpleTrajectoryPoint<W extends WaypointInterface<W>, T extends Sim
       if (!MathTools.epsilonEquals(time, other.getTime(), epsilon))
          return false;
       return waypointData.epsilonEquals(other.waypointData, epsilon);
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      waypointData.applyTransform(transform);
    }
 }

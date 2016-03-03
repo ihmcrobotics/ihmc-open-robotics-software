@@ -51,7 +51,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new ConvexPolygon2d());
-      this.convexPolygon = this.transformableDataObject;
+      this.convexPolygon = this.getGeometryObject();
       update();
    }
 
@@ -120,7 +120,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, ConvexPolygon2d otherPolygon)
    {
       super(referenceFrame, new ConvexPolygon2d());
-      this.convexPolygon = this.transformableDataObject;
+      this.convexPolygon = this.getGeometryObject();
 
       setIncludingFrameAndUpdate(referenceFrame, otherPolygon);
    }

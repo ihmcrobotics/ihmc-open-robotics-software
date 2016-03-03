@@ -245,7 +245,7 @@ public class PelvisOrientationManager
       handleTrajectoryMessage(message);
    }
 
-   public void handleTrajectoryMessage(TrajectoryPointListInterface<? extends SO3TrajectoryPointInterface<?>, ?> trajectoryPointList)
+   public void handleTrajectoryMessage(TrajectoryPointListInterface<?, ? extends SO3TrajectoryPointInterface<?>> trajectoryPointList)
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
 

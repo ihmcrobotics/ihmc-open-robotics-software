@@ -268,8 +268,8 @@ public class FrameSO3TrajectoryPointTest
    {
       assertTrue(expectedFrame == testedFrameSO3TrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameSO3TrajectoryPoint.getTime(), epsilon);
-      assertTrue(expectedOrientation.epsilonEquals(testedFrameSO3TrajectoryPoint.getSimpleWaypoint().getOrientation(), epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSO3TrajectoryPoint.getSimpleWaypoint().getAngularVelocity(), epsilon));
+      assertTrue(expectedOrientation.epsilonEquals(testedFrameSO3TrajectoryPoint.getGeometryObject().getOrientation(), epsilon));
+      assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSO3TrajectoryPoint.getGeometryObject().getAngularVelocity(), epsilon));
 
       Quat4d actualOrientation = new Quat4d();
       Vector3d actualAngularVelocity = new Vector3d();

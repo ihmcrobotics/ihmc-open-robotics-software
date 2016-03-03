@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeometryObjectInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameTrajectoryPointList<S extends TransformableGeometryObjectInterface & TrajectoryPointInterface<S>, F extends FrameTrajectoryPoint<S, F>, T extends FrameTrajectoryPointList<S, F, T>>
-      extends AbstractReferenceFrameHolder implements TrajectoryPointListInterface<F, T>
+public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, F, S>, F extends FrameTrajectoryPoint<F, S>, S extends TrajectoryPointInterface<S>>
+      extends AbstractReferenceFrameHolder implements TrajectoryPointListInterface<T, F>
 {
    protected ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    protected final RecyclingArrayList<F> trajectoryPoints;

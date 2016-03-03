@@ -153,7 +153,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       }
    }
 
-   public void appendWaypoints(TrajectoryPointListInterface<? extends SO3TrajectoryPointInterface<?>, ?> trajectoryPointList)
+   public void appendWaypoints(TrajectoryPointListInterface<?, ? extends SO3TrajectoryPointInterface<?>> trajectoryPointList)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
 

@@ -7,7 +7,7 @@ import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerStateMachin
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedCommonControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.sliderboard.SliderBoardModes;
+import us.ihmc.quadrupedRobotics.sliderboard.QuadrupedSliderBoardMode;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -35,8 +35,7 @@ public class QuadrupedControllerManager implements RobotController
    private final DoubleYoVariable robotTimestamp = new DoubleYoVariable("robotTimestamp", registry);
    private final RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
 
-   private final EnumYoVariable<SliderBoardModes> sliderboardMode = new EnumYoVariable<>("sliderboardMode", registry,
-         SliderBoardModes.class);
+   private final EnumYoVariable<QuadrupedSliderBoardMode> sliderboardMode = QuadrupedSliderBoardMode.createYoVariable(registry);
 
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters,
          SDFFullRobotModel sdfFullRobotModel, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators,

@@ -258,8 +258,8 @@ public class FrameEuclideanTrajectoryPointTest
    {
       assertTrue(expectedFrame == testedFrameEuclideanTrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameEuclideanTrajectoryPoint.getTime(), epsilon);
-      assertTrue(expectedPosition.epsilonEquals(testedFrameEuclideanTrajectoryPoint.simpleWaypoint.getPosition(), epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameEuclideanTrajectoryPoint.simpleWaypoint.getLinearVelocity(), epsilon));
+      assertTrue(expectedPosition.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getGeometryObject().getPosition(), epsilon));
+      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getGeometryObject().getLinearVelocity(), epsilon));
 
       Point3d actualPosition = new Point3d();
       Vector3d actualLinearVelocity = new Vector3d();

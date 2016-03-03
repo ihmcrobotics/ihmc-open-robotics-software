@@ -3,14 +3,14 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T extends GeometryObject<T>> extends AbstractReferenceFrameHolder implements FrameObject<S>
+public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, G>, G extends GeometryObject<G>> extends AbstractReferenceFrameHolder implements FrameObject<S>
 {
-   protected final T transformableDataObject;
+   private final G geometryObject;
    protected ReferenceFrame referenceFrame;
 
-   public AbstractFrameObject(ReferenceFrame referenceFrame, T transformableDataObject)
+   public AbstractFrameObject(ReferenceFrame referenceFrame, G transformableDataObject)
    {
-      this.transformableDataObject = transformableDataObject;
+      this.geometryObject = transformableDataObject;
       this.referenceFrame = referenceFrame;
    }
 
@@ -26,16 +26,16 @@ public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T
       if (desiredFrame != referenceFrame)
       {
          referenceFrame.verifySameRoots(desiredFrame);
-         RigidBodyTransform referenceTf, desiredTf;
+         RigidBodyTransform referenceFrameTransformToRoot, rootTransformToDesiredFrame;
 
-         if ((referenceTf = referenceFrame.getTransformToRoot()) != null)
+         if ((referenceFrameTransformToRoot = referenceFrame.getTransformToRoot()) != null)
          {
-            transformableDataObject.applyTransform(referenceTf);
+            geometryObject.applyTransform(referenceFrameTransformToRoot);
          }
 
-         if ((desiredTf = desiredFrame.getInverseTransformToRoot()) != null)
+         if ((rootTransformToDesiredFrame = desiredFrame.getInverseTransformToRoot()) != null)
          {
-            transformableDataObject.applyTransform(desiredTf);
+            geometryObject.applyTransform(rootTransformToDesiredFrame);
          }
 
          referenceFrame = desiredFrame;
@@ -47,39 +47,39 @@ public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T
    @Override
    public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
    {
-      transformableDataObject.applyTransform(transformToNewFrame);
+      geometryObject.applyTransform(transformToNewFrame);
       referenceFrame = desiredFrame;
    }
 
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
-      transformableDataObject.applyTransform(transform);
+      geometryObject.applyTransform(transform);
    }
    
    @Override
    public void set(S other)
    {
       checkReferenceFrameMatch(other);
-      this.transformableDataObject.set(other.transformableDataObject);
+      this.geometryObject.set(other.getGeometryObject());
    }
 
    @Override
    public void setToZero()
    {
-      this.transformableDataObject.setToZero();
+      this.geometryObject.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
-      this.transformableDataObject.setToNaN();      
+      this.geometryObject.setToNaN();      
    }
 
    @Override
    public boolean containsNaN()
    {
-      return this.transformableDataObject.containsNaN();
+      return this.geometryObject.containsNaN();
    }
 
    @Override
@@ -87,7 +87,7 @@ public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T
    {
       if (other == null) return false;
       if (referenceFrame != other.referenceFrame) return false;
-      return this.transformableDataObject.epsilonEquals(other.transformableDataObject, epsilon);
+      return this.geometryObject.epsilonEquals(other.getGeometryObject(), epsilon);
    }
 
    @Override
@@ -103,16 +103,21 @@ public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, T>, T
       this.referenceFrame = referenceFrame;
       setToNaN();
    }
-   
-   public void set(T other)
+
+   public void set(G other)
    {
-      this.transformableDataObject.set(other);
+      this.geometryObject.set(other);
    }
-   
-   public void set(ReferenceFrame referenceFrame, T other)
+
+   public void set(ReferenceFrame referenceFrame, G other)
    {
       this.referenceFrame = referenceFrame;
-      this.transformableDataObject.set(other);
+      this.geometryObject.set(other);
+   }
+   
+   public G getGeometryObject()
+   {
+      return geometryObject;
    }
 
 }

@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-public interface TrajectoryPointInterface<T extends TrajectoryPointInterface<T>> extends WaypointInterface<T>
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+
+public interface TrajectoryPointInterface<T extends TrajectoryPointInterface<T>> extends GeometryObject<T>
 {
    public abstract void setTime(double time);
 

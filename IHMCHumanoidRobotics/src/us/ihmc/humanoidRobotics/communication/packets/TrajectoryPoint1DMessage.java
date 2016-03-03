@@ -7,6 +7,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 
 @ClassDocumentation("This class is used to build 1D trajectory messages including jointspace trajectory messages."
@@ -149,5 +150,11 @@ public class TrajectoryPoint1DMessage extends IHMCRosApiMessage<TrajectoryPoint1
       String positionString = "position = " + doubleFormat.format(getPosition());
       String velocityString = "velocity = " + doubleFormat.format(getVelocity());
       return "Trajectory point 1D: (" + timeString + ", " + positionString + ", " + velocityString + ")";
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      // Do nothing since simple numbers here.
    }
 }

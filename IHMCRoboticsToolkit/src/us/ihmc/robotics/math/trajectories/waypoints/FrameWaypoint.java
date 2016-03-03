@@ -2,43 +2,47 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeometryObjectInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class FrameWaypoint<S extends TransformableGeometryObjectInterface & WaypointInterface<S>, F extends FrameWaypoint<S, F>>
-      extends AbstractReferenceFrameHolder implements TransformableGeometryObjectInterface, WaypointInterface<F>
+public abstract class FrameWaypoint<F extends FrameWaypoint<F, G>, G extends GeometryObject<G>> extends AbstractReferenceFrameHolder implements GeometryObject<F>
 {
-   private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-   protected final S simpleWaypoint;
+   private final G geometryObject;
+   protected ReferenceFrame referenceFrame;
 
-   protected FrameWaypoint(S simpleWaypoint)
+   public FrameWaypoint(G simpleWaypoint)
    {
-      this.simpleWaypoint = simpleWaypoint;
+      this(simpleWaypoint, ReferenceFrame.getWorldFrame());
+   }
+   
+   public FrameWaypoint(G simpleWaypoint, ReferenceFrame referenceFrame)
+   {
+      this.geometryObject = simpleWaypoint;
+      this.referenceFrame = referenceFrame;
    }
 
-   public final void set(S simpleWaypoint)
+   public final void set(G simpleWaypoint)
    {
-      this.simpleWaypoint.set(simpleWaypoint);
+      this.geometryObject.set(simpleWaypoint);
    }
 
-   public final void setIncludingFrame(ReferenceFrame referenceFrame, S simpleWaypoint)
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, G simpleWaypoint)
    {
       this.referenceFrame = referenceFrame;
-      this.simpleWaypoint.set(simpleWaypoint);
+      this.geometryObject.set(simpleWaypoint);
    }
 
    @Override
    public void set(F other)
    {
       checkReferenceFrameMatch(other);
-      simpleWaypoint.set(other.simpleWaypoint);
+      geometryObject.set(other.getGeometryObject());
    }
 
    public void setIncludingFrame(F other)
    {
       referenceFrame = other.getReferenceFrame();
-      simpleWaypoint.set(other.simpleWaypoint);
+      geometryObject.set(other.getGeometryObject());
    }
 
    public final void changeFrame(ReferenceFrame referenceFrame)
@@ -68,42 +72,42 @@ public abstract class FrameWaypoint<S extends TransformableGeometryObjectInterfa
    @Override
    public final void applyTransform(RigidBodyTransform transform)
    {
-      simpleWaypoint.applyTransform(transform);
+      geometryObject.applyTransform(transform);
    }
 
    @Override
    public void setToZero()
    {
-      simpleWaypoint.setToZero();
+      geometryObject.setToZero();
    }
 
    public void setToZero(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
-      simpleWaypoint.setToZero();
+      geometryObject.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
-      simpleWaypoint.setToNaN();
+      geometryObject.setToNaN();
    }
 
    public void setToNaN(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
-      simpleWaypoint.setToNaN();
+      geometryObject.setToNaN();
    }
 
    @Override
    public boolean containsNaN()
    {
-      return simpleWaypoint.containsNaN();
+      return geometryObject.containsNaN();
    }
 
-   public final void get(S simpleWaypoint)
+   public final void get(G simpleWaypoint)
    {
-      simpleWaypoint.set(this.simpleWaypoint);
+      simpleWaypoint.set(this.geometryObject);
    }
 
    @Override
@@ -117,13 +121,13 @@ public abstract class FrameWaypoint<S extends TransformableGeometryObjectInterfa
    {
       if (referenceFrame != other.getReferenceFrame())
          return false;
-      if (!simpleWaypoint.epsilonEquals(other.simpleWaypoint, epsilon))
+      if (!geometryObject.epsilonEquals(other.getGeometryObject(), epsilon))
          return false;
       return true;
    }
 
-   S getSimpleWaypoint()
+   G getGeometryObject()
    {
-      return simpleWaypoint;
+      return geometryObject;
    }
 }
