@@ -4,6 +4,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -46,17 +47,20 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    private final DoubleYoVariable stepPitch = new DoubleYoVariable("stepPitch", registry);
    private final IntegerYoVariable numberBlindStepsInPlace = new IntegerYoVariable("numberBlindStepsInPlace", registry);
 
-   private SideDependentList<ZUpFrame> soleZUpFrames;
-   private SideDependentList<? extends ReferenceFrame> soleFrames;
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<ZUpFrame> soleZUpFrames = new SideDependentList<>();
 
-   public BlindWalkingDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> soleFrames, YoVariableRegistry parentRegistry)
+   public BlindWalkingDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, YoVariableRegistry parentRegistry)
    {
       super(parentRegistry);
 
-      this.soleFrames = soleFrames;
-      soleZUpFrames = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
-         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, soleFrames.get(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "SoleZUpFrame"));
+      {
+         ReferenceFrame soleFrame = contactableBodies.get(robotSide).getSoleFrame();
+         soleFrames.put(robotSide, soleFrame);
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, soleFrame, "soleZUpFrame"));
+      }
+
    }
 
    public void setBlindWalkingDirection(BlindWalkingDirection blindWalkingDirection)
