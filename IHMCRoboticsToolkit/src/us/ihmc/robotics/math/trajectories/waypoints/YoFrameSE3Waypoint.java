@@ -135,7 +135,7 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
    @Override
    protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       SimpleEuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
       SimpleSO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
 
@@ -148,7 +148,7 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSE3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       SimpleEuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
       SimpleSO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
 

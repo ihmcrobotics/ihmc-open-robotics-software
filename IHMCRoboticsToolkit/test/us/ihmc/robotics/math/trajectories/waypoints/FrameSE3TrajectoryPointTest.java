@@ -323,10 +323,10 @@ public class FrameSE3TrajectoryPointTest
    {
       assertTrue(expectedFrame == testedFrameSE3TrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameSE3TrajectoryPoint.getTime(), epsilon);
-      assertTrue(expectedPosition.epsilonEquals(testedFrameSE3TrajectoryPoint.getSimpleWaypoint().getEuclideanWaypoint().getPosition(), epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(testedFrameSE3TrajectoryPoint.getSimpleWaypoint().getSO3Waypoint().getOrientation(), epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getSimpleWaypoint().getEuclideanWaypoint().getLinearVelocity(), epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getSimpleWaypoint().getSO3Waypoint().getAngularVelocity(), epsilon));
+      assertTrue(expectedPosition.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getEuclideanWaypoint().getPosition(), epsilon));
+      assertTrue(expectedOrientation.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getSO3Waypoint().getOrientation(), epsilon));
+      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getEuclideanWaypoint().getLinearVelocity(), epsilon));
+      assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getSO3Waypoint().getAngularVelocity(), epsilon));
 
       Point3d actualPosition = new Point3d();
       Quat4d actualOrientation = new Quat4d();

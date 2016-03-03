@@ -161,7 +161,7 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getGeometryObject();
       time.set(frameWaypoint.getTime());
       position.set(simpleWaypoint.getPosition());
       linearVelocity.set(simpleWaypoint.getLinearVelocity());

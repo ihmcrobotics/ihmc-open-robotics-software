@@ -284,7 +284,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSE3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSE3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getGeometryObject();
       SimpleEuclideanWaypoint euclideanWaypoint = simpleTrajectoryPoint.getEuclideanWaypoint();
       SimpleSO3Waypoint so3Waypoint = simpleTrajectoryPoint.getSO3Waypoint();
 

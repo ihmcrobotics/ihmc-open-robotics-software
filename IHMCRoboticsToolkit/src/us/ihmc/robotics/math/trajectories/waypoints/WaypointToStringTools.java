@@ -15,7 +15,7 @@ public abstract class WaypointToStringTools
 {
    public static String waypointToString(FrameEuclideanWaypoint frameEuclideanWaypoint)
    {
-      SimpleEuclideanWaypoint simpleWaypoint = frameEuclideanWaypoint.getSimpleWaypoint();
+      SimpleEuclideanWaypoint simpleWaypoint = frameEuclideanWaypoint.getGeometryObject();
       if (simpleWaypoint.getNumberFormat() == null)
          simpleWaypoint.setNumberFormat(createNumberFormat());
       Point3d position = simpleWaypoint.getPosition();
@@ -26,7 +26,7 @@ public abstract class WaypointToStringTools
 
    public static String waypointToString(FrameSO3Waypoint frameSO3Waypoint)
    {
-      SimpleSO3Waypoint simpleWaypoint = frameSO3Waypoint.getSimpleWaypoint();
+      SimpleSO3Waypoint simpleWaypoint = frameSO3Waypoint.getGeometryObject();
       if (simpleWaypoint.getNumberFormat() == null)
          simpleWaypoint.setNumberFormat(createNumberFormat());
       Quat4d orientation = simpleWaypoint.getOrientation();
@@ -37,7 +37,7 @@ public abstract class WaypointToStringTools
 
    public static String waypointToString(FrameSE3Waypoint frameSE3Waypoint)
    {
-      SimpleSE3Waypoint simpleWaypoint = frameSE3Waypoint.getSimpleWaypoint();
+      SimpleSE3Waypoint simpleWaypoint = frameSE3Waypoint.getGeometryObject();
       if (simpleWaypoint.getNumberFormat() == null)
          simpleWaypoint.setNumberFormat(createNumberFormat());
       SimpleEuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();

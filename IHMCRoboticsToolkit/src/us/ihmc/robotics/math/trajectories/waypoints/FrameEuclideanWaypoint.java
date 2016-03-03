@@ -11,140 +11,143 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint, SimpleEuclideanWaypoint>
       implements EuclideanWaypointInterface<FrameEuclideanWaypoint>
 {
+   private final SimpleEuclideanWaypoint geometryObject;
+   
    public FrameEuclideanWaypoint()
    {
       super(new SimpleEuclideanWaypoint());
+      geometryObject = getGeometryObject();
    }
 
    @Override
    public void setPosition(Point3d position)
    {
-      simpleWaypoint.setPosition(position);
+      geometryObject.setPosition(position);
    }
 
    public void setPosition(FramePoint position)
    {
       checkReferenceFrameMatch(position);
-      simpleWaypoint.setPosition(position.getPoint());
+      geometryObject.setPosition(position.getPoint());
    }
 
    @Override
    public void setLinearVelocity(Vector3d linearVelocity)
    {
-      simpleWaypoint.setLinearVelocity(linearVelocity);
+      geometryObject.setLinearVelocity(linearVelocity);
    }
 
    public void setLinearVelocity(FrameVector linearVelocity)
    {
       checkReferenceFrameMatch(linearVelocity);
-      simpleWaypoint.setLinearVelocity(linearVelocity.getVector());
+      geometryObject.setLinearVelocity(linearVelocity.getVector());
    }
 
    public void set(Point3d position, Vector3d linearVelocity)
    {
-      simpleWaypoint.set(position, linearVelocity);
+      geometryObject.set(position, linearVelocity);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, Point3d position, Vector3d linearVelocity)
    {
       setToZero(referenceFrame);
-      simpleWaypoint.set(position, linearVelocity);
+      geometryObject.set(position, linearVelocity);
    }
 
    public void set(FramePoint position, FrameVector linearVelocity)
    {
       checkReferenceFrameMatch(position);
       checkReferenceFrameMatch(linearVelocity);
-      simpleWaypoint.set(position.getPoint(), linearVelocity.getVector());
+      geometryObject.set(position.getPoint(), linearVelocity.getVector());
    }
 
    public void setIncludingFrame(FramePoint position, FrameVector linearVelocity)
    {
       position.checkReferenceFrameMatch(linearVelocity);
       setToZero(position.getReferenceFrame());
-      simpleWaypoint.set(position.getPoint(), linearVelocity.getVector());
+      geometryObject.set(position.getPoint(), linearVelocity.getVector());
    }
 
    public void set(EuclideanWaypointInterface<?> euclideanWaypoint)
    {
-      simpleWaypoint.set(euclideanWaypoint);
+      geometryObject.set(euclideanWaypoint);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanWaypointInterface<?> euclideanWaypoint)
    {
       setToZero(referenceFrame);
-      simpleWaypoint.set(euclideanWaypoint);
+      geometryObject.set(euclideanWaypoint);
    }
 
    @Override
    public void setPositionToZero()
    {
-      simpleWaypoint.setPositionToZero();
+      geometryObject.setPositionToZero();
    }
 
    @Override
    public void setLinearVelocityToZero()
    {
-      simpleWaypoint.setLinearVelocityToZero();
+      geometryObject.setLinearVelocityToZero();
    }
 
    @Override
    public void setPositionToNaN()
    {
-      simpleWaypoint.setPositionToNaN();
+      geometryObject.setPositionToNaN();
    }
 
    @Override
    public void setLinearVelocityToNaN()
    {
-      simpleWaypoint.setLinearVelocityToNaN();
+      geometryObject.setLinearVelocityToNaN();
    }
 
    public double positionDistance(FrameEuclideanWaypoint frameEuclideanWaypoint)
    {
       checkReferenceFrameMatch(frameEuclideanWaypoint);
-      return simpleWaypoint.positionDistance(frameEuclideanWaypoint.simpleWaypoint);
+      return geometryObject.positionDistance(frameEuclideanWaypoint.geometryObject);
    }
 
    @Override
    public void getPosition(Point3d positionToPack)
    {
-      simpleWaypoint.getPosition(positionToPack);
+      geometryObject.getPosition(positionToPack);
    }
 
    public void getPosition(FramePoint positionToPack)
    {
       checkReferenceFrameMatch(positionToPack);
-      simpleWaypoint.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack.getPoint());
    }
 
    public void getPositionIncludingFrame(FramePoint positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
-      simpleWaypoint.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack.getPoint());
    }
 
    @Override
    public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      simpleWaypoint.getLinearVelocity(linearVelocityToPack);
+      geometryObject.getLinearVelocity(linearVelocityToPack);
    }
 
    public void getLinearVelocity(FrameVector linearVelocityToPack)
    {
       checkReferenceFrameMatch(linearVelocityToPack);
-      simpleWaypoint.getLinearVelocity(linearVelocityToPack.getVector());
+      geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
    public void getLinearVelocityIncludingFrame(FrameVector linearVelocityToPack)
    {
       linearVelocityToPack.setToZero(getReferenceFrame());
-      simpleWaypoint.getLinearVelocity(linearVelocityToPack.getVector());
+      geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
    public void get(Point3d positionToPack, Vector3d linearVelocityToPack)
    {
-      simpleWaypoint.get(positionToPack, linearVelocityToPack);
+      geometryObject.get(positionToPack, linearVelocityToPack);
    }
 
    public void get(FramePoint positionToPack, FrameVector linearVelocityToPack)
@@ -161,8 +164,8 @@ public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint
 
    public void get(EuclideanWaypointInterface<?> euclideanWaypoint)
    {
-      euclideanWaypoint.setPosition(simpleWaypoint.getPosition());
-      euclideanWaypoint.setLinearVelocity(simpleWaypoint.getLinearVelocity());
+      euclideanWaypoint.setPosition(geometryObject.getPosition());
+      euclideanWaypoint.setLinearVelocity(geometryObject.getLinearVelocity());
    }
 
    @Override
