@@ -35,12 +35,12 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    public FramePose(ReferenceFrame referenceFrame, Pose pose)
    {
       super(referenceFrame, pose);
-      this.pose = transformableDataObject;
+      this.pose = getGeometryObject();
    }
 
    public FramePose(FramePoint position, FrameOrientation orientation)
    {
-      this(position.getReferenceFrame(), new Pose(position.transformableDataObject, orientation.transformableDataObject));
+      this(position.getReferenceFrame(), new Pose(position.getGeometryObject(), orientation.getGeometryObject()));
       
       if (position.getReferenceFrame() != orientation.getReferenceFrame())
       {
@@ -57,7 +57,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public FramePose(FramePose framePose)
    {
-      this(framePose.getReferenceFrame(), new Pose(framePose.transformableDataObject));
+      this(framePose.getReferenceFrame(), new Pose(framePose.getGeometryObject()));
    }
 
    public FramePose(ReferenceFrame referenceFrame, RigidBodyTransform transform)

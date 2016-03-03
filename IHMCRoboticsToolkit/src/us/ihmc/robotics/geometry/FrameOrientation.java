@@ -21,13 +21,13 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
    public FrameOrientation(FrameOrientation orientation)
    {
       super(orientation.getReferenceFrame(), new TransformableQuat4d(orientation.quaternion));
-      this.quaternion = this.transformableDataObject;
+      this.quaternion = this.getGeometryObject();
    }
 
    public FrameOrientation(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new TransformableQuat4d());
-      this.quaternion = this.transformableDataObject;
+      this.quaternion = this.getGeometryObject();
       setToZero(referenceFrame);
    }
 
