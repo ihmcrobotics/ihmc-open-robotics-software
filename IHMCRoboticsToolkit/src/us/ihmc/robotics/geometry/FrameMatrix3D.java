@@ -25,7 +25,7 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Transforma
    public FrameMatrix3D(ReferenceFrame referenceFrame)
    {
       super(referenceFrame, new TransformableMatrix3d());
-      this.matrix = this.transformableDataObject;
+      this.matrix = this.getGeometryObject();
    }
 
    public FrameMatrix3D(FrameMatrix3D frameMatrix3D)

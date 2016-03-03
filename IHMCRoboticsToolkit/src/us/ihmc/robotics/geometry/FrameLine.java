@@ -18,8 +18,8 @@ public class FrameLine extends AbstractFrameObject<FrameLine, TransformableLine3
    {
       super(referenceFrame, new TransformableLine3d());
 
-      origin = transformableDataObject.getOrigin();
-      direction = transformableDataObject.getDirection();
+      origin = getGeometryObject().getOrigin();
+      direction = getGeometryObject().getDirection();
    }
 
    public FrameLine(FramePoint origin, FrameVector direction)
