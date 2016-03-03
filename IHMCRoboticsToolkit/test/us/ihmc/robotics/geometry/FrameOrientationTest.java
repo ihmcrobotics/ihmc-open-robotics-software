@@ -44,7 +44,7 @@ public class FrameOrientationTest
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.04)
-	@Test(timeout = 100)
+	@Test(timeout = 3000)
    public void testOrientationOrientation()
    {
       FrameOrientation original = new FrameOrientation(testFrame);
@@ -67,7 +67,7 @@ public class FrameOrientationTest
    }
 	
 	@DeployableTestMethod(estimatedDuration = 0.01)
-	@Test(timeout = 100)
+	@Test(timeout = 3000)
 	public void testSetOrientationFromOneToTwo()
 	{
 	   Random random = new Random(1776L);
@@ -347,7 +347,7 @@ public class FrameOrientationTest
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.001)
-	@Test(timeout = 100)
+	@Test(timeout = 3000)
    public void testChangeFrameCopy()
    {
       FrameOrientation origOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
