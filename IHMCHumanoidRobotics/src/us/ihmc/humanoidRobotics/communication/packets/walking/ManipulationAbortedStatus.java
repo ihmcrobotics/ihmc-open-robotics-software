@@ -9,6 +9,11 @@ public class ManipulationAbortedStatus extends StatusPacket<ManipulationAbortedS
    }
 
    @Override
+   public void set(ManipulationAbortedStatus other)
+   {
+   }
+
+   @Override
    public boolean epsilonEquals(ManipulationAbortedStatus other, double epsilon)
    {
       if (other == null)

@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -29,10 +28,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(feet, referenceFrames.getAnkleZUpReferenceFrames(), walkingControllerParameters,
             registry);
 
-      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
-
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepPovider,
-            capturabilityBasedStatusProducer);
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepPovider);
 
       return variousProviders;
    }

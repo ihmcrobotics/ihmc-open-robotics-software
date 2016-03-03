@@ -28,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.C
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
@@ -64,6 +63,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.util.PeriodicThreadScheduler;
 
 public class MomentumBasedControllerFactory
 {
@@ -112,6 +112,8 @@ public class MomentumBasedControllerFactory
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
 
    private HumanoidGlobalDataProducer globalDataProducer;
+   private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
+   private PeriodicThreadScheduler scheduler;
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
@@ -154,10 +156,11 @@ public class MomentumBasedControllerFactory
       momentumBasedController.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
-   public void createControllerNetworkSubscriber()
+   public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler)
    {
+      this.scheduler = scheduler;
       if (globalDataProducer != null)
-         new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, globalDataProducer);
+         new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, closeableAndDisposableRegistry, scheduler, globalDataProducer);
       else
          createControllerNetworkSubscriber = true;
    }
@@ -186,6 +189,7 @@ public class MomentumBasedControllerFactory
          ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, HumanoidGlobalDataProducer dataProducer,
          InverseDynamicsJoint... jointsToIgnore)
    {
+      this.closeableAndDisposableRegistry = closeableAndDisposableRegistry;
       this.globalDataProducer = dataProducer;
       SideDependentList<ContactableFoot> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
@@ -250,7 +254,7 @@ public class MomentumBasedControllerFactory
       if (createComponentBasedFootstepDataMessageGenerator)
          createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
       if (createControllerNetworkSubscriber)
-         createControllerNetworkSubscriber();
+         createControllerNetworkSubscriber(scheduler);
 
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry,
             transferTimeCalculator, transferTime);
@@ -266,13 +270,11 @@ public class MomentumBasedControllerFactory
       ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
             referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry);
 
-      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = variousWalkingProviders.getCapturabilityBasedStatusProducer();
-
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPAndMomentumBasedController //////////////////////////////////////////////////
       double omega0 = walkingControllerParameters.getOmega0();
       icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, omega0, iCPBasedLinearMomentumRateOfChangeControlModule,
-            bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
+            bipedSupportPolygons, statusOutputManager, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////

@@ -110,6 +110,31 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       return footstepStatus;
    }
 
+   @Override
+   public void set(FootstepStatus other)
+   {
+      status = other.status;
+      footstepIndex = other.footstepIndex;
+      robotSide = other.robotSide;
+
+      if (actualFootPositionInWorld == null)
+         actualFootPositionInWorld = new Point3d();
+      if (actualFootOrientationInWorld == null)
+         actualFootOrientationInWorld = new Quat4d();
+
+      if (other.actualFootPositionInWorld == null)
+         actualFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+      else
+         actualFootPositionInWorld.set(other.actualFootPositionInWorld);
+
+      if (other.actualFootOrientationInWorld == null)
+         actualFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      else
+         actualFootOrientationInWorld.set(other.actualFootOrientationInWorld);
+
+      isDoneWalking = other.isDoneWalking;
+   }
+
    public boolean isDoneWalking()
    {
       return isDoneWalking;

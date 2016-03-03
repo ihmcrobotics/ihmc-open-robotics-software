@@ -12,16 +12,18 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.calculators.ConstantOmega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0Calculator;
 import us.ihmc.commonWalkingControlModules.calculators.Omega0CalculatorInterface;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -71,7 +73,8 @@ public class ICPAndMomentumBasedController
 
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<YoPlaneContactState>();
 
-   private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
+   private final ControllerStatusOutputManager statusOutputManager;
+   private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
    private final SpatialForceVector gravitationalWrench;
 
@@ -81,12 +84,12 @@ public class ICPAndMomentumBasedController
 
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, double omega0,
          ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule, BipedSupportPolygons bipedSupportPolygons,
-         CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, YoVariableRegistry parentRegistry)
+         ControllerStatusOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
       this.momentumBasedController = momentumBasedController;
-      this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
+      this.statusOutputManager = statusOutputManager;
       this.icpBasedLinearMomentumRateOfChangeControlModule = icpBasedLinearMomentumRateOfChangeControlModule;
 
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
@@ -181,14 +184,29 @@ public class ICPAndMomentumBasedController
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
 
-      if (capturabilityBasedStatusProducer != null)
+      reportCapturabilityBasedStatus();
+   }
+
+   private void reportCapturabilityBasedStatus()
+   {
+      yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
+      centerOfMassPosition.setToZero(centerOfMassFrame);
+      centerOfMassPosition.changeFrame(worldFrame);
+
+      capturePoint2d.checkReferenceFrameMatch(worldFrame);
+      desiredCapturePoint2d.checkReferenceFrameMatch(worldFrame);
+
+      SideDependentList<FrameConvexPolygon2d> footSupportPolygons = bipedSupportPolygons.getFootPolygonsInWorldFrame();
+
+      capturePoint2d.get(capturabilityBasedStatus.capturePoint);
+      desiredCapturePoint2d.get(capturabilityBasedStatus.desiredCapturePoint);
+      centerOfMassPosition.get(capturabilityBasedStatus.centerOfMass);
+      for (RobotSide robotSide : RobotSide.values)
       {
-         yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
-         centerOfMassPosition.setToZero(centerOfMassFrame);
-         centerOfMassPosition.changeFrame(worldFrame);
-         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, centerOfMassPosition,
-               bipedSupportPolygons.getFootPolygonsInWorldFrame());
+         capturabilityBasedStatus.setSupportPolygon(robotSide, footSupportPolygons.get(robotSide));
       }
+
+      statusOutputManager.reportCapturabilityBasedStatus(capturabilityBasedStatus);
    }
 
    private void computeOmega0()
