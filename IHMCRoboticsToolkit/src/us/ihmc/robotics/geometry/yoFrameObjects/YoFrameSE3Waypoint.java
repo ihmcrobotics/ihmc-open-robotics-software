@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.yoFrameObjects;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -23,7 +23,7 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
    private final YoFrameVector linearVelocity;
    private final YoFrameVector angularVelocity;
 
-   protected YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
+   public YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
       super(new FrameSE3Waypoint(), namePrefix, nameSuffix, registry, referenceFrames);
       position = YoFrameEuclideanWaypoint.createYoPosition(this, namePrefix, nameSuffix, registry);
