@@ -2,6 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -30,32 +31,30 @@ public class FourBarKinematicLoop
    private static final boolean DEBUG = true;
 
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final String name;
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
-   private final String name;
+   private final FrameVector closurePointFromLastPassiveJointFrameVect;
+   private final boolean recomputeJointLimits;
 
    private final DoubleYoVariable masterJointQ;
    private final DoubleYoVariable masterJointQd;
 
    private final FramePoint masterJointAPosition, jointBPosition, jointCPosition, jointDPosition;
    private double masterLinkAB, BC, CD, DA;
+   private final FrameVector vectorBC, vectorCD, vectorDA, vectorAB;
 
    private FourBarCalculatorFromFastRunner fourBarCalculator;
-   private double[] interiorAnglesAtZeroConfiguration = new double[4];
-
-   private double maxValidMasterJointAngle, minValidMasterJointAngle;
-
-   private final FrameVector vectorBC, vectorCD, vectorDA, vectorAB;
    
-   private final FrameVector jointAxisInWorld;
+   private double[] interiorAnglesAtZeroConfiguration = new double[4];
+   private double maxValidMasterJointAngle, minValidMasterJointAngle;
+   
    private final FrameVector tempVector = new FrameVector();
    private final FrameVector linkLengthVector = new FrameVector();
-   
+   private final FrameVector jointAxisInWorld;  
    private final FrameVector masterAxis, jointBAxis, jointCAxis, jointDAxis;
    
-   private final FrameVector closurePointFromLastPassiveJointFrameVect;
-
-   public FourBarKinematicLoop(String name, YoVariableRegistry registry, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJoint)
+   public FourBarKinematicLoop(String name, YoVariableRegistry registry, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
    {
       this.name = name;
       this.masterJointA = masterJointA;
@@ -63,6 +62,7 @@ public class FourBarKinematicLoop
       this.passiveJointC = passiveJointC;
       this.passiveJointD = passiveJointD;   
       closurePointFromLastPassiveJointFrameVect = new FrameVector(worldFrame, closurePointFromLastPassiveJoint);
+      this.recomputeJointLimits = recomputeJointLimits;
       
       jointBPosition = new FramePoint();
       jointCPosition = new FramePoint();
@@ -122,8 +122,8 @@ public class FourBarKinematicLoop
       jointCAxis.changeFrame(worldFrame);     
       jointDAxis.changeFrame(worldFrame);     
      
-      // Both the exact same axis and a flipped axis are valid (eg: y and -y). So as long as the absolute value of the dot product is 1, the axis are parallel.
-      if (Math.abs(masterAxis.dot(jointBAxis)) == 1 && Math.abs(masterAxis.dot(jointCAxis)) == 1 && Math.abs(masterAxis.dot(jointDAxis)) == 1)
+      // Both the exact same axis and a flipped axis are valid (eg: y and -y). So as long as the absolute value of the dot product is 1, the axis are parallel.      
+      if (MathTools.epsilonEquals(Math.abs(masterAxis.dot(jointBAxis)), 1.0, 1.0e-7) && MathTools.epsilonEquals(Math.abs(masterAxis.dot(jointCAxis)), 1.0, 1.0e-7) && MathTools.epsilonEquals(Math.abs(masterAxis.dot(jointDAxis)), 1.0, 1.0e-7))
       {
          jointAxisInWorld.set(masterAxis);
       }
