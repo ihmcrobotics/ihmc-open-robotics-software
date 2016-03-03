@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSO3Waypoint extends FrameWaypoint<SimpleSO3Waypoint, FrameSO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
+public class FrameSO3Waypoint extends FrameWaypoint<FrameSO3Waypoint, SimpleSO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
 {
    public FrameSO3Waypoint()
    {

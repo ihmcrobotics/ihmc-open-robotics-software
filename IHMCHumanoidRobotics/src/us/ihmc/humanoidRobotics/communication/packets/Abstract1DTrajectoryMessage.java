@@ -13,7 +13,7 @@ import us.ihmc.robotics.random.RandomTools;
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between trajectory points.")
 public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T>> extends IHMCRosApiMessage<T>
-      implements TrajectoryPointListInterface<TrajectoryPoint1DMessage, T>
+      implements TrajectoryPointListInterface<T, TrajectoryPoint1DMessage>
 {
    @FieldDocumentation("List of trajectory points to go through while executing the trajectory.")
    public TrajectoryPoint1DMessage[] trajectoryPoints;
@@ -25,7 +25,7 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
    {
    }
 
-   public Abstract1DTrajectoryMessage(TrajectoryPointListInterface<? extends TrajectoryPoint1DInterface<?>, ?> trajectory1dMessage)
+   public Abstract1DTrajectoryMessage(TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectory1dMessage)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[trajectory1dMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)

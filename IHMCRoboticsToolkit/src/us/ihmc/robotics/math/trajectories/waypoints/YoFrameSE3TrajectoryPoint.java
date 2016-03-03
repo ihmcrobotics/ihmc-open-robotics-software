@@ -15,7 +15,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<SimpleSE3TrajectoryPoint, FrameSE3TrajectoryPoint, YoFrameSE3TrajectoryPoint>
+public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3TrajectoryPoint, FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<YoFrameSE3TrajectoryPoint>
 {
    private final YoFramePoint position;

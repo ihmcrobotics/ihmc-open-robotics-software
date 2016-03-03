@@ -4,7 +4,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
-public class SimpleTrajectoryPointList<P extends TrajectoryPointInterface<P>> implements TrajectoryPointListInterface<P, SimpleTrajectoryPointList<P>>
+public class SimpleTrajectoryPointList<P extends TrajectoryPointInterface<P>> implements TrajectoryPointListInterface<SimpleTrajectoryPointList<P>, P>
 {
    protected final RecyclingArrayList<P> trajectoryPoints;
 

@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.robotics.EpsilonComparable;
 
-public interface TrajectoryPointListInterface<P extends TrajectoryPointInterface<P>, T extends TrajectoryPointListInterface<P, T>> extends EpsilonComparable<T>
+public interface TrajectoryPointListInterface<T extends TrajectoryPointListInterface<T, P>, P extends TrajectoryPointInterface<P>> extends EpsilonComparable<T>
 {
    public abstract void clear();
 

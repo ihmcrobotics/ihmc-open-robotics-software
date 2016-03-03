@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameEuclideanWaypoint extends FrameWaypoint<SimpleEuclideanWaypoint, FrameEuclideanWaypoint>
+public class FrameEuclideanWaypoint extends FrameWaypoint<FrameEuclideanWaypoint, SimpleEuclideanWaypoint>
       implements EuclideanWaypointInterface<FrameEuclideanWaypoint>
 {
    public FrameEuclideanWaypoint()

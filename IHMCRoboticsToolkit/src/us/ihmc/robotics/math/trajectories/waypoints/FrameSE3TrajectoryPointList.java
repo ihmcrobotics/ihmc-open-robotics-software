@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 
-public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<SimpleSE3TrajectoryPoint, FrameSE3TrajectoryPoint, FrameSE3TrajectoryPointList>
+public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameSE3TrajectoryPointList, FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
 {
    public FrameSE3TrajectoryPointList()
    {

@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSO3Waypoint extends YoFrameWaypoint<SimpleSO3Waypoint, FrameSO3Waypoint, YoFrameSO3Waypoint>
+public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, FrameSO3Waypoint, SimpleSO3Waypoint>
       implements SO3WaypointInterface<YoFrameSO3Waypoint>
 {
    private final YoFrameQuaternion orientation;

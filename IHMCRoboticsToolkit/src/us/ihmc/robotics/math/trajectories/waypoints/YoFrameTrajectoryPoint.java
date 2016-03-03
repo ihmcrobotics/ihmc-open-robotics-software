@@ -9,8 +9,8 @@ import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class YoFrameTrajectoryPoint<S extends Transformable & TrajectoryPointInterface<S>, F extends FrameTrajectoryPoint<S, F>, Y extends YoFrameTrajectoryPoint<S, F, Y>>
-      extends YoFrameWaypoint<S, F, Y> implements TrajectoryPointInterface<Y>, Transformable
+public abstract class YoFrameTrajectoryPoint<Y extends YoFrameTrajectoryPoint<Y, F, S>, F extends FrameTrajectoryPoint<F, S>, S extends Transformable & TrajectoryPointInterface<S>>
+      extends YoFrameWaypoint<Y, F, S> implements TrajectoryPointInterface<Y>
 {
    protected final DoubleYoVariable time;
 
