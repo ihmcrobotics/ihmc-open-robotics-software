@@ -128,12 +128,12 @@ subprojects { subproject ->
             }
         }
     }
-    
+
    	task testFast(type: Test) {
 		ignoreFailures true
 		include "**/*FastTestSuite.class"
 	}
-	
+
 	task testSlow(type: Test) {
 		ignoreFailures true
 		include "**/*SlowTestSuite.class"
