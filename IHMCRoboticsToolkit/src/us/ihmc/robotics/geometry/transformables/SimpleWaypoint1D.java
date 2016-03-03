@@ -5,9 +5,10 @@ import java.text.NumberFormat;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.Waypoint1DInterface;
 
-public class SimpleWaypoint1D implements Waypoint1DInterface<SimpleWaypoint1D>
+public class SimpleWaypoint1D implements GeometryObject<SimpleWaypoint1D>, Waypoint1DInterface<SimpleWaypoint1D>
 {
    private double position;
    private double velocity;

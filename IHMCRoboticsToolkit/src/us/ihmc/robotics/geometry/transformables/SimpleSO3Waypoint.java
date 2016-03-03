@@ -6,10 +6,11 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
-public class SimpleSO3Waypoint implements SO3WaypointInterface<SimpleSO3Waypoint>
+public class SimpleSO3Waypoint implements GeometryObject<SimpleSO3Waypoint>, SO3WaypointInterface<SimpleSO3Waypoint>
 {
    private final Quat4d orientation = new Quat4d();
    private final Vector3d angularVelocity = new Vector3d();
