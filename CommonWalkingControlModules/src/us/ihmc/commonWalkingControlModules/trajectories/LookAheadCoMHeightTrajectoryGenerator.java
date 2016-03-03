@@ -6,7 +6,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
@@ -103,14 +102,16 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private ReferenceFrame frameOfLastFoostep;
    private final ReferenceFrame pelvisFrame;
+   private final ReferenceFrame centerOfMassFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
-   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
-         double nominalHeightAboveGround, double maximumHeightAboveGround,
-         double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame pelvisFrame, SideDependentList<ReferenceFrame> ankleZUpFrames,
-         final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
+         double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
+         SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
+      this.centerOfMassFrame = centerOfMassFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
@@ -127,7 +128,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
             double previous = waypointOffsetHeightAboveGroundTrajectoryGenerator.getValue();
             waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
             waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, previous, 0.0);
-            waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(offsetHeightAboveGroundTrajectoryTimeProvider.getValue(), offsetHeightAboveGround.getDoubleValue(), 0.0);
+            waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(offsetHeightAboveGroundTrajectoryTimeProvider.getValue(),
+                  offsetHeightAboveGround.getDoubleValue(), 0.0);
             waypointOffsetHeightAboveGroundTrajectoryGenerator.initialize();
          }
       });
@@ -301,12 +303,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       frameOfLastFoostep = newFrame;
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
-         List<PlaneContactState> contactStates)
-   {
-      initialize(transferToAndNextFootstepsData);
-   }
-
    private final Point2d tempPoint2dA = new Point2d();
    private final Point2d tempPoint2dB = new Point2d();
 
@@ -343,7 +339,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final FramePoint tempFramePointForViz1 = new FramePoint();
    private final FramePoint tempFramePointForViz2 = new FramePoint();
 
-   private void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       if (DEBUG)
       {
@@ -690,17 +686,17 @@ public class LookAheadCoMHeightTrajectoryGenerator
       sNextMax.setX(xSNext);
    }
 
-   public double findMinimumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
+   private double findMinimumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
    {
       return findDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), s0, sF, s_d0, foot0Height, foot1Height);
    }
 
-   public double findNominalDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
+   private double findNominalDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
    {
       return findDoubleSupportHeight(nominalHeightAboveGround.getDoubleValue(), s0, sF, s_d0, foot0Height, foot1Height);
    }
 
-   public double findMaximumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
+   private double findMaximumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
    {
       return findDoubleSupportHeight(maximumHeightAboveGround.getDoubleValue(), s0, sF, s_d0, foot0Height, foot1Height);
    }
@@ -723,11 +719,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final Point2d queryPoint = new Point2d();
    private final Point2d solutionPoint = new Point2d();
 
-   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
+   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
    {
-      getCenterOfMass2d(queryPoint, centerOfMassHeightInputData.getCenterOfMassFrame());
+      getCenterOfMass2d(queryPoint, centerOfMassFrame);
       solutionPoint.set(queryPoint);
-      boolean isInDoubleSupport = centerOfMassHeightInputData.getSupportLeg() == null;
       solve(coMHeightPartialDerivativesDataToPack, solutionPoint, isInDoubleSupport);
 
       coMHeightPartialDerivativesDataToPack.getCoMHeight(tempFramePoint);
@@ -802,7 +797,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          offsetHeightAboveGround.set(heightOffset);
          offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
          offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-         
+
          waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
          waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, heightOffset, 0.0);
          waypointOffsetHeightAboveGroundTrajectoryGenerator.initialize();
@@ -905,16 +900,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
    public boolean hasBeenInitializedWithNextStep()
    {
       return hasBeenInitializedWithNextStep.getBooleanValue();
-   }
-
-   public void setOffsetHeightAboveGround(double value)
-   {
-      offsetHeightAboveGround.set(value);
-   }
-
-   public double getOffsetHeightAboveGround()
-   {
-      return offsetHeightAboveGround.getDoubleValue();
    }
 
    private void printOutFootstepGenerationCode(TransferToAndNextFootstepsData transferToAndNextFootstepsData)

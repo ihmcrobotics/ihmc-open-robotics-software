@@ -86,7 +86,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       setupStuff(yoGraphicsListRegistry, registry);
       LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround, nominalHeightAboveGround,
-            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
+            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
 
       lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(true);
 
@@ -193,9 +193,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          }
 
          // Initialize at the beginning of single support.
-         lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, null, null, null);
+         lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData);
          CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack = new CoMHeightPartialDerivativesData();
-         ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData = new ContactStatesAndUpcomingFootstepData();
 
          scs.tickAndUpdate();
 
@@ -207,7 +206,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             if (i == 0.35 * numberOfTicks)
             {
                // Initialize again at the beginning of double support.
-               lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, null, null, null);
+               lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData);
                supportLeg = null;
             }
             else if (i == 0.65 * numberOfTicks)
@@ -246,8 +245,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
                lookAheadCoMHeightTrajectoryGenerator.setSupportLeg(supportLegFrameSide.getEnumValue());
             }
 
-            centerOfMassHeightInputData.set(pelvisFrame, pelvisFrame, supportLeg, upcomingFootstep, listOfContactStates);
-            lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, centerOfMassHeightInputData);
+            boolean isInDoubleSupport = supportLeg == null;
+            lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, isInDoubleSupport);
 
             FramePoint comPosition = new FramePoint();
             pelvisFrame.setZ(comPosition.getZ());

@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -78,12 +77,5 @@ public class CoMHeightPartialDerivativesData
    public void setPartialD2zDxDy(double partialD2zDxDy)
    {
       this.partialD2zDxDy = partialD2zDxDy;
-   }
-
-   public boolean isFlat(double epsilon)
-   {
-      return MathTools.epsilonEquals(partialD2zDx2, 0.0, epsilon) && MathTools.epsilonEquals(partialD2zDxDy, 0.0, epsilon)
-            && MathTools.epsilonEquals(partialD2zDy2, 0.0, epsilon) && MathTools.epsilonEquals(partialDzDx, 0.0, epsilon)
-            && MathTools.epsilonEquals(partialDzDy, 0.0, epsilon);
    }
 }
