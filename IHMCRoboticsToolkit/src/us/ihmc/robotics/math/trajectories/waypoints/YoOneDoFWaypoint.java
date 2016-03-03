@@ -11,7 +11,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
-public class OneDoFYoWaypoint implements OneDoFWaypointInterface<OneDoFYoWaypoint>
+public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoint>
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -19,7 +19,7 @@ public class OneDoFYoWaypoint implements OneDoFWaypointInterface<OneDoFYoWaypoin
    private final DoubleYoVariable position;
    private final DoubleYoVariable velocity;
 
-   public OneDoFYoWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoOneDoFWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
@@ -53,7 +53,7 @@ public class OneDoFYoWaypoint implements OneDoFWaypointInterface<OneDoFYoWaypoin
    }
 
    @Override
-   public void set(OneDoFYoWaypoint waypoint)
+   public void set(YoOneDoFWaypoint waypoint)
    {
       position.set(waypoint.getPosition());
       velocity.set(waypoint.getVelocity());
@@ -108,7 +108,7 @@ public class OneDoFYoWaypoint implements OneDoFWaypointInterface<OneDoFYoWaypoin
    }
 
    @Override
-   public boolean epsilonEquals(OneDoFYoWaypoint other, double epsilon)
+   public boolean epsilonEquals(YoOneDoFWaypoint other, double epsilon)
    {
       if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
          return false;

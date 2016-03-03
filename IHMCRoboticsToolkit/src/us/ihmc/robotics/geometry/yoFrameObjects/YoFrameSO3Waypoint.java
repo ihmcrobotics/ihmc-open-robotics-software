@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.yoFrameObjects;
 
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 
@@ -28,7 +28,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
       angularVelocity = createYoAngularVelocity(this, namePrefix, nameSuffix, registry);
    }
 
-   protected static YoFrameQuaternion createYoOrientation(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
+   public static YoFrameQuaternion createYoOrientation(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
          YoVariableRegistry registry)
    {
       return new YoFrameQuaternion(createName(namePrefix, "orientation", ""), nameSuffix, null, registry)
@@ -41,7 +41,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
       };
    }
 
-   protected static YoFrameVector createYoAngularVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
+   public static YoFrameVector createYoAngularVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
          YoVariableRegistry registry)
    {
       return new YoFrameVector(createName(namePrefix, "angularVelocity", ""), nameSuffix, null, registry)

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.yoFrameObjects;
 
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 
@@ -28,7 +28,7 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
       linearVelocity = createYoLinearVelocity(this, namePrefix, nameSuffix, registry);
    }
 
-   protected static YoFramePoint createYoPosition(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public static YoFramePoint createYoPosition(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       return new YoFramePoint(createName(namePrefix, "position", ""), nameSuffix, null, registry)
       {
@@ -40,7 +40,7 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
       };
    }
 
-   protected static YoFrameVector createYoLinearVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public static YoFrameVector createYoLinearVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       return new YoFrameVector(createName(namePrefix, "linearVelocity", ""), nameSuffix, null, registry)
       {
