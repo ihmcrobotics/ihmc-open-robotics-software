@@ -73,19 +73,23 @@ public class GeometricJacobianHolder
       long jacobianId = ScrewTools.computeGeometricJacobianNameBasedHashCode(joints, 0, numberOfJointsToConsider - 1, jacobianFrame, allowChangeFrame);
       GeometricJacobian jacobian = getJacobian(jacobianId);
 
-      if (joints.length == numberOfJointsToConsider)
+      if (jacobian == null)
       {
-         jacobian = new GeometricJacobian(joints, jacobianFrame, allowChangeFrame);
+         if (joints.length == numberOfJointsToConsider)
+         {
+            jacobian = new GeometricJacobian(joints, jacobianFrame, allowChangeFrame);
+         }
+         else
+         {
+            InverseDynamicsJoint[] jointsForNewJacobian = new InverseDynamicsJoint[numberOfJointsToConsider];
+            System.arraycopy(joints, 0, jointsForNewJacobian, 0, numberOfJointsToConsider);
+            jacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame, allowChangeFrame);
+         }
+         jacobian.compute(); // Compute in case you need it right away
+         geometricJacobians.add(jacobian);
+         nameBasedHashCodeToJacobianMap.put(jacobian.nameBasedHashCode(), jacobian);
       }
-      else
-      {
-         InverseDynamicsJoint[] jointsForNewJacobian = new InverseDynamicsJoint[numberOfJointsToConsider];
-         System.arraycopy(joints, 0, jointsForNewJacobian, 0, numberOfJointsToConsider);
-         jacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame, allowChangeFrame);
-      }
-      jacobian.compute(); // Compute in case you need it right away
-      geometricJacobians.add(jacobian);
-      nameBasedHashCodeToJacobianMap.put(jacobian.nameBasedHashCode(), jacobian);
+
       return jacobian.nameBasedHashCode();
    }
 

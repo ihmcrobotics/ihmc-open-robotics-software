@@ -890,7 +890,7 @@ public class ScrewTools
    public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
    {
       long jointsHashCode = NameBasedHashCodeTools.computeArrayHashCode(joints);
-      if (allowChangeFrame)
+      if (!allowChangeFrame)
          return NameBasedHashCodeTools.combineHashCodes(jointsHashCode, jacobianFrame);
       else
          return jointsHashCode;
@@ -899,7 +899,7 @@ public class ScrewTools
    public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
    {
       long jointsHashCode = NameBasedHashCodeTools.computeSubArrayHashCode(joints, firstIndex, lastIndex);
-      if (allowChangeFrame)
+      if (!allowChangeFrame)
          return NameBasedHashCodeTools.combineHashCodes(jointsHashCode, jacobianFrame);
       else
          return jointsHashCode;
