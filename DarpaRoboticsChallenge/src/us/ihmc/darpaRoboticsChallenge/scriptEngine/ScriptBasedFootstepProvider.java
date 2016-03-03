@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -27,7 +26,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
+public class ScriptBasedFootstepProvider implements Updatable
 {
    private int footstepCounter = 0;
    private int completedFootstepCount = 0;
@@ -168,19 +167,16 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       footstepQueue.addAll(footsteps);
    }
 
-   @Override
    public Footstep poll()
    {
       return footstepQueue.poll();
    }
 
-   @Override
    public Footstep peek()
    {
       return footstepQueue.peek();
    }
 
-   @Override
    public Footstep peekPeek()
    {
       Iterator<Footstep> iterator = footstepQueue.iterator();
@@ -203,30 +199,25 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       }
    }
 
-   @Override
    public boolean isEmpty()
    {
       return footstepQueue.isEmpty();
    }
 
-   @Override
    public void notifyComplete(FramePose actualFootPoseInWorld)
    {
       completedFootstepCount++;
    }
 
-   @Override
    public void notifyWalkingComplete()
    {
    }
 
-   @Override
    public int getNumberOfFootstepsToProvide()
    {
       return footstepQueue.size();
    }
 
-   @Override
    public boolean isBlindWalking()
    {
       return false;
@@ -238,13 +229,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       grabNewScriptEventIfNecessary();
    }
 
-   @Override
    public boolean isPaused()
    {
       return false;
    }
 
-   @Override
    public void cancelPlan()
    {
       footstepQueue.clear();

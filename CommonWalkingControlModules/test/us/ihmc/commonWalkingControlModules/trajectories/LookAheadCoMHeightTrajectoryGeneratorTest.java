@@ -15,9 +15,8 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProviderTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -126,7 +125,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
-      FootstepProviderTestHelper footstepProviderTestHelper = new FootstepProviderTestHelper(contactableFeet, ankleZUpFrames, ankleFrames, dt);
+      FootstepTestHelper footstepTestTools = new FootstepTestHelper(contactableFeet, ankleFrames);
 
       //    double stepWidth = 0.3;
       //    double stepLength = 0.75;
@@ -135,7 +134,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       //    FootstepProvider footstepProvider = footstepProviderTestHelper.createFlatGroundWalkingTrackFootstepProvider(registry, updatables);
 
-      FootstepProvider footstepProvider = generateFootstepsForATestCase(footstepProviderTestHelper);
+      List<Footstep> footsteps = generateFootstepsForATestCase(footstepTestTools);
 
       boolean changeZRandomly = false;
       double maxZChange = 0.6;
@@ -145,23 +144,23 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       int stepNumber = 0;
       int maxNumberOfSteps = 80;
 
-      Footstep transferFromFootstep = footstepProvider.poll();
+      Footstep transferFromFootstep = footsteps.remove(0);
       Footstep previousFootstep = transferFromFootstep;
 
       Footstep transferToFootstep;
 
-      while ((footstepProvider.getNumberOfFootstepsToProvide() > 2) && (stepNumber < maxNumberOfSteps))
+      while ((footsteps.size() > 2) && (stepNumber < maxNumberOfSteps))
       {
          stepNumber++;
 
          transferFromFootstep = previousFootstep;
-         transferToFootstep = footstepProvider.poll();
+         transferToFootstep = footsteps.remove(0);
 
          if (changeZRandomly)
             transferToFootstep.setZ(transferToFootstep.getZ() + RandomTools.generateRandomDouble(random, 0.0, maxZChange));
          previousFootstep = transferToFootstep;
 
-         Footstep upcomingFootstep = footstepProvider.peek();
+         Footstep upcomingFootstep = footsteps.get(0);
 
          FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
          FramePoint transferFromFootFramePoint = new FramePoint();
@@ -348,7 +347,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
    }
 
-   public FootstepProvider generateFootstepsForATestCase(FootstepProviderTestHelper footstepProviderTestHelper)
+   public List<Footstep> generateFootstepsForATestCase(FootstepTestHelper footstepProviderTestHelper)
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
@@ -372,7 +371,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3d(13.370848128885667, 13.814155292179699, 0.3745783670265563),
             new Quat4d(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
 
-      return footstepProviderTestHelper.createFootstepProviderForGivenFootstepList(footsteps);
+      return footsteps;
    }
 
 }

@@ -5,92 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteComponentBasedDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingUpdater;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
-   public static ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
-         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
-         SideDependentList<? extends ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
-   {
-      ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = new ObsoleteBlindWalkingToDestinationDesiredFootstepCalculator(
-            referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getFootReferenceFrames(), bipedFeet, registry);
-
-      desiredFootstepCalculator.setDesiredStepWidth(walkingControllerParameters.getInPlaceWidth());
-      desiredFootstepCalculator.setDesiredStepForward(walkingControllerParameters.getDesiredStepForward());
-      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
-      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
-      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
-      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
-
-      return desiredFootstepCalculator;
-   }
-
-   public static ObsoleteComponentBasedDesiredFootstepCalculator getDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
-         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
-         ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript)
-   {
-      ObsoleteComponentBasedDesiredFootstepCalculator desiredFootstepCalculator;
-      ManualDesiredVelocityControlModule desiredVelocityControlModule;
-
-      DesiredHeadingControlModule desiredHeadingControlModule;
-      if (useHeadingAndVelocityScript)
-      {
-         desiredVelocityControlModule = new ManualDesiredVelocityControlModule(ReferenceFrame.getWorldFrame(), registry);
-         desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 1.0, 0.0));
-
-         SimpleDesiredHeadingControlModule simpleDesiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
-         simpleDesiredHeadingControlModule.setMaxHeadingDot(0.4);
-         simpleDesiredHeadingControlModule.updateDesiredHeadingFrame();
-         boolean cycleThroughAllEvents = true;
-         HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, controlDT,
-               simpleDesiredHeadingControlModule, desiredVelocityControlModule, registry);
-         updatables.add(headingAndVelocityEvaluationScript);
-         desiredHeadingControlModule = simpleDesiredHeadingControlModule;
-      }
-      else
-      {
-         desiredHeadingControlModule = new RateBasedDesiredHeadingControlModule(0.0, controlDT, registry);
-         desiredVelocityControlModule = new ManualDesiredVelocityControlModule(desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
-      }
-
-      updatables.add(new DesiredHeadingUpdater(desiredHeadingControlModule));
-
-      double ankleHeight = walkingControllerParameters.getAnkleHeight();
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      SideDependentList<ReferenceFrame> ankleZUpReferenceFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      SideDependentList<ReferenceFrame> footReferenceFrames = referenceFrames.getFootReferenceFrames();
-      desiredFootstepCalculator = new ObsoleteComponentBasedDesiredFootstepCalculator(ankleHeight, pelvisZUpFrame, ankleZUpReferenceFrames, footReferenceFrames,
-            bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
-
-      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
-      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
-      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getMinStepWidth());
-      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getMaxStepWidth());
-      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
-
-      return desiredFootstepCalculator;
-   }
-
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
    {
       List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
