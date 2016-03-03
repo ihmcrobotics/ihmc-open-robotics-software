@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +12,9 @@ import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -31,7 +26,6 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.scriptEngine.VariousWalkingProviderFromScriptFactory;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -70,7 +64,7 @@ public class DRCSimulationStarter
    private DRCSimulationFactory drcSimulationFactory;
    private SimulationConstructionSet simulationConstructionSet;
 
-   private String scriptFileName;
+   private String scriptFileName; // TODO Reimplement the script based message generator.
    private boolean createSCSSimulatedSensors;
 
    private boolean deactivateWalkingFallDetector = false;
@@ -378,8 +372,6 @@ public class DRCSimulationStarter
       if (deactivateWalkingFallDetector)
          controllerFactory.setFallbackControllerForFailure(null);
 
-      registerWalkingProviderFactory(dataProducer, controllerFactory);
-
       drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, dataProducer);
 
       if (externalPelvisCorrectorSubscriber != null)
@@ -395,30 +387,6 @@ public class DRCSimulationStarter
       simulationConstructionSet.attachPlaybackListener(playbackListener);
 
       drcSimulationFactory.start();
-   }
-
-   private void registerWalkingProviderFactory(HumanoidGlobalDataProducer dataProducer, MomentumBasedControllerFactory controllerFactory)
-   {
-      if ((scriptFileName != null) && (!scriptFileName.equals("")))
-      {
-         // Create providers that read a script file with command to be executed by the controller.
-         InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptFileName);
-         VariousWalkingProviderFromScriptFactory variousWalkingProviderFactory = new VariousWalkingProviderFromScriptFactory(scriptInputStream);
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      }
-      else if (dataProducer != null)
-      {
-         // Create providers that listen to incoming packets through the HumanoidGlobalDataProducer, some of the producers are also able to send feedback.
-         FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
-         VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      }
-      else
-      {
-         // Create providers that use YoVariables instead of packets or scripts. Mostly used for debugging or when the operator interface is inaccessible.
-         YoVariableVariousWalkingProviderFactory variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      }
    }
 
    public LocalObjectCommunicator createSimulatedSensorsPacketCommunicator()

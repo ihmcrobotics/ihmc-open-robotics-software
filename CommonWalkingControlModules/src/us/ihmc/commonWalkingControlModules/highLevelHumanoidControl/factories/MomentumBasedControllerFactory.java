@@ -119,10 +119,6 @@ public class MomentumBasedControllerFactory
       this.capturePointPlannerParameters = capturePointPlannerParameters;
    }
 
-   public void setVariousWalkingProviderFactory(VariousWalkingProviderFactory variousWalkingProviderFactory)
-   {
-   }
-
    public void addUpdatable(Updatable updatable)
    {
       this.updatables.add(updatable);
@@ -375,11 +371,6 @@ public class MomentumBasedControllerFactory
    public void reinitializePositionControl()
    {
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.JOINT_POSITION_CONTROL);
-   }
-
-   public VariousWalkingProviders getVariousWalkingProviders()
-   {
-      return null;
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)
