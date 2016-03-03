@@ -892,29 +892,44 @@ public class HandControlModule
       int armJoints = trajectoryPacket.trajectoryPoints[0].positions.length;
       if (armJoints != oneDoFJoints.length)
       {
-         System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket packet contains " + armJoints + " joints - expected was "
-                            + oneDoFJoints.length);
+         System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket packet contains " + armJoints + " joints - expected was " + oneDoFJoints.length);
          return;
       }
-
       int waypoints = trajectoryPacket.trajectoryPoints.length;
-      for (int jointIdx = 0; jointIdx < oneDoFJoints.length; jointIdx++)
+
+      for (int jointIndex = 0; jointIndex < oneDoFJoints.length; jointIndex++)
       {
-         MultipleWaypointsOneDoFJointTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[jointIdx]);
+         double previousWaypointTime = 0.0;
+
+         for (int waypointIndex = 0; waypointIndex < waypoints; waypointIndex++)
+         {
+            double position = trajectoryPacket.trajectoryPoints[waypointIndex].positions[jointIndex];
+            double time = trajectoryPacket.trajectoryPoints[waypointIndex].time;
+
+            if (!MathTools.isInsideBoundsInclusive(position, oneDoFJoints[jointIndex].getJointLimitLower(), oneDoFJoints[jointIndex].getJointLimitUpper()))
+            {
+               PrintTools.warn(this, "Waypoint " + waypointIndex + " is out of the joint position limits for joint " + oneDoFJoints[jointIndex].getName() + ", cancelling action.");
+               return;
+            }
+            else if (time <= previousWaypointTime)
+            {
+               PrintTools.warn(this, "Time of waypoint " + waypointIndex + " is less or equal to previous waypoint time: waypoint time = " + time + ", previous waypoint time = " + previousWaypointTime + ", cancelling action.");
+               return;
+            }
+            previousWaypointTime = time;
+         }
+      }
+
+      for (int jointIndex = 0; jointIndex < oneDoFJoints.length; jointIndex++)
+      {
+         MultipleWaypointsOneDoFJointTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[jointIndex]);
          trajectoryGenerator.clear();
 
          for (int i = 0; i < waypoints; i++)
          {
-            double position = trajectoryPacket.trajectoryPoints[i].positions[jointIdx];
-            double velocity = trajectoryPacket.trajectoryPoints[i].velocities[jointIdx];
+            double position = trajectoryPacket.trajectoryPoints[i].positions[jointIndex];
+            double velocity = trajectoryPacket.trajectoryPoints[i].velocities[jointIndex];
             double time = trajectoryPacket.trajectoryPoints[i].time;
-
-            if (!MathTools.isInsideBoundsInclusive(position, oneDoFJoints[jointIdx].getJointLimitLower(), oneDoFJoints[jointIdx].getJointLimitUpper()))
-            {
-               PrintTools.warn(this, "Waypoint " + i + " is out of the joint position limits, cancelling action.");
-               trajectoryGenerator.clear();
-               return;
-            }
 
             boolean success = trajectoryGenerator.appendWaypoint(time, position, velocity);
             if (!success)
