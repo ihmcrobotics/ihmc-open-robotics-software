@@ -912,7 +912,7 @@ public class HandControlModule
             if (!MathTools.isInsideBoundsInclusive(position, oneDoFJoints[jointIdx].getJointLimitLower(), oneDoFJoints[jointIdx].getJointLimitUpper()))
             {
                PrintTools.warn(this, "Waypoint " + i + " is out of the joint position limits for joint " + oneDoFJoints[jointIdx].getName() + ", cancelling action.");
-               trajectoryGenerator.clear();
+               // trajectoryGenerator.clear();
                return;
             }
 
