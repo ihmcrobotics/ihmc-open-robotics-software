@@ -246,46 +246,6 @@ public class ControllerCommandInputManager
       return modifiableMessageClassToBufferMap.get(messageClassToCheck).poll();
    }
 
-   public RecyclingArrayList<ModifiableHandTrajectoryMessage> pollHandTrajectoryMessages()
-   {
-      return pollNewMessages(ModifiableHandTrajectoryMessage.class);
-   }
-
-   public RecyclingArrayList<ModifiableArmTrajectoryMessage> pollArmTrajectoryMessages()
-   {
-      return pollNewMessages(ModifiableArmTrajectoryMessage.class);
-   }
-
-   public RecyclingArrayList<ModifiableArmDesiredAccelerationsMessage> pollArmDesiredAccelerationsMessages()
-   {
-      return pollNewMessages(ModifiableArmDesiredAccelerationsMessage.class);
-   }
-
-   public RecyclingArrayList<ModifiableHandComplianceControlParametersMessage> pollHandComplianceControlParametersMessages()
-   {
-      return pollNewMessages(ModifiableHandComplianceControlParametersMessage.class);
-   }
-
-   public RecyclingArrayList<ModifiableHeadTrajectoryMessage> pollHeadTrajectoryMessages()
-   {
-      return pollNewMessages(ModifiableHeadTrajectoryMessage.class);
-   }
-
-   public ModifiableHeadTrajectoryMessage pollNewestHeadTrajectoryMessage()
-   {
-      return pollNewestMessage(ModifiableHeadTrajectoryMessage.class);
-   }
-
-   public ModifiableChestTrajectoryMessage pollNewestChestTrajectoryMessage()
-   {
-      return pollNewestMessage(ModifiableChestTrajectoryMessage.class);
-   }
-
-   public ModifiablePelvisHeightTrajectoryMessage pollNewestPelvisHeightTrajectoryMessage()
-   {
-      return pollNewestMessage(ModifiablePelvisHeightTrajectoryMessage.class);
-   }
-
    public ModifiableEndEffectorLoadBearingMessage pollAndCompileEndEffectorLoadBearingMessages()
    {
       RecyclingArrayList<ModifiableEndEffectorLoadBearingMessage> messages = pollNewMessages(ModifiableEndEffectorLoadBearingMessage.class);
