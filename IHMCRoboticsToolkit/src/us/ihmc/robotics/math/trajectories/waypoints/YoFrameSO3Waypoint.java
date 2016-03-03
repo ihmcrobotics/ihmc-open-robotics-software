@@ -7,13 +7,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.transformables.SimpleSO3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, FrameSO3Waypoint, SimpleSO3Waypoint>
+public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, FrameSO3Waypoint, SO3Waypoint>
       implements SO3WaypointInterface<YoFrameSO3Waypoint>
 {
    private final YoFrameQuaternion orientation;
@@ -110,7 +110,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
+      SO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       orientation.get(simpleWaypoint.getOrientation());
       angularVelocity.get(simpleWaypoint.getAngularVelocity());
    }
@@ -118,7 +118,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
+      SO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       orientation.set(simpleWaypoint.getOrientation());
       angularVelocity.set(simpleWaypoint.getAngularVelocity());
    }

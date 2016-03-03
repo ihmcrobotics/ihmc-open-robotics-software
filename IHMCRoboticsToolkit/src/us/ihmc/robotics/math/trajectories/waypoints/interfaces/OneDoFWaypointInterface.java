@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
-public interface Waypoint1DInterface<T extends Waypoint1DInterface<T>> extends GeometryObject<T>
+public interface OneDoFWaypointInterface<T extends OneDoFWaypointInterface<T>> extends GeometryObject<T>
 {
    public abstract void setPosition(double position);
 

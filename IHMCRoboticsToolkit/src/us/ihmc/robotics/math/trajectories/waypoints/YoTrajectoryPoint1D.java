@@ -17,7 +17,7 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
    private final String nameSuffix;
 
    private final DoubleYoVariable time;
-   private final YoWaypoint1D waypoint1d;
+   private final OneDoFYoWaypoint waypoint1d;
 
    public YoTrajectoryPoint1D(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
@@ -25,7 +25,7 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
       this.nameSuffix = nameSuffix;
 
       time = new DoubleYoVariable(createName(namePrefix, "time", nameSuffix), registry);
-      waypoint1d = new YoWaypoint1D(namePrefix, nameSuffix, registry);
+      waypoint1d = new OneDoFYoWaypoint(namePrefix, nameSuffix, registry);
    }
 
    @Override

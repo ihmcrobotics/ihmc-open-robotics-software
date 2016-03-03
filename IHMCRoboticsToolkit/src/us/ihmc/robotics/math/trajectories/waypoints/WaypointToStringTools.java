@@ -9,16 +9,16 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.geometry.transformables.SimpleEuclideanWaypoint;
-import us.ihmc.robotics.geometry.transformables.SimpleSE3Waypoint;
-import us.ihmc.robotics.geometry.transformables.SimpleSO3Waypoint;
+import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class WaypointToStringTools
 {
    public static String waypointToString(FrameEuclideanWaypoint frameEuclideanWaypoint)
    {
-      SimpleEuclideanWaypoint simpleWaypoint = frameEuclideanWaypoint.getGeometryObject();
+      EuclideanWaypoint simpleWaypoint = frameEuclideanWaypoint.getGeometryObject();
       if (simpleWaypoint.getNumberFormat() == null)
          simpleWaypoint.setNumberFormat(createNumberFormat());
       Point3d position = simpleWaypoint.getPosition();
@@ -29,7 +29,7 @@ public abstract class WaypointToStringTools
 
    public static String waypointToString(FrameSO3Waypoint frameSO3Waypoint)
    {
-      SimpleSO3Waypoint simpleWaypoint = frameSO3Waypoint.getGeometryObject();
+      SO3Waypoint simpleWaypoint = frameSO3Waypoint.getGeometryObject();
       if (simpleWaypoint.getNumberFormat() == null)
          simpleWaypoint.setNumberFormat(createNumberFormat());
       Quat4d orientation = simpleWaypoint.getOrientation();
@@ -40,12 +40,12 @@ public abstract class WaypointToStringTools
 
    public static String waypointToString(FrameSE3Waypoint frameSE3Waypoint)
    {
-      SimpleSE3Waypoint simpleWaypoint = frameSE3Waypoint.getGeometryObject();
+      SE3Waypoint simpleWaypoint = frameSE3Waypoint.getGeometryObject();
       if (simpleWaypoint.getNumberFormat() == null)
          simpleWaypoint.setNumberFormat(createNumberFormat());
-      SimpleEuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
+      EuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
       Point3d position = euclideanWaypoint.getPosition();
-      SimpleSO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
+      SO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
       Quat4d orientation = so3Waypoint.getOrientation();
       Vector3d linearVelocity = euclideanWaypoint.getLinearVelocity();
       Vector3d angularVelocity = so3Waypoint.getAngularVelocity();
@@ -53,7 +53,7 @@ public abstract class WaypointToStringTools
       return waypointToString(position, orientation, linearVelocity, angularVelocity, referenceFrame, simpleWaypoint.getNumberFormat());
    }
 
-   public static String waypointToString(SimpleEuclideanWaypoint simpleEuclideanWaypoint)
+   public static String waypointToString(EuclideanWaypoint simpleEuclideanWaypoint)
    {
       if (simpleEuclideanWaypoint.getNumberFormat() == null)
          simpleEuclideanWaypoint.setNumberFormat(createNumberFormat());
@@ -62,7 +62,7 @@ public abstract class WaypointToStringTools
       return waypointToString(position, linearVelocity, simpleEuclideanWaypoint.getNumberFormat());
    }
 
-   public static String waypointToString(SimpleSO3Waypoint simpleSO3Waypoint)
+   public static String waypointToString(SO3Waypoint simpleSO3Waypoint)
    {
       if (simpleSO3Waypoint.getNumberFormat() == null)
          simpleSO3Waypoint.setNumberFormat(createNumberFormat());
@@ -71,7 +71,7 @@ public abstract class WaypointToStringTools
       return waypointToString(orientation, angularVelocity, simpleSO3Waypoint.getNumberFormat());
    }
 
-   public static String waypointToString(SimpleSE3Waypoint simpleSE3Waypoint)
+   public static String waypointToString(SE3Waypoint simpleSE3Waypoint)
    {
       if (simpleSE3Waypoint.getNumberFormat() == null)
          simpleSE3Waypoint.setNumberFormat(createNumberFormat());

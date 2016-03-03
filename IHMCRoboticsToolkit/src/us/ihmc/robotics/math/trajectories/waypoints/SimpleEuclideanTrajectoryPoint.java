@@ -7,16 +7,16 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.SimpleEuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 
-public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<SimpleEuclideanWaypoint, SimpleEuclideanTrajectoryPoint>
+public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<EuclideanWaypoint, SimpleEuclideanTrajectoryPoint>
       implements EuclideanTrajectoryPointInterface<SimpleEuclideanTrajectoryPoint>
 {
    public SimpleEuclideanTrajectoryPoint()
    {
-      super(new SimpleEuclideanWaypoint());
+      super(new EuclideanWaypoint());
    }
 
    @Override
@@ -73,7 +73,7 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Simple
       waypointData.setLinearVelocityToNaN();
    }
 
-   public double distance(SimpleEuclideanWaypoint euclideanWaypoint)
+   public double distance(EuclideanWaypoint euclideanWaypoint)
    {
       return waypointData.positionDistance(euclideanWaypoint);
    }

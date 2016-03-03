@@ -10,12 +10,12 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 
-public class SimpleEuclideanWaypoint implements GeometryObject<SimpleEuclideanWaypoint>, EuclideanWaypointInterface<SimpleEuclideanWaypoint>
+public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, EuclideanWaypointInterface<EuclideanWaypoint>
 {
    private final Point3d position = new Point3d();
    private final Vector3d linearVelocity = new Vector3d();
 
-   public SimpleEuclideanWaypoint()
+   public EuclideanWaypoint()
    {
    }
 
@@ -44,7 +44,7 @@ public class SimpleEuclideanWaypoint implements GeometryObject<SimpleEuclideanWa
    }
 
    @Override
-   public void set(SimpleEuclideanWaypoint other)
+   public void set(EuclideanWaypoint other)
    {
       position.set(other.position);
       linearVelocity.set(other.linearVelocity);
@@ -88,7 +88,7 @@ public class SimpleEuclideanWaypoint implements GeometryObject<SimpleEuclideanWa
       setLinearVelocityToNaN();
    }
 
-   public double positionDistance(SimpleEuclideanWaypoint euclideanWaypoint)
+   public double positionDistance(EuclideanWaypoint euclideanWaypoint)
    {
       return position.distance(euclideanWaypoint.position);
    }
@@ -129,7 +129,7 @@ public class SimpleEuclideanWaypoint implements GeometryObject<SimpleEuclideanWa
    }
 
    @Override
-   public boolean epsilonEquals(SimpleEuclideanWaypoint other, double epsilon)
+   public boolean epsilonEquals(EuclideanWaypoint other, double epsilon)
    {
       if (!position.epsilonEquals(other.position, epsilon))
          return false;
