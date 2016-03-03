@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
@@ -62,10 +61,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       updatables.add(footstepProvider);
 
-      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
-
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepProvider,
-            capturabilityBasedStatusProducer);
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepProvider);
 
       return variousProviders;
    }

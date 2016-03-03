@@ -365,7 +365,7 @@ public class ControllerCommandInputManager
       }
    }
 
-   private static <U> Builder<U> createBuilderWithEmptyConstructor(Class<U> clazz)
+   public static <U> Builder<U> createBuilderWithEmptyConstructor(Class<U> clazz)
    {
       final Constructor<U> emptyConstructor;
       // Trying to get an empty constructor from clazz

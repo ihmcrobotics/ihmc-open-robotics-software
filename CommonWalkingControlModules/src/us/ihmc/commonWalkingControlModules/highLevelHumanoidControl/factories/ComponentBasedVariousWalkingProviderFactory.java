@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteComponentBasedDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper;
-import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -48,9 +47,7 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new ObsoleteDesiredFootstepCalculatorFootstepProviderWrapper(
             desiredFootstepCalculator, registry);
 
-      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = null;
-
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, capturabilityBasedStatusProducer);
+      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider);
 
       return variousWalkingProviders;
    }

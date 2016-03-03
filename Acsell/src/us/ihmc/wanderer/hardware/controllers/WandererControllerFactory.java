@@ -204,6 +204,7 @@ public class WandererControllerFactory
       // Configure the MomentumBasedControllerFactory so we start with the diagnostic controller
       diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
+      controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority));
       
       VariousWalkingProviderFactory variousWalkingProviderFactory;
       switch(walkingProvider)

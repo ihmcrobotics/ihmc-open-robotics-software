@@ -133,6 +133,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
       diagnosticControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, true, true, valkyrieTorqueOffsetPrinter);
       diagnosticControllerFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticControllerFactory);
+      controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY));
 
       VariousWalkingProviderFactory variousWalkingProviderFactory;
       switch(walkingProvider)

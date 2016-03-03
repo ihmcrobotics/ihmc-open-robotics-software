@@ -12,6 +12,12 @@ public class WalkingStatusMessage extends StatusPacket<WalkingStatusMessage>
    {
    }
 
+   @Override
+   public void set(WalkingStatusMessage other)
+   {
+      status = other.status;
+   }
+
    public void setWalkingStatus(Status status)
    {
       this.status = status;

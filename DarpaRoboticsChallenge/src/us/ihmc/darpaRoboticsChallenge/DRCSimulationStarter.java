@@ -370,7 +370,7 @@ public class DRCSimulationStarter
             walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
-         controllerFactory.createControllerNetworkSubscriber();
+         controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
       
       for (int i = 0; i < highLevelBehaviorFactories.size(); i++)
          controllerFactory.addHighLevelBehaviorFactory(highLevelBehaviorFactories.get(i));

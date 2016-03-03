@@ -1,21 +1,41 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.output;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.concurrent.Builder;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class ControllerStatusOutputManager
 {
+   private final Map<Class<? extends StatusPacket<?>>, StatusPacket<?>> statusClassToObjectMap = new HashMap<>();
+   private final List<Class<? extends StatusPacket<?>>> listOfSupportedMessages;
+
    private final Map<Class<? extends StatusPacket<?>>, List<StatusMessageListener<?>>> specificStatusMessageListenerMap = new HashMap<>();
    private final List<GlobalStatusMessageListener> globalStatusMessageListeners = new ArrayList<>();
 
    public ControllerStatusOutputManager()
    {
+      registerStatusMessage(CapturabilityBasedStatus.class);
+      registerStatusMessage(FootstepStatus.class);
+      registerStatusMessage(WalkingStatusMessage.class);
+
+      listOfSupportedMessages = new ArrayList<>(statusClassToObjectMap.keySet());
+   }
+
+   private <T extends StatusPacket<T>> void registerStatusMessage(Class<T> statusMessageClass)
+   {
+      Builder<T> builer = ControllerCommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
+      statusClassToObjectMap.put(statusMessageClass, builer.newInstance());
    }
 
    public void attachGlobalStatusMessageListener(GlobalStatusMessageListener globalStatusMessageListener)
@@ -30,6 +50,12 @@ public class ControllerStatusOutputManager
 
    public <T extends StatusPacket<T>> void attachStatusMessageListener(Class<T> statusMessageClass, StatusMessageListener<T> statusMessageListener)
    {
+      if (statusClassToObjectMap.get(statusMessageClass) == null)
+      {
+         PrintTools.error(this, "The status message " + statusMessageClass.getClass().getSimpleName() + " has not been registered or is not supported.");
+         return;
+      }
+
       List<StatusMessageListener<?>> specificStatusMessageListenerList = specificStatusMessageListenerMap.get(statusMessageClass);
       if (specificStatusMessageListenerList == null)
       {
@@ -49,24 +75,33 @@ public class ControllerStatusOutputManager
       }
    }
 
+   @SuppressWarnings("unchecked")
    public <T extends StatusPacket<T>> void reportStatusMessage(T statusMessage)
    {
       List<StatusMessageListener<?>> specificStatusMessageListeners = specificStatusMessageListenerMap.get(statusMessage.getClass());
+      T statusMessageClone = (T) statusClassToObjectMap.get(statusMessage.getClass());
+
+      if (statusMessageClone == null)
+      {
+         PrintTools.error(this, "The status message " + statusMessage.getClass().getSimpleName() + " has not been registered or is not supported.");
+         return;
+      }
+
+      statusMessageClone.set(statusMessage);
 
       if (specificStatusMessageListeners != null)
       {
          for (int i = 0; i < specificStatusMessageListeners.size(); i++)
          {
-            @SuppressWarnings("unchecked")
             StatusMessageListener<T> statusMessageListener = (StatusMessageListener<T>) specificStatusMessageListeners.get(i);
-            statusMessageListener.receivedNewMessageStatus(statusMessage);
+            statusMessageListener.receivedNewMessageStatus(statusMessageClone);
          }
       }
 
       for (int i = 0; i < globalStatusMessageListeners.size(); i++)
       {
          GlobalStatusMessageListener globalStatusMessageListener = globalStatusMessageListeners.get(i);
-         globalStatusMessageListener.receivedNewMessageStatus(statusMessage);
+         globalStatusMessageListener.receivedNewMessageStatus(statusMessageClone);
       }
    }
 
@@ -78,6 +113,16 @@ public class ControllerStatusOutputManager
    public void reportFootstepStatus(FootstepStatus statusMessage)
    {
       reportStatusMessage(statusMessage);
+   }
+
+   public void reportCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      reportStatusMessage(capturabilityBasedStatus);
+   }
+
+   public List<Class<? extends StatusPacket<?>>> getListOfSupportedMessages()
+   {
+      return listOfSupportedMessages;
    }
 
    public static interface StatusMessageListener<T extends StatusPacket<T>>
