@@ -56,8 +56,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final FramePoint coMPosition = new FramePoint();
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfMassPositionXYProjection = new YoFramePoint("centerOfMassXYProjection", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMassViz", centerOfMassPosition, 0.02, YoAppearance.Black(),
-         GraphicType.BALL_WITH_CROSS);
+   private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMassViz", centerOfMassPosition, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
    private final YoFramePoint icp = new YoFramePoint("icp", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition icpViz = new YoGraphicPosition("icpViz", icp, 0.01, YoAppearance.DarkSlateBlue(), GraphicType.SQUARE);
@@ -77,6 +76,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    private final FramePoint copFramePoint = new FramePoint();
    private final YoFramePoint centerOfPressure = new YoFramePoint("centerOfPressure", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint desiredCenterOfPressure = new YoFramePoint("desiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
+   private final DoubleYoVariable desiredCenterOfPressureOffsetX = new DoubleYoVariable("desiredCenterOfPressureOffsetX", registry);
+   private final DoubleYoVariable desiredCenterOfPressureOffsetY = new DoubleYoVariable("desiredCenterOfPressureOffsetY", registry);
    private final YoFramePoint centerOfPressureS1Location = new YoFramePoint("centerOfPressureS1Location", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfPressureS2Location = new YoFramePoint("centerOfPressureS2Location", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint frontMidPoint = new FramePoint();
@@ -86,10 +88,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final YoGraphicPosition centerOfPressureS2Viz = new YoGraphicPosition("centerOfPressureS2Viz", centerOfPressureS2Location, 0.01, YoAppearance.Crimson(), GraphicType.BALL_WITH_ROTATED_CROSS);
    private final DoubleYoVariable centerOfPressureS1 = new DoubleYoVariable("centerOfPressureS1", registry);
    private final DoubleYoVariable centerOfPressureS2 = new DoubleYoVariable("centerOfPressureS2", registry);
-   private final DoubleYoVariable icpRatioFrontToBack = new DoubleYoVariable("icpRatioFrontToBack", registry);
-   private final DoubleYoVariable distanceICPFromMidline = new DoubleYoVariable("distanceICPFromMidline", registry);
+   private final DoubleYoVariable desiredCoPRatioFrontToBack = new DoubleYoVariable("desiredCoPRatioFrontToBack", registry);
+   private final DoubleYoVariable distanceDesiredCoPFromMidline = new DoubleYoVariable("distanceDesiredCoPFromMidline", registry);
    private final DoubleYoVariable halfStanceWidth = new DoubleYoVariable("halfStanceWidth", registry);
-   private final DoubleYoVariable icpRatioCenterToSide = new DoubleYoVariable("icpRatioCenterToSide", registry);
+   private final DoubleYoVariable desiredCoPRatioCenterToSide = new DoubleYoVariable("desiredCoPRatioCenterToSide", registry);
    private final DoubleYoVariable hackyS1 = new DoubleYoVariable("hackyS1", registry);
    private final DoubleYoVariable hackyS2 = new DoubleYoVariable("hackyS2", registry);
 
@@ -114,35 +116,36 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final DoubleYoVariable Ny = new DoubleYoVariable("Ny", registry);
    private final DoubleYoVariable Nz = new DoubleYoVariable("Nz", registry);
 
-   private DoubleYoVariable k_x = new DoubleYoVariable("k_x", registry);
-   private DoubleYoVariable k_y = new DoubleYoVariable("k_y", registry);
-   private DoubleYoVariable k_z = new DoubleYoVariable("k_z", registry);
-   private DoubleYoVariable k_roll = new DoubleYoVariable("k_roll", registry);
-   private DoubleYoVariable k_pitch = new DoubleYoVariable("k_pitch", registry);
-   private DoubleYoVariable k_yaw = new DoubleYoVariable("k_yaw", registry);
+   private final DoubleYoVariable k_x = new DoubleYoVariable("k_x", registry);
+   private final DoubleYoVariable k_y = new DoubleYoVariable("k_y", registry);
+   private final DoubleYoVariable k_z = new DoubleYoVariable("k_z", registry);
+   private final DoubleYoVariable k_roll = new DoubleYoVariable("k_roll", registry);
+   private final DoubleYoVariable k_pitch = new DoubleYoVariable("k_pitch", registry);
+   private final DoubleYoVariable k_yaw = new DoubleYoVariable("k_yaw", registry);
 
-   private DoubleYoVariable b_x = new DoubleYoVariable("b_x", registry);
-   private DoubleYoVariable b_y = new DoubleYoVariable("b_y", registry);
-   private DoubleYoVariable b_z = new DoubleYoVariable("b_z", registry);
-   private DoubleYoVariable ki_z = new DoubleYoVariable("ki_z", registry);
-   private DoubleYoVariable i_z = new DoubleYoVariable("i_z", registry);
-   private DoubleYoVariable b_roll = new DoubleYoVariable("b_roll", registry);
-   private DoubleYoVariable b_pitch = new DoubleYoVariable("b_pitch", registry);
-   private DoubleYoVariable b_yaw = new DoubleYoVariable("b_yaw", registry);
+   private final DoubleYoVariable b_x = new DoubleYoVariable("b_x", registry);
+   private final DoubleYoVariable b_y = new DoubleYoVariable("b_y", registry);
+   private final DoubleYoVariable b_z = new DoubleYoVariable("b_z", registry);
+   private final DoubleYoVariable ki_z = new DoubleYoVariable("ki_z", registry);
+   private final DoubleYoVariable i_z = new DoubleYoVariable("i_z", registry);
+   private final DoubleYoVariable b_roll = new DoubleYoVariable("b_roll", registry);
+   private final DoubleYoVariable b_pitch = new DoubleYoVariable("b_pitch", registry);
+   private final DoubleYoVariable b_yaw = new DoubleYoVariable("b_yaw", registry);
 
-   private DoubleYoVariable ff_z = new DoubleYoVariable("ff_z", registry);
-   private DoubleYoVariable fz_limit = new DoubleYoVariable("fz_limit", registry);
+   private final DoubleYoVariable ff_z = new DoubleYoVariable("ff_z", registry);
+   private final DoubleYoVariable fz_limit = new DoubleYoVariable("fz_limit", registry);
 
-   private DoubleYoVariable q_d_x = new DoubleYoVariable("q_d_x", registry);
-   private DoubleYoVariable q_d_y = new DoubleYoVariable("q_d_y", registry);
-   private DoubleYoVariable q_d_z = new DoubleYoVariable("q_d_z", registry);
+   private final DoubleYoVariable q_d_x = new DoubleYoVariable("q_d_x", registry);
+   private final DoubleYoVariable q_d_y = new DoubleYoVariable("q_d_y", registry);
+   private final DoubleYoVariable q_d_z = new DoubleYoVariable("q_d_z", registry);
 
-   private DoubleYoVariable q_roll = new DoubleYoVariable("q_roll", registry);
-   private DoubleYoVariable q_pitch = new DoubleYoVariable("q_pitch", registry);
+   private final DoubleYoVariable q_roll = new DoubleYoVariable("q_roll", registry);
+   private final DoubleYoVariable q_pitch = new DoubleYoVariable("q_pitch", registry);
+   private final DoubleYoVariable q_yaw = new DoubleYoVariable("q_yaw", registry);
 
-   private DoubleYoVariable q_d_roll = new DoubleYoVariable("q_d_roll", registry);
-   private DoubleYoVariable q_d_pitch = new DoubleYoVariable("q_d_pitch", registry);
-   private DoubleYoVariable q_d_yaw = new DoubleYoVariable("q_d_yaw", registry);
+   private final DoubleYoVariable q_d_roll = new DoubleYoVariable("q_d_roll", registry);
+   private final DoubleYoVariable q_d_pitch = new DoubleYoVariable("q_d_pitch", registry);
+   private final DoubleYoVariable q_d_yaw = new DoubleYoVariable("q_d_yaw", registry);
 
    private final DoubleYoVariable Fx_lfore = new DoubleYoVariable("Fx_lfore", registry);
    private final DoubleYoVariable Fy_lfore = new DoubleYoVariable("Fy_lfore", registry);
@@ -180,8 +183,8 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
    private final HashMap<String, DoubleYoVariable> desiredTorques = new HashMap<>();
 
-   private DoubleYoVariable qd_d_z = new DoubleYoVariable("qd_d_z", registry);
-   private DoubleYoVariable qd_d_yaw = new DoubleYoVariable("qd_d_yaw", registry);
+   private final DoubleYoVariable qd_d_z = new DoubleYoVariable("qd_d_z", registry);
+   private final DoubleYoVariable qd_d_yaw = new DoubleYoVariable("qd_d_yaw", registry);
 
    private final IntegerYoVariable numberOfFeetInContact = new IntegerYoVariable("numberOfFeetInContact", registry);
 
@@ -317,6 +320,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       //update orientation qs
       q_roll.set(bodyPose.getRoll());
       q_pitch.set(bodyPose.getPitch());
+      q_yaw.set(bodyPose.getYaw());
 
       //update feet locations
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -426,27 +430,38 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       
       GeometryTools.averagePoints(feetLocations.get(RobotQuadrant.FRONT_LEFT).getFrameTuple(), feetLocations.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple(), frontMidPoint);
       GeometryTools.averagePoints(feetLocations.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), feetLocations.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), hindMidPoint);
-      double distanceFrontToICP = icp.distance(frontMidPoint);
-      distanceICPFromMidline.set(GeometryTools.distanceFromPointToLine2d(icp.getFrameTuple(), frontMidPoint, hindMidPoint));
-      double distanceICPToLeftSide = GeometryTools.distanceFromPointToLine2d(icp.getFrameTuple(), feetLocations.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), feetLocations.get(RobotQuadrant.FRONT_LEFT).getFrameTuple());
-      double distanceICPToRightSide = GeometryTools.distanceFromPointToLine2d(icp.getFrameTuple(), feetLocations.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), feetLocations.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple());
+      
+      desiredCenterOfPressure.set(icp);
+      if (Math.abs(desiredCenterOfPressureOffsetX.getDoubleValue()) > 0.005)
+      {
+         desiredCenterOfPressure.add(desiredCenterOfPressureOffsetX.getDoubleValue(), 0.0, 0.0);
+      }
+      if (Math.abs(desiredCenterOfPressureOffsetY.getDoubleValue()) > 0.005)
+      {
+         desiredCenterOfPressure.add(0.0, desiredCenterOfPressureOffsetY.getDoubleValue(), 0.0);
+      }
+      
+      double distanceFrontToDesiredCoP = desiredCenterOfPressure.distance(frontMidPoint);
+      distanceDesiredCoPFromMidline.set(GeometryTools.distanceFromPointToLine2d(desiredCenterOfPressure.getFrameTuple(), frontMidPoint, hindMidPoint));
+      double distanceDesiredCoPToLeftSide = GeometryTools.distanceFromPointToLine2d(desiredCenterOfPressure.getFrameTuple(), feetLocations.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), feetLocations.get(RobotQuadrant.FRONT_LEFT).getFrameTuple());
+      double distanceDesiredCoPToRightSide = GeometryTools.distanceFromPointToLine2d(desiredCenterOfPressure.getFrameTuple(), feetLocations.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), feetLocations.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple());
       
       halfStanceWidth.set(feetLocations.get(RobotQuadrant.FRONT_LEFT).distance(feetLocations.get(RobotQuadrant.FRONT_RIGHT)) / 2.0);
       
       if (halfStanceWidth.getDoubleValue() > 1e-7)
       {
-         icpRatioCenterToSide.set(distanceICPFromMidline.getDoubleValue() / halfStanceWidth.getDoubleValue());
+         desiredCoPRatioCenterToSide.set(distanceDesiredCoPFromMidline.getDoubleValue() / halfStanceWidth.getDoubleValue());
       }
       
-      if (distanceICPToLeftSide >= distanceICPToRightSide)
+      if (distanceDesiredCoPToLeftSide >= distanceDesiredCoPToRightSide)
       {
-         icpRatioCenterToSide.set(-icpRatioCenterToSide.getDoubleValue());
+         desiredCoPRatioCenterToSide.set(-desiredCoPRatioCenterToSide.getDoubleValue());
       }
       
-      icpRatioFrontToBack.set(distanceFrontToICP / distanceFH);
+      desiredCoPRatioFrontToBack.set(distanceFrontToDesiredCoP / distanceFH);
       
-      hackyS1.set(icpRatioFrontToBack.getDoubleValue() + icpRatioCenterToSide.getDoubleValue());
-      hackyS2.set(icpRatioFrontToBack.getDoubleValue() - icpRatioCenterToSide.getDoubleValue());
+      hackyS1.set(desiredCoPRatioFrontToBack.getDoubleValue() + desiredCoPRatioCenterToSide.getDoubleValue());
+      hackyS2.set(desiredCoPRatioFrontToBack.getDoubleValue() - desiredCoPRatioCenterToSide.getDoubleValue());
       
       centerOfPressureS1.set(hackyS1.getDoubleValue() - yAdjust + xAdjust);
       centerOfPressureS2.set(hackyS2.getDoubleValue() + yAdjust + xAdjust);
@@ -481,7 +496,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       // Use PD Controller on Nx, Ny, Nz to control orientation of the body
       Nx.set(k_roll.getDoubleValue() * (q_d_roll.getDoubleValue() - q_roll.getDoubleValue()) - b_roll.getDoubleValue() * qd_wx.getDoubleValue());
       Ny.set(k_pitch.getDoubleValue() * (q_d_pitch.getDoubleValue() - q_pitch.getDoubleValue()) - b_pitch.getDoubleValue() * qd_wy.getDoubleValue());
-      Nz.set(k_yaw.getDoubleValue() * computeYawError(q_d_yaw.getDoubleValue(), body_rel_yaw.getDoubleValue()) - b_yaw.getDoubleValue() * qd_wz.getDoubleValue());
+      Nz.set(k_yaw.getDoubleValue() * (q_d_yaw.getDoubleValue() - q_yaw.getDoubleValue()) - b_yaw.getDoubleValue() * qd_wz.getDoubleValue());
    }
 
    public double computeYawError(double q_d_yaw, double q_yaw)
@@ -813,13 +828,13 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       k_y.set(0.0); // 2000.0);
       b_y.set(50.0); // 0.0);    // 50 for pace, 0 for trot.
 
-      k_roll.set(300.0);
-      b_roll.set(40.0);
+      k_roll.set(4000.0);
+      b_roll.set(50.0);
 
       k_pitch.set(4000.0); // 80.0);
       b_pitch.set(50.0); // 20.0);
 
-      k_yaw.set(300.0); // 80.0);    // 250.0);
+      k_yaw.set(3000.0); // 80.0);    // 250.0);
       b_yaw.set(40.0); // 20.0);    // 100.0);
 
       k_z.set(30000.0);
