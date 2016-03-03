@@ -62,6 +62,8 @@ import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorAutoEnableFlagPacket;
@@ -92,8 +94,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.SpigotPosePac
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.TorusPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
@@ -137,6 +137,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
@@ -295,6 +296,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       // Footstep data
       registerPacketClass(FootstepDataMessage.class);
+      registerPacketField(FootstepOrigin.class);
       registerPacketField(ArrayList.class);
 
       registerPacketClass(FootstepDataListMessage.class);
