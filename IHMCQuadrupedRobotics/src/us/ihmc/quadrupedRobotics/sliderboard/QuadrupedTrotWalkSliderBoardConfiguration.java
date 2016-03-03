@@ -26,12 +26,13 @@ public class QuadrupedTrotWalkSliderBoardConfiguration implements EnumDependentS
          }
       });
       
-      sliderBoardConfigurationManager.setSlider(1, "q_d_z", scs, 0.4, 1.0);
-      sliderBoardConfigurationManager.setSlider(2, "q_d_x", scs, -0.1, 0.1);
-      sliderBoardConfigurationManager.setSlider(3, "q_d_y", scs, -0.1, 0.1);
-      sliderBoardConfigurationManager.setSlider(4, "q_d_roll", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setSlider(5, "q_d_pitch", scs, -0.1, 0.1);
-      sliderBoardConfigurationManager.setSlider(6, "q_d_yaw", scs, -0.03, 0.03);
+      String namespace = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.";
+      sliderBoardConfigurationManager.setSlider(1, namespace + "q_d_z", scs, 0.4, 1.0);
+      sliderBoardConfigurationManager.setSlider(2, namespace + "q_d_x", scs, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(3, namespace + "q_d_y", scs, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(4, namespace + "q_d_roll", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(5, namespace + "q_d_pitch", scs, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(6, namespace + "q_d_yaw", scs, -0.01, 0.01);
       sliderBoardConfigurationManager.saveConfiguration(QuadrupedSliderBoardMode.TROT_WALK.toString());
    }
 
