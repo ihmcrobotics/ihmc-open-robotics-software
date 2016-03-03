@@ -69,7 +69,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    ///Hacky Sim yoVariables.... Delete this and use the inverse dynamics robot
    private DoubleYoVariable qd_z;
    private DoubleYoVariable qd_wx, qd_wy, qd_wz;
-   ///
 
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final FramePose bodyPose = new FramePose(worldFrame);
@@ -482,8 +481,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       // Use PD Controller on Nx, Ny, Nz to control orientation of the body
       Nx.set(k_roll.getDoubleValue() * (q_d_roll.getDoubleValue() - q_roll.getDoubleValue()) - b_roll.getDoubleValue() * qd_wx.getDoubleValue());
       Ny.set(k_pitch.getDoubleValue() * (q_d_pitch.getDoubleValue() - q_pitch.getDoubleValue()) - b_pitch.getDoubleValue() * qd_wy.getDoubleValue());
-      Nz.set(k_yaw.getDoubleValue() * computeYawError(q_d_yaw.getDoubleValue(), body_rel_yaw.getDoubleValue())
-            - b_yaw.getDoubleValue() * qd_wz.getDoubleValue());
+      Nz.set(k_yaw.getDoubleValue() * computeYawError(q_d_yaw.getDoubleValue(), body_rel_yaw.getDoubleValue()) - b_yaw.getDoubleValue() * qd_wz.getDoubleValue());
    }
 
    public double computeYawError(double q_d_yaw, double q_yaw)
@@ -818,8 +816,8 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       k_roll.set(300.0);
       b_roll.set(40.0);
 
-      k_pitch.set(500.0); // 80.0);
-      b_pitch.set(40.0); // 20.0);
+      k_pitch.set(4000.0); // 80.0);
+      b_pitch.set(50.0); // 20.0);
 
       k_yaw.set(300.0); // 80.0);    // 250.0);
       b_yaw.set(40.0); // 20.0);    // 100.0);
