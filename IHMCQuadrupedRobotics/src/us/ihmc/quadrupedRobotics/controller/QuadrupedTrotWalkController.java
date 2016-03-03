@@ -77,8 +77,8 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final FramePoint copFramePoint = new FramePoint();
    private final YoFramePoint centerOfPressure = new YoFramePoint("centerOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint desiredCenterOfPressure = new YoFramePoint("desiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
-   private final DoubleYoVariable desiredCenterOfPressureOffsetX = new DoubleYoVariable("desiredCenterOfPressureOffsetX", registry);
-   private final DoubleYoVariable desiredCenterOfPressureOffsetY = new DoubleYoVariable("desiredCenterOfPressureOffsetY", registry);
+   private final YoFramePoint desiredICP = new YoFramePoint("desiredICP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint desiredICPFromCentroid = new YoFramePoint("desiredICPFromCentroid", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfPressureS1Location = new YoFramePoint("centerOfPressureS1Location", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfPressureS2Location = new YoFramePoint("centerOfPressureS2Location", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint frontMidPoint = new FramePoint();
@@ -431,15 +431,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       GeometryTools.averagePoints(feetLocations.get(RobotQuadrant.FRONT_LEFT).getFrameTuple(), feetLocations.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple(), frontMidPoint);
       GeometryTools.averagePoints(feetLocations.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), feetLocations.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), hindMidPoint);
       
+      desiredICP.set(centroid);
+      desiredICP.add(desiredICPFromCentroid.getX(), desiredICPFromCentroid.getY(), 0.0);
+      
       desiredCenterOfPressure.set(icp);
-      if (Math.abs(desiredCenterOfPressureOffsetX.getDoubleValue()) > 0.005)
-      {
-         desiredCenterOfPressure.add(desiredCenterOfPressureOffsetX.getDoubleValue(), 0.0, 0.0);
-      }
-      if (Math.abs(desiredCenterOfPressureOffsetY.getDoubleValue()) > 0.005)
-      {
-         desiredCenterOfPressure.add(0.0, desiredCenterOfPressureOffsetY.getDoubleValue(), 0.0);
-      }
+      desiredCenterOfPressure.scale(2.0);
+      desiredCenterOfPressure.sub(desiredICP);
       
       double distanceFrontToDesiredCoP = desiredCenterOfPressure.distance(frontMidPoint);
       distanceDesiredCoPFromMidline.set(GeometryTools.distanceFromPointToLine2d(desiredCenterOfPressure.getFrameTuple(), frontMidPoint, hindMidPoint));
