@@ -6,10 +6,11 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 
-public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<SimpleEuclideanWaypoint>
+public class SimpleEuclideanWaypoint implements GeometryObject<SimpleEuclideanWaypoint>, EuclideanWaypointInterface<SimpleEuclideanWaypoint>
 {
    private final Point3d position = new Point3d();
    private final Vector3d linearVelocity = new Vector3d();

@@ -7,12 +7,13 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
-public class SimpleSE3Waypoint implements SE3WaypointInterface<SimpleSE3Waypoint>
+public class SimpleSE3Waypoint implements GeometryObject<SimpleSE3Waypoint>, SE3WaypointInterface<SimpleSE3Waypoint>
 {
    private final SimpleEuclideanWaypoint euclideanWaypoint = new SimpleEuclideanWaypoint();
    private final SimpleSO3Waypoint so3Waypoint = new SimpleSO3Waypoint();
