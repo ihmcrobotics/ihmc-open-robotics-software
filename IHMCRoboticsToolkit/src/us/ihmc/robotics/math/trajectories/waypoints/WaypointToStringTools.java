@@ -9,6 +9,9 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
+import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
+import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;

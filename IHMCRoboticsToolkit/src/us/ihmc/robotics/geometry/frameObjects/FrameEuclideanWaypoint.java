@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.frameObjects;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -6,8 +6,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameEuclideanWaypoint extends AbstractFrameObject<FrameEuclideanWaypoint, EuclideanWaypoint>

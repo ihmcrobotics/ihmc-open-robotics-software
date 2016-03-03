@@ -6,7 +6,7 @@ import java.text.NumberFormat;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
 public class OneDoFWaypoint implements GeometryObject<OneDoFWaypoint>, OneDoFWaypointInterface<OneDoFWaypoint>
 {

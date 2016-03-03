@@ -1,9 +1,7 @@
-package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
+package us.ihmc.robotics.geometry.interfaces;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
 public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends GeometryObject<T>
 {

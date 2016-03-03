@@ -4,10 +4,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import us.ihmc.robotics.geometry.transformables.OneDoFWaypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<OneDoFWaypoint, SimpleTrajectoryPoint1D>
-      implements TrajectoryPoint1DInterface<SimpleTrajectoryPoint1D>
+      implements OneDoFTrajectoryPointInterface<SimpleTrajectoryPoint1D>
 {
    public SimpleTrajectoryPoint1D()
    {
@@ -30,7 +30,7 @@ public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<OneDoFWaypoin
       waypointData.set(position, velocity);
    }
 
-   public void set(TrajectoryPoint1DInterface<?> other)
+   public void set(OneDoFTrajectoryPointInterface<?> other)
    {
       setTime(other.getTime());
       setPosition(other.getPosition());

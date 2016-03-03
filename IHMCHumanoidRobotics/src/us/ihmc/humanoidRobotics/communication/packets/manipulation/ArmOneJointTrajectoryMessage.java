@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
@@ -19,7 +19,7 @@ public class ArmOneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<Ar
       super();
    }
 
-   public ArmOneJointTrajectoryMessage(TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectory1dMessage)
+   public ArmOneJointTrajectoryMessage(TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>> trajectory1dMessage)
    {
       super(trajectory1dMessage);
    }

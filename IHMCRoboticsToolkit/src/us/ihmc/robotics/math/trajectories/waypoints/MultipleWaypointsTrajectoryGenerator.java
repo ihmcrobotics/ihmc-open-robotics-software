@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
@@ -36,7 +36,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    private final IntegerYoVariable numberOfWaypoints;
    private final IntegerYoVariable currentWaypointIndex;
 
-   private final ArrayList<YoTrajectoryPoint1D> waypoints;
+   private final ArrayList<YoOneDoFTrajectoryPoint> waypoints;
 
    private final SettableDoubleProvider initialPositionProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider initialVelocityProvider = new SettableDoubleProvider();
@@ -66,7 +66,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         YoTrajectoryPoint1D waypoint = new YoTrajectoryPoint1D(namePrefix, "AtWaypoint" + i, registry);
+         YoOneDoFTrajectoryPoint waypoint = new YoOneDoFTrajectoryPoint(namePrefix, "AtWaypoint" + i, registry);
          waypoints.add(waypoint);
       }
 
@@ -109,12 +109,12 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], velocities[i]);
    }
 
-   public void appendWaypoint(TrajectoryPoint1DInterface<?> waypoint1D)
+   public void appendWaypoint(OneDoFTrajectoryPointInterface<?> waypoint1D)
    {
       appendWaypoint(waypoint1D.getTime(), waypoint1D.getPosition(), waypoint1D.getVelocity());
    }
 
-   public void appendWaypoints(TrajectoryPoint1DInterface<?>[] waypoints1D)
+   public void appendWaypoints(OneDoFTrajectoryPointInterface<?>[] waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.length);
 
@@ -122,7 +122,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D[i].getTime(), waypoints1D[i].getPosition(), waypoints1D[i].getVelocity());
    }
 
-   public void appendWaypoints(RecyclingArrayList<? extends TrajectoryPoint1DInterface<?>> waypoints1D)
+   public void appendWaypoints(RecyclingArrayList<? extends OneDoFTrajectoryPointInterface<?>> waypoints1D)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + waypoints1D.size());
 
@@ -130,7 +130,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          appendWaypointUnsafe(waypoints1D.get(i).getTime(), waypoints1D.get(i).getPosition(), waypoints1D.get(i).getVelocity());
    }
 
-   public <W extends TrajectoryPoint1DInterface<W>> void appendWaypoints(TrajectoryPointListInterface<?, W> trajectoryWaypoint1DData)
+   public <W extends OneDoFTrajectoryPointInterface<W>> void appendWaypoints(TrajectoryPointListInterface<?, W> trajectoryWaypoint1DData)
    {
       for (int i = 0; i < trajectoryWaypoint1DData.getNumberOfTrajectoryPoints(); i++)
          appendWaypoint(trajectoryWaypoint1DData.getTrajectoryPoint(i));

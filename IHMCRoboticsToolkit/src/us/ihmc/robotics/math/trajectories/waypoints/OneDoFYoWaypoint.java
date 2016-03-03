@@ -9,7 +9,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
 public class OneDoFYoWaypoint implements OneDoFWaypointInterface<OneDoFYoWaypoint>
 {
