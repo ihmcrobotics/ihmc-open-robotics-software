@@ -159,7 +159,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
    
    public void applyTransform(RigidBodyTransform transform, boolean requireTransformInXYPlane)
    {
-      this.transformableDataObject.applyTransform(transform, requireTransformInXYPlane);
+      this.getGeometryObject().applyTransform(transform, requireTransformInXYPlane);
    }
 
    /**
