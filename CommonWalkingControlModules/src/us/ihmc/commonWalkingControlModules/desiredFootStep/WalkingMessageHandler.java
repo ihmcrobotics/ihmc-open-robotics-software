@@ -79,6 +79,14 @@ public class WalkingMessageHandler
          clearFootTrajectory();
       }
 
+      double messageTransferTime = message.getTransferTime();
+      double messageSwingTime = message.getSwingTime();
+      if (!Double.isNaN(messageSwingTime) && messageSwingTime > 1.0e-2 && !Double.isNaN(messageTransferTime) && messageTransferTime > 1.0e-2)
+      {
+         transferTime.set(messageTransferTime);
+         swingTime.set(messageSwingTime);
+      }
+
       currentNumberOfFootsteps.set(message.getNumberOfFootsteps());
 
       for (int i = 0; i < message.getNumberOfFootsteps(); i++)
