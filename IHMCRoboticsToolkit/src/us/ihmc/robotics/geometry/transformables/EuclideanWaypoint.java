@@ -6,9 +6,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 
 public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, EuclideanWaypointInterface<EuclideanWaypoint>
 {

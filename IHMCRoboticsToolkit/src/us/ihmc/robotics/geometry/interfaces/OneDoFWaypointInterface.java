@@ -1,6 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
-
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+package us.ihmc.robotics.geometry.interfaces;
 
 public interface OneDoFWaypointInterface<T extends OneDoFWaypointInterface<T>> extends GeometryObject<T>
 {

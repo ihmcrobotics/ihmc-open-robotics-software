@@ -9,9 +9,9 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
-public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTrajectoryPoint1D>
+public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<YoOneDoFTrajectoryPoint>
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -19,7 +19,7 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
    private final DoubleYoVariable time;
    private final OneDoFYoWaypoint waypoint1d;
 
-   public YoTrajectoryPoint1D(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoOneDoFTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
@@ -46,14 +46,14 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
       waypoint1d.setVelocity(velocity);
    }
 
-   public void set(TrajectoryPoint1DInterface<?> trajectoryPoint)
+   public void set(OneDoFTrajectoryPointInterface<?> trajectoryPoint)
    {
       time.set(trajectoryPoint.getTime());
       waypoint1d.set(trajectoryPoint.getPosition(), trajectoryPoint.getVelocity());
    }
 
    @Override
-   public void set(YoTrajectoryPoint1D other)
+   public void set(YoOneDoFTrajectoryPoint other)
    {
       time.set(other.getTime());
       waypoint1d.set(other.waypoint1d);
@@ -138,7 +138,7 @@ public class YoTrajectoryPoint1D implements TrajectoryPoint1DInterface<YoTraject
    }
 
    @Override
-   public boolean epsilonEquals(YoTrajectoryPoint1D other, double epsilon)
+   public boolean epsilonEquals(YoOneDoFTrajectoryPoint other, double epsilon)
    {
       if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
          return false;

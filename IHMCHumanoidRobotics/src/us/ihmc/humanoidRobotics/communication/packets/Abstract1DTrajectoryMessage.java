@@ -6,7 +6,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -25,7 +25,7 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
    {
    }
 
-   public Abstract1DTrajectoryMessage(TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectory1dMessage)
+   public Abstract1DTrajectoryMessage(TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>> trajectory1dMessage)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[trajectory1dMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)

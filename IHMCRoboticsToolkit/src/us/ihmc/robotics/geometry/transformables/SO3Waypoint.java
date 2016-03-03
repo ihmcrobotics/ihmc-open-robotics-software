@@ -7,8 +7,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
 public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInterface<SO3Waypoint>
 {

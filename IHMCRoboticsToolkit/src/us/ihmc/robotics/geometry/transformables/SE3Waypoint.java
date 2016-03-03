@@ -7,11 +7,11 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
 public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInterface<SE3Waypoint>
 {

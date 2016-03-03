@@ -1,9 +1,7 @@
-package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
+package us.ihmc.robotics.geometry.interfaces;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 
 public interface EuclideanWaypointInterface<T extends EuclideanWaypointInterface<T>> extends GeometryObject<T>
 {
