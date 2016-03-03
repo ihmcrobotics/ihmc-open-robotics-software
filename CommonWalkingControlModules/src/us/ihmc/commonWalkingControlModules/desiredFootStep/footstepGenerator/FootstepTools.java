@@ -57,6 +57,7 @@ public class FootstepTools
          break;
       case AT_SOLE_FRAME:
          footstep.setSolePose(footstepPose);
+         break;
       default:
          throw new RuntimeException("Should not get there.");
       }
