@@ -8,6 +8,9 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.transformables.SimpleEuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.SimpleSE3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SimpleSO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;

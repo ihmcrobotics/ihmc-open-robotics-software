@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
@@ -7,6 +7,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
@@ -201,24 +202,24 @@ public class SimpleSE3Waypoint implements SE3WaypointInterface<SimpleSE3Waypoint
       return true;
    }
 
-   SimpleEuclideanWaypoint getEuclideanWaypoint()
+   public SimpleEuclideanWaypoint getEuclideanWaypoint()
    {
       return euclideanWaypoint;
    }
 
-   SimpleSO3Waypoint getSO3Waypoint()
+   public SimpleSO3Waypoint getSO3Waypoint()
    {
       return so3Waypoint;
    }
 
-   NumberFormat numberFormat;
+   private NumberFormat numberFormat;
 
-   NumberFormat getNumberFormat()
+   public NumberFormat getNumberFormat()
    {
       return numberFormat;
    }
 
-   void setNumberFormat(NumberFormat numberFormat)
+   public void setNumberFormat(NumberFormat numberFormat)
    {
       this.numberFormat = numberFormat;
    }

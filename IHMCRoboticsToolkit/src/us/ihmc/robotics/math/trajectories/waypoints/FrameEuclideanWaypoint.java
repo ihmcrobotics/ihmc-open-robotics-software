@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.transformables.SimpleEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.transformables;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

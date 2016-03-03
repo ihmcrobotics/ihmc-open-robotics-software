@@ -8,6 +8,7 @@ import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.transformables.SimpleSE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;

@@ -9,6 +9,9 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.transformables.SimpleEuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.SimpleSE3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SimpleSO3Waypoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class WaypointToStringTools

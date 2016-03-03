@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
@@ -6,6 +6,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
 public class SimpleSO3Waypoint implements SO3WaypointInterface<SimpleSO3Waypoint>
@@ -135,24 +136,24 @@ public class SimpleSO3Waypoint implements SO3WaypointInterface<SimpleSO3Waypoint
       return true;
    }
 
-   Quat4d getOrientation()
+   public Quat4d getOrientation()
    {
       return orientation;
    }
 
-   Vector3d getAngularVelocity()
+   public Vector3d getAngularVelocity()
    {
       return angularVelocity;
    }
 
    private NumberFormat numberFormat;
 
-   NumberFormat getNumberFormat()
+   public NumberFormat getNumberFormat()
    {
       return numberFormat;
    }
 
-   void setNumberFormat(NumberFormat numberFormat)
+   public void setNumberFormat(NumberFormat numberFormat)
    {
       this.numberFormat = numberFormat;
    }
