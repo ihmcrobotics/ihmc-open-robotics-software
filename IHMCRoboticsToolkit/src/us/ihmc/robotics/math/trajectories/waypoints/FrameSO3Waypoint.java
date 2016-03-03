@@ -6,17 +6,17 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.transformables.SimpleSO3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SimpleSO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
+public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
 {
-   private final SimpleSO3Waypoint geometryObject;
+   private final SO3Waypoint geometryObject;
    
    public FrameSO3Waypoint()
    {
-      super(new SimpleSO3Waypoint());
+      super(new SO3Waypoint());
       geometryObject = getGeometryObject();
    }
 

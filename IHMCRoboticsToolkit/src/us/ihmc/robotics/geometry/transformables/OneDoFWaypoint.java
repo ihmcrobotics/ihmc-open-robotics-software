@@ -6,14 +6,14 @@ import java.text.NumberFormat;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.Waypoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointInterface;
 
-public class SimpleWaypoint1D implements GeometryObject<SimpleWaypoint1D>, Waypoint1DInterface<SimpleWaypoint1D>
+public class OneDoFWaypoint implements GeometryObject<OneDoFWaypoint>, OneDoFWaypointInterface<OneDoFWaypoint>
 {
    private double position;
    private double velocity;
 
-   public SimpleWaypoint1D()
+   public OneDoFWaypoint()
    {
    }
 
@@ -36,7 +36,7 @@ public class SimpleWaypoint1D implements GeometryObject<SimpleWaypoint1D>, Waypo
    }
 
    @Override
-   public void set(SimpleWaypoint1D other)
+   public void set(OneDoFWaypoint other)
    {
       position = other.position;
       velocity = other.velocity;
@@ -75,7 +75,7 @@ public class SimpleWaypoint1D implements GeometryObject<SimpleWaypoint1D>, Waypo
    }
 
    @Override
-   public boolean epsilonEquals(SimpleWaypoint1D other, double epsilon)
+   public boolean epsilonEquals(OneDoFWaypoint other, double epsilon)
    {
       if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
          return false;

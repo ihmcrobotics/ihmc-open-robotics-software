@@ -8,19 +8,19 @@ import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.transformables.SimpleSE3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SimpleSE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
+public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
 {
-   private final SimpleSE3Waypoint geometryObject;
+   private final SE3Waypoint geometryObject;
    
    public FrameSE3Waypoint()
    {
-      super(new SimpleSE3Waypoint());
+      super(new SE3Waypoint());
       geometryObject = getGeometryObject();
    }
 

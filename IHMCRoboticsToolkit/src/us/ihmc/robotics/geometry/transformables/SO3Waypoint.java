@@ -10,12 +10,12 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
-public class SimpleSO3Waypoint implements GeometryObject<SimpleSO3Waypoint>, SO3WaypointInterface<SimpleSO3Waypoint>
+public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInterface<SO3Waypoint>
 {
    private final Quat4d orientation = new Quat4d();
    private final Vector3d angularVelocity = new Vector3d();
 
-   public SimpleSO3Waypoint()
+   public SO3Waypoint()
    {
       setToZero();
    }
@@ -45,7 +45,7 @@ public class SimpleSO3Waypoint implements GeometryObject<SimpleSO3Waypoint>, SO3
    }
 
    @Override
-   public void set(SimpleSO3Waypoint other)
+   public void set(SO3Waypoint other)
    {
       orientation.set(other.orientation);
       angularVelocity.set(other.angularVelocity);
@@ -128,7 +128,7 @@ public class SimpleSO3Waypoint implements GeometryObject<SimpleSO3Waypoint>, SO3
    }
 
    @Override
-   public boolean epsilonEquals(SimpleSO3Waypoint other, double epsilon)
+   public boolean epsilonEquals(SO3Waypoint other, double epsilon)
    {
       if (!orientation.epsilonEquals(other.orientation, epsilon))
          return false;

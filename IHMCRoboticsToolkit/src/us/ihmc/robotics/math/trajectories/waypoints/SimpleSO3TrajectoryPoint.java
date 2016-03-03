@@ -7,16 +7,16 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.SimpleSO3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
-public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SimpleSO3Waypoint, SimpleSO3TrajectoryPoint>
+public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint, SimpleSO3TrajectoryPoint>
       implements SO3TrajectoryPointInterface<SimpleSO3TrajectoryPoint>
 {
    public SimpleSO3TrajectoryPoint()
    {
-      super(new SimpleSO3Waypoint());
+      super(new SO3Waypoint());
    }
 
    @Override
