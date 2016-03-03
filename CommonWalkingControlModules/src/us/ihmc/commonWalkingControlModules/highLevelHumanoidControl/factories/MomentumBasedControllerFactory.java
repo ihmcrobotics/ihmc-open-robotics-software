@@ -32,7 +32,6 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -40,7 +39,6 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -190,19 +188,6 @@ public class MomentumBasedControllerFactory
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup different things for walking ///////////////////////////////////////////////////////
-      double doubleSupportPercentageIn = 0.3; // NOTE: used to be 0.35, jojo
-      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();
-      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
-      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
-
-      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
-      SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-            nominalHeightAboveGround, maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime,
-            yoGraphicsListRegistry, registry);
-      centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
-
       ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, feet, capturePointPlannerParameters,
             registry, yoGraphicsListRegistry);
       instantaneousCapturePointPlanner
@@ -251,8 +236,7 @@ public class MomentumBasedControllerFactory
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
       walkingBehavior = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, variousWalkingManagers,
-            centerOfMassHeightTrajectoryGenerator, walkingControllerParameters, instantaneousCapturePointPlanner, icpAndMomentumBasedController,
-            momentumBasedController);
+            walkingControllerParameters, instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////

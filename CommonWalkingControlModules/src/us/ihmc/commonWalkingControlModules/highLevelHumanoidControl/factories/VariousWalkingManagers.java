@@ -9,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManag
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -18,6 +20,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class VariousWalkingManagers
 {
+   private final BalanceManager balanceManager;
+   private final CenterOfMassHeightManager centerOfMassHeightManager;
    private final HeadOrientationManager headOrientationManager;
    private final ChestOrientationManager chestOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
@@ -25,10 +29,12 @@ public class VariousWalkingManagers
    private final PelvisOrientationManager pelvisOrientationManager;
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
 
-   public VariousWalkingManagers(HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager,
-         ManipulationControlModule manipulationControlModule, FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager,
-         PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager)
+   public VariousWalkingManagers(BalanceManager balanceManager, CenterOfMassHeightManager centerOfMassHeightManager,
+         HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager, ManipulationControlModule manipulationControlModule,
+         FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager, PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager)
    {
+      this.balanceManager = balanceManager;
+      this.centerOfMassHeightManager = centerOfMassHeightManager;
       this.headOrientationManager = headOrientationManager;
       this.chestOrientationManager = chestOrientationManager;
       this.manipulationControlModule = manipulationControlModule;
@@ -41,6 +47,10 @@ public class VariousWalkingManagers
          ArmControllerParameters armControlParameters, YoVariableRegistry registry)
    {
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+
+      BalanceManager balanceManager = new BalanceManager(registry);
+
+      CenterOfMassHeightManager centerOfMassHeightManager = new CenterOfMassHeightManager(momentumBasedController, walkingControllerParameters, registry);
 
       HeadOrientationManager headOrientationManager = null;
       if (fullRobotModel.getHead() != null)
@@ -75,20 +85,34 @@ public class VariousWalkingManagers
       PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, pelvisXYControlGains,
             registry);
 
-      VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(headOrientationManager, chestOrientationManager, manipulationControlModule,
-            feetManager, pelvisOrientationManager, pelvisICPBasedTranslationManager);
+      VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(balanceManager, centerOfMassHeightManager, headOrientationManager,
+            chestOrientationManager, manipulationControlModule, feetManager, pelvisOrientationManager, pelvisICPBasedTranslationManager);
 
       return variousWalkingManagers;
    }
 
    public void initializeManagers()
    {
+      if (balanceManager != null)
+         balanceManager.initialize();
+      if (centerOfMassHeightManager != null)
+         centerOfMassHeightManager.initialize();
       if (manipulationControlModule != null)
          manipulationControlModule.initialize();
       if (headOrientationManager != null)
          headOrientationManager.initialize();
       if (chestOrientationManager != null)
          chestOrientationManager.initialize();
+   }
+
+   public BalanceManager getBalanceManager()
+   {
+      return balanceManager;
+   }
+
+   public CenterOfMassHeightManager getCenterOfMassHeightManager()
+   {
+      return centerOfMassHeightManager;
    }
 
    public HeadOrientationManager getHeadOrientationManager()

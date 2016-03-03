@@ -1,18 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAbortWalkingMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
@@ -33,9 +28,10 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -47,13 +43,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -61,8 +50,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBea
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -71,7 +58,6 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -80,8 +66,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
 import us.ihmc.robotics.stateMachines.StateMachine;
@@ -106,25 +90,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final static boolean DEBUG = false;
 
    private final StateMachine<WalkingState> stateMachine;
-   private final CenterOfMassJacobian centerOfMassJacobian;
 
-   private final LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator;
-   private final CoMHeightTimeDerivativesCalculator coMHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
-   private final CoMHeightTimeDerivativesSmoother coMHeightTimeDerivativesSmoother;
-   private final DoubleYoVariable desiredCoMHeightFromTrajectory = new DoubleYoVariable("desiredCoMHeightFromTrajectory", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityFromTrajectory = new DoubleYoVariable("desiredCoMHeightVelocityFromTrajectory", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationFromTrajectory = new DoubleYoVariable("desiredCoMHeightAccelerationFromTrajectory", registry);
-   //   private final DoubleYoVariable desiredCoMHeightBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightBeforeSmoothing", registry);
-   //   private final DoubleYoVariable desiredCoMHeightVelocityBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityBeforeSmoothing", registry);
-   //   private final DoubleYoVariable desiredCoMHeightAccelerationBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationBeforeSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightCorrected = new DoubleYoVariable("desiredCoMHeightCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityCorrected = new DoubleYoVariable("desiredCoMHeightVelocityCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationCorrected = new DoubleYoVariable("desiredCoMHeightAccelerationCorrected", registry);
-   private final DoubleYoVariable desiredCoMHeightAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAfterSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityAfterSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityAfterSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
-
-   private final PDController centerOfMassHeightController;
+   private final BalanceManager balanceManager;
+   private final CenterOfMassHeightManager comHeightManager;
 
    private final YoFramePoint2d transferToFootstep = new YoFramePoint2d("transferToFootstep", worldFrame, registry);
 
@@ -132,8 +100,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable alwaysIntegrateAnkleAcceleration = new BooleanYoVariable("alwaysIntegrateAnkleAcceleration", registry);
 
    private final DoubleYoVariable stopInDoubleSupporTrajectoryTime = new DoubleYoVariable("stopInDoubleSupporTrajectoryTime", registry);
-
-   private final BooleanYoVariable controlPelvisHeightInsteadOfCoMHeight = new BooleanYoVariable("controlPelvisHeightInsteadOfCoMHeight", registry);
 
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
    private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
@@ -165,8 +131,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FramePoint2d tempFramePoint2d = new FramePoint2d();
 
    private final DoubleYoVariable controlledCoMHeightAcceleration;
-
-   private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
 
    private final BooleanYoVariable stayInTransferWalkingState = new BooleanYoVariable("stayInTransferWalkingState", registry);
 
@@ -226,11 +190,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private ControllerCoreOuput controllerCoreOuput;
 
    public WalkingHighLevelHumanoidController(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
-         VariousWalkingManagers variousWalkingManagers, LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-         WalkingControllerParameters walkingControllerParameters, ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner,
-         ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController)
+         VariousWalkingManagers variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
+         ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
+         MomentumBasedController momentumBasedController)
    {
       super(variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
+
+      balanceManager = variousWalkingManagers.getBalanceManager();
+      comHeightManager = variousWalkingManagers.getCenterOfMassHeightManager();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -258,15 +225,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       if (VISUALIZE)
       {
-         transferToAndNextFootstepsDataVisualizer = new TransferToAndNextFootstepsDataVisualizer(registry, yoGraphicsListRegistry);
-      }
-      else
-      {
-         transferToAndNextFootstepsDataVisualizer = null;
-      }
-
-      if (VISUALIZE)
-      {
          YoGraphicPosition dynamicGraphicPositionECMP = new YoGraphicPosition("ecmpviz", ecmpViz, 0.002, YoAppearance.BlueViolet());
          yoGraphicsListRegistry.registerYoGraphic("ecmpviz", dynamicGraphicPositionECMP);
          yoGraphicsListRegistry.registerArtifact("ecmpviz", dynamicGraphicPositionECMP.createArtifact());
@@ -282,10 +240,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredICPVelocity = icpAndMomentumBasedController.getDesiredICPVelocity();
       bipedSupportPolygons = icpAndMomentumBasedController.getBipedSupportPolygons();
       controlledCoMHeightAcceleration = icpAndMomentumBasedController.getControlledCoMHeightAcceleration();
-      centerOfMassJacobian = momentumBasedController.getCenterOfMassJacobian();
 
       // this.finalDesiredICPCalculator = finalDesiredICPCalculator;
-      this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
 
       this.footSwitches = momentumBasedController.getFootSwitches();
 
@@ -298,17 +254,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, feet, statusOutputManager, registry);
-
-      YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
-      DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
-      DoubleYoVariable kdCoMHeight = comHeightControlGains.getYoKd();
-      DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumAcceleration();
-      DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumJerk();
-
-      // TODO Need to extract the maximum velocity parameter.
-      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(null, maxCoMHeightAcceleration, maxCoMHeightJerk, controlDT, registry);
-      this.centerOfMassHeightController = new PDController(kpCoMHeight, kdCoMHeight, "comHeight", registry);
+      walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, feet, statusOutputManager, yoGraphicsListRegistry, registry);
 
       String namePrefix = "walking";
 
@@ -319,7 +265,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coefficientOfFriction.set(0.0); // TODO Remove coefficient of friction from the abstract high level stuff and let the EndEffector controlModule deal with it
 
-      this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
+      comHeightManager.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
 
       pushRecoveryModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
 
@@ -335,9 +281,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stopInDoubleSupporTrajectoryTime.set(0.5);
 
       minimumSwingFraction.set(0.5); // 0.8);
-
-      // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
-      controlPelvisHeightInsteadOfCoMHeight.set(true);
 
       if (DESIREDICP_FROM_POLYGON_COORDINATE)
       {
@@ -486,8 +429,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public void initializeDesiredHeightToCurrent()
    {
-      centerOfMassHeightTrajectoryGenerator.initializeDesiredHeightToCurrent();
-      coMHeightTimeDerivativesSmoother.reset();
+      comHeightManager.initializeDesiredHeightToCurrent();
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
@@ -635,7 +577,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          pelvisOrientationManager.handlePelvisTrajectoryMessage(message);
          pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
-         centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(message);
+         comHeightManager.handlePelvisTrajectoryMessage(message);
       }
 
       private void handleAutomaticManipulationAbortOnICPError()
@@ -687,7 +629,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredICP.getFrameTuple2dIncludingFrame(desiredICPLocal);
 
             // If trailing leg is doing toe off, then use front leg for reference frames for com height trajectory.
-            centerOfMassHeightTrajectoryGenerator.setSupportLeg(trailingLeg.getOppositeSide());
+            comHeightManager.setSupportLeg(trailingLeg.getOppositeSide());
 
             boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, desiredCMP, desiredICPLocal, capturePoint2d);
 
@@ -703,9 +645,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             // Always do this so that when a foot slips or is loaded in the air, the height
             // gets adjusted.
             if (transferToSide != null)
-               centerOfMassHeightTrajectoryGenerator.setSupportLeg(transferToSide);
+            {
+               comHeightManager.setSupportLeg(transferToSide);
+            }
             else
-               centerOfMassHeightTrajectoryGenerator.setSupportLeg(lastPlantedLeg.getEnumValue());
+            {
+               comHeightManager.setSupportLeg(lastPlantedLeg.getEnumValue());
+            }
          }
       }
 
@@ -714,10 +660,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Footstep transferFromFootstep = createFootstepAtCurrentLocation(transferToSide.getOppositeSide());
          Footstep transferToFootstep = createFootstepAtCurrentLocation(transferToSide);
 
-         Footstep nextFootstep, nextNextFootstep;
+         Footstep nextFootstep;
 
          nextFootstep = walkingMessageHandler.peek(0);
-         nextNextFootstep = walkingMessageHandler.peek(1);
 
          failureDetectionControlModule.setNextFootstep(nextFootstep);
 
@@ -726,12 +671,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
          transferToAndNextFootstepsData.setTransferToSide(transferToSide);
          transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
-         transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
-
-         if (VISUALIZE)
-         {
-            transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
-         }
 
          return transferToAndNextFootstepsData;
       }
@@ -787,14 +726,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             transferToSideToUseInFootstepData = lastPlantedLeg.getEnumValue();
 
          boolean hasFootTrajectoryMessage = walkingMessageHandler.hasFootTrajectoryForFlamingoStance();
-         if (!hasFootTrajectoryMessage && !centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
+         if (!hasFootTrajectoryMessage && !comHeightManager.hasBeenInitializedWithNextStep())
          {
             boolean inInitialize = true;
             TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(
                   transferToSideToUseInFootstepData, inInitialize);
 
-            centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsDataForDoubleSupport,
-                  transferToAndNextFootstepsDataForDoubleSupport.getTransferToSide(), null, getContactStatesList());
+            comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport);
          }
 
          if (pushRecoveryModule.isEnabled())
@@ -1023,7 +961,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          pelvisOrientationManager.handlePelvisTrajectoryMessage(message);
          pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
-         centerOfMassHeightTrajectoryGenerator.handlePelvisTrajectoryMessage(message);
       }
 
       private void handleEndEffectorLoadBearingRequest(ModifiableEndEffectorLoadBearingMessage message)
@@ -1132,7 +1069,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
-            centerOfMassHeightTrajectoryGenerator.setSupportLeg(supportSide);
+            comHeightManager.setSupportLeg(supportSide);
          }
 
          loadFoot.set(false);
@@ -1170,7 +1107,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
          // amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
 
-         centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, supportLeg.getEnumValue(), nextFootstep, getContactStatesList());
+         comHeightManager.initialize(transferToAndNextFootstepsData);
 
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
@@ -1479,12 +1416,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
       transferToAndNextFootstepsData.setNextFootstep(walkingMessageHandler.peek(0));
-      transferToAndNextFootstepsData.setNextNextFootstep(walkingMessageHandler.peek(1));
-
-      if (VISUALIZE)
-      {
-         transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
-      }
 
       return transferToAndNextFootstepsData;
    }
@@ -1533,7 +1464,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.doAction();
 
       desiredICPVelocity.getFrameVector2d(desiredICPVelocityAsFrameVector);
-      controlledCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector));
+      boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
+      double omega0 = icpAndMomentumBasedController.getOmega0();
+      boolean isRecoveringFromPush = pushRecoveryModule.isRecovering();
+      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
+            trailingLeg.getEnumValue(), isRecoveringFromPush, feetManager));
 
       doFootControl();
       doArmControl();
@@ -1613,169 +1548,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
    }
 
-   // Temporary objects to reduce garbage collection.
-   private final CoMHeightPartialDerivativesData coMHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
-   private final ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData = new ContactStatesAndUpcomingFootstepData();
-   private final FramePoint comPosition = new FramePoint();
-   private final FrameVector comVelocity = new FrameVector(worldFrame);
-   private final FrameVector2d comXYVelocity = new FrameVector2d();
-   private final FrameVector2d comXYAcceleration = new FrameVector2d();
-   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
-   private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
-   private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
-   private final FramePoint pelvisPosition = new FramePoint();
-   private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
-
-   private final Twist currentPelvisTwist = new Twist();
-
-   private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
-   {
-      centerOfMassHeightInputData.setCenterOfMassAndPelvisZUpFrames(momentumBasedController.getCenterOfMassFrame(),
-            momentumBasedController.getPelvisZUpFrame());
-
-      List<? extends PlaneContactState> contactStatesList = getContactStatesList();
-
-      centerOfMassHeightInputData.setContactStates(contactStatesList);
-
-      centerOfMassHeightInputData.setSupportLeg(supportLeg.getEnumValue());
-
-      Footstep nextFootstep;
-      if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
-      {
-         nextFootstep = null;
-      }
-      else
-      {
-         nextFootstep = walkingMessageHandler.peek(0);
-      }
-
-      centerOfMassHeightInputData.setUpcomingFootstep(nextFootstep);
-
-      centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivatives, centerOfMassHeightInputData);
-
-      comPosition.setToZero(referenceFrames.getCenterOfMassFrame());
-      centerOfMassJacobian.getCenterOfMassVelocity(comVelocity);
-      comPosition.changeFrame(worldFrame);
-      comVelocity.changeFrame(worldFrame);
-
-      double zCurrent = comPosition.getZ();
-      double zdCurrent = comVelocity.getZ();
-
-      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
-      {
-         pelvisPosition.setToZero(referenceFrames.getPelvisFrame());
-         pelvisPosition.changeFrame(worldFrame);
-         zCurrent = pelvisPosition.getZ();
-         twistCalculator.getTwistOfBody(currentPelvisTwist, fullRobotModel.getPelvis());
-         currentPelvisTwist.changeFrame(worldFrame);
-         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
-      }
-
-      // TODO: use current omega0 instead of previous
-      comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
-      if (desiredICPVelocity.containsNaN())
-      {
-         System.err.println("Desired ICP velocity contains NaN");
-         comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
-      }
-      else
-      {
-         comXYAcceleration.setIncludingFrame(desiredICPVelocity);
-      }
-      comXYAcceleration.sub(comXYVelocity);
-      comXYAcceleration.scale(icpAndMomentumBasedController.getOmega0()); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
-
-      // FrameVector2d comd2dSquared = new FrameVector2d(comXYVelocity.getReferenceFrame(), comXYVelocity.getX() * comXYVelocity.getX(), comXYVelocity.getY() * comXYVelocity.getY());
-      comPosition.getFramePoint2d(comPositionAsFramePoint2d);
-      comXYTimeDerivatives.setCoMXYPosition(comPositionAsFramePoint2d);
-      comXYTimeDerivatives.setCoMXYVelocity(comXYVelocity);
-      comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);
-
-      coMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, coMHeightPartialDerivatives);
-
-      comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
-
-      //    correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing, false, false);
-
-      //    comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      //    desiredCoMHeightBeforeSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
-      //    desiredCoMHeightVelocityBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
-      //    desiredCoMHeightAccelerationBeforeSmoothing.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
-
-      coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
-
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-
-      feetManager.correctCoMHeight(trailingLeg.getEnumValue(), desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
-
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-      desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityCorrected.set(comHeightDataAfterSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationCorrected.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
-
-      double zDesired = desiredCenterOfMassHeightPoint.getZ();
-      double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
-      double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
-
-      double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (feetManager.isInFlatSupportState(robotSide) && feetManager.isInSingularityNeighborhood(robotSide))
-         {
-            // Ignore the desired height acceleration only if EndEffectorControlModule is not taking care of singularity during support
-            if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
-               zddDesired = 0.0;
-
-            double zTreshold = 0.01;
-
-            if (zDesired >= zCurrent - zTreshold)
-            {
-               // Can't achieve the desired height, just lock the knee
-               feetManager.lockKnee(robotSide);
-            }
-            else
-            {
-               // Do the singularity escape before trying to achieve the desired height
-               feetManager.doSupportSingularityEscape(robotSide);
-            }
-         }
-      }
-
-      // In a recovering context, accelerating upwards is just gonna make the robot fall faster. We should even consider letting the robot fall a bit.
-      if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecovering())
-         zddDesired = Math.min(0.0, zddDesired);
-
-      double epsilon = 1e-12;
-      zddDesired = MathTools.clipToMinMax(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
-
-      return zddDesired;
-   }
-
-   private List<PlaneContactState> getContactStatesList()
-   {
-      List<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         PlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
-
-         if (contactState.inContact())
-            contactStatesList.add(contactState);
-      }
-
-      return contactStatesList;
-   }
-
    private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
@@ -1839,7 +1611,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void consumePelvisMessages()
    {
       if (commandInputManager.isNewMessageAvailable(ModifiablePelvisOrientationTrajectoryMessage.class))
-         pelvisOrientationManager.handlePelvisOrientationTrajectoryMessages(commandInputManager.pollNewestMessage(ModifiablePelvisOrientationTrajectoryMessage.class));
+         pelvisOrientationManager
+               .handlePelvisOrientationTrajectoryMessages(commandInputManager.pollNewestMessage(ModifiablePelvisOrientationTrajectoryMessage.class));
 
       if (commandInputManager.isNewMessageAvailable(ModifiablePelvisTrajectoryMessage.class))
       {
@@ -1855,7 +1628,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void consumePelvisHeightMessages()
    {
       if (commandInputManager.isNewMessageAvailable(ModifiablePelvisHeightTrajectoryMessage.class))
-         centerOfMassHeightTrajectoryGenerator.handlePelvisHeightTrajectoryMessage(commandInputManager.pollNewestMessage(ModifiablePelvisHeightTrajectoryMessage.class));
+         comHeightManager.handlePelvisHeightTrajectoryMessage(commandInputManager.pollNewestMessage(ModifiablePelvisHeightTrajectoryMessage.class));
    }
 
    private void consumeManipulationMessages()
@@ -1869,7 +1642,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       manipulationControlModule.handleHandTrajectoryMessages(commandInputManager.pollNewMessages(ModifiableHandTrajectoryMessage.class));
       manipulationControlModule.handleArmTrajectoryMessages(commandInputManager.pollNewMessages(ModifiableArmTrajectoryMessage.class));
       manipulationControlModule.handleArmDesiredAccelerationsMessages(commandInputManager.pollNewMessages(ModifiableArmDesiredAccelerationsMessage.class));
-      manipulationControlModule.handleHandComplianceControlParametersMessages(commandInputManager.pollNewMessages(ModifiableHandComplianceControlParametersMessage.class));
+      manipulationControlModule
+            .handleHandComplianceControlParametersMessages(commandInputManager.pollNewMessages(ModifiableHandComplianceControlParametersMessage.class));
    }
 
    private void consumeGoHomeMessages()
@@ -1905,7 +1679,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ModifiableStopAllTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiableStopAllTrajectoryMessage.class);
       chestOrientationManager.handleStopAllTrajectoryMessage(message);
       feetManager.handleStopAllTrajectoryMessage(message);
-      centerOfMassHeightTrajectoryGenerator.handleStopAllTrajectoryMessage(message);
+      comHeightManager.handleStopAllTrajectoryMessage(message);
       pelvisICPBasedTranslationManager.handleStopAllTrajectoryMessage(message);
       pelvisOrientationManager.handleStopAllTrajectoryMessage(message);
    }

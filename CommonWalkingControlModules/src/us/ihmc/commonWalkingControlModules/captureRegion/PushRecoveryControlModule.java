@@ -300,7 +300,7 @@ public class PushRecoveryControlModule
 
    public boolean isRecovering()
    {
-      return recovering.getBooleanValue();
+      return isEnabled() && recovering.getBooleanValue();
    }
 
    public boolean isRobotBackToSafeState()

@@ -28,6 +28,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class WalkingMessageHandler
 {
@@ -53,8 +54,10 @@ public class WalkingMessageHandler
    @SuppressWarnings("unchecked")
    private final EnumYoVariable<RobotSide>[] upcomingFoostepSide = new EnumYoVariable[numberOfFootstepsToVisualize];
 
+   private final FootstepListVisualizer footstepListVisualizer;
+
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         ControllerStatusOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+         ControllerStatusOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
@@ -64,6 +67,8 @@ public class WalkingMessageHandler
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
          upcomingFoostepSide[i] = new EnumYoVariable<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
+
+      footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
       updateVisualization();
 
       parentRegistry.addChild(registry);
@@ -246,6 +251,8 @@ public class WalkingMessageHandler
       {
          upcomingFoostepSide[i].set(null);
       }
+
+      footstepListVisualizer.update(upcomingFootsteps);
    }
 
    private Footstep createFootstep(ModifiableFootstepDataMessage footstepData)
