@@ -14,7 +14,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajecto
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<SimpleEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint>
+public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuclideanTrajectoryPoint, SimpleEuclideanTrajectoryPoint>
       implements EuclideanTrajectoryPointInterface<FrameEuclideanTrajectoryPoint>
 {
    public FrameEuclideanTrajectoryPoint()

@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<SimpleEuclideanWaypoint, FrameEuclideanWaypoint, YoFrameEuclideanWaypoint>
+public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWaypoint, FrameEuclideanWaypoint, SimpleEuclideanWaypoint>
       implements EuclideanWaypointInterface<YoFrameEuclideanWaypoint>
 {
    private final YoFramePoint position;

@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterf
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSE3Waypoint extends FrameWaypoint<SimpleSE3Waypoint, FrameSE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
+public class FrameSE3Waypoint extends FrameWaypoint<FrameSE3Waypoint, SimpleSE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
 {
    public FrameSE3Waypoint()
    {

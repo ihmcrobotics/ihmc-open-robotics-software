@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<SimpleSE3TrajectoryPoint, FrameSE3TrajectoryPoint>
+public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<FrameSE3TrajectoryPoint>
 {
    public FrameSE3TrajectoryPoint()

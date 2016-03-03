@@ -14,7 +14,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<SimpleSO3TrajectoryPoint, FrameSO3TrajectoryPoint>
+public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3TrajectoryPoint, SimpleSO3TrajectoryPoint>
       implements SO3TrajectoryPointInterface<FrameSO3TrajectoryPoint>
 {
    public FrameSO3TrajectoryPoint()

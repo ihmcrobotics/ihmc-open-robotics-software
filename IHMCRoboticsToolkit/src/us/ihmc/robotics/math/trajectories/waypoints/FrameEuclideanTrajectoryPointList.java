@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 
-public class FrameEuclideanTrajectoryPointList extends FrameTrajectoryPointList<SimpleEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPoint, FrameEuclideanTrajectoryPointList>
+public class FrameEuclideanTrajectoryPointList extends FrameTrajectoryPointList<FrameEuclideanTrajectoryPointList, FrameEuclideanTrajectoryPoint, SimpleEuclideanTrajectoryPoint>
 {
    public FrameEuclideanTrajectoryPointList()
    {

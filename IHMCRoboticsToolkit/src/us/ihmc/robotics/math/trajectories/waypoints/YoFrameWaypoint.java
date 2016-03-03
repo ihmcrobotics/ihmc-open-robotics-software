@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class YoFrameWaypoint<S extends GeometryObject<S>, F extends FrameWaypoint<S, F>, Y extends YoFrameWaypoint<S, F, Y>>
+public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F extends FrameWaypoint<F, S>, S extends GeometryObject<S>>
       extends AbstractReferenceFrameHolder implements YoMultipleFramesHolder, GeometryObject<Y>
 {
    private final String namePrefix;

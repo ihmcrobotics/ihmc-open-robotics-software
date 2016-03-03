@@ -7,8 +7,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointIn
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameTrajectoryPointList<S extends Transformable & TrajectoryPointInterface<S>, F extends FrameTrajectoryPoint<S, F>, T extends FrameTrajectoryPointList<S, F, T>>
-      extends AbstractReferenceFrameHolder implements TrajectoryPointListInterface<F, T>
+public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, F, S>, F extends FrameTrajectoryPoint<F, S>, S extends TrajectoryPointInterface<S>>
+      extends AbstractReferenceFrameHolder implements TrajectoryPointListInterface<T, F>
 {
    protected ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
    protected final RecyclingArrayList<F> trajectoryPoints;

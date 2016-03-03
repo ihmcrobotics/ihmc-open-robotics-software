@@ -11,7 +11,7 @@ import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
 public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends IHMCRosApiMessage<T>
-      implements TransformableDataObject<T>, TrajectoryPointListInterface<SO3TrajectoryPointMessage, T>, Transformable
+      implements TransformableDataObject<T>, TrajectoryPointListInterface<T, SO3TrajectoryPointMessage>, Transformable
 {
    @FieldDocumentation("List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
