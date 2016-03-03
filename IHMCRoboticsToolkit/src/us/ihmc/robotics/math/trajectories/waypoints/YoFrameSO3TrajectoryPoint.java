@@ -168,7 +168,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getGeometryObject();
       time.set(simpleTrajectoryPoint.getTime());
       orientation.set(simpleTrajectoryPoint.getOrientation());
       angularVelocity.set(simpleTrajectoryPoint.getAngularVelocity());

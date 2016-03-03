@@ -109,7 +109,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       orientation.get(simpleWaypoint.getOrientation());
       angularVelocity.get(simpleWaypoint.getAngularVelocity());
    }
@@ -117,7 +117,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getSimpleWaypoint();
+      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       orientation.set(simpleWaypoint.getOrientation());
       angularVelocity.set(simpleWaypoint.getAngularVelocity());
    }
