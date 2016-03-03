@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
@@ -6,6 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
 
 public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<SimpleEuclideanWaypoint>
@@ -136,24 +137,24 @@ public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<Simpl
       return true;
    }
 
-   Point3d getPosition()
+   public Point3d getPosition()
    {
       return position;
    }
 
-   Vector3d getLinearVelocity()
+   public Vector3d getLinearVelocity()
    {
       return linearVelocity;
    }
 
    NumberFormat numberFormat;
 
-   NumberFormat getNumberFormat()
+   public NumberFormat getNumberFormat()
    {
       return numberFormat;
    }
 
-   void setNumberFormat(NumberFormat numberFormat)
+   public void setNumberFormat(NumberFormat numberFormat)
    {
       this.numberFormat = numberFormat;
    }

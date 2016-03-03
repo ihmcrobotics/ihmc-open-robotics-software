@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.robotics.geometry.transformables.SimpleWaypoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 
 public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<SimpleWaypoint1D, SimpleTrajectoryPoint1D>

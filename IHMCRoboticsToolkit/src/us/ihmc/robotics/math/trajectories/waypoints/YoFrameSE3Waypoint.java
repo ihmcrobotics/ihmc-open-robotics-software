@@ -5,6 +5,9 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.transformables.SimpleEuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.SimpleSE3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SimpleSO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
