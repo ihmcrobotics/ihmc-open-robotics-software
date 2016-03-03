@@ -4,7 +4,6 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
@@ -45,8 +44,8 @@ public class ChestOrientationManager
    private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains,
-         VariousWalkingProviders variousWalkingProviders, double trajectoryTime, YoVariableRegistry parentRegistry)
+   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, double trajectoryTime,
+         YoVariableRegistry parentRegistry)
    {
       this.yoTime = momentumBasedController.getYoTime();
       this.pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
@@ -160,7 +159,7 @@ public class ChestOrientationManager
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
       waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
-      
+
       desiredOrientation.changeFrame(pelvisZUpFrame);
       waypointOrientationTrajectoryGenerator.clear();
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(pelvisZUpFrame);

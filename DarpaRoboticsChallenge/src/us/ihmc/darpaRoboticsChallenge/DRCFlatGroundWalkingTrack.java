@@ -58,6 +58,7 @@ public class DRCFlatGroundWalkingTrack
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
             HighLevelState.WALKING);
+      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript);
 
       HeightMap heightMapForCheating = null;
       if (cheatWithGroundHeightAtForFootstep)

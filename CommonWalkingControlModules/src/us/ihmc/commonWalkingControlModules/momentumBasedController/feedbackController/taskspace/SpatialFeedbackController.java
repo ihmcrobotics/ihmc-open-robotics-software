@@ -19,6 +19,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -69,6 +70,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
 
+   private long jacobianForSingularityEscapeId = NameBasedHashCodeTools.NULL_HASHCODE;
+   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, SpatialAccelerationVector.SIZE);
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
@@ -129,8 +132,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       base = command.getBase();
 
       output.set(base, endEffector);
-      output.setJacobianForNullspaceId(command.getJacobianForNullspaceId());
-      output.setNullspaceMultpliers(command.getNullspaceMultipliers());
+      jacobianForSingularityEscapeId = command.getJacobianForNullspaceId();
+      nullspaceMultipliers.set(command.getNullspaceMultipliers());
 
       setGains(command.getGains());
       setWeightForSolver(command.getWeightForSolver());
@@ -195,7 +198,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       updatePositionVisualization();
       updateOrientationVisualization();
 
-      output.set(desiredSpatialAcceleration);
+      output.set(desiredSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
+      output.setJacobianForNullspaceId(jacobianForSingularityEscapeId);
    }
 
    private void updatePositionVisualization()

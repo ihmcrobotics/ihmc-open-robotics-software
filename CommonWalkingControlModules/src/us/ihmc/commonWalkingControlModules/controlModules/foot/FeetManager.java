@@ -23,7 +23,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class FeetManager
@@ -53,7 +52,7 @@ public class FeetManager
 
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         DoubleProvider swingTimeProvider, YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
       singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
@@ -76,7 +75,7 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, swingTimeProvider, momentumBasedController, registry);
+               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, momentumBasedController, registry);
          footControlModule.setNullspaceMultiplier(singularityEscapeMultiplierForSwing);
 
          footControlModules.put(robotSide, footControlModule);
@@ -94,7 +93,7 @@ public class FeetManager
       }
    }
 
-   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep)
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
    {
       if (!footstep.getTrustHeight())
       {
@@ -105,7 +104,7 @@ public class FeetManager
       }
 
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstep);
+      footControlModule.setFootstep(footstep, swingTime);
       setContactStateForSwing(upcomingSwingSide);
    }
 
@@ -126,9 +125,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep)
+   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTime)
    {
-      footControlModules.get(swingSide).replanTrajectory(footstep);
+      footControlModules.get(swingSide).replanTrajectory(footstep, swingTime);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
@@ -208,7 +207,7 @@ public class FeetManager
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-               setFlatFootContactState(robotSide);
+            setFlatFootContactState(robotSide);
          }
       }
       else

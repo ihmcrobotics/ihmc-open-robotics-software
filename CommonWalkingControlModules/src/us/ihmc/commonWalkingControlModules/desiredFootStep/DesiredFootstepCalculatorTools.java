@@ -37,6 +37,25 @@ public class DesiredFootstepCalculatorTools
       return minZ;
    }
 
+   public static double computeMinZPointWithRespectToSoleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
+   {
+      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
+      double minZ = Double.POSITIVE_INFINITY;
+      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      Vector3d tempVector = new Vector3d();
+      for (FramePoint footPoint : footPoints)
+      {
+         tempFramePoint.setIncludingFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getSoleFrame());
+         tempVector.set(tempFramePoint.getPoint());
+         footToWorldRotation.transform(tempVector);
+         if (tempVector.getZ() < minZ)
+            minZ = tempVector.getZ();
+      }
+
+      return minZ;
+   }
+
    public static FramePoint computeMinZWithRespectToAnkleInWorldFramePoint(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
    {
       List<FramePoint> footPoints = contactableBody.getContactPointsCopy();

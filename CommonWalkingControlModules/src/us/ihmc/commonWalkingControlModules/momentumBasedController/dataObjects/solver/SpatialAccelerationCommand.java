@@ -129,7 +129,7 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
       nullspaceMultipliers.reshape(0, 1);
    }
 
-   public void setNullspaceMultpliers(DenseMatrix64F nullspaceMultipliers)
+   public void setNullspaceMultipliers(DenseMatrix64F nullspaceMultipliers)
    {
       this.nullspaceMultipliers.set(nullspaceMultipliers);
    }

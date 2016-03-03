@@ -31,6 +31,7 @@ import us.ihmc.robotics.trajectories.providers.CurrentAngularVelocityProvider;
 import us.ihmc.robotics.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.robotics.trajectories.providers.CurrentLinearVelocityProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
+import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
@@ -53,7 +54,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new TrajectoryParameters());
 
-   private final DoubleProvider swingTimeProvider;
+   private final SettableDoubleProvider swingTimeProvider = new SettableDoubleProvider();
 
    private final DoubleYoVariable swingTimeSpeedUpFactor;
    private final DoubleYoVariable maxSwingTimeSpeedUpFactor;
@@ -73,8 +74,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final ReferenceFrame footFrame;
 
-   public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
-         VectorProvider touchdownAccelerationProvider, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public SwingState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
+         YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
 
@@ -87,7 +88,6 @@ public class SwingState extends AbstractUnconstrainedState
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
-      this.swingTimeProvider = swingTimeProvider;
 
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
@@ -232,8 +232,9 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePose newFootstepPose = new FramePose();
    private final FramePoint oldFootstepPosition = new FramePoint();
 
-   public void setFootstep(Footstep footstep)
+   public void setFootstep(Footstep footstep, double swingTime)
    {
+      swingTimeProvider.setValue(swingTime);
       footstep.getPose(newFootstepPose);
       newFootstepPose.changeFrame(worldFrame);
 
@@ -263,9 +264,9 @@ public class SwingState extends AbstractUnconstrainedState
       }
    }
 
-   public void replanTrajectory(Footstep newFootstep)
+   public void replanTrajectory(Footstep newFootstep, double swingTime)
    {
-      setFootstep(newFootstep);
+      setFootstep(newFootstep, swingTime);
       if (!currentTimeWithSwingSpeedUp.isNaN())
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
       else

@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Modifiabl
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHighLevelStateMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
@@ -78,6 +79,7 @@ public class ControllerCommandInputManager
       createBuffer(ModifiableHandComplianceControlParametersMessage.class);
       createBuffer(ModifiableHighLevelStateMessage.class);
       createBuffer(ModifiableAbortWalkingMessage.class);
+      createBuffer(ModifiablePauseWalkingMessage.class);
 
       listOfSupportedMessages = new ArrayList<>(messageClassToBufferMap.keySet());
       // This message has to be added manually as it is handled in a different way to the others.
@@ -122,7 +124,7 @@ public class ControllerCommandInputManager
       if (modifiableMessage instanceof WholeBodyTrajectoryMessage)
          submitWholeBodyTrajectoryMessage((WholeBodyTrajectoryMessage) modifiableMessage);
 
-      ConcurrentRingBuffer<? extends ControllerMessage<?, ?>> buffer = messageClassToBufferMap.get(modifiableMessage.getClass());
+      ConcurrentRingBuffer<? extends ControllerMessage<?, ?>> buffer = modifiableMessageClassToBufferMap.get(modifiableMessage.getClass());
       if (buffer == null)
       {
          PrintTools.error(this, "The message type " + modifiableMessage.getClass().getSimpleName() + " is not supported.");

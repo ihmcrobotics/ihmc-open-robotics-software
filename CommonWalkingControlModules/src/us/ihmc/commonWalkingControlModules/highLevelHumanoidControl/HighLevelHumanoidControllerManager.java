@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHighLevelStateMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore;
@@ -57,8 +56,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public HighLevelHumanoidControllerManager(ControllerCommandInputManager commandInputManager, WholeBodyControllerCore controllerCore,
          HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors, MomentumBasedController momentumBasedController,
-         VariousWalkingProviders variousWalkingProviders, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-         ControllerCoreOuput controllerCoreOuput, HumanoidGlobalDataProducer dataProducer)
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOuput controllerCoreOuput, HumanoidGlobalDataProducer dataProducer)
    {
       this.commandInputManager = commandInputManager;
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();

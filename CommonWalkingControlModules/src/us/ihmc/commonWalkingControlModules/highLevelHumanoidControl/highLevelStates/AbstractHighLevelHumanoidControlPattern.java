@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand;
@@ -44,7 +43,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final JointspaceFeedbackControlCommand unconstrainedJointsCommand = new JointspaceFeedbackControlCommand();
-   
+
    protected final DoubleYoVariable yoTime;
    protected final double controlDT;
    protected final double gravity;
@@ -78,18 +77,14 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
-   protected final VariousWalkingProviders variousWalkingProviders;
-
    protected final VariousWalkingManagers variousWalkingManagers;
 
    protected final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-         MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
+   public AbstractHighLevelHumanoidControlPattern(VariousWalkingManagers variousWalkingManagers, MomentumBasedController momentumBasedController,
+         WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
    {
       super(controllerState);
-
-      this.variousWalkingProviders = variousWalkingProviders;
 
       this.variousWalkingManagers = variousWalkingManagers;
 

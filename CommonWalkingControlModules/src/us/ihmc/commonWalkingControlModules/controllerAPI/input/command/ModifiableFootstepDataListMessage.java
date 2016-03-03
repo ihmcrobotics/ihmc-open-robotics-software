@@ -88,6 +88,16 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
       return footsteps;
    }
 
+   public ModifiableFootstepDataMessage getFootstep(int footstepIndex)
+   {
+      return footsteps.get(footstepIndex);
+   }
+
+   public int getNumberOfFootsteps()
+   {
+      return footsteps.size();
+   }
+
    @Override
    public Class<FootstepDataListMessage> getMessageClass()
    {
