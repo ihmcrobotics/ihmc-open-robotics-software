@@ -16,6 +16,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(Quat4d tuple)
    {
       super(tuple);
+      normalizeAndLimitToPiMinusPi();
    }
 
    public TransformableQuat4d()
@@ -27,6 +28,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(double[] quaternion)
    {
       super(quaternion);
+      normalizeAndLimitToPiMinusPi();
    }
 
    @Override

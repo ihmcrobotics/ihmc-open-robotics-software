@@ -33,8 +33,18 @@ public class YoFrameEuclideanTrajectoryPoint
       this.position.set(position);
    }
 
+   public void setPosition(FramePoint position)
+   {
+      this.position.set(position);
+   }
+
    @Override
    public void setLinearVelocity(Vector3d linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
+   public void setLinearVelocity(FrameVector linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }

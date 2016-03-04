@@ -42,8 +42,18 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.position.set(position);
    }
 
+   public void setPosition(FramePoint position)
+   {
+      this.position.set(position);
+   }
+
    @Override
    public void setOrientation(Quat4d orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
+   public void setOrientation(FrameOrientation orientation)
    {
       this.orientation.set(orientation);
    }
@@ -54,8 +64,18 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.linearVelocity.set(linearVelocity);
    }
 
+   public void setLinearVelocity(FrameVector linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
    @Override
    public void setAngularVelocity(Vector3d angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
+   }
+
+   public void setAngularVelocity(FrameVector angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }

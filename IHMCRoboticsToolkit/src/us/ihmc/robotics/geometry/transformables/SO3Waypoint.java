@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
 public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInterface<SO3Waypoint>
 {
-   private final Quat4d orientation = new Quat4d();
+   private final TransformableQuat4d orientation = new TransformableQuat4d();
    private final Vector3d angularVelocity = new Vector3d();
 
    public SO3Waypoint()
@@ -24,6 +24,7 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    public void setOrientation(Quat4d orientation)
    {
       this.orientation.set(orientation);
+      this.orientation.normalizeAndLimitToPiMinusPi();
    }
 
    @Override
@@ -49,6 +50,7 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    {
       orientation.set(other.orientation);
       angularVelocity.set(other.angularVelocity);
+      orientation.normalizeAndLimitToPiMinusPi();
    }
 
    @Override
@@ -117,13 +119,10 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
       getAngularVelocity(angularVelocityToPack);
    }
 
-   private final Quat4d tempQuaternionForTransform = new Quat4d();
-
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
-      transform.get(tempQuaternionForTransform);
-      orientation.mul(tempQuaternionForTransform, orientation);
+      orientation.applyTransform(transform);
       transform.transform(angularVelocity);
    }
 
