@@ -3,7 +3,7 @@ package us.ihmc.atlas.parameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 
 /** {@inheritDoc} */
-public class AtlasCapturePointPlannerParameters implements CapturePointPlannerParameters
+public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;

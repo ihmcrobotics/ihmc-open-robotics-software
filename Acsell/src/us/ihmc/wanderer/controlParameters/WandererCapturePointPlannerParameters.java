@@ -3,7 +3,7 @@ package us.ihmc.wanderer.controlParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 
 /** {@inheritDoc} */
-public class WandererCapturePointPlannerParameters implements CapturePointPlannerParameters
+public class WandererCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
    private boolean runningOnRealRobot;
    // TODO Try using new ICP planner with two CMPs.
