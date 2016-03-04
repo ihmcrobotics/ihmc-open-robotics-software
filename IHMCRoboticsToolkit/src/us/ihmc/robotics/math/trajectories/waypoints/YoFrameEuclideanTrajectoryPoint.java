@@ -4,9 +4,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -60,9 +60,9 @@ public class YoFrameEuclideanTrajectoryPoint
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void set(DoubleYoVariable time, YoFramePoint position, YoFrameVector linearVelocity)
+   public void set(double time, YoFramePoint position, YoFrameVector linearVelocity)
    {
-      this.time.set(time.getDoubleValue());
+      this.time.set(time);
       this.position.set(position);
       this.linearVelocity.set(linearVelocity);
    }
@@ -70,34 +70,48 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    public void setPositionToZero()
    {
-      frameWaypoint.setPositionToZero();
-      getYoValuesFromFrameWaypoint();
+      position.setToZero();
    }
 
    @Override
    public void setLinearVelocityToZero()
    {
-      frameWaypoint.setLinearVelocityToZero();
-      getYoValuesFromFrameWaypoint();
+      linearVelocity.setToZero();
    }
 
    @Override
    public void setPositionToNaN()
    {
-      frameWaypoint.setPositionToNaN();
-      getYoValuesFromFrameWaypoint();
+      position.setToNaN();
    }
 
    @Override
    public void setLinearVelocityToNaN()
    {
-      frameWaypoint.setLinearVelocityToNaN();
-      getYoValuesFromFrameWaypoint();
+      linearVelocity.setToNaN();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      super.setToNaN();
+      setTimeToNaN();
+      setPositionToNaN();
+      setLinearVelocityToNaN();
+   }
+
+   @Override
+   public void setToNaN(ReferenceFrame referenceFrame)
+   {
+      super.setToNaN(referenceFrame);
+      setToNaN();
    }
 
    @Override
    public double positionDistance(YoFrameEuclideanTrajectoryPoint other)
    {
+      putYoValuesIntoFrameWaypoint();
+      other.putYoValuesIntoFrameWaypoint();
       return frameWaypoint.positionDistance(other.frameWaypoint);
    }
 
@@ -162,10 +176,12 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleEuclideanTrajectoryPoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      time.set(frameWaypoint.getTime());
-      position.set(simpleWaypoint.getPosition());
-      linearVelocity.set(simpleWaypoint.getLinearVelocity());
+      SimpleEuclideanTrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getGeometryObject();
+      EuclideanWaypoint euclideanWaypoint = simpleTrajectoryPoint.getEuclideanWaypoint();
+      
+      time.set(simpleTrajectoryPoint.getTime());
+      position.set(euclideanWaypoint.getPosition());
+      linearVelocity.set(euclideanWaypoint.getLinearVelocity());
    }
 
    @Override
@@ -173,7 +189,15 @@ public class YoFrameEuclideanTrajectoryPoint
    {
       frameWaypoint.setToZero(getReferenceFrame());
 
+      frameWaypoint.setTime(time.getDoubleValue());
       frameWaypoint.setPosition(position.getFrameTuple());
       frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
+   }
+
+   @Override
+   public String toString()
+   {
+      putYoValuesIntoFrameWaypoint();
+      return frameWaypoint.toString();
    }
 }
