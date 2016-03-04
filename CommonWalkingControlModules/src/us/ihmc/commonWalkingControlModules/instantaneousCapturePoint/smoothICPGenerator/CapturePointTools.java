@@ -10,7 +10,9 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 
 /**
  * Note: CMP stands for Centroidal Momentum Pivot
@@ -369,6 +371,21 @@ public class CapturePointTools
     */
    public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0,
          YoFramePoint desiredCMPToPack)
+   {
+      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
+   }
+
+   /**
+    * Computes the desired centroidal momentum pivot by,
+    * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
+    * 
+    * @param desiredCapturePointPosition
+    * @param desiredCapturePointVelocity
+    * @param omega0
+    * @param desiredCMPToPack
+    */
+   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint2d desiredCapturePointPosition, YoFrameVector2d desiredCapturePointVelocity, double omega0,
+         YoFramePoint2d desiredCMPToPack)
    {
       desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }

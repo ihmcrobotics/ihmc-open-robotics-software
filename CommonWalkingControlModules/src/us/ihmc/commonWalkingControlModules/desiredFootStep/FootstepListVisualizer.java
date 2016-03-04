@@ -44,6 +44,8 @@ public class FootstepListVisualizer
             footstepVisualizers.get(robotSide).add(footstepVisualizer);
          }
       }
+
+      parentRegistry.addChild(registry);
    }
 
    private final SideDependentList<MutableInt> counters = new SideDependentList<MutableInt>(new MutableInt(0), new MutableInt(0));

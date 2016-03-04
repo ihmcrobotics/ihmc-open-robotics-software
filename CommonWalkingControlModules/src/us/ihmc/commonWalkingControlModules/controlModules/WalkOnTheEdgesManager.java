@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -267,11 +266,6 @@ public class WalkOnTheEdgesManager
       boolean isStepLongEnough = tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeOff.getDoubleValue();
       boolean isStepLongEnoughAlongX = tempLeadingFootPosition.getX() > footLength;
       return isStepLongEnough && isStepLongEnoughAlongX;
-   }
-
-   public boolean willDoToeOff(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
-   {
-      return willDoToeOff(transferToAndNextFootstepsData.getNextFootstep(), transferToAndNextFootstepsData.getTransferToSide());
    }
 
    public boolean willDoToeOff(Footstep nextFootstep, RobotSide transferToSide)

@@ -442,7 +442,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       dFMin.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
       dFNom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
 
-      if ((walkOnTheEdgesManager != null) && walkOnTheEdgesManager.willDoToeOff(transferToAndNextFootstepsData))
+      if ((walkOnTheEdgesManager != null) && walkOnTheEdgesManager.willDoToeOff(transferToAndNextFootstepsData.getNextFootstep(), transferToAndNextFootstepsData.getTransferToSide()))
       {
          dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0 + extraCoMMaxHeightWithToes, footHeight1));
       }
