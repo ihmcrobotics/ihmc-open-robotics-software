@@ -4,9 +4,9 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -41,6 +41,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
 
    public void set(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
    {
+      frameWaypoint.setToZero(getReferenceFrame());
       frameWaypoint.set(so3TrajectoryPoint);
       getYoValuesFromFrameWaypoint();
    }
@@ -54,20 +55,18 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
 
    public void set(double time, FrameOrientation orientation, FrameVector angularVelocity)
    {
-      checkReferenceFrameMatch(orientation);
-      checkReferenceFrameMatch(angularVelocity);
       this.time.set(time);
-      this.orientation.set(orientation.getQuaternion());
-      this.angularVelocity.set(angularVelocity.getVector());
-   }
-
-   public void set(DoubleYoVariable time, YoFrameQuaternion orientation, YoFrameVector angularVelocity)
-   {
-      this.time.set(time.getDoubleValue());
       this.orientation.set(orientation);
       this.angularVelocity.set(angularVelocity);
    }
 
+   public void set(double time, YoFrameQuaternion orientation, YoFrameVector angularVelocity)
+   {
+      this.time.set(time);
+      this.orientation.set(orientation);
+      this.angularVelocity.set(angularVelocity);
+   }
+   
    @Override
    public void setOrientationToZero()
    {
@@ -77,7 +76,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    @Override
    public void setAngularVelocityToZero()
    {
-      angularVelocity.setToNaN();
+      angularVelocity.setToZero();
    }
 
    @Override
@@ -170,9 +169,11 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    protected void getYoValuesFromFrameWaypoint()
    {
       SimpleSO3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getGeometryObject();
+      SO3Waypoint so3Waypoint = simpleTrajectoryPoint.getSO3Waypoint();
+      
       time.set(simpleTrajectoryPoint.getTime());
-      orientation.set(simpleTrajectoryPoint.getOrientation());
-      angularVelocity.set(simpleTrajectoryPoint.getAngularVelocity());
+      orientation.set(so3Waypoint.getOrientation());
+      angularVelocity.set(so3Waypoint.getAngularVelocity());
    }
 
    @Override
@@ -180,7 +181,15 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    {
       frameWaypoint.setToZero(getReferenceFrame());
 
+      frameWaypoint.setTime(time.getDoubleValue());
       frameWaypoint.setOrientation(orientation.getFrameOrientation());
       frameWaypoint.setAngularVelocity(angularVelocity.getFrameTuple());
+   }
+
+   @Override
+   public String toString()
+   {
+      putYoValuesIntoFrameWaypoint();
+      return frameWaypoint.toString();
    }
 }

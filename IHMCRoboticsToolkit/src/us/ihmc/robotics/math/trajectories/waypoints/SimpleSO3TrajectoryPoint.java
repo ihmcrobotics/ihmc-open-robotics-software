@@ -19,6 +19,11 @@ public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint,
       super(new SO3Waypoint());
    }
 
+   public SO3Waypoint getSO3Waypoint()
+   {
+      return waypointData;
+   }
+
    @Override
    public void setOrientation(Quat4d orientation)
    {
@@ -123,4 +128,5 @@ public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint,
 
       return "SO3 trajectory point: (" + timeToString + ", " + waypointData + ")";
    }
+
 }

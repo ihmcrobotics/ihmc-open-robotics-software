@@ -19,6 +19,11 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
       super(new EuclideanWaypoint());
    }
 
+   public EuclideanWaypoint getEuclideanWaypoint()
+   {
+      return waypointData;
+   }
+
    @Override
    public void setPosition(Point3d position)
    {
@@ -133,4 +138,5 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
 
       return "Euclidean trajectory point: (" + timeToString + ", " + waypointData + ")";
    }
+
 }
