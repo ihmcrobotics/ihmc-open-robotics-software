@@ -2,12 +2,14 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
@@ -29,30 +31,16 @@ public class VariousWalkingManagers
    private final PelvisOrientationManager pelvisOrientationManager;
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
 
-   public VariousWalkingManagers(BalanceManager balanceManager, CenterOfMassHeightManager centerOfMassHeightManager,
-         HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager, ManipulationControlModule manipulationControlModule,
-         FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager, PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager)
-   {
-      this.balanceManager = balanceManager;
-      this.centerOfMassHeightManager = centerOfMassHeightManager;
-      this.headOrientationManager = headOrientationManager;
-      this.chestOrientationManager = chestOrientationManager;
-      this.manipulationControlModule = manipulationControlModule;
-      this.feetManager = feetManager;
-      this.pelvisOrientationManager = pelvisOrientationManager;
-      this.pelvisICPBasedTranslationManager = pelvisICPBasedTranslationManager;
-   }
-
-   public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public VariousWalkingManagers(ControllerStatusOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
+         WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
          ArmControllerParameters armControlParameters, YoVariableRegistry registry)
    {
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
-      BalanceManager balanceManager = new BalanceManager(registry);
+      balanceManager = new BalanceManager(statusOutputManager, momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, registry);
 
-      CenterOfMassHeightManager centerOfMassHeightManager = new CenterOfMassHeightManager(momentumBasedController, walkingControllerParameters, registry);
+      centerOfMassHeightManager = new CenterOfMassHeightManager(momentumBasedController, walkingControllerParameters, registry);
 
-      HeadOrientationManager headOrientationManager = null;
       if (fullRobotModel.getHead() != null)
       {
          YoOrientationPIDGainsInterface headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
@@ -60,35 +48,38 @@ public class VariousWalkingManagers
          headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains, initialHeadYawPitchRoll,
                registry);
       }
+      else
+      {
+         headOrientationManager = null;
+      }
 
-      ChestOrientationManager chestOrientationManager = null;
       if (fullRobotModel.getChest() != null)
       {
          double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
          YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
          chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, trajectoryTimeHeadOrientation, registry);
       }
-
-      ManipulationControlModule manipulationControlModule = null;
+      else
+      {
+         chestOrientationManager = null;
+      }
 
       if (fullRobotModel.getChest() != null && fullRobotModel.getHand(RobotSide.LEFT) != null && fullRobotModel.getHand(RobotSide.RIGHT) != null)
       {
          // Setup arm+hand manipulation state machines
          manipulationControlModule = new ManipulationControlModule(armControlParameters, momentumBasedController, registry);
       }
+      else
+      {
+         manipulationControlModule = null;
+      }
 
-      FeetManager feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, registry);
+      feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, registry);
 
-      PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, registry);
+      pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, registry);
 
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
-      PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, pelvisXYControlGains,
-            registry);
-
-      VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(balanceManager, centerOfMassHeightManager, headOrientationManager,
-            chestOrientationManager, manipulationControlModule, feetManager, pelvisOrientationManager, pelvisICPBasedTranslationManager);
-
-      return variousWalkingManagers;
+      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, pelvisXYControlGains, registry);
    }
 
    public void initializeManagers()
