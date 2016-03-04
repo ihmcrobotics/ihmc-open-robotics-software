@@ -8,11 +8,11 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 @ClassDocumentation("This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).")
-public class TrajectoryPoint1DMessage extends IHMCRosApiMessage<TrajectoryPoint1DMessage> implements TrajectoryPoint1DInterface<TrajectoryPoint1DMessage>
+public class TrajectoryPoint1DMessage extends IHMCRosApiMessage<TrajectoryPoint1DMessage> implements OneDoFTrajectoryPointInterface<TrajectoryPoint1DMessage>
 {
    @FieldDocumentation("Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -28,7 +28,7 @@ public class TrajectoryPoint1DMessage extends IHMCRosApiMessage<TrajectoryPoint1
    {
    }
 
-   public TrajectoryPoint1DMessage(TrajectoryPoint1DInterface<?> trajectoryPoint)
+   public TrajectoryPoint1DMessage(OneDoFTrajectoryPointInterface<?> trajectoryPoint)
    {
       time = trajectoryPoint.getTime();
       position = trajectoryPoint.getPosition();

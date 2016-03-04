@@ -8,17 +8,20 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 
-public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SimpleSE3Waypoint, SimpleSE3TrajectoryPoint>
+public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<SimpleSE3TrajectoryPoint>
 {
    public SimpleSE3TrajectoryPoint()
    {
-      super(new SimpleSE3Waypoint());
+      super(new SE3Waypoint());
    }
 
    @Override
@@ -161,8 +164,8 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SimpleSE3Way
 
    public double get(SE3WaypointInterface<?> se3WaypointToPack)
    {
-      SimpleEuclideanWaypoint euclideanWaypoint = waypointData.getEuclideanWaypoint();
-      SimpleSO3Waypoint so3Waypoint = waypointData.getSO3Waypoint();
+      EuclideanWaypoint euclideanWaypoint = waypointData.getEuclideanWaypoint();
+      SO3Waypoint so3Waypoint = waypointData.getSO3Waypoint();
 
       se3WaypointToPack.setPosition(euclideanWaypoint.getPosition());
       se3WaypointToPack.setLinearVelocity(euclideanWaypoint.getLinearVelocity());
@@ -186,12 +189,12 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SimpleSE3Way
       return "SE3 trajectory point: (" + timeToString + ", " + waypointData + ")";
    }
 
-   SimpleEuclideanWaypoint getEuclideanWaypoint()
+   EuclideanWaypoint getEuclideanWaypoint()
    {
       return waypointData.getEuclideanWaypoint();
    }
 
-   SimpleSO3Waypoint getSO3Waypoint()
+   SO3Waypoint getSO3Waypoint()
    {
       return waypointData.getSO3Waypoint();
    }

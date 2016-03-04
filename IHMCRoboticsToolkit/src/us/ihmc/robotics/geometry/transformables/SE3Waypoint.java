@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
@@ -7,16 +7,18 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
-public class SimpleSE3Waypoint implements SE3WaypointInterface<SimpleSE3Waypoint>
+public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInterface<SE3Waypoint>
 {
-   private final SimpleEuclideanWaypoint euclideanWaypoint = new SimpleEuclideanWaypoint();
-   private final SimpleSO3Waypoint so3Waypoint = new SimpleSO3Waypoint();
+   private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
+   private final SO3Waypoint so3Waypoint = new SO3Waypoint();
 
-   public SimpleSE3Waypoint()
+   public SE3Waypoint()
    {
       setToZero();
    }
@@ -64,7 +66,7 @@ public class SimpleSE3Waypoint implements SE3WaypointInterface<SimpleSE3Waypoint
    }
 
    @Override
-   public void set(SimpleSE3Waypoint other)
+   public void set(SE3Waypoint other)
    {
       euclideanWaypoint.set(other);
       so3Waypoint.set(other);
@@ -133,7 +135,7 @@ public class SimpleSE3Waypoint implements SE3WaypointInterface<SimpleSE3Waypoint
    }
 
    @Override
-   public double positionDistance(SimpleSE3Waypoint other)
+   public double positionDistance(SE3Waypoint other)
    {
       return euclideanWaypoint.positionDistance(other.euclideanWaypoint);
    }
@@ -192,7 +194,7 @@ public class SimpleSE3Waypoint implements SE3WaypointInterface<SimpleSE3Waypoint
    }
 
    @Override
-   public boolean epsilonEquals(SimpleSE3Waypoint other, double epsilon)
+   public boolean epsilonEquals(SE3Waypoint other, double epsilon)
    {
       if (!euclideanWaypoint.epsilonEquals(other.euclideanWaypoint, epsilon))
          return false;
@@ -201,24 +203,24 @@ public class SimpleSE3Waypoint implements SE3WaypointInterface<SimpleSE3Waypoint
       return true;
    }
 
-   SimpleEuclideanWaypoint getEuclideanWaypoint()
+   public EuclideanWaypoint getEuclideanWaypoint()
    {
       return euclideanWaypoint;
    }
 
-   SimpleSO3Waypoint getSO3Waypoint()
+   public SO3Waypoint getSO3Waypoint()
    {
       return so3Waypoint;
    }
 
-   NumberFormat numberFormat;
+   private NumberFormat numberFormat;
 
-   NumberFormat getNumberFormat()
+   public NumberFormat getNumberFormat()
    {
       return numberFormat;
    }
 
-   void setNumberFormat(NumberFormat numberFormat)
+   public void setNumberFormat(NumberFormat numberFormat)
    {
       this.numberFormat = numberFormat;
    }
