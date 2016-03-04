@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.yoFrameObjects;
 
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 
@@ -7,12 +7,14 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, FrameSO3Waypoint, SimpleSO3Waypoint>
+public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, FrameSO3Waypoint, SO3Waypoint>
       implements SO3WaypointInterface<YoFrameSO3Waypoint>
 {
    private final YoFrameQuaternion orientation;
@@ -26,7 +28,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
       angularVelocity = createYoAngularVelocity(this, namePrefix, nameSuffix, registry);
    }
 
-   protected static YoFrameQuaternion createYoOrientation(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
+   public static YoFrameQuaternion createYoOrientation(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
          YoVariableRegistry registry)
    {
       return new YoFrameQuaternion(createName(namePrefix, "orientation", ""), nameSuffix, null, registry)
@@ -39,7 +41,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
       };
    }
 
-   protected static YoFrameVector createYoAngularVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
+   public static YoFrameVector createYoAngularVelocity(final ReferenceFrameHolder referenceFrameHolder, String namePrefix, String nameSuffix,
          YoVariableRegistry registry)
    {
       return new YoFrameVector(createName(namePrefix, "angularVelocity", ""), nameSuffix, null, registry)
@@ -109,7 +111,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    protected void putYoValuesIntoFrameWaypoint()
    {
-      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
+      SO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       orientation.get(simpleWaypoint.getOrientation());
       angularVelocity.get(simpleWaypoint.getAngularVelocity());
    }
@@ -117,7 +119,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    protected void getYoValuesFromFrameWaypoint()
    {
-      SimpleSO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
+      SO3Waypoint simpleWaypoint = frameWaypoint.getGeometryObject();
       orientation.set(simpleWaypoint.getOrientation());
       angularVelocity.set(simpleWaypoint.getAngularVelocity());
    }

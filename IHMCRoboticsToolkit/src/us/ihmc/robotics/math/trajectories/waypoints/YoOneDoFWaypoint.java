@@ -9,9 +9,9 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.Waypoint1DInterface;
+import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
-public class YoWaypoint1D implements Waypoint1DInterface<YoWaypoint1D>
+public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoint>
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -19,7 +19,7 @@ public class YoWaypoint1D implements Waypoint1DInterface<YoWaypoint1D>
    private final DoubleYoVariable position;
    private final DoubleYoVariable velocity;
 
-   public YoWaypoint1D(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoOneDoFWaypoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
    {
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
@@ -46,14 +46,14 @@ public class YoWaypoint1D implements Waypoint1DInterface<YoWaypoint1D>
       setVelocity(velocity);
    }
 
-   public void set(Waypoint1DInterface<?> waypoint)
+   public void set(OneDoFWaypointInterface<?> waypoint)
    {
       position.set(waypoint.getPosition());
       velocity.set(waypoint.getVelocity());
    }
 
    @Override
-   public void set(YoWaypoint1D waypoint)
+   public void set(YoOneDoFWaypoint waypoint)
    {
       position.set(waypoint.getPosition());
       velocity.set(waypoint.getVelocity());
@@ -108,7 +108,7 @@ public class YoWaypoint1D implements Waypoint1DInterface<YoWaypoint1D>
    }
 
    @Override
-   public boolean epsilonEquals(YoWaypoint1D other, double epsilon)
+   public boolean epsilonEquals(YoOneDoFWaypoint other, double epsilon)
    {
       if (!MathTools.epsilonEquals(getPosition(), other.getPosition(), epsilon))
          return false;

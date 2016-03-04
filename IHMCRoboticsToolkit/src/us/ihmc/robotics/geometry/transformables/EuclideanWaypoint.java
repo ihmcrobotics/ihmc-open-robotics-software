@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.trajectories.waypoints;
+package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
@@ -6,14 +6,16 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
-public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<SimpleEuclideanWaypoint>
+public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, EuclideanWaypointInterface<EuclideanWaypoint>
 {
    private final Point3d position = new Point3d();
    private final Vector3d linearVelocity = new Vector3d();
 
-   public SimpleEuclideanWaypoint()
+   public EuclideanWaypoint()
    {
    }
 
@@ -42,7 +44,7 @@ public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<Simpl
    }
 
    @Override
-   public void set(SimpleEuclideanWaypoint other)
+   public void set(EuclideanWaypoint other)
    {
       position.set(other.position);
       linearVelocity.set(other.linearVelocity);
@@ -86,7 +88,7 @@ public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<Simpl
       setLinearVelocityToNaN();
    }
 
-   public double positionDistance(SimpleEuclideanWaypoint euclideanWaypoint)
+   public double positionDistance(EuclideanWaypoint euclideanWaypoint)
    {
       return position.distance(euclideanWaypoint.position);
    }
@@ -127,7 +129,7 @@ public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<Simpl
    }
 
    @Override
-   public boolean epsilonEquals(SimpleEuclideanWaypoint other, double epsilon)
+   public boolean epsilonEquals(EuclideanWaypoint other, double epsilon)
    {
       if (!position.epsilonEquals(other.position, epsilon))
          return false;
@@ -136,24 +138,24 @@ public class SimpleEuclideanWaypoint implements EuclideanWaypointInterface<Simpl
       return true;
    }
 
-   Point3d getPosition()
+   public Point3d getPosition()
    {
       return position;
    }
 
-   Vector3d getLinearVelocity()
+   public Vector3d getLinearVelocity()
    {
       return linearVelocity;
    }
 
    NumberFormat numberFormat;
 
-   NumberFormat getNumberFormat()
+   public NumberFormat getNumberFormat()
    {
       return numberFormat;
    }
 
-   void setNumberFormat(NumberFormat numberFormat)
+   public void setNumberFormat(NumberFormat numberFormat)
    {
       this.numberFormat = numberFormat;
    }

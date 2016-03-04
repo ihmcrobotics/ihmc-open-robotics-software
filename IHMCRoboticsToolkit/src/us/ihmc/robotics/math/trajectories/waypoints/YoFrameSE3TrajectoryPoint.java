@@ -9,6 +9,10 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
+import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
+import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -26,7 +30,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    public YoFrameSE3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
       super(new FrameSE3TrajectoryPoint(), namePrefix, nameSuffix, registry, referenceFrames);
-
+      
       position = YoFrameEuclideanWaypoint.createYoPosition(this, namePrefix, nameSuffix, registry);
       orientation = YoFrameSO3Waypoint.createYoOrientation(this, namePrefix, nameSuffix, registry);
       linearVelocity = YoFrameEuclideanWaypoint.createYoLinearVelocity(this, namePrefix, nameSuffix, registry);
@@ -285,8 +289,8 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    protected void getYoValuesFromFrameWaypoint()
    {
       SimpleSE3TrajectoryPoint simpleTrajectoryPoint = frameWaypoint.getGeometryObject();
-      SimpleEuclideanWaypoint euclideanWaypoint = simpleTrajectoryPoint.getEuclideanWaypoint();
-      SimpleSO3Waypoint so3Waypoint = simpleTrajectoryPoint.getSO3Waypoint();
+      EuclideanWaypoint euclideanWaypoint = simpleTrajectoryPoint.getEuclideanWaypoint();
+      SO3Waypoint so3Waypoint = simpleTrajectoryPoint.getSO3Waypoint();
 
       time.set(simpleTrajectoryPoint.getTime());
       position.set(euclideanWaypoint.getPosition());

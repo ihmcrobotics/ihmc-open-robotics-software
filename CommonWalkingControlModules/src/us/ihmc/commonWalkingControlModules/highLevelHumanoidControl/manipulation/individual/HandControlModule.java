@@ -52,8 +52,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientation
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPoint1DInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -509,7 +509,7 @@ public class HandControlModule
       }
    }
 
-   private <T extends TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>>> boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<T> trajectoryPointLists)
+   private <T extends TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>>> boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<T> trajectoryPointLists)
    {
       if (trajectoryPointLists.size() != oneDoFJoints.length)
          return false;
@@ -523,7 +523,7 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, TrajectoryPointListInterface<?, ? extends TrajectoryPoint1DInterface<?>> trajectoryPointList)
+   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>> trajectoryPointList)
    {
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
       {
