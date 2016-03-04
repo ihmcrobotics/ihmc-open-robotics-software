@@ -138,9 +138,11 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
          String torqueOffset = Double.toString(diagnosticsWhenHangingHelper.getTorqueOffset());
          String type = null;
 
-         if (name.contains("Ankle"))
-            type = "ankle";
-         else if (name.contains("torso"))
+         if (name.contains("leftAnkle"))
+            type = "leftAnkle";
+         if (name.contains("rightAnkle"))
+        	 type="rightAnkle";
+         else if (name.contains("torsoRoll") || name.contains("torsoPitch"))
             type = "waist";
 
          XMLJointWithTorqueOffset xmlJointWithTorqueOffset = new XMLJointWithTorqueOffset();
