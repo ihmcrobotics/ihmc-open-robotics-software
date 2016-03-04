@@ -172,6 +172,8 @@ public class YoFrameEuclideanTrajectoryPoint
    protected void putYoValuesIntoFrameWaypoint()
    {
       frameWaypoint.setToZero(getReferenceFrame());
-      frameWaypoint.set(this);
+
+      frameWaypoint.setPosition(position.getFrameTuple());
+      frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
    }
 }
