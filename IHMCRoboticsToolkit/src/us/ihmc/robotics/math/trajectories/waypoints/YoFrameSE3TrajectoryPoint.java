@@ -303,7 +303,12 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    protected void putYoValuesIntoFrameWaypoint()
    {
       frameWaypoint.setToZero(getReferenceFrame());
-      frameWaypoint.set(this);
+
+      frameWaypoint.setTime(time.getDoubleValue());
+      frameWaypoint.setPosition(position.getFrameTuple());
+      frameWaypoint.setOrientation(orientation.getFrameOrientation());
+      frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
+      frameWaypoint.setAngularVelocity(angularVelocity.getFrameTuple());
    }
 
    @Override
