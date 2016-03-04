@@ -28,13 +28,14 @@ public class QuadrupedTrotWalkSliderBoardConfiguration implements EnumDependentS
       
       String namespace = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.";
       sliderBoardConfigurationManager.setSlider(1, namespace + "q_d_z", scs, 0.4, 1.0);
-      sliderBoardConfigurationManager.setSlider(2, namespace + "q_d_x", scs, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(2, namespace + "quadAlpha", scs, -0.2, 1.2);
       sliderBoardConfigurationManager.setSlider(3, namespace + "q_d_y", scs, -0.1, 0.1);
       sliderBoardConfigurationManager.setSlider(4, namespace + "q_d_roll", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(5, namespace + "q_d_pitch", scs, -0.1, 0.1);
       sliderBoardConfigurationManager.setSlider(6, namespace + "q_d_yaw", scs, -0.1, 0.1);
       sliderBoardConfigurationManager.setSlider(7, namespace + "desiredICPFromCentroidX", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(8, namespace + "desiredICPFromCentroidY", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setButton(1, namespace + "enableTrot", scs);
       sliderBoardConfigurationManager.saveConfiguration(QuadrupedSliderBoardMode.TROT_WALK.toString());
    }
 
