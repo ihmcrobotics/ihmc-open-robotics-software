@@ -136,7 +136,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void updatePlanForSingleSupportDisturbances(double time, FramePoint actualCapturePointPosition)
+   public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
    {
       timeDelay.set(0.0);
       previousTime.set(time);

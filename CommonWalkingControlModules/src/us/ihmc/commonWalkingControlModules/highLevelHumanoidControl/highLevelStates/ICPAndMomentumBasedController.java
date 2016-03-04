@@ -266,19 +266,44 @@ public class ICPAndMomentumBasedController
       return yoCapturePoint;
    }
 
+   public void getCapturePoint(FramePoint2d capturePointToPack)
+   {
+      yoCapturePoint.getFrameTuple2dIncludingFrame(capturePointToPack);
+   }
+
    public YoFramePoint2d getDesiredICP()
    {
       return yoDesiredCapturePoint;
    }
 
+   public void setDesiredICP(FramePoint2d desiredCapturePoint)
+   {
+      yoDesiredCapturePoint.set(desiredCapturePoint);
+   }
+
    public void getDesiredICP(FramePoint2d pointToPack)
    {
-      this.yoDesiredCapturePoint.getFrameTuple2d(pointToPack);
+      this.yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(pointToPack);
    }
 
    public YoFrameVector2d getDesiredICPVelocity()
    {
       return yoDesiredICPVelocity;
+   }
+
+   public void getDesiredICPVelocity(FrameVector2d desiredICPToPack)
+   {
+      yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredICPToPack);
+   }
+
+   public void setDesiredICPVelocity(FrameVector2d desiredICP)
+   {
+      yoDesiredICPVelocity.set(desiredICP);
+   }
+
+   public void scaleDesiredICPVelocity(double scaleFactor)
+   {
+      yoDesiredICPVelocity.scale(scaleFactor);
    }
 
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)

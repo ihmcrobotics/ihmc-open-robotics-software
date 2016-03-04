@@ -468,7 +468,7 @@ public class ICPPlanner
          exitCornerPoints.get(i).changeFrame(desiredFrame);
    }
 
-   public void updatePlanForSingleSupportDisturbances(double time, FramePoint actualCapturePointPosition)
+   public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
    {
       initializeSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue(), false);
 
@@ -488,7 +488,7 @@ public class ICPPlanner
       initialTime.sub(deltaTimeToBeAccounted);
    }
 
-   public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint actualCapturePointPosition)
+   public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint2d actualCapturePointPosition)
    {
       if (isDone(time))
          return 0.0;
@@ -510,7 +510,7 @@ public class ICPPlanner
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
    private final FramePoint2d actualICP2d = new FramePoint2d();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(double time, FramePoint actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(double time, FramePoint2d actualCapturePointPosition)
    {
       computeDesiredCapturePoint(computeAndReturnTimeInCurrentState(time));
       computeDesiredCentroidalMomentumPivot();
@@ -521,7 +521,7 @@ public class ICPPlanner
          return Double.NaN;
 
       desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
-      actualICP2d.setByProjectionOntoXYPlaneIncludingFrame(actualCapturePointPosition);
+      actualICP2d.setIncludingFrame(actualCapturePointPosition);
       double percentAlongLineSegmentICP = desiredICPToFinalICPLineSegment.percentageAlongLineSegment(actualICP2d);
       if (percentAlongLineSegmentICP < 0.0)
       {
