@@ -223,10 +223,24 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.getPosition(positionToPack.getPoint());
    }
 
+   public FramePoint getPositionCopy()
+   {
+      FramePoint positionCopy = new FramePoint(getReferenceFrame());
+      getPosition(positionCopy);
+      return positionCopy;
+   }
+
    public void getOrientation(FrameOrientation orientationToPack)
    {
       checkReferenceFrameMatch(orientationToPack);
       geometryObject.getOrientation(orientationToPack.getQuaternion());
+   }
+   
+   public FrameOrientation getOrientationCopy()
+   {
+      FrameOrientation orientationCopy = new FrameOrientation(getReferenceFrame());
+      getOrientation(orientationCopy);
+      return orientationCopy;
    }
 
    public void getLinearVelocity(FrameVector linearVelocityToPack)
@@ -235,10 +249,24 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
+   public FrameVector getLinearVelocityCopy()
+   {
+      FrameVector linearVelocityCopy = new FrameVector(getReferenceFrame());
+      getLinearVelocity(linearVelocityCopy);
+      return linearVelocityCopy;
+   }
+
    public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+   }
+
+   public FrameVector getAngularVelocityCopy()
+   {
+      FrameVector angularVelocityCopy = new FrameVector(getReferenceFrame());
+      getAngularVelocity(angularVelocityCopy);
+      return angularVelocityCopy;
    }
 
    public void getPositionIncludingFrame(FramePoint positionToPack)
@@ -272,4 +300,5 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       String timeToString = "time = " + doubleFormat.format(getTime());
       return "SE3 trajectory point: (" + timeToString + ", " + geometryObject + ")";
    }
+
 }

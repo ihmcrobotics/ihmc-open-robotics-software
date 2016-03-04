@@ -8,6 +8,7 @@ import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -401,5 +402,55 @@ public class YoFrameEuclideanTrajectoryPointTest
       String string = yoFrameEuclideanTrajectoryPoint.toString();
       String expectedString = "Euclidean trajectory point: (time =  9.90, Euclidean trajectory point: (time =  9.90, Euclidean waypoint: [position = ( 3.90,  2.20,  1.10), linearVelocity = ( 8.80,  1.40,  9.22)].))";      
       assertEquals(expectedString, string);
+   }
+   
+   @Test
+   public void testSomeMoreSettersAndGetters()
+   {
+      String namePrefix = "point";
+      String nameSuffix = "toTest";
+      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      YoFrameEuclideanTrajectoryPoint yoFrameEuclideanTrajectoryPoint = new YoFrameEuclideanTrajectoryPoint(namePrefix, nameSuffix, registry, worldFrame);
+      yoFrameEuclideanTrajectoryPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      double time = 3.4;
+      FramePoint position = new FramePoint(worldFrame, 1.0, 2.1, 3.7);
+      FrameVector linearVelocity = new FrameVector(worldFrame, -0.4, 1.2, 3.3);
+
+      yoFrameEuclideanTrajectoryPoint.setTime(time);
+      yoFrameEuclideanTrajectoryPoint.setPosition(position);
+      yoFrameEuclideanTrajectoryPoint.setLinearVelocity(linearVelocity);
+      
+      PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
+
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      poseFrame.setPositionAndUpdate(poseFramePosition);
+
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      poseFrame.setOrientationAndUpdate(poseOrientation);
+
+      yoFrameEuclideanTrajectoryPoint.registerReferenceFrame(poseFrame);
+      
+      yoFrameEuclideanTrajectoryPoint.changeFrame(poseFrame);
+      
+      assertFalse(position.epsilonEquals(yoFrameEuclideanTrajectoryPoint.getPosition().getFramePointCopy(), 1e-10));
+      assertFalse(linearVelocity.epsilonEquals(yoFrameEuclideanTrajectoryPoint.getLinearVelocity().getFrameVectorCopy(), 1e-10));
+
+      position.changeFrame(poseFrame);
+      linearVelocity.changeFrame(poseFrame);
+
+      assertTrue(position.epsilonEquals(yoFrameEuclideanTrajectoryPoint.getPosition().getFramePointCopy(), 1e-10));
+      assertTrue(linearVelocity.epsilonEquals(yoFrameEuclideanTrajectoryPoint.getLinearVelocity().getFrameVectorCopy(), 1e-10));
+
+      YoFrameEuclideanTrajectoryPoint yoFrameEuclideanTrajectoryPointTwo = new YoFrameEuclideanTrajectoryPoint(namePrefix, nameSuffix+"Two", registry, poseFrame);
+
+      yoFrameEuclideanTrajectoryPointTwo.setTime(time);
+      yoFrameEuclideanTrajectoryPointTwo.setPosition(position);
+      yoFrameEuclideanTrajectoryPointTwo.setLinearVelocity(linearVelocity);
+      
+      assertTrue(yoFrameEuclideanTrajectoryPointTwo.epsilonEquals(yoFrameEuclideanTrajectoryPointTwo, 1e-10));
    }
 }

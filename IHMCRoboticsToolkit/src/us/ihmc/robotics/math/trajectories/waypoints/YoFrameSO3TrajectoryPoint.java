@@ -33,12 +33,21 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       this.orientation.set(orientation);
    }
 
+   public void setOrientation(FrameOrientation orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
    @Override
    public void setAngularVelocity(Vector3d angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
 
+   public void setAngularVelocity(FrameVector angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
+   }
    public void set(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
    {
       frameWaypoint.setToZero(getReferenceFrame());

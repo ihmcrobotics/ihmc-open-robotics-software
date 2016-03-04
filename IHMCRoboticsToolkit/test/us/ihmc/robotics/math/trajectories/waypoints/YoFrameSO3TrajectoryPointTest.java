@@ -415,4 +415,56 @@ public class YoFrameSO3TrajectoryPointTest
       
       assertEquals(expectedString, string);
    }
+   
+   @Test
+   public void testSomeMoreSettersAndGetters()
+   {
+      String namePrefix = "point";
+      String nameSuffix = "toTest";
+      YoVariableRegistry registry = new YoVariableRegistry("myRegistry");
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      YoFrameSO3TrajectoryPoint yoFrameSO3TrajectoryPoint = new YoFrameSO3TrajectoryPoint(namePrefix, nameSuffix, registry, worldFrame);
+      yoFrameSO3TrajectoryPoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      double time = 3.4;
+      FrameOrientation orientation = new FrameOrientation(worldFrame, new Quat4d(0.1, 0.22, 0.34, 0.56));
+
+      FrameVector angularVelocity = new FrameVector(worldFrame, 1.7, 8.4, 2.2);
+
+      yoFrameSO3TrajectoryPoint.setTime(time);
+      yoFrameSO3TrajectoryPoint.setOrientation(orientation);
+      yoFrameSO3TrajectoryPoint.setAngularVelocity(angularVelocity);
+    
+      
+      PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
+
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      poseFrame.setPositionAndUpdate(poseFramePosition);
+
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      poseFrame.setOrientationAndUpdate(poseOrientation);
+
+      yoFrameSO3TrajectoryPoint.registerReferenceFrame(poseFrame);
+      
+      yoFrameSO3TrajectoryPoint.changeFrame(poseFrame);
+      
+      assertFalse(orientation.epsilonEquals(yoFrameSO3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), 1e-10));
+      assertFalse(angularVelocity.epsilonEquals(yoFrameSO3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), 1e-10));
+
+      orientation.changeFrame(poseFrame);
+      angularVelocity.changeFrame(poseFrame);
+
+      assertTrue(orientation.epsilonEquals(yoFrameSO3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), 1e-10));
+      assertTrue(angularVelocity.epsilonEquals(yoFrameSO3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), 1e-10));
+
+      YoFrameSO3TrajectoryPoint yoFrameSO3TrajectoryPointTwo = new YoFrameSO3TrajectoryPoint(namePrefix, nameSuffix+"Two", registry, poseFrame);
+
+      yoFrameSO3TrajectoryPointTwo.setTime(time);
+      yoFrameSO3TrajectoryPointTwo.setOrientation(orientation);
+      yoFrameSO3TrajectoryPointTwo.setAngularVelocity(angularVelocity);
+      
+      assertTrue(yoFrameSO3TrajectoryPointTwo.epsilonEquals(yoFrameSO3TrajectoryPointTwo, 1e-10));
+   }
 }
