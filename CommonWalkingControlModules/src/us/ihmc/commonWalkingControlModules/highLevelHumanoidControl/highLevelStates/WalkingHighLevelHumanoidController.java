@@ -31,7 +31,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
@@ -443,7 +442,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          balanceManager.setDesiredICP(desiredICPLocal);
          balanceManager.setDesiredICPVelocity(desiredICPVelocityLocal);
 
-         initializeECMPbasedToeOffIfNotInitializedYet();
+         switchToToeOffIfPossible();
 
          boolean isICPPlannerDone = balanceManager.isDone(yoTime.getDoubleValue());
          if (transferToSide != null && isICPPlannerDone)
@@ -519,7 +518,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
-      public void initializeECMPbasedToeOffIfNotInitializedYet()
+      public void switchToToeOffIfPossible()
       {
          // the only case left for determining the contact state of the trailing foot
          if (!isPerformingToeOff.getBooleanValue() && transferToSide != null)
@@ -527,6 +526,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             RobotSide trailingLeg = transferToSide.getOppositeSide();
             balanceManager.getDesiredCMP(desiredCMP);
             balanceManager.getDesiredICP(desiredICPLocal);
+            balanceManager.getCapturePoint(capturePoint2d);
 
             double predictedToeOffDuration = balanceManager.computeAndReturnTimeRemaining(yoTime.getDoubleValue());
 

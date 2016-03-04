@@ -46,10 +46,12 @@ public class BipedSupportPolygons
    // Reference frames:
    private final ReferenceFrame midFeetZUp;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    // Polygons:
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInWorldFrame = new SideDependentList<FrameConvexPolygon2d>();
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInSoleFrame = new SideDependentList<FrameConvexPolygon2d>();
+   private final SideDependentList<FrameConvexPolygon2d> footPolygonsInSoleZUpFrame = new SideDependentList<FrameConvexPolygon2d>();
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>();
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>();
    private final FrameConvexPolygon2d supportPolygonInMidFeetZUp = new FrameConvexPolygon2d();
@@ -67,11 +69,12 @@ public class BipedSupportPolygons
 
    private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
 
-   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame,
+         SideDependentList<ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFeetZUp = midFeetZUpFrame;
+      this.soleZUpFrames = soleZUpFrames;
 
       supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 30, registry);
       footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", worldFrame, registry);
@@ -85,6 +88,7 @@ public class BipedSupportPolygons
       {
          footPolygonsInWorldFrame.put(robotSide, new FrameConvexPolygon2d());
          footPolygonsInSoleFrame.put(robotSide, new FrameConvexPolygon2d());
+         footPolygonsInSoleZUpFrame.put(robotSide, new FrameConvexPolygon2d());
          footPolygonsInAnkleZUp.put(robotSide, new FrameConvexPolygon2d());
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2d());
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -121,6 +125,11 @@ public class BipedSupportPolygons
    public FrameConvexPolygon2d getFootPolygonInSoleFrame(RobotSide robotSide)
    {
       return footPolygonsInSoleFrame.get(robotSide);
+   }
+
+   public FrameConvexPolygon2d getFootPolygonInSoleZUpFrame(RobotSide robotSide)
+   {
+      return footPolygonsInSoleZUpFrame.get(robotSide);
    }
 
    public FrameConvexPolygon2d getFootPolygonInWorldFrame(RobotSide robotSide)
@@ -163,11 +172,13 @@ public class BipedSupportPolygons
 
          FrameConvexPolygon2d footPolygonInWorldFrame = footPolygonsInWorldFrame.get(robotSide);
          FrameConvexPolygon2d footPolygonInSoleFrame = footPolygonsInSoleFrame.get(robotSide);
+         FrameConvexPolygon2d footPolygonInSoleZUpFrame = footPolygonsInSoleZUpFrame.get(robotSide);
          FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonsInAnkleZUp.get(robotSide);
          FrameConvexPolygon2d footPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(robotSide);
 
          footPolygonInWorldFrame.clearAndUpdate(worldFrame);
          footPolygonInSoleFrame.clearAndUpdate(contactState.getPlaneFrame());
+         footPolygonInSoleZUpFrame.clearAndUpdate(soleZUpFrames.get(robotSide));
          footPolygonInAnkleZUp.clearAndUpdate(ankleZUpFrames.get(robotSide));
          footPolygonInMidFeetZUp.clearAndUpdate(midFeetZUp);
 
@@ -185,12 +196,14 @@ public class BipedSupportPolygons
                contactPoint.getPosition(tempFramePoint);
                footPolygonInWorldFrame.addVertexByProjectionOntoXYPlane(tempFramePoint);
                footPolygonInSoleFrame.addVertexByProjectionOntoXYPlane(tempFramePoint);
+               footPolygonInSoleZUpFrame.addVertexByProjectionOntoXYPlane(tempFramePoint);
                footPolygonInAnkleZUp.addVertexByProjectionOntoXYPlane(tempFramePoint);
                footPolygonInMidFeetZUp.addVertexByProjectionOntoXYPlane(tempFramePoint);
             }
 
             footPolygonInWorldFrame.update();
             footPolygonInSoleFrame.update();
+            footPolygonInSoleZUpFrame.update();
             footPolygonInAnkleZUp.update();
             footPolygonInMidFeetZUp.update();
 
@@ -246,6 +259,16 @@ public class BipedSupportPolygons
    public ReferenceFrame getMidFeetZUpFrame()
    {
       return midFeetZUp;
+   }
+
+   public SideDependentList<ReferenceFrame> getAnkleZUpFrames()
+   {
+      return ankleZUpFrames;
+   }
+
+   public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+   {
+      return soleZUpFrames;
    }
 
    public String toString()
