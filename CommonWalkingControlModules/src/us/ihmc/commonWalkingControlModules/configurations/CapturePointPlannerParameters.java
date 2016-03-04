@@ -13,7 +13,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
  * 
  * <p>
  * When using the new ICP planner ({@link #useNewICPPlanner()} == true), there is the possibility to use a different mode for planning the ICP trajectory.
- * The mode considers for each single support, an initial CMP (referred here as entryCMP) location that is used at the beginning of single support, and a final CMP location that is used at the end of single support (referred here as exitCMP).
+ * The mode considers for each single support, an initial CMP (referred here as entryCMP) location that is used at the beginning of single support, and a CMP location that is used at the end of single support (referred here as exitCMP).
  * This mode is referred as using two CMPs per support ({@link #useTwoCMPsPerSupport()} == true) and is preferable as it helps the robot moving more towards the walking heading direction.
  * It also helps triggering the toe off earlier, and helps stepping down obstacles.
  * However, it requires to tune some more parameters.
@@ -24,24 +24,22 @@ public abstract class CapturePointPlannerParameters
    /** Refers to the duration of the first transfer when starting to walk. */
    public abstract double getDoubleSupportInitialTransferDuration();
 
-   /** TODO Not the right place to get this value from and it is not really used. */
-   @Deprecated
-   public abstract double getDoubleSupportDuration();
-
    /** FIXME That's a hack which makes the planner slower than the swing foot. Need to get rid of it. */
    @Deprecated
-   public abstract double getAdditionalTimeForSingleSupport();
-
-   /** TODO Not the right place to get this value from and it is not really used. */
-   @Deprecated
-   public abstract double getSingleSupportDuration();
+   public double getAdditionalTimeForSingleSupport()
+   {
+      return 0.0;
+   }
 
    /**
     * How many footsteps the ICP planner will use to build the plan.
     * The more the better, but will increase the number of YoVariables and increase the computation time.
     * The values 3 and 4 seem to be good.
     */
-   public abstract int getNumberOfFootstepsToConsider();
+   public int getNumberOfFootstepsToConsider()
+   {
+      return 3;
+   }
 
    /**
     * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
@@ -50,29 +48,44 @@ public abstract class CapturePointPlannerParameters
     * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
     * <p> A value close to 0.5 is preferable. </p>
     */
-   public abstract double getDoubleSupportSplitFraction();
+   public double getDoubleSupportSplitFraction()
+   {
+      return 0.5;
+   }
 
    /**
     * Slow down factor on the time when doing partial time freeze
     */
-   public abstract double getFreezeTimeFactor();
+   public double getFreezeTimeFactor()
+   {
+      return 0.9;
+   }
 
    /**
     * Threshold on the ICP error used to trigger the complete time freeze.
     */
-   public abstract double getMaxInstantaneousCapturePointErrorForStartingSwing();
+   public double getMaxInstantaneousCapturePointErrorForStartingSwing()
+   {
+      return 0.025;
+   }
 
    /**
     * Threshold on the ICP error used to trigger the partial time freeze which consists in slowing down time.
     */
-   public abstract double getMaxAllowedErrorWithoutPartialTimeFreeze();
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return 0.03;
+   }
 
    /**
     * Enable / disable time freezing.
     * When enabled, the time freezer will first slow down time when the actual ICP is behind the plan, and totally freeze time if the actual ICP is far behing the plan.
     * In summary, this makes the plan wait for the actual ICP when there is a lag.
     */
-   public abstract boolean getDoTimeFreezing();
+   public boolean getDoTimeFreezing()
+   {
+      return false;
+   }
 
    /**
     * This parameter forces the entry CMPs to be more inside or outside in the foot.
@@ -112,7 +125,10 @@ public abstract class CapturePointPlannerParameters
     * <li> 1.0 is equivalent to never use the entry CMP. </li>
     * <p> A value close to 0.5 is preferable. </p>
     */
-   public abstract double getTimeSpentOnExitCMPInPercentOfStepTime();
+   public double getTimeSpentOnExitCMPInPercentOfStepTime()
+   {
+      return 0.5;
+   }
 
    /**
     * This parameter indicates how far front in the foot the entry CMP can be.
@@ -141,49 +157,73 @@ public abstract class CapturePointPlannerParameters
    /**
     * This parameter is used when computing the entry CMP and exit CMP to make sure they are contained inside a safe support polygon.
     */
-   public abstract double getCMPSafeDistanceAwayFromSupportEdges();
+   public double getCMPSafeDistanceAwayFromSupportEdges()
+   {
+      return 0.01;
+   }
 
    /**
-    *  Pretty refers to how fast the CMP should move from the entry CMP to the exit CMP in single support. 0.5sec seems reasonable.
+    *  Pretty much refers to how fast the CMP should move from the entry CMP to the exit CMP in single support. 0.5sec seems reasonable.
     *  This parameter allows to reduce unexpected behaviors due to smoothing the exponentially unstable motion of the ICP with a minimum acceleration trajectory (cubic).
     */
-   public abstract double getMaxDurationForSmoothingEntryToExitCMPSwitch();
+   public double getMaxDurationForSmoothingEntryToExitCMPSwitch()
+   {
+      return 0.5;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * The forward offset of the CMPs is computed according to the upcoming step length times the returned factor
     * One third seems to be a reasonable value.
     */
-   public abstract double getStepLengthToCMPOffsetFactor();
+   public double getStepLengthToCMPOffsetFactor()
+   {
+      return 1.0 / 3.0;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * If true, the ICP planner will put the exit CMP on the toes of the trailing foot when stepping down and forward.
     */
-   public abstract boolean useExitCMPOnToesForSteppingDown();
+   public boolean useExitCMPOnToesForSteppingDown()
+   {
+      return false;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * Threshold used to figure out if the exit CMP should be put on the toes.
     */
-   public abstract double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown();
+   public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
+   {
+      return 0.15;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * Threshold used to figure out if the exit CMP should be put on the toes.
     * An absolute value is expected.
     */
-   public abstract double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown();
+   public double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown()
+   {
+      return 0.10;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * If set to zero, the exit CMP will be on the toes' edge when stepping, a positive value will pull back the exit CMP towards the foot center.
     */
-   public abstract double getCMPSafeDistanceAwayFromToesWhenSteppingDown();
+   public double getCMPSafeDistanceAwayFromToesWhenSteppingDown()
+   {
+      return 0.0;
+   }
 
    /**
     * For doing toe off in single support. Set it to 0.0 if not using this feature.
     * @return
     */
-   public abstract double getMinTimeToSpendOnExitCMPInSingleSupport();
+   public double getMinTimeToSpendOnExitCMPInSingleSupport()
+   {
+      return 0.0;
+   }
 }
