@@ -76,7 +76,6 @@ public class MomentumBasedControllerFactory
    private final HighLevelState initialBehavior;
 
    private MomentumBasedController momentumBasedController = null;
-   private ICPAndMomentumBasedController icpAndMomentumBasedController = null;
 
    private boolean isListeningToHighLevelStatePackets = true;
    private HighLevelHumanoidControllerManager highLevelHumanoidControllerManager = null;
@@ -183,16 +182,6 @@ public class MomentumBasedControllerFactory
       RigidBody rootBody = fullRobotModel.getRootJoint().getSuccessor();
       SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
-            registry, yoGraphicsListRegistry);
-
-      /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup different things for walking ///////////////////////////////////////////////////////
-      ICPPlannerWithTimeFreezer instantaneousCapturePointPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, feet, capturePointPlannerParameters,
-            registry, yoGraphicsListRegistry);
-      instantaneousCapturePointPlanner
-            .setMinimumSingleSupportTimeForDisturbanceRecovery(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
-
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
@@ -206,19 +195,8 @@ public class MomentumBasedControllerFactory
       if (createControllerNetworkSubscriber)
          createControllerNetworkSubscriber(scheduler);
 
-      variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, walkingControllerParameters, armControllerParameters, registry);
-
-      /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
-      ICPControlGains icpControlGains = walkingControllerParameters.getICPControlGains();
-      ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
-            referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry);
-
-      /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the ICPAndMomentumBasedController //////////////////////////////////////////////////
-      double omega0 = walkingControllerParameters.getOmega0();
-      icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, omega0, iCPBasedLinearMomentumRateOfChangeControlModule,
-            bipedSupportPolygons, statusOutputManager, registry);
+      variousWalkingManagers = new VariousWalkingManagers(statusOutputManager, momentumBasedController, walkingControllerParameters,
+            capturePointPlannerParameters, armControllerParameters, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
@@ -235,14 +213,14 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
-      walkingBehavior = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, variousWalkingManagers,
-            walkingControllerParameters, instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
+      walkingBehavior = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, variousWalkingManagers, walkingControllerParameters,
+            momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DoNothingController ////////////////////////////////////////////////////////////
       // Useful as a transition state on the real robot
-      DoNothingBehavior doNothingBehavior = new DoNothingBehavior(momentumBasedController, bipedSupportPolygons);
+      DoNothingBehavior doNothingBehavior = new DoNothingBehavior(momentumBasedController, variousWalkingManagers.getBalanceManager().getBipedSupportPolygons());
       highLevelBehaviors.add(doNothingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,8 +303,7 @@ public class MomentumBasedControllerFactory
       for (int i = 0; i < highLevelBehaviorFactories.size(); i++)
       {
          HighLevelBehaviorFactory highLevelBehaviorFactory = highLevelBehaviorFactories.get(i);
-         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(variousWalkingManagers, momentumBasedController,
-               icpAndMomentumBasedController);
+         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(variousWalkingManagers, momentumBasedController);
          boolean transitionRequested = highLevelBehaviorFactory.isTransitionToBehaviorRequested();
          highLevelHumanoidControllerManager.addHighLevelBehavior(highLevelBehavior, transitionRequested);
       }
@@ -373,8 +350,7 @@ public class MomentumBasedControllerFactory
       }
       else
       {
-         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(variousWalkingManagers, momentumBasedController,
-               icpAndMomentumBasedController);
+         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(variousWalkingManagers, momentumBasedController);
          boolean transitionToBehaviorRequested = highLevelBehaviorFactory.isTransitionToBehaviorRequested();
          highLevelHumanoidControllerManager.addHighLevelBehavior(highLevelBehavior, transitionToBehaviorRequested);
       }

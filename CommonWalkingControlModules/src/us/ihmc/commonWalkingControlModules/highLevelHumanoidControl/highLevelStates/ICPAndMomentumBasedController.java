@@ -180,7 +180,7 @@ public class ICPAndMomentumBasedController
       yoCapturePoint.setXY(capturePoint2d);
    }
 
-   protected void updateBipedSupportPolygons()
+   public void updateBipedSupportPolygons()
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
 
