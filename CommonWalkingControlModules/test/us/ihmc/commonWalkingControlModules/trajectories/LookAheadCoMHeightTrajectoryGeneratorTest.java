@@ -193,7 +193,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          }
 
          // Initialize at the beginning of single support.
-         lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData);
+         lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
          CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack = new CoMHeightPartialDerivativesData();
 
          scs.tickAndUpdate();
@@ -206,7 +206,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             if (i == 0.35 * numberOfTicks)
             {
                // Initialize again at the beginning of double support.
-               lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData);
+               lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
                supportLeg = null;
             }
             else if (i == 0.65 * numberOfTicks)
