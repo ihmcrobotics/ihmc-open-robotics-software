@@ -495,15 +495,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (!isPerformingToeOff.getBooleanValue() && transferToSide != null)
          {
             RobotSide trailingLeg = transferToSide.getOppositeSide();
-            balanceManager.getDesiredCMP(desiredCMP);
-            balanceManager.getDesiredICP(desiredICPLocal);
-            balanceManager.getCapturePoint(capturePoint2d);
 
             double predictedToeOffDuration = balanceManager.computeAndReturnTimeRemaining(yoTime.getDoubleValue());
 
             // If trailing leg is doing toe off, then use front leg for reference frames for com height trajectory.
             comHeightManager.setSupportLeg(trailingLeg.getOppositeSide());
 
+            balanceManager.getDesiredCMP(desiredCMP);
+            balanceManager.getDesiredICP(desiredICPLocal);
+            balanceManager.getCapturePoint(capturePoint2d);
             boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, desiredCMP, desiredICPLocal, capturePoint2d);
 
             if (doToeOff)
