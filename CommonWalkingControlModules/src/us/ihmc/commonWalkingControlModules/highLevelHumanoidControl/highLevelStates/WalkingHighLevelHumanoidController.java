@@ -200,8 +200,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
 
-      comHeightManager.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
-
       pushRecoveryModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
 
       setupStateMachine();
@@ -594,7 +592,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(
                   transferToSideToUseInFootstepData);
-            comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport);
+            double extraToeOffHeight = 0.0;
+            if (transferToSide != null && feetManager.willDoToeOff(null, transferToSide))
+               extraToeOffHeight = feetManager.getWalkOnTheEdgesManager().getExtraCoMMaxHeightWithToes();
+            comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
          }
 
          if (pushRecoveryModule.isEnabled())
@@ -919,7 +920,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
          transferToAndNextFootstepsData.setTransferFromDesiredFootstep(previousDesiredFootstep);
-         comHeightManager.initialize(transferToAndNextFootstepsData);
+         double extraToeOffHeight = 0.0;
+         if (feetManager.willDoToeOff(nextFootstep, swingSide))
+            extraToeOffHeight = feetManager.getWalkOnTheEdgesManager().getExtraCoMMaxHeightWithToes();
+         comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
          // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
          momentumBasedController.updateContactPointsForUpcomingFootstep(nextFootstep);

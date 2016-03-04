@@ -6,7 +6,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
@@ -94,9 +93,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final BooleanYoVariable initializeToCurrent = new BooleanYoVariable("initializeCoMHeightToCurrent", registry);
 
    private final BagOfBalls bagOfBalls;
-
-   private WalkOnTheEdgesManager walkOnTheEdgesManager;
-   private double extraCoMMaxHeightWithToes = 0.0;
 
    private final DoubleYoVariable yoTime;
 
@@ -229,12 +225,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
    }
 
-   public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
-   {
-      this.walkOnTheEdgesManager = walkOnTheEdgesManager;
-      extraCoMMaxHeightWithToes = walkOnTheEdgesManager.getExtraCoMMaxHeightWithToes();
-   }
-
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
    {
       this.minimumHeightAboveGround.set(minimumHeightAboveGround);
@@ -339,7 +329,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final FramePoint tempFramePointForViz1 = new FramePoint();
    private final FramePoint tempFramePointForViz2 = new FramePoint();
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       if (DEBUG)
       {
@@ -441,15 +431,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       dFMin.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
       dFNom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
-
-      if ((walkOnTheEdgesManager != null) && walkOnTheEdgesManager.willDoToeOff(transferToAndNextFootstepsData.getNextFootstep(), transferToAndNextFootstepsData.getTransferToSide()))
-      {
-         dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0 + extraCoMMaxHeightWithToes, footHeight1));
-      }
-      else
-      {
-         dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
-      }
+      dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0 + extraToeOffHeight, footHeight1));
 
       sNextMin.setY(nextFootHeight + minimumHeightAboveGround.getDoubleValue());
       sNextNom.setY(nextFootHeight + nominalHeightAboveGround.getDoubleValue());

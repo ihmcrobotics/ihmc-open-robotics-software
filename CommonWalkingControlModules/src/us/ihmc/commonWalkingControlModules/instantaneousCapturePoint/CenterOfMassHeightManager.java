@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
@@ -132,14 +131,9 @@ public class CenterOfMassHeightManager
       coMHeightTimeDerivativesSmoother.reset();
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
-      centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData);
-   }
-
-   public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
-   {
-      centerOfMassTrajectoryGenerator.attachWalkOnToesManager(walkOnTheEdgesManager);
+      centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
    public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
