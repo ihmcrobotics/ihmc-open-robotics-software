@@ -87,7 +87,7 @@ public class ICPPlanner
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
@@ -123,12 +123,9 @@ public class ICPPlanner
       referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
 
       midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         soleFrames.put(robotSide, contactableFeet.get(robotSide).getSoleFrame());
-      }
+      soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
 
-      ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleFrames.get(RobotSide.LEFT), soleFrames.get(RobotSide.RIGHT)};
+      ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT)};
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
@@ -247,8 +244,8 @@ public class ICPPlanner
       if (transferToSide == null)
          transferToSide = RobotSide.LEFT;
       RobotSide transferFromSide = transferToSide.getOppositeSide();
-      ReferenceFrame transferFromSoleFrame = soleFrames.get(transferFromSide);
-      ReferenceFrame transferToSoleFrame = soleFrames.get(transferToSide);
+      ReferenceFrame transferFromSoleFrame = soleZUpFrames.get(transferFromSide);
+      ReferenceFrame transferToSoleFrame = soleZUpFrames.get(transferToSide);
 
       isDoubleSupport.set(true);
       icpSingleSupportTrajectoryGenerator.hideVisualization();
@@ -393,7 +390,7 @@ public class ICPPlanner
       singleSupportInitialICP.switchCurrentReferenceFrame(worldFrame);
       singleSupportFinalICP.switchCurrentReferenceFrame(worldFrame);
 
-      ReferenceFrame supportSoleFrame = soleFrames.get(supportSide);
+      ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide);
       if (useTwoConstantCMPsPerSupport.getBooleanValue())
       {
          double timeRemainingOnEntryCMP = totalTimeSpentOnEntryCMP - doubleSupportTimeSpentBeforeEntryCornerPoint;
