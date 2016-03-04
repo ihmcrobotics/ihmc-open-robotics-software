@@ -8,7 +8,6 @@ import java.util.List;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
@@ -56,7 +55,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedDesiredAccelerations = new LinkedHashMap<>();
 
    protected final PelvisOrientationManager pelvisOrientationManager;
-   protected final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    protected final ChestOrientationManager chestOrientationManager;
    protected final HeadOrientationManager headOrientationManager;
    protected final ManipulationControlModule manipulationControlModule;
@@ -72,8 +70,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final WalkingControllerParameters walkingControllerParameters;
 
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
-
-   protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
@@ -105,15 +101,12 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       allOneDoFjoints = fullRobotModel.getOneDoFJoints();
 
       this.pelvisOrientationManager = variousWalkingManagers.getPelvisOrientationManager();
-      this.pelvisICPBasedTranslationManager = variousWalkingManagers.getPelvisICPBasedTranslationManager();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       this.manipulationControlModule = variousWalkingManagers.getManipulationControlModule();
       this.feetManager = variousWalkingManagers.getFeetManager();
 
       this.walkingControllerParameters = walkingControllerParameters;
-
-      coefficientOfFriction.set(1.0);
 
       // Setup foot control modules:
       //    setupFootControlModules(); //TODO: get rid of that?
