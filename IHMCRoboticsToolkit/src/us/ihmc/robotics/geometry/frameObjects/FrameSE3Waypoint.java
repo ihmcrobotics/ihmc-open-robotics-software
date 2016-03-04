@@ -12,6 +12,7 @@ import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3Waypoint> implements SE3WaypointInterface<FrameSE3Waypoint>
@@ -261,5 +262,11 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    {
       setToZero(getReferenceFrame());
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+   }
+
+   public void get(SimpleSE3TrajectoryPoint geometryObject2)
+   {
+      // TODO Auto-generated method stub
+      
    }
 }
