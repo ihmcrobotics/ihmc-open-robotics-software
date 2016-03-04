@@ -44,7 +44,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
          }
       }
 
-      this.tuple = transformableDataObject;
+      this.tuple = getGeometryObject();
       this.name = name;
    }
 

@@ -32,7 +32,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
          }
       }
 
-      this.tuple = transformableDataObject;
+      this.tuple = getGeometryObject();
       this.name = name;
    }
 
