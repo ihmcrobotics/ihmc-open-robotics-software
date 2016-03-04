@@ -858,13 +858,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
       return 0.025;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
    @Override
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {

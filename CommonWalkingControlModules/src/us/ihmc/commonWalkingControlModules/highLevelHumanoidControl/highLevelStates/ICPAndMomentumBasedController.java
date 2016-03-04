@@ -301,11 +301,6 @@ public class ICPAndMomentumBasedController
       yoDesiredICPVelocity.set(desiredICP);
    }
 
-   public void scaleDesiredICPVelocity(double scaleFactor)
-   {
-      yoDesiredICPVelocity.scale(scaleFactor);
-   }
-
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
    {
       icpBasedLinearMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMPToPack);
