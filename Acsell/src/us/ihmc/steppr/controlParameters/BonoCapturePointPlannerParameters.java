@@ -3,7 +3,7 @@ package us.ihmc.steppr.controlParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 
 /** {@inheritDoc} */
-public class BonoCapturePointPlannerParameters implements CapturePointPlannerParameters
+public class BonoCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
    private final boolean runningOnRealRobot;
    // TODO Try using new ICP planner with two CMPs.

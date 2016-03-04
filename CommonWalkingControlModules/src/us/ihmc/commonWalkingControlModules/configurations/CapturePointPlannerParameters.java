@@ -19,7 +19,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
  * However, it requires to tune some more parameters.
  * </p>
  */
-public interface CapturePointPlannerParameters
+public abstract class CapturePointPlannerParameters
 {
    /** Refers to the duration of the first transfer when starting to walk. */
    public abstract double getDoubleSupportInitialTransferDuration();

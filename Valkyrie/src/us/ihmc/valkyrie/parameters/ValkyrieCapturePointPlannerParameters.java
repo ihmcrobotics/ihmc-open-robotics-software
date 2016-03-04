@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.parameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 
 /** {@inheritDoc} */
-public class ValkyrieCapturePointPlannerParameters implements CapturePointPlannerParameters
+public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;
