@@ -2,10 +2,10 @@ package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public abstract class FrameShape3d extends ReferenceFrameHolder
+public abstract class FrameShape3d extends AbstractReferenceFrameHolder
 {
    /**
     * Apply the given transform to translate and rotate this shape.

@@ -1,21 +1,23 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.After;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.After;
+import org.junit.Test;
+
+import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * <p>Title: </p>
@@ -29,7 +31,7 @@ import static org.junit.Assert.fail;
  * @author not attributable
  * @version 1.0
  */
-public class FrameVectorTest extends FrameTupleTest<Vector3d>
+public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
 {
 
    @After
@@ -50,7 +52,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
    }
 
    @Override
-   public FrameTuple<Vector3d> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
+   public FrameTuple<FrameVector, TransformableVector3d> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
    {
       return new FrameVector(referenceFrame, x, y, z, name);
    }
@@ -118,12 +120,13 @@ public class FrameVectorTest extends FrameTupleTest<Vector3d>
    {
       FrameVector frameVector = new FrameVector(theFrame);
       RigidBodyTransform transform3d = new RigidBodyTransform();
-      FrameVector result = new FrameVector();
       
       frameVector.changeFrameUsingTransform(childFrame, transform3d);
       frameVector.checkReferenceFrameMatch(childFrame);
       
-      result = frameVector.changeFrameUsingTransformCopy(theFrame, transform3d);
+      FrameVector result = new FrameVector(frameVector);
+
+      result.changeFrameUsingTransform(theFrame, transform3d);
       result.checkReferenceFrameMatch(theFrame);
       
       result = new FrameVector(frameVector);

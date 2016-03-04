@@ -30,17 +30,17 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
    private final ArrayList<RosTopicPublisher<?>> publishers;
 
 
-   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator gfe_communicator, PacketRouter<PacketDestination> packetRouter, String namespace)
+   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator rosAPI_communicator, PacketRouter<PacketDestination> packetRouter, String namespace)
    {
       ROS_NAMESPACE = namespace;
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.publishers = new ArrayList<RosTopicPublisher<?>>();
-      packetRouter.setPacketRedirects(PacketDestination.CONTROLLER, PacketDestination.GFE);
-      setupMsgTopics(gfe_communicator);
+      packetRouter.setPacketRedirects(PacketDestination.CONTROLLER, PacketDestination.ROS_API);
+      setupMsgTopics(rosAPI_communicator);
       rosMainNode.execute();
-//      gfe_communicator.attachGlobalListener(this);
+//      rosAPI_communicator.attachGlobalListener(this);
    }
 
    @Override
@@ -53,7 +53,7 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
 //      }
    }
 
-   private void setupMsgTopics(PacketCommunicator gfe_communicator)
+   private void setupMsgTopics(PacketCommunicator rosAPI_communicator)
    {
       Map<String, Class> outputPacketList = PACKETS_TO_REDIRECT_TO_ROS;
 
@@ -61,7 +61,7 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
       {
          Message message = messageFactory.newFromType(e.getKey());
 
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, gfe_communicator,
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, rosAPI_communicator,
                e.getValue());
          publishers.add(publisher);
          rosMainNode.attachPublisher(ROS_NAMESPACE + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), publisher);

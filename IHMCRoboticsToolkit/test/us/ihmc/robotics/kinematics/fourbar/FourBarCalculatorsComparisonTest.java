@@ -78,10 +78,10 @@ public class FourBarCalculatorsComparisonTest
       double outputFastRunnerCalculator = fastRunnerCalculator.getAngleABC();
 
       // (2) Other calculations
-      FourbarLink outputLink = new FourbarLink(AD);
-      FourbarLink groundLink = new FourbarLink(AB);
-      FourbarLink inputLink = new FourbarLink(BC);
-      FourbarLink floatingLink = new FourbarLink(CD);
+      final FourbarLink outputLink = new FourbarLink(AD);
+      final FourbarLink groundLink = new FourbarLink(AB);
+      final FourbarLink inputLink = new FourbarLink(BC);
+      final FourbarLink floatingLink = new FourbarLink(CD);
 
       FourbarProperties fourBarProperties = new FourbarProperties()
       {

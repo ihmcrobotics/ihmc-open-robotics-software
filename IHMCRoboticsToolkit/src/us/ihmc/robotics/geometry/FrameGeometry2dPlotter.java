@@ -542,7 +542,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
       for (int i = 0; i < frameConvexPolygon2d.getNumberOfVertices(); i++)
       {
-         FramePoint2d vertex = frameConvexPolygon2d.getFrameVertex(i);
+         Point2d vertex = frameConvexPolygon2d.getVertex(i);
          int xInt = doubleToInt(vertex.getX(), xCenter, scale, getWidth());
          int yInt = doubleToInt(vertex.getY(), yCenter, -scale, getHeight());
 

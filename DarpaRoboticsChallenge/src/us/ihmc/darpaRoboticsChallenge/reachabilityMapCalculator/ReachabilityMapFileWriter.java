@@ -187,7 +187,7 @@ public class ReachabilityMapFileWriter
    public static void main(String[] args) throws IOException
    {
       FramePose framePose = new FramePose();
-      framePose.setOrientation(1.0, 0.8, -1.1);
+      framePose.setYawPitchRoll(1.0, 0.8, -1.1);
       framePose.setPosition(3.1, 0.1, 1.0);
       System.out.println(framePose.getFrameOrientationCopy().toStringAsQuaternion());
 

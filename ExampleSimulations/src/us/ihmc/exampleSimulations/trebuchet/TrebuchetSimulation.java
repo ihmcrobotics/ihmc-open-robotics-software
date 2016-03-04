@@ -8,88 +8,100 @@ import javax.swing.JRadioButton;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-
+/**
+ * Example SimulationConstructionSet simulation. Trebuchet siege engine.  
+ *
+ */
 public class TrebuchetSimulation
 {
-   private SimulationConstructionSet sim;
+   private SimulationConstructionSet simulationConstructionSet;
 
    public TrebuchetSimulation()
    {
       TrebuchetRobot trebuchet = new TrebuchetRobot();
+      TrebuchetController trebuchetController = new TrebuchetController(trebuchet);
+      trebuchet.setController(trebuchetController);
 
-      sim = new SimulationConstructionSet(trebuchet);
+      simulationConstructionSet = new SimulationConstructionSet(trebuchet);
 
-      // Trebuchet View:
-      sim.setCameraFix(45.0, 0.0, 18.0);
-      sim.setCameraPosition(-64.0, 100.0, 8.0);
+      setupCameras();
+      createTrebuchetAndCastleViewButtons();
 
-      sim.setDT(0.001, 5);
+      setupGraphsAndEntryBoxes();
 
-      sim.setCameraTracking(false, true, true, true);
-      sim.setCameraDolly(false, true, true, true);
+      simulationConstructionSet.setDT(0.001, 5);
+      simulationConstructionSet.setSimulateDuration(15.0);
 
-      sim.setCameraTrackingVars("q_ball_x", "q_ball_y", "q_ball_z");
-      sim.setCameraDollyVars("q_ball_x", "q_ball_y", "q_ball_z");
-
-      sim.setCameraDollyOffsets(-30.0, -0.0, 10.0);
-
-      // Add some buttons:
-
-      JRadioButton trebView = new JRadioButton("Treb View");
-      trebView.setSelected(true);
-      trebView.setActionCommand("Treb View");
-      trebView.setRequestFocusEnabled(false);
-
-      JRadioButton castleView = new JRadioButton("Castle View");
-      castleView.setActionCommand("Castle View");
-      castleView.setRequestFocusEnabled(false);
-
-      ButtonGroup group = new ButtonGroup();
-      group.add(trebView);
-      group.add(castleView);
-
-      RadioListener myListener = new RadioListener();
-      trebView.addActionListener(myListener);
-      castleView.addActionListener(myListener);
-
-      sim.addRadioButton(trebView);
-      sim.addRadioButton(castleView);
-
-      sim.setClipDistances(1.0, 1000.0);
-      sim.setSimulateDuration(15.0);
-
-      // Set up some graphs and entry boxes:
-
-      sim.setupGraph("q_ball_x");
-      sim.setupGraph("q_ball_z");
-      sim.setupGraph(new String[] {"qd_ball_x", "qd_ball_z"});
-
-      sim.setupEntryBox("q_x");
-
-      // Start the simulation
-      Thread myThread = new Thread(sim);
-      myThread.start();
+      simulationConstructionSet.startOnAThread();
    }
 
-   public static void main(String[] args)
+   private void setupCameras()
    {
-      new TrebuchetSimulation();
+      simulationConstructionSet.setClipDistances(1.0, 1000.0);
+
+      simulationConstructionSet.setCameraFix(45.0, 0.0, 18.0);
+      simulationConstructionSet.setCameraPosition(-64.0, 100.0, 8.0);
+
+      simulationConstructionSet.setCameraTracking(false, true, true, true);
+      simulationConstructionSet.setCameraDolly(false, true, true, true);
+
+      simulationConstructionSet.setCameraTrackingVars("q_ball_x", "q_ball_y", "q_ball_z");
+      simulationConstructionSet.setCameraDollyVars("q_ball_x", "q_ball_y", "q_ball_z");
+
+      simulationConstructionSet.setCameraDollyOffsets(-30.0, -0.0, 10.0);
+   }
+
+   private void setupGraphsAndEntryBoxes()
+   {
+      simulationConstructionSet.setupGraph("q_ball_x");
+      simulationConstructionSet.setupGraph("q_ball_z");
+      simulationConstructionSet.setupGraph(new String[] { "qd_ball_x", "qd_ball_z" });
+
+      simulationConstructionSet.setupEntryBox("q_x");
+   }
+
+   private void createTrebuchetAndCastleViewButtons()
+   {
+      JRadioButton trebuchetViewButton = new JRadioButton("Trebuchet View");
+      trebuchetViewButton.setSelected(true);
+      trebuchetViewButton.setActionCommand("Trebuchet View");
+      trebuchetViewButton.setRequestFocusEnabled(false);
+
+      JRadioButton castleViewButton = new JRadioButton("Castle View");
+      castleViewButton.setActionCommand("Castle View");
+      castleViewButton.setRequestFocusEnabled(false);
+
+      ButtonGroup group = new ButtonGroup();
+      group.add(trebuchetViewButton);
+      group.add(castleViewButton);
+
+      RadioListener myListener = new RadioListener();
+      trebuchetViewButton.addActionListener(myListener);
+      castleViewButton.addActionListener(myListener);
+
+      simulationConstructionSet.addRadioButton(trebuchetViewButton);
+      simulationConstructionSet.addRadioButton(castleViewButton);
    }
 
    public class RadioListener implements ActionListener
    {
       public void actionPerformed(ActionEvent e)
       {
-         if (e.getActionCommand() == "Treb View")
+         if (e.getActionCommand() == "Trebuchet View")
          {
-            sim.setCameraFix(45.0, 0.0, 18.0);
-            sim.setCameraPosition(-64.0, 100.0, 8.0);
+            simulationConstructionSet.setCameraFix(45.0, 0.0, 18.0);
+            simulationConstructionSet.setCameraPosition(-64.0, 100.0, 8.0);
          }
          else if (e.getActionCommand() == "Castle View")
          {
-            sim.setCameraFix(395, 0.0, 8.0);
-            sim.setCameraPosition(470.0, 0.0, 0.0);
+            simulationConstructionSet.setCameraFix(395, 0.0, 8.0);
+            simulationConstructionSet.setCameraPosition(470.0, 0.0, 0.0);
          }
       }
+   }
+
+   public static void main(String[] args)
+   {
+      new TrebuchetSimulation();
    }
 }

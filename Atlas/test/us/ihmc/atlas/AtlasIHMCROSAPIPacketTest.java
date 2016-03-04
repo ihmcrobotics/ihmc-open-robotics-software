@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import us.ihmc.darpaRoboticsChallenge.GFERosPacketTest;
+import us.ihmc.darpaRoboticsChallenge.IHMCROSAPIPacketTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
@@ -8,7 +8,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 
 @DeployableTestClass(targets=TestPlanTarget.InDevelopment)
-public class AtlasGFERosPacketTest extends GFERosPacketTest
+public class AtlasIHMCROSAPIPacketTest extends IHMCROSAPIPacketTest
 {
 
    @Override
