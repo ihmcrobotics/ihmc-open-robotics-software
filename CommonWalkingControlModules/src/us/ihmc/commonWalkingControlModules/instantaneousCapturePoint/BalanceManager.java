@@ -76,6 +76,8 @@ public class BalanceManager
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
       icpPlanner.setOmega0(omega0);
+      icpPlanner.setSingleSupportTime(walkingControllerParameters.getDefaultSwingTime());
+      icpPlanner.setDoubleSupportTime(walkingControllerParameters.getDefaultTransferTime());
       icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, omega0, icpBasedLinearMomentumRateOfChangeControlModule,
             bipedSupportPolygons, statusOutputManager, parentRegistry);
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);

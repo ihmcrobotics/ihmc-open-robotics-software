@@ -23,58 +23,9 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
 
    /** {@inheritDoc} */
    @Override
-   public double getDoubleSupportDuration()
-   {
-      return runningOnRealRobot ? 2.0 : 0.25;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getAdditionalTimeForSingleSupport()
    {
       return 0.1;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getSingleSupportDuration()
-   {
-      return runningOnRealRobot ? 1.5 : 0.7;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public int getNumberOfFootstepsToConsider()
-   {
-      return 3;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDoubleSupportSplitFraction()
-   {
-      return 0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getFreezeTimeFactor()
-   {
-      return 0.0; //0.9;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaxInstantaneousCapturePointErrorForStartingSwing()
-   {
-      return 0.0; //0.025;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getDoTimeFreezing()
-   {
-      return false;
    }
 
    /** {@inheritDoc} */
@@ -107,23 +58,9 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
 
    /** {@inheritDoc} */
    @Override
-   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
-   {
-      return 0.03;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean useTwoCMPsPerSupport()
    {
       return useTwoCMPsPerSupport;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getTimeSpentOnExitCMPInPercentOfStepTime()
-   {
-      return 0.50;
    }
 
    /** {@inheritDoc} */
@@ -152,61 +89,5 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    public double getMinExitCMPForwardOffset()
    {
       return -0.04;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getCMPSafeDistanceAwayFromSupportEdges()
-   {
-      return 0.01;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaxDurationForSmoothingEntryToExitCMPSwitch()
-   {
-      return 0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getStepLengthToCMPOffsetFactor()
-   {
-      return 1.0 / 3.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useExitCMPOnToesForSteppingDown()
-   {
-      return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
-   {
-      return 0.15;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown()
-   {
-      return 0.10;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getCMPSafeDistanceAwayFromToesWhenSteppingDown()
-   {
-      return 0.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinTimeToSpendOnExitCMPInSingleSupport()
-   {
-      return 0.0;
    }
 }
