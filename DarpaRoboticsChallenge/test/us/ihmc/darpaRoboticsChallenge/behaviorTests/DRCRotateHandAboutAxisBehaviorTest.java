@@ -173,7 +173,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       FramePose desiredHandPose = new FramePose(chestFrame);
       desiredHandPose.setPosition(0.6, 0.2, -0.4);
-      desiredHandPose.setOrientation(0.0, 0.0, Math.PI / 3.0);
+      desiredHandPose.setYawPitchRoll(0.0, 0.0, Math.PI / 3.0);
       desiredHandPose.changeFrame(worldFrame);
       Point3d position = new Point3d();
       Quat4d orientation = new Quat4d();

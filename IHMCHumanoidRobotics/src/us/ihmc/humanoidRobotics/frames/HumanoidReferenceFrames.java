@@ -147,7 +147,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
                footPose.getOrientation(tempYawPitchRoll);
                tempYawPitchRoll[1] = 0.0;
                tempYawPitchRoll[2] = 0.0;
-               footPose.setOrientation(tempYawPitchRoll);
+               footPose.setYawPitchRoll(tempYawPitchRoll);
             }
 
             midFootZUpPose.interpolate(leftFootPose, rightFootPose, 0.5);

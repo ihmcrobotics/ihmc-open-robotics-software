@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.dataStructures.Pose;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;

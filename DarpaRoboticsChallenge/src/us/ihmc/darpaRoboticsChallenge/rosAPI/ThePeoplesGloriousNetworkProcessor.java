@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.gfe;
+package us.ihmc.darpaRoboticsChallenge.rosAPI;
 
 import java.io.IOException;
 import java.net.URI;
@@ -66,20 +66,20 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator,
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
          DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix) throws IOException
    {
-      this(rosUri, gfe_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, null, null);
+      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, null, null);
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator,
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
          DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix,
          List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
          List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
-      this.controllerCommunicationBridge = gfe_communicator;
+      this.controllerCommunicationBridge = rosAPI_communicator;
       this.scsSensorCommunicationBridge = sensorCommunicator;
       this.ppsTimestampOffsetProvider = ppsOffsetProvider;
       this.ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
@@ -90,10 +90,10 @@ public class ThePeoplesGloriousNetworkProcessor
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.fullRobotModel = robotModel.createFullRobotModel();
       HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
-      gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-      gfe_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
-      gfe_communicator.attachListener(HighLevelStateChangePacket.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
-      gfe_communicator.attachListener(CapturabilityBasedStatus.class, new RosCapturabilityBasedStatusPublisher(rosMainNode, namespace));
+      rosAPI_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      rosAPI_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
+      rosAPI_communicator.attachListener(HighLevelStateChangePacket.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
+      rosAPI_communicator.attachListener(CapturabilityBasedStatus.class, new RosCapturabilityBasedStatusPublisher(rosMainNode, namespace));
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace, tfPrefix);
@@ -125,7 +125,7 @@ public class ThePeoplesGloriousNetworkProcessor
          ThreadTools.sleep(100);
       }
 
-      gfe_communicator.connect();
+      rosAPI_communicator.connect();
 
       System.out.println("IHMC ROS API node successfully started.");
    }

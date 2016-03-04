@@ -553,7 +553,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       fullRobotModel.updateFrames();
       FramePose defaultSteeringWheelPose = new FramePose(fullRobotModel.getChest().getBodyFixedFrame());
       defaultSteeringWheelPose.setPosition(0.6, 0.0, -0.4);
-      defaultSteeringWheelPose.setOrientation(0.0, Math.toRadians(-33.0), 0.0);
+      defaultSteeringWheelPose.setYawPitchRoll(0.0, Math.toRadians(-33.0), 0.0);
       defaultSteeringWheelPose.changeFrame(worldFrame);
       steeringWheelPose.set(defaultSteeringWheelPose);
 
@@ -642,7 +642,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         desiredPelvisOffset.set(supportPolygon.getFrameVertex(i));
+         supportPolygon.getFrameVertex(i, desiredPelvisOffset);
          desiredPelvisOffset.sub(center);
          submitDesiredPelvisPositionOffset(false, shiftScaleVector.getX() * desiredPelvisOffset.getX(), shiftScaleVector.getY() * desiredPelvisOffset.getY(),
                0.0);
@@ -651,7 +651,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          sequencePelvisRotations(0.3); //TODO increase/decrease limit?
       }
       // Get back to the first vertex again
-      desiredPelvisOffset.set(supportPolygon.getFrameVertex(0));
+      supportPolygon.getFrameVertex(0, desiredPelvisOffset);
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
             pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
@@ -659,6 +659,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitChestHomeCommand(false);
       submitPelvisHomeCommand(false);
    }
+
+   private final FramePoint2d frameVertexBefore = new FramePoint2d();
+   private final FramePoint2d frameVertexCurrentlyChecked = new FramePoint2d();
+   private final FramePoint2d frameVertexAfter = new FramePoint2d();
 
    private void sequenceHardWarmup()
    {
@@ -676,9 +680,9 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       for (int i = 0; i < numberOfVertices; i++)
       {
-         FramePoint2d frameVertexBefore = supportPolygon.getFrameVertex(i);
-         FramePoint2d frameVertexCurrentlyChecked = supportPolygon.getFrameVertex((i + 1) % numberOfVertices);
-         FramePoint2d frameVertexAfter = supportPolygon.getFrameVertex((i + 2) % numberOfVertices);
+         supportPolygon.getFrameVertex(i, frameVertexBefore);
+         supportPolygon.getFrameVertex((i + 1) % numberOfVertices, frameVertexCurrentlyChecked);
+         supportPolygon.getFrameVertex((i + 2) % numberOfVertices, frameVertexAfter);
 
          FrameVector2d frameVector1 = new FrameVector2d(midFeetZUpFrame);
          frameVector1.sub(frameVertexCurrentlyChecked, frameVertexBefore);
@@ -1105,13 +1109,13 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         desiredPelvisOffset.set(supportPolygon.getFrameVertex(i));
+         supportPolygon.getFrameVertex(i, desiredPelvisOffset);
          desiredPelvisOffset.sub(center);
          submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
                pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
       }
       // Get back to the first vertex again
-      desiredPelvisOffset.set(supportPolygon.getFrameVertex(0));
+      supportPolygon.getFrameVertex(0, desiredPelvisOffset);
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
             pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
@@ -1387,7 +1391,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       FramePose footPose = new FramePose(ankleZUpFrame);
       footPose.setPosition(-0.40, robotSide.negateIfRightSide(0.25), 0.40);
-      footPose.setOrientation(0.0, 0.8 * Math.PI / 2.0, 0.0);
+      footPose.setYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(20.0), 0.0);
@@ -1401,7 +1405,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.13);
-      footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
+      footPose.setYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       submitFootPose(true, robotSide, footPose);
       submitChestHomeCommand(true);
       submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians(robotSide.negateIfRightSide(25.0)));
@@ -1413,7 +1417,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.13);
-      footPose.setOrientation(0.0, 0.0, 0.0);
+      footPose.setYawPitchRoll(0.0, 0.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredPelvisOrientation(true, 0.0, 0.0, 0.0);
@@ -1843,7 +1847,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FramePose footPose = new FramePose();
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
-      footPose.setOrientation(0.0, 0.0, 0.0);
+      footPose.setYawPitchRoll(0.0, 0.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitChestHomeCommand(true);
@@ -1937,7 +1941,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FramePose footPose = new FramePose();
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
-      footPose.setOrientation(0.0, -halfPi / 2.0, 0.0);
+      footPose.setYawPitchRoll(0.0, -halfPi / 2.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(-5.0), 0.0);
@@ -1954,7 +1958,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
-      footPose.setOrientation(0.0, 0.8 * halfPi, 0.0);
+      footPose.setYawPitchRoll(0.0, 0.8 * halfPi, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(30.0), 0.0);
@@ -1971,7 +1975,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.2);
-      footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
+      footPose.setYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(30.0)));
@@ -1984,7 +1988,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
-      footPose.setOrientation(0.0, 0.0, 0.0);
+      footPose.setYawPitchRoll(0.0, 0.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitChestHomeCommand(true);
@@ -2106,7 +2110,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       SixDoFJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePose desiredPelvisPosition = new FramePose(frameAfterRootJoint);
       desiredPelvisPosition.setPosition(dx, dy, dz);
-      desiredPelvisPosition.setOrientation(yaw, pitch, roll);
+      desiredPelvisPosition.setYawPitchRoll(yaw, pitch, roll);
       desiredPelvisPosition.changeFrame(worldFrame);
       PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisPosition, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue());

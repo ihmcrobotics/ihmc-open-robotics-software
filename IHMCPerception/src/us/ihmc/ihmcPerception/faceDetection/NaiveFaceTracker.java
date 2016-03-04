@@ -85,7 +85,7 @@ public class NaiveFaceTracker
       while (true)
       {
          cap.read(image);
-//         Imgcodecs.imdecode(buf, flags)
+         //         Imgcodecs.imdecode(buf, flags)
          Imgcodecs.imencode(".bmp", image, mem);
          BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
 

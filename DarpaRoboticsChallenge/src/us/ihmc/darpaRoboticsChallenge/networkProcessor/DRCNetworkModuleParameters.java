@@ -20,7 +20,7 @@ public class DRCNetworkModuleParameters
    private boolean useHandModule;
    private boolean usePerceptionModule;
    private boolean useRosModule;
-   private boolean useGFECommunicator;
+   private boolean useROSAPICommunicator;
    private boolean useZeroPoseRobotConfigurationPublisher;
    private boolean useMocapModule;
    private boolean useLocalControllerCommunicator;
@@ -174,14 +174,14 @@ public class DRCNetworkModuleParameters
       return useZeroPoseRobotConfigurationPublisher;
    }
    
-   public void enableGFECommunicator(boolean useGFECommunicator)
+   public void enableROSAPICommunicator(boolean useROSAPICommunicator)
    {
-      this.useGFECommunicator = useGFECommunicator;
+      this.useROSAPICommunicator = useROSAPICommunicator;
    }
    
-   public boolean isGFECommunicatorEnabled()
+   public boolean isROSAPICommunicatorEnabled()
    {
-      return useGFECommunicator;
+      return useROSAPICommunicator;
    }
    
    public void enableControllerCommunicator(boolean useControllerCommunicator)

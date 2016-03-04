@@ -22,8 +22,8 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    private FrameVector jointAxis;
 
-   protected double q;
-   protected double qd;
+   private double q;
+   private double qd;
    private double qdd;
    private double tauMeasured;
    private double qddDesired;

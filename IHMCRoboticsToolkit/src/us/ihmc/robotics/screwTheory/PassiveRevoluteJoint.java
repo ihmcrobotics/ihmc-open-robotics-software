@@ -8,7 +8,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {
-   private boolean hasBeenInitialized = false;
    private final boolean isPartOfClosedKinematicLoop;
 
    /**
@@ -21,30 +20,12 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     *    2) getTau() should always return a zero because, since the joint is NOT actuated,
     *    there is no torque.
     */
-   
    public PassiveRevoluteJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, FrameVector jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       super(name, predecessor, beforeJointFrame, jointAxis);
       this.isPartOfClosedKinematicLoop = isPartOfClosedKinematicLoop;
    }
-   
-   /**
-    * This method should only be called once. Do not use as a setQ(), or setQD()
-    */
-   public void initializePositionAndVelocity(double q, double qd)
-   {
-      if(!hasBeenInitialized)
-      {
-         this.q = q;
-         this.qd = qd;         
-      }
-      else
-      {
-         throw new RuntimeException(getName() + " has already been initialized!");
-      }
-      hasBeenInitialized = true;
-   }
-   
+
    /**
     * Torque on a passive joint is always zero
     */
@@ -74,22 +55,31 @@ public class PassiveRevoluteJoint extends RevoluteJoint
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
 
+   /** 
+    * If part of a kinematic loop, this should only be called by that loop's calculator 
+    */
    @Override
    public void setQ(double q)
    {
-      throw new RuntimeException("Cannot set position of a passive joint");
+      super.setQ(q);
    }
 
+   /** 
+    * If part of a kinematic loop, this should only be called by that loop's calculator 
+    */
    @Override
    public void setQd(double qd)
    {
-      throw new RuntimeException("Cannot set velocity of a passive joint");
+      super.setQd(qd);
    }
 
+   /** 
+    * If part of a kinematic loop, this should only be called by that loop's calculator 
+    */
    @Override
    public void setQdd(double qdd)
    {
-      throw new RuntimeException("Cannot set acceleration of a passive joint");
+      super.setQdd(qdd);
    }
 
    @Override
@@ -101,7 +91,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    @Override
    public void setTau(double tau)
    {
-      throw new RuntimeException("Cannot set torque of a passive joint");  
+      throw new RuntimeException("Cannot set torque of a passive joint");
    }
 
    @Override
@@ -133,22 +123,9 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    {
       return true;
    }
-   
+
    public boolean isPartOfClosedKinematicLoop()
    {
       return isPartOfClosedKinematicLoop;
-   }
-   
-   void updateQ(double q)
-   {
-      if (Double.isNaN(q))
-         throw new RuntimeException("q is NaN! this = " + this);
-      this.q = q;
-      afterJointFrame.setAndUpdate(q);      
-   }
-   
-   void updateQd(double qd)
-   {
-      this.qd = qd;
    }
 }

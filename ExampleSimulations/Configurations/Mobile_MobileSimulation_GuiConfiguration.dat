@@ -1,7 +1,8 @@
 <GraphGroup>
 	<Cols>1</Cols>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes Tab Pane>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -37,10 +38,10 @@
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>false</Track>
+<Track>true</Track>
 <Track X>false</Track X>
 <Track Y>false</Track Y>
-<Track Z>false</Track Z>
+<Track Z>true</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>

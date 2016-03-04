@@ -1,11 +1,11 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import java.util.Random;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * <p>Title: </p>
@@ -19,9 +19,8 @@ import java.util.Random;
  * @author Twan Koolen
  * @version 1.0
  */
-public class FrameLineSegment2d extends FrameGeometry2d
+public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, LineSegment2d>
 {
-   protected ReferenceFrame referenceFrame;
    protected final LineSegment2d lineSegment;
 
    private final Point2d tempPoint2d = new Point2d();
@@ -34,46 +33,45 @@ public class FrameLineSegment2d extends FrameGeometry2d
 
    public FrameLineSegment2d(ReferenceFrame referenceFrame)
    {
-      this.referenceFrame = referenceFrame;
-      this.lineSegment = new LineSegment2d();
+      super(referenceFrame, new LineSegment2d());
+      
+      this.lineSegment = this.transformableDataObject;
    }
 
    public FrameLineSegment2d(ReferenceFrame referenceFrame, LineSegment2d lineSegment2d)
    {
-      this.referenceFrame = referenceFrame;
-      this.lineSegment = lineSegment2d;
+      super(referenceFrame, lineSegment2d);
+      
+      this.lineSegment = this.transformableDataObject;
    }
 
    public FrameLineSegment2d(ReferenceFrame referenceFrame, Point2d[] endpoints)
    {
-      this.referenceFrame = referenceFrame;
-      this.lineSegment = new LineSegment2d(endpoints);
+      this(referenceFrame);
+      this.lineSegment.set(endpoints);
    }
 
    public FrameLineSegment2d(ReferenceFrame referenceFrame, Point2d endpoint1, Point2d endpoint2)
    {
-      this.referenceFrame = referenceFrame;
-      this.lineSegment = new LineSegment2d(endpoint1, endpoint2);
+      this(referenceFrame, new LineSegment2d(endpoint1, endpoint2));
    }
 
    public FrameLineSegment2d(FramePoint2d[] endpoints)
    {
+      this(endpoints[0].getReferenceFrame(), new LineSegment2d(endpoints[0].getPointCopy(), endpoints[1].getPointCopy()));
+      
       endpoints[0].checkReferenceFrameMatch(endpoints[1]);
-      this.referenceFrame = endpoints[0].getReferenceFrame();
-      this.lineSegment = new LineSegment2d(endpoints[0].getPointCopy(), endpoints[1].getPointCopy());
    }
 
    public FrameLineSegment2d(FramePoint2d endpoint1, FramePoint2d endpoint2)
    {
+      this(endpoint1.getReferenceFrame(), new LineSegment2d(endpoint1.getPointCopy(), endpoint2.getPointCopy()));
       endpoint1.checkReferenceFrameMatch(endpoint2);
-      this.referenceFrame = endpoint1.getReferenceFrame();
-      this.lineSegment = new LineSegment2d(endpoint1.getPointCopy(), endpoint2.getPointCopy());
    }
 
    public FrameLineSegment2d(FrameLineSegment2d frameLineSegment2d)
    {
-      this.referenceFrame = frameLineSegment2d.getReferenceFrame();
-      this.lineSegment = new LineSegment2d(frameLineSegment2d.lineSegment);
+      this(frameLineSegment2d.getReferenceFrame(), new LineSegment2d(frameLineSegment2d.lineSegment));
    }
 
    public void set(FramePoint2d endpoint0, FramePoint2d endpoint1)
@@ -254,18 +252,6 @@ public class FrameLineSegment2d extends FrameGeometry2d
    }
 
    @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
-   }
-
-   @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      lineSegment.applyTransform(transform);
-   }
-
-   @Override
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
    {
       lineSegment.applyTransformAndProjectToXYPlane(transform);
@@ -288,22 +274,6 @@ public class FrameLineSegment2d extends FrameGeometry2d
    }
 
    private RigidBodyTransform temporaryTransformToDesiredFrame;
-
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // this is in the correct frame already
-      if (desiredFrame == referenceFrame)
-         return;
-
-      if (temporaryTransformToDesiredFrame == null)
-         temporaryTransformToDesiredFrame = new RigidBodyTransform();
-
-      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
-
-      applyTransform(temporaryTransformToDesiredFrame);
-      referenceFrame = desiredFrame;
-   }
 
    @Override
    public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)

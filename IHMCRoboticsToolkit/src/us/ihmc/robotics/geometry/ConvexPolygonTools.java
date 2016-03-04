@@ -757,7 +757,8 @@ public class ConvexPolygonTools
       if (!success)
          return false;
 
-      combinedPolygonToPack.updateFramePoints();
+//      combinedPolygonToPack.updateFramePoints();
+      combinedPolygonToPack.update();
 
       return true;
    }
@@ -791,7 +792,13 @@ public class ConvexPolygonTools
 
    public static int cutPolygonWithLine(FrameLine2d cuttingLine, FrameConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
    {
-      FramePoint2d[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
+      cuttingLine.checkReferenceFrameMatch(polygonToCut);
+      return cutPolygonWithLine(cuttingLine.getLine2d(), polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
+   }
+   
+   public static int cutPolygonWithLine(Line2d cuttingLine, ConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
+   {
+      Point2d[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
 
       if (intersectionPoints == null || intersectionPoints.length == 1)
       {
@@ -803,7 +810,7 @@ public class ConvexPolygonTools
          int index = 0;
          while (index < polygonToCut.getNumberOfVertices())
          {
-            FramePoint2d vertex = polygonToCut.getFrameVertexUnsafe(index);
+            Point2d vertex = polygonToCut.getVertexUnsafe(index);
             if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut))
             {
                polygonToCut.removeVertex(index);
@@ -814,7 +821,7 @@ public class ConvexPolygonTools
                index++;
             }
          }
-         polygonToCut.addVertices(intersectionPoints);
+         polygonToCut.addVertices(intersectionPoints, intersectionPoints.length);
          polygonToCut.update();
          return numberOfVerticesRemoved;
       }

@@ -423,7 +423,7 @@ public class GenericRosMessageConverter
             int index = (byte) getValue.invoke(message);
             if ((index < 0) || (index >= fieldType.getEnumConstants().length))
             {
-               // print a useful message to syserr for GFE teams:
+               // print a useful message to syserr for ROS API users:
                System.err.println(fieldName + " has invalid value of " + index + " (the size of enum " + fieldType.getName() + " is "
                                   + fieldType.getEnumConstants().length + ")");
 
