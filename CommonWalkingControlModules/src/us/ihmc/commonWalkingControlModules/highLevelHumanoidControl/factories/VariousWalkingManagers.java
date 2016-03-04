@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
@@ -16,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMas
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -29,7 +27,6 @@ public class VariousWalkingManagers
    private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
 
    public VariousWalkingManagers(ControllerStatusOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
@@ -77,9 +74,6 @@ public class VariousWalkingManagers
       feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, registry);
 
       pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, registry);
-
-      YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
-      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, pelvisXYControlGains, registry);
    }
 
    public void initializeManagers()
@@ -129,11 +123,6 @@ public class VariousWalkingManagers
    public PelvisOrientationManager getPelvisOrientationManager()
    {
       return pelvisOrientationManager;
-   }
-
-   public PelvisICPBasedTranslationManager getPelvisICPBasedTranslationManager()
-   {
-      return pelvisICPBasedTranslationManager;
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
