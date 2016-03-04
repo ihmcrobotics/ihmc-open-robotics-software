@@ -135,10 +135,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable hasICPPlannerBeenInitializedAtStart = new BooleanYoVariable("hasICPPlannerBeenInitializedAtStart", registry);
 
-   private final DoubleYoVariable timeICPPlannerFinishedAt;
-   private final DoubleYoVariable desiredICPVelocityReductionDuration;
-   private final DoubleYoVariable desiredICPVelocityRedutionFactor;
-
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
    private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent",
@@ -193,11 +189,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       controlledCoMHeightAcceleration = balanceManager.getControlledCoMHeightAcceleration();
 
       this.footSwitches = momentumBasedController.getFootSwitches();
-
-      this.timeICPPlannerFinishedAt = new DoubleYoVariable("timeICPPlannerFinishedAt", registry);
-      this.desiredICPVelocityReductionDuration = new DoubleYoVariable("desiredICPVelocityReductionDuration", registry);
-      desiredICPVelocityReductionDuration.set(walkingControllerParameters.getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer());
-      this.desiredICPVelocityRedutionFactor = new DoubleYoVariable("desiredICPVelocityRedutionFactor", registry);
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -401,8 +392,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d capturePoint2d = new FramePoint2d();
       private final FramePoint2d desiredCMP = new FramePoint2d();
 
-      private boolean isICPPlannerDonePreviousValue = false;
-
       public DoubleSupportState(RobotSide transferToSide)
       {
          super((transferToSide == null) ? WalkingState.DOUBLE_SUPPORT : WalkingState.getTransferState(transferToSide));
@@ -443,24 +432,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          balanceManager.setDesiredICPVelocity(desiredICPVelocityLocal);
 
          switchToToeOffIfPossible();
-
-         boolean isICPPlannerDone = balanceManager.isDone(yoTime.getDoubleValue());
-         if (transferToSide != null && isICPPlannerDone)
-         {
-            if (!isICPPlannerDonePreviousValue)
-               timeICPPlannerFinishedAt.set(yoTime.getDoubleValue());
-
-            isICPPlannerDonePreviousValue = isICPPlannerDone;
-
-            if (!timeICPPlannerFinishedAt.isNaN())
-            {
-               double doneDuration = yoTime.getDoubleValue() - timeICPPlannerFinishedAt.getDoubleValue();
-               desiredICPVelocityRedutionFactor.set(1.0 - doneDuration / desiredICPVelocityReductionDuration.getDoubleValue());
-               desiredICPVelocityRedutionFactor.set(MathTools.clipToMinMax(desiredICPVelocityRedutionFactor.getDoubleValue(), 0.0, 1.0));
-
-               balanceManager.scaleDesiredICPVelocity(desiredICPVelocityRedutionFactor.getDoubleValue());
-            }
-         }
 
          if (pushRecoveryModule.isEnabled())
          {
@@ -582,9 +553,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          balanceManager.enablePelvisXYControl();
          balanceManager.clearPlan();
-         isICPPlannerDonePreviousValue = false;
-         timeICPPlannerFinishedAt.set(Double.NaN);
-         desiredICPVelocityRedutionFactor.set(Double.NaN);
          supportLeg.set(null);
 
          commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);

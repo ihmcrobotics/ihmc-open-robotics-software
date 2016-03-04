@@ -58,6 +58,9 @@ public class ICPPlanner
    private final DoubleYoVariable remainingTime = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
    private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable(namePrefix + "NumberFootstepsToConsider", registry);
 
+   private final DoubleYoVariable velocityDecayDurationWhenDone = new DoubleYoVariable(namePrefix + "VelocityDecayDurationWhenDone", registry);
+   private final DoubleYoVariable velocityReductionFactor = new DoubleYoVariable(namePrefix + "VelocityReductionFactor", registry);
+
    private final YoFramePointInMultipleFrames singleSupportInitialICP;
    private final YoFrameVector singleSupportInitialICPVelocity = new YoFrameVector(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
 
@@ -112,6 +115,9 @@ public class ICPPlanner
       doubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
       exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
       useTwoConstantCMPsPerSupport.set(icpPlannerParameters.useTwoCMPsPerSupport());
+
+      velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
+      velocityReductionFactor.set(Double.NaN);
 
       // Initialize omega0 to NaN to force the user to explicitly set it.
       omega0.set(Double.NaN);
@@ -569,6 +575,33 @@ public class ICPPlanner
                desiredCapturePointPosition);
          CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP,
                desiredCapturePointVelocity);
+      }
+
+      decayDesiredVelocityIfNeeded(timeInCurrentState);
+   }
+
+   private void decayDesiredVelocityIfNeeded(double timeInCurrentState)
+   {
+      if (velocityDecayDurationWhenDone.isNaN())
+      {
+         velocityReductionFactor.set(Double.NaN);
+         return;
+      }
+
+      double hasBeenDoneForDuration = timeInCurrentState;
+      if (isDoubleSupport.getBooleanValue())
+         hasBeenDoneForDuration -= doubleSupportDuration.getDoubleValue();
+      else
+         hasBeenDoneForDuration -= singleSupportDuration.getDoubleValue();
+
+      if (hasBeenDoneForDuration <= 0.0)
+      {
+         velocityReductionFactor.set(Double.NaN);
+      }
+      else
+      {
+         velocityReductionFactor.set(MathTools.clipToMinMax(1.0 - hasBeenDoneForDuration / velocityDecayDurationWhenDone.getDoubleValue(), 0.0, 1.0));
+         desiredCapturePointVelocity.scale(velocityReductionFactor.getDoubleValue());
       }
    }
 

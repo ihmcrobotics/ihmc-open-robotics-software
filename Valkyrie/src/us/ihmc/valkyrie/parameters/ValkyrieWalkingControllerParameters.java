@@ -979,13 +979,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return 0.02;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
    @Override
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {

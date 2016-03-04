@@ -226,4 +226,17 @@ public abstract class CapturePointPlannerParameters
    {
       return 0.0;
    }
+
+   /**
+    * When the plan is done for the current state, the desired ICP velocity then linearly decays to reach 0.0 in the given duration.
+    * This is particularly useful when the robot gets stuck in transfer state because the ICP error is too large to switch to swing.
+    * Even in that state, the ICP planner is still giving a desired ICP velocity preventing the ICP convergence to a certain extent.
+    * This parameter allows to cancel out this desired velocity when stuck in the transfer state helping the convergence of the ICP and will help to get the robot to switch to swing.
+    * Set to {@link Double#NaN} or {@link Double#POSITIVE_INFINITY} to not use this feature.
+    * A value around 0.5sec to 1.0sec seems reasonable.
+    */
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return Double.NaN;
+   }
 }

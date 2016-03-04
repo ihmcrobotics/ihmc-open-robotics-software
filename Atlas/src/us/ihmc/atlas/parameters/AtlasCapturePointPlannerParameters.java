@@ -104,4 +104,11 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    {
       return AtlasPhysicalProperties.footLengthForControl;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return 0.5;
+   }
 }

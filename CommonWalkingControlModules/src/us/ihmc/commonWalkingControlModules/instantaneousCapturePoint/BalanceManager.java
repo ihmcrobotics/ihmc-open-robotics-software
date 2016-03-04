@@ -209,11 +209,6 @@ public class BalanceManager
       icpAndMomentumBasedController.setDesiredICPVelocity(desiredICP);
    }
 
-   public void scaleDesiredICPVelocity(double scaleFactor)
-   {
-      icpAndMomentumBasedController.scaleDesiredICPVelocity(scaleFactor);
-   }
-
    public void getFinalDesiredCapturePointPosition(FramePoint2d finalDesiredCapturePointPositionToPack)
    {
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredCapturePointPositionToPack);
