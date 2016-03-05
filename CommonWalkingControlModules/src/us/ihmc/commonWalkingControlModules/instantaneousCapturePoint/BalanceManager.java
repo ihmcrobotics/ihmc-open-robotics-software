@@ -21,6 +21,8 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -54,13 +56,17 @@ public class BalanceManager
 
    private final DoubleYoVariable yoTime;
 
+   private final ReferenceFrame centerOfMassFrame;
+
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-
    private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
-
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
+   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
+
+   private final FramePoint centerOfMass = new FramePoint();
+   private final FramePoint2d centerOfMass2d = new FramePoint2d();
 
    public BalanceManager(ControllerStatusOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
@@ -82,6 +88,8 @@ public class BalanceManager
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
       yoTime = momentumBasedController.getYoTime();
+
+      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
 
@@ -116,13 +124,19 @@ public class BalanceManager
    {
       return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
    }
+
    public void clearICPPlan()
    {
       icpPlanner.clearPlan();
    }
 
-   public void compute(boolean keepCMPInsideSupportPolygon)
+   public void compute(RobotSide supportLeg, boolean keepCMPInsideSupportPolygon)
    {
+      if (supportLeg == null)
+         computeForDoubleSupport();
+      else
+         computeForSingleSupport(supportLeg);
+
       finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
       icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
    }
@@ -314,6 +328,19 @@ public class BalanceManager
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
+   public double getICPErrorMagnitude()
+   {
+      return icpAndMomentumBasedController.getCapturePoint().getXYPlaneDistance(icpAndMomentumBasedController.getDesiredICP());
+   }
+
+   public void getICPError(FrameVector2d icpErrorToPack)
+   {
+      getCapturePoint(capturePoint2d);
+      getDesiredICP(desiredCapturePoint2d);
+      icpErrorToPack.setIncludingFrame(desiredCapturePoint2d);
+      icpErrorToPack.sub(capturePoint2d);
+   }
+
    public boolean isICPPlanDone(double doubleValue)
    {
       return icpPlanner.isDone(doubleValue);
@@ -357,6 +384,23 @@ public class BalanceManager
    public void resetPushRecovery()
    {
       pushRecoveryControlModule.reset();
+   }
+
+   public void requestICPPlannerToHoldCurrentCoM(double distancceFromSupportPolygonEdges)
+   {
+      centerOfMass.setToZero(centerOfMassFrame);
+
+      updateBipedSupportPolygons();
+      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distancceFromSupportPolygonEdges, shrunkSupportPolygon);
+
+      centerOfMass.changeFrame(shrunkSupportPolygon.getReferenceFrame());
+      centerOfMass2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMass);
+      shrunkSupportPolygon.orthogonalProjection(centerOfMass2d);
+      centerOfMass.setXY(centerOfMass2d);
+
+      centerOfMass.changeFrame(worldFrame);
+      icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), centerOfMass);
    }
 
    public void setDesiredICP(FramePoint2d desiredCapturePoint)

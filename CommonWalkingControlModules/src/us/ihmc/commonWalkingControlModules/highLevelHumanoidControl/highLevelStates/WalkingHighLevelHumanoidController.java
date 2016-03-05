@@ -47,7 +47,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -95,9 +94,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final FramePoint tmpFramePoint = new FramePoint(worldFrame);
-   private final FramePoint2d tempFramePoint2d = new FramePoint2d();
-
    private final DoubleYoVariable controlledCoMHeightAcceleration;
 
    private final BooleanYoVariable isPerformingToeOff = new BooleanYoVariable("isPerformingToeOff", registry);
@@ -125,8 +121,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable hasICPPlannerBeenInitializedAtStart = new BooleanYoVariable("hasICPPlannerBeenInitializedAtStart", registry);
 
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
-   private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
    private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent",
          registry);
    private final BooleanYoVariable holdICPToCurrentCoMLocationInNextDoubleSupport = new BooleanYoVariable("holdICPToCurrentCoMLocationInNextDoubleSupport",
@@ -338,24 +332,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
-   public void requestICPPlannerToHoldCurrentCoM()
-   {
-      tmpFramePoint.setToZero(referenceFrames.getCenterOfMassFrame());
-
-      balanceManager.updateBipedSupportPolygons();
-      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(),
-            shrunkSupportPolygon);
-
-      tmpFramePoint.changeFrame(shrunkSupportPolygon.getReferenceFrame());
-      tempFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(tmpFramePoint);
-      shrunkSupportPolygon.orthogonalProjection(tempFramePoint2d);
-      tmpFramePoint.setXY(tempFramePoint2d);
-
-      tmpFramePoint.changeFrame(worldFrame);
-      balanceManager.holdCurrentICP(yoTime.getDoubleValue(), tmpFramePoint);
-   }
-
    private void initializeContacts()
    {
       momentumBasedController.clearContacts();
@@ -400,8 +376,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             consumeManipulationMessages();
             consumePelvisMessages();
          }
-
-         balanceManager.computeForDoubleSupport();
 
          switchToToeOffIfPossible();
 
@@ -513,6 +487,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          preparingForLocomotion.set(false);
 
          balanceManager.clearICPPlan();
+         balanceManager.setDoubleSupportTime(walkingMessageHandler.getTransferTime());
+         balanceManager.setSingleSupportTime(walkingMessageHandler.getSwingTime());
+
          supportLeg.set(null);
          isPerformingToeOff.set(false);
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
@@ -603,7 +580,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
             {
-               requestICPPlannerToHoldCurrentCoM();
+               balanceManager.requestICPPlannerToHoldCurrentCoM(distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue());
                holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
             }
 
@@ -631,8 +608,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private class SingleSupportState extends State<WalkingState>
    {
       private final RobotSide swingSide;
-
-      private final FramePoint2d desiredICPLocal = new FramePoint2d();
       private final FramePoint2d capturePoint2d = new FramePoint2d();
 
       private Footstep nextFootstep;
@@ -653,17 +628,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          RobotSide supportSide = swingSide.getOppositeSide();
          integrateAnkleAccelerationsOnSwingLeg(swingSide);
 
-         balanceManager.computeForSingleSupport(supportSide);
-
          if (isInFlamingoStance.getBooleanValue())
          {
             feetManager.handleFootTrajectoryMessage(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
          }
 
-         balanceManager.getDesiredICP(desiredICPLocal);
          balanceManager.getCapturePoint(capturePoint2d);
 
-         boolean icpErrorIsTooLarge = capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
+         boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
          if (isInFlamingoStance.getBooleanValue())
          {
@@ -822,7 +794,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             updateFootstepParameters();
 
-            updateICPPlannerTimesAndOmega0();
             balanceManager.addFootstepToPlan(nextFootstep);
             balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
             balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
@@ -995,9 +966,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public class DoneWithTransferCondition implements StateTransitionCondition
    {
       private final RobotSide robotSide;
-      private final FramePoint2d capturePoint2d = new FramePoint2d();
-      private final FramePoint2d desiredICP2d = new FramePoint2d();
-      private final FramePoint2d icpError2d = new FramePoint2d();
+      private final FrameVector2d icpError2d = new FrameVector2d();
 
       public DoneWithTransferCondition(RobotSide robotSide)
       {
@@ -1011,14 +980,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (!icpTrajectoryIsDone)
             return false;
 
-         balanceManager.getCapturePoint(capturePoint2d);
-         balanceManager.getDesiredICP(desiredICP2d);
-
-         capturePoint2d.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
-         desiredICP2d.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
-
-         icpError2d.setIncludingFrame(desiredICP2d);
-         icpError2d.sub(capturePoint2d);
+         balanceManager.getICPError(icpError2d);
+         icpError2d.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
 
          double ellipticErrorSquared = MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getDoubleValue())
                + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getDoubleValue());
@@ -1128,12 +1091,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private void updateICPPlannerTimesAndOmega0()
-   {
-      balanceManager.setDoubleSupportTime(walkingMessageHandler.getTransferTime());
-      balanceManager.setSingleSupportTime(walkingMessageHandler.getSwingTime());
-   }
-
    private TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
    {
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
@@ -1210,12 +1167,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doPelvisControl();
       JointspaceFeedbackControlCommand unconstrainedJointCommand = doUnconstrainedJointControl();
 
-
       boolean keepCMPInsideSupportPolygon = true;
       if ((manipulationControlModule != null) && (manipulationControlModule.isAtLeastOneHandLoadBearing()))
          keepCMPInsideSupportPolygon = false;
 
-      balanceManager.compute(keepCMPInsideSupportPolygon);      
+      balanceManager.compute(supportLeg.getEnumValue(), keepCMPInsideSupportPolygon);      
 
       submitControllerCoreCommands(unconstrainedJointCommand);
 
@@ -1402,8 +1358,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       if (commandInputManager.isNewMessageAvailable(ModifiableFootstepDataListMessage.class))
          walkingMessageHandler.handleFootstepDataListMessage(commandInputManager.pollNewestMessage(ModifiableFootstepDataListMessage.class));
-
-      updateICPPlannerTimesAndOmega0();
    }
 
    private void consumeAbortWalkingMessages()
