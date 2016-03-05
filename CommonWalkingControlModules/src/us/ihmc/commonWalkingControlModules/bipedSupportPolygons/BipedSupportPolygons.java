@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer.defaultFeetColors;
+
 import java.awt.Color;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -40,6 +42,7 @@ public class BipedSupportPolygons
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static boolean VISUALIZE = true;
+   private static final int maxNumberOfContactPointsPerFoot = 4;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedSupportPolygons");
 
@@ -56,8 +59,10 @@ public class BipedSupportPolygons
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>();
    private final FrameConvexPolygon2d supportPolygonInMidFeetZUp = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d supportPolygonInWorld = new FrameConvexPolygon2d();
+
    private final YoFrameConvexPolygon2d supportPolygonViz;
    private final YoFrameLineSegment2d footToFootSegmentViz;
+   private final SideDependentList<YoFrameConvexPolygon2d> footPolygonsViz = new SideDependentList<>();
 
    // 'Sweet spots', the spots inside each of the footPolygons where capture point placement leads to really good balance. Typically the middle of the foot or so:
    private final SideDependentList<YoFramePoint2d> sweetSpotsInAnkleZUp = new SideDependentList<YoFramePoint2d>();
@@ -76,13 +81,13 @@ public class BipedSupportPolygons
       this.midFeetZUp = midFeetZUpFrame;
       this.soleZUpFrames = soleZUpFrames;
 
-      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 30, registry);
+      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
       footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", worldFrame, registry);
 
       ArtifactList artifactList = new ArtifactList("Biped Support Polygon");
 
-      YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon("Combined Polygon", supportPolygonViz, Color.pink, false);
-      artifactList.add(dynamicGraphicYoPolygonArtifact);
+      YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("Combined Polygon", supportPolygonViz, Color.pink, false);
+      artifactList.add(supportPolygonArtifact);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -94,6 +99,11 @@ public class BipedSupportPolygons
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          sweetSpotsInAnkleZUp.put(robotSide, new YoFramePoint2d(robotSidePrefix + "SweetSpotInAnkleZUp", ankleZUpFrames.get(robotSide), registry));
          sweetSpotsInMidFeetZUp.put(robotSide, new YoFramePoint2d(robotSidePrefix + "SweetSpotsInMidFeetZUp", midFeetZUpFrame, registry));
+
+         YoFrameConvexPolygon2d footPolygonViz = new YoFrameConvexPolygon2d(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
+         footPolygonsViz.put(robotSide, footPolygonViz);
+         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz, defaultFeetColors.get(robotSide), false);
+         artifactList.add(footPolygonArtifact);
       }
 
       footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(midFeetZUp);
@@ -280,5 +290,14 @@ public class BipedSupportPolygons
    {
       supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInWorld);
       footToFootSegmentViz.setFrameLineSegment2d(footToFootLineSegmentInWorld);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoFrameConvexPolygon2d footPolygonViz = footPolygonsViz.get(robotSide);
+         FrameConvexPolygon2d footPolygon = footPolygonsInWorldFrame.get(robotSide);
+         if (footPolygon.isEmpty())
+            footPolygonViz.hide();
+         else
+            footPolygonViz.setFrameConvexPolygon2d(footPolygon);
+      }
    }
 }
