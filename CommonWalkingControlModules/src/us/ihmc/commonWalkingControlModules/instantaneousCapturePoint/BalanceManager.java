@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -80,12 +79,10 @@ public class BalanceManager
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
 
-   private final ControllerStatusOutputManager statusOutputManager;
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   public BalanceManager(ControllerStatusOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
-         WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
-         YoVariableRegistry parentRegistry)
+   public BalanceManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+         CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
@@ -103,7 +100,6 @@ public class BalanceManager
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
       this.momentumBasedController = momentumBasedController;
-      this.statusOutputManager = statusOutputManager;
       yoTime = momentumBasedController.getYoTime();
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -321,7 +317,7 @@ public class BalanceManager
       yoDesiredCapturePoint.setByProjectionOntoXYPlane(yoCapturePoint);
    }
 
-   public void initializeForDoubleSupportPushRecovery()
+   public void prepareForDoubleSupportPushRecovery()
    {
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
@@ -356,9 +352,9 @@ public class BalanceManager
       icpErrorToPack.sub(capturePoint2d);
    }
 
-   public boolean isICPPlanDone(double doubleValue)
+   public boolean isICPPlanDone()
    {
-      return icpPlanner.isDone(doubleValue);
+      return icpPlanner.isDone(yoTime.getDoubleValue());
    }
 
    public boolean isOnExitCMP()
@@ -459,10 +455,9 @@ public class BalanceManager
    public void updateBipedSupportPolygons(SideDependentList<? extends PlaneContactState> footContactStates)
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      reportCapturabilityBasedStatus();
    }
 
-   private void reportCapturabilityBasedStatus()
+   public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
    {
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
       centerOfMassPosition.setToZero(centerOfMassFrame);
@@ -481,7 +476,7 @@ public class BalanceManager
          capturabilityBasedStatus.setSupportPolygon(robotSide, footSupportPolygons.get(robotSide));
       }
 
-      statusOutputManager.reportCapturabilityBasedStatus(capturabilityBasedStatus);
+      return capturabilityBasedStatus;
    }
 
    public void updateICPPlanForSingleSupportDisturbances()

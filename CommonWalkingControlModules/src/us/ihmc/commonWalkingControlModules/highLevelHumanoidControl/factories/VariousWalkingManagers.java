@@ -34,7 +34,7 @@ public class VariousWalkingManagers
    {
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
-      balanceManager = new BalanceManager(statusOutputManager, momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, registry);
+      balanceManager = new BalanceManager(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, registry);
 
       centerOfMassHeightManager = new CenterOfMassHeightManager(momentumBasedController, walkingControllerParameters, registry);
 
