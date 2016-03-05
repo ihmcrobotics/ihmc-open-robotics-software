@@ -135,6 +135,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
+   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
+
    private final ControllerCommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(true);
@@ -197,6 +199,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       alwaysIntegrateAnkleAcceleration.set(true);
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
+
+      momentumBasedController.getFootContactStates(footContactStates);
    }
 
    private void setupStateMachine()
@@ -457,7 +461,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             if (doToeOff)
             {
                feetManager.requestToeOff(trailingLeg, predictedToeOffDuration);
-               balanceManager.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+               balanceManager.updateBipedSupportPolygons(footContactStates); // need to always update biped support polygons after a change to the contact states
                isPerformingToeOff.set(true);
             }
          }
@@ -493,7 +497,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          supportLeg.set(null);
          isPerformingToeOff.set(false);
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
-         balanceManager.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+         balanceManager.updateBipedSupportPolygons(footContactStates); // need to always update biped support polygons after a change to the contact states
 
          commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
 
@@ -828,7 +832,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
          momentumBasedController.updateContactPointsForUpcomingFootstep(nextFootstep);
-         balanceManager.updateBipedSupportPolygons();
+         balanceManager.updateBipedSupportPolygons(footContactStates);
 
       }
 
@@ -1148,7 +1152,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 
-      balanceManager.update();
+      balanceManager.update(footContactStates);
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
