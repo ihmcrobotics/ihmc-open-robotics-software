@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.calculators.ConstantOmega0Calculator;
@@ -124,17 +123,12 @@ public class ICPAndMomentumBasedController
          cops.put(robotSide, cop);
       }
 
-      // TODO: Have local updatables, instead of adding them to the momentum based controller.
-
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
       if (yoGraphicsListRegistry != null)
       {
          ArrayList<PlaneContactState> feetContactStates = new ArrayList<PlaneContactState>();
          momentumBasedController.getFeetContactStates(feetContactStates);
-         //         Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
-         FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, yoGraphicsListRegistry, registry);
-         momentumBasedController.addUpdatable(footPolygonVisualizer);
 
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
          yoGraphicsListRegistry.registerYoGraphic("Capture Point", capturePointViz);
