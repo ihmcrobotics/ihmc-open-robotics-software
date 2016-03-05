@@ -1185,7 +1185,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       momentumBasedController.doSecondaryControl();
 
-      momentumBasedController.doPassiveKneeControl();
       momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
