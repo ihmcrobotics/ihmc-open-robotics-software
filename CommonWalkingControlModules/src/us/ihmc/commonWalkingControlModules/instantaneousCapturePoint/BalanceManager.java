@@ -20,7 +20,6 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -83,7 +82,7 @@ public class BalanceManager
       icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, omega0, icpBasedLinearMomentumRateOfChangeControlModule,
             bipedSupportPolygons, statusOutputManager, parentRegistry);
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
-      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, pelvisXYControlGains, registry);
+      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       YoGraphicPosition dynamicGraphicPositionECMP = new YoGraphicPosition("ecmpviz", ecmpViz, 0.002, YoAppearance.BlueViolet());
       yoGraphicsListRegistry.registerYoGraphic("ecmpviz", dynamicGraphicPositionECMP);
@@ -117,12 +116,12 @@ public class BalanceManager
       icpPlanner.clearPlan();
    }
 
-   public void computePelvisXY(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify, FrameConvexPolygon2d supportPolygon)
+   public void computePelvisXY(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
    {
       RobotSide supportLeg = getYoSupportLeg().getEnumValue();
       icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
       pelvisICPBasedTranslationManager.compute(supportLeg, actualCapturePointPosition);
-      pelvisICPBasedTranslationManager.addICPOffset(desiredICPToModify, desiredICPVelocityToModify, supportPolygon);
+      pelvisICPBasedTranslationManager.addICPOffset(desiredICPToModify, desiredICPVelocityToModify);
    }
 
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
