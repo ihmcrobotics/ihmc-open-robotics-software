@@ -46,6 +46,8 @@ public class BalanceManager
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
 
+   private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
+
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
    private final YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
 
@@ -123,8 +125,11 @@ public class BalanceManager
       pelvisICPBasedTranslationManager.addICPOffset(desiredICPToModify, desiredICPVelocityToModify, supportPolygon);
    }
 
-   public void compute(FramePoint2d finalDesiredCapturePoint2d, boolean keepCMPInsideSupportPolygon)
+   private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
+
+   public void compute(boolean keepCMPInsideSupportPolygon)
    {
+      finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
       icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
    }
 
@@ -251,17 +256,20 @@ public class BalanceManager
 
    public void initialize()
    {
+      finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
       icpAndMomentumBasedController.getDesiredICP().setByProjectionOntoXYPlane(icpAndMomentumBasedController.getCapturePoint());
    }
 
    public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
    {
       icpPlanner.initializeDoubleSupport(initialTime, transferToSide);
+      icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
    public void initializeSingleSupport(double initialTime, RobotSide supportSide)
    {
       icpPlanner.initializeSingleSupport(initialTime, supportSide);
+      icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
    public boolean isDone(double doubleValue)
@@ -307,6 +315,7 @@ public class BalanceManager
    {
       icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
       icpPlanner.updatePlanForSingleSupportDisturbances(time, actualCapturePointPosition);
+      icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
    public void handleGoHomeMessage(ModifiableGoHomeMessage message)
