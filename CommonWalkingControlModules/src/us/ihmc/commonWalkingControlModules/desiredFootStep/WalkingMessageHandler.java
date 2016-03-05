@@ -39,6 +39,7 @@ public class WalkingMessageHandler
    // TODO Need to find something better than an ArrayList.
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
+   private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
 
    private ModifiableFootTrajectoryMessage nextFootTrajectoryForFlamingoStance;
 
@@ -64,6 +65,17 @@ public class WalkingMessageHandler
 
       transferTime.set(defaultTransferTime);
       swingTime.set(defaultSwingTime);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+         RigidBody endEffector = contactableFoot.getRigidBody();
+         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame(sidePrefix + "FootstepAtCurrentLocation", worldFrame);
+         Footstep footstepAtCurrentLocation = new Footstep(endEffector, robotSide, soleFrame, poseReferenceFrame);
+         footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
+      }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
          upcomingFoostepSide[i] = new EnumYoVariable<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
@@ -222,6 +234,17 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.ABORT_REQUESTED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
+   }
+
+   private final FramePose tempPose = new FramePose();
+
+   public Footstep getFootstepAtCurrentLocation(RobotSide robotSide)
+   {
+      tempPose.setToZero(contactableFeet.get(robotSide).getFrameAfterParentJoint());
+      tempPose.changeFrame(worldFrame);
+      Footstep footstep = footstepsAtCurrentLocation.get(robotSide);
+      footstep.setPose(tempPose);
+      return footstep;
    }
 
    public double getTransferTime()
