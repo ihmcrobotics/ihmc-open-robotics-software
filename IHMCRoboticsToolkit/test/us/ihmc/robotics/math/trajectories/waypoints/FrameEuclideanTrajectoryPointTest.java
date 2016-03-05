@@ -479,7 +479,7 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(frameEuclideanTrajectoryPointTwo.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));
    
       frameEuclideanTrajectoryPointTwo = new FrameEuclideanTrajectoryPoint(poseFrame);
-      EuclideanWaypointInterface<?> euclideanWaypoint = new EuclideanWaypoint();
+      EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
       frameEuclideanTrajectoryPoint.getEuclideanWaypoint(euclideanWaypoint);
       frameEuclideanTrajectoryPointTwo.set(time, euclideanWaypoint);
       assertTrue(frameEuclideanTrajectoryPointTwo.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));

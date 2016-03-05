@@ -10,6 +10,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -157,9 +158,9 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       geometryObject.setAngularVelocityToNaN();
    }
 
-   public void getSO3Waypoint(SO3WaypointInterface<?> so3Waypoint)
+   public void getSO3Waypoint(SO3Waypoint so3WaypointToPack)
    {
-      geometryObject.get(so3Waypoint);
+      geometryObject.get(so3WaypointToPack);
    }
    
    public void getFrameSO3Waypoint(FrameSO3Waypoint frameSO3Waypoint)

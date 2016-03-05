@@ -493,7 +493,7 @@ public class FrameSO3TrajectoryPointTest
       assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPointTwo, 1e-10));
 
       frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(poseFrame);
-      SO3WaypointInterface<?> SO3Waypoint = new SO3Waypoint();
+      SO3Waypoint SO3Waypoint = new SO3Waypoint();
       frameSO3TrajectoryPoint.getSO3Waypoint(SO3Waypoint);
       frameSO3TrajectoryPointTwo.set(time, SO3Waypoint);
       assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPoint, 1e-10));
