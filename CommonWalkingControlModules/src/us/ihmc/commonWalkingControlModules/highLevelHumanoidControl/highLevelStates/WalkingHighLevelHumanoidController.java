@@ -40,7 +40,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -56,8 +55,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.State;
@@ -437,6 +434,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pushRecoveryModule.updateForDoubleSupport(desiredICPLocal, capturePoint2d, balanceManager.getOmega0());
          }
 
+         // Always do this so that when a foot slips or is loaded in the air, the height
+         // gets adjusted.
+         if (transferToSide != null)
+            comHeightManager.setSupportLeg(transferToSide);
+         else
+            comHeightManager.setSupportLeg(lastPlantedLeg.getEnumValue());
+
          // Do it only when standing
          if (transferToSide == null)
             handleAutomaticManipulationAbortOnICPError();
@@ -496,9 +500,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             double predictedToeOffDuration = balanceManager.computeAndReturnTimeRemaining(yoTime.getDoubleValue());
 
-            // If trailing leg is doing toe off, then use front leg for reference frames for com height trajectory.
-            comHeightManager.setSupportLeg(trailingLeg.getOppositeSide());
-
             balanceManager.getDesiredCMP(desiredCMP);
             balanceManager.getDesiredICP(desiredICPLocal);
             balanceManager.getCapturePoint(capturePoint2d);
@@ -511,25 +512,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                isPerformingToeOff.set(true);
             }
          }
-         else
-         {
-            // Always do this so that when a foot slips or is loaded in the air, the height
-            // gets adjusted.
-            if (transferToSide != null)
-            {
-               comHeightManager.setSupportLeg(transferToSide);
-            }
-            else
-            {
-               comHeightManager.setSupportLeg(lastPlantedLeg.getEnumValue());
-            }
-         }
       }
 
       private TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
       {
-         Footstep transferFromFootstep = createFootstepAtCurrentLocation(transferToSide.getOppositeSide());
-         Footstep transferToFootstep = createFootstepAtCurrentLocation(transferToSide);
+         Footstep transferFromFootstep = walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide());
+         Footstep transferToFootstep = walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide);
 
          Footstep nextFootstep;
 
@@ -552,6 +540,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          balanceManager.enablePelvisXYControl();
          balanceManager.clearPlan();
          supportLeg.set(null);
+         isPerformingToeOff.set(false);
+         feetManager.initializeContactStatesForDoubleSupport(transferToSide);
+         balanceManager.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
          commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
 
@@ -562,16 +553,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             walkingMessageHandler.reportWalkingComplete();
          }
 
-         isPerformingToeOff.set(false);
          if (transferToSide != null)
-            trailingLeg.set(transferToSide);
+            trailingLeg.set(transferToSide.getOppositeSide());
          else
             trailingLeg.set(null);
 
-         if (DEBUG)
-            System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
-
-         feetManager.initializeContactStatesForDoubleSupport(transferToSide);
 
          if (transferToSide == null)
          {
@@ -581,7 +567,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
             failureDetectionControlModule.setNextFootstep(walkingMessageHandler.peek(0));
 
-         balanceManager.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
          RobotSide transferToSideToUseInFootstepData = transferToSide;
          if (transferToSideToUseInFootstepData == null)
@@ -639,7 +624,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else if (hasFootTrajectoryMessage)
          {
             balanceManager.setSingleSupportTime(Double.POSITIVE_INFINITY);
-            balanceManager.addFootstepToPlan(createFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
+            balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
          }
          else
          {
@@ -661,12 +646,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
 
          if (transferToSide == null)
-         {
             momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
-         }
-
-         if (DEBUG)
-            System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
       }
    }
 
@@ -829,21 +809,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
-      @SuppressWarnings("unused")
-      private Footstep createSquareUpFootstep(RobotSide footstepSide)
-      {
-         Footstep squareUpFootstep = createFootstepAtCurrentLocation(footstepSide);
-         FramePose squareUpFootstepPose = new FramePose();
-
-         squareUpFootstepPose.setToZero(referenceFrames.getFootFrame(footstepSide.getOppositeSide()));
-         squareUpFootstepPose.translate(0.0, footstepSide.negateIfRightSide(walkingControllerParameters.getInPlaceWidth()), 0.0);
-
-         squareUpFootstepPose.changeFrame(worldFrame);
-         squareUpFootstep.setPose(squareUpFootstepPose);
-
-         return squareUpFootstep;
-      }
-
       @Override
       public void doTransitionIntoAction()
       {
@@ -970,7 +935,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       balanceManager.setSingleSupportTime(loadFootDuration.getDoubleValue());
       balanceManager.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
       balanceManager.clearPlan();
-      balanceManager.addFootstepToPlan(createFootstepAtCurrentLocation(swingSide));
+      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.initializeSingleSupport(yoTime.getDoubleValue(), supportLeg.getEnumValue());
 
       balanceManager.freezePelvisXYControl();
@@ -1222,7 +1187,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
 
-      Footstep transferFromFootstep = createFootstepAtCurrentLocation(swingSide.getOppositeSide());
+      Footstep transferFromFootstep = walkingMessageHandler.getFootstepAtCurrentLocation(swingSide.getOppositeSide());
 
       transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
       transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
@@ -1363,23 +1328,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
       balanceManager.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
-   }
-
-   private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
-   {
-      ContactablePlaneBody foot = feet.get(robotSide);
-      ReferenceFrame footReferenceFrame = foot.getRigidBody().getParentJoint().getFrameAfterJoint();
-      FramePose framePose = new FramePose(footReferenceFrame);
-      framePose.changeFrame(worldFrame);
-
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
-
-      boolean trustHeight = true;
-      Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
-
-      momentumBasedController.setFootstepsContactPointsBasedOnFootContactStatePoints(footstep);
-
-      return footstep;
    }
 
    private void integrateAnkleAccelerationsOnSwingLeg(RobotSide swingSide)
