@@ -58,6 +58,11 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
       return getXYPlaneDistance(yoFramePoint.getFrameTuple());
    }
 
+   public double getXYPlaneDistance(YoFramePoint2d yoFramePoint2d)
+   {
+      return getXYPlaneDistance(yoFramePoint2d.getFrameTuple2d());
+   }
+
    @Override
    public void getPoint(Point3d pointToPack)
    {
