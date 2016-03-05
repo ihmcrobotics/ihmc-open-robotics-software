@@ -11,7 +11,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -38,7 +37,6 @@ public class ICPAndMomentumBasedController
    private final BipedSupportPolygons bipedSupportPolygons;
    private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("desiredICP", "", worldFrame, registry);
    private final YoFrameVector2d yoDesiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", worldFrame, registry);
-   private final EnumYoVariable<RobotSide> supportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
    private final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
@@ -146,7 +144,7 @@ public class ICPAndMomentumBasedController
       statusOutputManager.reportCapturabilityBasedStatus(capturabilityBasedStatus);
    }
 
-   public void compute(FramePoint2d finalDesiredCapturePoint2d, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
+   public void compute(RobotSide supportLeg, FramePoint2d finalDesiredCapturePoint2d, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
    {
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
@@ -161,16 +159,11 @@ public class ICPAndMomentumBasedController
       icpBasedLinearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
 
-      icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg.getEnumValue());
+      icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
 
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
 
       icpBasedLinearMomentumRateOfChangeControlModule.compute();
-   }
-
-   public EnumYoVariable<RobotSide> getYoSupportLeg()
-   {
-      return supportLeg;
    }
 
    public BipedSupportPolygons getBipedSupportPolygons()
