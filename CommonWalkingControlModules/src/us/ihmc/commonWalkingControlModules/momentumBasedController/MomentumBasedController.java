@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -62,9 +61,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class MomentumBasedController
 {
-   private static final boolean DO_PASSIVE_KNEE_CONTROL = true;
-   private static final boolean VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES = false;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
@@ -83,14 +79,6 @@ public class MomentumBasedController
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
    private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-
-   private final DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
-   private final DoubleYoVariable rightPassiveKneeTorque = new DoubleYoVariable("rightPassiveKneeTorque", registry);
-   private final SideDependentList<DoubleYoVariable> passiveKneeTorque = new SideDependentList<DoubleYoVariable>(leftPassiveKneeTorque, rightPassiveKneeTorque);
-
-   private final DoubleYoVariable passiveQKneeThreshold = new DoubleYoVariable("passiveQKneeThreshold", registry);
-   private final DoubleYoVariable passiveKneeMaxTorque = new DoubleYoVariable("passiveKneeMaxTorque", registry);
-   private final DoubleYoVariable passiveKneeKv = new DoubleYoVariable("passiveKneeKv", registry);
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final DoubleYoVariable yoTime;
@@ -113,9 +101,6 @@ public class MomentumBasedController
    private final YoFrameVector admissibleDesiredGroundReactionTorque;
    private final YoFrameVector admissibleDesiredGroundReactionForce;
    private final YoFramePoint2d admissibleDesiredCenterOfPressure;
-
-   // private final YoFrameVector groundReactionTorqueCheck;
-   // private final YoFrameVector groundReactionForceCheck;
 
    private final ContactPointVisualizer contactPointVisualizer;
 
@@ -142,8 +127,6 @@ public class MomentumBasedController
    private final InverseDynamicsJoint[] controlledJoints;
 
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
-
-   private final AntiGravityJointTorquesVisualizer antiGravityJointTorquesVisualizer;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
@@ -179,21 +162,6 @@ public class MomentumBasedController
       this.hands = hands;
 
       RigidBody elevator = fullRobotModel.getElevator();
-
-      if (VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES)
-      {
-         SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches = new SideDependentList<>();
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            wrenchBasedFootSwitches.put(robotSide, (WrenchBasedFootSwitch) footSwitches.get(robotSide));
-         }
-
-         antiGravityJointTorquesVisualizer = new AntiGravityJointTorquesVisualizer(fullRobotModel, twistCalculator, wrenchBasedFootSwitches, registry,
-               gravityZ);
-      }
-      else
-         antiGravityJointTorquesVisualizer = null;
-
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
@@ -252,13 +220,6 @@ public class MomentumBasedController
       controlledJoints = momentumOptimizationSettings.getJointsToOptimizeFor();
 
       contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry, registry);
-
-      if (DO_PASSIVE_KNEE_CONTROL)
-      {
-         passiveQKneeThreshold.set(0.55);
-         passiveKneeMaxTorque.set(60.0);
-         passiveKneeKv.set(5.0);
-      }
 
       desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
@@ -378,49 +339,8 @@ public class MomentumBasedController
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
-      if (antiGravityJointTorquesVisualizer != null)
-         antiGravityJointTorquesVisualizer.computeAntiGravityJointTorques();
-
       if (contactPointVisualizer != null)
          contactPointVisualizer.update(yoTime.getDoubleValue());
-
-   }
-
-   // FIXME GET RID OF THAT HACK!!!
-
-   /**
-    * Call this method after doSecondaryControl() to generate a small torque of flexion at the knees when almost straight.
-    * This helps a lot when working near singularities but it is kinda hackish.
-    */
-   private final FrameVector tempVector = new FrameVector();
-
-   public void doPassiveKneeControl()
-   {
-      double maxPassiveTorque = passiveKneeMaxTorque.getDoubleValue();
-      double kneeLimit = passiveQKneeThreshold.getDoubleValue();
-      double kdKnee = passiveKneeKv.getDoubleValue();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
-         kneeJoint.getJointAxis(tempVector);
-         double sign = Math.signum(tempVector.getY());
-         double tauKnee = kneeJoint.getTau();
-         double qKnee = kneeJoint.getQ() * sign;
-         double qdKnee = kneeJoint.getQd() * sign;
-         if (qKnee < kneeLimit)
-         {
-            double percent = 1.0 - qKnee / kneeLimit;
-            percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-            passiveKneeTorque.get(robotSide).set(sign * maxPassiveTorque * MathTools.square(percent) - kdKnee * qdKnee);
-            tauKnee += passiveKneeTorque.get(robotSide).getDoubleValue();
-            kneeJoint.setTau(tauKnee);
-         }
-         else
-         {
-            passiveKneeTorque.get(robotSide).set(0.0);
-         }
-      }
    }
 
    private final FramePoint2d copDesired = new FramePoint2d();
