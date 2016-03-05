@@ -460,6 +460,7 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(orientation.epsilonEquals(simpleSO3TrajectoryPoint.getOrientationCopy(), 1e-10));
       assertTrue(angularVelocity.epsilonEquals(simpleSO3TrajectoryPoint.getAngularVelocityCopy(), 1e-10));
 
+      
       SimpleSO3TrajectoryPoint simpleSO3TrajectoryPointTwo = new SimpleSO3TrajectoryPoint();
       simpleSO3TrajectoryPointTwo.setTime(time);
       simpleSO3TrajectoryPointTwo.setOrientation(orientation);
@@ -480,21 +481,30 @@ public class SimpleSO3TrajectoryPointTest
       simpleSO3TrajectoryPointTwo.set(time, simpleSO3Waypoint);
       assertTrue(simpleSO3TrajectoryPointTwo.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
 
+      
       simpleSO3TrajectoryPointTwo = new SimpleSO3TrajectoryPoint();
-      SO3WaypointInterface<?> so3Waypoint = simpleSO3TrajectoryPoint.getSO3Waypoint();
+      SO3Waypoint so3Waypoint = simpleSO3TrajectoryPoint.getSO3Waypoint();
       
       simpleSO3TrajectoryPointTwo.set(time, so3Waypoint);
       assertTrue(simpleSO3TrajectoryPointTwo.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
+
+      simpleSO3TrajectoryPointTwo = new SimpleSO3TrajectoryPoint();
+      so3Waypoint = new SO3Waypoint();
+      simpleSO3TrajectoryPoint.get(so3Waypoint);
       
-//      simpleSO3TrajectoryPointTwo = new SimpleSO3TrajectoryPoint();
-//      so3Waypoint = new SO3Waypoint();
-//      simpleSO3TrajectoryPoint.get(so3Waypoint);
-//      
-//      simpleSO3TrajectoryPointTwo.set(time, so3Waypoint);
-//      assertTrue(simpleSO3TrajectoryPointTwo.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
+      simpleSO3TrajectoryPointTwo.set(time, so3Waypoint);
+      assertTrue(simpleSO3TrajectoryPointTwo.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
 
       Quat4d orientationToPack = new Quat4d();
       Vector3d angularVelocityToPack = new Vector3d();
+      simpleSO3TrajectoryPoint.get(orientationToPack, angularVelocityToPack);
+
+      simpleSO3TrajectoryPointTwo = new SimpleSO3TrajectoryPoint();
+      simpleSO3TrajectoryPointTwo.set(time, orientationToPack, angularVelocityToPack);
+      assertTrue(simpleSO3TrajectoryPointTwo.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
+
+      orientationToPack = new Quat4d();
+      angularVelocityToPack = new Vector3d();
       simpleSO3TrajectoryPoint.get( orientationToPack, angularVelocityToPack);
 
       simpleSO3TrajectoryPointTwo = new SimpleSO3TrajectoryPoint();

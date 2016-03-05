@@ -206,10 +206,10 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       return positionCopy;
    }
 
-   public <T extends PointInterface & FrameObject<?>> void getPositionIncludingFrame(T positionToPack)
+   public void getPositionIncludingFrame(FramePoint positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
-      geometryObject.getPosition(positionToPack);
+      geometryObject.getPosition(positionToPack.getPoint());
    }
 
    public void getLinearVelocity(FrameVector linearVelocityToPack)

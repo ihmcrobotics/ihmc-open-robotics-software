@@ -8,8 +8,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.PointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 
 public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<EuclideanWaypoint, SimpleEuclideanTrajectoryPoint>
@@ -18,6 +19,18 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
    public SimpleEuclideanTrajectoryPoint()
    {
       super(new EuclideanWaypoint());
+   }
+
+   public SimpleEuclideanTrajectoryPoint(double time, Point3d position, Vector3d linearVelocity)
+   {
+      this();
+      set(time, position, linearVelocity);
+   }
+
+   public SimpleEuclideanTrajectoryPoint(SimpleEuclideanTrajectoryPoint simpleEuclideanTrajectoryPoint)
+   {
+      this();
+      set(simpleEuclideanTrajectoryPoint);
    }
 
    public EuclideanWaypoint getEuclideanWaypoint()
@@ -79,19 +92,14 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
       waypointData.setLinearVelocityToNaN();
    }
 
-   public double distance(EuclideanWaypoint euclideanWaypoint)
+   public double positionDistance(EuclideanWaypoint euclideanWaypoint)
    {
       return waypointData.positionDistance(euclideanWaypoint);
    }
 
    public double positionDistance(SimpleEuclideanTrajectoryPoint euclideanTrajectoryPoint)
    {
-      return waypointData.positionDistance(euclideanTrajectoryPoint.waypointData);
-   }
-
-   public void getPosition(PointInterface positionToPack)
-   {
-      positionToPack.setPoint(waypointData.getPosition());
+      return positionDistance(euclideanTrajectoryPoint.waypointData);
    }
    
    @Override
@@ -100,10 +108,24 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
       waypointData.getPosition(positionToPack);
    }
 
+   public TransformablePoint3d getPositionCopy()
+   {
+      TransformablePoint3d positionCopy = new TransformablePoint3d();
+      getPosition(positionCopy);
+      return positionCopy;
+   }
+
    @Override
    public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
       waypointData.getLinearVelocity(linearVelocityToPack);
+   }
+
+   public TransformableVector3d getLinearVelocityCopy()
+   {
+      TransformableVector3d linearVelocityCopy = new TransformableVector3d();
+      getLinearVelocity(linearVelocityCopy);
+      return linearVelocityCopy;
    }
 
    public double get(Point3d positionToPack, Vector3d linearVelocityToPack)
@@ -112,11 +134,11 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
       return getTime();
    }
 
-   public double get(EuclideanWaypointInterface<?> euclideanWaypoint)
+   public void get(SimpleEuclideanTrajectoryPoint simpleEuclideanTrajectoryPointToPack)
    {
-      euclideanWaypoint.setPosition(waypointData.getPosition());
-      euclideanWaypoint.setLinearVelocity(waypointData.getLinearVelocity());
-      return getTime();
+      simpleEuclideanTrajectoryPointToPack.setTime(getTime());
+      simpleEuclideanTrajectoryPointToPack.setPosition(waypointData.getPosition());
+      simpleEuclideanTrajectoryPointToPack.setLinearVelocity(waypointData.getLinearVelocity());
    }
 
    @Override
