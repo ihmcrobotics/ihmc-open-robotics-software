@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDe
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -70,12 +71,18 @@ public class ComponentBasedFootstepDataMessageGenerator
                componentBasedDesiredFootstepCalculator.initialize();
                computeAndSubmitFootsteps();
             }
+            else
+            {
+               commandInputManager.submitMessage(new PauseWalkingMessage(true));
+            }
          }
       };
    }
 
    public void computeAndSubmitFootsteps()
    {
+      if (!walk.getBooleanValue())
+         return;
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
