@@ -115,7 +115,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager.freeze();
    }
 
-   public void clearPlan()
+   public void clearICPPlan()
    {
       icpPlanner.clearPlan();
    }
