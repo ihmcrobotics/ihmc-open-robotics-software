@@ -6,12 +6,8 @@ import java.awt.Color;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -61,16 +57,7 @@ public class BipedSupportPolygons
    private final FrameConvexPolygon2d supportPolygonInWorld = new FrameConvexPolygon2d();
 
    private final YoFrameConvexPolygon2d supportPolygonViz;
-   private final YoFrameLineSegment2d footToFootSegmentViz;
    private final SideDependentList<YoFrameConvexPolygon2d> footPolygonsViz = new SideDependentList<>();
-
-   // 'Sweet spots', the spots inside each of the footPolygons where capture point placement leads to really good balance. Typically the middle of the foot or so:
-   private final SideDependentList<YoFramePoint2d> sweetSpotsInAnkleZUp = new SideDependentList<YoFramePoint2d>();
-   private final SideDependentList<YoFramePoint2d> sweetSpotsInMidFeetZUp = new SideDependentList<YoFramePoint2d>();
-
-   // Line segment from one sweet spot to the other:
-   private final FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
-   private final FrameLineSegment2d footToFootLineSegmentInWorld;
 
    private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
 
@@ -82,7 +69,6 @@ public class BipedSupportPolygons
       this.soleZUpFrames = soleZUpFrames;
 
       supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
-      footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", worldFrame, registry);
 
       ArtifactList artifactList = new ArtifactList("Biped Support Polygon");
 
@@ -97,17 +83,12 @@ public class BipedSupportPolygons
          footPolygonsInAnkleZUp.put(robotSide, new FrameConvexPolygon2d());
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2d());
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         sweetSpotsInAnkleZUp.put(robotSide, new YoFramePoint2d(robotSidePrefix + "SweetSpotInAnkleZUp", ankleZUpFrames.get(robotSide), registry));
-         sweetSpotsInMidFeetZUp.put(robotSide, new YoFramePoint2d(robotSidePrefix + "SweetSpotsInMidFeetZUp", midFeetZUpFrame, registry));
 
          YoFrameConvexPolygon2d footPolygonViz = new YoFrameConvexPolygon2d(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
          footPolygonsViz.put(robotSide, footPolygonViz);
          YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz, defaultFeetColors.get(robotSide), false);
          artifactList.add(footPolygonArtifact);
       }
-
-      footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(midFeetZUp);
-      footToFootLineSegmentInWorld = new FrameLineSegment2d(worldFrame);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -119,7 +100,7 @@ public class BipedSupportPolygons
 
    private final FramePoint tempFramePoint = new FramePoint();
 
-   public void updateUsingContactStates(SideDependentList<YoPlaneContactState> contactStates)
+   public void updateUsingContactStates(SideDependentList<? extends PlaneContactState> contactStates)
    {
       timer.startTimer();
       boolean inDoubleSupport = true;
@@ -128,7 +109,7 @@ public class BipedSupportPolygons
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoPlaneContactState contactState = contactStates.get(robotSide);
+         PlaneContactState contactState = contactStates.get(robotSide);
 
          FrameConvexPolygon2d footPolygonInWorldFrame = footPolygonsInWorldFrame.get(robotSide);
          FrameConvexPolygon2d footPolygonInSoleFrame = footPolygonsInSoleFrame.get(robotSide);
@@ -166,9 +147,6 @@ public class BipedSupportPolygons
             footPolygonInSoleZUpFrame.update();
             footPolygonInAnkleZUp.update();
             footPolygonInMidFeetZUp.update();
-
-            sweetSpotsInAnkleZUp.get(robotSide).set(footPolygonInAnkleZUp.getCentroid()); // Sweet spots are the centroids of the foot polygons.
-            sweetSpotsInMidFeetZUp.get(robotSide).set(footPolygonInMidFeetZUp.getCentroid()); // Sweet spots are the centroids of the foot polygons.
          }
          else
          {
@@ -183,8 +161,6 @@ public class BipedSupportPolygons
       if (VISUALIZE)
          visualize();
    }
-
-   private final FramePoint2d tempFramePoint2d = new FramePoint2d();
 
    private void updateSupportPolygon(boolean inDoubleSupport, boolean neitherFootIsSupportingFoot, RobotSide supportSide)
    {
@@ -203,23 +179,14 @@ public class BipedSupportPolygons
          supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(supportSide));
       }
 
-      sweetSpotsInMidFeetZUp.get(RobotSide.LEFT).getFrameTuple2dIncludingFrame(tempFramePoint2d);
-      footToFootLineSegmentInMidFeetZUp.setFirstEndPoint(tempFramePoint2d);
-
-      sweetSpotsInMidFeetZUp.get(RobotSide.RIGHT).getFrameTuple2dIncludingFrame(tempFramePoint2d);
-      footToFootLineSegmentInMidFeetZUp.setSecondEndPoint(tempFramePoint2d);
-
       supportPolygonInWorld.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
       supportPolygonInWorld.changeFrame(worldFrame);
-
-      footToFootLineSegmentInWorld.setAndChangeFrame(footToFootLineSegmentInMidFeetZUp);
-      footToFootLineSegmentInWorld.changeFrame(worldFrame);
    }
 
    private void visualize()
    {
       supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInWorld);
-      footToFootSegmentViz.setFrameLineSegment2d(footToFootLineSegmentInWorld);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          YoFrameConvexPolygon2d footPolygonViz = footPolygonsViz.get(robotSide);
@@ -289,11 +256,6 @@ public class BipedSupportPolygons
    public SideDependentList<FrameConvexPolygon2d> getFootPolygonsInWorldFrame()
    {
       return footPolygonsInWorldFrame;
-   }
-
-   public FrameLineSegment2d getFootToFootLineSegmentInMidFeetZUp()
-   {
-      return footToFootLineSegmentInMidFeetZUp;
    }
 
    public String toString()

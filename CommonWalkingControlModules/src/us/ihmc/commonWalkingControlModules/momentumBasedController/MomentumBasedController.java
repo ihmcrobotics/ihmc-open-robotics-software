@@ -9,7 +9,6 @@ import javax.vecmath.Point2d;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -358,11 +357,11 @@ public class MomentumBasedController
       throw new RuntimeException("Sylvain was there.");
    }
 
-   public void getFeetContactStates(ArrayList<PlaneContactState> feetContactStatesToPack)
+   public void getFootContactStates(SideDependentList<YoPlaneContactState> feetContactStatesToPack)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         feetContactStatesToPack.add(yoPlaneContactStates.get(feet.get(robotSide)));
+         feetContactStatesToPack.put(robotSide, yoPlaneContactStates.get(feet.get(robotSide)));
       }
    }
 

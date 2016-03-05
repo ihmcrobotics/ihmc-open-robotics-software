@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -390,7 +391,6 @@ public class BalanceManager
    {
       centerOfMass.setToZero(centerOfMassFrame);
 
-      updateBipedSupportPolygons();
       FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distancceFromSupportPolygonEdges, shrunkSupportPolygon);
 
@@ -423,18 +423,19 @@ public class BalanceManager
       icpPlanner.setSingleSupportTime(newSingleSupportTime);
    }
 
-   public void update()
+   public void update(SideDependentList<? extends PlaneContactState> footContactStates)
    {
       YoFramePoint2d desiredICP = icpAndMomentumBasedController.getDesiredICP();
       YoFrameVector2d desiredICPVelocity = icpAndMomentumBasedController.getDesiredICPVelocity();
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, getOmega0(), desiredECMP);
       ecmpViz.setXY(desiredECMP);
       icpAndMomentumBasedController.update();
+      updateBipedSupportPolygons(footContactStates);
    }
 
-   public void updateBipedSupportPolygons()
+   public void updateBipedSupportPolygons(SideDependentList<? extends PlaneContactState> footContactStates)
    {
-      icpAndMomentumBasedController.updateBipedSupportPolygons();
+      icpAndMomentumBasedController.updateBipedSupportPolygons(footContactStates);
    }
 
    public void updateICPPlanForSingleSupportDisturbances()
