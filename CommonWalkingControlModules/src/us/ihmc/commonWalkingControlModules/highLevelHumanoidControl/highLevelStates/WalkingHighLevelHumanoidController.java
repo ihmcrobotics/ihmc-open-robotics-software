@@ -611,7 +611,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             for (int i = 0; i < 3; i++)
                balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i));
-            balanceManager.initializeICPPlanDoubleSupport(yoTime.getDoubleValue(), transferToSide);
+            balanceManager.initializeICPPlanDoubleSupport(transferToSide);
          }
          else if (hasFootTrajectoryMessage)
          {
@@ -849,7 +849,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             balanceManager.addFootstepToPlan(nextFootstep);
             balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
             balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
-            balanceManager.initializeICPPlanSingleSupport(yoTime.getDoubleValue(), supportSide);
+            balanceManager.initializeICPPlanSingleSupport(supportSide);
 
             if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
             {
@@ -922,7 +922,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       balanceManager.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
       balanceManager.clearPlan();
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
-      balanceManager.initializeICPPlanSingleSupport(yoTime.getDoubleValue(), supportLeg.getEnumValue());
+      balanceManager.initializeICPPlanSingleSupport(supportLeg.getEnumValue());
 
       balanceManager.freezePelvisXYControl();
    }
