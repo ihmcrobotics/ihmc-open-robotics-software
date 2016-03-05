@@ -21,6 +21,12 @@ public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3W
       geometryObject = getGeometryObject();
    }
 
+   public FrameSO3Waypoint(ReferenceFrame referenceFrame)
+   {
+     this();
+     this.referenceFrame = referenceFrame;
+   }
+
    public void set(Quat4d orientation, Vector3d angularVelocity)
    {
       geometryObject.set(orientation, angularVelocity);
@@ -46,7 +52,13 @@ public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3W
       geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
    }
 
-   public void set(SO3WaypointInterface<?> so3Waypoint)
+   public void set(FrameSO3Waypoint so3Waypoint)
+   {
+      checkReferenceFrameMatch(so3Waypoint);
+      geometryObject.set(so3Waypoint);
+   }
+   
+   public void set(SO3Waypoint so3Waypoint)
    {
       geometryObject.set(so3Waypoint);
    }

@@ -10,8 +10,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -124,12 +122,14 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    public void set(double time, FrameSO3Waypoint frameSO3Waypoint)
    {
       checkReferenceFrameMatch(frameSO3Waypoint);
+      setTime(time);
       frameSO3Waypoint.get(geometryObject);
    }
 
    public void setIncludingFrame(double time, FrameSO3Waypoint frameSO3Waypoint)
    {
-      setToZero(getReferenceFrame());
+      setToZero(frameSO3Waypoint.getReferenceFrame());
+      setTime(time);
       frameSO3Waypoint.get(geometryObject);
    }
 
@@ -155,6 +155,21 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    public void setAngularVelocityToNaN()
    {
       geometryObject.setAngularVelocityToNaN();
+   }
+
+   public void getSO3Waypoint(SO3WaypointInterface<?> so3Waypoint)
+   {
+      geometryObject.get(so3Waypoint);
+   }
+   
+   public void getFrameSO3Waypoint(FrameSO3Waypoint frameSO3Waypoint)
+   {
+      checkReferenceFrameMatch(frameSO3Waypoint);
+ 
+      Quat4d orientation = geometryObject.getOrientation();
+      Vector3d angularVelocity = geometryObject.getAngularVelocity();
+
+      frameSO3Waypoint.set(orientation, angularVelocity);
    }
 
    @Override
