@@ -28,8 +28,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand;
@@ -114,7 +114,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
     	  lidarJoint = fullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
       }
       
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
+      InverseDynamicsJoint[] jointsToOptimizeFor = MomentumBasedController.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = 1e-4;
       MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(jointsToOptimizeFor, 0.0, 1e-3, 1e-9, 0.0);
@@ -214,7 +214,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
     	  lidarJoint = fullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
       }
       
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
+      InverseDynamicsJoint[] jointsToOptimizeFor = MomentumBasedController.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = robotModel.getControllerDT();
       MomentumOptimizationSettings optimizationSettings = createOptimizationSettings(jointsToOptimizeFor, 0.0, 0.0, 1e-5, 0.0);

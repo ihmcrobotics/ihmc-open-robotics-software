@@ -195,7 +195,7 @@ public class MomentumBasedControllerFactory
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      InverseDynamicsJoint[] jointsToOptimizeFor = MomentumBasedController.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
       walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
@@ -215,7 +215,7 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DoNothingController ////////////////////////////////////////////////////////////
       // Useful as a transition state on the real robot
-      DoNothingBehavior doNothingBehavior = new DoNothingBehavior(momentumBasedController, variousWalkingManagers.getBalanceManager().getBipedSupportPolygons());
+      DoNothingBehavior doNothingBehavior = new DoNothingBehavior(momentumBasedController);
       highLevelBehaviors.add(doNothingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -87,9 +86,6 @@ public class BalanceManager
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
-      SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      SideDependentList<ReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
       double omega0 = walkingControllerParameters.getOmega0();
@@ -105,7 +101,7 @@ public class BalanceManager
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       this.omega0.set(omega0);
 
-      bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
       icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
             totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry);
@@ -219,11 +215,6 @@ public class BalanceManager
       pelvisICPBasedTranslationManager.freeze();
    }
 
-   public BipedSupportPolygons getBipedSupportPolygons()
-   {
-      return bipedSupportPolygons;
-   }
-
    public void getCapturePoint(FramePoint2d capturePointToPack)
    {
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePointToPack);
@@ -286,13 +277,7 @@ public class BalanceManager
 
    public void initialize()
    {
-      initialize(null);
-   }
-
-   public void initialize(SideDependentList<? extends PlaneContactState> footContactStates)
-   {
-      if (footContactStates != null)
-         update(footContactStates);
+      update();
       finalDesiredICPInWorld.set(Double.NaN, Double.NaN);
       yoDesiredCapturePoint.setByProjectionOntoXYPlane(yoCapturePoint);
    }
@@ -406,11 +391,10 @@ public class BalanceManager
    /**
     * Update the basics: capture point, omega0, and the support polygons.
     */
-   public void update(SideDependentList<? extends PlaneContactState> footContactStates)
+   public void update()
    {
       CapturePointTools.computeDesiredCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, getOmega0(), desiredECMP);
       ecmpViz.setXY(desiredECMP);
-      updateBipedSupportPolygons(footContactStates);
       computeCapturePoint();
       icpBasedLinearMomentumRateOfChangeControlModule.updateCenterOfMassViz();
    }
@@ -430,11 +414,6 @@ public class BalanceManager
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.setXY(capturePoint2d);
-   }
-
-   public void updateBipedSupportPolygons(SideDependentList<? extends PlaneContactState> footContactStates)
-   {
-      bipedSupportPolygons.updateUsingContactStates(footContactStates);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
