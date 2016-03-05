@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -8,16 +9,15 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -45,7 +45,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -55,8 +54,6 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class MomentumBasedController
@@ -74,6 +71,8 @@ public class MomentumBasedController
 
    private final SideDependentList<ContactableFoot> feet;
    private final SideDependentList<ContactablePlaneBody> hands;
+
+   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
@@ -97,12 +96,6 @@ public class MomentumBasedController
    private final FrameVector tempWristTorque = new FrameVector();
 
    private final SideDependentList<DoubleYoVariable> handsMass;
-
-   private final YoFrameVector admissibleDesiredGroundReactionTorque;
-   private final YoFrameVector admissibleDesiredGroundReactionForce;
-   private final YoFramePoint2d admissibleDesiredCenterOfPressure;
-
-   private final ContactPointVisualizer contactPointVisualizer;
 
    private final GeometricJacobianHolder robotJacobianHolder;
 
@@ -132,6 +125,8 @@ public class MomentumBasedController
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
    private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
 
+   private final BipedSupportPolygons bipedSupportPolygons;
+
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder, CenterOfMassJacobian centerOfMassJacobian,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -143,6 +138,11 @@ public class MomentumBasedController
 
       this.robotJacobianHolder = robotJacobianHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+
+      SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      SideDependentList<ReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
+      bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
 
       this.footSwitches = footSwitches;
       this.wristForceSensors = wristForceSensors;
@@ -163,17 +163,6 @@ public class MomentumBasedController
 
       RigidBody elevator = fullRobotModel.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
-
-      this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
-      this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
-      this.admissibleDesiredCenterOfPressure = new YoFramePoint2d("admissibleDesiredCenterOfPressure", worldFrame, registry);
-      admissibleDesiredCenterOfPressure.setToNaN();
-      yoGraphicsListRegistry.registerArtifact("Desired Center of Pressure",
-            new YoGraphicPosition("Desired Overall Center of Pressure", admissibleDesiredCenterOfPressure, 0.008, YoAppearance.Navy(), GraphicType.BALL)
-                  .createArtifact());
-
-      // this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
-      // this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -213,13 +202,19 @@ public class MomentumBasedController
          yoPlaneContactStateList.add(contactState);
       }
 
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footContactStates.put(robotSide, yoPlaneContactStates.get(feet.get(robotSide)));
+      }
+
+      InverseDynamicsJoint[] jointsToOptimizeFor = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
       walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
 
       controlledJoints = momentumOptimizationSettings.getJointsToOptimizeFor();
 
-      contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry, registry);
+      ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry, registry);
+      addUpdatable(contactPointVisualizer);
 
       desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
@@ -313,34 +308,57 @@ public class MomentumBasedController
       copSmootherErrorThreshold.set(momentumOptimizationSettings.getCopErrorThresholdToTriggerSmoother());
    }
 
+   public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
+   {
+      List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
+      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+      joints.addAll(Arrays.asList(allJoints));
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         if (hand != null)
+         {
+            List<InverseDynamicsJoint> fingerJoints = Arrays.asList(ScrewTools.computeSubtreeJoints(hand));
+            joints.removeAll(fingerJoints);
+         }
+      }
+
+      if (jointsToRemove != null)
+      {
+         for (InverseDynamicsJoint joint : jointsToRemove)
+         {
+            joints.remove(joint);
+         }
+      }
+
+      return joints.toArray(new InverseDynamicsJoint[joints.size()]);
+   }
+
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       throw new RuntimeException("Sylvain was there.");
    }
 
-   public void getFootContactStates(SideDependentList<YoPlaneContactState> feetContactStatesToPack)
+   public SideDependentList<YoPlaneContactState> getFootContactStates()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         feetContactStatesToPack.put(robotSide, yoPlaneContactStates.get(feet.get(robotSide)));
-      }
+      return footContactStates;
    }
 
-   // TODO: Temporary method for a big refactor allowing switching between high level behaviors
-   public void doPrioritaryControl()
+   public void update()
    {
+      updateBipedSupportPolygons();
+      readWristSensorData();
+
       robotJacobianHolder.compute();
 
-      callUpdatables();
-
-      readWristSensorData();
+      for (int i = 0; i < updatables.size(); i++)
+         updatables.get(i).update(yoTime.getDoubleValue());
    }
 
-   // TODO: Temporary method for a big refactor allowing switching between high level behaviors
-   public void doSecondaryControl()
+   public void updateBipedSupportPolygons()
    {
-      if (contactPointVisualizer != null)
-         contactPointVisualizer.update(yoTime.getDoubleValue());
+      bipedSupportPolygons.updateUsingContactStates(footContactStates);
    }
 
    private final FramePoint2d copDesired = new FramePoint2d();
@@ -484,15 +502,6 @@ public class MomentumBasedController
       return currentWRhoSmootherForShakies.getDoubleValue();
    }
 
-   public void callUpdatables()
-   {
-      double time = yoTime.getDoubleValue();
-      for (int i = 0; i < updatables.size(); i++)
-      {
-         updatables.get(i).update(time);
-      }
-   }
-
    public void addUpdatable(Updatable updatable)
    {
       updatables.add(updatable);
@@ -506,9 +515,7 @@ public class MomentumBasedController
 
    public void initialize()
    {
-      // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state
-      // where the feet are all jacked up. For example, after falling and getting back up.
-      callUpdatables();
+      update();
    }
 
    private void readWristSensorData()
@@ -730,13 +737,6 @@ public class MomentumBasedController
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityToPack);
    }
 
-   public void getAdmissibleDesiredGroundReactionWrench(SpatialForceVector admissibleDesiredGroundReactionWrenchToPack)
-   {
-      admissibleDesiredGroundReactionWrenchToPack.setToZero(centerOfMassFrame);
-      admissibleDesiredGroundReactionWrenchToPack.set(admissibleDesiredGroundReactionForce.getFrameTuple(),
-            admissibleDesiredGroundReactionTorque.getFrameTuple());
-   }
-
    public SideDependentList<ContactableFoot> getContactableFeet()
    {
       return feet;
@@ -808,6 +808,11 @@ public class MomentumBasedController
       }
 
       return null;
+   }
+
+   public BipedSupportPolygons getBipedSupportPolygons()
+   {
+      return bipedSupportPolygons;
    }
 
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()

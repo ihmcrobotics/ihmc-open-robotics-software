@@ -135,8 +135,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
-   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
-
    private final ControllerCommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(true);
@@ -170,7 +168,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(momentumBasedController.getContactableFeet(), registry);
 
-      bipedSupportPolygons = balanceManager.getBipedSupportPolygons();
+      bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
       this.footSwitches = momentumBasedController.getFootSwitches();
 
@@ -197,8 +195,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       alwaysIntegrateAnkleAcceleration.set(true);
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
-
-      momentumBasedController.getFootContactStates(footContactStates);
    }
 
    private void setupStateMachine()
@@ -318,7 +314,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
       chestOrientationManager.holdCurrentOrientation();
 
-      balanceManager.initialize(footContactStates);
+      balanceManager.initialize();
       //      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.
 
       // Need to reset it so the planner will be initialized even when restarting the walking controller.
@@ -459,7 +455,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             if (doToeOff)
             {
                feetManager.requestToeOff(trailingLeg, predictedToeOffDuration);
-               balanceManager.updateBipedSupportPolygons(footContactStates); // need to always update biped support polygons after a change to the contact states
+               momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
                isPerformingToeOff.set(true);
             }
          }
@@ -495,7 +491,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          supportLeg.set(null);
          isPerformingToeOff.set(false);
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
-         balanceManager.updateBipedSupportPolygons(footContactStates); // need to always update biped support polygons after a change to the contact states
+         momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
          commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
 
@@ -830,7 +826,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
          momentumBasedController.updateContactPointsForUpcomingFootstep(nextFootstep);
-         balanceManager.updateBipedSupportPolygons(footContactStates);
+         momentumBasedController.updateBipedSupportPolygons();
 
       }
 
@@ -1147,10 +1143,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             balanceManager.disablePushRecovery();
       }
 
-      momentumBasedController.doPrioritaryControl();
-      super.callUpdatables();
+      momentumBasedController.update();
 
-      balanceManager.update(footContactStates);
+      balanceManager.update();
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
@@ -1182,8 +1177,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          controllerCoreOuput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
          momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
-
-      momentumBasedController.doSecondaryControl();
 
       momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
 

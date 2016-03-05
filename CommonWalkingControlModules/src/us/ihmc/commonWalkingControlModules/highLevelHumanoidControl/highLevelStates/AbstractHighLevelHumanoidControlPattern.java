@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManage
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -70,8 +69,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final WalkingControllerParameters walkingControllerParameters;
 
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
-
-   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
    protected final VariousWalkingManagers variousWalkingManagers;
 
@@ -199,22 +196,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       momentumBasedController.initialize();
       variousWalkingManagers.initializeManagers();
-      callUpdatables();
-   }
-
-   protected void callUpdatables()
-   {
-      double time = yoTime.getDoubleValue();
-      for (int i = 0; i < updatables.size(); i++)
-      {
-         updatables.get(i).update(time);
-      }
    }
 
    public void doMotionControl()
    {
-      momentumBasedController.doPrioritaryControl();
-      callUpdatables();
+      momentumBasedController.update();
 
       doFootControl();
       doArmControl();
@@ -223,8 +209,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       doCoMControl();
       doPelvisControl();
       doUnconstrainedJointControl();
-
-      momentumBasedController.doSecondaryControl();
    }
 
    protected void doHeadControl()
@@ -314,10 +298,5 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   public void addUpdatables(ArrayList<Updatable> updatables)
-   {
-      this.updatables.addAll(updatables);
    }
 }

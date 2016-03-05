@@ -111,13 +111,13 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(false);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
-   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, BipedSupportPolygons bipedSupportPolygons, boolean useArms, boolean robotIsHanging,
+   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
          MomentumBasedController momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.DIAGNOSTICS);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
-      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -328,7 +328,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
 
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      momentumBasedController.callUpdatables();
+      momentumBasedController.update();
    }
 
    public void updateDiagnosticsWhenHangingHelpers()
