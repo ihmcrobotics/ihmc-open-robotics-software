@@ -1141,12 +1141,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return true;
          }
 
-         boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
-         if (isInDoubleSupport)
-            System.out.println();
+         if (!super.checkCondition())
+            return false;
+
          boolean noMoreFootstepsForThisSide = !walkingMessageHandler.isNextFootstepFor(robotSide.getOppositeSide());
          boolean noMoreFootTrajectoryMessages = !walkingMessageHandler.hasFootTrajectoryForFlamingoStance(robotSide.getOppositeSide());
-         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootTrajectoryMessages && (isInDoubleSupport || super.checkCondition());
+         boolean readyToStopWalking = noMoreFootstepsForThisSide && noMoreFootTrajectoryMessages;
          return readyToStopWalking;
       }
    }
