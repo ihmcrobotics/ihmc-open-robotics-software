@@ -114,9 +114,8 @@ public class PushRecoveryControlModule
    /**
     * Return null if the robot is not falling.
     * If the robot is falling, it returns the suggested swingSide to recover. 
-    * @param timeInState
     */
-   public RobotSide isRobotFallingFromDoubleSupport(double timeInState)
+   public RobotSide isRobotFallingFromDoubleSupport()
    {
       if (!isICPOutside.getBooleanValue())
          return null;
@@ -131,6 +130,9 @@ public class PushRecoveryControlModule
 
    public void updateForDoubleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
+      if (!isEnabled())
+         return;
+
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
@@ -175,6 +177,9 @@ public class PushRecoveryControlModule
 
    public void updateForSingleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
+      if (!isEnabled())
+         return;
+
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
