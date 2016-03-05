@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
@@ -44,6 +45,7 @@ public class BalanceManager
    private final ICPPlannerWithTimeFreezer icpPlanner;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
+   private final PushRecoveryControlModule pushRecoveryControlModule;
 
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
@@ -88,6 +90,8 @@ public class BalanceManager
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
+      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
+
       YoGraphicPosition dynamicGraphicPositionECMP = new YoGraphicPosition("ecmpviz", ecmpViz, 0.002, YoAppearance.BlueViolet());
       yoGraphicsListRegistry.registerYoGraphic("ecmpviz", dynamicGraphicPositionECMP);
       yoGraphicsListRegistry.registerArtifact("ecmpviz", dynamicGraphicPositionECMP.createArtifact());
@@ -118,6 +122,83 @@ public class BalanceManager
    public void clearICPPlan()
    {
       icpPlanner.clearPlan();
+   }
+
+   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
+   private final FramePoint2d capturePoint2d = new FramePoint2d();
+
+   public void updatePushRecovery(boolean isInDoubleSupport)
+   {
+      getDesiredICP(desiredCapturePoint2d);
+      getCapturePoint(capturePoint2d);
+      if (isInDoubleSupport)
+      {
+         pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, getOmega0());
+      }
+      else
+      {
+         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, getOmega0());
+      }
+   }
+
+   public void resetPushRecovery()
+   {
+      pushRecoveryControlModule.reset();
+   }
+
+   public boolean isPushRecoveryEnabled()
+   {
+      return pushRecoveryControlModule.isEnabled();
+   }
+
+   public boolean checkAndUpdateFootstep(Footstep footstep)
+   {
+      return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
+   }
+
+   public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
+   {
+      return pushRecoveryControlModule.createFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining);
+   }
+
+   public RobotSide isRobotFallingFromDoubleSupport()
+   {
+      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
+   }
+
+   public void initializeForDoubleSupportPushRecovery()
+   {
+      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
+   }
+
+   public void enablePushRecovery()
+   {
+      pushRecoveryControlModule.setIsEnabled(true);
+   }
+
+   public void disablePushRecovery()
+   {
+      pushRecoveryControlModule.setIsEnabled(false);
+   }
+
+   public boolean isRecoveryImpossible()
+   {
+      return pushRecoveryControlModule.isCaptureRegionEmpty();
+   }
+
+   public boolean isRobotBackToSafeState()
+   {
+      return pushRecoveryControlModule.isRobotBackToSafeState();
+   }
+
+   public boolean isRecovering()
+   {
+      return pushRecoveryControlModule.isRecovering();
+   }
+
+   public boolean isRecoveringFromDoubleSupportFall()
+   {
+      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
    }
 
    public void computePelvisXY(RobotSide supportLeg, FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
