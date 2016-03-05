@@ -77,10 +77,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
    }
 
-   public void initialize()
-   {
-   }
-
    public void compute()
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
