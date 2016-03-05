@@ -898,7 +898,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean switchToSingleSupport = transferToSide != suggestedSwingSide;
 
          if (switchToSingleSupport)
-            balanceManager.initializeForDoubleSupportPushRecovery();
+            balanceManager.prepareForDoubleSupportPushRecovery();
 
          return switchToSingleSupport;
       }
@@ -977,7 +977,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
-         boolean icpTrajectoryIsDone = balanceManager.isICPPlanDone(yoTime.getDoubleValue());
+         boolean icpTrajectoryIsDone = balanceManager.isICPPlanDone();
 
          if (!icpTrajectoryIsDone)
             return false;
@@ -1040,7 +1040,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (finishSingleSupportWhenICPPlannerIsDone && !isInFlamingoStance.getBooleanValue())
          {
-            if (balanceManager.isICPPlanDone(yoTime.getDoubleValue()))
+            if (balanceManager.isICPPlanDone())
                return true;
          }
 
@@ -1187,6 +1187,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       momentumBasedController.doPassiveKneeControl();
       momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
+
+      statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
    }
 
    public void submitControllerCoreCommands(JointspaceFeedbackControlCommand unconstrainedJointCommand)
