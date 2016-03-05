@@ -242,7 +242,15 @@ public class ICPPlanner
       requestedHoldPosition.set(true);
    }
 
-   public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
+   public void initializeForStanding(double time)
+   {
+      isStanding.set(true);
+
+      clearPlan();
+      initializeForTransfer(time, null);
+   }
+
+   public void initializeForTransfer(double initialTime, RobotSide transferToSide)
    {
       this.transferToSide.set(transferToSide);
       this.supportSide.set(null);
@@ -366,12 +374,12 @@ public class ICPPlanner
       }
    }
 
-   public void initializeSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeForSingleSupport(double initialTime, RobotSide supportSide)
    {
-      initializeSingleSupport(initialTime, supportSide, true);
+      initializeForSingleSupport(initialTime, supportSide, true);
    }
 
-   public void initializeSingleSupport(double initialTime, RobotSide supportSide, boolean startFromCurrentDesiredICP)
+   public void initializeForSingleSupport(double initialTime, RobotSide supportSide, boolean startFromCurrentDesiredICP)
    {
       this.transferToSide.set(null);
       this.supportSide.set(supportSide);
@@ -473,7 +481,7 @@ public class ICPPlanner
 
    public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
    {
-      initializeSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue(), false);
+      initializeForSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue(), false);
 
       if (isDone(time))
          return;
@@ -750,14 +758,6 @@ public class ICPPlanner
       entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
       tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
-   }
-
-   public void reset(double time)
-   {
-      isStanding.set(true);
-
-      clearPlan();
-      initializeDoubleSupport(time, null);
    }
 
    public void getNextExitCMP(FramePoint entryCMPToPack)

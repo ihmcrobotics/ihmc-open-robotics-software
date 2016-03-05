@@ -76,19 +76,19 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
+   public void initializeForTransfer(double initialTime, RobotSide transferToSide)
    {
       timeDelay.set(0.0);
       previousTime.set(initialTime);
-      super.initializeDoubleSupport(initialTime, transferToSide);
+      super.initializeForTransfer(initialTime, transferToSide);
    }
 
    @Override
-   public void initializeSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeForSingleSupport(double initialTime, RobotSide supportSide)
    {
       timeDelay.set(0.0);
       previousTime.set(initialTime);
-      super.initializeSingleSupport(initialTime, supportSide);
+      super.initializeForSingleSupport(initialTime, supportSide);
    }
 
    private void doTimeFreezeIfNeeded(FramePoint2d currentCapturePointPosition, double time)
@@ -159,10 +159,10 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void reset(double time)
+   public void initializeForStanding(double time)
    {
       timeDelay.set(0.0);
       previousTime.set(time);
-      super.reset(time);
+      super.initializeForStanding(time);
    }
 }
