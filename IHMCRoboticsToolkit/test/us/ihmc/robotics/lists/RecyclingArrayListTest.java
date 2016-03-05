@@ -25,11 +25,11 @@ public class RecyclingArrayListTest
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
 
-      int initialCapacity = 10;
-      list = new RecyclingArrayList<>(initialCapacity, Object.class);
-      assertTrue(list.isEmpty());
-      assertTrue(list.size() == 0);
-      assertTrue(list.getLast() == null);
+      int expectedSize = 10;
+      list = new RecyclingArrayList<>(expectedSize, Object.class);
+      assertFalse(list.isEmpty());
+      assertTrue(list.size() == expectedSize);
+      assertTrue(list.getLast() != null);
       
       list.clear();
       assertTrue(list.isEmpty());
@@ -233,7 +233,6 @@ public class RecyclingArrayListTest
    {
       int currentSize = 10;
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(currentSize, Object.class);
-      list.growByN(currentSize);
       assertTrue(list.size() == currentSize);
 
       ArrayList<Object> savedList = new ArrayList<>();
@@ -270,7 +269,6 @@ public class RecyclingArrayListTest
    {
       int currentSize = 10;
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
-      list.growByN(currentSize);
       for (int i = 0; i < currentSize; i++)
          list.get(i).setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -319,7 +317,6 @@ public class RecyclingArrayListTest
       Random rand = new Random(541964L);
       int currentSize = 10;
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
-      list.growByN(currentSize);
       for (int i = 0; i < currentSize; i++)
          list.get(i).setValue(10 + i);
       assertTrue(list.size() == currentSize);
@@ -370,7 +367,6 @@ public class RecyclingArrayListTest
       Random rand = new Random(541964L);
       int currentSize = 10;
       RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
-      list.growByN(currentSize);
       for (int i = 0; i < currentSize; i++)
          list.get(i).setValue(10 + i);
       assertTrue(list.size() == currentSize);

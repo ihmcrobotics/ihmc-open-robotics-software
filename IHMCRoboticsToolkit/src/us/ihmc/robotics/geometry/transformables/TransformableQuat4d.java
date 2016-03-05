@@ -16,6 +16,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(Quat4d tuple)
    {
       super(tuple);
+      normalizeAndLimitToPiMinusPi();
    }
 
    public TransformableQuat4d()
@@ -27,6 +28,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(double[] quaternion)
    {
       super(quaternion);
+      normalizeAndLimitToPiMinusPi();
    }
 
    @Override
@@ -36,13 +38,16 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
       this.mul(tempQuaternionForTransform, this);
       normalizeAndLimitToPiMinusPi();
    }
-   
+
    /**
     * Normalize the quaternion and also limits the described angle magnitude in [-Pi, Pi].
     * The latter prevents some controllers to poop their pants.
     */
    public void normalizeAndLimitToPiMinusPi()
    {
+      // Quat4d.normalize() turns it into zero if it contains NaN. This needs to be fixed. Should stay NaN...
+      if (this.containsNaN()) return;
+
       if (normSquared() < 1.0e-7)
          setToZero();
       else

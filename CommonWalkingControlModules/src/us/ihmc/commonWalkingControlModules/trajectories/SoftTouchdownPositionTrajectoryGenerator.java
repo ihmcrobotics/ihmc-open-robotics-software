@@ -14,6 +14,7 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
+
 public class SoftTouchdownPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
@@ -22,31 +23,31 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
    private final YoFrameVector desiredAcceleration;
-
+   
    private final ReferenceFrame referenceFrame;
 
    private final PositionProvider initialPositionSource;
    private final VectorProvider velocitySource;
    private final VectorProvider accelerationSource;
-
+   
    private final DoubleProvider startTimeProvider;
-
+   
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable timeIntoTouchdown;
-
+   
    private final FramePoint p0;
    private final FrameVector pd0;
    private final FrameVector pdd0;
-
+   
    private final double tf = Double.POSITIVE_INFINITY;
    private double t0;
-
+   
    private final BooleanYoVariable replanningTrajectory;
 
    private final YoSpline3D trajectory;
 
    public SoftTouchdownPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, PositionProvider initialPositionProvider,
-         VectorProvider velocityProvider, VectorProvider accelerationProvider, DoubleProvider startTimeProvider, YoVariableRegistry parentRegistry)
+           VectorProvider velocityProvider, VectorProvider accelerationProvider, DoubleProvider startTimeProvider, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
@@ -54,23 +55,23 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
-
+      
       p0 = new FramePoint();
       pd0 = new FrameVector();
       pdd0 = new FrameVector();
       t0 = 0.0;
-
+      
       this.replanningTrajectory = new BooleanYoVariable(namePrefix + "ReplanningTrajectory", parentRegistry);
       this.replanningTrajectory.set(false);
-
+      
       this.referenceFrame = referenceFrame;
 
       initialPositionSource = initialPositionProvider;
       velocitySource = velocityProvider;
       accelerationSource = accelerationProvider;
-
+      
       this.startTimeProvider = startTimeProvider;
-
+      
       startTime = new DoubleYoVariable(namePrefix + "startTime", registry);
       startTime.set(startTimeProvider.getValue());
 
@@ -81,35 +82,35 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 
    public void initialize()
    {
-      setInitialTimePositionsAndVelocities();
-
+	  setInitialTimePositionsAndVelocities();
+      
       trajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, p0, pd0, pdd0);
    }
 
    public void compute(double time)
    {
       timeIntoTouchdown.set(time - startTime.getDoubleValue());
-
+      
       trajectory.compute(time);
       desiredPosition.set(trajectory.getPosition());
       desiredVelocity.set(trajectory.getVelocity());
       desiredAcceleration.set(trajectory.getAcceleration());
    }
-
+   
    public void setInitialTimePositionsAndVelocities()
    {
-      t0 = startTimeProvider.getValue();
-      startTime.set(startTimeProvider.getValue());
-      timeIntoTouchdown.set(0.0);
+	   t0 = startTimeProvider.getValue();
+	   startTime.set(startTimeProvider.getValue());
+	   timeIntoTouchdown.set(0.0);
+	      
+	   initialPositionSource.getPosition(p0);
+	   p0.changeFrame(referenceFrame);
+	   
+	   velocitySource.get(pd0);
+	   pd0.changeFrame(referenceFrame);
 
-      initialPositionSource.getPosition(p0);
-      p0.changeFrame(referenceFrame);
-
-      velocitySource.get(pd0);
-      pd0.changeFrame(referenceFrame);
-
-      accelerationSource.get(pdd0);
-      pdd0.changeFrame(referenceFrame);
+	   accelerationSource.get(pdd0);
+	   pdd0.changeFrame(referenceFrame);
    }
 
    public boolean isDone()

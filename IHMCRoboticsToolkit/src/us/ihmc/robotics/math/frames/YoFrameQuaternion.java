@@ -61,6 +61,12 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       this.qs = qs;
       this.referenceFrame = referenceFrame;
    }
+   
+   public final FrameOrientation getFrameOrientation()
+   {
+      putYoValuesIntoFrameOrientation();
+      return frameOrientation;
+   }
 
    public void set(Quat4d quaternion)
    {
@@ -294,10 +300,8 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 
    public void setToNaN()
    {
-      qx.set(Double.NaN);
-      qy.set(Double.NaN);
-      qz.set(Double.NaN);
-      qs.set(Double.NaN);
+      frameOrientation.setToNaN();
+      getYoValuesFromFrameOrientation();
    }
 
    public void setToZero()

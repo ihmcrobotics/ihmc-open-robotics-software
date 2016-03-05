@@ -35,7 +35,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       initialPositionInSpecificFrame.changeFrame(attachedFrame);
       initialVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
-
+   
    public void setFinalConditions(YoFramePoint finalPosition, YoFrameVector finalVelocity, ReferenceFrame attachedFrame)
    {
       finalPosition.getFrameTupleIncludingFrame(finalPositionInSpecificFrame);

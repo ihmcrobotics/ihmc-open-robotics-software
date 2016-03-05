@@ -5,7 +5,6 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -43,8 +42,18 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.position.set(position);
    }
 
+   public void setPosition(FramePoint position)
+   {
+      this.position.set(position);
+   }
+
    @Override
    public void setOrientation(Quat4d orientation)
+   {
+      this.orientation.set(orientation);
+   }
+
+   public void setOrientation(FrameOrientation orientation)
    {
       this.orientation.set(orientation);
    }
@@ -55,8 +64,18 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.linearVelocity.set(linearVelocity);
    }
 
+   public void setLinearVelocity(FrameVector linearVelocity)
+   {
+      this.linearVelocity.set(linearVelocity);
+   }
+
    @Override
    public void setAngularVelocity(Vector3d angularVelocity)
+   {
+      this.angularVelocity.set(angularVelocity);
+   }
+
+   public void setAngularVelocity(FrameVector angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
@@ -86,9 +105,9 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(DoubleYoVariable time, YoFramePoint position, YoFrameQuaternion orientation, YoFrameVector linearVelocity, YoFrameVector angularVelocity)
+   public void set(double time, YoFramePoint position, YoFrameQuaternion orientation, YoFrameVector linearVelocity, YoFrameVector angularVelocity)
    {
-      this.time.set(time.getDoubleValue());
+      this.time.set(time);
       this.position.set(position);
       this.orientation.set(orientation);
       this.linearVelocity.set(linearVelocity);
@@ -303,7 +322,12 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    protected void putYoValuesIntoFrameWaypoint()
    {
       frameWaypoint.setToZero(getReferenceFrame());
-      frameWaypoint.set(this);
+
+      frameWaypoint.setTime(time.getDoubleValue());
+      frameWaypoint.setPosition(position.getFrameTuple());
+      frameWaypoint.setOrientation(orientation.getFrameOrientation());
+      frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
+      frameWaypoint.setAngularVelocity(angularVelocity.getFrameTuple());
    }
 
    @Override

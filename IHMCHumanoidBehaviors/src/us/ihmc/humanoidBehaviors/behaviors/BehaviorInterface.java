@@ -71,7 +71,6 @@ public abstract class BehaviorInterface implements RobotController
 
    public void sendPacketToController(Packet<?> obj)
    {
-      System.out.println(obj);
       outgoingCommunicationBridge.sendPacketToController(obj);
    }
 
