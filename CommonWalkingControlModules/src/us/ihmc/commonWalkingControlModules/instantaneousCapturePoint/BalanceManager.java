@@ -50,6 +50,8 @@ public class BalanceManager
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
    private final YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
 
+   private final DoubleYoVariable yoTime;
+
    public BalanceManager(ControllerStatusOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
          YoVariableRegistry parentRegistry)
@@ -68,6 +70,8 @@ public class BalanceManager
       double gravityZ = momentumBasedController.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
+
+      yoTime = momentumBasedController.getYoTime();
 
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
 
@@ -132,17 +136,17 @@ public class BalanceManager
       icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
    }
 
-   public double computeAndReturnTimeRemaining(double time)
+   public double getTimeRemainingInCurrentState()
    {
-      return icpPlanner.computeAndReturnTimeInCurrentState(time);
+      return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
    }
 
    private final FramePoint2d actualCapturePointPosition = new FramePoint2d();
 
-   public double estimateTimeRemainingForStateUnderDisturbance(double time)
+   public double estimateTimeRemainingForSwingUnderDisturbance()
    {
       icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
-      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(time, actualCapturePointPosition);
+      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), actualCapturePointPosition);
    }
 
    public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
@@ -170,12 +174,11 @@ public class BalanceManager
       return icpAndMomentumBasedController.getControlledCoMHeightAcceleration();
    }
 
-   public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack,
-         double time)
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack)
    {
       icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
       icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, actualCapturePointPosition,
-            time);
+            yoTime.getDoubleValue());
    }
 
    public void getDesiredCMP(FramePoint2d desiredCMP)
@@ -259,19 +262,19 @@ public class BalanceManager
       icpAndMomentumBasedController.getDesiredICP().setByProjectionOntoXYPlane(icpAndMomentumBasedController.getCapturePoint());
    }
 
-   public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
+   public void initializeICPPlanDoubleSupport(double initialTime, RobotSide transferToSide)
    {
       icpPlanner.initializeDoubleSupport(initialTime, transferToSide);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
-   public void initializeSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeICPPlanSingleSupport(double initialTime, RobotSide supportSide)
    {
       icpPlanner.initializeSingleSupport(initialTime, supportSide);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
-   public boolean isDone(double doubleValue)
+   public boolean isICPPlanDone(double doubleValue)
    {
       return icpPlanner.isDone(doubleValue);
    }
@@ -286,14 +289,14 @@ public class BalanceManager
       icpPlanner.reset(time);
    }
 
-   public void setDoubleSupportTime(double time)
+   public void setDoubleSupportTime(double newDoubleSupportTime)
    {
-      icpPlanner.setDoubleSupportTime(time);
+      icpPlanner.setDoubleSupportTime(newDoubleSupportTime);
    }
 
-   public void setSingleSupportTime(double time)
+   public void setSingleSupportTime(double newSingleSupportTime)
    {
-      icpPlanner.setSingleSupportTime(time);
+      icpPlanner.setSingleSupportTime(newSingleSupportTime);
    }
 
    public void update()
@@ -310,10 +313,10 @@ public class BalanceManager
       icpAndMomentumBasedController.updateBipedSupportPolygons();
    }
 
-   public void updatePlanForSingleSupportDisturbances(double time)
+   public void updateICPPlanForSingleSupportDisturbances()
    {
       icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
-      icpPlanner.updatePlanForSingleSupportDisturbances(time, actualCapturePointPosition);
+      icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), actualCapturePointPosition);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
