@@ -40,7 +40,7 @@ public class FootstepListVisualizer
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "Footstep" + i;
             AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide).darker(), 0.0);
-            FootstepVisualizer footstepVisualizer = new FootstepVisualizer(name, graphicListName, robotSide, contactableFoot, yoGraphicsListRegistry, registry, footstepColor);
+            FootstepVisualizer footstepVisualizer = new FootstepVisualizer(name, graphicListName, robotSide, contactableFoot, footstepColor, yoGraphicsListRegistry, registry);
             footstepVisualizers.get(robotSide).add(footstepVisualizer);
          }
       }
