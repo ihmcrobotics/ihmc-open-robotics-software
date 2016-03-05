@@ -262,15 +262,15 @@ public class BalanceManager
       icpAndMomentumBasedController.getDesiredICP().setByProjectionOntoXYPlane(icpAndMomentumBasedController.getCapturePoint());
    }
 
-   public void initializeICPPlanDoubleSupport(double initialTime, RobotSide transferToSide)
+   public void initializeICPPlanDoubleSupport(RobotSide transferToSide)
    {
-      icpPlanner.initializeDoubleSupport(initialTime, transferToSide);
+      icpPlanner.initializeDoubleSupport(yoTime.getDoubleValue(), transferToSide);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
-   public void initializeICPPlanSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeICPPlanSingleSupport(RobotSide supportSide)
    {
-      icpPlanner.initializeSingleSupport(initialTime, supportSide);
+      icpPlanner.initializeSingleSupport(yoTime.getDoubleValue(), supportSide);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
