@@ -194,11 +194,6 @@ public class BalanceManager
       return bipedSupportPolygons;
    }
 
-   public YoFramePoint getCapturePoint()
-   {
-      return icpAndMomentumBasedController.getCapturePoint();
-   }
-
    public void getCapturePoint(FramePoint2d capturePointToPack)
    {
       icpAndMomentumBasedController.getCapturePoint(capturePointToPack);
@@ -221,19 +216,9 @@ public class BalanceManager
       icpAndMomentumBasedController.getDesiredCMP(desiredCMP);
    }
 
-   public YoFramePoint2d getDesiredICP()
-   {
-      return icpAndMomentumBasedController.getDesiredICP();
-   }
-
    public void getDesiredICP(FramePoint2d desiredICP)
    {
       icpAndMomentumBasedController.getDesiredICP(desiredICP);
-   }
-
-   public YoFrameVector2d getDesiredICPVelocity()
-   {
-      return icpAndMomentumBasedController.getDesiredICPVelocity();
    }
 
    public void getDesiredICPVelocity(FrameVector2d desiredICPToPack)
