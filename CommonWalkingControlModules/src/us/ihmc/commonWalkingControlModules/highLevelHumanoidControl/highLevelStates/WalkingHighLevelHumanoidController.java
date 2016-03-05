@@ -94,7 +94,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final DoubleYoVariable controlledCoMHeightAcceleration;
+   private final DoubleYoVariable controlledCoMHeightAcceleration = new DoubleYoVariable("controlledCoMHeightAcceleration", registry);
 
    private final BooleanYoVariable isPerformingToeOff = new BooleanYoVariable("isPerformingToeOff", registry);
 
@@ -172,7 +172,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       supportLeg = balanceManager.getYoSupportLeg();
       bipedSupportPolygons = balanceManager.getBipedSupportPolygons();
-      controlledCoMHeightAcceleration = balanceManager.getControlledCoMHeightAcceleration();
 
       this.footSwitches = momentumBasedController.getFootSwitches();
 
@@ -1175,7 +1174,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if ((manipulationControlModule != null) && (manipulationControlModule.isAtLeastOneHandLoadBearing()))
          keepCMPInsideSupportPolygon = false;
 
-      balanceManager.compute(supportLeg.getEnumValue(), keepCMPInsideSupportPolygon);      
+      balanceManager.compute(supportLeg.getEnumValue(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon);      
 
       submitControllerCoreCommands(unconstrainedJointCommand);
 

@@ -47,6 +47,7 @@ public class BalanceManager
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithTimeFreezer icpPlanner;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
+   private final ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule;
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
 
@@ -94,7 +95,7 @@ public class BalanceManager
 
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
 
-      ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
+      icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
             referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry);
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
@@ -131,7 +132,7 @@ public class BalanceManager
       icpPlanner.clearPlan();
    }
 
-   public void compute(RobotSide supportLeg, boolean keepCMPInsideSupportPolygon)
+   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
    {
       if (supportLeg == null)
          computeForDoubleSupport();
@@ -139,7 +140,7 @@ public class BalanceManager
          computeForSingleSupport(supportLeg);
 
       finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
-      icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
+      icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, desiredCoMHeightAcceleration, keepCMPInsideSupportPolygon);
    }
 
    public void computeForDoubleSupport()
@@ -212,11 +213,6 @@ public class BalanceManager
    public void getCapturePoint(FramePoint2d capturePointToPack)
    {
       icpAndMomentumBasedController.getCapturePoint(capturePointToPack);
-   }
-
-   public DoubleYoVariable getControlledCoMHeightAcceleration()
-   {
-      return icpAndMomentumBasedController.getControlledCoMHeightAcceleration();
    }
 
    public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack)
