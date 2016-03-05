@@ -413,7 +413,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          balanceManager.getDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal);
 
          if (transferToSide == null)
-            balanceManager.computePelvisXY(desiredICPLocal, desiredICPVelocityLocal);
+            balanceManager.computePelvisXY(null, desiredICPLocal, desiredICPVelocityLocal);
 
          balanceManager.setDesiredICP(desiredICPLocal);
          balanceManager.setDesiredICPVelocity(desiredICPVelocityLocal);
@@ -734,7 +734,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (isInFlamingoStance.getBooleanValue())
          {
-            balanceManager.computePelvisXY(desiredICPLocal, desiredICPVelocityLocal);
+            balanceManager.computePelvisXY(supportSide, desiredICPLocal, desiredICPVelocityLocal);
             consumePelvisMessages();
          }
          else
