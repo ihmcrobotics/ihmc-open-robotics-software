@@ -529,7 +529,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          preparingForLocomotion.set(false);
 
-         balanceManager.clearPlan();
+         balanceManager.clearICPPlan();
          supportLeg.set(null);
          isPerformingToeOff.set(false);
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
@@ -720,7 +720,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                walkingMessageHandler.reportWalkingAbortRequested();
                walkingMessageHandler.clearFootsteps();
 
-               balanceManager.clearPlan();
+               balanceManager.clearICPPlan();
                balanceManager.addFootstepToPlan(nextFootstep);
                balanceManager.updateICPPlanForSingleSupportDisturbances();
                holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
@@ -810,7 +810,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          RobotSide supportSide = swingSide.getOppositeSide();
          supportLeg.set(supportSide);
-         balanceManager.clearPlan();
+         balanceManager.clearICPPlan();
 
          footSwitches.get(swingSide).reset();
 
@@ -920,7 +920,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       loadFootStartTime.set(yoTime.getDoubleValue());
       balanceManager.setSingleSupportTime(loadFootDuration.getDoubleValue());
       balanceManager.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
-      balanceManager.clearPlan();
+      balanceManager.clearICPPlan();
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.initializeICPPlanSingleSupport(supportLeg.getEnumValue());
 
