@@ -370,7 +370,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       private final RobotSide transferToSide;
       private final FramePoint2d desiredICPLocal = new FramePoint2d();
-      private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
       private final FramePoint2d capturePoint2d = new FramePoint2d();
       private final FramePoint2d desiredCMP = new FramePoint2d();
 
@@ -402,20 +401,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             consumePelvisMessages();
          }
 
-         desiredICPLocal.setToZero(worldFrame);
-         desiredICPVelocityLocal.setToZero(worldFrame);
-
-         balanceManager.getDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal);
-
-         if (transferToSide == null)
-            balanceManager.computePelvisXY(null, desiredICPLocal, desiredICPVelocityLocal);
-
-         balanceManager.setDesiredICP(desiredICPLocal);
-         balanceManager.setDesiredICPVelocity(desiredICPVelocityLocal);
+         balanceManager.computeForDoubleSupport();
 
          switchToToeOffIfPossible();
-
-         balanceManager.updatePushRecovery(true);
 
          // Always do this so that when a foot slips or is loaded in the air, the height
          // gets adjusted.
@@ -460,6 +448,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < minimumDurationBetweenTwoManipulationAborts.getDoubleValue())
             return;
 
+         balanceManager.getCapturePoint(capturePoint2d);
+         balanceManager.getDesiredICP(desiredICPLocal);
+
          if (capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToAbortManipulation.getDoubleValue())
          {
             hasManipulationBeenAborted.set(true);
@@ -486,6 +477,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             balanceManager.getDesiredCMP(desiredCMP);
             balanceManager.getDesiredICP(desiredICPLocal);
             balanceManager.getCapturePoint(capturePoint2d);
+
             boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, desiredCMP, desiredICPLocal, capturePoint2d);
 
             if (doToeOff)
@@ -599,12 +591,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             for (int i = 0; i < 3; i++)
                balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i));
-            balanceManager.initializeICPPlanDoubleSupport(transferToSide);
+            balanceManager.initializeICPPlanForTransfer(transferToSide);
          }
          else if (hasFootTrajectoryMessage)
          {
             balanceManager.setSingleSupportTime(Double.POSITIVE_INFINITY);
             balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
+            balanceManager.initializeICPPlanForTransfer(transferToSide);
          }
          else
          {
@@ -614,7 +607,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
             }
 
-            balanceManager.reset(yoTime.getDoubleValue());
+            balanceManager.initializeICPPlanForStanding();
          }
       }
 
@@ -640,7 +633,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final RobotSide swingSide;
 
       private final FramePoint2d desiredICPLocal = new FramePoint2d();
-      private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
       private final FramePoint2d capturePoint2d = new FramePoint2d();
 
       private Footstep nextFootstep;
@@ -658,21 +650,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doAction()
       {
+         RobotSide supportSide = swingSide.getOppositeSide();
          integrateAnkleAccelerationsOnSwingLeg(swingSide);
 
-         desiredICPLocal.setToZero(worldFrame);
-         desiredICPVelocityLocal.setToZero(worldFrame);
-
-         balanceManager.getCapturePoint(capturePoint2d);
-
-         balanceManager.getDesiredCapturePointPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal);
+         balanceManager.computeForSingleSupport(supportSide);
 
          if (isInFlamingoStance.getBooleanValue())
          {
             feetManager.handleFootTrajectoryMessage(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
          }
 
-         RobotSide supportSide = swingSide.getOppositeSide();
+         balanceManager.getDesiredICP(desiredICPLocal);
+         balanceManager.getCapturePoint(capturePoint2d);
 
          boolean icpErrorIsTooLarge = capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
@@ -692,7 +681,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else if (balanceManager.isPushRecoveryEnabled())
          {
-            balanceManager.updatePushRecovery(false);
 
             double estimatedTimeRemaining = balanceManager.getTimeRemainingInCurrentState();
             boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
@@ -721,7 +709,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (isInFlamingoStance.getBooleanValue())
          {
-            balanceManager.computePelvisXY(supportSide, desiredICPLocal, desiredICPVelocityLocal);
             consumePelvisMessages();
          }
          else
@@ -729,8 +716,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             walkingMessageHandler.clearFootTrajectory();
          }
 
-         balanceManager.setDesiredICP(desiredICPLocal);
-         balanceManager.setDesiredICPVelocity(desiredICPVelocityLocal);
 
          if ((stateMachine.timeInCurrentState() - captureTime < 0.5 * walkingMessageHandler.getSwingTime())
                && feetManager.isInSingularityNeighborhood(swingSide))
@@ -738,6 +723,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             feetManager.doSingularityEscape(swingSide);
          }
 
+         switchToToeOffIfPossible(supportSide);
+      }
+
+      public void switchToToeOffIfPossible(RobotSide supportSide)
+      {
          if (feetManager.doToeOffIfPossibleInSingleSupport())
          {
             boolean willDoToeOff = feetManager.willDoToeOff(nextFootstep, swingSide);
@@ -836,7 +826,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             balanceManager.addFootstepToPlan(nextFootstep);
             balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
             balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
-            balanceManager.initializeICPPlanSingleSupport(supportSide);
+            balanceManager.initializeICPPlanForSingleSupport(supportSide);
 
             if (balanceManager.isRecoveringFromDoubleSupportFall())
             {
@@ -906,7 +896,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       balanceManager.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
       balanceManager.clearICPPlan();
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
-      balanceManager.initializeICPPlanSingleSupport(supportLeg.getEnumValue());
+      balanceManager.initializeICPPlanForSingleSupport(supportLeg.getEnumValue());
 
       balanceManager.freezePelvisXYControl();
    }

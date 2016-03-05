@@ -54,6 +54,14 @@ public class BalanceManager
 
    private final DoubleYoVariable yoTime;
 
+   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
+
+   private final FramePoint2d capturePoint2d = new FramePoint2d();
+
+   private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
+
+   private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
+
    public BalanceManager(ControllerStatusOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
          YoVariableRegistry parentRegistry)
@@ -104,111 +112,14 @@ public class BalanceManager
       icpPlanner.addFootstepToPlan(footstep);
    }
 
-   public void disablePelvisXYControl()
-   {
-      pelvisICPBasedTranslationManager.disable();
-   }
-
-   public void enablePelvisXYControl()
-   {
-      pelvisICPBasedTranslationManager.enable();
-   }
-
-   public void freezePelvisXYControl()
-   {
-      pelvisICPBasedTranslationManager.freeze();
-   }
-
-   public void clearICPPlan()
-   {
-      icpPlanner.clearPlan();
-   }
-
-   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
-
-   public void updatePushRecovery(boolean isInDoubleSupport)
-   {
-      getDesiredICP(desiredCapturePoint2d);
-      getCapturePoint(capturePoint2d);
-      if (isInDoubleSupport)
-      {
-         pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, getOmega0());
-      }
-      else
-      {
-         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, getOmega0());
-      }
-   }
-
-   public void resetPushRecovery()
-   {
-      pushRecoveryControlModule.reset();
-   }
-
-   public boolean isPushRecoveryEnabled()
-   {
-      return pushRecoveryControlModule.isEnabled();
-   }
-
    public boolean checkAndUpdateFootstep(Footstep footstep)
    {
       return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
    }
-
-   public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
+   public void clearICPPlan()
    {
-      return pushRecoveryControlModule.createFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining);
+      icpPlanner.clearPlan();
    }
-
-   public RobotSide isRobotFallingFromDoubleSupport()
-   {
-      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
-   }
-
-   public void initializeForDoubleSupportPushRecovery()
-   {
-      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
-   }
-
-   public void enablePushRecovery()
-   {
-      pushRecoveryControlModule.setIsEnabled(true);
-   }
-
-   public void disablePushRecovery()
-   {
-      pushRecoveryControlModule.setIsEnabled(false);
-   }
-
-   public boolean isRecoveryImpossible()
-   {
-      return pushRecoveryControlModule.isCaptureRegionEmpty();
-   }
-
-   public boolean isRobotBackToSafeState()
-   {
-      return pushRecoveryControlModule.isRobotBackToSafeState();
-   }
-
-   public boolean isRecovering()
-   {
-      return pushRecoveryControlModule.isRecovering();
-   }
-
-   public boolean isRecoveringFromDoubleSupportFall()
-   {
-      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
-   }
-
-   public void computePelvisXY(RobotSide supportLeg, FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
-   {
-      icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
-      pelvisICPBasedTranslationManager.compute(supportLeg, actualCapturePointPosition);
-      pelvisICPBasedTranslationManager.addICPOffset(desiredICPToModify, desiredICPVelocityToModify);
-   }
-
-   private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
 
    public void compute(boolean keepCMPInsideSupportPolygon)
    {
@@ -216,22 +127,66 @@ public class BalanceManager
       icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
    }
 
-   public double getTimeRemainingInCurrentState()
+   public void computeForDoubleSupport()
    {
-      return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
+      getCapturePoint(capturePoint2d);
+      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, yoTime.getDoubleValue());
+      computePelvisXY(null, desiredCapturePoint2d, desiredCapturePointVelocity2d);
+      setDesiredICP(desiredCapturePoint2d);
+      setDesiredICPVelocity(desiredCapturePointVelocity2d);
+      updatePushRecovery(true);
    }
 
-   private final FramePoint2d actualCapturePointPosition = new FramePoint2d();
+   public void computeForSingleSupport(RobotSide supportSide)
+   {
+      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePoint2d, desiredCapturePointVelocity2d, yoTime.getDoubleValue());
+      computePelvisXY(supportSide, desiredCapturePoint2d, desiredCapturePointVelocity2d);
+      setDesiredICP(desiredCapturePoint2d);
+      setDesiredICPVelocity(desiredCapturePointVelocity2d);
+      updatePushRecovery(false);
+   }
+
+   public void computePelvisXY(RobotSide supportLeg, FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
+   {
+      icpAndMomentumBasedController.getCapturePoint(capturePoint2d);
+      pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
+      pelvisICPBasedTranslationManager.addICPOffset(desiredICPToModify, desiredICPVelocityToModify);
+   }
+
+   public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
+   {
+      return pushRecoveryControlModule.createFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining);
+   }
+
+   public void disablePelvisXYControl()
+   {
+      pelvisICPBasedTranslationManager.disable();
+   }
+
+   public void disablePushRecovery()
+   {
+      pushRecoveryControlModule.setIsEnabled(false);
+   }
+
+   public void enablePelvisXYControl()
+   {
+      pelvisICPBasedTranslationManager.enable();
+   }
+
+   public void enablePushRecovery()
+   {
+      pushRecoveryControlModule.setIsEnabled(true);
+   }
 
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
-      icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
-      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), actualCapturePointPosition);
+      icpAndMomentumBasedController.getCapturePoint(capturePoint2d);
+      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), capturePoint2d);
    }
 
-   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+   public void freezePelvisXYControl()
    {
-      pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
+      pelvisICPBasedTranslationManager.freeze();
    }
 
    public BipedSupportPolygons getBipedSupportPolygons()
@@ -256,19 +211,14 @@ public class BalanceManager
 
    public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack)
    {
-      icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, actualCapturePointPosition,
+      icpAndMomentumBasedController.getCapturePoint(capturePoint2d);
+      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, capturePoint2d,
             yoTime.getDoubleValue());
    }
 
    public void getDesiredCMP(FramePoint2d desiredCMP)
    {
       icpAndMomentumBasedController.getDesiredCMP(desiredCMP);
-   }
-
-   public void setDesiredICP(FramePoint2d desiredCapturePoint)
-   {
-      icpAndMomentumBasedController.setDesiredICP(desiredCapturePoint);
    }
 
    public YoFramePoint2d getDesiredICP()
@@ -289,11 +239,6 @@ public class BalanceManager
    public void getDesiredICPVelocity(FrameVector2d desiredICPToPack)
    {
       icpAndMomentumBasedController.getDesiredICPVelocity(desiredICPToPack);
-   }
-
-   public void setDesiredICPVelocity(FrameVector2d desiredICP)
-   {
-      icpAndMomentumBasedController.setDesiredICPVelocity(desiredICP);
    }
 
    public void getFinalDesiredCapturePointPosition(FramePoint2d finalDesiredCapturePointPositionToPack)
@@ -326,9 +271,29 @@ public class BalanceManager
       return icpAndMomentumBasedController.getOmega0();
    }
 
+   public double getTimeRemainingInCurrentState()
+   {
+      return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
+   }
+
    public EnumYoVariable<RobotSide> getYoSupportLeg()
    {
       return icpAndMomentumBasedController.getYoSupportLeg();
+   }
+
+   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
+   {
+      pelvisICPBasedTranslationManager.handleGoHomeMessage(message);
+   }
+
+   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+   {
+      pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
+   }
+
+   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
+   {
+      pelvisICPBasedTranslationManager.handleStopAllTrajectoryMessage(message);
    }
 
    public void holdCurrentICP(double doubleValue, FramePoint tmpFramePoint)
@@ -342,15 +307,25 @@ public class BalanceManager
       icpAndMomentumBasedController.getDesiredICP().setByProjectionOntoXYPlane(icpAndMomentumBasedController.getCapturePoint());
    }
 
-   public void initializeICPPlanDoubleSupport(RobotSide transferToSide)
+   public void initializeForDoubleSupportPushRecovery()
    {
-      icpPlanner.initializeDoubleSupport(yoTime.getDoubleValue(), transferToSide);
+      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
+   }
+
+   public void initializeICPPlanForSingleSupport(RobotSide supportSide)
+   {
+      icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
-   public void initializeICPPlanSingleSupport(RobotSide supportSide)
+   public void initializeICPPlanForStanding()
    {
-      icpPlanner.initializeSingleSupport(yoTime.getDoubleValue(), supportSide);
+      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
+   }
+
+   public void initializeICPPlanForTransfer(RobotSide transferToSide)
+   {
+      icpPlanner.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
@@ -364,9 +339,49 @@ public class BalanceManager
       return icpPlanner.isOnExitCMP();
    }
 
-   public void reset(double time)
+   public boolean isPushRecoveryEnabled()
    {
-      icpPlanner.reset(time);
+      return pushRecoveryControlModule.isEnabled();
+   }
+
+   public boolean isRecovering()
+   {
+      return pushRecoveryControlModule.isRecovering();
+   }
+
+   public boolean isRecoveringFromDoubleSupportFall()
+   {
+      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
+   }
+
+   public boolean isRecoveryImpossible()
+   {
+      return pushRecoveryControlModule.isCaptureRegionEmpty();
+   }
+
+   public boolean isRobotBackToSafeState()
+   {
+      return pushRecoveryControlModule.isRobotBackToSafeState();
+   }
+
+   public RobotSide isRobotFallingFromDoubleSupport()
+   {
+      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
+   }
+
+   public void resetPushRecovery()
+   {
+      pushRecoveryControlModule.reset();
+   }
+
+   public void setDesiredICP(FramePoint2d desiredCapturePoint)
+   {
+      icpAndMomentumBasedController.setDesiredICP(desiredCapturePoint);
+   }
+
+   public void setDesiredICPVelocity(FrameVector2d desiredICP)
+   {
+      icpAndMomentumBasedController.setDesiredICPVelocity(desiredICP);
    }
 
    public void setDoubleSupportTime(double newDoubleSupportTime)
@@ -395,18 +410,22 @@ public class BalanceManager
 
    public void updateICPPlanForSingleSupportDisturbances()
    {
-      icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
-      icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), actualCapturePointPosition);
+      icpAndMomentumBasedController.getCapturePoint(capturePoint2d);
+      icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), capturePoint2d);
       icpPlanner.getFinalDesiredCapturePointPosition(finalDesiredICPInWorld);
    }
 
-   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
+   public void updatePushRecovery(boolean isInDoubleSupport)
    {
-      pelvisICPBasedTranslationManager.handleGoHomeMessage(message);
-   }
-
-   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
-   {
-      pelvisICPBasedTranslationManager.handleStopAllTrajectoryMessage(message);
+      getDesiredICP(desiredCapturePoint2d);
+      getCapturePoint(capturePoint2d);
+      if (isInDoubleSupport)
+      {
+         pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, getOmega0());
+      }
+      else
+      {
+         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, getOmega0());
+      }
    }
 }
