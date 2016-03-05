@@ -22,6 +22,12 @@ public class FrameEuclideanWaypoint extends AbstractFrameObject<FrameEuclideanWa
       geometryObject = getGeometryObject();
    }
 
+   public FrameEuclideanWaypoint(ReferenceFrame referenceFrame)
+   {
+      this();
+      this.referenceFrame = referenceFrame;
+   }
+
    @Override
    public void setPosition(Point3d position)
    {

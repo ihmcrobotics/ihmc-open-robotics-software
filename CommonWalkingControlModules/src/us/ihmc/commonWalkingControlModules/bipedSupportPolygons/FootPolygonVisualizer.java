@@ -13,6 +13,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
+
 public class FootPolygonVisualizer implements Updatable
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -62,7 +63,6 @@ public class FootPolygonVisualizer implements Updatable
    }
 
    private final FramePoint tempFramePoint = new FramePoint();
-
    public void update(double time)
    {
       for (int i = 0; i < contactStates.size(); i++)

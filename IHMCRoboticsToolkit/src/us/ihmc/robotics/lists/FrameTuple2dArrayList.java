@@ -16,9 +16,9 @@ public class FrameTuple2dArrayList<T extends FrameTuple2d<?, ?>> extends Recycli
       super(clazz);
    }
 
-   private FrameTuple2dArrayList(int initialCapacity, Class<T> clazz)
+   private FrameTuple2dArrayList(int initialSize, Class<T> clazz)
    {
-      super(initialCapacity, clazz);
+      super(initialSize, clazz);
    }
 
    public void setOrCreate(int i, FrameTuple2d<?, ?> frameTuple2d)

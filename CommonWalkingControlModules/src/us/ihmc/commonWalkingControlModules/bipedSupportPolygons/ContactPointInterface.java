@@ -13,7 +13,7 @@ public interface ContactPointInterface
    public abstract void setInContact(boolean inContact);
 
    public abstract void getPosition(FramePoint framePointToPack);
-
+   
    public abstract void getPosition2d(FramePoint2d framePoint2dToPack);
 
    public abstract void getPosition2d(Point2d position2d);
