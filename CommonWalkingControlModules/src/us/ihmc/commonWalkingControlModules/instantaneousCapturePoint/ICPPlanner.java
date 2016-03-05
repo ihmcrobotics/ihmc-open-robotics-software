@@ -589,7 +589,9 @@ public class ICPPlanner
       }
 
       double hasBeenDoneForDuration = timeInCurrentState;
-      if (isDoubleSupport.getBooleanValue())
+      if (isInitialTransfer.getBooleanValue())
+         hasBeenDoneForDuration -= doubleSupportInitialTransferDuration.getDoubleValue();
+      else if (isDoubleSupport.getBooleanValue())
          hasBeenDoneForDuration -= doubleSupportDuration.getDoubleValue();
       else
          hasBeenDoneForDuration -= singleSupportDuration.getDoubleValue();
