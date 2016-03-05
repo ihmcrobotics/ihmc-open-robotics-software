@@ -38,8 +38,8 @@ public class FootstepVisualizer
    private final YoGraphicCoordinateSystem poseViz;
    private final YoGraphicPolygon footholdViz;
 
-   public FootstepVisualizer(String name, String graphicListName, RobotSide robotSide, ContactablePlaneBody contactableFoot, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry registry, AppearanceDefinition footstepColor)
+   public FootstepVisualizer(String name, String graphicListName, RobotSide robotSide, ContactablePlaneBody contactableFoot, AppearanceDefinition footstepColor,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
       yoFootstepPose = new YoFramePose(name + "Pose", worldFrame, registry);
