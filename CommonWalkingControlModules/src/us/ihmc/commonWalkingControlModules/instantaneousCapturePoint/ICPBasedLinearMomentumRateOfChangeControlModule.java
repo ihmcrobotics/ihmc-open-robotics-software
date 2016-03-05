@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP.CapturabilityBasedDesiredCoPVisualizer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
@@ -26,7 +25,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ICPProportionalController icpProportionalController;
-   private final CapturabilityBasedDesiredCoPVisualizer visualizer;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
@@ -59,19 +57,15 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry, yoGraphicsListRegistry);
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
       this.totalMass = totalMass;
       centerOfMass = new FramePoint(centerOfMassFrame);
       this.gravityZ = gravityZ;
       parentRegistry.addChild(registry);
-
-      // hide CoP since we won't be calculating it explicitly in this class
-      visualizer.setDesiredCoP(new FramePoint2d(controlledCMP.getReferenceFrame(), Double.NaN, Double.NaN));
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
 
@@ -92,10 +86,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       desiredCMP.changeFrame(controlledCMP.getReferenceFrame());
       controlledCMP.set(desiredCMP);
 
-      visualizer.setDesiredCapturePoint(desiredCapturePoint);
-      visualizer.setDesiredCMP(desiredCMP);
-      visualizer.setFinalDesiredCapturePoint(finalDesiredCapturePoint);
-
       supportLegPreviousTick.set(supportSide);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
@@ -111,12 +101,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
    }
 
-   public void updateCenterOfMassViz()
-   {
-      centerOfMass.setToZero(centerOfMassFrame);
-      visualizer.setCenterOfMass(centerOfMass);
-   }
-
    private final FramePoint cmp3d = new FramePoint();
    private final FrameVector groundReactionForce = new FrameVector();
 
@@ -124,8 +108,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    {
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, omega0);
-
-      visualizer.setPseudoCMP(cmp3d);
 
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computeForce(groundReactionForce, centerOfMass, cmp3d, fZ);

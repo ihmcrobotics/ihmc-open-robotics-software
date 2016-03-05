@@ -19,7 +19,6 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class ICPProportionalController
 {
@@ -63,9 +62,9 @@ public class ICPProportionalController
 
    private final BooleanYoVariable useHackToReduceFeedForward = new BooleanYoVariable("icpControlUseHackToReduceFeedForward", registry);
 
-   public ICPProportionalController(ICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPProportionalController(ICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry)
    {
-      smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry, yoGraphicsListRegistry);
+      smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry);
 
       this.controlDT = controlDT;
 
