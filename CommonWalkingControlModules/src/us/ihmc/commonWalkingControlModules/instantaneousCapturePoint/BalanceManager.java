@@ -120,9 +120,8 @@ public class BalanceManager
       icpPlanner.clearPlan();
    }
 
-   public void computePelvisXY(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
+   public void computePelvisXY(RobotSide supportLeg, FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
    {
-      RobotSide supportLeg = getYoSupportLeg().getEnumValue();
       icpAndMomentumBasedController.getCapturePoint(actualCapturePointPosition);
       pelvisICPBasedTranslationManager.compute(supportLeg, actualCapturePointPosition);
       pelvisICPBasedTranslationManager.addICPOffset(desiredICPToModify, desiredICPVelocityToModify);
