@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
+import us.ihmc.robotics.geometry.interfaces.PointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 
@@ -88,6 +89,11 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
       return waypointData.positionDistance(euclideanTrajectoryPoint.waypointData);
    }
 
+   public void getPosition(PointInterface positionToPack)
+   {
+      positionToPack.setPoint(waypointData.getPosition());
+   }
+   
    @Override
    public void getPosition(Point3d positionToPack)
    {

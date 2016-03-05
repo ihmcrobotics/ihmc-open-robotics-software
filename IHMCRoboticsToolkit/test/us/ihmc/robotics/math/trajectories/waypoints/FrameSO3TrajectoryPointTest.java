@@ -18,6 +18,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
+import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
+import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomTools;
@@ -479,17 +482,35 @@ public class FrameSO3TrajectoryPointTest
       assertTrue(orientation.epsilonEquals(frameSO3TrajectoryPoint.getOrientationCopy(), 1e-10));
       assertTrue(angularVelocity.epsilonEquals(frameSO3TrajectoryPoint.getAngularVelocityCopy(), 1e-10));
 
-      FrameSO3TrajectoryPoint FrameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(poseFrame);
+      FrameSO3TrajectoryPoint frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(poseFrame);
+      frameSO3TrajectoryPointTwo.setTime(time);
+      frameSO3TrajectoryPointTwo.setOrientation(orientation);
+      frameSO3TrajectoryPointTwo.setAngularVelocity(angularVelocity);
+      assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPointTwo, 1e-10));
 
-      FrameSO3TrajectoryPointTwo.setTime(time);
-      FrameSO3TrajectoryPointTwo.setOrientation(orientation);
-      FrameSO3TrajectoryPointTwo.setAngularVelocity(angularVelocity);
+      frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(worldFrame);
+      frameSO3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, orientation.getQuaternionCopy(), angularVelocity.getVectorCopy());
+      assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPointTwo, 1e-10));
 
-      assertTrue(FrameSO3TrajectoryPointTwo.epsilonEquals(FrameSO3TrajectoryPointTwo, 1e-10));
+      frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(poseFrame);
+      SO3WaypointInterface<?> SO3Waypoint = new SO3Waypoint();
+      frameSO3TrajectoryPoint.getSO3Waypoint(SO3Waypoint);
+      frameSO3TrajectoryPointTwo.set(time, SO3Waypoint);
+      assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPoint, 1e-10));
 
-      FrameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(worldFrame);
-      FrameSO3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, orientation.getQuaternionCopy(), angularVelocity.getVectorCopy());
-      assertTrue(FrameSO3TrajectoryPointTwo.epsilonEquals(FrameSO3TrajectoryPointTwo, 1e-10));
+      frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(worldFrame);
+      frameSO3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, SO3Waypoint);
+      assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPoint, 1e-10));
+
+      frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(poseFrame);
+      FrameSO3Waypoint frameSO3Waypoint = new FrameSO3Waypoint(poseFrame);
+      frameSO3TrajectoryPoint.getFrameSO3Waypoint(frameSO3Waypoint);
+      frameSO3TrajectoryPointTwo.set(time, frameSO3Waypoint);
+      assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPoint, 1e-10));
+
+      frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(worldFrame);
+      frameSO3TrajectoryPointTwo.setIncludingFrame(time, frameSO3Waypoint);
+      assertTrue(frameSO3TrajectoryPointTwo.epsilonEquals(frameSO3TrajectoryPoint, 1e-10));
 
    }
 }

@@ -18,6 +18,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
+import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
+import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomTools;
@@ -604,20 +607,38 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(linearVelocity.epsilonEquals(frameSE3TrajectoryPoint.getLinearVelocityCopy(), 1e-10));
       assertTrue(angularVelocity.epsilonEquals(frameSE3TrajectoryPoint.getAngularVelocityCopy(), 1e-10));
 
-      FrameSE3TrajectoryPoint FrameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
+      FrameSE3TrajectoryPoint frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
+      frameSE3TrajectoryPointTwo.setTime(time);
+      frameSE3TrajectoryPointTwo.setPosition(position);
+      frameSE3TrajectoryPointTwo.setOrientation(orientation);
+      frameSE3TrajectoryPointTwo.setLinearVelocity(linearVelocity);
+      frameSE3TrajectoryPointTwo.setAngularVelocity(angularVelocity);
+      assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 
-      FrameSE3TrajectoryPointTwo.setTime(time);
-      FrameSE3TrajectoryPointTwo.setPosition(position);
-      FrameSE3TrajectoryPointTwo.setOrientation(orientation);
-      FrameSE3TrajectoryPointTwo.setLinearVelocity(linearVelocity);
-      FrameSE3TrajectoryPointTwo.setAngularVelocity(angularVelocity);
-
-      assertTrue(FrameSE3TrajectoryPointTwo.epsilonEquals(FrameSE3TrajectoryPointTwo, 1e-10));
-
-      FrameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(worldFrame);
-      FrameSE3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, position.getPointCopy(), orientation.getQuaternionCopy(), linearVelocity.getVectorCopy(),
+      frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(worldFrame);
+      frameSE3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, position.getPointCopy(), orientation.getQuaternionCopy(), linearVelocity.getVectorCopy(),
             angularVelocity.getVectorCopy());
-      assertTrue(FrameSE3TrajectoryPointTwo.epsilonEquals(FrameSE3TrajectoryPointTwo, 1e-10));
+      assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
+   
+      frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
+      SE3WaypointInterface<?> se3Waypoint = new SE3Waypoint();
+      frameSE3TrajectoryPoint.getSE3Waypoint(se3Waypoint);
+      frameSE3TrajectoryPointTwo.set(time, se3Waypoint);
+      assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
+
+      frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(worldFrame);
+      frameSE3TrajectoryPointTwo.setIncludingFrame(poseFrame, time, se3Waypoint);
+      assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
+
+      frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
+      FrameSE3Waypoint frameSE3Waypoint = new FrameSE3Waypoint(poseFrame);
+      frameSE3TrajectoryPoint.getFrameSE3Waypoint(frameSE3Waypoint);
+      frameSE3TrajectoryPointTwo.set(time, frameSE3Waypoint);
+      assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
+
+      frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(worldFrame);
+      frameSE3TrajectoryPointTwo.setIncludingFrame(time, frameSE3Waypoint);
+      assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 
    }
 }
