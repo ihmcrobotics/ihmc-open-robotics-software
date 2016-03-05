@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
@@ -66,6 +67,9 @@ public class PelvisICPBasedTranslationManager
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
+   private final BipedSupportPolygons bipedSupportPolygons;
+   private FrameConvexPolygon2d supportPolygon;
+
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempVelocity = new FrameVector();
    private final FramePoint2d tempPosition2d = new FramePoint2d();
@@ -73,7 +77,7 @@ public class PelvisICPBasedTranslationManager
    private final FrameVector2d tempICPOffset = new FrameVector2d();
    private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
 
-   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, BipedSupportPolygons bipedSupportPolygons, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
       frozenOffsetDecayAlpha.set(0.998);
@@ -83,6 +87,8 @@ public class PelvisICPBasedTranslationManager
       pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
       midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
       ankleZUpFrames = momentumBasedController.getReferenceFrames().getAnkleZUpReferenceFrames();
+
+      this.bipedSupportPolygons = bipedSupportPolygons;
 
       boolean allowMultipleFrames = true;
       waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", 15, allowMultipleFrames, worldFrame, registry);
@@ -111,7 +117,16 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      supportFrame = supportLeg == null ? midFeetZUpFrame : ankleZUpFrames.get(supportLeg);
+      if (supportLeg == null)
+      {
+         supportFrame = midFeetZUpFrame;
+         supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+      }
+      else
+      {
+         supportFrame = ankleZUpFrames.get(supportLeg);
+         supportPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
+      }
 
       if (!isEnabled.getBooleanValue())
       {
@@ -223,7 +238,7 @@ public class PelvisICPBasedTranslationManager
 
    private final FramePoint2d originalICPToModify = new FramePoint2d();
 
-   public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify, FrameConvexPolygon2d supportPolygon)
+   public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
    {
       desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
       desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());
