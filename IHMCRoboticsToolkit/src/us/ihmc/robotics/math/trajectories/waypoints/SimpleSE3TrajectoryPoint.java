@@ -169,7 +169,7 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint,
       return getTime();
    }
 
-   public double get(EuclideanWaypointInterface<?> euclideanWaypointToPack, SO3WaypointInterface<?> so3WaypointToPack)
+   public double get(EuclideanWaypoint euclideanWaypointToPack, SO3Waypoint so3WaypointToPack)
    {
       waypointData.get(euclideanWaypointToPack, so3WaypointToPack);
       return getTime();

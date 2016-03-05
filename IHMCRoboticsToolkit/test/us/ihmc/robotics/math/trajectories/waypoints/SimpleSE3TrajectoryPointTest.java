@@ -531,10 +531,6 @@ public class SimpleSE3TrajectoryPointTest
       positionDistance = simpleSE3TrajectoryPoint.positionDistance(simpleSE3TrajectoryPointTwo);
       assertEquals(0.0, positionDistance, 1e-7);
       
-      
-      System.out.println(simpleSE3TrajectoryPoint);
-      System.out.println(simpleSE3TrajectoryPointTwo);
-      
       assertTrue(simpleSE3TrajectoryPoint.epsilonEquals(simpleSE3TrajectoryPointTwo, 1e-7));
 
       String string = simpleSE3TrajectoryPoint.toString();
@@ -611,8 +607,8 @@ public class SimpleSE3TrajectoryPointTest
 
       
       simpleSE3TrajectoryPointTwo = new SimpleSE3TrajectoryPoint();
-      EuclideanWaypointInterface<?> euclideanWaypoint = simpleSE3TrajectoryPoint.getEuclideanWaypoint();
-      SO3WaypointInterface<?> so3Waypoint = simpleSE3TrajectoryPoint.getSO3Waypoint();
+      EuclideanWaypoint euclideanWaypoint = simpleSE3TrajectoryPoint.getEuclideanWaypoint();
+      SO3Waypoint so3Waypoint = simpleSE3TrajectoryPoint.getSO3Waypoint();
       
       simpleSE3TrajectoryPointTwo.set(time, euclideanWaypoint, so3Waypoint);
       assertTrue(simpleSE3TrajectoryPointTwo.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));

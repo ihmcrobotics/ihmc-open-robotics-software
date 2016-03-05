@@ -9,6 +9,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
+import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
 public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint, SimpleSO3TrajectoryPoint>
@@ -17,6 +19,18 @@ public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint,
    public SimpleSO3TrajectoryPoint()
    {
       super(new SO3Waypoint());
+   }
+
+   public SimpleSO3TrajectoryPoint(double time, Quat4d orientation, Vector3d angularVelocity)
+   {
+      this();
+      set(time, orientation, angularVelocity);
+   }
+
+   public SimpleSO3TrajectoryPoint(SimpleSO3TrajectoryPoint simpleSO3TrajectoryPoint)
+   {
+      this();
+      set(simpleSO3TrajectoryPoint);
    }
 
    public SO3Waypoint getSO3Waypoint()
@@ -84,10 +98,24 @@ public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint,
       waypointData.getOrientation(orientationToPack);
    }
 
+   public TransformableQuat4d getOrientationCopy()
+   {
+      TransformableQuat4d orientationCopy = new TransformableQuat4d();
+      getOrientation(orientationCopy);
+      return orientationCopy;
+   }
+
    @Override
    public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
       waypointData.getAngularVelocity(angularVelocityToPack);
+   }
+   
+   public TransformableVector3d getAngularVelocityCopy()
+   {
+      TransformableVector3d angularVelocityCopy = new TransformableVector3d();
+      getAngularVelocity(angularVelocityCopy);
+      return angularVelocityCopy;
    }
 
    public double get(Quat4d orientationToPack, Vector3d angularVelocityToPack)
@@ -96,11 +124,11 @@ public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint,
       return getTime();
    }
 
-   public double get(SO3WaypointInterface<?> so3Waypoint)
+   public void get(SimpleSO3TrajectoryPoint simpleSO3TrajectoryPointToPack)
    {
-      so3Waypoint.setOrientation(waypointData.getOrientation());
-      so3Waypoint.setAngularVelocity(waypointData.getAngularVelocity());
-      return getTime();
+      simpleSO3TrajectoryPointToPack.setTime(getTime());
+      simpleSO3TrajectoryPointToPack.setOrientation(waypointData.getOrientation());
+      simpleSO3TrajectoryPointToPack.setAngularVelocity(waypointData.getAngularVelocity());
    }
 
    @Override
@@ -128,5 +156,7 @@ public class SimpleSO3TrajectoryPoint extends SimpleTrajectoryPoint<SO3Waypoint,
 
       return "SO3 trajectory point: (" + timeToString + ", " + waypointData + ")";
    }
+
+
 
 }

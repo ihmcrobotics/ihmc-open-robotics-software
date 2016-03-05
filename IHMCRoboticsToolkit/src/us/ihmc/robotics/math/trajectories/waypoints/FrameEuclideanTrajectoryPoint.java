@@ -12,6 +12,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
+import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -159,9 +160,9 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       geometryObject.setLinearVelocityToNaN();
    }
 
-   public void getEuclideanWaypoint(EuclideanWaypointInterface<?> euclideanWaypoint)
+   public void getEuclideanWaypoint(EuclideanWaypoint euclideanWaypointToPack)
    {
-      geometryObject.get(euclideanWaypoint);
+      geometryObject.get(euclideanWaypointToPack);
    }
    
    public void getFrameEuclideanWaypoint(FrameEuclideanWaypoint frameEuclideanWaypoint)

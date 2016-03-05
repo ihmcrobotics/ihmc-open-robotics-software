@@ -621,7 +621,7 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
    
       frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
-      SE3WaypointInterface<?> se3Waypoint = new SE3Waypoint();
+      SE3Waypoint se3Waypoint = new SE3Waypoint();
       frameSE3TrajectoryPoint.getSE3Waypoint(se3Waypoint);
       frameSE3TrajectoryPointTwo.set(time, se3Waypoint);
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
