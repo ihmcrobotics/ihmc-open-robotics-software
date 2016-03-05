@@ -21,7 +21,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -140,7 +139,7 @@ public class BalanceManager
          computeForSingleSupport(supportLeg);
 
       finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
-      icpAndMomentumBasedController.compute(finalDesiredCapturePoint2d, desiredCoMHeightAcceleration, keepCMPInsideSupportPolygon);
+      icpAndMomentumBasedController.compute(supportLeg, finalDesiredCapturePoint2d, desiredCoMHeightAcceleration, keepCMPInsideSupportPolygon);
    }
 
    public void computeForDoubleSupport()
@@ -270,11 +269,6 @@ public class BalanceManager
    public double getTimeRemainingInCurrentState()
    {
       return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
-   }
-
-   public EnumYoVariable<RobotSide> getYoSupportLeg()
-   {
-      return icpAndMomentumBasedController.getYoSupportLeg();
    }
 
    public void handleGoHomeMessage(ModifiableGoHomeMessage message)

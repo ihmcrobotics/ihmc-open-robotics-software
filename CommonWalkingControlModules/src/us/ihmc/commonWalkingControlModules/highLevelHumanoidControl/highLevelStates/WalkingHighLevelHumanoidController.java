@@ -88,7 +88,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final WalkingMessageHandler walkingMessageHandler;
    private final BooleanYoVariable abortWalkingRequested = new BooleanYoVariable("requestAbortWalking", registry);
 
-   private final EnumYoVariable<RobotSide> supportLeg;
+   private final EnumYoVariable<RobotSide> supportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
    private final EnumYoVariable<RobotSide> trailingLeg = new EnumYoVariable<RobotSide>("trailingLeg", "", registry, RobotSide.class, true);
    private final EnumYoVariable<RobotSide> lastPlantedLeg = new EnumYoVariable<RobotSide>("lastPlantedLeg", "", registry, RobotSide.class, true);
 
@@ -170,7 +170,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(momentumBasedController.getContactableFeet(), registry);
 
-      supportLeg = balanceManager.getYoSupportLeg();
       bipedSupportPolygons = balanceManager.getBipedSupportPolygons();
 
       this.footSwitches = momentumBasedController.getFootSwitches();
