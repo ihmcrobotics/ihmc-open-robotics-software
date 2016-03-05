@@ -39,7 +39,6 @@ public class ICPAndMomentumBasedController
    private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("desiredICP", "", worldFrame, registry);
    private final YoFrameVector2d yoDesiredICPVelocity = new YoFrameVector2d("desiredICPVelocity", "", worldFrame, registry);
    private final EnumYoVariable<RobotSide> supportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class, true);
-   private final DoubleYoVariable controlledCoMHeightAcceleration = new DoubleYoVariable("controlledCoMHeightAcceleration", registry);
    private final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
@@ -147,7 +146,7 @@ public class ICPAndMomentumBasedController
       statusOutputManager.reportCapturabilityBasedStatus(capturabilityBasedStatus);
    }
 
-   public void compute(FramePoint2d finalDesiredCapturePoint2d, boolean keepCMPInsideSupportPolygon)
+   public void compute(FramePoint2d finalDesiredCapturePoint2d, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
    {
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
@@ -164,7 +163,7 @@ public class ICPAndMomentumBasedController
 
       icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg.getEnumValue());
 
-      icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(controlledCoMHeightAcceleration.getDoubleValue());
+      icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
 
       icpBasedLinearMomentumRateOfChangeControlModule.compute();
    }
@@ -172,11 +171,6 @@ public class ICPAndMomentumBasedController
    public EnumYoVariable<RobotSide> getYoSupportLeg()
    {
       return supportLeg;
-   }
-
-   public DoubleYoVariable getControlledCoMHeightAcceleration()
-   {
-      return controlledCoMHeightAcceleration;
    }
 
    public BipedSupportPolygons getBipedSupportPolygons()
