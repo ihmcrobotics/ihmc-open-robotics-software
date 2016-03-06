@@ -78,7 +78,8 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.multTransA(Js, Ws, JstWs);
 
       /*
-       * Q = [A'CA + Js'Ws Js + Lambda 0 ] [0 Wp+Wpsm+Wpcop + QfeetCoP'QfeetCoP]
+       * Q = [A'CA + Js'Ws Js + Lambda 0 ]
+       *     [0 Wp+Wpsm+Wpcop + QfeetCoP'QfeetCoP]
        */
 
       CommonOps.mult(AtC, A, QBlk1);
@@ -102,7 +103,8 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.add(1e-8, IdentityMatrix, Q, Q); // regularization
 
       /*
-       * f = -[A'C b + Js' Ws ps ] [Wpsm Pprev + Wpcop Ppavg]
+       * f = -[A'C b + Js' Ws ps ]
+       *      [Wpsm Pprev + Wpcop Ppavg]
        */
 
       // blk1
@@ -121,7 +123,9 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.changeSign(f);
 
       /*
-       * nDoF|nRho Aeq = [-A QRho] nWrench [Jp Zero] nDoF beq = [c pp ]
+       * nDoF|nRho Aeq = [-A QRho]
+       *         nWrench [Jp Zero]
+       *  nDoF beq = [c pp ]
        */
       boolean isPrimaryConstraintUsed = (Jp.numRows > 0) && !Double.isNaN(Jp.get(0, 0));
       if (isPrimaryConstraintUsed)
