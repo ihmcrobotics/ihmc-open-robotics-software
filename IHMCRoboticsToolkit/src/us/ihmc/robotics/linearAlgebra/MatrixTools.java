@@ -16,6 +16,7 @@ import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4d;
 import javax.vecmath.Vector4f;
 
+import org.ejml.alg.dense.misc.TransposeAlgs;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixIO;
@@ -1123,6 +1124,38 @@ public class MatrixTools
          boolean isZeroRow = MathTools.epsilonEquals(sumOfRowElements, 0.0, epsilon);
          if (isZeroRow)
             removeRow(matrixToModify, rowIndex);
+      }
+   }
+
+   /**
+    * <p>
+    * Transposes matrix 'a' and stores the results in 'b':<br>
+    * <br>
+    * b<sub>ij</sub> = &alpha;*a<sub>ji</sub><br>
+    * where 'b' is the scaled transpose of 'a'.
+    * </p>
+    * 
+    * Transpose algorithm taken from {@link TransposeAlgs#standard(org.ejml.data.RowD1Matrix64F, org.ejml.data.RowD1Matrix64F)}.
+    * @param alpha the amount each element is multiplied by.
+    * @param a The matrix that is to be scaled and transposed.  Not modified.
+    * @param b Where the scaled transpose is stored. Modified.
+    */
+   public static void scaleTranspose(double alpha, DenseMatrix64F a, DenseMatrix64F b)
+   {
+      if (a.getNumRows() != b.getNumCols() || a.getNumCols() != b.getNumRows())
+         throw new IllegalArgumentException("Incompatible matrix dimensions");
+
+      int index = 0;
+      for (int i = 0; i < b.numRows; i++)
+      {
+         int index2 = i;
+
+         int end = index + b.numCols;
+         while (index < end)
+         {
+            b.data[index++] = alpha * a.data[index2];
+            index2 += a.numCols;
+         }
       }
    }
 
