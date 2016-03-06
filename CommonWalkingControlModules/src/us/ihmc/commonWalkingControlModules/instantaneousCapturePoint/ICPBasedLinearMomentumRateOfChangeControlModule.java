@@ -68,7 +68,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
-
    }
 
    public void compute()
@@ -121,11 +120,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
-   public MomentumRateCommand getMomentumRateCommand()
-   {
-      return momentumRateCommand;
-   }
-
    public void setSupportLeg(RobotSide newSupportSide)
    {
       supportSide = newSupportSide;
@@ -166,5 +160,10 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
    {
       desiredCoMHeightAcceleration = desiredCenterOfMassHeightAcceleration;
+   }
+
+   public MomentumRateCommand getMomentumRateCommand()
+   {
+      return momentumRateCommand;
    }
 }
