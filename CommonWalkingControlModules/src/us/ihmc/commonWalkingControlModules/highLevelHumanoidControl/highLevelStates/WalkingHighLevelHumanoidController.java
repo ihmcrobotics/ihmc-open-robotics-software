@@ -626,7 +626,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          RobotSide supportSide = swingSide.getOppositeSide();
          integrateAnkleAccelerationsOnSwingLeg(swingSide);
 
-         if (isInFlamingoStance.getBooleanValue())
+         if (isInFlamingoStance.getBooleanValue() && walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
          {
             feetManager.handleFootTrajectoryMessage(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
          }
