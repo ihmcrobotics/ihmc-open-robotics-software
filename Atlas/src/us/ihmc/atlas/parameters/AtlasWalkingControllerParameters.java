@@ -420,27 +420,16 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public ICPControlGains getICPControlGains()
    {
       ICPControlGains gains = new ICPControlGains();
-      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpParallel = realRobot ? 2.5 : 1.5;
+      double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
-      double ki = realRobot ? 0.0 : 4.0;
-      double kiBleedOff = 0.9;
-      boolean useRawCMP = true;
-      boolean useHackToReduceFeedForward = false;
-//      double cmpFilterBreakFrequencyInHertz = 16.0;
-//      double cmpRateLimit = 60.0;
-//      double cmpAccelerationLimit = 2000.0;
+      double ki = 0.0;
+      double kiBleedOff = 0.0;
 
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
-      gains.setUseRawCMP(useRawCMP);
-      //      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
-//      gains.setCMPRateLimit(cmpRateLimit);
-//      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
-      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
 
       return gains;
    }

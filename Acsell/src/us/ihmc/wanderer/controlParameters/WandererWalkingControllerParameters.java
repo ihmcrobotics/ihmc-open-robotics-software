@@ -367,37 +367,15 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    {
       ICPControlGains gains = new ICPControlGains();
 
-//      double kp = 1.5;
-//      double ki = 4.0;
-//      double kiBleedOff = 0.9;
-//      boolean useRawCMP = false;
-//      double cmpFilterBreakFrequencyInHertz = 16.0;
-//      double cmpRateLimit = 6.0;
-//      double cmpAccelerationLimit = 200.0;
-//
-//      gains.setKpParallelToMotion(kp);
-//      gains.setKpOrthogonalToMotion(kp);
-//      gains.setKi(ki);
-//      gains.setKiBleedOff(kiBleedOff);
-//      gains.setUseRawCMP(useRawCMP);
-//      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
-//      gains.setCMPRateLimit(cmpRateLimit);
-//      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
-
-      // TODO Try using similar parameters to Atlas:
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
       double ki = 0.0;
       double kiBleedOff = 0.9;
-      boolean useRawCMP = true;
-      boolean useHackToReduceFeedForward = false;
 
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
-      gains.setUseRawCMP(useRawCMP);
-      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
 
       return gains;
    }

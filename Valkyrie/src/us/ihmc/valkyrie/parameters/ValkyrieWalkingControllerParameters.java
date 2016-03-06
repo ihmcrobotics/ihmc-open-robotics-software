@@ -457,19 +457,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double kpParallel = runningOnRealRobot ? 2.0 : 1.5;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double kiBleedOff = 0.9;
-      boolean useRawCMP = true;
-      double cmpFilterBreakFrequencyInHertz = 16.0;
-      double cmpRateLimit = runningOnRealRobot ? 6.0 : 60.0;
-      double cmpAccelerationLimit = runningOnRealRobot ? 200.0 : 2000.0;
 
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
-      gains.setUseRawCMP(useRawCMP);
-      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
-      gains.setCMPRateLimit(cmpRateLimit);
-      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
 
       return gains;
    }
