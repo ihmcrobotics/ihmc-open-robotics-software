@@ -219,27 +219,26 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide);
          DoneWithTransferCondition doneWithTransferCondition = new DoneWithTransferCondition(robotSide);
-         SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide);
-         SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide.getOppositeSide());
+         SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide, robotSide.getOppositeSide());
+         SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide, robotSide);
          StartWalkingCondition startWalkingCondition = new StartWalkingCondition(robotSide);
          FlamingoStanceCondition flamingoStanceCondition = new FlamingoStanceCondition(robotSide);
 
          StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingCondition);
          StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnum, doneWithTransferCondition);
-         //         StateTransition<WalkingState> toDoubleSupport2 = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingCondition, resetICPTrajectoryAction);
          StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(oppTransferStateEnum,
                singleSupportToTransferToOppositeSideCondition);
          StateTransition<WalkingState> toTransferSameSide = new StateTransition<WalkingState>(transferStateEnum, singleSupportToTransferToSameSideCondition);
          StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnum, startWalkingCondition);
-         StateTransition<WalkingState> toTransfer2 = new StateTransition<WalkingState>(transferStateEnum, flamingoStanceCondition);
+         StateTransition<WalkingState> toTransferForFlamingo = new StateTransition<WalkingState>(transferStateEnum, flamingoStanceCondition);
 
          transferState.addStateTransition(toDoubleSupport);
          transferState.addStateTransition(toSingleSupport);
-         //         singleSupportState.addStateTransition(toDoubleSupport2);
          singleSupportState.addStateTransition(toTransferOppositeSide);
          singleSupportState.addStateTransition(toTransferSameSide);
+         singleSupportState.addStateTransition(toDoubleSupport);
          doubleSupportState.addStateTransition(toTransfer);
-         doubleSupportState.addStateTransition(toTransfer2);
+         doubleSupportState.addStateTransition(toTransferForFlamingo);
 
          stateMachine.addState(transferState);
          stateMachine.addState(singleSupportState);
@@ -991,27 +990,22 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private class SingleSupportToTransferToCondition extends DoneWithSingleSupportCondition
    {
-      private final RobotSide supportSide;
+      private final RobotSide transferToSide;
 
-      public SingleSupportToTransferToCondition(RobotSide supportSide)
+      public SingleSupportToTransferToCondition(RobotSide supportSide, RobotSide transferToSide)
       {
          super(supportSide);
 
-         this.supportSide = supportSide;
+         this.transferToSide = transferToSide;
       }
 
       public boolean checkCondition()
       {
-         Footstep nextFootstep = walkingMessageHandler.peek(0);
-         if (nextFootstep == null)
-            return super.checkCondition();
-
-         if (this.supportSide != nextFootstep.getRobotSide())
+         if (!super.checkCondition())
             return false;
 
-         boolean condition = super.checkCondition();
-
-         return condition;
+         boolean hasNextFootstepForThisSide = walkingMessageHandler.isNextFootstepFor(transferToSide.getOppositeSide());
+         return hasNextFootstepForThisSide;
       }
    }
 
