@@ -317,6 +317,7 @@ public class BalanceManager
    public void initializeICPPlanForStanding()
    {
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
+      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public void initializeICPPlanForTransfer(RobotSide transferToSide)
