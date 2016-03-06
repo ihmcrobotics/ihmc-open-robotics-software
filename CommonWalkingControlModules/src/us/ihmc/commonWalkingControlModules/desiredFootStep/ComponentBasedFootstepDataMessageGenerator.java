@@ -87,7 +87,7 @@ public class ComponentBasedFootstepDataMessageGenerator
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
       ModifiableFootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
-      commandInputManager.submitFootstepDataListMessage(footsteps);
+      commandInputManager.submitModifiableMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);
    }
