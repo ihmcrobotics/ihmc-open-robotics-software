@@ -37,7 +37,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       this.controllerStatusOutputManager = controllerStatusOutputManager;
       this.scheduler = scheduler;
       this.globalDataProducer = globalDataProducer;
-      scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
       listOfSupportedMessages = controllerStatusOutputManager.getListOfSupportedMessages();
 
       createAllSubscribersForSupportedMessages();
