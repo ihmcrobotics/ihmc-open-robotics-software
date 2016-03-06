@@ -590,7 +590,7 @@ public class ICPPlanner
 
    private void decayDesiredVelocityIfNeeded(double timeInCurrentState)
    {
-      if (velocityDecayDurationWhenDone.isNaN())
+      if (velocityDecayDurationWhenDone.isNaN() || isStanding.getBooleanValue())
       {
          velocityReductionFactor.set(Double.NaN);
          return;
@@ -742,20 +742,22 @@ public class ICPPlanner
 
    public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
    {
-      entryCornerPoints.get(1).getFrameTupleIncludingFrame(finalDesiredCapturePointPositionToPack);
-   }
-
-   public void getFinalDesiredCapturePointPosition(FramePoint2d finalDesiredCapturePointPositionToPack)
-   {
-      entryCornerPoints.get(1).getFrameTuple2dIncludingFrame(finalDesiredCapturePointPositionToPack);
-      finalDesiredCapturePointPositionToPack.changeFrameAndProjectToXYPlane(worldFrame);
+      if (isStanding.getBooleanValue())
+         referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+      else
+         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+      tempFinalICP.changeFrame(worldFrame);
+      finalDesiredCapturePointPositionToPack.setIncludingFrame(tempFinalICP);
    }
 
    private final FramePoint tempFinalICP = new FramePoint();
 
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
-      entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+      if (referenceCMPsCalculator.isDoneWalking())
+         referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+      else
+         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
       tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
