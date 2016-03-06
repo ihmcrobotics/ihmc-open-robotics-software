@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
+import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -214,15 +215,15 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.setAngularVelocityToNaN();
    }
 
-   public void getSE3Waypoint(SE3WaypointInterface<?> se3Waypoint)
+   public void getSE3Waypoint(SE3Waypoint se3WaypointToPack)
    {
       EuclideanWaypoint euclideanWaypoint = geometryObject.getEuclideanWaypoint();
-      se3Waypoint.setPosition(euclideanWaypoint.getPosition());
-      se3Waypoint.setLinearVelocity(euclideanWaypoint.getLinearVelocity());
+      se3WaypointToPack.setPosition(euclideanWaypoint.getPosition());
+      se3WaypointToPack.setLinearVelocity(euclideanWaypoint.getLinearVelocity());
 
       SO3Waypoint so3Waypoint = geometryObject.getSO3Waypoint();
-      se3Waypoint.setOrientation(so3Waypoint.getOrientation());
-      se3Waypoint.setAngularVelocity(so3Waypoint.getAngularVelocity());
+      se3WaypointToPack.setOrientation(so3Waypoint.getOrientation());
+      se3WaypointToPack.setAngularVelocity(so3Waypoint.getAngularVelocity());
    }
    
    public void getFrameSE3Waypoint(FrameSE3Waypoint frameSE3Waypoint)
