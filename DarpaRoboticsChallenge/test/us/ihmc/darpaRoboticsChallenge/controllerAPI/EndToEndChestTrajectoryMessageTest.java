@@ -38,7 +38,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-4;
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -75,12 +75,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       Quat4d desiredOrientation = new Quat4d();
       desiredRandomChestOrientation.getQuaternion(desiredOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
+      drcSimulationTestHelper.send(chestTrajectoryMessage);
 
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      assertTrue(success);
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(humanoidReferenceFrames.getPelvisZUpFrame());
 
-      drcSimulationTestHelper.send(chestTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);

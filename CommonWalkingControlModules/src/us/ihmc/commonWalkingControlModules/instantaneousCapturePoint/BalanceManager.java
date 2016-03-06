@@ -429,8 +429,8 @@ public class BalanceManager
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
 
-      centerOfMassPosition2d.setByProjectionOntoXYPlane(centerOfMassPosition);
-      centerOfMassVelocity2d.setByProjectionOntoXYPlane(centerOfMassVelocity);
+      centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
+      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
 
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, getOmega0());
 

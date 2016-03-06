@@ -16,7 +16,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -43,7 +42,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       BambooTools.reportTestStartedMessage();
 
       Random random = new Random(564574L);
-      double epsilon = 5.0e-5;
+      double epsilon = 1.0e-10;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -70,10 +69,12 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       Quat4d desiredOrientation = new Quat4d();
       desiredRandomChestOrientation.getQuaternion(desiredOrientation);
       HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
+      drcSimulationTestHelper.send(headTrajectoryMessage);
 
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      assertTrue(success);
       desiredRandomChestOrientation.changeFrame(chest.getBodyFixedFrame());
 
-      drcSimulationTestHelper.send(headTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
