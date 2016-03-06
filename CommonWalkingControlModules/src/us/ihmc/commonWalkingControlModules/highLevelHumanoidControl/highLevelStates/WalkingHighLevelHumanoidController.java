@@ -679,6 +679,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (isInFlamingoStance.getBooleanValue())
          {
             consumePelvisMessages();
+            consumeManipulationMessages();
          }
          else
          {
@@ -1296,8 +1297,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       manipulationControlModule.handleHandTrajectoryMessages(commandInputManager.pollNewMessages(ModifiableHandTrajectoryMessage.class));
       manipulationControlModule.handleArmTrajectoryMessages(commandInputManager.pollNewMessages(ModifiableArmTrajectoryMessage.class));
       manipulationControlModule.handleArmDesiredAccelerationsMessages(commandInputManager.pollNewMessages(ModifiableArmDesiredAccelerationsMessage.class));
-      manipulationControlModule
-            .handleHandComplianceControlParametersMessages(commandInputManager.pollNewMessages(ModifiableHandComplianceControlParametersMessage.class));
+      manipulationControlModule.handleHandComplianceControlParametersMessages(commandInputManager.pollNewMessages(ModifiableHandComplianceControlParametersMessage.class));
    }
 
    private void consumeGoHomeMessages()
@@ -1331,6 +1331,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          return;
 
       ModifiableStopAllTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiableStopAllTrajectoryMessage.class);
+      manipulationControlModule.handleStopAllTrajectoryMessage(message);
       chestOrientationManager.handleStopAllTrajectoryMessage(message);
       feetManager.handleStopAllTrajectoryMessage(message);
       comHeightManager.handleStopAllTrajectoryMessage(message);
