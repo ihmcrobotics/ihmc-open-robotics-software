@@ -7,6 +7,8 @@ import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readIMUs;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
@@ -25,6 +27,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -248,13 +251,18 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityMagnitude;
 
-      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
-
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ForceSensorDataHolder forceSensorDataHolderToUpdate = new ForceSensorDataHolder(Arrays.asList(forceSensorDefinitions));
 
+      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
+      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+
       for (RobotSide robotSide : RobotSide.values)
       {
+         ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
+         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         bipedFeetMap.put(rigidBody, contactablePlaneBody);
+         
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
@@ -264,7 +272,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
 
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator, footSwitchCoPThresholdFraction,
                totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, registry);
-         footSwitches.put(robotSide, wrenchBasedFootSwitch);
+         footSwitchMap.put(rigidBody, wrenchBasedFootSwitch);
 
       }
 
@@ -272,8 +280,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
 
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitches, null,
-            new RobotMotionStatusHolder(), bipedFeet, yoGraphicsListRegistry);
+            sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap, null,
+            new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
 
       registry.addChild(stateEstimator.getYoVariableRegistry());
 

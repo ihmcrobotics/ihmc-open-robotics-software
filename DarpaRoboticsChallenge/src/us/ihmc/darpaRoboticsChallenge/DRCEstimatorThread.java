@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -12,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -312,8 +314,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravityMagnitude;
 
-      SideDependentList<FootSwitchInterface> footSwitchesForEstimator = new SideDependentList<>();
+//      SideDependentList<FootSwitchInterface> footSwitchesForEstimator = new SideDependentList<>();
 
+      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
+      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
@@ -324,6 +329,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          //         double footSwitchCoPThresholdFraction = 0.01;
          double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
          double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
+         
+         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
+         bipedFeetMap.put(foot, bipedFeet.get(robotSide));
 
          switch (stateEstimatorParameters.getFootSwitchType())
          {
@@ -331,32 +339,32 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
                KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, bipedFeet,
                      stateEstimatorParameters.getContactThresholdHeight(), totalRobotWeight, robotSide, registry);
-               footSwitchesForEstimator.put(robotSide, footSwitch);
+               footSwitchMap.put(foot, footSwitch);
                break;
             case WrenchBased:
                WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,
                      footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, registry);
-               footSwitchesForEstimator.put(robotSide, wrenchBasedFootSwitchForEstimator);
+               footSwitchMap.put(foot, wrenchBasedFootSwitchForEstimator);
                break;
 
             case WrenchAndContactSensorFused:
                WrenchAndContactSensorFusedFootSwitch wrenchAndContactSensorBasedFootswitch = new WrenchAndContactSensorFusedFootSwitch(namePrefix,
                      footForceSensorForEstimator, contactSensorHolder.getByName(footContactSensorName), footSwitchCoPThresholdFraction, totalRobotWeight,
                      bipedFeet.get(robotSide), null, contactThresholdForce, registry);
-               footSwitchesForEstimator.put(robotSide, wrenchAndContactSensorBasedFootswitch);
+               footSwitchMap.put(foot, wrenchAndContactSensorBasedFootswitch);
                break;
             default:
                throw new Error("unknown foot switch type");
          }
 
       }
-
+    
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, estimatorForceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchesForEstimator,
-            centerOfPressureDataHolderFromController, robotMotionStatusFromController, bipedFeet, yoGraphicsListRegistry);
+            sensorOutputMapReadOnly, estimatorForceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
+            centerOfPressureDataHolderFromController, robotMotionStatusFromController, bipedFeetMap, yoGraphicsListRegistry);
 
       return drcStateEstimator;
    }
