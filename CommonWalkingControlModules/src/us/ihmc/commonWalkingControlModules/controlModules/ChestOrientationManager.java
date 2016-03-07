@@ -55,7 +55,7 @@ public class ChestOrientationManager
       RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
 
-      orientationFeedbackControlCommand.setWeightForSolver(50.0);
+      orientationFeedbackControlCommand.setWeightForSolver(10.0);
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
 

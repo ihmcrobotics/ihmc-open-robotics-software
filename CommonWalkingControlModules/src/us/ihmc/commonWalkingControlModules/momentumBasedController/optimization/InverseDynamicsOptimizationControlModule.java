@@ -279,6 +279,8 @@ public class InverseDynamicsOptimizationControlModule
       {
          InverseDynamicsJoint joint = command.getJoint(jointIndex);
          int[] columns = columnsForJoints.get(joint);
+         if (columns == null)
+            return;
          for (int column : columns)
             motionQPInput.taskJacobian.set(row, column, 1.0);
 
