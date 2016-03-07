@@ -4,10 +4,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorFromFastRunner;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -35,21 +34,22 @@ public class FourBarKinematicLoop
    private final String name;
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
-   private final FrameVector closurePointFromLastPassiveJointFrameVect;
+   private final Vector3d closurePointFromLastPassiveJointVect;
    
-   private final DoubleYoVariable masterJointQ;
-   private final DoubleYoVariable masterJointQd;
-
    private final FramePoint masterJointAPosition = new FramePoint();
    private final FramePoint jointBPosition = new FramePoint();
    private final FramePoint jointCPosition = new FramePoint();
    private final FramePoint jointDPosition = new FramePoint();
    private double masterLinkAB, BC, CD, DA;
+   private final FrameVector vectorAB = new FrameVector();
    private final FrameVector vectorBC = new FrameVector();
    private final FrameVector vectorCD = new FrameVector();
    private final FrameVector vectorDA = new FrameVector();
-   private final FrameVector vectorAB = new FrameVector();
-
+   private final FrameVector2d vectorBCProjected = new FrameVector2d();
+   private final FrameVector2d vectorCDProjected = new FrameVector2d();
+   private final FrameVector2d vectorDAProjected = new FrameVector2d();
+   private final FrameVector2d vectorABProjected = new FrameVector2d();
+   
    private FourBarCalculatorFromFastRunner fourBarCalculator;
    
    private double[] interiorAnglesAtZeroConfiguration = new double[4];
@@ -59,22 +59,17 @@ public class FourBarKinematicLoop
    private final FrameVector masterAxis, jointBAxis, jointCAxis, jointDAxis;
    private final ReferenceFrame frameWithZAlongJointAxis;
    
-   public FourBarKinematicLoop(String name, YoVariableRegistry registry, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
-         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJointInWorld, boolean recomputeJointLimits)
+   public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
+         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
    {
       this.name = name;
       this.masterJointA = masterJointA;
       this.passiveJointB = passiveJointB;
       this.passiveJointC = passiveJointC;
       this.passiveJointD = passiveJointD;
-      closurePointFromLastPassiveJointFrameVect = new FrameVector(worldFrame, closurePointFromLastPassiveJointInWorld);
+      this.closurePointFromLastPassiveJointVect = closurePointFromLastPassiveJoint;
       
-      masterJointQ = new DoubleYoVariable(name + "MasterJointQ", registry);
-      masterJointQ.set(masterJointA.getQ());
-
-      masterJointQd = new DoubleYoVariable(name + "MasterJointQd", registry);
-      masterJointQd.set(masterJointA.getQd());
-      
+      // Rotation axis
       masterAxis = masterJointA.getJointAxis();
       jointBAxis = passiveJointB.getJointAxis();
       jointCAxis = passiveJointC.getJointAxis();
@@ -82,25 +77,34 @@ public class FourBarKinematicLoop
 
       jointAxisInWorld = new FrameVector();
       checkJointAxesAreParallelAndSetJointAxis();
-      frameWithZAlongJointAxis = ReferenceFrame.constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint(), Axis.Z, jointAxisInWorld);
+      
+      // Joint order
       checkCorrectJointOrder();
-
+      
+      // Go to zero configuration
+      masterJointA.setQ(0.0);
+      passiveJointB.setQ(0.0);
+      passiveJointC.setQ(0.0);
+      passiveJointD.setQ(0.0);
+      
+      // Check joint limits and close the loop
+      frameWithZAlongJointAxis = ReferenceFrame.constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint(), Axis.Z, jointAxisInWorld);
       initializeJointPositionsAndLinkVectors();
-      masterLinkAB = getXYLengthInFrame(vectorAB, frameWithZAlongJointAxis);
-      BC = getXYLengthInFrame(vectorBC, frameWithZAlongJointAxis);
-      CD = getXYLengthInFrame(vectorCD, frameWithZAlongJointAxis);
-      DA = getXYLengthInFrame(closurePointFromLastPassiveJointFrameVect, frameWithZAlongJointAxis);
+      masterLinkAB = vectorABProjected.length();
+      BC = vectorBCProjected.length();
+      CD = vectorCDProjected.length();
+      DA = vectorDAProjected.length();
       
       if (DEBUG)
       {
          System.out.println("\nLink length debugging: \n");
          System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
-
+      
       verifyMasterJointLimits();
       setInteriorAngleOffsets();
 
-      fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD);
+      fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD, recomputeJointLimits);
       updateAnglesAndVelocities();
 
       if (DEBUG)
@@ -158,46 +162,50 @@ public class FourBarKinematicLoop
       jointDPosition.changeFrame(worldFrame);
       masterJointAPosition.changeFrame(worldFrame);
 
+      vectorAB.sub(jointBPosition, masterJointAPosition);
       vectorBC.sub(jointCPosition, jointBPosition);
       vectorCD.sub(jointDPosition, jointCPosition);
-      vectorDA.sub(masterJointAPosition, jointDPosition);
-      vectorAB.sub(jointBPosition, masterJointAPosition);
+      vectorDA.setIncludingFrame(passiveJointD.getFrameAfterJoint(), closurePointFromLastPassiveJointVect);
+      
+      vectorAB.changeFrame(frameWithZAlongJointAxis);
+      vectorBC.changeFrame(frameWithZAlongJointAxis);
+      vectorCD.changeFrame(frameWithZAlongJointAxis);
+      vectorDA.changeFrame(frameWithZAlongJointAxis);
+      
+      vectorBCProjected.set(vectorBC.getX(), vectorBC.getY());
+      vectorCDProjected.set(vectorCD.getX(), vectorCD.getY());
+      vectorDAProjected.set(vectorDA.getX(), vectorDA.getY());
+      vectorABProjected.set(vectorAB.getX(), vectorAB.getY());
+      
+      if (DEBUG)
+      {  
+      System.out.println("\nJoint to joint vectors debugging:\n");
+      System.out.println("vector ab = " + vectorAB);
+      System.out.println("vector bc = " + vectorBC);
+      System.out.println("vector cd = " + vectorCD);
+      System.out.println("vector da = " + vectorDA);
+      }
    }
-
+   
    private void setInteriorAngleOffsets()
    {
-      vectorDA.normalize();
-      vectorAB.normalize();
-      vectorBC.normalize();
-      vectorCD.normalize();
-      
-      vectorDA.changeFrame(worldFrame);
-      vectorAB.changeFrame(worldFrame);
-      vectorBC.changeFrame(worldFrame);
-      vectorCD.changeFrame(worldFrame);
+      vectorDAProjected.changeFrame(worldFrame);
+      vectorABProjected.changeFrame(worldFrame);
+      vectorBCProjected.changeFrame(worldFrame);
+      vectorCDProjected.changeFrame(worldFrame);
 
-      interiorAnglesAtZeroConfiguration[0] = Math.PI - Math.acos(vectorDA.dot(vectorAB));
-      interiorAnglesAtZeroConfiguration[1] = Math.PI - Math.acos(vectorAB.dot(vectorBC));
-      interiorAnglesAtZeroConfiguration[2] = Math.PI - Math.acos(vectorBC.dot(vectorCD));
-      interiorAnglesAtZeroConfiguration[3] = Math.PI - Math.acos(vectorCD.dot(vectorDA));
-
+      interiorAnglesAtZeroConfiguration[1] = Math.PI - vectorABProjected.angle(vectorBCProjected);
+      interiorAnglesAtZeroConfiguration[2] = Math.PI - vectorBCProjected.angle(vectorCDProjected);
+      interiorAnglesAtZeroConfiguration[3] = Math.PI - vectorCDProjected.angle(vectorDAProjected);
+           
       if (DEBUG)
-      {
+      {  
          System.out.println("\nOffset angle debugging:\n");
          System.out.println("offset A = " + interiorAnglesAtZeroConfiguration[0]);
          System.out.println("offset B = " + interiorAnglesAtZeroConfiguration[1]);
          System.out.println("offset C = " + interiorAnglesAtZeroConfiguration[2]);
          System.out.println("offset D = " + interiorAnglesAtZeroConfiguration[3]);
       }
-   }
-
-   /**
-    * Projects the link onto the plane of the four bar
-    */
-   private static double getXYLengthInFrame(FrameVector jointToJointVector, ReferenceFrame frameToProjectTo)
-   {
-      jointToJointVector.changeFrame(frameToProjectTo);
-      return Math.sqrt(jointToJointVector.getX() * jointToJointVector.getX() + jointToJointVector.getY() * jointToJointVector.getY());
    }
 
    private void verifyMasterJointLimits() //TODO write a test for this
@@ -207,8 +215,8 @@ public class FourBarKinematicLoop
 
       if (DEBUG)
       {
-         System.out.println(" Max master joint angle: " + maxValidMasterJointAngle);
-         System.out.println(" Min master joint angle: " + minValidMasterJointAngle);
+         System.out.println("\nMax master joint angle: " + maxValidMasterJointAngle);
+         System.out.println("Min master joint angle: " + minValidMasterJointAngle);
       }
 
       // 1 - Angle limits not set
@@ -251,7 +259,7 @@ public class FourBarKinematicLoop
 
    public void updateAnglesAndVelocities()
    {
-      fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ() - interiorAnglesAtZeroConfiguration[0], masterJointA.getQd());
+      fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
       passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[1]);
       passiveJointC.setQ(fourBarCalculator.getAngleBCD() - interiorAnglesAtZeroConfiguration[2]);
       passiveJointD.setQ(fourBarCalculator.getAngleCDA() - interiorAnglesAtZeroConfiguration[3]);
