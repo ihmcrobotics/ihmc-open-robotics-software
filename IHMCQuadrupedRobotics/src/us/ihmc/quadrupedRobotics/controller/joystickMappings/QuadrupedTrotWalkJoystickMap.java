@@ -14,6 +14,7 @@ import us.ihmc.tools.inputDevices.joystick.mapping.LogitechExtreme3DMapping;
 import us.ihmc.tools.inputDevices.joystick.mapping.MadCatzFLY5StickMapping;
 import us.ihmc.tools.inputDevices.joystick.mapping.MadCatzV1StickMapping;
 import us.ihmc.tools.inputDevices.joystick.mapping.SaitekX52Mapping;
+import us.ihmc.tools.inputDevices.joystick.mapping.Thrustmaster16000M;
 
 public class QuadrupedTrotWalkJoystickMap implements EnumDependentJoystickMapping<QuadrupedControllerState>
 {
@@ -47,6 +48,11 @@ public class QuadrupedTrotWalkJoystickMap implements EnumDependentJoystickMappin
          rightStickYawComponent = joystick.findComponent(MadCatzFLY5StickMapping.STICK_YAW.getIdentifier());
          rightStickPitchComponent = joystick.findComponent(MadCatzFLY5StickMapping.STICK_PITCH.getIdentifier());
          rightStickRollComponent = joystick.findComponent(MadCatzFLY5StickMapping.STICK_ROLL.getIdentifier());
+         break;
+      case THRUSTMASTER_16000M:
+         rightStickYawComponent = joystick.findComponent(Thrustmaster16000M.STICK_YAW.getIdentifier());
+         rightStickPitchComponent = joystick.findComponent(Thrustmaster16000M.STICK_PITCH.getIdentifier());
+         rightStickRollComponent = joystick.findComponent(Thrustmaster16000M.STICK_ROLL.getIdentifier());
          break;
       case MAD_CATZ_V1_STICK:
          rightStickYawComponent = joystick.findComponent(MadCatzV1StickMapping.STICK_YAW.getIdentifier());
