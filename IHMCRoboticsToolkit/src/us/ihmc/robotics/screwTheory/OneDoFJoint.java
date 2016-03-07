@@ -390,7 +390,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
    
    public abstract boolean isPassiveJoint();
-  
    
    /*
     * VRC HACKS
