@@ -94,6 +94,7 @@ public class JointSpaceHandControlState extends HandControlState
 
       doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
 
+      jointspaceFeedbackControlCommand.setWeightForSolver(10.0);
       jointspaceFeedbackControlCommand.setGains(gains);
 
       for (int i = 0; i < oneDoFJoints.length; i++)

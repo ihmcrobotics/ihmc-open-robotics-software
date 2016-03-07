@@ -64,6 +64,7 @@ public class HoldPositionState extends AbstractFootControlState
       FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
+      spatialFeedbackControlCommand.setWeightForSolver(10.0);
    }
 
    @Override

@@ -66,6 +66,8 @@ public class PlaneContactWrenchMatrixCalculator
 
    private final DenseMatrix64F rhoMeanTemp;
    private final YoMatrix rhoMeanYoMatrix;
+   private final DenseMatrix64F rhoPreviousTemp;
+   private final YoMatrix rhoPreviousYoMatrix;
 
    private final DenseMatrix64F rhoMeanLoadedEndEffectors;
    private final YoMatrix rhoMeanLoadedEndEffectorsYoMatrix;
@@ -110,6 +112,8 @@ public class PlaneContactWrenchMatrixCalculator
 
       rhoMeanTemp = new DenseMatrix64F(rhoSize, 1);
       rhoMeanYoMatrix = new YoMatrix(name + "RhoMean", rhoSize, 1, registry);
+      rhoPreviousTemp = new DenseMatrix64F(rhoSize, 1);
+      rhoPreviousYoMatrix = new YoMatrix(name + "RhoPrevious", rhoSize, 1, registry);
 
       rhoMeanLoadedEndEffectors = new DenseMatrix64F(contactablePlaneBodies.size(), 1);
       rhoMeanLoadedEndEffectorsYoMatrix = new YoMatrix(name + "RhoMeanLoadedEndEffectorsYoMatrix", contactablePlaneBodies.size(), 1, registry);
@@ -302,6 +306,7 @@ public class PlaneContactWrenchMatrixCalculator
 
       rhoMeanTemp.zero();
       rhoMeanYoMatrix.set(rhoMeanTemp);
+      rhoPreviousYoMatrix.set(rho);
 
       rhoTotal.set(0.0);
 
@@ -423,6 +428,12 @@ public class PlaneContactWrenchMatrixCalculator
    {
       rhoMeanYoMatrix.get(rhoMeanTemp);
       return rhoMeanTemp;
+   }
+
+   public DenseMatrix64F getRhoPrevious()
+   {
+      rhoPreviousYoMatrix.get(rhoPreviousTemp);
+      return rhoPreviousTemp;
    }
 
    public DenseMatrix64F getQRho()

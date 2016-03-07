@@ -56,6 +56,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       else
          legJointLimitAvoidanceControlModule = null;
 
+      spatialFeedbackControlCommand.setWeightForSolver(10.0);
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setJacobianForNullspaceId(footControlHelper.getJacobianId());

@@ -30,6 +30,8 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F solverInput_ub;
 
    private final DenseMatrix64F solverOutput;
+   private final DenseMatrix64F solverOutput_jointAccelerations;
+   private final DenseMatrix64F solverOutput_rhos;
 
    private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
    private final DoubleYoVariable rhoRegularization = new DoubleYoVariable("rhoRegularization", registry);
@@ -38,6 +40,7 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F tempMotionTask_H;
    private final DenseMatrix64F tempMotionTask_f;
    private final DenseMatrix64F tempRhoTask_f;
+
 
    private final int numberOfDoFs;
    private final int rhoSize;
@@ -70,10 +73,12 @@ public class InverseDynamicsQPSolver
 
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
-      jointAccelerationRegularization.set(0.1);
-      rhoRegularization.set(0.1);
+      jointAccelerationRegularization.set(0.05);
+      rhoRegularization.set(0.001);
 
       solverOutput = new DenseMatrix64F(problemSize, 1);
+      solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
+      solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
       parentRegistry.addChild(registry);
    }
@@ -100,6 +105,16 @@ public class InverseDynamicsQPSolver
 
       solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 0);
+   }
+
+   public void addMotionInput(InverseDynamicsMotionQPInput input)
+   {
+      if (input.isMotionConstraint())
+         addMotionConstraint(input.taskJacobian, input.taskObjective);
+      else if (input.useWeightScalar())
+         addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+      else
+         addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
    }
 
    public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskObjective, double taskWeight)
@@ -150,11 +165,11 @@ public class InverseDynamicsQPSolver
     * @param centroidalMomentumMatrix refers to A in the equation.
     * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to be optimized for.
     * @param convectiveTerm refers to ADot * qDot in the equation.
-    * @param additionExternalWrench refers to &sum;W<sub>user</sub> in the equation. These are constant wrenches usually used for compensating for the weight of an object that the robot is holding.
+    * @param additionalExternalWrench refers to &sum;W<sub>user</sub> in the equation. These are constant wrenches usually used for compensating for the weight of an object that the robot is holding.
     * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by the wieght of the robot.
     */
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
-         DenseMatrix64F additionExternalWrench, DenseMatrix64F gravityWrench)
+         DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
    {
       int constraintSize = Wrench.SIZE;
       int previousSize = solverInput_beq.getNumRows();
@@ -167,7 +182,7 @@ public class InverseDynamicsQPSolver
       CommonOps.insert(rhoJacobian, solverInput_Aeq, previousSize, numberOfDoFs);
 
       tempWrenchEquilibriumRightHandSide.set(convectiveTerm);
-      CommonOps.subtractEquals(tempWrenchEquilibriumRightHandSide, additionExternalWrench);
+      CommonOps.subtractEquals(tempWrenchEquilibriumRightHandSide, additionalExternalWrench);
       CommonOps.subtractEquals(tempWrenchEquilibriumRightHandSide, gravityWrench);
       CommonOps.insert(tempWrenchEquilibriumRightHandSide, solverInput_beq, previousSize, 0);
 
@@ -200,7 +215,7 @@ public class InverseDynamicsQPSolver
    public void solve() throws NoConvergenceException
    {
       if (!hasWrenchesEquilibriumConstraintBeenSetup)
-         throw new RuntimeException("The wrench euilibrium constraint has to be setup before calling solve().");
+         throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
 
       boolean firstCall = !seedFromPreviousSolution.getBooleanValue();
 
@@ -213,20 +228,36 @@ public class InverseDynamicsQPSolver
       DenseMatrix64F lb = solverInput_lb;
       DenseMatrix64F ub = solverInput_ub;
       DenseMatrix64F output = solverOutput;
-      qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall);
+
+      NoConvergenceException noConvergenceException;
+      try
+      {
+         qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall);
+         noConvergenceException = null;
+      }
+      catch (NoConvergenceException e)
+      {
+         noConvergenceException = e;
+      }
+
+      CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
+      CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
 
       seedFromPreviousSolution.set(true);
       hasWrenchesEquilibriumConstraintBeenSetup = false;
+
+      if (noConvergenceException != null)
+         throw noConvergenceException;
    }
 
-   public void getJointAccelerations(DenseMatrix64F jointAccelerationsToPack)
+   public DenseMatrix64F getJointAccelerations()
    {
-      CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, jointAccelerationsToPack, 0, numberOfDoFs);
+      return solverOutput_jointAccelerations;
    }
 
-   public void getRhos(DenseMatrix64F rhosToPack)
+   public DenseMatrix64F getRhos()
    {
-      CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, rhosToPack, 0, rhoSize);
+      return solverOutput_rhos;
    }
 
    public void setMinJointAccelerations(DenseMatrix64F qDDotMin)
@@ -237,6 +268,12 @@ public class InverseDynamicsQPSolver
    public void setMaxJointAccelerations(DenseMatrix64F qDDotMax)
    {
       CommonOps.insert(qDDotMax, solverInput_ub, 0, 0);
+   }
+
+   public void setMinRho(double rhoMin)
+   {
+      for (int i = numberOfDoFs; i < problemSize; i++)
+         solverInput_lb.set(i, 0, rhoMin);
    }
 
    public void setMinRho(DenseMatrix64F rhoMin)

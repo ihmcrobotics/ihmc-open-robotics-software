@@ -7,9 +7,11 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateCommand>
 {
+   private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F momentumRate = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
@@ -41,43 +43,74 @@ public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateComm
 
    public void setLinearMomentumRateOfChange(FrameVector linearMomentumRateOfChange)
    {
-      selectionMatrix.reshape(SpatialForceVector.SIZE, 3);
-      selectionMatrix.set(3, 0, 1.0);
-      selectionMatrix.set(4, 1, 1.0);
-      selectionMatrix.set(5, 2, 1.0);
+      selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 3, 1.0);
+      selectionMatrix.set(1, 4, 1.0);
+      selectionMatrix.set(2, 5, 1.0);
 
       momentumRate.reshape(selectionMatrix.getNumCols(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(momentumRate, linearMomentumRateOfChange.getVector(), 0, 0);
+      MatrixTools.setDenseMatrixFromTuple3d(momentumRate, linearMomentumRateOfChange.getVector(), 3, 0);
    }
 
    public void setEmpty()
    {
-      selectionMatrix.reshape(SpatialForceVector.SIZE, 0);
+      selectionMatrix.reshape(0, SpatialForceVector.SIZE);
       momentumRate.reshape(0, 1);
    }
 
-   public DenseMatrix64F getMomentumSubspace()
+   public void setWeights(double linear, double angular)
+   {
+      for (int i = 0; i < 3; i++)
+         weightVector.set(i, 0, angular);
+      for (int i = 3; i < SpatialAccelerationVector.SIZE; i++)
+         weightVector.set(i, 0, linear);
+   }
+
+   public void setWeights(double linearX, double linearY, double linearZ, double angularX, double angularY, double angularZ)
+   {
+      weightVector.set(0, 0, angularX);
+      weightVector.set(1, 0, angularY);
+      weightVector.set(2, 0, angularZ);
+      weightVector.set(3, 0, linearX);
+      weightVector.set(4, 0, linearY);
+      weightVector.set(5, 0, linearZ);
+   }
+
+   public DenseMatrix64F getSelectionMatrix()
    {
       return selectionMatrix;
    }
 
-   public DenseMatrix64F getMomentumMultipliers()
+   public DenseMatrix64F getMomemtumRate()
    {
       return momentumRate;
    }
 
-   public void setMomentumMultipliers(DenseMatrix64F momentumMultipliers)
+   public DenseMatrix64F getWeightVector()
    {
-      this.momentumRate.set(momentumMultipliers);
+      return weightVector;
    }
 
-   public void setMomentumSubspace(DenseMatrix64F momentumSubspace)
+   public void getWeightMatrix(DenseMatrix64F weightMatrix)
    {
-      this.selectionMatrix.set(momentumSubspace);
+      weightMatrix.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+      CommonOps.setIdentity(weightMatrix);
+      for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+         weightMatrix.set(i, i, weightVector.get(i, 0));
+   }
+
+   public void setMomentumRate(DenseMatrix64F momentumRate)
+   {
+      this.momentumRate.set(momentumRate);
+   }
+
+   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      this.selectionMatrix.set(selectionMatrix);
    }
 
    public String toString()
    {
-      return getClass().getSimpleName() + ": MomentumSubspace = " + selectionMatrix;
+      return getClass().getSimpleName() + ": selection matrix = " + selectionMatrix;
    }
 }

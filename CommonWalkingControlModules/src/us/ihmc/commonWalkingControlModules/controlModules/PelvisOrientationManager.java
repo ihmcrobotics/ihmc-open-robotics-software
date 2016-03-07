@@ -97,6 +97,7 @@ public class PelvisOrientationManager
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody elevator = fullRobotModel.getElevator();
       RigidBody pelvis = fullRobotModel.getPelvis();
+      orientationFeedbackControlCommand.setWeightForSolver(50.0);
       orientationFeedbackControlCommand.set(elevator, pelvis);
       orientationFeedbackControlCommand.setGains(pelvisOrientationControlGains);
 

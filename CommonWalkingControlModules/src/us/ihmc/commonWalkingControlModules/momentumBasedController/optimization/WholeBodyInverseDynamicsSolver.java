@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
@@ -30,7 +32,7 @@ public class WholeBodyInverseDynamicsSolver
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   private final OptimizationMomentumControlModule optimizationMomentumControlModule;
+   private final InverseDynamicsOptimizationControlModule optimizationControlModule;
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    private final Map<OneDoFJoint, DoubleYoVariable> jointAccelerationsSolution = new HashMap<>();
@@ -39,7 +41,7 @@ public class WholeBodyInverseDynamicsSolver
    private final WrenchVisualizer wrenchVisualizer;
 
    private final OneDoFJoint[] controlledOneDoFJoints;
-   private final InverseDynamicsJoint[] jointsToOptimizeFors;
+   private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
@@ -50,10 +52,11 @@ public class WholeBodyInverseDynamicsSolver
       YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
-      optimizationMomentumControlModule = new OptimizationMomentumControlModule(toolbox, momentumOptimizationSettings, registry);
+      optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, momentumOptimizationSettings, registry);
+      optimizationControlModule.setMinRho(momentumOptimizationSettings.getRhoMinScalar());
 
-      jointsToOptimizeFors = momentumOptimizationSettings.getJointsToOptimizeFor();
-      controlledOneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFors, OneDoFJoint.class);
+      jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
+      controlledOneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
@@ -75,7 +78,7 @@ public class WholeBodyInverseDynamicsSolver
    public void reset()
    {
       inverseDynamicsCalculator.reset();
-      optimizationMomentumControlModule.reset();
+      optimizationControlModule.initialize();
    }
 
    public void initialize()
@@ -83,7 +86,7 @@ public class WholeBodyInverseDynamicsSolver
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state
       // where the feet are all jacked up. For example, after falling and getting back up.
       inverseDynamicsCalculator.compute();
-      optimizationMomentumControlModule.initialize();
+      optimizationControlModule.initialize();
       planeContactWrenchProcessor.initialize();
    }
 
@@ -93,7 +96,7 @@ public class WholeBodyInverseDynamicsSolver
 
       try
       {
-         momentumModuleSolution = optimizationMomentumControlModule.compute();
+         momentumModuleSolution = optimizationControlModule.compute();
       }
       catch (MomentumControlModuleException momentumControlModuleException)
       {
@@ -102,6 +105,7 @@ public class WholeBodyInverseDynamicsSolver
          momentumModuleSolution = momentumControlModuleException.getMomentumModuleSolution();
       }
 
+      DenseMatrix64F jointAccelerations = momentumModuleSolution.getJointAccelerations();
       Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
 
@@ -110,6 +114,8 @@ public class WholeBodyInverseDynamicsSolver
          RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
          inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
       }
+
+      ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
       inverseDynamicsCalculator.compute();
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
@@ -127,7 +133,7 @@ public class WholeBodyInverseDynamicsSolver
 
    public void submitInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
    {
-      optimizationMomentumControlModule.setInverseDynamicsCommand(inverseDynamicsCommand);
+      optimizationControlModule.submitInverseDynamicsCommand(inverseDynamicsCommand);
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()
@@ -147,6 +153,6 @@ public class WholeBodyInverseDynamicsSolver
 
    public InverseDynamicsJoint[] getJointsToOptimizeFors()
    {
-      return jointsToOptimizeFors;
+      return jointsToOptimizeFor;
    }
 }
