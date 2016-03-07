@@ -110,7 +110,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    Vector3d comOffsetFoot = new Vector3d(footX / 2.0 - 0.075, 0.0, -footZ / 2.0);
 
    private double bodyZ, bodyX; //global so that it is created only once (avoid generating garbage)
-   private double initialBodyHeight = RobotParameters2.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters2.LENGTHS.get(LinkNames.LOWER_LINK) + footZ - 0.045;
+   private double initialBodyHeight = RobotParameters2.LENGTHS.get(LinkNames.UPPER_LINK) + RobotParameters2.LENGTHS.get(LinkNames.LOWER_LINK) + footZ - 0.045;  
 
    // Frames
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -150,6 +150,8 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
    private final FramePoint2d capturePoint = new FramePoint2d();
    private double totalFz;
+   
+
 
    /**
     * Constructor - ID robot + SCS robot + visualizers
@@ -190,13 +192,13 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
          // Jacobian
          RigidBodyTransform transformToParent = new RigidBodyTransform();
          transformToParent.setTranslation(0.0, 0.0, -footZ);
-         ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sidePrefix + "SoleFrame", ankleJointID.getFrameAfterJoint(), transformToParent);
+		 ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sidePrefix + "SoleFrame", ankleJointID.getFrameAfterJoint(), transformToParent);
          soleFrames.put(robotSide, soleFrame);
 
          ZUpFrame soleZUpFrame = new ZUpFrame(worldFrame, soleFrame, sidePrefix + "SoleZUpFrame");
          soleZUpFrames.put(robotSide, soleZUpFrame);
 
-         GeometricJacobian jacobian = new GeometricJacobian(bodyRigidBody, allLegRigidBodies.get(robotSide).get(LinkNames.LOWER_LINK), soleFrame);
+         GeometricJacobian jacobian = new GeometricJacobian(bodyRigidBody, allLegRigidBodies.get(robotSide).get(LinkNames.LOWER_LINK), soleFrame); 
          legJacobians.put(robotSide, jacobian);
       }
 
@@ -215,12 +217,12 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
          if (robotSide == RobotSide.LEFT)
          {
-            hipJointSCS.setQ(-0.2);
+            hipJointSCS.setQ(-0.2); 
          }
 
          else
          {
-            hipJointSCS.setQ(0.37);
+            hipJointSCS.setQ(0.37); 
          }
 
          bodyJointSCS.addJoint(hipJointSCS);
@@ -237,7 +239,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
          // ANKLE SCS
          PinJoint ankleJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.ANKLE.getName(), new Vector3d(0.0, 0.0, ankleOffsetZ), this, jointAxesPinJoints);
          ankleJointSCS.setLimitStops(-0.7, 0.7, 1e3, 1e2);
-
+         
          if (robotSide == RobotSide.LEFT)
          {
             ankleJointSCS.setQ(0.21);
@@ -281,30 +283,31 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       qd_z = bodyJointSCS.getQd_t2().getDoubleValue();
       qd_wy = bodyJointSCS.getQd_rot().getDoubleValue();
 
+      
       /****************** Visualizers ***********************/
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-
+         
          YoFramePoint yoFootPosition = new YoFramePoint(sidePrefix + "FootPosition", worldFrame, yoVariableRegistry);
          yoFootPositions.put(robotSide, yoFootPosition);
-
+              
          // Visualize feet location on plotter panel
          YoArtifactPosition footPositionArtifact = new YoArtifactPosition(sidePrefix + " Foot", yoFootPosition.getYoX(), yoFootPosition.getYoY(), GraphicType.SOLID_BALL, YoAppearance.Green().getColor().get(), 0.009);
          artifactList.add(footPositionArtifact);
-
+         
          // Visualize feel location on SCS
-         //         YoGraphicPosition footPositionGraphic = new YoGraphicPosition(sidePrefix + "Foot", yoFootPosition, 0.025, YoAppearance.Yellow());
-         //         yoGraphicsList.add(footPositionGraphic); 
+//         YoGraphicPosition footPositionGraphic = new YoGraphicPosition(sidePrefix + "Foot", yoFootPosition, 0.025, YoAppearance.Yellow());
+//         yoGraphicsList.add(footPositionGraphic); 
 
          // Visualize sole frames on SCS
-         //         soleFramesViz.put(robotSide, new YoGraphicReferenceFrame(soleFrames.get(robotSide), registry, 0.1));
-         //         yoGraphicsList.add(soleFramesViz.get(robotSide));
+//         soleFramesViz.put(robotSide, new YoGraphicReferenceFrame(soleFrames.get(robotSide), registry, 0.1));
+//         yoGraphicsList.add(soleFramesViz.get(robotSide));
       }
 
       // Visualize body frame in SCS
-      //      bodyFrameViz = new YoGraphicReferenceFrame(bodyJointID.getFrameAfterJoint(), registry, 0.3);
-      //      yoGraphicsList.add(bodyFrameViz);
+//      bodyFrameViz = new YoGraphicReferenceFrame(bodyJointID.getFrameAfterJoint(), registry, 0.3);
+//      yoGraphicsList.add(bodyFrameViz);
 
       // Visualize CoM, CP and CoP on plotter panel
       YoArtifactPosition centerOfMassArtifact = new YoArtifactPosition("Center of Mass", yoCoM.getYoX(), yoCoM.getYoY(), GraphicType.SOLID_BALL, YoAppearance.Black().getColor().get(), 0.009);
@@ -323,7 +326,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
       gravity = 9.81;
       omega0.set(Math.sqrt(gravity / bodyPosition.getZ()));
-
+      
       updatePositionsIDrobot();
    }
 
@@ -350,7 +353,8 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    private Matrix3d createInertiaMatrixCylinder(LinkNames linkName)
    {
       Matrix3d inertiaCylinder = new Matrix3d();
-      inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(RobotParameters2.MASSES.get(linkName), RobotParameters2.RADII.get(linkName), RobotParameters2.LENGTHS.get(linkName), Axis.Z);
+      inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(RobotParameters2.MASSES.get(linkName),
+            RobotParameters2.RADII.get(linkName), RobotParameters2.LENGTHS.get(linkName), Axis.Z);
       return inertiaCylinder;
    }
 
@@ -468,7 +472,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         soleFrames.get(robotSide).update();
+    	 soleFrames.get(robotSide).update();
          soleZUpFrames.get(robotSide).update();
          legJacobians.get(robotSide).compute();
       }
@@ -495,14 +499,14 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
       // CoP  (+ updating  body and sole Frames)  //TODO important update!
       measuredGroundReactionForce.setToZero();
-      //      bodyFrameViz.update();
-
+//      bodyFrameViz.update();
+      
       for (RobotSide robotside : RobotSide.values)
       {
          footPosition.setToZero(soleFrames.get(robotside));
          footPosition.changeFrame(worldFrame);
          yoFootPositions.get(robotside).setAndMatchFrame(footPosition);
-         //         soleFramesViz.get(robotside).update();
+//         soleFramesViz.get(robotside).update();
          measuredGroundReactionForce.add(GCpointsHeel.get(robotside).getYoForce());
          measuredGroundReactionForce.add(GCpointsToe.get(robotside).getYoForce());
       }
@@ -722,7 +726,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    {
       GCpointsHeel.get(robotSide).getYoVelocity().getFrameTupleIncludingFrame(linearVelocityToPack);
    }
-
+   
    // Others
    public double getTotalRobotMass()
    {
@@ -768,7 +772,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    {
       return gravity;
    }
-
+   
    //CoM and ICP
    public void getCoM(FramePoint2d comToPack)
    {
@@ -784,16 +788,16 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    {
       yoICP.getFrameTuple2dIncludingFrame(capturePoinToPack);
    }
-
+   
    // Set initial velocity
    public void setInitialVelocity(double desInitialVelocity)
    {
-      bodyJointSCS.getQd_t1().set(desInitialVelocity);
+	   bodyJointSCS.getQd_t1().set(desInitialVelocity);
    }
-
+   
    // Other  
    public double getHipOffsetY()
    {
-      return hipOffsetY;
+	   return hipOffsetY;
    }
 }
