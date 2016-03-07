@@ -44,7 +44,7 @@ public class ContactableBodiesFactory
       this.pelvisContactPointTransform = pelvisContactPointTransform;
       this.pelvisContactPoints = pelvisContactPoints;
    }
-
+   
    public void addPelvisBackContactParameters(List<Point2d> pelvisBackContactPoints, RigidBodyTransform pelvisBackContactPointTransform)
    {
       this.pelvisBackContactPoints = pelvisBackContactPoints;
