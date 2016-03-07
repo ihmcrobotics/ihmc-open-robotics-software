@@ -3,21 +3,33 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, G>, G extends GeometryObject<G>> extends AbstractReferenceFrameHolder implements FrameObject<S>
+public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G extends GeometryObject<G>> extends AbstractReferenceFrameHolder implements FrameObject<F>
 {
    private final G geometryObject;
    protected ReferenceFrame referenceFrame;
 
-   public AbstractFrameObject(ReferenceFrame referenceFrame, G transformableDataObject)
+   public AbstractFrameObject(G geometryObject)
    {
-      this.geometryObject = transformableDataObject;
+      this(ReferenceFrame.getWorldFrame(), geometryObject);
+   }
+
+   public AbstractFrameObject(ReferenceFrame referenceFrame, G geometryObject)
+   {
+      this.geometryObject = geometryObject;
       this.referenceFrame = referenceFrame;
    }
 
    @Override
-   public ReferenceFrame getReferenceFrame()
+   public void set(F other)
    {
-      return referenceFrame;
+      checkReferenceFrameMatch(other);
+      geometryObject.set(other.getGeometryObject());
+   }
+
+   public void setIncludingFrame(F other)
+   {
+      referenceFrame = other.getReferenceFrame();
+      geometryObject.set(other.getGeometryObject());
    }
 
    @Override
@@ -56,38 +68,11 @@ public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, G>, G
    {
       geometryObject.applyTransform(transform);
    }
-   
-   @Override
-   public void set(S other)
-   {
-      checkReferenceFrameMatch(other);
-      this.geometryObject.set(other.getGeometryObject());
-   }
 
    @Override
    public void setToZero()
    {
-      this.geometryObject.setToZero();
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      this.geometryObject.setToNaN();      
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      return this.geometryObject.containsNaN();
-   }
-
-   @Override
-   public boolean epsilonEquals(S other, double epsilon)
-   {
-      if (other == null) return false;
-      if (referenceFrame != other.referenceFrame) return false;
-      return this.geometryObject.epsilonEquals(other.getGeometryObject(), epsilon);
+      geometryObject.setToZero();
    }
 
    @Override
@@ -98,26 +83,57 @@ public abstract class AbstractFrameObject<S extends AbstractFrameObject<S, G>, G
    }
 
    @Override
+   public void setToNaN()
+   {
+      geometryObject.setToNaN();
+   }
+
+   @Override
    public void setToNaN(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
       setToNaN();
    }
 
-   public void set(G other)
+   @Override
+   public boolean containsNaN()
    {
-      this.geometryObject.set(other);
+      return geometryObject.containsNaN();
    }
 
-   public void set(ReferenceFrame referenceFrame, G other)
+   @Override
+   public ReferenceFrame getReferenceFrame()
+   {
+      return referenceFrame;
+   }
+
+   public void set(G geometryObject)
+   {
+      this.geometryObject.set(geometryObject);
+   }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, G geometryObject)
    {
       this.referenceFrame = referenceFrame;
-      this.geometryObject.set(other);
+      this.geometryObject.set(geometryObject);
    }
-   
+
+   public void get(G geometryObject)
+   {
+      geometryObject.set(this.geometryObject);
+   }
+
    public G getGeometryObject()
    {
       return geometryObject;
+   }
+
+   @Override
+   public boolean epsilonEquals(F other, double epsilon)
+   {
+      if (other == null) return false;
+      if (referenceFrame != other.referenceFrame) return false;
+      return this.geometryObject.epsilonEquals(other.getGeometryObject(), epsilon);
    }
 
 }
