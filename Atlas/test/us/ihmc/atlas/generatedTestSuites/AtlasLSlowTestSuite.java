@@ -12,11 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWholeBodyTrajectoryTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
 })
 
-public class AtlasNSlowTestSuite
+public class AtlasLSlowTestSuite
 {
    public static void main(String[] args)
    {
