@@ -13,8 +13,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -36,8 +34,6 @@ public class OnToesState extends AbstractFootControlState
    private static final double MIN_TRAJECTORY_TIME = 0.1;
 
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
-   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
    private final JointspaceAccelerationCommand kneeJointCommand = new JointspaceAccelerationCommand();
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
@@ -119,16 +115,15 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
-      pointAccelerationCommand.setBase(rootBody);
-      pointAccelerationCommand.setEndEffector(contactableFoot.getRigidBody());
+      kneeJointCommand.setWeight(10.0);
       kneeJointCommand.addJoint(kneeJoint, Double.NaN);
-      commandList.addCommand(spatialAccelerationCommand);
-      commandList.addCommand(pointAccelerationCommand);
       commandList.addCommand(kneeJointCommand);
 
+      orientationFeedbackControlCommand.setWeightForSolver(10.0);
       orientationFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       orientationFeedbackControlCommand.setGains(gains.getOrientationGains());
-      
+
+      pointFeedbackControlCommand.setWeightForSolver(10.0);
       pointFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       pointFeedbackControlCommand.setGains(gains.getPositionGains());
 
