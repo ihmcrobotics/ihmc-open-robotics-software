@@ -68,6 +68,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
+      momentumRateCommand.setWeights(2.0, 10.0);
    }
 
    public void compute()

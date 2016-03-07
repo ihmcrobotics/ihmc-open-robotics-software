@@ -27,6 +27,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      spatialAccelerationCommand.setWeight(10.0);
    }
 
    @Override

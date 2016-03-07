@@ -52,6 +52,7 @@ public class HeadOrientationManager
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
       RigidBody elevator = fullRobotModel.getElevator();
+      orientationFeedbackControlCommand.setWeightForSolver(10.0);
       orientationFeedbackControlCommand.set(elevator, head);
       orientationFeedbackControlCommand.setGains(gains);
       chestFrame = chest.getBodyFixedFrame();

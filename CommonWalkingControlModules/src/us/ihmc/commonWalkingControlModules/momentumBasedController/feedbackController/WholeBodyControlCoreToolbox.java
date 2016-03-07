@@ -16,6 +16,11 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class WholeBodyControlCoreToolbox
 {
+   public static final int nBasisVectorsPerContactPoint = 4;
+   public static final int nContactPointsPerContactableBody = 4;
+   public static final int nContactableBody = 4;
+   public static final int rhoSize = nContactableBody * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
+
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final TwistCalculator twistCalculator;
    private final double controlDT;

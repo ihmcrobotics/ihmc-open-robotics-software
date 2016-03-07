@@ -284,7 +284,7 @@ public class OptimizationMomentumControlModule
       momentumOptimizationSettings.getDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
 
       // Lambda
-      DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateCommand.getMomentumSubspace());
+      DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateCommand.getSelectionMatrix());
 
       if (useNullSpaceProjection)
       {
