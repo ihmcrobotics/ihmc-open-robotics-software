@@ -81,7 +81,7 @@ public class HeadOrientationManager
          finalOrientationProvider.setOrientation(desiredOrientation);
          simpleOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", chestFrame, trajectoryTimeProvider,
                initialOrientationProvider, finalOrientationProvider, registry);
-         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", 15, true, chestFrame, registry);
+         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", true, chestFrame, registry);
          waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
          simpleOrientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
 
