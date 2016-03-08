@@ -1,7 +1,5 @@
 package us.ihmc.tools.maps;
 
-import sun.misc.SharedSecrets;
-
 //TODO: Implement size, iterator
 public class EnumDoubleMap<K extends Enum<K>>
 {
@@ -9,8 +7,8 @@ public class EnumDoubleMap<K extends Enum<K>>
 
    public EnumDoubleMap(Class<K> keyType)
    {
-      K[] universe = SharedSecrets.getJavaLangAccess().getEnumConstantsShared(keyType);
-      vals = new double[universe.length];
+      K[] enumConstants = keyType.getEnumConstants();
+      vals = new double[enumConstants.length];
       
       for(int i = 0; i < vals.length; i++)
       {
