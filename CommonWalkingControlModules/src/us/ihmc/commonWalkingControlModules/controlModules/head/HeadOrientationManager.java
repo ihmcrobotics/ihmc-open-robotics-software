@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
@@ -116,7 +116,7 @@ public class HeadOrientationManager
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
    }
 
-   public void handleHeadTrajectoryMessage(ModifiableHeadTrajectoryMessage message)
+   public void handleHeadTrajectoryMessage(HeadTrajectoryControllerCommand message)
    {
       if (message == null)
          return;

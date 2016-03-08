@@ -20,6 +20,13 @@ public class FrameSO3TrajectoryPointList extends FrameTrajectoryPointList<FrameS
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
          addTrajectoryPoint(trajectoryPointList.getLastTrajectoryPoint());
    }
+   
+   public void setIncludingFrame(ReferenceFrame referenceFrame, FrameSE3TrajectoryPointList trajectoryPointList)
+   {
+      clear(trajectoryPointList.getReferenceFrame());
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
+         addTrajectoryPoint(trajectoryPointList.getLastTrajectoryPoint());
+   }
 
    public void addTrajectoryPoint(double time, Quat4d orientation, Vector3d angularVelocity)
    {

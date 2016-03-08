@@ -5,14 +5,14 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAcc
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableArmDesiredAccelerationsMessage
-      implements ControllerMessage<ModifiableArmDesiredAccelerationsMessage, ArmDesiredAccelerationsMessage>
+public class ArmDesiredAccelerationsControllerCommand
+      implements ControllerCommand<ArmDesiredAccelerationsControllerCommand, ArmDesiredAccelerationsMessage>
 {
    private RobotSide robotSide;
    private ArmControlMode armControlMode;
    private final TDoubleArrayList armDesiredJointAccelerations = new TDoubleArrayList(10);
 
-   public ModifiableArmDesiredAccelerationsMessage()
+   public ArmDesiredAccelerationsControllerCommand()
    {
    }
 
@@ -35,7 +35,7 @@ public class ModifiableArmDesiredAccelerationsMessage
    }
 
    @Override
-   public void set(ModifiableArmDesiredAccelerationsMessage other)
+   public void set(ArmDesiredAccelerationsControllerCommand other)
    {
       robotSide = other.robotSide;
       armControlMode = other.armControlMode;

@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
@@ -108,7 +108,7 @@ public class FeetManager
       setContactStateForSwing(upcomingSwingSide);
    }
 
-   public void handleFootTrajectoryMessage(ModifiableFootTrajectoryMessage footTrajectoryMessage)
+   public void handleFootTrajectoryMessage(FootTrajectoryControllerCommand footTrajectoryMessage)
    {
       RobotSide robotSide = footTrajectoryMessage.getRobotSide();
       FootControlModule footControlModule = footControlModules.get(robotSide);
@@ -135,7 +135,7 @@ public class FeetManager
       footControlModules.get(swingSide).requestTouchdownForDisturbanceRecovery();
    }
 
-   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
    {
       if (!message.isStopAllTrajectory())
          return;

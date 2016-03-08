@@ -2,7 +2,7 @@ package us.ihmc.robotDataCommunication;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
@@ -11,7 +11,7 @@ public class VisualizerRobot extends SDFHumanoidRobot
    private final YoVariableRegistry reducedRegistry;
 
    
-   public VisualizerRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
+   public VisualizerRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFHumanoidJointNameMap sdfJointNameMap)
    {
       super(generalizedSDFRobotModel, null, sdfJointNameMap, false);
       this.reducedRegistry = new YoVariableRegistry(generalizedSDFRobotModel.getName());

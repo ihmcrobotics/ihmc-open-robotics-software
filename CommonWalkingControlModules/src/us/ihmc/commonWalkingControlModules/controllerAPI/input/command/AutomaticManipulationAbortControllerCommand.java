@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 
-public class ModifiableAutomaticManipulationAbortMessage implements ControllerMessage<ModifiableAutomaticManipulationAbortMessage, AutomaticManipulationAbortMessage>
+public class AutomaticManipulationAbortControllerCommand implements ControllerCommand<AutomaticManipulationAbortControllerCommand, AutomaticManipulationAbortMessage>
 {
    private boolean enable;
 
-   public ModifiableAutomaticManipulationAbortMessage()
+   public AutomaticManipulationAbortControllerCommand()
    {
    }
 
@@ -16,7 +16,7 @@ public class ModifiableAutomaticManipulationAbortMessage implements ControllerMe
    }
 
    @Override
-   public void set(ModifiableAutomaticManipulationAbortMessage other)
+   public void set(AutomaticManipulationAbortControllerCommand other)
    {
       enable = other.enable;
    }
