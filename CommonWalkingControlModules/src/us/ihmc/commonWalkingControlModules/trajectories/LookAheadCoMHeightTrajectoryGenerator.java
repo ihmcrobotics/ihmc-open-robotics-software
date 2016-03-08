@@ -64,7 +64,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider(
          "offsetHeightAboveGroundTrajectoryTimeProvider", registry);
    private final MultipleWaypointsTrajectoryGenerator waypointOffsetHeightAboveGroundTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(
-         "pelvisHeightOffset", 15, registry);
+         "pelvisHeightOffset", registry);
 
    private final DoubleYoVariable minimumHeightAboveGround = new DoubleYoVariable("minimumHeightAboveGround", registry);
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
