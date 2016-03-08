@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
+
 import java.util.ArrayList;
 
 import javax.vecmath.Quat4d;
@@ -30,6 +32,17 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    private final ArrayList<YoFrameSO3TrajectoryPoint> waypoints;
 
    private final HermiteCurveBasedOrientationTrajectoryGenerator subTrajectory;
+
+   public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, parentRegistry);
+   }
+
+   public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
+         YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, defaultMaximumNumberOfWaypoints, allowMultipleFrames, referenceFrame, parentRegistry);
+   }
 
    public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
          YoVariableRegistry parentRegistry)

@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
+
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
@@ -16,10 +18,6 @@ import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryG
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-/*
- * Note: this class can be used to interpolate N variables simultaneously.
- * You don't have a provider for the waypoint, therefore you should use method initialize(
- */
 public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
    private final String namePrefix;
@@ -35,6 +33,17 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    private final ArrayList<YoFrameEuclideanTrajectoryPoint> waypoints;
 
    private final VelocityConstrainedPositionTrajectoryGenerator subTrajectory;
+
+   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, parentRegistry);
+   }
+
+   public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
+         YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, defaultMaximumNumberOfWaypoints, allowMultipleFrames, referenceFrame, parentRegistry);
+   }
 
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
          YoVariableRegistry parentRegistry)
