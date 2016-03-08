@@ -18,7 +18,7 @@ public class ModifiablePelvisHeightTrajectoryMessage extends SimpleTrajectoryPoi
    @Override
    public void set(PelvisHeightTrajectoryMessage message)
    {
-      super.set(message);
+      message.getTrajectoryPoints(this);
    }
 
    @Override

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -68,13 +69,14 @@ public class ModifiableArmTrajectoryMessage implements ControllerMessage<Modifia
       set(other.robotSide, other.getTrajectoryPointLists());
    }
 
-   public <T extends TrajectoryPointListInterface<T, ? extends OneDoFTrajectoryPointInterface<?>>> void set(RobotSide robotSide, T[] trajectoryPointListArray)
+   public void set(RobotSide robotSide, ArmOneJointTrajectoryMessage[] trajectoryPointListArray)
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.length; i++)
       {
-         jointTrajectoryInputs.add().set(trajectoryPointListArray[i]);
-         set(i, trajectoryPointListArray[i]);
+         SimpleTrajectoryPoint1DList simpleTrajectoryPoint1DList = jointTrajectoryInputs.add();
+         ArmOneJointTrajectoryMessage armOneJointTrajectoryMessage = trajectoryPointListArray[i];
+         armOneJointTrajectoryMessage.getTrajectoryPoints(simpleTrajectoryPoint1DList);
       }
    }
 

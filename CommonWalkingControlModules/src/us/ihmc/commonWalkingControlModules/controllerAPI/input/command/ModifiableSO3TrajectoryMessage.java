@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class ModifiableSO3TrajectoryMessage<T extends ModifiableSO3TrajectoryMessage<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
       extends FrameSO3TrajectoryPointList implements ControllerMessage<T, M>
@@ -20,6 +19,6 @@ public abstract class ModifiableSO3TrajectoryMessage<T extends ModifiableSO3Traj
    @Override
    public void set(M message)
    {
-      setIncludingFrame(ReferenceFrame.getWorldFrame(), message);
+      message.getTrajectoryPoints(this);
    }
 }

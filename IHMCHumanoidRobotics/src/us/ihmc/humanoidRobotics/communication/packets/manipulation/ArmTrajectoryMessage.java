@@ -153,14 +153,6 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       rangeCheck(jointIndex);
       return jointTrajectoryMessages[jointIndex];
    }
-   
-   public SimpleTrajectoryPoint1D[] getJointTrajectoryPointListCopy(int jointIndex)
-   {
-      rangeCheck(jointIndex);
-      ArmOneJointTrajectoryMessage armOneJointTrajectoryMessage = jointTrajectoryMessages[jointIndex];
-      
-      return armOneJointTrajectoryMessage.getJointTrajectoryPointListCopy();
-   }
 
    public ArmOneJointTrajectoryMessage[] getTrajectoryPointLists()
    {

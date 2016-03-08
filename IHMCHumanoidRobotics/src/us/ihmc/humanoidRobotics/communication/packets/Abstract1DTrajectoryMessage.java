@@ -5,10 +5,8 @@ import java.util.Random;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
-import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.random.RandomTools;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
@@ -29,7 +27,9 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[trajectory1dMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+      {
          trajectoryPoints[i] = new TrajectoryPoint1DMessage(trajectory1dMessage.getTrajectoryPoint(i));
+      }
    }
 
    /**
@@ -41,19 +41,32 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[] {new TrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0)};
    }
-
-   public SimpleTrajectoryPoint1D[] getJointTrajectoryPointListCopy()
+   
+   public Abstract1DTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
    {
-      int numberOfPoints = trajectoryPoints.length;
-      SimpleTrajectoryPoint1D[] trajectoryPointListToReturn = new SimpleTrajectoryPoint1D[numberOfPoints];
+      int numberOfPoints = trajectoryData.getNumberOfTrajectoryPoints();
+      trajectoryPoints = new TrajectoryPoint1DMessage[numberOfPoints];
 
       for (int i=0; i<numberOfPoints; i++)
       {
-         TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints[i];
-         trajectoryPointListToReturn[i] = new SimpleTrajectoryPoint1D(trajectoryPoint1DMessage.time, trajectoryPoint1DMessage.position, trajectoryPoint1DMessage.velocity);
+         SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
+         trajectoryPoints[i] = new TrajectoryPoint1DMessage(trajectoryPoint);
+         
       }
+   }
+   
+   public void getTrajectoryPoints(SimpleTrajectoryPoint1DList trajectoryPointListToPack)
+   {
+      trajectoryPointListToPack.clear();
+      
+      TrajectoryPoint1DMessage[] trajectoryPointMessages = getTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.length;
 
-      return trajectoryPointListToReturn;
+      for (int i=0; i<numberOfPoints; i++)
+      {
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPointMessages[i];
+         trajectoryPointListToPack.addTrajectoryPoint(trajectoryPoint1DMessage.time, trajectoryPoint1DMessage.position, trajectoryPoint1DMessage.velocity);
+      }
    }
 
    /**
