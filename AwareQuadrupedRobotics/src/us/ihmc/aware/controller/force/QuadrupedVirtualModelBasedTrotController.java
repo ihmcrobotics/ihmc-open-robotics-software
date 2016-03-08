@@ -1,8 +1,15 @@
 package us.ihmc.aware.controller.force;
 
+import java.awt.Color;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
+import us.ihmc.aware.packets.BodyPosePacket;
+import us.ihmc.aware.packets.BodyTwistPacket;
+import us.ihmc.aware.packets.PosePacket;
+import us.ihmc.aware.packets.TwistPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
@@ -14,7 +21,11 @@ import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
-import us.ihmc.aware.vmc.*;
+import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
+import us.ihmc.aware.vmc.QuadrupedContactForceOptimization;
+import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
+import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
+import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
@@ -37,18 +48,18 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
-
-import java.awt.*;
 
 public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceController
 {
@@ -129,6 +140,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
    // provider inputs
+   private final QuadrupedControllerInputProvider inputProvider;
    private double bodyYawRateInput;
    private double bodyYawRateIntegral;
    private final FrameVector bodyVelocityInput;
@@ -214,7 +226,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final Twist twistStorage = new Twist();
 
    public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters,
-         ParameterMapRepository parameterMapRepository)
+         ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -223,6 +235,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
+      this.inputProvider = inputProvider;
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedTrotController.class);
@@ -621,6 +634,14 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    @Override public QuadrupedForceControllerEvent process()
    {
+      BodyPosePacket bodyPosePacket = inputProvider.getBodyPosePacket().get();
+      BodyTwistPacket bodyTwistPacket = inputProvider.getBodyTwistPacket().get();
+      yoBodyOrientationInput
+            .setYawPitchRoll(bodyPosePacket.getYaw(), bodyPosePacket.getPitch(), bodyPosePacket.getRoll());
+      yoBodyVelocityInput.set(bodyTwistPacket.getLinearVelocityX(), bodyTwistPacket.getLinearVelocityY(), 0.0);
+      yoBodyYawRateInput.set(bodyTwistPacket.getAngularVelocityZ());
+      yoComHeightInput.set(yoComHeightInput.getDoubleValue() + bodyTwistPacket.getLinearVelocityZ() * controlDT);
+
       readYoVariables();
       updateEstimates();
       updateSetpoints();

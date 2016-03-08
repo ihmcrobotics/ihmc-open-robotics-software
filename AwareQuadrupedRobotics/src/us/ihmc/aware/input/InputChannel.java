@@ -1,6 +1,6 @@
 package us.ihmc.aware.input;
 
-public enum InputDeviceAxis
+public enum InputChannel
 {
    HOME_BUTTON,
    VIEW_BUTTON,
