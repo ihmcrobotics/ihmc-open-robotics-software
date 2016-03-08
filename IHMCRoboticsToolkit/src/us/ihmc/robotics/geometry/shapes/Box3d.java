@@ -261,15 +261,15 @@ public class Box3d implements Shape3d
    {
       updateFacesIfNecessary();
 
+      if (closestPointToPack == null)
+         closestPointToPack = new Point3d();
+
       if (isInsideOrOnSurface(pointInWorldToCheck))
       {
          Plane3d nearestFace = getClosestFace(pointInWorldToCheck);
 
-         if (closestPointToPack != null)
-         {
-            closestPointToPack.set(pointInWorldToCheck);
-            nearestFace.orthogonalProjection(closestPointToPack);
-         }
+         closestPointToPack.set(pointInWorldToCheck);
+         nearestFace.orthogonalProjection(closestPointToPack);
 
          if (normalToPack != null)
          {
@@ -280,11 +280,8 @@ public class Box3d implements Shape3d
       }
       else
       {
-         if (closestPointToPack != null)
-         {
-            closestPointToPack.set(pointInWorldToCheck);
-            this.orthogonalProjection(closestPointToPack);
-         }
+         closestPointToPack.set(pointInWorldToCheck);
+         this.orthogonalProjection(closestPointToPack);
 
          if (normalToPack != null)
          {
