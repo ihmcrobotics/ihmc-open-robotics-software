@@ -13,6 +13,12 @@ public class SimpleTrajectoryPoint1D extends SimpleTrajectoryPoint<OneDoFWaypoin
    {
       super(new OneDoFWaypoint());
    }
+   
+   public SimpleTrajectoryPoint1D(double time, double position, double velocity)
+   {
+      this();
+      set(time, position, velocity);
+   }
 
    public void setPosition(double position)
    {

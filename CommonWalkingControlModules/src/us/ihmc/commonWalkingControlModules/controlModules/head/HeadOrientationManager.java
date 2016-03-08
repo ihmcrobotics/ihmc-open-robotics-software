@@ -16,6 +16,7 @@ import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -176,7 +177,9 @@ public class HeadOrientationManager
          waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
+      SimpleSO3TrajectoryPoint[] trajectoryPoints = message.getTrajectoryPointsCopy();
+
+      waypointOrientationTrajectoryGenerator.appendWaypoints(trajectoryPoints);
       waypointOrientationTrajectoryGenerator.changeFrame(chestFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);

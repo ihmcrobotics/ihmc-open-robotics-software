@@ -196,7 +196,7 @@ public class ChestOrientationManager
          waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, tempAngularVelocity);
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
+      waypointOrientationTrajectoryGenerator.appendWaypoints(message.getTrajectoryPointsCopy());
       waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);

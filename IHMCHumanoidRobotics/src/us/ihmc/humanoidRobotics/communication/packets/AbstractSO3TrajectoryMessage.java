@@ -8,10 +8,9 @@ import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
 
-public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends IHMCRosApiMessage<T>
-      implements TransformableDataObject<T>, TrajectoryPointListInterface<T, SO3TrajectoryPointMessage>, Transformable
+public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends IHMCRosApiMessage<T> implements TransformableDataObject<T>, Transformable 
 {
    @FieldDocumentation("List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -38,19 +37,20 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
    }
 
-   @Override
-   public final void clear()
+   public SimpleSO3TrajectoryPoint[] getTrajectoryPointsCopy()
    {
-      throw new RuntimeException("Cannot clear a trajectory message.");
+      SO3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.length;
+      SimpleSO3TrajectoryPoint[] trajectoryPoints = new SimpleSO3TrajectoryPoint[numberOfPoints];
+      for (int i=0; i<numberOfPoints; i++)
+      {
+         SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages[i];
+         trajectoryPoints[i] = new SimpleSO3TrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation, so3TrajectoryPointMessage.angularVelocity);
+      }
+      
+      return trajectoryPoints;
    }
 
-   @Override
-   public final void addTrajectoryPoint(SO3TrajectoryPointMessage trajectoryPoint)
-   {
-      throw new RuntimeException("Cannot add a trajectory point to a trajectory message.");
-   }
-
-   @Override
    public void set(T other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
@@ -79,7 +79,6 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
          taskspaceTrajectoryPoints[i].applyTransform(transform);
    }
 
-   @Override
    public final int getNumberOfTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints.length;
@@ -90,20 +89,17 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       return taskspaceTrajectoryPoints;
    }
 
-   @Override
    public final SO3TrajectoryPointMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
       rangeCheck(trajectoryPointIndex);
       return taskspaceTrajectoryPoints[trajectoryPointIndex];
    }
 
-   @Override
    public final SO3TrajectoryPointMessage getLastTrajectoryPoint()
    {
       return taskspaceTrajectoryPoints[taskspaceTrajectoryPoints.length - 1];
    }
 
-   @Override
    public final double getTrajectoryTime()
    {
       return getLastTrajectoryPoint().time;

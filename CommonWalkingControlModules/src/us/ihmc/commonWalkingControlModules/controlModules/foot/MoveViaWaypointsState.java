@@ -83,8 +83,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          orientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
 
-      positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPoints());
-      orientationTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPoints());
+      positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPointsCopy());
+      orientationTrajectoryGenerator.appendWaypoints(footTrajectoryMessage.getTrajectoryPointsCopy());
    }
 
    @Override
