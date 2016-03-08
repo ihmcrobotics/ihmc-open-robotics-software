@@ -36,6 +36,8 @@ public class FourBarCalculatorFromFastRunner
 
    private final double a, b, c, d;
    private final double minA, maxA;
+   
+   private final boolean computeMinMax;
 
    // Angles
    private double angleDAB, angleABC, angleBCD, angleCDA;
@@ -48,26 +50,39 @@ public class FourBarCalculatorFromFastRunner
 
    public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD)
    {
+      this(length_DA, length_AB, length_BC, length_CD, true);
+   }
+
+   public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD, boolean computeMinMax)
+   {
       this.a = abs(length_DA);
       this.b = abs(length_AB);
       this.c = abs(length_BC);
       this.d = abs(length_CD);
+      this.computeMinMax = computeMinMax;
 
-      double eMax = min(a + b, d + c);
-      if (eMax == a + b)
-         maxA = PI;
-      else
-         maxA = getAngleWithCosineLaw(a, b, eMax);
-
-      double fMax = min(a + d, b + c);
-      if (fMax == a + d)
-         minA = getAngleWithCosineLaw(fMax, b, c);
-      else
-         minA = getAngleWithCosineLaw(fMax, a, d);
+//      if(computeMinMax)
+//      {
+         double eMax = min(a + b, d + c);
+         if (eMax == a + b)
+            maxA = PI;
+         else
+            maxA = getAngleWithCosineLaw(a, b, eMax);
+         
+         double fMax = min(a + d, b + c);
+         if (fMax == a + d)
+            minA = getAngleWithCosineLaw(fMax, b, c);
+         else
+            minA = getAngleWithCosineLaw(fMax, a, d);    
+//      }
+//      else
+//      {
+//         
+//      }
    }
 
    /**
-    * Compute every angles of the quadrilateral.
+    * Compute every angle of the quadrilateral AND crop the range of the input angle so that the four bar doesn't flip.
     * @param angleDABInRadians is the angle formed by the sides a and b (see scheme in this class)
     * @return true if the angle DAB is out of range making the quadrilateral non-convex
     */
@@ -90,7 +105,7 @@ public class FourBarCalculatorFromFastRunner
    }
 
    /**
-    * Compute every angles of the quadrilateral.
+    * Compute every angle of the quadrilateral.
     * @param angleDABInRadians is the angle formed by the sides a and b (see scheme in this class)
     * @param angularVelocityDAB first time-derivative of the angle DAB
     * @return true if the angle DAB is out of range making the quadrilateral non-convex
@@ -119,7 +134,7 @@ public class FourBarCalculatorFromFastRunner
    }
 
    /**
-    * Compute every angles of the quadrilateral.
+    * Compute every angle of the quadrilateral.
     * @param angleDABInRadians is the angle formed by the sides a and b (see scheme in this class)
     * @param angularVelocityDAB first time-derivative of the angle DAB
     * @param angularAccelerationDAB second time-derivative of the angle DAB
