@@ -8,7 +8,9 @@ import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends IHMCRosApiMessage<T> implements TransformableDataObject<T>, Transformable 
 {
@@ -37,18 +39,18 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
    }
 
-   public SimpleSO3TrajectoryPoint[] getTrajectoryPointsCopy()
+   public void getTrajectoryPoints(FrameSO3TrajectoryPointList trajectoryPointListToPack)
    {
+      trajectoryPointListToPack.clear(ReferenceFrame.getWorldFrame());
+      
       SO3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.length;
-      SimpleSO3TrajectoryPoint[] trajectoryPoints = new SimpleSO3TrajectoryPoint[numberOfPoints];
+
       for (int i=0; i<numberOfPoints; i++)
       {
          SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages[i];
-         trajectoryPoints[i] = new SimpleSO3TrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation, so3TrajectoryPointMessage.angularVelocity);
+         trajectoryPointListToPack.addTrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation, so3TrajectoryPointMessage.angularVelocity);
       }
-      
-      return trajectoryPoints;
    }
 
    public void set(T other)

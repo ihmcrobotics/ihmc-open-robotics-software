@@ -9,7 +9,8 @@ import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends IHMCRosApiMessage<T>
       implements TransformableDataObject<T>, Transformable
@@ -51,18 +52,18 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
    }
 
-   public SimpleSE3TrajectoryPoint[] getTrajectoryPointsCopy()
+   public void getTrajectoryPoints(FrameSE3TrajectoryPointList trajectoryPointListToPack)
    {
+      trajectoryPointListToPack.clear(ReferenceFrame.getWorldFrame());
+      
       SE3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.length;
-      SimpleSE3TrajectoryPoint[] trajectoryPoints = new SimpleSE3TrajectoryPoint[numberOfPoints];
+
       for (int i=0; i<numberOfPoints; i++)
       {
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages[i];
-         trajectoryPoints[i] = new SimpleSE3TrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation, se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
+         trajectoryPointListToPack.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation, se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
       }
-      
-      return trajectoryPoints;
    }
 
    /**

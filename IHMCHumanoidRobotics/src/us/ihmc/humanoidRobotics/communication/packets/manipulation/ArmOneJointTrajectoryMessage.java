@@ -5,6 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
@@ -25,10 +26,10 @@ public class ArmOneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<Ar
       super(trajectory1dMessage);
    }
 
-//   public ArmOneJointTrajectoryMessage(TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>> trajectory1dMessage)
-//   {
-//      super(trajectory1dMessage);
-//   }
+   public ArmOneJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
+   {
+      super(trajectoryData);
+   }
 
    /**
     * Use this constructor to go straight to the given end point.
