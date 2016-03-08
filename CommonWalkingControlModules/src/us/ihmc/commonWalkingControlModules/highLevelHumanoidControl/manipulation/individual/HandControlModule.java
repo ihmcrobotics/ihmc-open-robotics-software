@@ -256,7 +256,7 @@ public class HandControlModule
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(oneDoFJoint.getName(), 15, registry);
+         MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(oneDoFJoint.getName(), registry);
          waypointJointTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
@@ -293,8 +293,8 @@ public class HandControlModule
       circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, registry,
             yoGraphicsListRegistry);
 
-      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix + "Hand", 15, true, worldFrame, registry);
-      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix + "Hand", 15, true, worldFrame, registry);
+      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix + "Hand", true, worldFrame, registry);
+      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix + "Hand", true, worldFrame, registry);
       wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator,
             waypointOrientationTrajectoryGenerator);
       waypointPositionTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
