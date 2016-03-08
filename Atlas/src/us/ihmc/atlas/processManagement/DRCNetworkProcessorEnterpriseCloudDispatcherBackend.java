@@ -23,7 +23,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runnable
 {
-   private JavaProcessSpawner networkProcessorSpawner = new JavaProcessSpawner(true);
+   private JavaProcessSpawner networkProcessorSpawner = new JavaProcessSpawner(true, true);
    private ReconnectingTCPServer commandServer;
 
    private final byte[] buffer;

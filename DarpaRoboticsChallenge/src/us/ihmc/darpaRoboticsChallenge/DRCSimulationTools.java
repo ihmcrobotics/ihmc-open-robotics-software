@@ -285,7 +285,7 @@ public abstract class DRCSimulationTools
     */
    public static void startOpertorInterfaceUsingProcessSpawner(Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs)
    {
-      JavaProcessSpawner spawner = new JavaProcessSpawner(true);
+      JavaProcessSpawner spawner = new JavaProcessSpawner(true, true);
       if (operatorInterfaceClass == null)
          return;
       spawner.spawn(operatorInterfaceClass, operatorInterfaceArgs);
