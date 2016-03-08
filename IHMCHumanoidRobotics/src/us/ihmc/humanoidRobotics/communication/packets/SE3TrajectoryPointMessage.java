@@ -11,16 +11,15 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.geometry.transformables.Transformable;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one trajectory point. "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and EuclideanTrajectoryPointMessage (rotational)")
-public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPointMessage>
-      implements SE3TrajectoryPointInterface<SE3TrajectoryPointMessage>, TransformableDataObject<SE3TrajectoryPointMessage>
+public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPointMessage> implements Transformable
+//      implements SE3TrajectoryPointInterface<SE3TrajectoryPointMessage>, TransformableDataObject<SE3TrajectoryPointMessage>
 {
    @FieldDocumentation("Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -62,7 +61,7 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
       this.angularVelocity = angularVelocity;
    }
 
-   @Override
+//   @Override
    public void set(SE3TrajectoryPointMessage other)
    {
       time = other.time;
@@ -84,179 +83,179 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
          angularVelocity.set(0.0, 0.0, 0.0);
    }
 
-   @Override
-   public void addTimeOffset(double timeOffsetToAdd)
-   {
-      time += timeOffsetToAdd;
-   }
-
-   @Override
-   public void subtractTimeOffset(double timeOffsetToSubtract)
-   {
-      time -= timeOffsetToSubtract;
-   }
-
-   @Override
+//   @Override
+//   public void addTimeOffset(double timeOffsetToAdd)
+//   {
+//      time += timeOffsetToAdd;
+//   }
+//
+//   @Override
+//   public void subtractTimeOffset(double timeOffsetToSubtract)
+//   {
+//      time -= timeOffsetToSubtract;
+//   }
+//
+//   @Override
    public void setTime(double time)
    {
       this.time = time;
    }
 
-   @Override
-   public double positionDistance(SE3TrajectoryPointMessage other)
-   {
-      return position.distance(other.position);
-   }
-
-   @Override
+//   @Override
+//   public double positionDistance(SE3TrajectoryPointMessage other)
+//   {
+//      return position.distance(other.position);
+//   }
+//
+//   @Override
    public double getTime()
    {
       return time;
    }
 
-   @Override
+//   @Override
    public void getPosition(Point3d positionToPack)
    {
       positionToPack.set(position);
    }
 
-   @Override
+//   @Override
    public void setPosition(Point3d position)
    {
       this.position = position;
    }
 
-   @Override
+//   @Override
    public void getOrientation(Quat4d orientationToPack)
    {
       orientationToPack.set(orientation);
    }
 
-   @Override
+//   @Override
    public void setOrientation(Quat4d orientation)
    {
       this.orientation = orientation;
    }
 
-   @Override
+//   @Override
    public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
       linearVelocityToPack.set(linearVelocity);
    }
 
-   @Override
+//   @Override
    public void setLinearVelocity(Vector3d linearVelocity)
    {
       this.linearVelocity = linearVelocity;
    }
 
-   @Override
+//   @Override
    public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
 
-   @Override
+//   @Override
    public void setAngularVelocity(Vector3d angularVelocity)
    {
       this.angularVelocity = angularVelocity;
    }
 
-   @Override
-   public void setTimeToZero()
-   {
-      time = 0.0;
-   }
-
-   @Override
-   public void setPositionToZero()
-   {
-      position.set(0.0, 0.0, 0.0);
-   }
-
-   @Override
-   public void setOrientationToZero()
-   {
-      orientation.set(0.0, 0.0, 0.0, 1.0);
-   }
-
-   @Override
-   public void setLinearVelocityToZero()
-   {
-      linearVelocity.set(0.0, 0.0, 0.0);
-   }
-
-   @Override
-   public void setAngularVelocityToZero()
-   {
-      angularVelocity.set(0.0, 0.0, 0.0);
-   }
-
-   @Override
-   public void setToZero()
-   {
-      setTimeToZero();
-      setPositionToZero();
-      setOrientationToZero();
-      setLinearVelocityToZero();
-      setAngularVelocityToZero();
-   }
-
-   @Override
-   public void setTimeToNaN()
-   {
-      time = Double.NaN;
-   }
-
-   @Override
-   public void setPositionToNaN()
-   {
-      position.set(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   @Override
-   public void setOrientationToNaN()
-   {
-      orientation.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   @Override
-   public void setLinearVelocityToNaN()
-   {
-      linearVelocity.set(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   @Override
-   public void setAngularVelocityToNaN()
-   {
-      angularVelocity.set(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      setTimeToNaN();
-      setPositionToNaN();
-      setOrientationToNaN();
-      setLinearVelocityToNaN();
-      setAngularVelocityToNaN();
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      if (Double.isNaN(time))
-         return true;
-      if (Double.isNaN(position.getX()) || Double.isNaN(position.getY()) || Double.isNaN(position.getZ()))
-         return true;
-      if (Double.isNaN(orientation.getX()) || Double.isNaN(orientation.getY()) || Double.isNaN(orientation.getZ()) || Double.isNaN(orientation.getW()))
-         return true;
-      if (Double.isNaN(linearVelocity.getX()) || Double.isNaN(linearVelocity.getY()) || Double.isNaN(linearVelocity.getZ()))
-         return true;
-      if (Double.isNaN(angularVelocity.getX()) || Double.isNaN(angularVelocity.getY()) || Double.isNaN(angularVelocity.getZ()))
-         return true;
-      return false;
-   }
+//   @Override
+//   public void setTimeToZero()
+//   {
+//      time = 0.0;
+//   }
+//
+//   @Override
+//   public void setPositionToZero()
+//   {
+//      position.set(0.0, 0.0, 0.0);
+//   }
+//
+//   @Override
+//   public void setOrientationToZero()
+//   {
+//      orientation.set(0.0, 0.0, 0.0, 1.0);
+//   }
+//
+//   @Override
+//   public void setLinearVelocityToZero()
+//   {
+//      linearVelocity.set(0.0, 0.0, 0.0);
+//   }
+//
+//   @Override
+//   public void setAngularVelocityToZero()
+//   {
+//      angularVelocity.set(0.0, 0.0, 0.0);
+//   }
+//
+//   @Override
+//   public void setToZero()
+//   {
+//      setTimeToZero();
+//      setPositionToZero();
+//      setOrientationToZero();
+//      setLinearVelocityToZero();
+//      setAngularVelocityToZero();
+//   }
+//
+//   @Override
+//   public void setTimeToNaN()
+//   {
+//      time = Double.NaN;
+//   }
+//
+//   @Override
+//   public void setPositionToNaN()
+//   {
+//      position.set(Double.NaN, Double.NaN, Double.NaN);
+//   }
+//
+//   @Override
+//   public void setOrientationToNaN()
+//   {
+//      orientation.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+//   }
+//
+//   @Override
+//   public void setLinearVelocityToNaN()
+//   {
+//      linearVelocity.set(Double.NaN, Double.NaN, Double.NaN);
+//   }
+//
+//   @Override
+//   public void setAngularVelocityToNaN()
+//   {
+//      angularVelocity.set(Double.NaN, Double.NaN, Double.NaN);
+//   }
+//
+//   @Override
+//   public void setToNaN()
+//   {
+//      setTimeToNaN();
+//      setPositionToNaN();
+//      setOrientationToNaN();
+//      setLinearVelocityToNaN();
+//      setAngularVelocityToNaN();
+//   }
+//
+//   @Override
+//   public boolean containsNaN()
+//   {
+//      if (Double.isNaN(time))
+//         return true;
+//      if (Double.isNaN(position.getX()) || Double.isNaN(position.getY()) || Double.isNaN(position.getZ()))
+//         return true;
+//      if (Double.isNaN(orientation.getX()) || Double.isNaN(orientation.getY()) || Double.isNaN(orientation.getZ()) || Double.isNaN(orientation.getW()))
+//         return true;
+//      if (Double.isNaN(linearVelocity.getX()) || Double.isNaN(linearVelocity.getY()) || Double.isNaN(linearVelocity.getZ()))
+//         return true;
+//      if (Double.isNaN(angularVelocity.getX()) || Double.isNaN(angularVelocity.getY()) || Double.isNaN(angularVelocity.getZ()))
+//         return true;
+//      return false;
+//   }
 
    @Override
    public boolean epsilonEquals(SE3TrajectoryPointMessage other, double epsilon)
@@ -295,35 +294,35 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
       return true;
    }
 
-   @Override
-   public SE3TrajectoryPointMessage transform(RigidBodyTransform transform)
-   {
-      SE3TrajectoryPointMessage transformedTrajectoryPointMessage = new SE3TrajectoryPointMessage();
-
-      transformedTrajectoryPointMessage.time = time;
-
-      if (position != null)
-         transformedTrajectoryPointMessage.position = TransformTools.getTransformedPoint(position, transform);
-      else
-         transformedTrajectoryPointMessage.position = null;
-
-      if (orientation != null)
-         transformedTrajectoryPointMessage.orientation = TransformTools.getTransformedQuat(orientation, transform);
-      else
-         transformedTrajectoryPointMessage.orientation = null;
-
-      if (linearVelocity != null)
-         transformedTrajectoryPointMessage.linearVelocity = TransformTools.getTransformedVector(linearVelocity, transform);
-      else
-         transformedTrajectoryPointMessage.linearVelocity = null;
-
-      if (angularVelocity != null)
-         transformedTrajectoryPointMessage.angularVelocity = TransformTools.getTransformedVector(angularVelocity, transform);
-      else
-         transformedTrajectoryPointMessage.angularVelocity = null;
-
-      return transformedTrajectoryPointMessage;
-   }
+//   @Override
+//   public SE3TrajectoryPointMessage transform(RigidBodyTransform transform)
+//   {
+//      SE3TrajectoryPointMessage transformedTrajectoryPointMessage = new SE3TrajectoryPointMessage();
+//
+//      transformedTrajectoryPointMessage.time = time;
+//
+//      if (position != null)
+//         transformedTrajectoryPointMessage.position = TransformTools.getTransformedPoint(position, transform);
+//      else
+//         transformedTrajectoryPointMessage.position = null;
+//
+//      if (orientation != null)
+//         transformedTrajectoryPointMessage.orientation = TransformTools.getTransformedQuat(orientation, transform);
+//      else
+//         transformedTrajectoryPointMessage.orientation = null;
+//
+//      if (linearVelocity != null)
+//         transformedTrajectoryPointMessage.linearVelocity = TransformTools.getTransformedVector(linearVelocity, transform);
+//      else
+//         transformedTrajectoryPointMessage.linearVelocity = null;
+//
+//      if (angularVelocity != null)
+//         transformedTrajectoryPointMessage.angularVelocity = TransformTools.getTransformedVector(angularVelocity, transform);
+//      else
+//         transformedTrajectoryPointMessage.angularVelocity = null;
+//
+//      return transformedTrajectoryPointMessage;
+//   }
 
    @IgnoreField
    private Quat4d tempQuaternionForTransform;
