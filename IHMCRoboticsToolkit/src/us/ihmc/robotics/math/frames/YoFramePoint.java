@@ -1,14 +1,17 @@
 package us.ihmc.robotics.math.frames;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.interfaces.PointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFramePoint extends YoFrameTuple<FramePoint>
+public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> implements PointInterface
 {
    public YoFramePoint(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -54,4 +57,26 @@ public class YoFramePoint extends YoFrameTuple<FramePoint>
    {
       return getXYPlaneDistance(yoFramePoint.getFrameTuple());
    }
+
+   @Override
+   public void getPoint(Point3d pointToPack)
+   {
+      this.get(pointToPack);
+   }
+
+   private final Point3d tempPoint = new Point3d();
+   
+   @Override
+   public void setPoint(PointInterface pointInterface)
+   {
+      pointInterface.getPoint(tempPoint);
+      this.set(tempPoint);
+   }
+
+   @Override
+   public void setPoint(Point3d point)
+   {
+      this.set(point);
+   }
+
 }

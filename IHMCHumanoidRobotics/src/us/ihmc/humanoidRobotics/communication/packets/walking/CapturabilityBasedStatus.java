@@ -79,11 +79,11 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
       {
          if(robotSide == RobotSide.LEFT)
          {
-            footPolygon.getFrameVertex(i).get(leftFootSupportPolygonStore[i]);
+            footPolygon.getVertex(i, leftFootSupportPolygonStore[i]);
          }
          else
          {
-            footPolygon.getFrameVertex(i).get(rightFootSupportPolygonStore[i]);
+            footPolygon.getVertex(i, rightFootSupportPolygonStore[i]);
          }
       }
    }

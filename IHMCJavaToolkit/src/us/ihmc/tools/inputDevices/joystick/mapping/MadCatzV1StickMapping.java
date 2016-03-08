@@ -4,7 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import net.java.games.input.Component.Identifier;
 
-public enum MadCatzV1StickMapping
+public enum MadCatzV1StickMapping implements JoystickMapping
 {
    TRIGGER(Identifier.Button._0, Identifier.Button._0, Identifier.Button.TRIGGER),
    THROTTLE(Identifier.Axis.Z, Identifier.Axis.Z, Identifier.Axis.Z),
@@ -44,6 +44,7 @@ public enum MadCatzV1StickMapping
       }
    }
 
+   @Override
    public Identifier getIdentifier()
    {
       return identifier;

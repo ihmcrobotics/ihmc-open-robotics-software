@@ -18,7 +18,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
@@ -119,18 +119,18 @@ public class GazeboControllerFactory
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
       URI rosURI = NetworkParameters.getROSURI();
       networkModuleParameters.setRosUri(rosURI);
-      networkModuleParameters.enableGFECommunicator(true);
+      networkModuleParameters.enableROSAPICommunicator(true);
       networkModuleParameters.enableLocalControllerCommunicator(true);
       networkModuleParameters.enableUiModule(true);
-      networkModuleParameters.enableGFECommunicator(true);
+      networkModuleParameters.enableROSAPICommunicator(true);
 
       DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkModuleParameters);
 
-      PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator rosAPI_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
 
-      new UiPacketToRosMsgRedirector(robotModel, rosURI, gfe_communicator, networkProcessor.getPacketRouter(), nameSpace + "/" + robotName);
-      new ThePeoplesGloriousNetworkProcessor(rosURI, gfe_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
+      new UiPacketToRosMsgRedirector(robotModel, rosURI, rosAPI_communicator, networkProcessor.getPacketRouter(), nameSpace + "/" + robotName);
+      new ThePeoplesGloriousNetworkProcessor(rosURI, rosAPI_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
 
       yoVariableServer.start();
 

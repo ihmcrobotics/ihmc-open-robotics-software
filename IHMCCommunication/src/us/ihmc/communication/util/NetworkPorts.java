@@ -28,13 +28,16 @@ public class NetworkPorts
    public static final NetworkPorts LEFT_HAND_MANAGER_PORT = new NetworkPorts(6004);
    public static final NetworkPorts RIGHT_HAND_MANAGER_PORT = new NetworkPorts(6005); 
    public static final NetworkPorts ROS_MODULE = new NetworkPorts(6006);
-   public static final NetworkPorts GFE_COMMUNICATOR = new NetworkPorts(6007);
+   public static final NetworkPorts ROS_API_COMMUNICATOR = new NetworkPorts(6007);
    public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
    public static final NetworkPorts MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE = new NetworkPorts(6009);
    public static final NetworkPorts ROS_AUXILIARY_ROBOT_DATA_PUBLISHER = new NetworkPorts(6010);
    public static final NetworkPorts ZERO_POSE_PRODUCER = new NetworkPorts(6011);
    public static final NetworkPorts DRILL_DETECTOR = new NetworkPorts(6012);
    public static final NetworkPorts TEXT_TO_SPEECH = new NetworkPorts(6013);
+   public static final NetworkPorts FACE_TRACKING = new NetworkPorts(6014);
+   public static final NetworkPorts AUDIO_MODULE_PORT = new NetworkPorts(6015);
+   public static final NetworkPorts TOUCH_MODULE_PORT = new NetworkPorts(6016);
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);

@@ -10,12 +10,12 @@ import javax.vecmath.Vector3d;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class Voxel3DGrid extends ReferenceFrameHolder
+public class Voxel3DGrid extends AbstractReferenceFrameHolder
 {
    private final ReferenceFrame referenceFrame;
    private final BoundingBox3d boundingBox;

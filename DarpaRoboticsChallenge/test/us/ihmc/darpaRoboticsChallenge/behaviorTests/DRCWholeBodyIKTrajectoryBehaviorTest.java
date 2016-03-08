@@ -103,7 +103,7 @@ public abstract class DRCWholeBodyIKTrajectoryBehaviorTest implements MultiRobot
       
       FramePose desiredRight = new FramePose(worldFrame);
       desiredRight.setPosition(new Point3d(0.6, 0.3, 0.8));
-      desiredRight.setOrientation(new double[]{Math.PI / 4.0, 0.0, 0.0});
+      desiredRight.setYawPitchRoll(new double[]{Math.PI / 4.0, 0.0, 0.0});
       
       wholeBodyIKTrajectoryBehavior.initialize();
       wholeBodyIKTrajectoryBehavior.setInput(ControlledDoF.DOF_NONE, null, ControlledDoF.DOF_3P, desiredRight);
@@ -133,11 +133,11 @@ public abstract class DRCWholeBodyIKTrajectoryBehaviorTest implements MultiRobot
       
       FramePose desiredRight = new FramePose(worldFrame);
       desiredRight.setPosition(new Point3d(0.8, -0.2, 0.9));
-      desiredRight.setOrientation(new double[]{Math.PI / 4.0, 0.0, -Math.PI / 2.0});
+      desiredRight.setYawPitchRoll(new double[]{Math.PI / 4.0, 0.0, -Math.PI / 2.0});
       
       FramePose desiredLeft = new FramePose(worldFrame);
       desiredLeft.setPosition(new Point3d(0.8, 0.2, 0.9));
-      desiredLeft.setOrientation(new double[]{-Math.PI / 4.0, 0.0, Math.PI / 2.0});
+      desiredLeft.setYawPitchRoll(new double[]{-Math.PI / 4.0, 0.0, Math.PI / 2.0});
       
       wholeBodyIKTrajectoryBehavior.setLockLevel(LockLevel.LOCK_LEGS);
       wholeBodyIKTrajectoryBehavior.initialize();

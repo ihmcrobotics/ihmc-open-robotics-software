@@ -1,5 +1,6 @@
 package us.ihmc.tools.io;
 
+import java.io.InputStream;
 import java.net.URL;
 
 import javax.sound.sampled.AudioFormat;
@@ -42,6 +43,30 @@ public class AudioTools
       
       clip.setFramePosition(0);
       clip.start();
+   }
+   
+   public static Clip loadSoundClip(InputStream is)
+   {
+      try
+      {
+         AudioInputStream stream;
+         AudioFormat format;
+         DataLine.Info info;
+         Clip clip;
+
+         stream = AudioSystem.getAudioInputStream(is);
+         format = stream.getFormat();
+         info = new DataLine.Info(Clip.class, format);
+         clip = (Clip) AudioSystem.getLine(info);
+         clip.open(stream);
+         
+         return clip;
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         return null;
+      }
    }
    
    public static Clip loadSoundClip(URL url)

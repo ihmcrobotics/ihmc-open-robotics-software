@@ -209,11 +209,18 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
          }
          double numberOfPoints = motionPolygon.getNumberOfVertices();
 
+         FramePoint2d vertex = new FramePoint2d();
+         FramePoint2d nextVertex = new FramePoint2d();
+         
          double totalLength = 0;
          for (int i = 0; i < numberOfPoints; i++)
          {
             int nextPoint = i >= (numberOfPoints - 1) ? 0 : i + 1;
-            totalLength += motionPolygon.getFrameVertex(i).distance(motionPolygon.getFrameVertex(nextPoint));
+            
+            motionPolygon.getFrameVertex(i, vertex);
+            motionPolygon.getFrameVertex(nextPoint, nextVertex);
+            
+            totalLength += vertex.distance(nextVertex);
          }
 
          
@@ -222,14 +229,17 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
          double lengthPassed = 0;
          for (int i = 0; i < numberOfPoints; i++)
          {
-            double distance = motionPolygon.getFrameVertex(i).distance(motionPolygon.getNextFrameVertex(i));
+            motionPolygon.getFrameVertex(i, vertex);
+            motionPolygon.getNextFrameVertex(i, nextVertex);
+            
+            double distance = vertex.distance(nextVertex);
             if ((lengthPassed + distance) > distanceInPolygon)
             {
-               FrameVector2d edge = new FrameVector2d(motionPolygon.getFrameVertex(i), motionPolygon.getNextFrameVertex(i));
+               FrameVector2d edge = new FrameVector2d(vertex, nextVertex);
                edge.normalize();
                edge.scale(distanceInPolygon - lengthPassed);
 
-               FramePoint2d desiredCapturePoint = new FramePoint2d(motionPolygon.getFrameVertex(i));
+               FramePoint2d desiredCapturePoint = new FramePoint2d(vertex);
                desiredCapturePoint.add(edge);
 
                return desiredCapturePoint;

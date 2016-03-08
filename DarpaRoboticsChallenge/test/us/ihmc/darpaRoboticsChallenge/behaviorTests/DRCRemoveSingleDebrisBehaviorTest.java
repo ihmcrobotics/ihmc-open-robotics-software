@@ -162,7 +162,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       }
       FramePose rightHandExpectedPose = new FramePose(midFeetZUpFrame);
       rightHandExpectedPose.setPosition(0.39, -0.24, 1.02);
-      rightHandExpectedPose.setOrientation(1.80, 0.0, 0.0);
+      rightHandExpectedPose.setYawPitchRoll(1.80, 0.0, 0.0);
       assertTrue(rightHandPose.epsilonEquals(rightHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       //Left wrist Position
@@ -176,7 +176,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       }
       FramePose leftHandExpectedPose = new FramePose(midFeetZUpFrame);
       leftHandExpectedPose.setPosition(0.39, 0.24, 1.02);
-      leftHandExpectedPose.setOrientation(-1.80, 0.0, 0.0);
+      leftHandExpectedPose.setYawPitchRoll(-1.80, 0.0, 0.0);
       assertTrue(leftHandPose.epsilonEquals(leftHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
    }
 
@@ -210,7 +210,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       }
       FramePose chestExpectedPose = new FramePose(midFeetZUpFrame);
       chestExpectedPose.setPosition(-0.11, 0.0, 1.25);
-      chestExpectedPose.setOrientation(0.0, 0.0, 0.0);
+      chestExpectedPose.setYawPitchRoll(0.0, 0.0, 0.0);
       assertTrue(chestPose.epsilonEquals(chestExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
       //pelvis pose
@@ -225,7 +225,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
 
       FramePose pelvisExpectedPose = new FramePose(midFeetZUpFrame);
       pelvisExpectedPose.setPosition(-0.04, 0.0, 0.76);
-      pelvisExpectedPose.setOrientation(0.0, 0.0, 0.0);
+      pelvisExpectedPose.setYawPitchRoll(0.0, 0.0, 0.0);
       assertTrue(pelvisPose.epsilonEquals(pelvisExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
    }
 

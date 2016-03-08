@@ -4,8 +4,8 @@ import java.util.Random;
 
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.transformables.TransformableVector2d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -16,17 +16,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2d<Vector2d>
+public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVector2d>
 {
    private static final long serialVersionUID = -610124454205790361L;
-
-   private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-   private final Vector3d temporaryTransformedVector = new Vector3d();
 
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
    public FrameVector2d(ReferenceFrame referenceFrame, double x, double y, String name)
    {
-      super(referenceFrame, new Vector2d(x, y), name);
+      super(referenceFrame, new TransformableVector2d(x, y), name);
    }
 
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
@@ -60,7 +57,7 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
    }
 
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
-   public FrameVector2d(FrameTuple2d<?> frameTuple2d)
+   public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
    {
       this(frameTuple2d.referenceFrame, frameTuple2d.tuple.x, frameTuple2d.tuple.y, frameTuple2d.name);
    }
@@ -91,7 +88,7 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
    {
       return this.tuple;
    }
-   
+
    @Override
    public boolean equals(Object frameVector)
    {
@@ -106,7 +103,7 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
          return super.equals(frameVector);
       }
    }
-   
+
    public boolean eplilonEquals(FrameVector2d frameVector, double epsilon)
    {
       boolean referenceFrameMatches = referenceFrame.equals(frameVector.getReferenceFrame());
@@ -173,61 +170,4 @@ public class FrameVector2d extends FrameTuple2d<Vector2d>
       scale(maxLength / length);
    }
 
-   /**
-    * Changes frame of this FrameVector2d to the given ReferenceFrame.
-    *
-    * @param desiredFrame ReferenceFrame to change the FrameVector2d into.
-    */
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // this is in the correct frame already
-      if (desiredFrame == referenceFrame)
-         return;
-
-      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
-      applyTransform(temporaryTransformToDesiredFrame);
-      referenceFrame = desiredFrame;
-   }
-
-   @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      temporaryTransformedVector.set(tuple.x, tuple.y, 0.0);
-      transform.transform(temporaryTransformedVector);
-
-      // Check if the transformation is planar:
-      checkIsTransformationInPlane(transform, temporaryTransformedVector);
-
-      this.tuple.set(temporaryTransformedVector.x, temporaryTransformedVector.y);
-   }
-
-   @Override
-   public FrameVector2d applyTransformCopy(RigidBodyTransform transform3D)
-   {
-      FrameVector2d ret = new FrameVector2d(this);
-      ret.applyTransform(transform3D);
-      return ret;
-   }
-
-   @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      applyTransform(transformToNewFrame);
-      referenceFrame = desiredFrame;
-   }
-
-   @Override
-   public FrameVector2d changeFrameUsingTransformCopy(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
-   {
-      FrameVector2d ret = new FrameVector2d(this);
-      ret.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
-      return ret;
-   }
-
-   private void checkIsTransformationInPlane(RigidBodyTransform transformToNewFrame, Vector3d transformedVector)
-   {
-      if (Math.abs(transformedVector.z) > epsilon)
-         throw new RuntimeException("Cannot transform FramePoint2d to a plane with a different surface normal");
-   }
 }

@@ -1,35 +1,35 @@
 package us.ihmc.quadrupedRobotics.sliderboard;
 
+import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.EnumDependentSliderBoardMapping;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
-public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
+public class QuadrupedPositionBasedCrawlSliderBoardConfiguration implements EnumDependentSliderBoardMapping<QuadrupedControllerState>
 {
-   private final String positionCrawlCoMShift = SliderBoardModes.POSITIONCRAWL_COM_SHIFT.toString();
-   private final String positionCrawlFootstepChooser = SliderBoardModes.POSITIONCRAWL_FOOTSTEP_CHOOSER.toString();
-   private final String positionCrawlOrientationTuning = SliderBoardModes.POSITIONCRAWL_ORIENTATION_TUNING.toString();
+   private final String positionCrawlCoMShift = QuadrupedSliderBoardMode.POSITIONCRAWL_COM_SHIFT.toString();
+   private final String positionCrawlFootstepChooser = QuadrupedSliderBoardMode.POSITIONCRAWL_FOOTSTEP_CHOOSER.toString();
+   private final String positionCrawlOrientationTuning = QuadrupedSliderBoardMode.POSITIONCRAWL_ORIENTATION_TUNING.toString();
    
    private final String variableNamespace = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.QuadrupedPositionBasedCrawlController.";
+   private final EnumYoVariable<QuadrupedSliderBoardMode> sliderboardMode;
    
    public QuadrupedPositionBasedCrawlSliderBoardConfiguration(final SliderBoardConfigurationManager sliderBoardConfigurationManager, SimulationConstructionSet scs)
    {
-      final EnumYoVariable<SliderBoardModes> selectedMode = (EnumYoVariable<SliderBoardModes>) scs.getRootRegistry().getVariable("sliderboardMode");
-      
-      selectedMode.addVariableChangedListener(new VariableChangedListener()
+      sliderboardMode = QuadrupedSliderBoardMode.getYoVariable(scs.getRootRegistry());
+      sliderboardMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            SliderBoardModes sliderBoardMode = SliderBoardModes.values()[selectedMode.getOrdinal()];
+            QuadrupedSliderBoardMode sliderBoardMode = QuadrupedSliderBoardMode.values()[sliderboardMode.getOrdinal()];
             System.out.println("loading configuration " + sliderBoardMode);
             sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.toString());
          }
       });
-      
-      
       
       //CoM Shift tuning
       sliderBoardConfigurationManager.setSlider(1, variableNamespace + "userProvidedDesiredVelocityProvider.userProvidedDesiredVelocityX", scs, -0.4, 0.4);
@@ -75,9 +75,17 @@ public class QuadrupedPositionBasedCrawlSliderBoardConfiguration
       
       sliderBoardConfigurationManager.saveConfiguration(positionCrawlOrientationTuning);
    }
-   
-   public String getDefaultConfiguration()
+
+   @Override
+   public QuadrupedControllerState getEnum()
    {
-      return positionCrawlCoMShift;
+      return QuadrupedControllerState.POSITION_CRAWL;
+   }
+
+   @Override
+   public void activateConfiguration(SliderBoardConfigurationManager sliderBoardConfigurationManager)
+   {
+      sliderboardMode.set(QuadrupedSliderBoardMode.POSITIONCRAWL_COM_SHIFT);
+      sliderBoardConfigurationManager.loadConfiguration(positionCrawlCoMShift);
    }
 }
