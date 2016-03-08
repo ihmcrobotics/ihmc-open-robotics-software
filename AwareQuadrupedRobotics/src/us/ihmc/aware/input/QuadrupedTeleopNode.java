@@ -73,14 +73,14 @@ public class QuadrupedTeleopNode implements InputEventCallback
       case RIGHT_STICK_Y:
          // TODO: Where should channel scaling and inversion go?
          double yaw = channels.get(InputChannel.RIGHT_STICK_X);
-         double pitch = -channels.get(InputChannel.RIGHT_STICK_Y) / 5.0;
-         double roll = (channels.get(InputChannel.RIGHT_TRIGGER) - channels.get(InputChannel.LEFT_TRIGGER)) / 5.0;
+         double pitch = -channels.get(InputChannel.RIGHT_STICK_Y);
+         double roll = channels.get(InputChannel.RIGHT_TRIGGER) - channels.get(InputChannel.LEFT_TRIGGER);
          BodyPosePacket posePacket = new BodyPosePacket(0.0, 0.0, 0.0, yaw, pitch, roll);
 
          double vx = -channels.get(InputChannel.LEFT_STICK_Y);
-         double vy = -channels.get(InputChannel.LEFT_STICK_X) / 2.0;
-         double vz = (-channels.get(InputChannel.LEFT_BUTTON) + channels.get(InputChannel.RIGHT_BUTTON)) * 0.1;
-         double wz = -channels.get(InputChannel.RIGHT_STICK_X) / 2.0;
+         double vy = -channels.get(InputChannel.LEFT_STICK_X);
+         double vz = -channels.get(InputChannel.LEFT_BUTTON) + channels.get(InputChannel.RIGHT_BUTTON);
+         double wz = -channels.get(InputChannel.RIGHT_STICK_X);
          BodyTwistPacket twistPacket = new BodyTwistPacket(vx, vy, vz, 0.0, 0.0, wz);
 
          packetCommunicator.send(posePacket);
