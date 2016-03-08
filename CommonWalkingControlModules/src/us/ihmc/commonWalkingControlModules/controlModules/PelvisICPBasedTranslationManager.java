@@ -231,7 +231,7 @@ public class PelvisICPBasedTranslationManager
          waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
       }
 
-      waypointPositionTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
+      waypointPositionTrajectoryGenerator.appendWaypoints(message.getTrajectoryPointsCopy());
       waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       waypointPositionTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);

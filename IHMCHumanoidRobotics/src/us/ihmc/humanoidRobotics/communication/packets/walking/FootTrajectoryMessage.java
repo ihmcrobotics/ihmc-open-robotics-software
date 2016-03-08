@@ -89,7 +89,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    @Override
    public FootTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      FootTrajectoryMessage transformedFootTrajectoryMessage = new FootTrajectoryMessage(robotSide, getNumberOfTrajectoryPoints());
+      FootTrajectoryMessage transformedFootTrajectoryMessage = new FootTrajectoryMessage(this);
       transformedFootTrajectoryMessage.applyTransform(transform);
       return transformedFootTrajectoryMessage;
    }

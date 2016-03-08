@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @ClassDocumentation("This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points."
@@ -150,6 +151,14 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
    {
       rangeCheck(jointIndex);
       return jointTrajectory1DListMessages[jointIndex];
+   }
+   
+   public SimpleTrajectoryPoint1D[] getJointTrajectoryPointListCopy(int jointIndex)
+   {
+      rangeCheck(jointIndex);
+      ArmOneJointTrajectoryMessage armOneJointTrajectoryMessage = jointTrajectory1DListMessages[jointIndex];
+      
+      return armOneJointTrajectoryMessage.getJointTrajectoryPointListCopy();
    }
 
    public ArmOneJointTrajectoryMessage[] getTrajectoryPointLists()

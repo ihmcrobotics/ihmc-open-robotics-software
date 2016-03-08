@@ -301,7 +301,7 @@ public class PelvisOrientationManager
          waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
 
-      waypointOrientationOffsetTrajectoryGenerator.appendWaypoints(message.getTrajectoryPoints());
+      waypointOrientationOffsetTrajectoryGenerator.appendWaypoints(message.getTrajectoryPointsCopy());
       waypointOrientationOffsetTrajectoryGenerator.changeFrame(desiredPelvisFrame);
       waypointOrientationOffsetTrajectoryGenerator.initialize();
       isUsingWaypointTrajectory.set(true);

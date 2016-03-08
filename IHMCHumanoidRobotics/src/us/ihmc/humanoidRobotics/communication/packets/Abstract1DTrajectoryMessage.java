@@ -6,6 +6,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.random.RandomTools;
@@ -13,7 +14,6 @@ import us.ihmc.robotics.random.RandomTools;
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between trajectory points.")
 public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T>> extends IHMCRosApiMessage<T>
-      implements TrajectoryPointListInterface<T, TrajectoryPoint1DMessage>
 {
    @FieldDocumentation("List of trajectory points to go through while executing the trajectory.")
    public TrajectoryPoint1DMessage[] trajectoryPoints;
@@ -25,7 +25,7 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
    {
    }
 
-   public Abstract1DTrajectoryMessage(TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>> trajectory1dMessage)
+   public Abstract1DTrajectoryMessage(Abstract1DTrajectoryMessage<T> trajectory1dMessage)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[trajectory1dMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
@@ -42,6 +42,20 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
       trajectoryPoints = new TrajectoryPoint1DMessage[] {new TrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0)};
    }
 
+   public SimpleTrajectoryPoint1D[] getJointTrajectoryPointListCopy()
+   {
+      int numberOfPoints = trajectoryPoints.length;
+      SimpleTrajectoryPoint1D[] trajectoryPointListToReturn = new SimpleTrajectoryPoint1D[numberOfPoints];
+
+      for (int i=0; i<numberOfPoints; i++)
+      {
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints[i];
+         trajectoryPointListToReturn[i] = new SimpleTrajectoryPoint1D(trajectoryPoint1DMessage.time, trajectoryPoint1DMessage.position, trajectoryPoint1DMessage.velocity);
+      }
+
+      return trajectoryPointListToReturn;
+   }
+
    /**
     * Use this constructor to build a message with more than one trajectory points.
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
@@ -50,18 +64,6 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
    public Abstract1DTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       trajectoryPoints = new TrajectoryPoint1DMessage[numberOfTrajectoryPoints];
-   }
-
-   @Override
-   public final void clear()
-   {
-      throw new RuntimeException("This cannot implement the method clear().");
-   }
-
-   @Override
-   public final void addTrajectoryPoint(TrajectoryPoint1DMessage trajectoryPoint)
-   {
-      throw new RuntimeException("This cannot implement the method addTrajectoryPoint().");
    }
 
    /**
@@ -77,7 +79,6 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
       trajectoryPoints[trajectoryPointIndex] = new TrajectoryPoint1DMessage(time, position, velocity);
    }
 
-   @Override
    public void set(T other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
@@ -87,13 +88,11 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
          trajectoryPoints[i].set(other.trajectoryPoints[i]);
    }
 
-   @Override
    public final int getNumberOfTrajectoryPoints()
    {
       return trajectoryPoints.length;
    }
 
-   @Override
    public final TrajectoryPoint1DMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
       return trajectoryPoints[trajectoryPointIndex];
@@ -104,13 +103,11 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
       return trajectoryPoints;
    }
 
-   @Override
    public final TrajectoryPoint1DMessage getLastTrajectoryPoint()
    {
       return trajectoryPoints[getNumberOfTrajectoryPoints() - 1];
    }
 
-   @Override
    public final double getTrajectoryTime()
    {
       return getLastTrajectoryPoint().getTime();

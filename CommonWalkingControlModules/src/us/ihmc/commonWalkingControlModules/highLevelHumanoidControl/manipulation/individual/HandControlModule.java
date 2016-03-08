@@ -521,7 +521,7 @@ public class HandControlModule
       }
 
       BaseForControl base = handTrajectoryMessage.getBase();
-      SE3TrajectoryPointInterface<?>[] taskspaceWaypoints = handTrajectoryMessage.getTrajectoryPoints();
+      SE3TrajectoryPointInterface<?>[] taskspaceWaypoints = handTrajectoryMessage.getTrajectoryPointsCopy();
 
       waypointPositionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       waypointOrientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
@@ -582,7 +582,8 @@ public class HandControlModule
          }
 
          ArmOneJointTrajectoryMessage jointTrajectory = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         trajectoryGenerator.appendWaypoints(jointTrajectory);
+
+         trajectoryGenerator.appendWaypoints(jointTrajectory.getJointTrajectoryPointListCopy());
          trajectoryGenerator.initialize();
       }
 
