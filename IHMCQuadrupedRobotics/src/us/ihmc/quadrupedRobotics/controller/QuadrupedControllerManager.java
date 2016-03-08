@@ -1,6 +1,9 @@
 package us.ihmc.quadrupedRobotics.controller;
 
+import java.util.Map;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerStateMachineBuilder;
@@ -8,15 +11,16 @@ import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematics
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedCommonControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.sliderboard.QuadrupedSliderBoardMode;
-import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 /**
  * A {@link RobotController} for switching between quadruped control states. The manager will ensure that the robot is
@@ -31,7 +35,7 @@ public class QuadrupedControllerManager implements RobotController
    private final EnumYoVariable<QuadrupedControllerState> requestedState = new EnumYoVariable<>("QuadrupedControllerStateMachineRequestedState", registry,
             QuadrupedControllerState.class, true);
 
-   private final QuadrupedStateEstimator stateEstimator;
+   private final Map<RobotQuadrant, FootSwitchInterface> footSwitches;
    private final DoubleYoVariable robotTimestamp = new DoubleYoVariable("robotTimestamp", registry);
    private final RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
 
@@ -39,26 +43,26 @@ public class QuadrupedControllerManager implements RobotController
 
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters,
          SDFFullRobotModel sdfFullRobotModel, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators,
-         QuadrupedStateEstimator stateEstimator, GlobalDataProducer globalDataProducer,
+         Map<RobotQuadrant, FootSwitchInterface> footSwitches, GlobalDataProducer globalDataProducer,
          YoGraphicsListRegistry yoGraphicsListRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       // Default to QuadrupedControllerState#DO_NOTHING.
-      this(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, inverseKinematicsCalculators, stateEstimator,
+      this(simulationDT, quadrupedRobotParameters, sdfFullRobotModel, inverseKinematicsCalculators, footSwitches,
             globalDataProducer, yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
             QuadrupedControllerState.DO_NOTHING);
    }
 
    public QuadrupedControllerManager(double simulationDT, QuadrupedRobotParameters quadrupedRobotParameters,
          SDFFullRobotModel sdfFullRobotModel, QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators,
-         QuadrupedStateEstimator stateEstimator, GlobalDataProducer globalDataProducer,
+         Map<RobotQuadrant, FootSwitchInterface> footSwitches, GlobalDataProducer globalDataProducer,
          YoGraphicsListRegistry yoGraphicsListRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead, QuadrupedControllerState startState)
    {
-      this.stateEstimator = stateEstimator;
+      this.footSwitches = footSwitches;
 
       QuadrupedCommonControllerParameters commonControllerParameters = new QuadrupedCommonControllerParameters(
-            simulationDT, robotTimestamp, sdfFullRobotModel, stateEstimator, registry, yoGraphicsListRegistry,
+            simulationDT, robotTimestamp, sdfFullRobotModel, footSwitches, registry, yoGraphicsListRegistry,
             yoGraphicsListRegistryForDetachedOverhead);
 
       QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(sdfFullRobotModel,

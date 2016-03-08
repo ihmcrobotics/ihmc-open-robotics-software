@@ -29,7 +29,6 @@ public class FootSwitchUpdaterBasedOnGroundContactPoints implements FootSwitchUp
          
          BooleanYoVariable rawBoolean = new BooleanYoVariable(prefix + "rawContact", parentRegistry);
          rawFootContacts.set(quadrant, rawBoolean);
-         
       }
    }
 

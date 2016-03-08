@@ -4,11 +4,11 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class QuadrupedSimulationController implements RobotController
 {
@@ -22,10 +22,10 @@ public class QuadrupedSimulationController implements RobotController
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
    private RobotController headController; //not implemented yet
-   private QuadrupedStateEstimator stateEstimator; //not implemented yet
+   private DRCKinematicsBasedStateEstimator stateEstimator; //not implemented yet
    private final DRCPoseCommunicator poseCommunicator;
    
-   public QuadrupedSimulationController(SDFRobot simulationRobot, RawSensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, QuadrupedStateEstimator stateEstimator,
+   public QuadrupedSimulationController(SDFRobot simulationRobot, RawSensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
          DRCPoseCommunicator poseCommunicator, RobotController headController)
    {
       this.sdfRobot = simulationRobot;
