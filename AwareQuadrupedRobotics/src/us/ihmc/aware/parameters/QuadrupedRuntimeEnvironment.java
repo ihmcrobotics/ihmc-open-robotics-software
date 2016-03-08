@@ -1,6 +1,7 @@
 package us.ihmc.aware.parameters;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
@@ -24,10 +25,13 @@ public class QuadrupedRuntimeEnvironment
    private final GlobalDataProducer globalDataProducer;
    private final QuadrupedLegInverseKinematicsCalculator legIkCalculator;
 
+   private final NetClassList netClassList;
+
    public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp,
          SDFFullRobotModel fullRobotModel, QuadrupedStateEstimator stateEstimator, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
-         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
+         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator,
+         NetClassList netClassList)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -38,6 +42,7 @@ public class QuadrupedRuntimeEnvironment
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
       this.globalDataProducer = globalDataProducer;
       this.legIkCalculator = legIkCalculator;
+      this.netClassList = netClassList;
    }
 
    public double getControlDT()
@@ -83,5 +88,10 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedLegInverseKinematicsCalculator getLegIkCalculator()
    {
       return legIkCalculator;
+   }
+
+   public NetClassList getNetClassList()
+   {
+      return netClassList;
    }
 }

@@ -10,22 +10,23 @@ import us.ihmc.aware.networking.AwareNetworkParameters;
 import us.ihmc.aware.packets.BodyPosePacket;
 import us.ihmc.aware.packets.BodyTwistPacket;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 
 public class QuadrupedTeleopNode implements InputEventCallback
 {
-   // TODO: Don't use TOUCH_MODULE_PORT
-   // TODO: Don't hardcode localhost
-   private final PacketCommunicator packetCommunicator = PacketCommunicator
-         .createTCPPacketCommunicatorClient("localhost", NetworkPorts.TOUCH_MODULE_PORT,
-               AwareNetworkParameters.AWARE_NETCLASS_LIST);
-
-   private final Map<InputChannel, Double> channels = new EnumMap<>(InputChannel.class);
+   private final PacketCommunicator packetCommunicator;
    private final InputDevice input;
+   private final Map<InputChannel, Double> channels = new EnumMap<>(InputChannel.class);
 
-   public QuadrupedTeleopNode() throws IOException
+   public QuadrupedTeleopNode(NetClassList netClassList) throws IOException
    {
+      // TODO: Don't use TOUCH_MODULE_PORT
+      // TODO: Don't hardcode localhost
+      this.packetCommunicator = PacketCommunicator
+            .createTCPPacketCommunicatorClient("localhost", NetworkPorts.TOUCH_MODULE_PORT,
+                  AwareNetworkParameters.AWARE_NETCLASS_LIST);
       this.input = new XboxControllerInputDevice();
       this.input.registerCallback(this);
 
@@ -103,10 +104,5 @@ public class QuadrupedTeleopNode implements InputEventCallback
       case D_PAD_LEFT:
          break;
       }
-   }
-
-   public static void main(String[] args) throws IOException
-   {
-      new QuadrupedTeleopNode().start();
    }
 }

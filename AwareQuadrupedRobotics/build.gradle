@@ -40,7 +40,6 @@ dependencies
   compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
   compile ihmc.getProjectDependency(":EtherlabWrapper")
-  compile ihmc.getProjectDependency(":AwareNetworking")
 }
 
 jar {
