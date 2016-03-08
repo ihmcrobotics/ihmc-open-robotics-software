@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -14,6 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -26,11 +30,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
@@ -384,6 +390,116 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       BambooTools.reportTestFinishedMessage();
    }
+	
+	
+	  @DeployableTestMethod(estimatedDuration = 71.5)
+	   @Test(timeout = 360000)
+	   public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
+	   {
+	      BambooTools.reportTestStartedMessage();
+
+	      String name = "DRCQueuedControllerCommandTest";
+	      
+	      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+	      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+	      
+	      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, null, selectedLocation, simulationTestingParameters, getRobotModel());
+	      ConcurrentLinkedQueue<ControllerCommand<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
+
+	      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+	      setupCameraForWalkingUpToRamp();
+
+	      ThreadTools.sleep(1000);
+	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+	      
+//	      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
+//	      walk.set(true);
+	      
+	      FootstepDataListControllerCommand footstepList = new FootstepDataListControllerCommand();
+         FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
+         
+         Point3d position = new Point3d(0.0, 0.2, 0.0);
+         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.LEFT);
+         footstepList.addFootstep(footstepCommand);
+
+         position = new Point3d(0.3, -0.2, 0.0);
+         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.RIGHT);
+         footstepList.addFootstep(footstepCommand);
+
+         position = new Point3d(0.8, 0.2, 0.0);
+         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.LEFT);
+         footstepList.addFootstep(footstepCommand);
+
+         position = new Point3d(0.8, -0.2, 0.0);
+         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.RIGHT);
+         footstepList.addFootstep(footstepCommand);
+	      
+	      queuedControllerCommands.add(footstepList);
+	      
+	      
+	      
+	      footstepList = new FootstepDataListControllerCommand();
+         footstepCommand = new FootstepDataControllerCommand();
+         
+         position = new Point3d(1.0, 0.2, 0.0);
+         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.LEFT);
+         footstepList.addFootstep(footstepCommand);
+
+         position = new Point3d(1.3, -0.2, 0.0);
+         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.RIGHT);
+         footstepList.addFootstep(footstepCommand);
+
+         position = new Point3d(1.8, 0.2, 0.0);
+         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.LEFT);
+         footstepList.addFootstep(footstepCommand);
+
+         position = new Point3d(1.8, -0.2, 0.0);
+         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         footstepCommand.setPose(position, orientation);
+         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepCommand.setRobotSide(RobotSide.RIGHT);
+         footstepList.addFootstep(footstepCommand);
+
+         
+         queuedControllerCommands.add(footstepList);
+
+	      
+	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+
+
+	      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+	      drcSimulationTestHelper.checkNothingChanged();
+
+	      assertTrue(success);
+
+	      Point3d center = new Point3d(1.8, 0.0, 0.78);
+	      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+	      
+	      BambooTools.reportTestFinishedMessage();
+	   }
 
 	@DeployableTestMethod(estimatedDuration = 64.5)
 	@Test(timeout = 320000)
