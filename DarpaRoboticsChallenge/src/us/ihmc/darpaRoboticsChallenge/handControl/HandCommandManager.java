@@ -17,7 +17,7 @@ public abstract class HandCommandManager
    protected final PacketCommunicator handManagerPacketCommunicator;
    protected final PacketCommunicator packetCommunicator;
 
-   protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
+   protected JavaProcessSpawner spawner = new JavaProcessSpawner(true, true);
 
 
    public HandCommandManager(Class<? extends Object> clazz, RobotSide robotSide)
