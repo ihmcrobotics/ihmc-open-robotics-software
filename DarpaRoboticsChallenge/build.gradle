@@ -10,9 +10,9 @@ sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
-project.ext.licenseURL = "http://gnu.org/licenses/gpl-3.0.txt"
-project.ext.licenseName = "GPLv3"
-project.ext.bintrayLicenseName = "GPL-3.0"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
 
 
 repositories ihmc.ihmcDefaultArtifactProxies()
@@ -30,7 +30,7 @@ repositories {
 }
 
 def strings = ['ihmc', 'robotics']
-ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "ihmc-robotics-releases", strings)
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
 evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
@@ -46,6 +46,7 @@ dependencies {
 	// compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.1.0-SNAPSHOT'
 	// compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.0.10'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-jbullet', version: '3.1.0-internal2'
+	
 	compile group: 'io.netty', name: 'netty', version: '3.9.0.Final' //'3.5.8.Final'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
@@ -55,7 +56,7 @@ dependencies {
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
-   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
+   compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
 	compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.51'

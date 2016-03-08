@@ -15,7 +15,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasLookAtBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.FooTest.class,
    us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
    us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,

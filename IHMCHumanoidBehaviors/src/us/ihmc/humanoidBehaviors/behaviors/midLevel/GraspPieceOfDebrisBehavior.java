@@ -185,7 +185,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       handPoseSolution1.changeFrame(handFrame);
 
       FramePose handPoseSolution2 = new FramePose(handFrameBeforeRotation);
-      handPoseSolution2.setOrientation(0.0, 0.0, Math.PI);
+      handPoseSolution2.setYawPitchRoll(0.0, 0.0, Math.PI);
       handPoseSolution2.changeFrame(handFrame);
 
       double rollOfSolution1 = handPoseSolution1.getRoll();

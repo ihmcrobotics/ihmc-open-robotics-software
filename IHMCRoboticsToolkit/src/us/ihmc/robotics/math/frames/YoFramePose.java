@@ -8,10 +8,10 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFramePose extends ReferenceFrameHolder
+public class YoFramePose extends AbstractReferenceFrameHolder
 {
    private final YoFramePoint position;
    private final YoFrameOrientation orientation;

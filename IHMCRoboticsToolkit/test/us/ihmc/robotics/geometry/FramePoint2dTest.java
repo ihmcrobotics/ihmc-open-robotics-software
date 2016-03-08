@@ -67,7 +67,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testFramePoint2d_FrameTuple2d()
    {
-      FrameTuple2d<?> frameTuple = createFrameTuple(theFrame, 1.0, 2.0, "testPointOne");
+      FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 1.0, 2.0, "testPointOne");
       FramePoint2d point = new FramePoint2d(frameTuple);
 
       point.checkReferenceFrameMatch(theFrame);
@@ -355,21 +355,21 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals("Should be equal", pointToTransform2.getY(), pointToTest2.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testApplyTransformCopy_Transform3D()
-   {
-      double[] matrix = { 6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0 };
-      RigidBodyTransform transform = new RigidBodyTransform(matrix);
-      FramePoint2d pointToTransform2 = new FramePoint2d(null, matrix);
-      FramePoint2d pointToTest2 = new FramePoint2d(null, matrix);
-
-      pointToTransform2.applyTransform(transform);
-      FramePoint2d copy = pointToTest2.applyTransformCopy(transform);
-
-      assertEquals("Should be equal", pointToTransform2.getX(), copy.getX(), epsilon);
-      assertEquals("Should be equal", pointToTransform2.getY(), copy.getY(), epsilon);
-   }
+//	@DeployableTestMethod(estimatedDuration = 0.0)
+//	@Test(timeout = 30000)
+//   public void testApplyTransformCopy_Transform3D()
+//   {
+//      double[] matrix = { 6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0 };
+//      RigidBodyTransform transform = new RigidBodyTransform(matrix);
+//      FramePoint2d pointToTransform2 = new FramePoint2d(null, matrix);
+//      FramePoint2d pointToTest2 = new FramePoint2d(null, matrix);
+//
+//      pointToTransform2.applyTransform(transform);
+//      FramePoint2d copy = pointToTest2.applyTransformCopy(transform);
+//
+//      assertEquals("Should be equal", pointToTransform2.getX(), copy.getX(), epsilon);
+//      assertEquals("Should be equal", pointToTransform2.getY(), copy.getY(), epsilon);
+//   }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -429,17 +429,6 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       {
          //Good 
       }
-   }
-
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testChangeFrameUsingTransformCopy_ReferenceFrame_Transform3D()
-   {
-      Random random = new Random(398742498237598750L);
-      FramePoint2d frame = new FramePoint2d(aFrame);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
-      FramePoint2d copy = frame.changeFrameUsingTransformCopy(theFrame, transform);
-      copy.checkReferenceFrameMatch(theFrame);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)

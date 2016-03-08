@@ -73,7 +73,7 @@ public class RootJointPoseCorrectorHelperTest
    @Test (timeout = 60000)
    public void testErrorDecreasesAtEveryTick()
    {
-      Random random = new Random();
+      Random random = new Random(1984L);
 
       FramePose poseError = new FramePose();
 
@@ -103,6 +103,7 @@ public class RootJointPoseCorrectorHelperTest
 
       RootJointPoseCorrectorHelper helper = new RootJointPoseCorrectorHelper("test", registry);
       helper.setCorrectionAlpha(0.1, 0.1);
+
       for (int i = 0; i < 500; i++)
       {
          helper.compensatePoseError(poseToBeCorrected, poseError);
@@ -114,6 +115,11 @@ public class RootJointPoseCorrectorHelperTest
          poseError.getPose(positionErrorVector, orientationErrorAxisAngle);
          orientationErrorAmplitude = orientationErrorAxisAngle.getAngle();
          positionErrorAmplitude = positionErrorVector.lengthSquared();
+
+//         System.out.println("\nposeToBeCorrected = " + poseToBeCorrected);
+//         System.out.println("poseError = " + poseError);
+//         System.out.println("orientationErrorAmplitude = " + orientationErrorAmplitude);
+//         System.out.println("positionErrorAmplitude = " + positionErrorAmplitude);
 
          assertTrue(orientationErrorAmplitude < previousOrientationErrorAmplitude || orientationErrorAmplitude < 1e-6);
          assertTrue(positionErrorAmplitude < previousPositionErrorAmplitude || positionErrorAmplitude < 1e-6);

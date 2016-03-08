@@ -88,11 +88,28 @@ public class ProcessSpawnerTest
 
    @DeployableTestMethod(estimatedDuration = 0.5)
    @Test(timeout = 30000)
-   public void testJavaProcessSpawner() throws Exception
+   public void testJavaProcessSpawnerWithClasspathAsArgument() throws Exception
    {
       String randomString = Long.toString(System.nanoTime());
       String[] arguments = {randomString};
-      JavaProcessSpawner jps = new JavaProcessSpawner(true);
+      JavaProcessSpawner jps = new JavaProcessSpawner(true, false);
+      jps.spawn(getClass(), arguments);
+
+      while (jps.hasRunningProcesses())
+      {
+         ThreadTools.sleep(500);
+      }
+
+      validateFileContents(randomString);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
+   public void testJavaProcessSpawnerWithClasspathAsEnvironmentVariable() throws Exception
+   {
+      String randomString = Long.toString(System.nanoTime());
+      String[] arguments = {randomString};
+      JavaProcessSpawner jps = new JavaProcessSpawner(true, true);
       jps.spawn(getClass(), arguments);
 
       while (jps.hasRunningProcesses())

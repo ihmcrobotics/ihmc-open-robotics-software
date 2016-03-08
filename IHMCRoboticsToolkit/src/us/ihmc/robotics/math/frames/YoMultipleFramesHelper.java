@@ -5,10 +5,10 @@ import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoMultipleFramesHelper extends ReferenceFrameHolder
+public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
 {
    private static final int MAX_REGISTERED_FRAMES = 10;
    private final IntegerYoVariable currentFrameIndex;

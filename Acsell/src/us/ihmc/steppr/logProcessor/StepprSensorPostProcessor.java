@@ -193,16 +193,20 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
       CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(estimatorFullRobotModel);
       SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, referenceFrames);
-      SideDependentList<FootSwitchInterface> footSwitches = createStateEstimatorFootSwitches(logDataProcessorHelper, bipedFeet);
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // no viz for now
       
+      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new HashMap<>();
+      Map<RigidBody, FootSwitchInterface> footSwitchMap = createStateEstimatorFootSwitches(logDataProcessorHelper, bipedFeet);
       final Map<RigidBody, RobotSide> feetMap = new LinkedHashMap<>();
       Map<RigidBody, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
+      
       for(RobotSide robotSide : RobotSide.values)
       {
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
-         feetMap.put(foot, robotSide);
-         soleFrames.put(foot, referenceFrames.getSoleFrame(robotSide));
+         ContactablePlaneBody contactableFoot = bipedFeet.get(robotSide);
+         RigidBody footRigidBody = contactableFoot.getRigidBody();
+         bipedFeetMap.put(footRigidBody, contactableFoot);
+         feetMap.put(footRigidBody, robotSide);
+         soleFrames.put(footRigidBody, referenceFrames.getSoleFrame(robotSide));
       }
 
       CenterOfPressureDataHolder centerOfPressureDataHolder = new CenterOfPressureDataHolder(soleFrames)
@@ -214,17 +218,18 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
          }
       };
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            postProcessedSensors, null, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeet, yoGraphicsListRegistry);
+            postProcessedSensors, null, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
       return stateEstimator;
    }
 
-   private SideDependentList<FootSwitchInterface> createStateEstimatorFootSwitches(final LogDataProcessorHelper logDataProcessorHelper, final SideDependentList<ContactablePlaneBody> bipedFeet)
+   private Map<RigidBody, FootSwitchInterface> createStateEstimatorFootSwitches(final LogDataProcessorHelper logDataProcessorHelper, final SideDependentList<ContactablePlaneBody> bipedFeet)
    {
-      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
+      Map<RigidBody, FootSwitchInterface> footSwitches = new HashMap<>();
       
       for (final RobotSide robotSide : RobotSide.values)
       {
-         String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
+         final ContactablePlaneBody contactableFoot = bipedFeet.get(robotSide);
+         String namePrefix = contactableFoot.getName() + "StateEstimator";
          String nameSpaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
          YoVariableHolder yoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();
          final BooleanYoVariable hasFootHitGround = (BooleanYoVariable) yoVariableHolder.getVariable(nameSpaceEnding, namePrefix + "FilteredFootHitGround");
@@ -272,11 +277,11 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             public void computeAndPackCoP(FramePoint2d copToPack)
             {
                logDataProcessorHelper.getMeasuredCoP(robotSide, copToPack);
-               copToPack.setIncludingFrame(bipedFeet.get(robotSide).getSoleFrame(), copToPack.getPointCopy());
+               copToPack.setIncludingFrame(contactableFoot.getSoleFrame(), copToPack.getPointCopy());
             }
          };
          
-         footSwitches.put(robotSide, footSwitch);
+         footSwitches.put(contactableFoot.getRigidBody(), footSwitch);
       }
       
       return footSwitches;

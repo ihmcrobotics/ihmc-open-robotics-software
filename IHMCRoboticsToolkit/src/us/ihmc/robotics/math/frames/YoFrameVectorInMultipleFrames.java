@@ -48,12 +48,12 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       set(vector);
    }
 
-   public void setIncludingFrame(YoFrameTuple<?> yoFrameTuple)
+   public void setIncludingFrame(YoFrameTuple<?, ?> yoFrameTuple)
    {
       setIncludingFrame(yoFrameTuple.getFrameTuple());
    }
 
-   public void setIncludingFrame(FrameTuple<?> frameTuple)
+   public void setIncludingFrame(FrameTuple<?, ?> frameTuple)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple.getReferenceFrame());
       set(frameTuple);
@@ -71,7 +71,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       return previousReferenceFrame;
    }
 
-   public final void subIncludingFrame(YoFrameTuple<?> yoFrameTuple1, YoFrameTuple<?> yoFrameTuple2)
+   public final void subIncludingFrame(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
    {
       yoFrameTuple1.checkReferenceFrameMatch(yoFrameTuple2);
       multipleFramesHelper.switchCurrentReferenceFrame(yoFrameTuple1.getReferenceFrame());

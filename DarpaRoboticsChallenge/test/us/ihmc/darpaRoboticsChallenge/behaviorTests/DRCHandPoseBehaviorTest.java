@@ -285,7 +285,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       FramePose handPoseStart = getCurrentHandPose(robotSide);
       FramePose handPoseTarget = new FramePose(handPoseStart);
       handPoseTarget.setX(handPoseTarget.getX() + 1.5);
-      handPoseTarget.setOrientation(new double[] { 0.0, 0.0, 0.6 });
+      handPoseTarget.setYawPitchRoll(new double[] { 0.0, 0.0, 0.6 });
       double swingTrajectoryTime = 2.0;
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
 

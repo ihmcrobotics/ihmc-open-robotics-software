@@ -14,7 +14,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
@@ -34,33 +34,33 @@ public class AtlasROSAPINetworkProcessor
    
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace, String tfPrefix) throws IOException
    {
-      PacketCommunicator gfeCommunicator = null;
+      PacketCommunicator rosAPICommunicator = null;
       URI rosUri = NetworkParameters.getROSURI();
 
       if (ENABLE_UI_PACKET_TO_ROS_CONVERTER)
       {
-         gfeCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+         rosAPICommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
          
          DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
          networkProcessorParameters.enableLocalControllerCommunicator(false);
          networkProcessorParameters.enableUiModule(true);
-         networkProcessorParameters.enableGFECommunicator(true);
+         networkProcessorParameters.enableROSAPICommunicator(true);
          networkProcessorParameters.enableControllerCommunicator(true);
          DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkProcessorParameters);
-         new UiPacketToRosMsgRedirector(robotModel, rosUri, gfeCommunicator, networkProcessor.getPacketRouter(), defaultRosNameSpace);
+         new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPICommunicator, networkProcessor.getPacketRouter(), defaultRosNameSpace);
       }
       else 
       {
          String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-         gfeCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(kryoIP, NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+         rosAPICommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(kryoIP, NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       }
 
       RosMainNode rosMainNode = new RosMainNode(rosUri, nameSpace + nodeName);
       RosAtlasAuxiliaryRobotDataPublisher auxiliaryRobotDataPublisher = new RosAtlasAuxiliaryRobotDataPublisher(rosMainNode, nameSpace);
       rosMainNode.execute();
 
-      gfeCommunicator.attachListener(RobotConfigurationData.class, auxiliaryRobotDataPublisher);
-      new ThePeoplesGloriousNetworkProcessor(rosUri, gfeCommunicator, robotModel, nameSpace, tfPrefix);
+      rosAPICommunicator.attachListener(RobotConfigurationData.class, auxiliaryRobotDataPublisher);
+      new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPICommunicator, robotModel, nameSpace, tfPrefix);
    }
    
    public static void main(String[] args) throws JSAPException, IOException

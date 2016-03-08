@@ -13,7 +13,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -228,7 +228,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double ret = 0.0;
 
       ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      SDFJointNameMap jointNameMap = (SDFJointNameMap) drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
+      SDFHumanoidJointNameMap jointNameMap = (SDFHumanoidJointNameMap) drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
       Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
       wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
       fingerJoints.remove(0);
@@ -249,7 +249,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
    private BoundingBox3d getDistalFingerJointBoundingBox(RobotSide robotSide)
    {
       ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      SDFJointNameMap jointNameMap = (SDFJointNameMap) drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
+      SDFHumanoidJointNameMap jointNameMap = (SDFHumanoidJointNameMap) drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
       Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
       wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
       fingerJoints.remove(0);

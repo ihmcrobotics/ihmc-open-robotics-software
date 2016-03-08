@@ -90,7 +90,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       drcNetworkModuleParameters.enableNetworkProcessor(true);
       drcNetworkModuleParameters.enableBehaviorModule(false);
       drcNetworkModuleParameters.enableBehaviorVisualizer(false);
-      drcNetworkModuleParameters.enableGFECommunicator(true);
+      drcNetworkModuleParameters.enableROSAPICommunicator(true);
       drcNetworkModuleParameters.enableHandModule(true);
       drcNetworkModuleParameters.enableLocalControllerCommunicator(true);
       drcNetworkModuleParameters.enablePerceptionModule(true);

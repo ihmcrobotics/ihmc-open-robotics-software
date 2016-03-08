@@ -14,7 +14,7 @@ import org.ajoberstar.grgit.*
 
 project.ext.repo = Grgit.open(projectDir)
 
-version = '0.7.0'
+version = '0.7.4'
 
 project.ext.fullVersion = version
 project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
@@ -59,7 +59,7 @@ repositories {
    }
 }
 
-task publishAllToMavenLocal(type: GradleBuild) {
+task publishAllToMavenLocal(type: GradleBuild) << {
     buildFile "build.gradle"
     def allTasks = new ArrayList<String>()
     buildType = "LOCAL"
@@ -128,6 +128,16 @@ subprojects { subproject ->
             }
         }
     }
+
+   	task testFast(type: Test) {
+		ignoreFailures true
+		include "**/*FastTestSuite.class"
+	}
+
+	task testSlow(type: Test) {
+		ignoreFailures true
+		include "**/*SlowTestSuite.class"
+	}
 }
 
 def getDate() {

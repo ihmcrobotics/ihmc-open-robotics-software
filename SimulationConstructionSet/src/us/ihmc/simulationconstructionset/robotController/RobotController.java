@@ -10,5 +10,5 @@ package us.ihmc.simulationconstructionset.robotController;
  */
 public interface RobotController extends RobotControlElement
 {
-   void doControl();
+   public abstract void doControl();
 }

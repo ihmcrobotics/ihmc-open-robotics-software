@@ -91,9 +91,19 @@ public class YoAccelerationWeights
       yoLinearAccelerationWeights.setLinearAccelerationWeights(weight);
    }
 
+   public void setXAccelerationWeight(double xWeight)
+   {
+      yoLinearAccelerationWeights.setXAccelerationWeight(xWeight);
+   }
+
+   public void setYAccelerationWeight(double yWeight)
+   {
+      yoLinearAccelerationWeights.setYAccelerationWeight(yWeight);
+   }
+
    public void setXYAccelerationWeights(double xWeight, double yWeight)
    {
-      yoLinearAccelerationWeights.setXYAccelerationWeights(Math.max(xWeight, yWeight));
+      yoLinearAccelerationWeights.setXYAccelerationWeights(xWeight, yWeight);
    }
 
    public void setXYAccelerationWeights(double xyWeights)
@@ -134,11 +144,6 @@ public class YoAccelerationWeights
    public double getYAccelerationWeight()
    {
       return yoLinearAccelerationWeights.getYAccelerationWeight();
-   }
-
-   public double getXYAccelerationWeights()
-   {
-      return yoLinearAccelerationWeights.getXYAccelerationWeights();
    }
 
    public double getZAccelerationWeight()
