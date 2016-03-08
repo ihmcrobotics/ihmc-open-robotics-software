@@ -7,8 +7,8 @@ import javax.vecmath.Quat4d;
 
 public class PosePacket extends Packet<PosePacket>
 {
-   private final Point3d position;
-   private final Quat4d orientation;
+   private Point3d position;
+   private Quat4d orientation;
 
    public PosePacket()
    {

@@ -107,6 +107,11 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
       this.state.set(state);
    }
 
+   public StateMachineState<E> getStateInstance()
+   {
+      return states.get(state);
+   }
+
    /**
     * Resets the state machine to the initial state, regardless of whether or not there is a transition to follow.
     */

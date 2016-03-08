@@ -1,6 +1,27 @@
 package us.ihmc.aware.input;
 
-public interface InputDevice
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class InputDevice
 {
-   void registerCallback(MotionEventCallback callback);
+   private final List<InputEventCallback> callbacks = new ArrayList<>();
+
+   /**
+    * Block on the input device, notifying listeners as events are triggered.
+    */
+   public abstract void poll();
+
+   public void registerCallback(InputEventCallback callback)
+   {
+      callbacks.add(callback);
+   }
+
+   protected void notifyListeners(InputEvent event)
+   {
+      for (InputEventCallback callback : callbacks)
+      {
+         callback.onInputEvent(event);
+      }
+   }
 }

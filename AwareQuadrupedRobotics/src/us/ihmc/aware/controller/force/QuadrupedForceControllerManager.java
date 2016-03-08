@@ -1,12 +1,21 @@
 package us.ihmc.aware.controller.force;
 
+import java.io.IOException;
+
+import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
+import us.ihmc.aware.networking.AwareNetworkParameters;
+import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -27,10 +36,19 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment,
-         QuadrupedRobotParameters parameters)
+         QuadrupedRobotParameters parameters) throws IOException
    {
+      // Set up network communication for controller inputs.
+      // TODO: Don't use touch module port
+      PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.TOUCH_MODULE_PORT,
+            AwareNetworkParameters.AWARE_NETCLASS_LIST);
+      packetCommunicator.connect();
+      GlobalDataProducer globalDataProducer = new GlobalDataProducer(packetCommunicator);
+      QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(globalDataProducer);
+
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
 
+      // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(
             runtimeEnvironment, parameters);
       QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(
@@ -39,8 +57,19 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             parameters, paramMapRepository);
       QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters,
             paramMapRepository);
-      QuadrupedController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters,
-            paramMapRepository);
+      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters,
+            paramMapRepository, inputProvider);
+
+      // TODO: Hack.
+      globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
+      {
+         @Override
+         public void receivedPacket(QuadrupedForceControllerEventPacket packet)
+         {
+            // TODO: Make this thread-safe
+            stateMachine.trigger(packet.get());
+         }
+      });
 
       StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(
             QuadrupedForceControllerState.class, "forceControllerState", registry);
