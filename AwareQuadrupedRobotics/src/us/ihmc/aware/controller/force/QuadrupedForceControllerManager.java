@@ -41,7 +41,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // Set up network communication for controller inputs.
       // TODO: Don't use touch module port
       PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.TOUCH_MODULE_PORT,
-            AwareNetworkParameters.AWARE_NETCLASS_LIST);
+            runtimeEnvironment.getNetClassList());
       packetCommunicator.connect();
       GlobalDataProducer globalDataProducer = new GlobalDataProducer(packetCommunicator);
       QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(globalDataProducer);
