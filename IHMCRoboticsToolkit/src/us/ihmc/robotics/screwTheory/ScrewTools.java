@@ -69,9 +69,9 @@ public class ScrewTools
       return new PassiveRevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis), isPartOfClosedKinematicLoop);
    }
 
-   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis)
+   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d parentJointAxis)
    {
-      return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis);
+      return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), parentJointAxis);
    }
 
    public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3d jointAxis)
