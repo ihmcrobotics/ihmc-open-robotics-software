@@ -24,7 +24,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
@@ -623,7 +623,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       drcBehaviorTestHelper.updateRobotModel();
       FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
-      SDFJointNameMap jointNameMap = (SDFJointNameMap) fullRobotModel.getRobotSpecificJointNames();
+      SDFHumanoidJointNameMap jointNameMap = (SDFHumanoidJointNameMap) fullRobotModel.getRobotSpecificJointNames();
       Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
 
       ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();

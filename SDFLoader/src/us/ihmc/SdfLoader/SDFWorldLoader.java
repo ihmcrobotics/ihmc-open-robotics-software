@@ -63,7 +63,7 @@ public class SDFWorldLoader
       return groundProfile;
    }
 
-   public ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel> createRobotAndRemoveFromWorld(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel> createRobotAndRemoveFromWorld(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       removeVisualFromWorld(sdfJointNameMap.getModelName());
 
