@@ -11,10 +11,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
@@ -28,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -384,18 +383,7 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
    }
 
-   public void handleHandTrajectoryMessage(ModifiableHandTrajectoryMessage handTrajectoryMessage)
-   {
-      if (handTrajectoryMessage.getRobotSide() != robotSide)
-      {
-         PrintTools.warn(this, "Received a " + handTrajectoryMessage.getClass().getSimpleName() + " for the wrong side.");
-         return;
-      }
-
-      handleHandTrajectoryMessage(handTrajectoryMessage.getBase(), handTrajectoryMessage);
-   }
-
-   public void handleHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
+   public void handleHandTrajectoryMessage(HandTrajectoryControllerCommand handTrajectoryMessage)
    {
       if (handTrajectoryMessage.getRobotSide() != robotSide)
       {
@@ -445,7 +433,7 @@ public class HandControlModule
       executeTaskspaceTrajectory(poseTrajectoryGenerator);
    }
 
-   public void handleArmTrajectoryMessage(ModifiableArmTrajectoryMessage armTrajectoryMessage)
+   public void handleArmTrajectoryMessage(ArmTrajectoryControllerCommand armTrajectoryMessage)
    {
       if (armTrajectoryMessage.getRobotSide() != robotSide)
       {
@@ -477,7 +465,7 @@ public class HandControlModule
       executeJointspaceTrajectory(jointTrajectoryGenerators);
    }
 
-   public void handleArmDesiredAccelerationsMessage(ModifiableArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsControllerCommand armDesiredAccelerationsMessage)
    {
       if (!checkArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage))
          return;
@@ -501,7 +489,7 @@ public class HandControlModule
       }
    }
 
-   public void handleHandComplianceControlParametersMessage(ModifiableHandComplianceControlParametersMessage message)
+   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersControllerCommand message)
    {
       if (taskSpacePositionControlState instanceof TaskspaceToJointspaceHandPositionControlState)
       {
@@ -536,7 +524,7 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkArmDesiredAccelerationsMessage(ModifiableArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
+   private boolean checkArmDesiredAccelerationsMessage(ArmDesiredAccelerationsControllerCommand armDesiredAccelerationsMessage)
    {
       if (armDesiredAccelerationsMessage.getRobotSide() != robotSide)
       {

@@ -24,7 +24,9 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
    {
       clear();
       for (int i = 0; i < trajectory.getNumberOfTrajectoryPoints(); i++)
+      {
          addTrajectoryPoint(trajectory.getTrajectoryPoint(i));
+      }
    }
 
    public void addTrajectoryPoint(OneDoFTrajectoryPointInterface<?> trajectoryPoint)
@@ -50,4 +52,5 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
       else
          return "Simple trajectory 1D: no trajectory point 1D.";
    }
+
 }

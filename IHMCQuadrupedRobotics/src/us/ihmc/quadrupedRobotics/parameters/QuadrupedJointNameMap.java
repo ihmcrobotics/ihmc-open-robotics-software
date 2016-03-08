@@ -1,10 +1,10 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
-import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public interface QuadrupedJointNameMap extends SDFJointNameMap 
+public interface QuadrupedJointNameMap extends SDFHumanoidJointNameMap 
 {
    QuadrupedJointName getJointNameForSDFName(String name);
 

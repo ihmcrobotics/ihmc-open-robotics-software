@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -157,7 +157,7 @@ public class PelvisICPBasedTranslationManager
       computeDesiredICPOffset();
    }
 
-   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
+   public void handleGoHomeMessage(GoHomeControllerCommand message)
    {
       if (isEnabled.getBooleanValue() && message.getRequest(BodyPart.PELVIS))
       {
@@ -171,7 +171,7 @@ public class PelvisICPBasedTranslationManager
       enable();
    }
 
-   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+   public void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand message)
    {
       initialPelvisPositionTime.set(yoTime.getDoubleValue());
 
@@ -201,7 +201,7 @@ public class PelvisICPBasedTranslationManager
       isRunning.set(true);
    }
 
-   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
    {
       isTrajectoryStopped.set(message.isStopAllTrajectory());
    }

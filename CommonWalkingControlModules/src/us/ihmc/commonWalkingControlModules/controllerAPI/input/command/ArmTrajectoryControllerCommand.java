@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -9,12 +10,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryP
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableArmTrajectoryMessage implements ControllerMessage<ModifiableArmTrajectoryMessage, ArmTrajectoryMessage>
+public class ArmTrajectoryControllerCommand implements ControllerCommand<ArmTrajectoryControllerCommand, ArmTrajectoryMessage>
 {
    private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
    private RobotSide robotSide;
 
-   public ModifiableArmTrajectoryMessage()
+   public ArmTrajectoryControllerCommand()
    {
       clear();
    }
@@ -63,18 +64,19 @@ public class ModifiableArmTrajectoryMessage implements ControllerMessage<Modifia
    }
 
    @Override
-   public void set(ModifiableArmTrajectoryMessage other)
+   public void set(ArmTrajectoryControllerCommand other)
    {
       set(other.robotSide, other.getTrajectoryPointLists());
    }
 
-   public <T extends TrajectoryPointListInterface<T, ? extends OneDoFTrajectoryPointInterface<?>>> void set(RobotSide robotSide, T[] trajectoryPointListArray)
+   public void set(RobotSide robotSide, ArmOneJointTrajectoryMessage[] trajectoryPointListArray)
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.length; i++)
       {
-         jointTrajectoryInputs.add().set(trajectoryPointListArray[i]);
-         set(i, trajectoryPointListArray[i]);
+         SimpleTrajectoryPoint1DList simpleTrajectoryPoint1DList = jointTrajectoryInputs.add();
+         ArmOneJointTrajectoryMessage armOneJointTrajectoryMessage = trajectoryPointListArray[i];
+         armOneJointTrajectoryMessage.getTrajectoryPoints(simpleTrajectoryPoint1DList);
       }
    }
 

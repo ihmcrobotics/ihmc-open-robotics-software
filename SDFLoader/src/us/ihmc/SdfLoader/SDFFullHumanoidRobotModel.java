@@ -45,7 +45,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       this( modelToCopy.rootLink, modelToCopy.sdfJointNameMap, modelToCopy.sensorLinksToTrack );
    }
 
-   public SDFFullHumanoidRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public SDFFullHumanoidRobotModel(SDFLinkHolder rootLink, SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super(rootLink, sdfJointNameMap, sensorLinksToTrack);
       

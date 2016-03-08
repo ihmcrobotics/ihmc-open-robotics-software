@@ -16,14 +16,21 @@ public class JavaProcessSpawner extends ProcessSpawner
    private final String currentClassPath;
    private final String currentNativeLibraryPath;
    private final String ldLibraryPath;
+   private final boolean useEnvironmentForClasspath;
 
-   public JavaProcessSpawner(boolean killChildProcessesOnShutdown)
+   public JavaProcessSpawner(boolean killChildProcessesOnShutdown, boolean useEnvironmentForClasspath)
    {
       super(killChildProcessesOnShutdown);
 
       currentClassPath = System.getProperty("java.class.path");
       currentNativeLibraryPath = System.getProperty("java.library.path");
       ldLibraryPath = System.getenv("LD_LIBRARY_PATH");
+      this.useEnvironmentForClasspath = useEnvironmentForClasspath;
+   }
+
+   public JavaProcessSpawner(boolean killChildProcessesOnShutdown)
+   {
+      this(killChildProcessesOnShutdown, false);
    }
 
    public Process spawn(Class<?> mainClass)
@@ -66,6 +73,11 @@ public class JavaProcessSpawner extends ProcessSpawner
          builder.environment().put("LD_LIBRARY_PATH", ldLibraryPath);
       }
 
+      if(useEnvironmentForClasspath)
+      {
+         builder.environment().put("CLASSPATH", currentClassPath);
+      }
+
       return spawn(mainClass.getSimpleName(), spawnString, builder, outputLog, errorLog, exitListener);
    }
 
@@ -79,8 +91,15 @@ public class JavaProcessSpawner extends ProcessSpawner
       }
 
       String fqClassName = mainClass.getCanonicalName();
-      String[] cp = new String[] { "-Djava.library.path=" + currentNativeLibraryPath, "-cp", currentClassPath, fqClassName };
+      String[] cp = new String[] { "-Djava.library.path=" + currentNativeLibraryPath};
+
+      if(!useEnvironmentForClasspath)
+      {
+         cp = (String[]) ArrayUtils.addAll(cp, new String[]{"-cp", currentClassPath});
+      }
+
       spawnString = (String[]) ArrayUtils.addAll(spawnString, cp);
+      spawnString = (String[]) ArrayUtils.addAll(spawnString, fqClassName);
 
       if (programArgs != null)
       {
@@ -99,7 +118,7 @@ public class JavaProcessSpawner extends ProcessSpawner
 
    public void prettyPrintClassPath()
    {
-      String[] paths = currentClassPath.split(":");
+      String[] paths = currentClassPath.split(File.pathSeparator);
       for (String s : paths)
       {
          System.out.println(s);
@@ -108,7 +127,7 @@ public class JavaProcessSpawner extends ProcessSpawner
 
    public void prettyPrintNativeLibraryPath()
    {
-      String[] paths = currentNativeLibraryPath.split(":");
+      String[] paths = currentNativeLibraryPath.split(File.pathSeparator);
       for (String s : paths)
       {
          System.out.println(s);

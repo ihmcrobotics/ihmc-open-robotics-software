@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 
-public class ModifiablePelvisTrajectoryMessage extends ModifiableSE3TrajectoryMessage<ModifiablePelvisTrajectoryMessage, PelvisTrajectoryMessage>
+public class PelvisTrajectoryControllerCommand extends SE3TrajectoryControllerCommand<PelvisTrajectoryControllerCommand, PelvisTrajectoryMessage>
 {
-   public ModifiablePelvisTrajectoryMessage()
+   public PelvisTrajectoryControllerCommand()
    {
    }
 

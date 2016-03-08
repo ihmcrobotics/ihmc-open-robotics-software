@@ -12,7 +12,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-public class ModifiableFootstepDataMessage implements ControllerMessage<ModifiableFootstepDataMessage, FootstepDataMessage>
+public class FootstepDataControllerCommand implements ControllerCommand<FootstepDataControllerCommand, FootstepDataMessage>
 {
    private RobotSide robotSide;
    private FootstepOrigin origin;
@@ -22,7 +22,7 @@ public class ModifiableFootstepDataMessage implements ControllerMessage<Modifiab
    private final Quat4d orientation = new Quat4d();
    private final RecyclingArrayList<Point2d> predictedContactPoints = new RecyclingArrayList<>(4, Point2d.class);
 
-   public ModifiableFootstepDataMessage()
+   public FootstepDataControllerCommand()
    {
       clear();
    }
@@ -58,7 +58,7 @@ public class ModifiableFootstepDataMessage implements ControllerMessage<Modifiab
    }
 
    @Override
-   public void set(ModifiableFootstepDataMessage other)
+   public void set(FootstepDataControllerCommand other)
    {
       robotSide = other.robotSide;
       origin = other.origin;

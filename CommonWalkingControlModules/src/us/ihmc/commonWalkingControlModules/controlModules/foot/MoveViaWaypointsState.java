@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -56,7 +56,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
             touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
    }
 
-   public void handleFootTrajectoryMessage(ModifiableFootTrajectoryMessage footTrajectoryMessage, boolean initializeToCurrent)
+   public void handleFootTrajectoryMessage(FootTrajectoryControllerCommand footTrajectoryMessage, boolean initializeToCurrent)
    {
       positionTrajectoryGenerator.clear();
       orientationTrajectoryGenerator.clear();

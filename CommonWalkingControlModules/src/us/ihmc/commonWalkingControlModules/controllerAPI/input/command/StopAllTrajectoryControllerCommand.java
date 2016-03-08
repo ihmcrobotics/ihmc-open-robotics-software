@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 
-public class ModifiableStopAllTrajectoryMessage implements ControllerMessage<ModifiableStopAllTrajectoryMessage, StopAllTrajectoryMessage>
+public class StopAllTrajectoryControllerCommand implements ControllerCommand<StopAllTrajectoryControllerCommand, StopAllTrajectoryMessage>
 {
    private boolean stopAllTrajectory = false;
 
@@ -13,7 +13,7 @@ public class ModifiableStopAllTrajectoryMessage implements ControllerMessage<Mod
    }
 
    @Override
-   public void set(ModifiableStopAllTrajectoryMessage other)
+   public void set(StopAllTrajectoryControllerCommand other)
    {
       stopAllTrajectory = other.stopAllTrajectory;
    }

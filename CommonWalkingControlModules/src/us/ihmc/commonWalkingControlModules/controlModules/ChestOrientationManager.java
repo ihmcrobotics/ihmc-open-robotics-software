@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
@@ -117,7 +117,7 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleChestTrajectoryMessage(ModifiableChestTrajectoryMessage message)
+   public void handleChestTrajectoryMessage(ChestTrajectoryControllerCommand message)
    {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
@@ -144,12 +144,12 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
    {
       isTrajectoryStopped.set(message.isStopAllTrajectory());
    }
 
-   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
+   public void handleGoHomeMessage(GoHomeControllerCommand message)
    {
       if (message.getRequest(BodyPart.CHEST))
          goToHomeFromCurrentDesired(message.getTrajectoryTime());

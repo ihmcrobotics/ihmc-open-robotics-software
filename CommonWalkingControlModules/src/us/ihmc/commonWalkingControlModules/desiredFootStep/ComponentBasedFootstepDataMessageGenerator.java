@@ -5,8 +5,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataListMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -86,7 +86,7 @@ public class ComponentBasedFootstepDataMessageGenerator
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-      ModifiableFootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
+      FootstepDataListControllerCommand footsteps = computeNextFootsteps(supportLeg);
       commandInputManager.submitModifiableMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);
@@ -127,12 +127,12 @@ public class ComponentBasedFootstepDataMessageGenerator
       statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusListener);
    }
 
-   private ModifiableFootstepDataListMessage computeNextFootsteps(RobotSide supportLeg)
+   private FootstepDataListControllerCommand computeNextFootsteps(RobotSide supportLeg)
    {
-      ModifiableFootstepDataListMessage footsteps = new ModifiableFootstepDataListMessage();
-      ModifiableFootstepDataMessage footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      ModifiableFootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep);
-      ModifiableFootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep);
+      FootstepDataListControllerCommand footsteps = new FootstepDataListControllerCommand();
+      FootstepDataControllerCommand footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
+      FootstepDataControllerCommand nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep);
+      FootstepDataControllerCommand nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep);
 
       footsteps.addFootstep(footstep);
       footsteps.addFootstep(nextFootstep);

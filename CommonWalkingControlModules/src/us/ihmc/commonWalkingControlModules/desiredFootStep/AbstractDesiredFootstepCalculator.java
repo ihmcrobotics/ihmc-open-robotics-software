@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -44,7 +44,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
    }
 
    @Override
-   public ModifiableFootstepDataMessage updateAndGetDesiredFootstep(RobotSide supportLegSide)
+   public FootstepDataControllerCommand updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
@@ -54,7 +54,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
       framePosition.changeFrame(worldFrame);
       frameOrientation.changeFrame(worldFrame);
 
-      ModifiableFootstepDataMessage footstep = new ModifiableFootstepDataMessage();
+      FootstepDataControllerCommand footstep = new FootstepDataControllerCommand();
       footstep.setRobotSide(swingLegSide);
       footstep.setPose(framePosition.getPoint(), frameOrientation.getQuaternion());
       footstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
