@@ -5,7 +5,6 @@ import java.io.IOException;
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
-import us.ihmc.aware.networking.AwareNetworkParameters;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMapRepository;
