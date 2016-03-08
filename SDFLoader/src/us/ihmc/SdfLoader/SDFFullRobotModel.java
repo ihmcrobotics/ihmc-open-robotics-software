@@ -38,7 +38,7 @@ import us.ihmc.tools.containers.ContainerTools;
 public class SDFFullRobotModel implements FullRobotModel
 {
 
-   protected final SDFJointNameMap sdfJointNameMap;
+   protected final SDFHumanoidJointNameMap sdfJointNameMap;
    protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
    protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
@@ -62,7 +62,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private double totalMass = 0.0;
 
-   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super();
       this.rootLink = rootLink;
