@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.robotics.MathTools;
@@ -96,7 +96,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    }
 
    @Override
-   public ModifiableFootstepDataMessage predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, ModifiableFootstepDataMessage desiredFootstep)
+   public FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep)
    {
       RobotSide futureSwingLegSide = supportLegSide;
       PoseReferenceFrame futureSupportFrame = new PoseReferenceFrame("futureSupportFrame", worldFrame);
@@ -108,7 +108,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       FrameOrientation footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), futureSwingLegSide, futureSupportZUpFrame);
       FramePoint footstepPosition = getDesiredFootstepPositionCopy(futureSupportZUpFrame, futureSupportFrame, futureSwingLegSide);
 
-      ModifiableFootstepDataMessage predictedFootstep = new ModifiableFootstepDataMessage();
+      FootstepDataControllerCommand predictedFootstep = new FootstepDataControllerCommand();
       predictedFootstep.setRobotSide(futureSwingLegSide);
       predictedFootstep.setPose(footstepPosition.getPoint(), footOrientation.getQuaternion());
       return predictedFootstep;

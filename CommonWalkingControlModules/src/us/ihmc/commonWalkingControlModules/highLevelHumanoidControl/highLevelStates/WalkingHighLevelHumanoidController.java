@@ -7,23 +7,23 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAbortWalkingMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmDesiredAccelerationsMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableArmTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableAutomaticManipulationAbortMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableChestTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableEndEffectorLoadBearingMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataListMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHeadTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePauseWalkingMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AbortWalkingControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AutomaticManipulationAbortControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.EndEffectorLoadBearingControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
@@ -388,7 +388,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             handleAutomaticManipulationAbortOnICPError();
       }
 
-      private void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+      private void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand message)
       {
          if (transferToSide != null)
             return;
@@ -405,9 +405,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return;
          }
 
-         if (commandInputManager.isNewMessageAvailable(ModifiableAutomaticManipulationAbortMessage.class))
+         if (commandInputManager.isNewMessageAvailable(AutomaticManipulationAbortControllerCommand.class))
          {
-            ModifiableAutomaticManipulationAbortMessage message = commandInputManager.pollNewestMessage(ModifiableAutomaticManipulationAbortMessage.class);
+            AutomaticManipulationAbortControllerCommand message = commandInputManager.pollNewestMessage(AutomaticManipulationAbortControllerCommand.class);
             isAutomaticManipulationAbortEnabled.set(message.isEnable());
          }
 
@@ -492,7 +492,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
          momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
-         commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
+         commandInputManager.flushMessages(PelvisTrajectoryControllerCommand.class);
 
          boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
          if (isInDoubleSupport && !walkingMessageHandler.hasUpcomingFootsteps() && !walkingMessageHandler.isWalkingPaused())
@@ -593,7 +593,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          feetManager.reset();
          isPerformingToeOff.set(false);
 
-         commandInputManager.flushMessages(ModifiablePelvisTrajectoryMessage.class);
+         commandInputManager.flushMessages(PelvisTrajectoryControllerCommand.class);
 
          if (transferToSide == null)
             momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
@@ -714,7 +714,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
-      private void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+      private void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand message)
       {
          if (!isInFlamingoStance.getBooleanValue() || loadFoot.getBooleanValue())
             return;
@@ -723,7 +723,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          balanceManager.handlePelvisTrajectoryMessage(message);
       }
 
-      private void handleEndEffectorLoadBearingRequest(ModifiableEndEffectorLoadBearingMessage message)
+      private void handleEndEffectorLoadBearingRequest(EndEffectorLoadBearingControllerCommand message)
       {
          if (isInFlamingoStance.getBooleanValue() && message.getRequest(swingSide, EndEffector.FOOT) == LoadBearingRequest.LOAD)
             initiateFootLoadingProcedure(swingSide);
@@ -1253,25 +1253,25 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void consumeHeadMessages()
    {
-      if (commandInputManager.isNewMessageAvailable(ModifiableHeadTrajectoryMessage.class))
-         headOrientationManager.handleHeadTrajectoryMessage(commandInputManager.pollNewestMessage(ModifiableHeadTrajectoryMessage.class));
+      if (commandInputManager.isNewMessageAvailable(HeadTrajectoryControllerCommand.class))
+         headOrientationManager.handleHeadTrajectoryMessage(commandInputManager.pollNewestMessage(HeadTrajectoryControllerCommand.class));
    }
 
    private void consumeChestMessages()
    {
-      if (commandInputManager.isNewMessageAvailable(ModifiableChestTrajectoryMessage.class))
-         chestOrientationManager.handleChestTrajectoryMessage(commandInputManager.pollNewestMessage(ModifiableChestTrajectoryMessage.class));
+      if (commandInputManager.isNewMessageAvailable(ChestTrajectoryControllerCommand.class))
+         chestOrientationManager.handleChestTrajectoryMessage(commandInputManager.pollNewestMessage(ChestTrajectoryControllerCommand.class));
    }
 
    private void consumePelvisMessages()
    {
-      if (commandInputManager.isNewMessageAvailable(ModifiablePelvisOrientationTrajectoryMessage.class))
+      if (commandInputManager.isNewMessageAvailable(PelvisOrientationTrajectoryControllerCommand.class))
          pelvisOrientationManager
-               .handlePelvisOrientationTrajectoryMessages(commandInputManager.pollNewestMessage(ModifiablePelvisOrientationTrajectoryMessage.class));
+               .handlePelvisOrientationTrajectoryMessages(commandInputManager.pollNewestMessage(PelvisOrientationTrajectoryControllerCommand.class));
 
-      if (commandInputManager.isNewMessageAvailable(ModifiablePelvisTrajectoryMessage.class))
+      if (commandInputManager.isNewMessageAvailable(PelvisTrajectoryControllerCommand.class))
       {
-         ModifiablePelvisTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiablePelvisTrajectoryMessage.class);
+         PelvisTrajectoryControllerCommand message = commandInputManager.pollNewestMessage(PelvisTrajectoryControllerCommand.class);
          State<WalkingState> currentState = stateMachine.getCurrentState();
          if (currentState instanceof DoubleSupportState)
             ((DoubleSupportState) currentState).handlePelvisTrajectoryMessage(message);
@@ -1282,8 +1282,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void consumePelvisHeightMessages()
    {
-      if (commandInputManager.isNewMessageAvailable(ModifiablePelvisHeightTrajectoryMessage.class))
-         comHeightManager.handlePelvisHeightTrajectoryMessage(commandInputManager.pollNewestMessage(ModifiablePelvisHeightTrajectoryMessage.class));
+      if (commandInputManager.isNewMessageAvailable(PelvisHeightTrajectoryControllerCommand.class))
+         comHeightManager.handlePelvisHeightTrajectoryMessage(commandInputManager.pollNewestMessage(PelvisHeightTrajectoryControllerCommand.class));
    }
 
    private void consumeManipulationMessages()
@@ -1294,18 +1294,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          return;
       }
 
-      manipulationControlModule.handleHandTrajectoryMessages(commandInputManager.pollNewMessages(ModifiableHandTrajectoryMessage.class));
-      manipulationControlModule.handleArmTrajectoryMessages(commandInputManager.pollNewMessages(ModifiableArmTrajectoryMessage.class));
-      manipulationControlModule.handleArmDesiredAccelerationsMessages(commandInputManager.pollNewMessages(ModifiableArmDesiredAccelerationsMessage.class));
-      manipulationControlModule.handleHandComplianceControlParametersMessages(commandInputManager.pollNewMessages(ModifiableHandComplianceControlParametersMessage.class));
+      manipulationControlModule.handleHandTrajectoryMessages(commandInputManager.pollNewMessages(HandTrajectoryControllerCommand.class));
+      manipulationControlModule.handleArmTrajectoryMessages(commandInputManager.pollNewMessages(ArmTrajectoryControllerCommand.class));
+      manipulationControlModule.handleArmDesiredAccelerationsMessages(commandInputManager.pollNewMessages(ArmDesiredAccelerationsControllerCommand.class));
+      manipulationControlModule.handleHandComplianceControlParametersMessages(commandInputManager.pollNewMessages(HandComplianceControlParametersControllerCommand.class));
    }
 
    private void consumeGoHomeMessages()
    {
-      if (!commandInputManager.isNewMessageAvailable(ModifiableGoHomeMessage.class))
+      if (!commandInputManager.isNewMessageAvailable(GoHomeControllerCommand.class))
          return;
 
-      ModifiableGoHomeMessage message = commandInputManager.pollAndCompileGoHomeMessages();
+      GoHomeControllerCommand message = commandInputManager.pollAndCompileGoHomeMessages();
       manipulationControlModule.handleGoHomeMessage(message);
 
       pelvisOrientationManager.handleGoHomeMessage(message);
@@ -1315,10 +1315,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void consumeEndEffectorLoadBearingMessages()
    {
-      if (!commandInputManager.isNewMessageAvailable(ModifiableEndEffectorLoadBearingMessage.class))
+      if (!commandInputManager.isNewMessageAvailable(EndEffectorLoadBearingControllerCommand.class))
          return;
 
-      ModifiableEndEffectorLoadBearingMessage message = commandInputManager.pollAndCompileEndEffectorLoadBearingMessages();
+      EndEffectorLoadBearingControllerCommand message = commandInputManager.pollAndCompileEndEffectorLoadBearingMessages();
       manipulationControlModule.handleEndEffectorLoadBearingMessage(message);
       State<WalkingState> currentState = stateMachine.getCurrentState();
       if (currentState instanceof SingleSupportState)
@@ -1327,10 +1327,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void consumeStopAllTrajectoryMessages()
    {
-      if (!commandInputManager.isNewMessageAvailable(ModifiableStopAllTrajectoryMessage.class))
+      if (!commandInputManager.isNewMessageAvailable(StopAllTrajectoryControllerCommand.class))
          return;
 
-      ModifiableStopAllTrajectoryMessage message = commandInputManager.pollNewestMessage(ModifiableStopAllTrajectoryMessage.class);
+      StopAllTrajectoryControllerCommand message = commandInputManager.pollNewestMessage(StopAllTrajectoryControllerCommand.class);
       manipulationControlModule.handleStopAllTrajectoryMessage(message);
       chestOrientationManager.handleStopAllTrajectoryMessage(message);
       feetManager.handleStopAllTrajectoryMessage(message);
@@ -1341,21 +1341,21 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void consumeFootTrajectoryMessages()
    {
-      if (commandInputManager.isNewMessageAvailable(ModifiableFootTrajectoryMessage.class))
-         walkingMessageHandler.handleFootTrajectoryMessage(commandInputManager.pollNewestMessage(ModifiableFootTrajectoryMessage.class));
+      if (commandInputManager.isNewMessageAvailable(FootTrajectoryControllerCommand.class))
+         walkingMessageHandler.handleFootTrajectoryMessage(commandInputManager.pollNewestMessage(FootTrajectoryControllerCommand.class));
 
-      if (commandInputManager.isNewMessageAvailable(ModifiablePauseWalkingMessage.class))
-         walkingMessageHandler.handlePauseWalkingMessage(commandInputManager.pollNewestMessage(ModifiablePauseWalkingMessage.class));
+      if (commandInputManager.isNewMessageAvailable(PauseWalkingControllerCommand.class))
+         walkingMessageHandler.handlePauseWalkingMessage(commandInputManager.pollNewestMessage(PauseWalkingControllerCommand.class));
 
-      if (commandInputManager.isNewMessageAvailable(ModifiableFootstepDataListMessage.class))
-         walkingMessageHandler.handleFootstepDataListMessage(commandInputManager.pollNewestMessage(ModifiableFootstepDataListMessage.class));
+      if (commandInputManager.isNewMessageAvailable(FootstepDataListControllerCommand.class))
+         walkingMessageHandler.handleFootstepDataListMessage(commandInputManager.pollNewestMessage(FootstepDataListControllerCommand.class));
    }
 
    private void consumeAbortWalkingMessages()
    {
-      if (!commandInputManager.isNewMessageAvailable(ModifiableAbortWalkingMessage.class))
+      if (!commandInputManager.isNewMessageAvailable(AbortWalkingControllerCommand.class))
          return;
-      abortWalkingRequested.set(commandInputManager.pollNewestMessage(ModifiableAbortWalkingMessage.class).isAbortWalkingRequested());
+      abortWalkingRequested.set(commandInputManager.pollNewestMessage(AbortWalkingControllerCommand.class).isAbortWalkingRequested());
    }
 
    @Override

@@ -10,12 +10,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryP
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ModifiableArmTrajectoryMessage implements ControllerMessage<ModifiableArmTrajectoryMessage, ArmTrajectoryMessage>
+public class ArmTrajectoryControllerCommand implements ControllerCommand<ArmTrajectoryControllerCommand, ArmTrajectoryMessage>
 {
    private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
    private RobotSide robotSide;
 
-   public ModifiableArmTrajectoryMessage()
+   public ArmTrajectoryControllerCommand()
    {
       clear();
    }
@@ -64,7 +64,7 @@ public class ModifiableArmTrajectoryMessage implements ControllerMessage<Modifia
    }
 
    @Override
-   public void set(ModifiableArmTrajectoryMessage other)
+   public void set(ArmTrajectoryControllerCommand other)
    {
       set(other.robotSide, other.getTrajectoryPointLists());
    }

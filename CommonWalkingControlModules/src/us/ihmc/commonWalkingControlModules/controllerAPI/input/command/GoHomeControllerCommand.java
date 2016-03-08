@@ -9,13 +9,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHomeMessage, GoHomeMessage>
+public class GoHomeControllerCommand implements ControllerCommand<GoHomeControllerCommand, GoHomeMessage>
 {
    private final SideDependentList<EnumMap<BodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(BodyPart.class);
    private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
    private double trajectoryTime = 1.0;
 
-   public ModifiableGoHomeMessage()
+   public GoHomeControllerCommand()
    {
       for (BodyPart bodyPart : BodyPart.values)
       {
@@ -70,7 +70,7 @@ public class ModifiableGoHomeMessage implements ControllerMessage<ModifiableGoHo
    }
 
    @Override
-   public void set(ModifiableGoHomeMessage other)
+   public void set(GoHomeControllerCommand other)
    {
       trajectoryTime = other.trajectoryTime;
 

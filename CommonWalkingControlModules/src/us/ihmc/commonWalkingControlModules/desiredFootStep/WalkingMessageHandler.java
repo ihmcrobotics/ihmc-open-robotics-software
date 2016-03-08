@@ -7,10 +7,10 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataListMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePauseWalkingMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -41,7 +41,7 @@ public class WalkingMessageHandler
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
 
-   private ModifiableFootTrajectoryMessage nextFootTrajectoryForFlamingoStance;
+   private FootTrajectoryControllerCommand nextFootTrajectoryForFlamingoStance;
 
    private final ControllerStatusOutputManager statusOutputManager;
 
@@ -86,7 +86,7 @@ public class WalkingMessageHandler
       parentRegistry.addChild(registry);
    }
 
-   public void handleFootstepDataListMessage(ModifiableFootstepDataListMessage message)
+   public void handleFootstepDataListMessage(FootstepDataListControllerCommand message)
    {
       if (message.getNumberOfFootsteps() > 0)
       {
@@ -114,12 +114,12 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
-   public void handlePauseWalkingMessage(ModifiablePauseWalkingMessage message)
+   public void handlePauseWalkingMessage(PauseWalkingControllerCommand message)
    {
       isWalkingPaused.set(message.isPauseRequested());
    }
 
-   public void handleFootTrajectoryMessage(ModifiableFootTrajectoryMessage message)
+   public void handleFootTrajectoryMessage(FootTrajectoryControllerCommand message)
    {
       nextFootTrajectoryForFlamingoStance = message;
    }
@@ -145,14 +145,14 @@ public class WalkingMessageHandler
       }
    }
 
-   public ModifiableFootTrajectoryMessage pollFootTrajectoryForFlamingoStance()
+   public FootTrajectoryControllerCommand pollFootTrajectoryForFlamingoStance()
    {
-      ModifiableFootTrajectoryMessage ret = nextFootTrajectoryForFlamingoStance;
+      FootTrajectoryControllerCommand ret = nextFootTrajectoryForFlamingoStance;
       nextFootTrajectoryForFlamingoStance = null;
       return ret;
    }
 
-   public ModifiableFootTrajectoryMessage pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
+   public FootTrajectoryControllerCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
    {
       if (!hasFootTrajectoryForFlamingoStance(swingSide))
          return null;
@@ -278,7 +278,7 @@ public class WalkingMessageHandler
       footstepListVisualizer.update(upcomingFootsteps);
    }
 
-   private Footstep createFootstep(ModifiableFootstepDataMessage footstepData)
+   private Footstep createFootstep(FootstepDataControllerCommand footstepData)
    {
       FramePose footstepPose = new FramePose(worldFrame, footstepData.getPosition(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
