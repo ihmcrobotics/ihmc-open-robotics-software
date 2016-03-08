@@ -74,7 +74,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
    private final SDFDescriptionMutator descriptionMutator;
 
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
@@ -274,7 +274,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       return oneDoFJoints.values().toArray(new OneDegreeOfFreedomJoint[oneDoFJoints.size()]);
    }
 
-   protected void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   protected void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFHumanoidJointNameMap jointNameMap)
    {
       if(jointNameMap != null)
       {
@@ -287,7 +287,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       }
    }
 
-   private void addForceSensor(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   private void addForceSensor(SDFJointHolder joint, SDFHumanoidJointNameMap jointNameMap)
    {
          String jointBeforeLeftFootName = jointNameMap.getJointBeforeFootName(RobotSide.LEFT);
          String jointBeforeRightFootName = jointNameMap.getJointBeforeFootName(RobotSide.RIGHT);
