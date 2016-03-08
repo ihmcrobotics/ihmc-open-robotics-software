@@ -86,7 +86,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private final JTextArea netProcConsole, controllerConsole;
    private JScrollPane robotModelScrollPane;
 
-   private final JavaProcessSpawner localSpawner = new JavaProcessSpawner(true);
+   private final JavaProcessSpawner localSpawner = new JavaProcessSpawner(true, true);
    private JButton spawnUIButton;
    private JButton spawnBehaviorModuleButton;
    private JPanel handIPPanel;

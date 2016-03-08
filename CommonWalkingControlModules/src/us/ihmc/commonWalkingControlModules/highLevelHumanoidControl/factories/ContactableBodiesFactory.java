@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Point2d;
 
@@ -42,7 +44,7 @@ public class ContactableBodiesFactory
       this.pelvisContactPointTransform = pelvisContactPointTransform;
       this.pelvisContactPoints = pelvisContactPoints;
    }
-
+   
    public void addPelvisBackContactParameters(List<Point2d> pelvisBackContactPoints, RigidBodyTransform pelvisBackContactPointTransform)
    {
       this.pelvisBackContactPoints = pelvisBackContactPoints;
@@ -161,6 +163,23 @@ public class ContactableBodiesFactory
          ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.getSoleFrame(robotSide),
                footContactPoints.get(robotSide));
          footContactableBodies.put(robotSide, footContactableBody);
+      }
+      return footContactableBodies;
+   }
+   
+   public Map<RigidBody, ContactablePlaneBody> createFootContactableBodiesMap(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   {
+      if (footContactPoints == null)
+         return null;
+
+      Map<RigidBody, ContactablePlaneBody> footContactableBodies = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.getSoleFrame(robotSide),
+               footContactPoints.get(robotSide));
+         footContactableBodies.put(footContactableBody.getRigidBody(), footContactableBody);
       }
       return footContactableBodies;
    }
