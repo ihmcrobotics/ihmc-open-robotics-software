@@ -67,7 +67,7 @@ public class HeadOrientationManager
       hasBeenInitialized.set(false);
 
       homeOrientation.setIncludingFrame(chestFrame, initialDesiredHeadYawPitchRoll);
-      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", 15, true, chestFrame, registry);
+      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", true, chestFrame, registry);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
    }
 
