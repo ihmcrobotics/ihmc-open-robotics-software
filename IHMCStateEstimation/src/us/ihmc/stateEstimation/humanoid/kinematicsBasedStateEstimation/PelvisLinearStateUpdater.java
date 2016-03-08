@@ -88,7 +88,7 @@ public class PelvisLinearStateUpdater
    
    private final double estimatorDT;
       
-   private final Map<RigidBody, ContactablePlaneBody> feetContactablePlaneBodies;
+   private final Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies;
    
    private final BooleanYoVariable reinitialize = new BooleanYoVariable("reinitialize", registry);
 
@@ -119,7 +119,7 @@ public class PelvisLinearStateUpdater
    
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          Map<RigidBody, FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-         Map<RigidBody, ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, DoubleYoVariable yoTime,
+         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, DoubleYoVariable yoTime,
          StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();

@@ -4,7 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import net.java.games.input.Component.Identifier;
 
-public enum LogitechExtreme3DMapping
+public enum LogitechExtreme3DMapping implements JoystickMapping
 {
    TRIGGER(Identifier.Button._0, Identifier.Button._0, Identifier.Button.TRIGGER),
    THROTTLE(Identifier.Axis.SLIDER, Identifier.Axis.SLIDER, Identifier.Axis.SLIDER),
@@ -49,6 +49,7 @@ public enum LogitechExtreme3DMapping
       }
    }
 
+   @Override
    public Identifier getIdentifier()
    {
       return identifier;

@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.diagnostics;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.github.quickhull3d.Point3d;
 
@@ -20,6 +22,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -158,9 +161,15 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
       SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, humanoidReferenceFrames);
 
-      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
+      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
+      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+
       for (RobotSide robotSide : RobotSide.values)
       {
+         ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
+         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+         bipedFeetMap.put(rigidBody, contactablePlaneBody);
+         
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
@@ -170,12 +179,12 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
          WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,
                footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, simulationRegistry);
-         footSwitches.put(robotSide, wrenchBasedFootSwitchForEstimator);
+         footSwitchMap.put(rigidBody, wrenchBasedFootSwitchForEstimator);
       }
-
+      
       stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnly,
-            forceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, null, new RobotMotionStatusHolder(),
-            bipedFeet, null);
+            forceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, null, new RobotMotionStatusHolder(),
+            bipedFeetMap, null);
       simulationRegistry.addChild(stateEstimator.getYoVariableRegistry());
 
       return sensorReader.getSensorOutputMapReadOnly();
