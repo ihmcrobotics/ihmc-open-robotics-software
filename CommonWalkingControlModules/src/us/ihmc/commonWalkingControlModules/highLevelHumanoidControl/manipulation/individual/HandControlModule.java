@@ -28,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.f
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -385,17 +384,6 @@ public class HandControlModule
    }
 
    public void handleHandTrajectoryMessage(ModifiableHandTrajectoryMessage handTrajectoryMessage)
-   {
-      if (handTrajectoryMessage.getRobotSide() != robotSide)
-      {
-         PrintTools.warn(this, "Received a " + handTrajectoryMessage.getClass().getSimpleName() + " for the wrong side.");
-         return;
-      }
-
-      handleHandTrajectoryMessage(handTrajectoryMessage.getBase(), handTrajectoryMessage);
-   }
-
-   public void handleHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
       if (handTrajectoryMessage.getRobotSide() != robotSide)
       {

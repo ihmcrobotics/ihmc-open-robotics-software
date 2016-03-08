@@ -10,16 +10,15 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
+import us.ihmc.robotics.geometry.transformables.Transformable;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one trajectory point (orientation & angular velocity). "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational AND translational)")
-public class SO3TrajectoryPointMessage extends IHMCRosApiMessage<SO3TrajectoryPointMessage>
-      implements SO3TrajectoryPointInterface<SO3TrajectoryPointMessage>, TransformableDataObject<SO3TrajectoryPointMessage>
+public class SO3TrajectoryPointMessage extends IHMCRosApiMessage<SO3TrajectoryPointMessage> implements Transformable
+      //implements SO3TrajectoryPointInterface<SO3TrajectoryPointMessage>, TransformableDataObject<SO3TrajectoryPointMessage>
 {
    @FieldDocumentation("Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -51,7 +50,6 @@ public class SO3TrajectoryPointMessage extends IHMCRosApiMessage<SO3TrajectoryPo
       this.angularVelocity = angularVelocity;
    }
 
-   @Override
    public void set(SO3TrajectoryPointMessage other)
    {
       time = other.time;
@@ -65,118 +63,36 @@ public class SO3TrajectoryPointMessage extends IHMCRosApiMessage<SO3TrajectoryPo
          angularVelocity.set(0.0, 0.0, 0.0);
    }
 
-   @Override
    public double getTime()
    {
       return time;
    }
 
-   @Override
-   public void addTimeOffset(double timeOffsetToAdd)
-   {
-      time += timeOffsetToAdd;
-   }
-
-   @Override
-   public void subtractTimeOffset(double timeOffsetToSubtract)
-   {
-      time -= timeOffsetToSubtract;
-   }
-
-   @Override
    public void setTime(double time)
    {
       this.time = time;
    }
 
-   @Override
    public void getOrientation(Quat4d orientationToPack)
    {
       orientationToPack.set(orientation);
    }
 
-   @Override
    public void setOrientation(Quat4d orientation)
    {
       this.orientation = orientation;
    }
 
-   @Override
    public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
 
-   @Override
    public void setAngularVelocity(Vector3d angularVelocity)
    {
       this.angularVelocity = angularVelocity;
    }
 
-   @Override
-   public void setTimeToZero()
-   {
-      time = 0.0;
-   }
-
-   @Override
-   public void setOrientationToZero()
-   {
-      orientation.set(0.0, 0.0, 0.0, 1.0);
-   }
-
-   @Override
-   public void setAngularVelocityToZero()
-   {
-      angularVelocity.set(0.0, 0.0, 0.0);
-   }
-
-   @Override
-   public void setToZero()
-   {
-      setTimeToZero();
-      setOrientationToZero();
-      setAngularVelocityToZero();
-   }
-
-   @Override
-   public void setTimeToNaN()
-   {
-      time = Double.NaN;
-   }
-
-   @Override
-   public void setOrientationToNaN()
-   {
-      orientation.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   @Override
-   public void setAngularVelocityToNaN()
-   {
-      angularVelocity.set(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   @Override
-   public void setToNaN()
-   {
-      setOrientationToNaN();
-      setAngularVelocityToNaN();
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      if (Double.isNaN(time))
-         return true;
-      if (Double.isNaN(orientation.getX()) || Double.isNaN(orientation.getY()) || Double.isNaN(orientation.getZ()) || Double.isNaN(orientation.getW()))
-         return true;
-      if (Double.isNaN(angularVelocity.getX()) || Double.isNaN(angularVelocity.getY()) || Double.isNaN(angularVelocity.getZ()))
-         return true;
-      return false;
-   }
-
-   @Override
    public SO3TrajectoryPointMessage transform(RigidBodyTransform transform)
    {
       SO3TrajectoryPointMessage transformedTrajectoryPointMessage = new SO3TrajectoryPointMessage();
