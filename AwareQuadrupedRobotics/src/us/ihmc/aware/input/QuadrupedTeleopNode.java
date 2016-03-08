@@ -6,7 +6,6 @@ import java.util.Map;
 
 import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
 import us.ihmc.aware.input.devices.XboxControllerInputDevice;
-import us.ihmc.aware.networking.AwareNetworkParameters;
 import us.ihmc.aware.packets.BodyPosePacket;
 import us.ihmc.aware.packets.BodyTwistPacket;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
@@ -26,7 +25,7 @@ public class QuadrupedTeleopNode implements InputEventCallback
       // TODO: Don't hardcode localhost
       this.packetCommunicator = PacketCommunicator
             .createTCPPacketCommunicatorClient("localhost", NetworkPorts.TOUCH_MODULE_PORT,
-                  AwareNetworkParameters.AWARE_NETCLASS_LIST);
+                  netClassList);
       this.input = new XboxControllerInputDevice();
       this.input.registerCallback(this);
 
