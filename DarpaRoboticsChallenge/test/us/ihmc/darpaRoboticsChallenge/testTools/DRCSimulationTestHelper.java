@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -14,6 +15,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -161,6 +163,11 @@ public class DRCSimulationTestHelper
       {
          nothingChangedVerifier = null;
       }
+   }
+   
+   public ConcurrentLinkedQueue<ControllerCommand<?, ?>> getQueuedControllerCommands()
+   {
+      return simulationStarter.getQueuedControllerCommands();
    }
 
    public BlockingSimulationRunner getBlockingSimulationRunner()

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -9,9 +10,11 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
@@ -63,6 +66,8 @@ public class MomentumBasedControllerFactory
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
    private boolean createControllerNetworkSubscriber = false;
+   private boolean createQueuedControllerCommandGenerator = false;
+   private ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands;
 
    private final WalkingControllerParameters walkingControllerParameters;
    private final ArmControllerParameters armControllerParameters;
@@ -152,6 +157,28 @@ public class MomentumBasedControllerFactory
          this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
       }
    }
+   
+   public void createdQueuedControllerCommandGenerator(ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands)
+   {
+      if (momentumBasedController != null)
+      {
+         System.out.println("In createdQueuedControllerCommandGenerator");
+         
+         SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
+         CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+         double controlDT = momentumBasedController.getControlDT();
+         QueuedControllerCommandGenerator queuedControllerCommandGenerator = new QueuedControllerCommandGenerator(controllerCommands,
+               commandInputManager, statusOutputManager,
+               walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, registry);
+
+         momentumBasedController.addUpdatables(queuedControllerCommandGenerator.getModulesToUpdate());
+      }
+      else
+      {
+         createQueuedControllerCommandGenerator = true;
+         this.controllerCommands = controllerCommands;
+      }
+   }
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
          DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry,
@@ -187,6 +214,8 @@ public class MomentumBasedControllerFactory
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
          createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
+      if (createQueuedControllerCommandGenerator)
+         createdQueuedControllerCommandGenerator(controllerCommands);
       if (createControllerNetworkSubscriber)
          createControllerNetworkSubscriber(scheduler);
 
