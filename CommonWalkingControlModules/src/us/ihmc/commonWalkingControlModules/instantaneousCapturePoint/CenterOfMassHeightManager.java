@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisHeightTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
@@ -136,17 +136,17 @@ public class CenterOfMassHeightManager
       centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
-   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+   public void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand message)
    {
       centerOfMassTrajectoryGenerator.handlePelvisTrajectoryMessage(message);
    }
 
-   public void handlePelvisHeightTrajectoryMessage(ModifiablePelvisHeightTrajectoryMessage message)
+   public void handlePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryControllerCommand message)
    {
       centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryMessage(message);
    }
 
-   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
    {
       centerOfMassTrajectoryGenerator.handleStopAllTrajectoryMessage(message);
    }

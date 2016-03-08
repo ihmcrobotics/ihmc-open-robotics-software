@@ -6,13 +6,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class ModifiableFootstepDataListMessage implements ControllerMessage<ModifiableFootstepDataListMessage, FootstepDataListMessage>
+public class FootstepDataListControllerCommand implements ControllerCommand<FootstepDataListControllerCommand, FootstepDataListMessage>
 {
    private double swingTime;
    private double transferTime = 0.0;
-   private final RecyclingArrayList<ModifiableFootstepDataMessage> footsteps = new RecyclingArrayList<>(30, ModifiableFootstepDataMessage.class);
+   private final RecyclingArrayList<FootstepDataControllerCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataControllerCommand.class);
 
-   public ModifiableFootstepDataListMessage()
+   public FootstepDataListControllerCommand()
    {
       clear();
    }
@@ -40,11 +40,11 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
    }
 
    @Override
-   public void set(ModifiableFootstepDataListMessage other)
+   public void set(FootstepDataListControllerCommand other)
    {
       swingTime = other.swingTime;
       transferTime = other.transferTime;
-      RecyclingArrayList<ModifiableFootstepDataMessage> otherFootsteps = other.getFootsteps();
+      RecyclingArrayList<FootstepDataControllerCommand> otherFootsteps = other.getFootsteps();
       clear();
       if (otherFootsteps != null)
       {
@@ -58,7 +58,7 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
       clear();
    }
 
-   public void addFootstep(ModifiableFootstepDataMessage footstep)
+   public void addFootstep(FootstepDataControllerCommand footstep)
    {
       footsteps.add().set(footstep);
    }
@@ -83,12 +83,12 @@ public class ModifiableFootstepDataListMessage implements ControllerMessage<Modi
       return transferTime;
    }
 
-   public RecyclingArrayList<ModifiableFootstepDataMessage> getFootsteps()
+   public RecyclingArrayList<FootstepDataControllerCommand> getFootsteps()
    {
       return footsteps;
    }
 
-   public ModifiableFootstepDataMessage getFootstep(int footstepIndex)
+   public FootstepDataControllerCommand getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
    }

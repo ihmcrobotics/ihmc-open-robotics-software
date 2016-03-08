@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 
-public abstract class ModifiableSO3TrajectoryMessage<T extends ModifiableSO3TrajectoryMessage<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
-      extends FrameSO3TrajectoryPointList implements ControllerMessage<T, M>
+public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
+      extends FrameSO3TrajectoryPointList implements ControllerCommand<T, M>
 {
-   public ModifiableSO3TrajectoryMessage()
+   public SO3TrajectoryControllerCommand()
    {
    }
 

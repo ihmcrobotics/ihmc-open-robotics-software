@@ -4,10 +4,10 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisOrientationTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
@@ -206,7 +206,7 @@ public class PelvisOrientationManager
       goToHomeFromCurrentDesired(defaultTrajectoryTime);
    }
 
-   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
+   public void handleGoHomeMessage(GoHomeControllerCommand message)
    {
       if (message.getRequest(BodyPart.PELVIS))
          goToHomeFromCurrentDesired(message.getTrajectoryTime());
@@ -230,17 +230,17 @@ public class PelvisOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
    {
       isTrajectoryStopped.set(message.isStopAllTrajectory());
    }
 
-   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+   public void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand message)
    {
       handleTrajectoryMessage(message);
    }
 
-   public void handlePelvisOrientationTrajectoryMessages(ModifiablePelvisOrientationTrajectoryMessage message)
+   public void handlePelvisOrientationTrajectoryMessages(PelvisOrientationTrajectoryControllerCommand message)
    {
       handleTrajectoryMessage(message);
    }

@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHandComplianceControlParametersMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -457,7 +457,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       return taskspaceToJointspaceCalculator.getControlFrame();
    }
 
-   public void handleHandComplianceControlParametersMessage(ModifiableHandComplianceControlParametersMessage message)
+   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersControllerCommand message)
    {
       setEnableCompliantControl(message.isEnable());
       handCompliantControlHelper.handleHandComplianceControlParametersMessage(message);

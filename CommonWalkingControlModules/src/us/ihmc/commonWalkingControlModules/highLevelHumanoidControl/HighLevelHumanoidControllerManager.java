@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableHighLevelStateMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateControllerCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore;
@@ -160,9 +160,9 @@ public class HighLevelHumanoidControllerManager implements RobotController
    {
       if (isListeningToHighLevelStateMessage.getBooleanValue())
       {
-         if (commandInputManager.isNewMessageAvailable(ModifiableHighLevelStateMessage.class))
+         if (commandInputManager.isNewMessageAvailable(HighLevelStateControllerCommand.class))
          {
-            requestedHighLevelState.set(commandInputManager.pollNewestMessage(ModifiableHighLevelStateMessage.class).getHighLevelState());
+            requestedHighLevelState.set(commandInputManager.pollNewestMessage(HighLevelStateControllerCommand.class).getHighLevelState());
          }
       }
 

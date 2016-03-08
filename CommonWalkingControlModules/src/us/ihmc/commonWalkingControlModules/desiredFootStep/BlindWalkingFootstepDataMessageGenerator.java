@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataListMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableFootstepDataMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -69,7 +69,7 @@ public class BlindWalkingFootstepDataMessageGenerator
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
       blindWalkingDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-      ModifiableFootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
+      FootstepDataListControllerCommand footsteps = computeNextFootsteps(supportLeg);
       commandInputManager.submitModifiableMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);
@@ -110,12 +110,12 @@ public class BlindWalkingFootstepDataMessageGenerator
       statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusListener);
    }
 
-   private ModifiableFootstepDataListMessage computeNextFootsteps(RobotSide supportLeg)
+   private FootstepDataListControllerCommand computeNextFootsteps(RobotSide supportLeg)
    {
-      ModifiableFootstepDataListMessage footsteps = new ModifiableFootstepDataListMessage();
-      ModifiableFootstepDataMessage footstep = blindWalkingDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      ModifiableFootstepDataMessage nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep);
-      ModifiableFootstepDataMessage nextNextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(),
+      FootstepDataListControllerCommand footsteps = new FootstepDataListControllerCommand();
+      FootstepDataControllerCommand footstep = blindWalkingDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
+      FootstepDataControllerCommand nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep);
+      FootstepDataControllerCommand nextNextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(),
             nextFootstep);
 
       footsteps.addFootstep(footstep);

@@ -15,9 +15,9 @@ import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModu
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableGoHomeMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiablePelvisTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ModifiableStopAllTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -281,17 +281,17 @@ public class BalanceManager
       return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
    }
 
-   public void handleGoHomeMessage(ModifiableGoHomeMessage message)
+   public void handleGoHomeMessage(GoHomeControllerCommand message)
    {
       pelvisICPBasedTranslationManager.handleGoHomeMessage(message);
    }
 
-   public void handlePelvisTrajectoryMessage(ModifiablePelvisTrajectoryMessage message)
+   public void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand message)
    {
       pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
    }
 
-   public void handleStopAllTrajectoryMessage(ModifiableStopAllTrajectoryMessage message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
    {
       pelvisICPBasedTranslationManager.handleStopAllTrajectoryMessage(message);
    }
