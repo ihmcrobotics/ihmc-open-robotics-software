@@ -2,7 +2,6 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +24,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -77,9 +74,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
-         double gravitationalAcceleration, SideDependentList<FootSwitchInterface> footSwitches,
+         double gravitationalAcceleration, Map<RigidBody, FootSwitchInterface> footSwitches,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
-         SideDependentList<? extends ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
+         Map<RigidBody, ? extends ContactablePlaneBody> feet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
@@ -121,17 +118,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, registry);
       
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
-      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
-      
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
-         footSwitchMap.put(foot, footSwitches.get(robotSide));
-         bipedFeetMap.put(foot, bipedFeet.get(robotSide));
-      }
-
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitchMap, centerOfPressureDataHolderFromController, bipedFeetMap, gravitationalAcceleration, yoTime,
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
       imuOrientationBiasEstimator = new IMUOrientationBiasEstimator(inverseDynamicsStructure, pelvisRotationalStateUpdater.getIMUUsedForEstimation(), estimatorDT, registry);
 

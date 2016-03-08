@@ -4,7 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import net.java.games.input.Component.Identifier;
 
-public enum SaitekX52Mapping
+public enum SaitekX52Mapping implements JoystickMapping
 {
    /** Mappings for Windows, Mac, Linux */
    TRIGGER_PARITIAL(Identifier.Button._0, Identifier.Button._0, Identifier.Button.TRIGGER),
@@ -83,6 +83,7 @@ public enum SaitekX52Mapping
       }
    }
 
+   @Override
    public Identifier getIdentifier()
    {
       return identifier;

@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -156,35 +154,22 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final DoubleYoVariable Fx_lfore = new DoubleYoVariable("Fx_lfore", registry);
    private final DoubleYoVariable Fy_lfore = new DoubleYoVariable("Fy_lfore", registry);
    private final DoubleYoVariable Fz_lfore = new DoubleYoVariable("Fz_lfore", registry);
-   private final DoubleYoVariable Nx_lfore = new DoubleYoVariable("Nx_lfore", registry);
-   private final DoubleYoVariable Ny_lfore = new DoubleYoVariable("Ny_lfore", registry);
-   private final DoubleYoVariable Nz_lfore = new DoubleYoVariable("Nz_lfore", registry);
    private final DoubleYoVariable Fx_rfore = new DoubleYoVariable("Fx_rfore", registry);
    private final DoubleYoVariable Fy_rfore = new DoubleYoVariable("Fy_rfore", registry);
    private final DoubleYoVariable Fz_rfore = new DoubleYoVariable("Fz_rfore", registry);
-   private final DoubleYoVariable Nx_rfore = new DoubleYoVariable("Nx_rfore", registry);
-   private final DoubleYoVariable Ny_rfore = new DoubleYoVariable("Ny_rfore", registry);
-   private final DoubleYoVariable Nz_rfore = new DoubleYoVariable("Nz_rfore", registry);
    private final DoubleYoVariable Fx_lhind = new DoubleYoVariable("Fx_lhind", registry);
    private final DoubleYoVariable Fy_lhind = new DoubleYoVariable("Fy_lhind", registry);
    private final DoubleYoVariable Fz_lhind = new DoubleYoVariable("Fz_lhind", registry);
-   private final DoubleYoVariable Nx_lhind = new DoubleYoVariable("Nx_lhind", registry);
-   private final DoubleYoVariable Ny_lhind = new DoubleYoVariable("Ny_lhind", registry);
-   private final DoubleYoVariable Nz_lhind = new DoubleYoVariable("Nz_lhind", registry);
    private final DoubleYoVariable Fx_rhind = new DoubleYoVariable("Fx_rhind", registry);
    private final DoubleYoVariable Fy_rhind = new DoubleYoVariable("Fy_rhind", registry);
    private final DoubleYoVariable Fz_rhind = new DoubleYoVariable("Fz_rhind", registry);
-   private final DoubleYoVariable Nx_rhind = new DoubleYoVariable("Nx_rhind", registry);
-   private final DoubleYoVariable Ny_rhind = new DoubleYoVariable("Ny_rhind", registry);
-   private final DoubleYoVariable Nz_rhind = new DoubleYoVariable("Nz_rhind", registry);
 
-   private final YoFrameVector leftForeLegForce = new YoFrameVector(Fx_lfore, Fy_lfore, Fz_lfore, null);
-   private final YoFrameVector leftHindLegForce = new YoFrameVector(Fx_lhind, Fy_lhind, Fz_lhind, null);
-   private final YoFrameVector rightForeLegForce = new YoFrameVector(Fx_rfore, Fy_rfore, Fz_rfore, null);
-   private final YoFrameVector rightHindLegForce = new YoFrameVector(Fx_rhind, Fy_rhind, Fz_rhind, null);
+   private final YoFrameVector leftForeLegForce = new YoFrameVector(Fx_lfore, Fy_lfore, Fz_lfore, ReferenceFrame.getWorldFrame());
+   private final YoFrameVector leftHindLegForce = new YoFrameVector(Fx_lhind, Fy_lhind, Fz_lhind, ReferenceFrame.getWorldFrame());
+   private final YoFrameVector rightForeLegForce = new YoFrameVector(Fx_rfore, Fy_rfore, Fz_rfore, ReferenceFrame.getWorldFrame());
+   private final YoFrameVector rightHindLegForce = new YoFrameVector(Fx_rhind, Fy_rhind, Fz_rhind, ReferenceFrame.getWorldFrame());
 
-   private final QuadrantDependentList<YoFrameVector> legForces = new QuadrantDependentList<YoFrameVector>(leftForeLegForce, rightForeLegForce,
-         leftHindLegForce, rightHindLegForce);
+   private final QuadrantDependentList<YoFrameVector> legForces = new QuadrantDependentList<YoFrameVector>(leftForeLegForce, rightForeLegForce, leftHindLegForce, rightHindLegForce);
 
    private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
    private final HashMap<String, DoubleYoVariable> desiredTorques = new HashMap<>();
@@ -544,50 +529,8 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       distributeForcesTwoDiagonalLegs(TrotPair.LeftTrot, centerOfPressureSL, Fz2, Nx2, Ny2, Nz2);
    }
 
-   private void clearLegForces()
-   {
-      Nx_lfore.set(0.0);
-      Nx_rfore.set(0.0);
-      Nx_lhind.set(0.0);
-      Nx_rhind.set(0.0);
-      Ny_lfore.set(0.0);
-      Ny_rfore.set(0.0);
-      Ny_lhind.set(0.0);
-      Ny_rhind.set(0.0);
-      Nz_lfore.set(0.0);
-      Nz_rfore.set(0.0);
-      Nz_lhind.set(0.0);
-      Nz_rhind.set(0.0);
-
-      Fx_rfore.set(0.0);
-      Fy_rfore.set(0.0);
-      Fz_rfore.set(0.0);
-      Fx_lhind.set(0.0);
-      Fy_lhind.set(0.0);
-      Fz_lhind.set(0.0);
-
-      Fx_lfore.set(0.0);
-      Fy_lfore.set(0.0);
-      Fz_lfore.set(0.0);
-      Fx_rhind.set(0.0);
-      Fy_rhind.set(0.0);
-      Fz_rhind.set(0.0);
-   }
-
-   private void getFootInBodyZUpFrame(RobotQuadrant footQuadrant, FramePoint framePointToPack)
-   {
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(footQuadrant);
-      framePointToPack.setToZero(footFrame);
-      framePointToPack.changeFrame(referenceFrames.getBodyZUpFrame());
-   }
-
    private void distributeForcesTwoDiagonalLegs(TrotPair trotPair, double centerOfPressureS, double Fz, double Nx, double Ny, double Nz)
    {
-      if (Fz <= 0.0)
-      {
-         System.err.println("Fz <= 0.0");
-      }
-
       if (trotPair == TrotPair.RightTrot)
       {
          getFootInBodyZUpFrame(RobotQuadrant.FRONT_RIGHT, foreFootInBodyZUp);
@@ -644,10 +587,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       DenseMatrix64F distributedForcesOnTheLegs = new DenseMatrix64F(6, 1);
       CommonOps.mult(forceConstraintsMatrixInverse, totalForcesOnTheBody, distributedForcesOnTheLegs);
 
-      //    System.out.println("forceConstraintsMatrix = " + forceConstraintsMatrix);
-      //    System.out.println("totalForcesOnTheBody = " + totalForcesOnTheBody);
-      //    System.out.println("distributedForcesOnTheLegs = " + distributedForcesOnTheLegs);
-
       if (trotPair == TrotPair.RightTrot)
       {
          Fx_rfore.set(distributedForcesOnTheLegs.get(0, 0));
@@ -668,31 +607,34 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       }
    }
 
-   private void computeStanceJacobiansThreeLegsNew(boolean lHind, boolean rHind, boolean lFore, boolean rFore)
+   private void computeStanceJacobiansThreeLegsNew(boolean hindLeft, boolean hindRight, boolean frontLeft, boolean frontRight)
    {
-      if (lHind)
+      if (hindLeft)
          computeStanceJacobianNew(RobotQuadrant.HIND_LEFT);
-      if (rHind)
+      if (hindRight)
          computeStanceJacobianNew(RobotQuadrant.HIND_RIGHT);
-      if (lFore)
+      if (frontLeft)
          computeStanceJacobianNew(RobotQuadrant.FRONT_LEFT);
-      if (rFore)
+      if (frontRight)
          computeStanceJacobianNew(RobotQuadrant.FRONT_RIGHT);
+   }
+   
+   private void applyPositionControlledSwingTorques(boolean hindLeft, boolean hindRight, boolean frontLeft, boolean frontRight)
+   {
+      
    }
 
    private void computeStanceJacobianNew(RobotQuadrant robotQuadrant)
    {
-      ArrayList<OneDoFJoint> legJoints = oneDofJoints.get(robotQuadrant);
-
+      ArrayList<OneDoFJoint> quadrantOneDoFJoints = oneDofJoints.get(robotQuadrant);
       YoFrameVector legForceVector = legForces.get(robotQuadrant);
       getFootInBodyZUpFrame(robotQuadrant, footInBodyZUp);
+      FrameVector legForceVectorInBodyZUp = new FrameVector(referenceFrames.getBodyZUpFrame());
+      legForceVectorInBodyZUp.set(legForceVector.getX(), legForceVector.getY(), legForceVector.getZ());
 
-      Vector3d legForceVector3d = legForceVector.getVector3dCopy();
-      FrameVector legForceVectorInBodyZUp = new FrameVector(referenceFrames.getBodyZUpFrame(), legForceVector3d);
-
-      for (int i = 0; i < legJoints.size(); i++)
+      for (int i = 0; i < quadrantOneDoFJoints.size(); i++)
       {
-         OneDoFJoint legJoint = legJoints.get(i);
+         OneDoFJoint legJoint = quadrantOneDoFJoints.get(i);
          ReferenceFrame legJointFrame = legJoint.getFrameBeforeJoint();
          FramePoint jointPositionInBodyZUp = new FramePoint(legJointFrame);
          jointPositionInBodyZUp.changeFrame(referenceFrames.getBodyZUpFrame());
@@ -713,6 +655,30 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          desiredTorques.get(legJoint.getName()).set(-torque);
          legJoint.setTau(-torque);
       }
+   }
+
+   private void getFootInBodyZUpFrame(RobotQuadrant footQuadrant, FramePoint framePointToPack)
+   {
+      ReferenceFrame footFrame = referenceFrames.getFootFrame(footQuadrant);
+      framePointToPack.setToZero(footFrame);
+      framePointToPack.changeFrame(referenceFrames.getBodyZUpFrame());
+   }
+
+   private void clearLegForces()
+   {   
+      Fx_rfore.set(0.0);
+      Fy_rfore.set(0.0);
+      Fz_rfore.set(0.0);
+      Fx_lhind.set(0.0);
+      Fy_lhind.set(0.0);
+      Fz_lhind.set(0.0);
+   
+      Fx_lfore.set(0.0);
+      Fy_lfore.set(0.0);
+      Fz_lfore.set(0.0);
+      Fx_rhind.set(0.0);
+      Fy_rhind.set(0.0);
+      Fz_rhind.set(0.0);
    }
 
    private class QuadSupportState extends State<QuadrupedWalkingState>
@@ -741,7 +707,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          distributeForcesFourLegs(quadAlpha.getDoubleValue(), centerOfPressureSR.getDoubleValue(), centerOfPressureSL.getDoubleValue(), Fz.getDoubleValue(),
                Nx.getDoubleValue(), Ny.getDoubleValue(), Nz.getDoubleValue());
 
-         preventSlippingForces();
+//         preventSlippingForces();
 
          computeStanceJacobiansThreeLegsNew(true, true, true, true);
       }
@@ -776,7 +742,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          distributeForcesFourLegs(quadAlpha.getDoubleValue(), centerOfPressureSR.getDoubleValue(), centerOfPressureSL.getDoubleValue(), Fz.getDoubleValue(),
                Nx.getDoubleValue(), Ny.getDoubleValue(), Nz.getDoubleValue());
 
-         preventSlippingForces();
+//         preventSlippingForces();
 
          computeStanceJacobiansThreeLegsNew(true, true, true, true);
       }
@@ -784,7 +750,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       @Override
       public void doTransitionIntoAction()
       {
-         quadAlpha.set(1.1);
+         quadAlpha.set(1.01);
       }
 
       @Override
@@ -811,7 +777,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          distributeForcesFourLegs(quadAlpha.getDoubleValue(), centerOfPressureSR.getDoubleValue(), centerOfPressureSL.getDoubleValue(), Fz.getDoubleValue(),
                Nx.getDoubleValue(), Ny.getDoubleValue(), Nz.getDoubleValue());
 
-         preventSlippingForces();
+//         preventSlippingForces();
 
          computeStanceJacobiansThreeLegsNew(true, true, true, true);
       }
@@ -819,7 +785,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       @Override
       public void doTransitionIntoAction()
       {
-         quadAlpha.set(-0.1);
+         quadAlpha.set(-0.01);
       }
 
       @Override
@@ -834,29 +800,21 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       if (Fz_lhind.getDoubleValue() < 2.0)
       {
          Fz_lhind.set(2.0);
-         Nx_lhind.set(0.0);
-         Ny_lhind.set(0.0);
       }
 
       if (Fz_rhind.getDoubleValue() < 2.0)
       {
          Fz_rhind.set(2.0);
-         Nx_rhind.set(0.0);
-         Ny_rhind.set(0.0);
       }
 
       if (Fz_lfore.getDoubleValue() < 2.0)
       {
          Fz_lfore.set(2.0);
-         Nx_lfore.set(0.0);
-         Ny_lfore.set(0.0);
       }
 
       if (Fz_rfore.getDoubleValue() < 2.0)
       {
          Fz_rfore.set(2.0);
-         Nx_rfore.set(0.0);
-         Ny_rfore.set(0.0);
       }
    }
 

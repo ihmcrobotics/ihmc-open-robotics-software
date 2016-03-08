@@ -4,7 +4,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import net.java.games.input.Component.Identifier;
 
-public enum MadCatzFLY5StickMapping
+public enum MadCatzFLY5StickMapping implements JoystickMapping
 {
    TRIGGER(Identifier.Button._0, Identifier.Button._0, Identifier.Button.TRIGGER),
    THROTTLE_LEFT(Identifier.Axis.Z, Identifier.Axis.Z, Identifier.Axis.Z),
@@ -56,6 +56,7 @@ public enum MadCatzFLY5StickMapping
       }
    }
 
+   @Override
    public Identifier getIdentifier()
    {
       return identifier;

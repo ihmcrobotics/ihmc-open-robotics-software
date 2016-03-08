@@ -75,11 +75,14 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotCameraParameters[] cameraInfo = sensorInformation.getCameraParameters();
-      for (int i = 0; i < cameraInfo.length; i++)
+      if (cameraInfo != null)
       {
-         CameraConfiguration camera = new CameraConfiguration(cameraInfo[i].getSensorNameInSdf());
-         camera.setCameraMount(cameraInfo[i].getSensorNameInSdf());
-         scs.setupCamera(camera);
+         for (int i = 0; i < cameraInfo.length; i++)
+         {
+            CameraConfiguration camera = new CameraConfiguration(cameraInfo[i].getSensorNameInSdf());
+            camera.setCameraMount(cameraInfo[i].getSensorNameInSdf());
+            scs.setupCamera(camera);
+         }
       }
 
       scs.setGroundVisible(groundProfileVisible);
