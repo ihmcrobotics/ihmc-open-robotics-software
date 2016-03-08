@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
@@ -10,12 +11,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -43,6 +44,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class QuadrupedTrotWalkController extends QuadrupedController
 {
@@ -52,7 +54,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final QuadrupedReferenceFrames referenceFrames;
    private final SDFFullRobotModel fullRobotModel;
-   private final QuadrupedStateEstimator stateEstimator;
+   private final Map<RobotQuadrant, FootSwitchInterface> footSwitches;
    private final QuadrantDependentList<YoFramePoint> feetLocations = new QuadrantDependentList<YoFramePoint>();
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -209,12 +211,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       RightTrot, LeftTrot;
    }
 
-   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrupedStateEstimator stateEstimator, double DT,
+   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, Map<RobotQuadrant, FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.TROT_WALK);
       this.fullRobotModel = fullRobotModel;
-      this.stateEstimator = stateEstimator;
+      this.footSwitches = footSwitches;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.dt = DT;
@@ -423,7 +425,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       numberOfFeetInContact.set(0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (stateEstimator.isFootInContact(robotQuadrant))
+         if (footSwitches.get(robotQuadrant).hasFootHitGround())
          {
             numberOfFeetInContact.increment();
          }

@@ -1,9 +1,12 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
+import java.util.Map;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedCommonControllerParameters
@@ -12,20 +15,20 @@ public class QuadrupedCommonControllerParameters
    private final DoubleYoVariable robotTimestamp;
 
    private final SDFFullRobotModel fullRobotModel;
-   private final QuadrupedStateEstimator stateEstimator;
+   private final Map<RobotQuadrant, FootSwitchInterface> footSwitches;
 
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
 
    public QuadrupedCommonControllerParameters(double controlDt, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel,
-         QuadrupedStateEstimator stateEstimator, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
+         Map<RobotQuadrant, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
          YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead)
    {
       this.controlDt = controlDt;
       this.robotTimestamp = robotTimestamp;
       this.fullRobotModel = fullRobotModel;
-      this.stateEstimator = stateEstimator;
+      this.footSwitches = footSwitches;
       this.parentRegistry = parentRegistry;
       this.graphicsListRegistry = graphicsListRegistry;
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
@@ -46,11 +49,6 @@ public class QuadrupedCommonControllerParameters
       return fullRobotModel;
    }
 
-   public QuadrupedStateEstimator getStateEstimator()
-   {
-      return stateEstimator;
-   }
-
    public YoVariableRegistry getParentRegistry()
    {
       return parentRegistry;
@@ -64,5 +62,10 @@ public class QuadrupedCommonControllerParameters
    public YoGraphicsListRegistry getGraphicsListRegistryForDetachedOverhead()
    {
       return graphicsListRegistryForDetachedOverhead;
+   }
+
+   public Map<RobotQuadrant, FootSwitchInterface> getFootSwicthes()
+   {
+      return footSwitches;
    }
 }

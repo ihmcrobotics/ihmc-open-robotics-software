@@ -1,12 +1,14 @@
 package us.ihmc.quadrupedRobotics.controller;
 
 import java.awt.Color;
+import java.util.Map;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -20,7 +22,6 @@ import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematics
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.stateEstimator.QuadrupedStateEstimator;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.swingLegChooser.NextSwingLegChooser;
@@ -76,6 +77,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactCircle;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 {
@@ -118,7 +120,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
    private final NextSwingLegChooser nextSwingLegChooser;
    private final SwingTargetGenerator swingTargetGenerator;
-   private final QuadrupedStateEstimator stateEstimator;
+   private final Map<RobotQuadrant, FootSwitchInterface> footSwitches;
    private final SDFFullRobotModel actualFullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -334,7 +336,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private DesiredYawInPlaceProvider desiredYawInPlaceProvider;
 
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         QuadrupedStateEstimator stateEstimator, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
+         Map<RobotQuadrant, FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
@@ -395,7 +397,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       }
       
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
-      this.stateEstimator = stateEstimator;
+      this.footSwitches = footSwitches;
       desiredVelocityProvider = new DesiredVelocityProvider(dataProducer, "userProvided", registry);
       desiredYawRateProvider = new DesiredYawRateProvider(dataProducer, "userProvided", registry);
       desiredYawInPlaceProvider = new DesiredYawInPlaceProvider(dataProducer, "userProvided", registry);
@@ -1232,16 +1234,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
     	  RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
     	  boolean swingTrajectoryIsDone = swingTrajectoryGenerators.get(swingQuadrant).isDone();
-    	  boolean swingFootHitGround = stateEstimator.isFootInContact(swingQuadrant);
+    	  boolean swingFootHitGround = false;
     	  boolean inSwingStateLongEnough = tripleSupportState.getTimeInCurrentState() > swingDuration.getDoubleValue() / 3.0;
 
-    	  if (runOpenLoop.getBooleanValue())
+    	  if (!runOpenLoop.getBooleanValue())
     	  {
-        	  swingFootHitGround = false;
-    	  }
-    	  else
-    	  {
-        	  swingFootHitGround = stateEstimator.isFootInContact(swingQuadrant);
+        	  FootSwitchInterface footSwitch = footSwitches.get(swingQuadrant);
+         swingFootHitGround = footSwitch.hasFootHitGround();
     	  }
     	  
     	  return ((swingTrajectoryIsDone || swingFootHitGround) && inSwingStateLongEnough);
