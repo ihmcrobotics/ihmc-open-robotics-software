@@ -52,7 +52,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final QuadrupedReferenceFrames referenceFrames;
    private final SDFFullRobotModel fullRobotModel;
-   private final Map<RobotQuadrant, FootSwitchInterface> footSwitches;
+   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
    private final QuadrantDependentList<YoFramePoint> feetLocations = new QuadrantDependentList<YoFramePoint>();
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -196,7 +196,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       RightTrot, LeftTrot;
    }
 
-   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, Map<RobotQuadrant, FootSwitchInterface> footSwitches, double DT,
+   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.TROT_WALK);
