@@ -8,20 +8,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.vecmath.Vector3d;
-
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class ScriptTransformer
+public abstract class ScriptTransformer
 {
-   private static final String ORIGINAL = "Original";
+   public static final String ORIGINAL = "Original";
 
    private static final Runtime rt = Runtime.getRuntime();
 
@@ -83,20 +80,7 @@ public class ScriptTransformer
          for (ScriptObject scriptObject : scriptObjects)
          {
             Object object = scriptObject.getScriptObject();
-
-            if (object instanceof HandPosePacket)
-            {
-               HandPosePacket packetToTransform = (HandPosePacket) object;
-               if (packetToTransform.orientation == null || packetToTransform.position == null)
-                  continue;
-               RigidBodyTransform handpose = new RigidBodyTransform();
-               handpose.setRotation(packetToTransform.getOrientation());
-               handpose.setTranslation(new Vector3d(packetToTransform.position));
-               RigidBodyTransform xOffsetInHandFrame = new RigidBodyTransform();
-               xOffsetInHandFrame.setTranslation(0.16, 0.0, 0.0);
-               handpose.multiply(handpose, xOffsetInHandFrame);
-               handpose.getTranslation(packetToTransform.position);
-            }
+            transformScriptObject(object);
          }
 
          ScriptFileSaver scriptFileSaver = null;
@@ -124,6 +108,8 @@ public class ScriptTransformer
       Process exec = rt.exec(new String[] { "cmd", "/C", "rmdir /Q /S " + scriptDirectoryPath});
       ThreadTools.sleepSeconds(0.1);
    }
+
+   public abstract void transformScriptObject(Object object);
 
    private static void findScripts(final String scriptDirectoryPath, final List<String> fileNamesToPack,
          final Set<String> listOfDirectoriesContainingAtLeastOneScript) throws IOException
@@ -184,29 +170,7 @@ public class ScriptTransformer
       return listOfDirectoriesToCreate;
    }
 
-   public static void main(String[] args) throws IOException, InterruptedException
-   {
-      ArrayList<String> paths = new ArrayList<>();
-      paths.add("..\\Atlas\\scripts");
-      paths.add("..\\DarpaRoboticsChallenge\\scripts");
-      paths.add("..\\DarpaRoboticsChallenge\\scriptsSaved");
-      paths.add("..\\DarpaRoboticsChallenge\\resources\\scripts\\ExerciseAndJUnitScripts");
-      paths.add("..\\IHMCHumanoidBehaviors\\scripts");
-      paths.add("..\\IHMCHumanoidBehaviors\\\resources\\scripts");
-      paths.add("..\\IHMCHumanoidOperatorInterface\\scripts");
-      paths.add("..\\IHMCHumanoidOperatorInterface\\resources\\finalScripts");
-
-      ArrayList<String> newPaths = moveScriptDirectories(paths, ORIGINAL);
-
-      int index = 0;
-      for (String path : newPaths)
-      {
-         System.out.println("Transforming scripts in: " + paths.get(index++));
-         new ScriptTransformer(path);
-      }
-   }
-
-   private static ArrayList<String> moveScriptDirectories(ArrayList<String> paths, String original) throws IOException
+   public static ArrayList<String> moveScriptDirectories(ArrayList<String> paths, String original) throws IOException
    {
       ArrayList<String> newPaths = new ArrayList<>();
       for (String originalPath : paths)
@@ -217,4 +181,5 @@ public class ScriptTransformer
       }
       return newPaths;
    }
+  
 }
