@@ -2,44 +2,60 @@ package us.ihmc.aware.communication;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.aware.packets.BodyPosePacket;
-import us.ihmc.aware.packets.BodyTwistPacket;
+import us.ihmc.aware.packets.BodyOrientationPacket;
+import us.ihmc.aware.packets.ComPositionPacket;
+import us.ihmc.aware.packets.PlanarVelocityPacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 
 public class QuadrupedControllerInputProvider
 {
-   private final AtomicReference<BodyPosePacket> bodyPosePacket = new AtomicReference<>(new BodyPosePacket());
-   private final AtomicReference<BodyTwistPacket> bodyTwistPacket = new AtomicReference<>(new BodyTwistPacket());
+   private final AtomicReference<ComPositionPacket> comPositionPacket = new AtomicReference<>(new ComPositionPacket());
+   private final AtomicReference<BodyOrientationPacket> bodyOrientationPacket = new AtomicReference<>(new BodyOrientationPacket());
+   private final AtomicReference<PlanarVelocityPacket> planarVelocityPacket = new AtomicReference<>(new PlanarVelocityPacket());
 
    public QuadrupedControllerInputProvider(GlobalDataProducer globalDataProducer)
    {
-      globalDataProducer.attachListener(BodyPosePacket.class, new PacketConsumer<BodyPosePacket>()
+      globalDataProducer.attachListener(ComPositionPacket.class, new PacketConsumer<ComPositionPacket>()
       {
          @Override
-         public void receivedPacket(BodyPosePacket packet)
+         public void receivedPacket(ComPositionPacket packet)
          {
-            bodyPosePacket.set(packet);
+            comPositionPacket.set(packet);
          }
       });
 
-      globalDataProducer.attachListener(BodyTwistPacket.class, new PacketConsumer<BodyTwistPacket>()
+      globalDataProducer.attachListener(BodyOrientationPacket.class, new PacketConsumer<BodyOrientationPacket>()
       {
          @Override
-         public void receivedPacket(BodyTwistPacket packet)
+         public void receivedPacket(BodyOrientationPacket packet)
          {
-            bodyTwistPacket.set(packet);
+            bodyOrientationPacket.set(packet);
+         }
+      });
+
+      globalDataProducer.attachListener(PlanarVelocityPacket.class, new PacketConsumer<PlanarVelocityPacket>()
+      {
+         @Override
+         public void receivedPacket(PlanarVelocityPacket packet)
+         {
+            planarVelocityPacket.set(packet);
          }
       });
    }
 
-   public AtomicReference<BodyPosePacket> getBodyPosePacket()
+   public AtomicReference<ComPositionPacket> getComPositionPacket()
    {
-      return bodyPosePacket;
+      return comPositionPacket;
    }
 
-   public AtomicReference<BodyTwistPacket> getBodyTwistPacket()
+   public AtomicReference<BodyOrientationPacket> getBodyOrientationPacket()
    {
-      return bodyTwistPacket;
+      return bodyOrientationPacket;
+   }
+
+   public AtomicReference<PlanarVelocityPacket> getPlanarVelocityPacket()
+   {
+      return planarVelocityPacket;
    }
 }

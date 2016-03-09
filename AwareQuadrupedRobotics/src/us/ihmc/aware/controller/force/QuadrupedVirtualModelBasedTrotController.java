@@ -6,10 +6,9 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
-import us.ihmc.aware.packets.BodyPosePacket;
-import us.ihmc.aware.packets.BodyTwistPacket;
-import us.ihmc.aware.packets.PosePacket;
-import us.ihmc.aware.packets.TwistPacket;
+import us.ihmc.aware.packets.BodyOrientationPacket;
+import us.ihmc.aware.packets.ComPositionPacket;
+import us.ihmc.aware.packets.PlanarVelocityPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
@@ -475,6 +474,17 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   private void updateProviders()
+   {
+      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
+      BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
+      PlanarVelocityPacket planarVelocityPacket = inputProvider.getPlanarVelocityPacket().get();
+      yoBodyOrientationInput.setYawPitchRoll(bodyOrientationPacket.getYaw(), bodyOrientationPacket.getPitch(), bodyOrientationPacket.getRoll());
+      yoBodyVelocityInput.set(planarVelocityPacket.getX(), planarVelocityPacket.getY(), 0.0);
+      yoBodyYawRateInput.set(planarVelocityPacket.getA());
+      yoComHeightInput.set(comPositionPacket.getZ());
+   }
+
    private void updateEstimates()
    {
       // update frames and twists
@@ -634,14 +644,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      BodyPosePacket bodyPosePacket = inputProvider.getBodyPosePacket().get();
-      BodyTwistPacket bodyTwistPacket = inputProvider.getBodyTwistPacket().get();
-      yoBodyOrientationInput
-            .setYawPitchRoll(bodyPosePacket.getYaw(), bodyPosePacket.getPitch(), bodyPosePacket.getRoll());
-      yoBodyVelocityInput.set(bodyTwistPacket.getLinearVelocityX(), bodyTwistPacket.getLinearVelocityY(), 0.0);
-      yoBodyYawRateInput.set(bodyTwistPacket.getAngularVelocityZ());
-      yoComHeightInput.set(yoComHeightInput.getDoubleValue() + bodyTwistPacket.getLinearVelocityZ() * controlDT);
-
+      updateProviders();
       readYoVariables();
       updateEstimates();
       updateSetpoints();
