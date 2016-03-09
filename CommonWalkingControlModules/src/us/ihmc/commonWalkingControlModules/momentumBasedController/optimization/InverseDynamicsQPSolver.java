@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OAS
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -33,6 +34,8 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F solverOutput_jointAccelerations;
    private final DenseMatrix64F solverOutput_rhos;
 
+   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfIterations", registry);
+   private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
    private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
    private final DoubleYoVariable rhoRegularization = new DoubleYoVariable("rhoRegularization", registry);
 
@@ -73,8 +76,11 @@ public class InverseDynamicsQPSolver
 
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
-      jointAccelerationRegularization.set(0.05);
+      jointAccelerationRegularization.set(0.005);
       rhoRegularization.set(0.001);
+      setMinJointAccelerations(-50.0);
+      setMaxJointAccelerations(50.0);
+      setMaxRho(200.0);
 
       solverOutput = new DenseMatrix64F(problemSize, 1);
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
@@ -229,10 +235,12 @@ public class InverseDynamicsQPSolver
       DenseMatrix64F ub = solverInput_ub;
       DenseMatrix64F output = solverOutput;
 
+      numberOfConstraints.set(Aeq.getNumRows() + Ain.getNumRows());
+
       NoConvergenceException noConvergenceException;
       try
       {
-         qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall);
+         numberOfIterations.set(qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall));
          noConvergenceException = null;
       }
       catch (NoConvergenceException e)
@@ -260,9 +268,21 @@ public class InverseDynamicsQPSolver
       return solverOutput_rhos;
    }
 
+   public void setMinJointAccelerations(double qDDotMin)
+   {
+      for (int i = 4; i < numberOfDoFs; i++)
+         solverInput_lb.set(i, 0, qDDotMin);
+   }
+
    public void setMinJointAccelerations(DenseMatrix64F qDDotMin)
    {
       CommonOps.insert(qDDotMin, solverInput_lb, 0, 0);
+   }
+
+   public void setMaxJointAccelerations(double qDDotMax)
+   {
+      for (int i = 4; i < numberOfDoFs; i++)
+         solverInput_ub.set(i, 0, qDDotMax);
    }
 
    public void setMaxJointAccelerations(DenseMatrix64F qDDotMax)
@@ -279,6 +299,12 @@ public class InverseDynamicsQPSolver
    public void setMinRho(DenseMatrix64F rhoMin)
    {
       CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
+   }
+
+   public void setMaxRho(double rhoMax)
+   {
+      for (int i = numberOfDoFs; i < problemSize; i++)
+         solverInput_ub.set(i, 0, rhoMax);
    }
 
    public void setMaxRho(DenseMatrix64F rhoMax)
