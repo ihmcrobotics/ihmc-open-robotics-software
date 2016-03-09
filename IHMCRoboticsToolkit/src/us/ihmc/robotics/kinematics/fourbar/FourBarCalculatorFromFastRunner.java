@@ -92,47 +92,44 @@ public class FourBarCalculatorFromFastRunner
    
    /**
     * Takes in angle B and computes the value of the master joint angle. 
-    * Kept the same notation used in the rest of the class, but rotated: 
-    * in this case angle ABC is A, so angle DAB (master) is actually D
+    * Same notation used in the rest of the class. 
     */
    public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
    {
-      double A = angleABCInRadians;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
-      double C = getAngleWithCosineLaw(c, d, e);
-      double angleDBA = getAngleWithCosineLaw(b, e, a);
-      double angleDBC = getAngleWithCosineLaw(c, e, d);
-      double B = angleDBA + angleDBC;
-      double D = 2 * PI - A - B - C;
-      this.angleDAB = D; 
+      double B = angleABCInRadians;
+      double f = getUnknownTriangleSideLengthByLawOfCosine(b, c, B);
+      double D = getAngleWithCosineLaw(d, a, f);
+      double angleACB = getAngleWithCosineLaw(c, f, b);
+      double angleACD = getAngleWithCosineLaw(d, f, a);
+      double C = angleACB + angleACD;
+      double A = 2 * PI - D - B - C;
+      this.angleDAB = A;
    }
    
    /**
-    * Takes in angle B and computes the value of the master joint angle. 
-    * Kept the same notation used in the rest of the class, but rotated: 
-    * in this case angle BCD is A, so angle DAB (master) is actually C
+    * Takes in angle C and computes the value of the master joint angle. 
+    * Same notation used in the rest of the class. 
     */
    public void computeMasterJointAngleGivenAngleBCD(double angleBCDInRadians)
    {
-      double A = angleBCDInRadians;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
-      double C = getAngleWithCosineLaw(c, d, e);
-      this.angleDAB = C;
+      double C = angleBCDInRadians;
+      double e = getUnknownTriangleSideLengthByLawOfCosine(c, d, C);
+      double A = getAngleWithCosineLaw(a, b, e);
+      this.angleDAB = A;
    }      
    
    /**
-    * Takes in angle B and computes the value of the master joint angle. 
-    * Kept the same notation used in the rest of the class, but rotated: 
-    * in this case angle CDA is A, so angle DAB (master) is actually B
+    * Takes in angle D and computes the value of the master joint angle. 
+    * Same notation used in the rest of the class. 
     */
    public void computeMasterJointAngleGivenAngleCDA(double angleCDAInRadians)
    {
-      double A = angleCDAInRadians;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
-      double angleDBA = getAngleWithCosineLaw(b, e, a);
-      double angleDBC = getAngleWithCosineLaw(c, e, d);
-      double B = angleDBA + angleDBC;
-      this.angleDAB = B;
+      double D = angleCDAInRadians;
+      double f = getUnknownTriangleSideLengthByLawOfCosine(d, a, D);
+      double angleCAD = getAngleWithCosineLaw(a, f, d);
+      double angleCAB = getAngleWithCosineLaw(b, f, c);
+      double A = angleCAD + angleCAB;
+      this.angleDAB = A;
    }
 
    /**
