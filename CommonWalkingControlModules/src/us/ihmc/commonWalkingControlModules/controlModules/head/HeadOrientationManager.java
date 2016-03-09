@@ -22,17 +22,17 @@ public class HeadOrientationManager
    private static final double defaultTrajectoryTime = 1.0;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewHeadOrientationTime;
+   private final DoubleYoVariable receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
 
-   private final BooleanYoVariable isTrackingOrientation;
+   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
 
    private final ReferenceFrame headFrame;
    private final ReferenceFrame chestFrame;
 
-   private final BooleanYoVariable hasBeenInitialized;
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
 
    private final FrameOrientation homeOrientation = new FrameOrientation();
    private final FrameOrientation desiredOrientation = new FrameOrientation();
@@ -44,8 +44,6 @@ public class HeadOrientationManager
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
          YoOrientationPIDGainsInterface gains, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(getClass().getSimpleName()); 
-
       this.yoTime = momentumBasedController.getYoTime();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
@@ -60,10 +58,6 @@ public class HeadOrientationManager
 
       parentRegistry.addChild(registry);
 
-      receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
-      isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-
-      hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
       hasBeenInitialized.set(false);
 
       homeOrientation.setIncludingFrame(chestFrame, initialDesiredHeadYawPitchRoll);
