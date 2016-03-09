@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -14,6 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
@@ -357,7 +360,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
+      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
 
+      
+      
       String name = "DRCSimpleFlatGroundScriptTest";
       
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -378,6 +384,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
+      
+      
+      drcSimulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
 
@@ -393,6 +402,51 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       BambooTools.reportTestFinishedMessage();
    }
+	
+	  @DeployableTestMethod(estimatedDuration = 71.5)
+	   @Test(timeout = 360000)
+	   public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
+	   {
+	      BambooTools.reportTestStartedMessage();
+	      String name = "DRCSimpleScriptsTest";
+	      
+	      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+	      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+	      
+	      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, null, selectedLocation, simulationTestingParameters, getRobotModel());
+	      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+	      setupCameraForWalkingUpToRamp();
+
+	      ThreadTools.sleep(1000);
+	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1); //1.0);	      
+	      
+	      
+	      SDFFullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+	      ReferenceFrame leftSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.LEFT);
+	      
+	      
+	      FramePoint leftSole = new FramePoint(leftSoleFrame);
+	      leftSole.changeFrame(ReferenceFrame.getWorldFrame());
+	      System.out.println("leftSole = " + leftSole);
+	      
+	      
+	      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleStepScript.xml";
+         InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame); 
+	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+
+	      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+	      drcSimulationTestHelper.checkNothingChanged();
+
+	      assertTrue(success);
+
+	      Point3d center = new Point3d(0.0, 0.0, 0.8358344340816537);
+	      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+	      
+	      BambooTools.reportTestFinishedMessage();
+	   }
 	
 	
 	  @DeployableTestMethod(estimatedDuration = 71.5)
