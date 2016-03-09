@@ -43,9 +43,20 @@ public class FourBarKinematicLoopTest
       Vector3d jointCtoD = new Vector3d(1.0, 0.0, 0.0);
       Vector3d jointDtoA = new Vector3d(1.0, 0.0, 0.0);
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
-      boolean recomputeJointLimits = false;
-      initializeAllJointsToSameLimits(0.0, Math.PI);
-
+      boolean recomputeJointLimits = false;      
+      
+      // try making a four bar with no joint limits
+      try
+      {
+         new FourBarKinematicLoop("simpleSquare", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+               recomputeJointLimits);
+         fail();
+      }
+      catch(Exception e)
+      {         
+      }
+      
+      initializeAllJointsToSameLimits(0.0, Math.PI);      
       fourBarKinematicLoop = new FourBarKinematicLoop("simpleSquare", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
             recomputeJointLimits);
 
@@ -244,7 +255,85 @@ public class FourBarKinematicLoopTest
          fail();
       }
    }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testJointLimitsNearFourBarConstraint()
+   {
+      // initialize to quadrulateral with side lengths 2.0, 1.0, 0.5, 1.0
+      elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, new RigidBodyTransform());
+      elevator = new RigidBody("elevator", elevatorFrame);
+      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d elevatorToJointA = new Vector3d();
+      Vector3d jointAtoB = new Vector3d(2.0, 0.0, 0.0);
+      Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointCtoD = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointDtoA = new Vector3d(0.5, 0.0, 0.0);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      boolean recomputeJointLimits = false;
 
+      double jointAMin = getInteriorAngleFromCosineRule(2.0, 1.0 + 0.5, 1.0);
+      double jointAMax = getInteriorAngleFromCosineRule(2.0, 1.0, 0.5 + 1.0);
+      double angleEpsilon = 1e-7;
+      
+      try
+      {
+         masterJointA.setJointLimitLower(jointAMin - angleEpsilon);
+         masterJointA.setJointLimitLower(jointAMax - angleEpsilon);
+         new FourBarKinematicLoop("simpleSquare", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+               recomputeJointLimits);         
+         fail();
+      }
+      catch(Exception e)
+      {
+      }
+
+      try
+      {
+         masterJointA.setJointLimitLower(jointAMin + angleEpsilon);
+         masterJointA.setJointLimitLower(jointAMax + angleEpsilon);
+         new FourBarKinematicLoop("simpleSquare", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+               recomputeJointLimits);         
+         fail();
+      }
+      catch(Exception e)
+      {
+      }
+      
+      try
+      {
+         masterJointA.setJointLimitLower(jointAMin - angleEpsilon);
+         masterJointA.setJointLimitLower(jointAMax + angleEpsilon);
+         new FourBarKinematicLoop("simpleSquare", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+               recomputeJointLimits);         
+         fail();
+      }
+      catch(Exception e)
+      {
+      }
+      
+      try
+      {
+         masterJointA.setJointLimitLower(jointAMin + angleEpsilon);
+         masterJointA.setJointLimitLower(jointAMax - angleEpsilon);
+         new FourBarKinematicLoop("simpleSquare", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+               recomputeJointLimits);         
+      }
+      catch(Exception e)
+      {
+         fail();
+      }
+   }
+   
+   
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testJointLimitsNotSet()
+   {
+      
+   }
+   
    private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis)
    {
       masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxis);
@@ -297,5 +386,10 @@ public class FourBarKinematicLoopTest
       passiveJointD.setJointLimitLower(lowerLimit);
       passiveJointD.setJointLimitUpper(upperLimit);
 
+   }
+   
+   private static double getInteriorAngleFromCosineRule(double adjacentSide1, double adjacentSide2, double oppositeSide)
+   {
+      return Math.acos((adjacentSide1 * adjacentSide1 + adjacentSide2 * adjacentSide2 - oppositeSide * oppositeSide) / (2.0 * adjacentSide1 * adjacentSide2));
    }
 }
