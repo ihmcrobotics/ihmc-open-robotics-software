@@ -347,7 +347,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getMaxStepLength()
    {
-      return 0.3;    // 0.5; //0.35;
+      return 0.6;    // 0.5; //0.35;
    }
 
    @Override
