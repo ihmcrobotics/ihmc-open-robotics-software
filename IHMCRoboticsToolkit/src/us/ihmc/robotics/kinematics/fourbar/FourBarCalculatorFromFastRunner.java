@@ -53,15 +53,15 @@ public class FourBarCalculatorFromFastRunner
       this(length_DA, length_AB, length_BC, length_CD, true);
    }
 
-   public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD, boolean computeMinMaxAngleValues)
+   public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD, boolean computeMinMaxMasterAngleValues)
    {
       this.a = abs(length_DA);
       this.b = abs(length_AB);
       this.c = abs(length_BC);
       this.d = abs(length_CD);
-      this.computeMinMaxAngleValues = computeMinMaxAngleValues;
+      this.computeMinMaxAngleValues = computeMinMaxMasterAngleValues;
 
-      if(computeMinMaxAngleValues)
+      if(computeMinMaxMasterAngleValues)
       {
          double eMax = min(a + b, d + c);
          if (eMax == a + b)
@@ -105,8 +105,11 @@ public class FourBarCalculatorFromFastRunner
       return !MathTools.isInsideBoundsInclusive(angleDABInRadians, minA, maxA);
    }
    
-   //TODO refactor or explain names
-   
+   /**
+    * Takes in angle B and computes the value of the master joint angle. 
+    * Kept the same notation used in the rest of the class, but rotated: 
+    * in this case angle ABC is A, so angle DAB (master) is actually D
+    */
    public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
    {
       double A = angleABCInRadians;
@@ -116,30 +119,34 @@ public class FourBarCalculatorFromFastRunner
       double angleDBC = getAngleWithCosineLaw(c, e, d);
       double B = angleDBA + angleDBC;
       double D = 2 * PI - A - B - C;
-      this.angleDAB = D; //TODO write test
+      this.angleDAB = D; 
    }
    
+   /**
+    * Takes in angle B and computes the value of the master joint angle. 
+    * Kept the same notation used in the rest of the class, but rotated: 
+    * in this case angle BCD is A, so angle DAB (master) is actually C
+    */
    public void computeMasterJointAngleGivenAngleBCD(double angleBCDInRadians)
    {
-      double C = angleBCDInRadians;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(c, d, C);
-      double A = getAngleWithCosineLaw(a, b, e);
-      double angleDBA = getAngleWithCosineLaw(b, e, a);
-      double angleDBC = getAngleWithCosineLaw(c, e, d);
-      double B = angleDBA + angleDBC;
-      double D = 2 * PI - A - B - C;
-      this.angleDAB = A;
+      double A = angleBCDInRadians;
+      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
+      double C = getAngleWithCosineLaw(c, d, e);
+      this.angleDAB = C;
    }      
    
+   /**
+    * Takes in angle B and computes the value of the master joint angle. 
+    * Kept the same notation used in the rest of the class, but rotated: 
+    * in this case angle CDA is A, so angle DAB (master) is actually B
+    */
    public void computeMasterJointAngleGivenAngleCDA(double angleCDAInRadians)
    {
       double A = angleCDAInRadians;
       double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
-      double C = getAngleWithCosineLaw(c, d, e);
       double angleDBA = getAngleWithCosineLaw(b, e, a);
       double angleDBC = getAngleWithCosineLaw(c, e, d);
       double B = angleDBA + angleDBC;
-      double D = 2 * PI - A - B - C;
       this.angleDAB = B;
    }
 
