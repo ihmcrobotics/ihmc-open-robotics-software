@@ -37,6 +37,8 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
    private final DoubleYoVariable userStepHeelPercentage = new DoubleYoVariable(namePrefix + "HeelPercentage", registry);
    private final DoubleYoVariable userStepToePercentage = new DoubleYoVariable(namePrefix + "ToePercentage", registry);
 
+   private final double userFixedWidth;
+
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
 
    public UserDesiredPlanarFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
@@ -50,6 +52,8 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
 
       userStepHeelPercentage.set(1.0);
       userStepToePercentage.set(1.0);
+
+      userFixedWidth = walkingControllerParameters.getMinStepWidth();
 
       userStepLength.addVariableChangedListener(new VariableChangedListener()
       {
@@ -170,11 +174,11 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
 
    private Footstep createFootstep(ReferenceFrame previousFootFrame, RobotSide swingLegSide)
    {
+      RobotSide supportLegSide = swingLegSide.getOppositeSide();
+
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(previousFootFrame);
-
-      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength.getDoubleValue(), 0.0, userStepHeight.getDoubleValue());
-
+      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(userFixedWidth), userStepHeight.getDoubleValue());
       footstepPosition.add(footstepOffset);
 
       // Footstep Orientation
