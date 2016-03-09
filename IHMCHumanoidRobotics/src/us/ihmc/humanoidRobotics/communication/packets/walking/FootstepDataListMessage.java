@@ -151,8 +151,6 @@ public class FootstepDataListMessage extends IHMCRosApiMessage<FootstepDataListM
       {
          return (this.size() + " Footsteps");
       }
-
-
    }
 
    public Iterator<FootstepDataMessage> iterator()
@@ -164,7 +162,7 @@ public class FootstepDataListMessage extends IHMCRosApiMessage<FootstepDataListM
    {
       FootstepDataListMessage ret = new FootstepDataListMessage(swingTime, transferTime);
 
-      for (FootstepDataMessage footstepData : (FootstepDataListMessage) this)
+      for (FootstepDataMessage footstepData : footstepDataList)
       {
          FootstepDataMessage transformedFootstepData = footstepData.transform(transform);
          ret.add(transformedFootstepData);

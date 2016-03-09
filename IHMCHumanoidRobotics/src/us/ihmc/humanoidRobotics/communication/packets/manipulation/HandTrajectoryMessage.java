@@ -51,7 +51,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    @FieldDocumentation("Specifies which hand will execute the trajectory.")
    public RobotSide robotSide;
    @FieldDocumentation("Specifies whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
-   public BaseForControl base;
+   public BaseForControl baseForControl;
 
    /**
     * Empty constructor for serialization.
@@ -73,7 +73,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       setUniqueId(handTrajectoryMessage.getUniqueId());
       setDestination(handTrajectoryMessage.getDestination());
       robotSide = handTrajectoryMessage.robotSide;
-      base = handTrajectoryMessage.base;
+      baseForControl = handTrajectoryMessage.baseForControl;
    }
 
    /**
@@ -103,7 +103,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       super(trajectoryTime, desiredPosition, desiredOrientation);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      this.base = base;
+      this.baseForControl = base;
    }
 
    /**
@@ -119,7 +119,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      this.base = base;
+      this.baseForControl = base;
    }
 
    @Override
@@ -127,7 +127,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    {
       super.set(other);
       robotSide = other.robotSide;
-      base = other.base;
+      baseForControl = other.baseForControl;
    }
 
    public RobotSide getRobotSide()
@@ -137,7 +137,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
 
    public BaseForControl getBase()
    {
-      return base;
+      return baseForControl;
    }
 
    @Override
@@ -145,7 +145,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    {
       if (robotSide != other.robotSide)
          return false;
-      if (base != other.base)
+      if (baseForControl != other.baseForControl)
          return false;
 
       return super.epsilonEquals(other, epsilon);
@@ -154,7 +154,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    @Override
    public HandTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      HandTrajectoryMessage transformedHandTrajectoryMessage = new HandTrajectoryMessage(robotSide, base, getNumberOfTrajectoryPoints());
+      HandTrajectoryMessage transformedHandTrajectoryMessage = new HandTrajectoryMessage(this);
       transformedHandTrajectoryMessage.applyTransform(transform);
       return transformedHandTrajectoryMessage;
    }
@@ -168,7 +168,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       else
          ret = "Hand SE3 trajectory: no SE3 trajectory points";
 
-      return ret + ", robotSide = " + robotSide + ", base for control = " + base;
+      return ret + ", robotSide = " + robotSide + ", base for control = " + baseForControl;
    }
 
    /** {@inheritDoc} */

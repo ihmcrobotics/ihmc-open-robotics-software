@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Vector3d;
 
@@ -12,6 +13,7 @@ import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -26,6 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -65,6 +68,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    private SimulationConstructionSet simulationConstructionSet;
 
    private String scriptFileName; // TODO Reimplement the script based message generator.
+   private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
    private boolean createSCSSimulatedSensors;
 
    private boolean deactivateWalkingFallDetector = false;
@@ -95,6 +99,8 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
 
+   private final ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
+   
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
       this.robotModel = robotModel;
@@ -365,6 +371,12 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       }
    }
 
+   
+   public ScriptBasedControllerCommandGenerator getScriptBasedControllerCommandGenerator()
+   {
+      return scriptBasedControllerCommandGenerator;
+   }
+   
    private void createSimulationFactory()
    {
       HumanoidGlobalDataProducer dataProducer = null;
@@ -391,6 +403,10 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       if (deactivateWalkingFallDetector)
          controllerFactory.setFallbackControllerForFailure(null);
 
+      controllerFactory.createdQueuedControllerCommandGenerator(controllerCommands);
+      
+      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
+
       drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, dataProducer);
 
       if (externalPelvisCorrectorSubscriber != null)
@@ -406,6 +422,11 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       simulationConstructionSet.attachPlaybackListener(playbackListener);
 
       drcSimulationFactory.start();
+   }
+
+   public ConcurrentLinkedQueue<ControllerCommand<?, ?>> getQueuedControllerCommands()
+   {
+      return controllerCommands;
    }
 
    @Override

@@ -103,19 +103,13 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       if (allowMultipleFrames)
       {
-         YoFrameQuaternionInMultipleFrames initialOrientation = new YoFrameQuaternionInMultipleFrames(name + initialOrientationName, registry,
-               trajectoryFrame);
-         YoFrameVectorInMultipleFrames initialAngularVelocity = new YoFrameVectorInMultipleFrames(name + initialAngularVelocityName, registry,
-               trajectoryFrame);
-         YoFrameQuaternionInMultipleFrames finalOrientation = new YoFrameQuaternionInMultipleFrames(name + finalOrientationName, registry,
-               trajectoryFrame);
-         YoFrameVectorInMultipleFrames finalAngularVelocity = new YoFrameVectorInMultipleFrames(name + finalAngularVelocityName, registry,
-               trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames initialOrientation = new YoFrameQuaternionInMultipleFrames(name + initialOrientationName, registry, trajectoryFrame);
+         YoFrameVectorInMultipleFrames initialAngularVelocity = new YoFrameVectorInMultipleFrames(name + initialAngularVelocityName, registry, trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames finalOrientation = new YoFrameQuaternionInMultipleFrames(name + finalOrientationName, registry, trajectoryFrame);
+         YoFrameVectorInMultipleFrames finalAngularVelocity = new YoFrameVectorInMultipleFrames(name + finalAngularVelocityName, registry, trajectoryFrame);
 
-         YoFrameQuaternionInMultipleFrames currentOrientation = new YoFrameQuaternionInMultipleFrames(name + currentOrientationName, registry,
-               trajectoryFrame);
-         YoFrameVectorInMultipleFrames currentAngularVelocity = new YoFrameVectorInMultipleFrames(name + currentAngularVelocityName, registry,
-               trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames currentOrientation = new YoFrameQuaternionInMultipleFrames(name + currentOrientationName, registry, trajectoryFrame);
+         YoFrameVectorInMultipleFrames currentAngularVelocity = new YoFrameVectorInMultipleFrames(name + currentAngularVelocityName, registry, trajectoryFrame);
          YoFrameVectorInMultipleFrames currentAngularAcceleration = new YoFrameVectorInMultipleFrames(name + currentAngularAccelerationName, registry,
                trajectoryFrame);
 
@@ -285,13 +279,13 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       initialFrameSO3Waypoint.getOrientationIncludingFrame(tempFrameOrientation);
       initialFrameSO3Waypoint.getAngularVelocityIncludingFrame(tempFrameVector);
-      
+
       initialOrientation.set(tempFrameOrientation);
       initialAngularVelocity.set(tempFrameVector);
-      
+
       finalFrameSO3Waypoint.getOrientationIncludingFrame(tempFrameOrientation);
       finalFrameSO3Waypoint.getAngularVelocityIncludingFrame(tempFrameVector);
-      
+
       finalOrientation.set(tempFrameOrientation);
       finalAngularVelocity.set(tempFrameVector);
    }
@@ -310,7 +304,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    /**
     * Before Initializing the isSolvable() method should be called to confirm that the limit conditions are within the bounds
     */
-   @Override public void initialize()
+   @Override
+   public void initialize()
    {
       piInteger.set(0);
       currentTime.set(0.0);
@@ -361,10 +356,13 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
          controlAngularVelocities[i].set(tempAngularVelocity);
       }
 
-      tempAngularVelocity.set(controlAngularVelocities[2].getVector3dCopy());
-      tempAngularVelocity.normalize();
-      tempAngularVelocity.scale(piInteger.getIntegerValue() * Math.PI);
-      controlAngularVelocities[2].add(tempAngularVelocity);
+      controlAngularVelocities[2].get(tempAngularVelocity);
+      if (tempAngularVelocity.lengthSquared() > 1.0e-10)
+      {
+         tempAngularVelocity.normalize();
+         tempAngularVelocity.scale(piInteger.getIntegerValue() * Math.PI);
+         controlAngularVelocities[2].add(tempAngularVelocity);
+      }
 
       for (int i = 0; i <= 3; i++)
       {
@@ -383,7 +381,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private final Quat4d qDDotOld = new Quat4d();
    private final Quat4d qDDot = new Quat4d();
 
-   @Override public void compute(double time)
+   @Override
+   public void compute(double time)
    {
       this.currentTime.set(time);
 
@@ -477,34 +476,40 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       return omegaALength && omegaBLength && !opposite;
    }
 
-   @Override public boolean isDone()
+   @Override
+   public boolean isDone()
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   @Override public void getOrientation(FrameOrientation orientationToPack)
+   @Override
+   public void getOrientation(FrameOrientation orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   @Override public void getAngularVelocity(FrameVector velocityToPack)
+   @Override
+   public void getAngularVelocity(FrameVector velocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   @Override public void getAngularAcceleration(FrameVector accelerationToPack)
+   @Override
+   public void getAngularAcceleration(FrameVector accelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   @Override public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   @Override
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   @Override public String toString()
+   @Override
+   public String toString()
    {
       String ret = "";
 

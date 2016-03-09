@@ -4,8 +4,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -14,6 +16,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -32,11 +35,13 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.ForceSensorHysteresisCreator;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
@@ -68,7 +73,6 @@ public class DRCSimulationTestHelper
    private final WalkingControllerParameters walkingControlParameters;
 
    private final FullHumanoidRobotModel fullRobotModel;
-   private final HumanoidReferenceFrames referenceFrames;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
@@ -115,7 +119,7 @@ public class DRCSimulationTestHelper
       }
 
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
       scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 
@@ -161,6 +165,23 @@ public class DRCSimulationTestHelper
       {
          nothingChangedVerifier = null;
       }
+   }
+
+   public void loadScriptFile(String scriptFilename, ReferenceFrame referenceFrame)
+   {
+      ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
+      scriptBasedControllerCommandGenerator.loadScriptFile(scriptFilename, referenceFrame);
+   }
+   
+   public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
+   {
+      ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
+      scriptBasedControllerCommandGenerator.loadScriptFile(scriptInputStream, referenceFrame);
+   }
+   
+   public ConcurrentLinkedQueue<ControllerCommand<?, ?>> getQueuedControllerCommands()
+   {
+      return simulationStarter.getQueuedControllerCommands();
    }
 
    public BlockingSimulationRunner getBlockingSimulationRunner()
@@ -404,4 +425,6 @@ public class DRCSimulationTestHelper
          }
       }
    }
+
+
 }
