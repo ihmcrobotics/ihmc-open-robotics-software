@@ -44,7 +44,7 @@ public class HeadOrientationManager
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
          YoOrientationPIDGainsInterface gains, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
-      this.yoTime = momentumBasedController.getYoTime();
+      yoTime = momentumBasedController.getYoTime();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
       RigidBody head = fullRobotModel.getHead();
