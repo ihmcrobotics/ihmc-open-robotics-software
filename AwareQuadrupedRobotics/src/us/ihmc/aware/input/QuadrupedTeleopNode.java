@@ -6,8 +6,8 @@ import java.util.Map;
 
 import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
 import us.ihmc.aware.input.devices.XboxControllerInputDevice;
-import us.ihmc.aware.packets.BodyPosePacket;
-import us.ihmc.aware.packets.BodyTwistPacket;
+import us.ihmc.aware.packets.BodyOrientationPacket;
+import us.ihmc.aware.packets.PlanarVelocityPacket;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -75,16 +75,16 @@ public class QuadrupedTeleopNode implements InputEventCallback
          double yaw = channels.get(InputChannel.RIGHT_STICK_X);
          double pitch = -channels.get(InputChannel.RIGHT_STICK_Y);
          double roll = channels.get(InputChannel.RIGHT_TRIGGER) - channels.get(InputChannel.LEFT_TRIGGER);
-         BodyPosePacket posePacket = new BodyPosePacket(0.0, 0.0, 0.0, yaw, pitch, roll);
+         BodyOrientationPacket orientationPacket = new BodyOrientationPacket(yaw, pitch, roll);
 
-         double vx = -channels.get(InputChannel.LEFT_STICK_Y);
-         double vy = -channels.get(InputChannel.LEFT_STICK_X);
-         double vz = -channels.get(InputChannel.LEFT_BUTTON) + channels.get(InputChannel.RIGHT_BUTTON);
-         double wz = -channels.get(InputChannel.RIGHT_STICK_X);
-         BodyTwistPacket twistPacket = new BodyTwistPacket(vx, vy, vz, 0.0, 0.0, wz);
+         double xdot = -channels.get(InputChannel.LEFT_STICK_Y);
+         double ydot = -channels.get(InputChannel.LEFT_STICK_X);
+         double zdot = -channels.get(InputChannel.LEFT_BUTTON) + channels.get(InputChannel.RIGHT_BUTTON);
+         double adot = -channels.get(InputChannel.RIGHT_STICK_X);
+         PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(xdot, ydot, adot);
 
-         packetCommunicator.send(posePacket);
-         packetCommunicator.send(twistPacket);
+         packetCommunicator.send(orientationPacket);
+         packetCommunicator.send(velocityPacket);
          break;
       case BUTTON_A:
          break;
