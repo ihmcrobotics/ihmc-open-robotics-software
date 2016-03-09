@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller;
 
 import java.awt.Color;
-import java.util.Map;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
@@ -77,7 +76,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactCircle;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 {
@@ -120,7 +118,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
    private final NextSwingLegChooser nextSwingLegChooser;
    private final SwingTargetGenerator swingTargetGenerator;
-   private final Map<RobotQuadrant, FootSwitchInterface> footSwitches;
+   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
    private final SDFFullRobotModel actualFullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -336,7 +334,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private DesiredYawInPlaceProvider desiredYawInPlaceProvider;
 
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
-         Map<RobotQuadrant, FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
+         QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
       super(QuadrupedControllerState.POSITION_CRAWL);
@@ -1237,10 +1235,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     	  boolean swingFootHitGround = false;
     	  boolean inSwingStateLongEnough = tripleSupportState.getTimeInCurrentState() > swingDuration.getDoubleValue() / 3.0;
 
-    	  if (!runOpenLoop.getBooleanValue())
+    	  if (!runOpenLoop.getBooleanValue() && footSwitches != null)
     	  {
         	  FootSwitchInterface footSwitch = footSwitches.get(swingQuadrant);
-         swingFootHitGround = footSwitch.hasFootHitGround();
+     	     swingFootHitGround = footSwitch.hasFootHitGround();
     	  }
     	  
     	  return ((swingTrajectoryIsDone || swingFootHitGround) && inSwingStateLongEnough);

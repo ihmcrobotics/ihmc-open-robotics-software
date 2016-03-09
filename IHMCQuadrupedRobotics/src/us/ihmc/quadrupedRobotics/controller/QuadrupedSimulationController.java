@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
-import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
@@ -18,14 +18,15 @@ public class QuadrupedSimulationController implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final SDFRobot sdfRobot;
-   private final RawSensorReader sensorReader;
+   private final SensorReader sensorReader;
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
    private RobotController headController; //not implemented yet
    private DRCKinematicsBasedStateEstimator stateEstimator; //not implemented yet
    private final DRCPoseCommunicator poseCommunicator;
+   private boolean firstTick = true;
    
-   public QuadrupedSimulationController(SDFRobot simulationRobot, RawSensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
+   public QuadrupedSimulationController(SDFRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
          DRCPoseCommunicator poseCommunicator, RobotController headController)
    {
       this.sdfRobot = simulationRobot;
@@ -66,7 +67,15 @@ public class QuadrupedSimulationController implements RobotController
    public void doControl()
    {
       sensorReader.read();
-      stateEstimator.doControl();
+      if(stateEstimator != null)
+      {
+         if(firstTick)
+         {
+            stateEstimator.initialize();
+            firstTick = false;
+         }
+         stateEstimator.doControl();
+      }
       gaitControlManager.doControl();
       if(poseCommunicator != null)
       {

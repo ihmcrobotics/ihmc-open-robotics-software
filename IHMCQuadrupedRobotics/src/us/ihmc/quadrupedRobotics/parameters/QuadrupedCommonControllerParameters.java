@@ -1,12 +1,10 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
-import java.util.Map;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedCommonControllerParameters
@@ -15,14 +13,14 @@ public class QuadrupedCommonControllerParameters
    private final DoubleYoVariable robotTimestamp;
 
    private final SDFFullRobotModel fullRobotModel;
-   private final Map<RobotQuadrant, FootSwitchInterface> footSwitches;
+   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
 
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
 
    public QuadrupedCommonControllerParameters(double controlDt, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel,
-         Map<RobotQuadrant, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
+         QuadrantDependentList<FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
          YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead)
    {
       this.controlDt = controlDt;
@@ -64,7 +62,7 @@ public class QuadrupedCommonControllerParameters
       return graphicsListRegistryForDetachedOverhead;
    }
 
-   public Map<RobotQuadrant, FootSwitchInterface> getFootSwicthes()
+   public QuadrantDependentList<FootSwitchInterface> getFootSwicthes()
    {
       return footSwitches;
    }
