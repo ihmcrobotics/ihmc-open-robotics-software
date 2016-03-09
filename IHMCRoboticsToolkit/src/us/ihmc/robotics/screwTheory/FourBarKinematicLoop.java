@@ -104,13 +104,13 @@ public class FourBarKinematicLoop
          System.out.println("\nLink length debugging: \n");
          System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
-      
+
+      fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD, recomputeJointLimits);
+
       // Check (and correct, if applicable) joint limits and close the loop
       clipMasterJointLimits(passiveJointB, passiveJointC, passiveJointD);
            
       setInteriorAngleOffsets();
-
-      fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD, recomputeJointLimits);
 
       verifyMasterJointLimits();
       
