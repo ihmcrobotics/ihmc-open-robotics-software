@@ -6,7 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
@@ -52,8 +54,6 @@ public class QueuedControllerCommandGenerator implements Updatable
    {
       if (waitingForWalkingStatusToComplete) return;
 
-      waitingForWalkingStatusToComplete = true;
-
       if (controllerCommands.isEmpty())
       {
          waitingForWalkingStatusToComplete = false;
@@ -68,9 +68,30 @@ public class QueuedControllerCommandGenerator implements Updatable
       }
 
       System.out.println("Found a controller command!!!");
-      FootstepDataListControllerCommand footsteps = (FootstepDataListControllerCommand) controllerCommand;
+      if (controllerCommand instanceof FootstepDataListControllerCommand)
+      {
+         FootstepDataListControllerCommand footstepDataListControllerCommand = (FootstepDataListControllerCommand) controllerCommand;
+         commandInputManager.submitModifiableMessage(footstepDataListControllerCommand);
+         waitingForWalkingStatusToComplete = true;
+      }
+      
+      else if (controllerCommand instanceof ChestTrajectoryControllerCommand)
+      {
+         ChestTrajectoryControllerCommand chestTrajectoryControllerCommand = (ChestTrajectoryControllerCommand) controllerCommand;
+         commandInputManager.submitModifiableMessage(chestTrajectoryControllerCommand);
+      }
+      
+      else if (controllerCommand instanceof FootTrajectoryControllerCommand)
+      {
+         FootTrajectoryControllerCommand footTrajectoryControllerCommand = (FootTrajectoryControllerCommand) controllerCommand;
+         commandInputManager.submitModifiableMessage(footTrajectoryControllerCommand);
+      }
+      
+      else
+      {
+         System.err.println("QueuedControllerCommandGenerator: No plan for how to deal with commands of type " + controllerCommand.getClass());
+      }
 
-      commandInputManager.submitModifiableMessage(footsteps);
    }
    
    public void addControllerCommand(ControllerCommand<?, ?> controllerCommand)
