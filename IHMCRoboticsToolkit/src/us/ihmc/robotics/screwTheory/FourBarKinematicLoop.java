@@ -37,6 +37,7 @@ public class FourBarKinematicLoop
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
    private final Vector3d closurePointFromLastPassiveJointVect;
+   private final boolean recomputeJointLimits;
    
    private final FramePoint masterJointAPosition = new FramePoint();
    private final FramePoint jointBPosition = new FramePoint();
@@ -70,6 +71,7 @@ public class FourBarKinematicLoop
       this.passiveJointC = passiveJointC;
       this.passiveJointD = passiveJointD;
       this.closurePointFromLastPassiveJointVect = closurePointFromLastPassiveJoint;
+      this.recomputeJointLimits = recomputeJointLimits;
       
       // Rotation axis
       masterAxis = masterJointA.getJointAxis();
@@ -89,7 +91,7 @@ public class FourBarKinematicLoop
       passiveJointC.setQ(0.0);
       passiveJointD.setQ(0.0);
       
-      // Check joint limits and close the loop
+      // Link lengths
       frameWithZAlongJointAxis = ReferenceFrame.constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint(), Axis.Z, jointAxisInWorld);
       initializeJointPositionsAndLinkVectors();
       masterLinkAB = vectorABProjected.length();
@@ -103,12 +105,15 @@ public class FourBarKinematicLoop
          System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
       
-      verifyMasterJointLimits();
+      // Check (and correct, if applicable) joint limits and close the loop
+      clipMasterJointLimits(passiveJointB, passiveJointC, passiveJointD);
+           
       setInteriorAngleOffsets();
 
       fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD, recomputeJointLimits);
-//      updateAnglesAndVelocities();
 
+      verifyMasterJointLimits();
+      
       if (DEBUG)
       {
          System.out.println("\nInitial joint angles debugging:\n\n" + "MasterQ: " + masterJointA.getQ() + "\njointBQ: " + passiveJointB.getQ() + "\njointCQ: "
@@ -228,10 +233,60 @@ public class FourBarKinematicLoop
       }
    }
 
-   private void verifyMasterJointLimits() //TODO write a test for this
+   //TODO avoid repetition
+   
+   /**
+    * Clips the range of motion of the master joint if the limits set for the joint that is passed in are more restrictive
+    */
+   private void clipMasterJointLimits(PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
    {
-      maxValidMasterJointAngle = Math.acos((masterLinkAB * masterLinkAB + DA * DA - (CD + BC) * (CD + BC)) / (2 * masterLinkAB * DA));
-      minValidMasterJointAngle = Math.acos((DA * DA + (BC + masterLinkAB) * (BC + masterLinkAB) - CD * CD) / (2 * DA * (BC + masterLinkAB)));
+
+      if (jointB.getJointLimitLower() != Double.NEGATIVE_INFINITY || jointB.getJointLimitUpper() != Double.POSITIVE_INFINITY)
+      {
+         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitLower());
+
+         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
+            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+
+         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitUpper());
+
+         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
+            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+      }
+      
+      if (jointC.getJointLimitLower() != Double.NEGATIVE_INFINITY || jointC.getJointLimitUpper() != Double.POSITIVE_INFINITY)
+      {
+         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitLower());
+
+         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
+            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+
+         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitUpper());
+
+         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
+            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+      }
+      
+      if (jointD.getJointLimitLower() != Double.NEGATIVE_INFINITY || jointD.getJointLimitUpper() != Double.POSITIVE_INFINITY)
+      {
+         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitLower());
+
+         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
+            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+
+         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitUpper());
+
+         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
+            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+      }
+
+   }
+     
+   
+   private void verifyMasterJointLimits() 
+   {
+      maxValidMasterJointAngle = fourBarCalculator.getMinDAB();
+      minValidMasterJointAngle = fourBarCalculator.getMaxDAB();
 
       if (DEBUG)
       {
@@ -242,20 +297,29 @@ public class FourBarKinematicLoop
       // 1 - Angle limits not set
       if (masterJointA.getJointLimitLower() == Double.NEGATIVE_INFINITY || masterJointA.getJointLimitUpper() == Double.POSITIVE_INFINITY)
       {
-         throw new RuntimeException("Must set the joint limits for the master joint of the " + name
-               + " four bar.\nNote that for the given link lengths max angle is " + maxValidMasterJointAngle + "and min angle is" + minValidMasterJointAngle);
+         if (recomputeJointLimits)
+         {
+            masterJointA.setJointLimitLower(minValidMasterJointAngle);
+            masterJointA.setJointLimitUpper(maxValidMasterJointAngle);
+            System.out.println("NOTE: The master joint limits have been set to " + minValidMasterJointAngle + " and " + maxValidMasterJointAngle);
+         }
+         else
+         {
+            throw new RuntimeException("Must set the joint limits for the master joint of the " + name
+                  + " four bar.\nNote that for the given link lengths max angle is " + maxValidMasterJointAngle + "and min angle is" + minValidMasterJointAngle);        
+         }
       }
 
       // 2 - Max angle limit is too large
       if (BC + CD > masterLinkAB + DA)
       {
-         if (masterJointA.getJointLimitUpper() > maxValidMasterJointAngle)
+         if (masterJointA.getJointLimitUpper() > maxValidMasterJointAngle && !recomputeJointLimits)
          {
             throw new RuntimeException("The maximum valid joint angle for the master joint of the " + name + " four bar is " + maxValidMasterJointAngle
                   + " to avoid flipping, but was set to " + masterJointA.getJointLimitUpper());
          }
       }
-      else if (masterJointA.getJointLimitUpper() > Math.PI)
+      else if (masterJointA.getJointLimitUpper() > Math.PI && !recomputeJointLimits)
       {
          throw new RuntimeException("The maximum valid joint angle for the master joint of the " + name + " four bar is " + maxValidMasterJointAngle
                + " to avoid flipping, but was set to " + masterJointA.getJointLimitUpper());
@@ -264,13 +328,13 @@ public class FourBarKinematicLoop
       // 3 - Min angle limit is too small
       if (masterLinkAB + BC < DA + CD)
       {
-         if (masterJointA.getJointLimitLower() < minValidMasterJointAngle)
+         if (masterJointA.getJointLimitLower() < minValidMasterJointAngle && !recomputeJointLimits)
          {
             throw new RuntimeException("The minimum valid joint angle for the master joint of the " + name + " four bar is " + minValidMasterJointAngle
                   + " to avoid flipping, but was set to " + masterJointA.getJointLimitLower());
          }
       }
-      else if (masterJointA.getJointLimitLower() < 0.0)
+      else if (masterJointA.getJointLimitLower() < 0.0 && !recomputeJointLimits)
       {
          throw new RuntimeException("The minimum valid joint angle for the master joint of the " + name + " four bar is " + minValidMasterJointAngle
                + " to avoid flipping, but was set to " + masterJointA.getJointLimitLower());

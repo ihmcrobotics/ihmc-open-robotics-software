@@ -37,7 +37,7 @@ public class FourBarCalculatorFromFastRunner
    private final double a, b, c, d;
    private final double minA, maxA;
    
-   private final boolean computeMinMax;
+   private final boolean computeMinMaxAngleValues;
 
    // Angles
    private double angleDAB, angleABC, angleBCD, angleCDA;
@@ -53,16 +53,16 @@ public class FourBarCalculatorFromFastRunner
       this(length_DA, length_AB, length_BC, length_CD, true);
    }
 
-   public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD, boolean computeMinMax)
+   public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD, boolean computeMinMaxAngleValues)
    {
       this.a = abs(length_DA);
       this.b = abs(length_AB);
       this.c = abs(length_BC);
       this.d = abs(length_CD);
-      this.computeMinMax = computeMinMax;
+      this.computeMinMaxAngleValues = computeMinMaxAngleValues;
 
-//      if(computeMinMax)
-//      {
+      if(computeMinMaxAngleValues)
+      {
          double eMax = min(a + b, d + c);
          if (eMax == a + b)
             maxA = PI;
@@ -74,11 +74,12 @@ public class FourBarCalculatorFromFastRunner
             minA = getAngleWithCosineLaw(fMax, b, c);
          else
             minA = getAngleWithCosineLaw(fMax, a, d);    
-//      }
-//      else
-//      {
-//         
-//      }
+      }
+      else //when it clips it will leave the original max and min angle values
+      {
+         minA = Double.NEGATIVE_INFINITY; 
+         maxA = Double.POSITIVE_INFINITY;
+      }
    }
 
    /**
@@ -102,6 +103,44 @@ public class FourBarCalculatorFromFastRunner
       this.angleCDA = D;
 
       return !MathTools.isInsideBoundsInclusive(angleDABInRadians, minA, maxA);
+   }
+   
+   //TODO refactor or explain names
+   
+   public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
+   {
+      double A = angleABCInRadians;
+      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
+      double C = getAngleWithCosineLaw(c, d, e);
+      double angleDBA = getAngleWithCosineLaw(b, e, a);
+      double angleDBC = getAngleWithCosineLaw(c, e, d);
+      double B = angleDBA + angleDBC;
+      double D = 2 * PI - A - B - C;
+      this.angleDAB = D; //TODO write test
+   }
+   
+   public void computeMasterJointAngleGivenAngleBCD(double angleBCDInRadians)
+   {
+      double C = angleBCDInRadians;
+      double e = getUnknownTriangleSideLengthByLawOfCosine(c, d, C);
+      double A = getAngleWithCosineLaw(a, b, e);
+      double angleDBA = getAngleWithCosineLaw(b, e, a);
+      double angleDBC = getAngleWithCosineLaw(c, e, d);
+      double B = angleDBA + angleDBC;
+      double D = 2 * PI - A - B - C;
+      this.angleDAB = A;
+   }      
+   
+   public void computeMasterJointAngleGivenAngleCDA(double angleCDAInRadians)
+   {
+      double A = angleCDAInRadians;
+      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
+      double C = getAngleWithCosineLaw(c, d, e);
+      double angleDBA = getAngleWithCosineLaw(b, e, a);
+      double angleDBC = getAngleWithCosineLaw(c, e, d);
+      double B = angleDBA + angleDBC;
+      double D = 2 * PI - A - B - C;
+      this.angleDAB = B;
    }
 
    /**
