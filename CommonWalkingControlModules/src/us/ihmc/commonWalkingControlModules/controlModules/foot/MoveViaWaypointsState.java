@@ -57,9 +57,6 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
    public void handleFootTrajectoryMessage(FootTrajectoryControllerCommand footTrajectoryMessage, boolean initializeToCurrent)
    {
-      positionTrajectoryGenerator.clear();
-      orientationTrajectoryGenerator.clear();
-
       if (footTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (initializeToCurrent)
@@ -78,8 +75,15 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          tempLinearVelocity.setToZero(worldFrame);
          tempAngularVelocity.setToZero(worldFrame);
 
+         positionTrajectoryGenerator.clear();
+         orientationTrajectoryGenerator.clear();
          positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
          orientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+      }
+      else
+      {
+         positionTrajectoryGenerator.clear();
+         orientationTrajectoryGenerator.clear();
       }
 
       positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage);
