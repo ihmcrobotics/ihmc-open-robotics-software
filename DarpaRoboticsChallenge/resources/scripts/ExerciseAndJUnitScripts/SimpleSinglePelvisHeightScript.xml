@@ -1,0 +1,18 @@
+<object-stream>
+  <long>38963645541</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
+    <destination>0</destination>
+    <trajectoryPoints>
+      <us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage>
+        <destination>0</destination>
+        <time>2.0</time>
+        <position>0.6</position>
+        <velocity>0.0</velocity>
+      </us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage>
+    </trajectoryPoints>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
+  <long>40681779074</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+    <destination>0</destination>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+</object-stream>

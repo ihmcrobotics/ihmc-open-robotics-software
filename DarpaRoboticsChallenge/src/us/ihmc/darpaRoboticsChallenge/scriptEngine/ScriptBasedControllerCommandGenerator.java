@@ -6,10 +6,16 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -69,24 +75,34 @@ public class ScriptBasedControllerCommandGenerator
 
       if (scriptObject instanceof FootstepDataListMessage)
       {
-         FootstepDataListMessage footstepDataListMessage = (FootstepDataListMessage) scriptObject;
-         FootstepDataListControllerCommand footstepDataListControllerCommand = new FootstepDataListControllerCommand();
-         footstepDataListControllerCommand.set(footstepDataListMessage);
-         controllerCommands.add(footstepDataListControllerCommand);
+         FootstepDataListMessage message = (FootstepDataListMessage) scriptObject;
+         FootstepDataListControllerCommand command = new FootstepDataListControllerCommand();
+         command.set(message);
+         controllerCommands.add(command);
       }
-//      else if (scriptObject instanceof FootTrajectoryMessage)
-//      {
-//         FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
-//         footTrajectoryMessageSubscriber.receivedPacket(message);
-//         setupTimesForNewScriptEvent(0.5);
-//      }
-//      else if (scriptObject instanceof HandTrajectoryMessage)
-//      {
-//         HandTrajectoryMessage handTrajectoryMessage = (HandTrajectoryMessage) scriptObject;
-//         handTrajectoryMessageSubscriber.receivedPacket(handTrajectoryMessage);
-//
-//         setupTimesForNewScriptEvent(handTrajectoryMessage.getLastTrajectoryPoint().time);
-//      }
+      else if (scriptObject instanceof FootTrajectoryMessage)
+      {
+         FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
+         FootTrajectoryControllerCommand command = new FootTrajectoryControllerCommand();
+         command.set(message);
+         controllerCommands.add(command);
+      }
+      else if (scriptObject instanceof HandTrajectoryMessage)
+      {
+         HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
+         HandTrajectoryControllerCommand command = new HandTrajectoryControllerCommand();
+         command.set(message);
+         controllerCommands.add(command);
+      }
+      else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
+      {
+         PelvisHeightTrajectoryMessage message = (PelvisHeightTrajectoryMessage) scriptObject;
+         PelvisHeightTrajectoryControllerCommand command = new PelvisHeightTrajectoryControllerCommand();
+         command.set(message);
+         controllerCommands.add(command);
+      }
+      
+
 //      else if (scriptObject instanceof ArmTrajectoryMessage)
 //      {
 //         ArmTrajectoryMessage armTrajectoryMessage = (ArmTrajectoryMessage) scriptObject;
@@ -94,13 +110,7 @@ public class ScriptBasedControllerCommandGenerator
 //         
 //         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
 //      }
-//      else if (scriptObject instanceof PelvisTrajectoryMessage)
-//      {
-//         PelvisTrajectoryMessage pelvisPosePacket = (PelvisTrajectoryMessage) scriptObject;
-//         pelvisTrajectoryMessageSubscriber.receivedPacket(pelvisPosePacket);
-//
-//         setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
-//      }
+
 //      else if (scriptObject instanceof PauseWalkingMessage)
 //      {
 //         PauseWalkingMessage pauseWalkingMessage = (PauseWalkingMessage) scriptObject;
