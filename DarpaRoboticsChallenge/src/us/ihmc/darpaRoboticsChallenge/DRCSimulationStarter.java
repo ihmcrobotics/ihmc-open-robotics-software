@@ -28,6 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -67,6 +68,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    private SimulationConstructionSet simulationConstructionSet;
 
    private String scriptFileName; // TODO Reimplement the script based message generator.
+   private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
    private boolean createSCSSimulatedSensors;
 
    private boolean deactivateWalkingFallDetector = false;
@@ -369,6 +371,12 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       }
    }
 
+   
+   public ScriptBasedControllerCommandGenerator getScriptBasedControllerCommandGenerator()
+   {
+      return scriptBasedControllerCommandGenerator;
+   }
+   
    private void createSimulationFactory()
    {
       HumanoidGlobalDataProducer dataProducer = null;
@@ -396,6 +404,8 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
          controllerFactory.setFallbackControllerForFailure(null);
 
       controllerFactory.createdQueuedControllerCommandGenerator(controllerCommands);
+      
+      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
 
       drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, dataProducer);
 
