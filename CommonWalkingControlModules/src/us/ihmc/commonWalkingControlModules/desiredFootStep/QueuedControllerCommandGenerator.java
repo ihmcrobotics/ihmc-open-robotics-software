@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTraj
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -85,6 +87,18 @@ public class QueuedControllerCommandGenerator implements Updatable
       {
          FootTrajectoryControllerCommand footTrajectoryControllerCommand = (FootTrajectoryControllerCommand) controllerCommand;
          commandInputManager.submitModifiableMessage(footTrajectoryControllerCommand);
+      }
+      
+      else if (controllerCommand instanceof HandTrajectoryControllerCommand)
+      {
+         HandTrajectoryControllerCommand handTrajectoryControllerCommand = (HandTrajectoryControllerCommand) controllerCommand;
+         commandInputManager.submitModifiableMessage(handTrajectoryControllerCommand);
+      }
+      
+      else if (controllerCommand instanceof PelvisHeightTrajectoryControllerCommand)
+      {
+         PelvisHeightTrajectoryControllerCommand pelvisHeightTrajectoryControllerCommand = (PelvisHeightTrajectoryControllerCommand) controllerCommand;
+         commandInputManager.submitModifiableMessage(pelvisHeightTrajectoryControllerCommand);
       }
       
       else

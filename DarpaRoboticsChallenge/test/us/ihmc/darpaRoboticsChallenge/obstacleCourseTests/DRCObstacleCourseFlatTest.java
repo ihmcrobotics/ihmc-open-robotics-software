@@ -422,18 +422,35 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      
 	      
 	      SDFFullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-	      ReferenceFrame leftSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.LEFT);
+         ReferenceFrame leftSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.LEFT);
+         ReferenceFrame rightSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.RIGHT);
 	      
 	      
 	      FramePoint leftSole = new FramePoint(leftSoleFrame);
 	      leftSole.changeFrame(ReferenceFrame.getWorldFrame());
 	      System.out.println("leftSole = " + leftSole);
 	      
-	      
 	      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleStepScript.xml";
-         InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+	      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
 	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame); 
 	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+
+	      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleHandTrajectoryScript.xml";
+	      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame); 
+	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+	      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleFootTrajectoryScript.xml";
+	      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, rightSoleFrame); 
+	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+	      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSinglePelvisHeightScript.xml";
+	      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+         drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame); 
+         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+	      
 
 	      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
 	      drcSimulationTestHelper.checkNothingChanged();
