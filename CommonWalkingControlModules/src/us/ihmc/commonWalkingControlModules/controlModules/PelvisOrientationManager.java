@@ -118,7 +118,7 @@ public class PelvisOrientationManager
       desiredPelvisOrientationOffset = new YoFrameQuaternion("desiredPelvis", "Offset", desiredPelvisFrame, registry);
 
       boolean allowMultipleFrames = true;
-      waypointOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", 15, allowMultipleFrames,
+      waypointOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", allowMultipleFrames,
             desiredPelvisFrame, registry);
       waypointOrientationOffsetTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 

@@ -43,9 +43,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
       footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
 
-      int maximumNumberOfWaypoints = 15;
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, maximumNumberOfWaypoints, worldFrame, registry);
-      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, maximumNumberOfWaypoints, worldFrame, registry);
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, worldFrame, registry);
+      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, worldFrame, registry);
 
       isTrajectoryStopped = new BooleanYoVariable(namePrefix + "IsTrajectoryStopped", registry);
       isPerformingTouchdown = new BooleanYoVariable(namePrefix + "IsPerformingTouchdown", registry);

@@ -12,19 +12,10 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryP
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
-/**
- * This class does a cubic interpolation between the provided waypoints.
- *
- * Procedure for use:
- * 1. setWaypoints(double[] timeAtWaypoints, double[] positions, double[] velocities)
- *    clears the generator and appends the given waypoints
- * 2. setInitialCondition(double initialPosition, double initialVelocity)
- *    informs the generator of the initial position and velocity
- * 3. compute(double time)
- * 4. getValue(), getVelocity, and getAcceleration()
- */
 public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
+   public static final int defaultMaximumNumberOfWaypoints = 30;
+
    private final int maximumNumberOfWaypoints;
 
    private final String namePrefix;
@@ -44,6 +35,11 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    private final SettableDoubleProvider finalVelocityProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider trajectoryTimeProvider = new SettableDoubleProvider();
    private final CubicPolynomialTrajectoryGenerator subTrajectory;
+
+   public MultipleWaypointsTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, defaultMaximumNumberOfWaypoints, parentRegistry);
+   }
 
    public MultipleWaypointsTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, YoVariableRegistry parentRegistry)
    {
