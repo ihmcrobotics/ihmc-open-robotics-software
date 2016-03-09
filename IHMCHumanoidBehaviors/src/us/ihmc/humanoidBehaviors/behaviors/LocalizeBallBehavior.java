@@ -9,10 +9,12 @@ import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.utilities.BallPoseEstimator;
+import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class LocalizeBallBehavior extends BehaviorInterface
 {
@@ -56,7 +58,7 @@ public class LocalizeBallBehavior extends BehaviorInterface
 
    PointCloudWorldPacket pointCloudPacket;
    PointCloudWorldPacket pointCloudPacketLatest = null;
-   
+
    @Override
    public void doControl()
    {
@@ -76,10 +78,20 @@ public class LocalizeBallBehavior extends BehaviorInterface
 
    private void findBallsAndSaveResult(Point3f[] points)
    {
-
       ArrayList<Sphere3D_F64> balls = ballPoseEstimator.detectBalls(points);
+
       totalBallsFound.set(ballPoseEstimator.getNumberOfBallsFound());
       smallestBallFound.set(ballPoseEstimator.getSmallestRadius());
+
+
+      for (Sphere3D_F64 ball : balls)
+      {
+         RigidBodyTransform t = new RigidBodyTransform();
+         t.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+         sendPacketToNetworkProcessor(new DetectedObjectPacket(t, 4));
+      }
+
+
       if (balls.size() > 0)
       {
          ballFound.set(true);
