@@ -45,6 +45,7 @@ public abstract class ScriptTransformer
       {
          String newScript = script.replaceFirst(ORIGINAL, "");
          ArrayList<ScriptObject> scriptObjects = new ArrayList<>();
+         ArrayList<Object> newScriptObjects = new ArrayList<>();
          ScriptFileLoader scriptFileLoader = null;
          try
          {
@@ -80,7 +81,8 @@ public abstract class ScriptTransformer
          for (ScriptObject scriptObject : scriptObjects)
          {
             Object object = scriptObject.getScriptObject();
-            transformScriptObject(object);
+            Object newScriptObject = transformScriptObject(object);
+            newScriptObjects.add(newScriptObject);
          }
 
          ScriptFileSaver scriptFileSaver = null;
@@ -98,8 +100,11 @@ public abstract class ScriptTransformer
             continue;
          }
 
-         for (ScriptObject scriptObject : scriptObjects)
-            scriptFileSaver.recordObject(scriptObject.getTimeStamp(), scriptObject.getScriptObject());
+         for (Object newObject : newScriptObjects)
+         {
+            ScriptObject newScriptObject = new ScriptObject(System.currentTimeMillis(), newObject);
+            scriptFileSaver.recordObject(newScriptObject.getTimeStamp(), newScriptObject.getScriptObject());
+         }
          
          scriptFileSaver.close();
          System.out.println("Done transforming script: " + newScript);
@@ -109,7 +114,7 @@ public abstract class ScriptTransformer
       ThreadTools.sleepSeconds(0.1);
    }
 
-   public abstract void transformScriptObject(Object object);
+   public abstract Object transformScriptObject(Object object);
 
    private static void findScripts(final String scriptDirectoryPath, final List<String> fileNamesToPack,
          final Set<String> listOfDirectoriesContainingAtLeastOneScript) throws IOException
