@@ -42,7 +42,7 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
    
    public PointCloudWorldPacket()
    {
-      setDestination(PacketDestination.UI);
+      setDestination(PacketDestination.BROADCAST);
    }
    
    public void setGroundQuadTreeSupport(Point3d[] pointCloud)
