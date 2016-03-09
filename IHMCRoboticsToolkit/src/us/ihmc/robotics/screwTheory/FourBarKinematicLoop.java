@@ -30,7 +30,7 @@ public class FourBarKinematicLoop
     *            |/      \|
     *            D--------C
     */
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final String name;
@@ -344,9 +344,9 @@ public class FourBarKinematicLoop
    public void updateAnglesAndVelocities()
    {      
       fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
-      passiveJointB.setQ(fourBarCalculator.getAngleABC() + interiorAnglesAtZeroConfiguration[1]);
-      passiveJointC.setQ(fourBarCalculator.getAngleBCD() + interiorAnglesAtZeroConfiguration[2]);
-      passiveJointD.setQ(fourBarCalculator.getAngleCDA() + interiorAnglesAtZeroConfiguration[3]);
+      passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[1]);
+      passiveJointC.setQ(fourBarCalculator.getAngleBCD() - interiorAnglesAtZeroConfiguration[2]);
+      passiveJointD.setQ(fourBarCalculator.getAngleCDA() - interiorAnglesAtZeroConfiguration[3]);
       passiveJointB.setQd(fourBarCalculator.getAngleDtABC());
       passiveJointC.setQd(fourBarCalculator.getAngleDtBCD());
       passiveJointD.setQd(fourBarCalculator.getAngleDtCDA());
