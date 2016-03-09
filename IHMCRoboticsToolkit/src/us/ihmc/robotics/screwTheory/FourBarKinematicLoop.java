@@ -1,9 +1,11 @@
 package us.ihmc.robotics.screwTheory;
 
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -105,7 +107,7 @@ public class FourBarKinematicLoop
       setInteriorAngleOffsets();
 
       fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD, recomputeJointLimits);
-      updateAnglesAndVelocities();
+//      updateAnglesAndVelocities();
 
       if (DEBUG)
       {
@@ -189,15 +191,33 @@ public class FourBarKinematicLoop
    
    private void setInteriorAngleOffsets()
    {
-      vectorDAProjected.changeFrame(worldFrame);
-      vectorABProjected.changeFrame(worldFrame);
-      vectorBCProjected.changeFrame(worldFrame);
-      vectorCDProjected.changeFrame(worldFrame);
+      vectorDAProjected.changeFrame(frameWithZAlongJointAxis);
+      vectorABProjected.changeFrame(frameWithZAlongJointAxis);
+      vectorBCProjected.changeFrame(frameWithZAlongJointAxis);
+      vectorCDProjected.changeFrame(frameWithZAlongJointAxis);
+      
+      jointBAxis.changeFrame(frameWithZAlongJointAxis);
+      jointCAxis.changeFrame(frameWithZAlongJointAxis);
+      jointDAxis.changeFrame(frameWithZAlongJointAxis); 
+      
+      double jointBAxisZ = jointBAxis.getZ();
+      double jointCAxisZ = jointCAxis.getZ();
+      double jointDAxisZ = jointDAxis.getZ();
+      
+      Vector2d tempVectorAB = new Vector2d();
+      Vector2d tempVectorBC = new Vector2d();
+      Vector2d tempVectorCD = new Vector2d();
+      Vector2d tempVectorDA = new Vector2d();
+      
+      vectorABProjected.get(tempVectorAB);
+      vectorBCProjected.get(tempVectorBC);
+      vectorCDProjected.get(tempVectorCD);
+      vectorDAProjected.get(tempVectorDA);
 
-      interiorAnglesAtZeroConfiguration[1] = Math.PI - vectorABProjected.angle(vectorBCProjected);
-      interiorAnglesAtZeroConfiguration[2] = Math.PI - vectorBCProjected.angle(vectorCDProjected);
-      interiorAnglesAtZeroConfiguration[3] = Math.PI - vectorCDProjected.angle(vectorDAProjected);
-           
+      interiorAnglesAtZeroConfiguration[1] = Math.PI - jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
+      interiorAnglesAtZeroConfiguration[2] = Math.PI - jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+      interiorAnglesAtZeroConfiguration[3] = Math.PI - jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
+      
       if (DEBUG)
       {  
          System.out.println("\nOffset angle debugging:\n");
@@ -258,11 +278,11 @@ public class FourBarKinematicLoop
    }
 
    public void updateAnglesAndVelocities()
-   {
+   {      
       fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
-      passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[1]);
-      passiveJointC.setQ(fourBarCalculator.getAngleBCD() - interiorAnglesAtZeroConfiguration[2]);
-      passiveJointD.setQ(fourBarCalculator.getAngleCDA() - interiorAnglesAtZeroConfiguration[3]);
+      passiveJointB.setQ(fourBarCalculator.getAngleABC() + interiorAnglesAtZeroConfiguration[1]);
+      passiveJointC.setQ(fourBarCalculator.getAngleBCD() + interiorAnglesAtZeroConfiguration[2]);
+      passiveJointD.setQ(fourBarCalculator.getAngleCDA() + interiorAnglesAtZeroConfiguration[3]);
       passiveJointB.setQd(fourBarCalculator.getAngleDtABC());
       passiveJointC.setQd(fourBarCalculator.getAngleDtBCD());
       passiveJointD.setQd(fourBarCalculator.getAngleDtCDA());
