@@ -30,7 +30,7 @@ public class FourBarKinematicLoop
     *            |/      \|
     *            D--------C
     */
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final String name;
@@ -127,7 +127,7 @@ public class FourBarKinematicLoop
       jointBAxis.changeFrame(worldFrame);
       jointCAxis.changeFrame(worldFrame);
       jointDAxis.changeFrame(worldFrame);
-
+      
       // Both the exact same axis and a flipped axis are valid (eg: y and -y). So as long as the absolute value of the dot product is 1, the axis are parallel.      
       if (MathTools.epsilonEquals(Math.abs(masterAxis.dot(jointBAxis)), 1.0, 1.0e-7)
             && MathTools.epsilonEquals(Math.abs(masterAxis.dot(jointCAxis)), 1.0, 1.0e-7)
@@ -179,10 +179,10 @@ public class FourBarKinematicLoop
       vectorCD.changeFrame(frameWithZAlongJointAxis);
       vectorDA.changeFrame(frameWithZAlongJointAxis);
       
-      vectorBCProjected.set(vectorBC.getX(), vectorBC.getY());
-      vectorCDProjected.set(vectorCD.getX(), vectorCD.getY());
-      vectorDAProjected.set(vectorDA.getX(), vectorDA.getY());
-      vectorABProjected.set(vectorAB.getX(), vectorAB.getY());
+      vectorBCProjected.setIncludingFrame(frameWithZAlongJointAxis, vectorBC.getX(), vectorBC.getY());
+      vectorCDProjected.setIncludingFrame(frameWithZAlongJointAxis, vectorCD.getX(), vectorCD.getY());
+      vectorDAProjected.setIncludingFrame(frameWithZAlongJointAxis, vectorDA.getX(), vectorDA.getY());
+      vectorABProjected.setIncludingFrame(frameWithZAlongJointAxis, vectorAB.getX(), vectorAB.getY());
       
       if (DEBUG)
       {  
