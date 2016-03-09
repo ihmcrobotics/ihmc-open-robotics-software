@@ -18,13 +18,13 @@ public class ChangingHandFrameScriptTransformer extends ScriptTransformer
    }
 
    @Override
-   public void transformScriptObject(Object object)
+   public Object transformScriptObject(Object object)
    {
       if (object instanceof HandPosePacket)
       {
          HandPosePacket packetToTransform = (HandPosePacket) object;
          if (packetToTransform.orientation == null || packetToTransform.position == null)
-            return;
+            return object;
          RigidBodyTransform handpose = new RigidBodyTransform();
          handpose.setRotation(packetToTransform.getOrientation());
          handpose.setTranslation(new Vector3d(packetToTransform.position));
@@ -33,6 +33,8 @@ public class ChangingHandFrameScriptTransformer extends ScriptTransformer
          handpose.multiply(handpose, xOffsetInHandFrame);
          handpose.getTranslation(packetToTransform.position);
       }
+      
+      return object;
    }
    
    public static void main(String[] args) throws IOException, InterruptedException
