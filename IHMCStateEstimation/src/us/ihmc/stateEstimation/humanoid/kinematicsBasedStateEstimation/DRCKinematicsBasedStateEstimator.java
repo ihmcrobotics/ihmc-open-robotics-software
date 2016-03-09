@@ -85,8 +85,15 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
-      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters, gravitationalAcceleration, yoGraphicsListRegistry, registry);
-
+      if(forceSensorDataHolderToUpdate != null)
+      {
+         forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters, gravitationalAcceleration, yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         forceSensorStateUpdater = null;
+      }
+      
       if(USE_NEW_PELVIS_POSE_CORRECTOR)
          this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, yoGraphicsListRegistry, 1000);
       else
@@ -168,7 +175,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       jointStateUpdater.initialize();
       pelvisRotationalStateUpdater.initialize();
-      forceSensorStateUpdater.initialize();
+      if(forceSensorStateUpdater != null)
+      {
+         forceSensorStateUpdater.initialize();
+      }
       pelvisLinearStateUpdater.initialize();
    }
 
@@ -191,14 +201,20 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          case FROZEN:
             pelvisRotationalStateUpdater.updateForFrozenState();
-            forceSensorStateUpdater.updateForceSensorState();
+            if(forceSensorStateUpdater != null)
+            {
+               forceSensorStateUpdater.updateForceSensorState();
+            }
             pelvisLinearStateUpdater.updateForFrozenState();
             break;
 
          case NORMAL:
          default:
             pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
-            forceSensorStateUpdater.updateForceSensorState();
+            if(forceSensorStateUpdater != null)
+            {
+               forceSensorStateUpdater.updateForceSensorState();
+            }
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
             imuOrientationBiasEstimator.compute(robotMotionStatusFromController.getCurrentRobotMotionStatus());
             break;
