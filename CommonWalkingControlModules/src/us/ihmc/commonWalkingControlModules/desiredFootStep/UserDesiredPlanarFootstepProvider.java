@@ -88,13 +88,20 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
          {
             Footstep footstep;
 
-            if (i == 0)
+            if (i == userStepsToTake.getIntegerValue() - 1 && userStepSquareUp.getBooleanValue())
+            {
+               if (i == 0)
+               {
+                  footstep = firstSquareUp(stepSide);
+               }
+               else
+               {
+                  footstep = squareUp(previousFootstep, stepSide);
+               }
+            }
+            else if (i == 0)
             {
                footstep = createFirstFootstep(stepSide);
-            }
-            else if (i == userStepsToTake.getIntegerValue() - 1 && userStepSquareUp.getBooleanValue())
-            {
-               footstep = squareUp(previousFootstep, stepSide);
             }
             else
             {
@@ -141,44 +148,33 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
    {
       FramePose pose = new FramePose();
       previousFootstep.getPose(pose);
-      pose.setY(pose.getY());
       PoseReferenceFrame referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
 
-      ContactablePlaneBody foot = bipedFeet.get(swingLegSide);
+      return createFootstep(referenceFrame, 0.0, 0.0, swingLegSide);
+   }
 
-      boolean trustHeight = false;
-      Footstep desiredFootstep = new Footstep(foot.getRigidBody(), swingLegSide, foot.getSoleFrame(), referenceFrame, trustHeight);
+   private Footstep firstSquareUp(RobotSide swingLegSide)
+   {
+      RobotSide supportLegSide = swingLegSide.getOppositeSide();
 
-      List<FramePoint2d> contactFramePoints = foot.getContactPoints2d();
-      ArrayList<Point2d> contactPoints = new ArrayList<Point2d>();
+      // Footstep Frame
+      ReferenceFrame supportAnkleZUpFrame = ankleZUpReferenceFrames.get(supportLegSide);
 
-      for (FramePoint2d contactFramePoint : contactFramePoints)
-      {
-         Point2d contactPoint = contactFramePoint.getPointCopy();
-
-         if (contactFramePoint.getX() > 0.0)
-         {
-            contactPoint.setX(contactPoint.getX() * userStepToePercentage.getDoubleValue());
-         }
-         else
-         {
-            contactPoint.setX(contactPoint.getX() * userStepHeelPercentage.getDoubleValue());
-         }
-
-         contactPoints.add(contactPoint);
-      }
-
-      desiredFootstep.setPredictedContactPointsFromPoint2ds(contactPoints);
-      return desiredFootstep;
+      return createFootstep(supportAnkleZUpFrame, 0.0, 0.0, swingLegSide);
    }
 
    private Footstep createFootstep(ReferenceFrame previousFootFrame, RobotSide swingLegSide)
+   {
+      return createFootstep(previousFootFrame, userStepLength.getDoubleValue(), userStepHeight.getDoubleValue(), swingLegSide);
+   }
+
+   private Footstep createFootstep(ReferenceFrame previousFootFrame, double userStepLength, double userStepHeight, RobotSide swingLegSide)
    {
       RobotSide supportLegSide = swingLegSide.getOppositeSide();
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(previousFootFrame);
-      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(userFixedWidth), userStepHeight.getDoubleValue());
+      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength, supportLegSide.negateIfLeftSide(userFixedWidth), userStepHeight);
       footstepPosition.add(footstepOffset);
 
       // Footstep Orientation
