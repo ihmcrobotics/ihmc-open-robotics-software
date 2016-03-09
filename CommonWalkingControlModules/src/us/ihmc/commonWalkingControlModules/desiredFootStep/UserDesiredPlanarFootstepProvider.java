@@ -90,18 +90,7 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
 
             if (i == userStepsToTake.getIntegerValue() - 1 && userStepSquareUp.getBooleanValue())
             {
-               if (i == 0)
-               {
-                  footstep = firstSquareUp(stepSide);
-               }
-               else
-               {
-                  footstep = squareUp(previousFootstep, stepSide);
-               }
-            }
-            else if (i == 0)
-            {
-               footstep = createFirstFootstep(stepSide);
+               footstep = squareUp(previousFootstep, stepSide);
             }
             else
             {
@@ -123,44 +112,41 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
       return ret;
    }
 
-   private Footstep createFirstFootstep(RobotSide swingLegSide)
-   {
-      RobotSide supportLegSide = swingLegSide.getOppositeSide();
-
-      // Footstep Frame
-      ReferenceFrame supportAnkleZUpFrame = ankleZUpReferenceFrames.get(supportLegSide);
-
-      Footstep footstep = createFootstep(supportAnkleZUpFrame, swingLegSide);
-
-      return footstep;
-   }
-
    private Footstep createNextFootstep(Footstep previousFootstep, RobotSide swingLegSide)
    {
-      FramePose pose = new FramePose();
-      previousFootstep.getPose(pose);
-      PoseReferenceFrame referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
+      ReferenceFrame referenceFrame;
+      if (previousFootstep != null)
+      {
+         FramePose pose = new FramePose();
+         previousFootstep.getPose(pose);
+         referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
+      }
+      else
+      {
+         RobotSide supportLegSide = swingLegSide.getOppositeSide();
+         // Footstep Frame
+          referenceFrame = ankleZUpReferenceFrames.get(supportLegSide);
+      }
 
       return createFootstep(referenceFrame, swingLegSide);
    }
 
    private Footstep squareUp(Footstep previousFootstep, RobotSide swingLegSide)
    {
-      FramePose pose = new FramePose();
-      previousFootstep.getPose(pose);
-      PoseReferenceFrame referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
+      ReferenceFrame referenceFrame;
+      if (previousFootstep != null)
+      {
+         FramePose pose = new FramePose();
+         previousFootstep.getPose(pose);
+         referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
+      }
+      else
+      {
+         RobotSide supportLegSide = swingLegSide.getOppositeSide();
+         referenceFrame = ankleZUpReferenceFrames.get(supportLegSide);
+      }
 
       return createFootstep(referenceFrame, 0.0, 0.0, swingLegSide);
-   }
-
-   private Footstep firstSquareUp(RobotSide swingLegSide)
-   {
-      RobotSide supportLegSide = swingLegSide.getOppositeSide();
-
-      // Footstep Frame
-      ReferenceFrame supportAnkleZUpFrame = ankleZUpReferenceFrames.get(supportLegSide);
-
-      return createFootstep(supportAnkleZUpFrame, 0.0, 0.0, swingLegSide);
    }
 
    private Footstep createFootstep(ReferenceFrame previousFootFrame, RobotSide swingLegSide)
