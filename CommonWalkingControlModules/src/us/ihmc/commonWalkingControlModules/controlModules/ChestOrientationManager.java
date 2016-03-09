@@ -59,7 +59,7 @@ public class ChestOrientationManager
       orientationFeedbackControlCommand.setGains(gains);
 
       boolean allowMultipleFrames = true;
-      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", 15, allowMultipleFrames, pelvisZUpFrame, registry);
+      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", allowMultipleFrames, pelvisZUpFrame, registry);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
       initializeToCurrent = new BooleanYoVariable("initializeChestOrientationToCurrent", registry);

@@ -193,7 +193,7 @@ public class HandControlModule
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(oneDoFJoint.getName(), 15, registry);
+         MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(oneDoFJoint.getName(), registry);
          jointTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
@@ -206,8 +206,8 @@ public class HandControlModule
 
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
 
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix + "Hand", 15, true, worldFrame, registry);
-      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix + "Hand", 15, true, worldFrame, registry);
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix + "Hand", true, worldFrame, registry);
+      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix + "Hand", true, worldFrame, registry);
       poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
       positionTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
