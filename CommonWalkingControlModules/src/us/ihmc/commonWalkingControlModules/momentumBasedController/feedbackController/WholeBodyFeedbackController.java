@@ -223,6 +223,7 @@ public class WholeBodyFeedbackController
          OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
          controller.setGains(gains);
          controller.setDesireds(desiredPosition, desiredVelocity, feedForwardAcceleration);
+         controller.setWeightForSolver(feedbackControlCommand.getWeightForSolver());
          controller.setEnabled(true);
       }
    }
