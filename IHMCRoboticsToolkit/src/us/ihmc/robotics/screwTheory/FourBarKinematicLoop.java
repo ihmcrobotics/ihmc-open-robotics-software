@@ -345,7 +345,14 @@ public class FourBarKinematicLoop
    }
 
    public void updateAnglesAndVelocities()
-   {      
+   {
+      double currentMasterJointA = masterJointA.getQ();
+      if (currentMasterJointA < minValidMasterJointAngle || currentMasterJointA > maxValidMasterJointAngle)
+      {
+         throw new RuntimeException(
+               masterJointA.getName() + " is set outside of its bounds [" + minValidMasterJointAngle + ", " + maxValidMasterJointAngle + "]");
+      }
+
       fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
       passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[1]);
       passiveJointC.setQ(fourBarCalculator.getAngleBCD() - interiorAnglesAtZeroConfiguration[2]);
