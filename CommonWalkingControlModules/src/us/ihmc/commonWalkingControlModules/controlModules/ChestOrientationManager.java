@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
@@ -38,19 +38,17 @@ public class ChestOrientationManager
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame chestFrame;
 
-   private final BooleanYoVariable initializeToCurrent;
-
    private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
    public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, double trajectoryTime,
          YoVariableRegistry parentRegistry)
    {
-      this.yoTime = momentumBasedController.getYoTime();
-      this.pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      yoTime = momentumBasedController.getYoTime();
+      pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
 
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody chest = fullRobotModel.getChest();
       RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
@@ -62,8 +60,6 @@ public class ChestOrientationManager
       boolean allowMultipleFrames = true;
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", allowMultipleFrames, pelvisZUpFrame, registry);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
-
-      initializeToCurrent = new BooleanYoVariable("initializeChestOrientationToCurrent", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -103,8 +99,6 @@ public class ChestOrientationManager
 
    public void holdCurrentOrientation()
    {
-      initializeToCurrent.set(false);
-
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
       desiredOrientation.setToZero(chestFrame);
