@@ -68,7 +68,7 @@ public class KickBallBehavior extends BehaviorInterface
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private final double initalWalkDistance = 1.0;
-   private final double standingDistance = 0.3;
+   private final double standingDistance = 0.4;
    private boolean pipelineSetUp = false;
 
    public KickBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,

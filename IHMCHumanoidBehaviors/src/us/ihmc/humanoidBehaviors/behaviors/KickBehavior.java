@@ -102,6 +102,15 @@ public class KickBehavior extends BehaviorInterface
    private void setupPipeline()
    {
       RobotSide kickFoot = RobotSide.RIGHT;
+    
+      
+      submitFootPosition(kickFoot.getOppositeSide(), new FramePoint(ankleZUpFrames.get(kickFoot), 0.0, kickFoot.getOppositeSide().negateIfRightSide(0.25), 0.227));
+      
+      submitFootPosition(kickFoot.getOppositeSide(), new FramePoint(ankleZUpFrames.get(kickFoot), 0.0, kickFoot.getOppositeSide().negateIfRightSide(0.35), 0.227));
+      
+      submitFootPosition(kickFoot.getOppositeSide(), new FramePoint(ankleZUpFrames.get(kickFoot), 0.0, kickFoot.getOppositeSide().negateIfRightSide(0.35), 0));
+
+
       
       submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0.227));
       

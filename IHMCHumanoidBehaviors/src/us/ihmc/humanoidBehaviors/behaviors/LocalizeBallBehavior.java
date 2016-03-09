@@ -22,6 +22,9 @@ public class LocalizeBallBehavior extends BehaviorInterface
    private DoubleYoVariable ballX = new DoubleYoVariable("ballX", registry);
    private DoubleYoVariable ballY = new DoubleYoVariable("ballY", registry);
    private DoubleYoVariable ballZ = new DoubleYoVariable("ballZ", registry);
+   private DoubleYoVariable totalBallsFound = new DoubleYoVariable("totalBallsFound", registry);
+   private DoubleYoVariable smallestBallFound = new DoubleYoVariable("smallestBallFound", registry);
+
 
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
@@ -75,6 +78,8 @@ public class LocalizeBallBehavior extends BehaviorInterface
    {
 
       ArrayList<Sphere3D_F64> balls = ballPoseEstimator.detectBalls(points);
+      totalBallsFound.set(ballPoseEstimator.getNumberOfBallsFound());
+      smallestBallFound.set(ballPoseEstimator.getSmallestRadius());
       if (balls.size() > 0)
       {
          ballFound.set(true);

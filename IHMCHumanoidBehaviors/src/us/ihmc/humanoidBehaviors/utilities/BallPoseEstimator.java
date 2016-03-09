@@ -84,13 +84,15 @@ public class BallPoseEstimator
       if (spheres.size() > 0)
       {
          PrintTools.debug(DEBUG, this, "spheres.size() " + spheres.size());
+         ballsFound = spheres.size();
+         smallestRadius = ((Sphere3D_F64) spheres.get(0).getParameters()).getRadius();
       }
       for (Shape sphere : spheres)
       {
          Sphere3D_F64 sphereParams = (Sphere3D_F64) sphere.getParameters();
          PrintTools.debug(DEBUG, this, "sphere radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
 
-         if (sphereParams.getRadius() < 0.254)// soccer ball -
+         if ((sphereParams.getRadius() < 0.284)&&(sphereParams.getRadius() > 0.15))// soccer ball -
          {
             foundBalls.add(sphereParams);
             PrintTools.debug(DEBUG, this, "------Found Soccer Ball radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
@@ -102,6 +104,16 @@ public class BallPoseEstimator
       }
       return foundBalls;
 
+   }
+   private double ballsFound = 0;
+   private double smallestRadius = 0;
+   public double getNumberOfBallsFound()
+   {
+	   return ballsFound;
+   }
+   public double getSmallestRadius()
+   {
+	   return smallestRadius;
    }
 
 }
