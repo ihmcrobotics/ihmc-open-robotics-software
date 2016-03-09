@@ -37,7 +37,6 @@ public class FourBarCalculatorFromFastRunner
    private final double a, b, c, d;
    private final double minA, maxA;
    
-   private final boolean computeMinMaxAngleValues;
 
    // Angles
    private double angleDAB, angleABC, angleBCD, angleCDA;
@@ -50,36 +49,22 @@ public class FourBarCalculatorFromFastRunner
 
    public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD)
    {
-      this(length_DA, length_AB, length_BC, length_CD, true);
-   }
-
-   public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD, boolean computeMinMaxMasterAngleValues)
-   {
       this.a = abs(length_DA);
       this.b = abs(length_AB);
       this.c = abs(length_BC);
       this.d = abs(length_CD);
-      this.computeMinMaxAngleValues = computeMinMaxMasterAngleValues;
 
-      if(computeMinMaxMasterAngleValues)
-      {
-         double eMax = min(a + b, d + c);
-         if (eMax == a + b)
-            maxA = PI;
-         else
-            maxA = getAngleWithCosineLaw(a, b, eMax);
-         
-         double fMax = min(a + d, b + c);
-         if (fMax == a + d)
-            minA = getAngleWithCosineLaw(fMax, b, c);
-         else
-            minA = getAngleWithCosineLaw(fMax, a, d);    
-      }
-      else //when it clips it will leave the original max and min angle values
-      {
-         minA = Double.NEGATIVE_INFINITY; 
-         maxA = Double.POSITIVE_INFINITY;
-      }
+      double eMax = min(a + b, d + c);
+      if (eMax == a + b)
+         maxA = PI;
+      else
+         maxA = getAngleWithCosineLaw(a, b, eMax);
+
+      double fMax = min(a + d, b + c);
+      if (fMax == a + d)
+         minA = getAngleWithCosineLaw(fMax, b, c);
+      else
+         minA = getAngleWithCosineLaw(fMax, a, d);
    }
 
    /**
