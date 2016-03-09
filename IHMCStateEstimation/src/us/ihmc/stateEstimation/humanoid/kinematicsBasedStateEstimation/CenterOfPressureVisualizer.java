@@ -1,5 +1,11 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.text.WordUtils;
+
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -7,8 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -22,25 +27,29 @@ public class CenterOfPressureVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final SideDependentList<YoFramePoint> footRawCoPPositionsInWorld = new SideDependentList<>();
+   private final Map<RigidBody, YoFramePoint> footRawCoPPositionsInWorld = new HashMap();
    private final YoFramePoint overallRawCoPPositionInWorld;
    private final FramePoint2d tempRawCoP2d = new FramePoint2d();
    private final FramePoint tempRawCoP = new FramePoint();
    private final Wrench tempWrench = new Wrench();
-   private final SideDependentList<FootSwitchInterface> footSwitches;
+   private final Map<RigidBody, FootSwitchInterface> footSwitches;
+   private final Collection<RigidBody> footRigidBodies;
 
-   public CenterOfPressureVisualizer(SideDependentList<FootSwitchInterface> footSwitches,
+   public CenterOfPressureVisualizer(Map<RigidBody, FootSwitchInterface> footSwitches,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
-
-      for (RobotSide robotSide : RobotSide.values)
+      footRigidBodies = footSwitches.keySet();
+      
+      for (RigidBody rigidBody : footRigidBodies)
       {
-         String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + side + "CoPPositionsInWorld", worldFrame, registry);
-         footRawCoPPositionsInWorld.put(robotSide, rawCoPPositionInWorld);
+         String rigidBodyName = rigidBody.getName();
+         rigidBodyName = WordUtils.capitalize(rigidBodyName);
+         
+         YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
+         footRawCoPPositionsInWorld.put(rigidBody, rawCoPPositionInWorld);
 
-         YoGraphicPosition copDynamicGraphic = new YoGraphicPosition("Meas " + side + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+         YoGraphicPosition copDynamicGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
          YoArtifactPosition copArtifact = copDynamicGraphic.createArtifact();
          yoGraphicsListRegistry.registerArtifact("StateEstimator", copArtifact);
       }
@@ -60,14 +69,14 @@ public class CenterOfPressureVisualizer
          overallRawCoPPositionInWorld.setToZero();
          double totalFootForce = 0.0;
 
-         for (RobotSide robotSide : RobotSide.values)
+         for (RigidBody rigidBody : footRigidBodies)
          {
-            footSwitches.get(robotSide).computeAndPackCoP(tempRawCoP2d);
+            footSwitches.get(rigidBody).computeAndPackCoP(tempRawCoP2d);
             tempRawCoP.setIncludingFrame(tempRawCoP2d.getReferenceFrame(), tempRawCoP2d.getX(), tempRawCoP2d.getY(), 0.0);
             tempRawCoP.changeFrame(worldFrame);
-            footRawCoPPositionsInWorld.get(robotSide).set(tempRawCoP);
+            footRawCoPPositionsInWorld.get(rigidBody).set(tempRawCoP);
 
-            footSwitches.get(robotSide).computeAndPackFootWrench(tempWrench);
+            footSwitches.get(rigidBody).computeAndPackFootWrench(tempWrench);
             double singleFootForce = tempWrench.getLinearPartZ();
             totalFootForce += singleFootForce;
             tempRawCoP.scale(singleFootForce);
@@ -80,8 +89,10 @@ public class CenterOfPressureVisualizer
 
    public void hide()
    {
-      for (RobotSide robotSide : RobotSide.values)
-         footRawCoPPositionsInWorld.get(robotSide).setToNaN();
+      for (RigidBody rigidBody : footRigidBodies)
+      {
+         footRawCoPPositionsInWorld.get(rigidBody).setToNaN();
+      }
       overallRawCoPPositionInWorld.setToNaN();
    }
 }

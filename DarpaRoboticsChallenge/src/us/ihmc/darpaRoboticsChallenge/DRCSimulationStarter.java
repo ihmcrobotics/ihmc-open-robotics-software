@@ -336,7 +336,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    @Override
    public void startBehaviorVisualizer()
    {
-      JavaProcessSpawner spawner = new JavaProcessSpawner(true);
+      JavaProcessSpawner spawner = new JavaProcessSpawner(true, true);
       spawner.spawn(BehaviorVisualizer.class);
    }
 

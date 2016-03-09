@@ -21,7 +21,7 @@ import us.ihmc.SdfLoader.SDFForceSensor;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
@@ -372,7 +372,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    { 
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
-      SDFJointNameMap jointMap = getJointMap();
+      SDFHumanoidJointNameMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
 
       SDFHumanoidRobot sdfRobot =  loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);

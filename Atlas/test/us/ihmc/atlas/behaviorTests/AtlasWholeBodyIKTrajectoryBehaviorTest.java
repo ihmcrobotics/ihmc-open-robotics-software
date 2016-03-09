@@ -35,7 +35,7 @@ public class AtlasWholeBodyIKTrajectoryBehaviorTest extends DRCWholeBodyIKTrajec
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 14.0)
+   @DeployableTestMethod(estimatedDuration = 14.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 70000)
    public void testConstructorAndSetInput()
    {
@@ -43,7 +43,7 @@ public class AtlasWholeBodyIKTrajectoryBehaviorTest extends DRCWholeBodyIKTrajec
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 23.0)
+   @DeployableTestMethod(estimatedDuration = 23.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 110000)
    public void testMoveBothHandsToPose() throws SimulationExceededMaximumTimeException
    {

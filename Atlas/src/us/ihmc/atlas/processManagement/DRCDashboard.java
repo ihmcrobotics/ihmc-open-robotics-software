@@ -111,8 +111,8 @@ public class DRCDashboard
    private ImageIcon startSimIcon = new ImageIcon(DRCDashboard.class.getResource("/drcDashboard/start_sim.png"));
    private ImageIcon killSimIcon = new ImageIcon(DRCDashboard.class.getResource("/drcDashboard/kill_sim.png"));
 
-   private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
-   private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
+   private JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true, true);
+   private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true, true);
    private GazeboRemoteSimulationAdapter sshSimLauncher = new GazeboRemoteSimulationAdapter();
 
    private HashMap<LocalCloudMachines, ImmutablePair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<>();
