@@ -18,9 +18,12 @@ public class ScriptFileSaver
 
    public ScriptFileSaver(String filename, boolean overwriteExistingScript) throws IOException
    {
+      this(new File(filename), overwriteExistingScript);
+   }
+   
+   public ScriptFileSaver(File file, boolean overwriteExistingScript) throws IOException
+   {
       XStream xStream = new XStream();
-
-      File file = new File(filename);
       if (!file.exists() || overwriteExistingScript)
       {
          file.createNewFile();
