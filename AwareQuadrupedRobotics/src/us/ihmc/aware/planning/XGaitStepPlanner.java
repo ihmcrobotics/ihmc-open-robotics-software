@@ -26,7 +26,7 @@ public class XGaitStepPlanner
    /**
     * The number of footsteps to generate for each foot. The total number of steps in a plan is 4 times this number.
     */
-   private static final int FOOTSTEP_QUEUE_SIZE = 15;
+   private static final int FOOTSTEP_QUEUE_SIZE = 5;
 
    private static final RobotQuadrant[] FOOTSTEP_ORDER = new RobotQuadrant[] { RobotQuadrant.HIND_LEFT,
          RobotQuadrant.FRONT_LEFT, RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT };
@@ -39,7 +39,7 @@ public class XGaitStepPlanner
    /**
     * The time during which both feet of a front or back pair are in support in s.
     */
-   private double endPairSupportDuration = 0.0;
+   private double endPairSupportDuration = 0.5;
 
    /**
     * The phase offset of the front and back feet pairs in deg.
@@ -121,7 +121,7 @@ public class XGaitStepPlanner
 
       // Fill the queue with steps.
       final double gaitPeriod = 2.0 * swingDuration + 2.0 * endPairSupportDuration;
-      for (int i = 0; i < FOOTSTEP_QUEUE_SIZE - 4; i++)
+      for (int i = 0; i < FOOTSTEP_QUEUE_SIZE - 1; i++)
       {
          addFourSteps(initializationPeriod + startTime + i * gaitPeriod);
       }
@@ -141,8 +141,8 @@ public class XGaitStepPlanner
       }
 
       // Clear the queue to make room for our plan.
-      while (steps.dequeue())
-         ;
+//      while (steps.dequeue())
+//         ;
 
       // Dequeue footsteps from each of the quadrant queues and add them to the plan ordered by their start time.
       mergeFootstepQueues(steps);
@@ -234,17 +234,22 @@ public class XGaitStepPlanner
       double nominalYaw = polygon.getNominalYaw();
       polygon.yawAboutCentroid(yawRate);
 
+      RigidBodyTransform tf = pool.lease(RigidBodyTransform.class);
+      tf.rotZ(nominalYaw);
+
+      FramePoint centroid = pool.lease(FramePoint.class);
+      polygon.getCentroid2d(centroid);
+
       // Compute the stride vector and rotate it to the new yaw angle.
       FrameVector stride = pool.lease(FrameVector.class);
       stride.setToZero(referenceFrames.getWorldFrame());
-      stride.add(strideLength, strideWidth, 0.0);
+      stride.add(quadrant.getEnd().negateIfHindEnd(stanceLength) / 2.0, quadrant.getSide().negateIfRightSide(stanceWidth) / 2.0, 0.0);
+//      stride.add(strideLength, strideWidth, 0.0);
+//      stride.applyTransform(tf);
+      stride.add(centroid);
 
-      RigidBodyTransform tf = pool.lease(RigidBodyTransform.class);
-      tf.rotZ(nominalYaw);
-      stride.applyTransform(tf);
-
-      step.setGoalPosition(polygon.getFootstep(quadrant));
-      step.getGoalPosition().add(stride);
+//      step.setGoalPosition(polygon.getFootstep(quadrant));
+      step.getGoalPosition().set(stride);
 
       return step;
    }
