@@ -343,17 +343,16 @@ public class PelvisLinearStateUpdater
 	   {
 	      updateTrustedFeetLists();
          yoRootJointPosition.getFrameTuple(rootJointPosition);
-	      kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
-	      
-	      if(numberOfEndEffectorsTrusted == 1)
-	         imuDriftCompensator.esimtateDriftIfPossible(listOfTrustedFeet.get(0));
-	      
-	      if (imuBasedLinearStateCalculator.isEstimationEnabled())
-	      {
-	         computeLinearStateFromMergingMeasurements();
-	      }
-	      else 
-	      {
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
+
+         imuDriftCompensator.esimtateDriftIfPossible(listOfTrustedFeet);
+
+         if (imuBasedLinearStateCalculator.isEstimationEnabled())
+         {
+            computeLinearStateFromMergingMeasurements();
+         }
+         else
+         {
 	         yoRootJointPosition.getFrameTuple(rootJointPosition);
 	         kinematicsBasedLinearStateCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
 	         yoRootJointPosition.set(rootJointPosition);

@@ -2,8 +2,7 @@ plugins {
    id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
 }
 
-
-
+/* whitespace sucks */
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
 sourceCompatibility = 1.7
@@ -51,7 +50,7 @@ dependencies {
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
-	compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160212'
+	compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
 
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
