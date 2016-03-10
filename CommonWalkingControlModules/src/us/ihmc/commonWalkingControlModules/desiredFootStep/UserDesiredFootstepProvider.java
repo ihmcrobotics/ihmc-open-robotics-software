@@ -52,6 +52,13 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
 
+   private RobotSide swingSide = RobotSide.LEFT;
+   private RobotSide supportSide = swingSide.getOppositeSide();
+   private Footstep previousFootstep;
+   private Footstep desiredFootstep;
+   private Footstep nextFootstep;
+   private Footstep nextNextFootstep;
+
    public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
          final WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
@@ -181,6 +188,10 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
       desiredFootstep.setPredictedContactPointsFromPoint2ds(contactPoints);
       return desiredFootstep;
+   }
+
+   private void createFootstep(double userStepLength, double userStepWidth, double userStepYaw)
+   {
    }
 
    private Footstep createFootstep(ReferenceFrame previousFootFrame, RobotSide swingLegSide)

@@ -43,11 +43,11 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
    private RobotSide supportSide = swingSide.getOppositeSide();
    private Footstep previousFootstep;
    private Footstep desiredFootstep;
+   private Footstep nextFootstep;
+   private Footstep nextNextFootstep;
    private ContactablePlaneBody swingFoot;
    private ReferenceFrame footstepReferenceFrame;
 
-   private Footstep nextFootstep;
-   private Footstep nextNextFootstep;
 
    private final FramePoint footstepPosition;
    private final FrameOrientation footstepOrientation;
