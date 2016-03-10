@@ -3,8 +3,11 @@ package us.ihmc.aware.input;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class InputDevice
+public abstract class PollingInputDevice
 {
+   /**
+    * A list of callbacks to be notified when an event occurs.
+    */
    private final List<InputEventCallback> callbacks = new ArrayList<>();
 
    /**
