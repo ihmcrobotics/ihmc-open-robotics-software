@@ -246,50 +246,80 @@ public class FourBarKinematicLoop
    {
       if (jointB.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[1]);
+         double angleBLower = jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[1];
 
-         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
-            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+         if (MathTools.isInsideBoundsExclusive(angleBLower, 0.0, Math.PI))
+         {
+            fourBarCalculator.computeMasterJointAngleGivenAngleABC(angleBLower);
+
+            if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
+               maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+         }
       }
-
+      
       if (jointB.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[1]);
+         double angleBUpper = jointB.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[1];
 
-         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
-            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+         if (MathTools.isInsideBoundsExclusive(angleBUpper, 0.0, Math.PI))
+         {
+            fourBarCalculator.computeMasterJointAngleGivenAngleABC(angleBUpper);
+
+            if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
+               minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+         }
       }
 
       if (jointC.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitLower() + interiorAnglesAtZeroConfiguration[2]);
+         double angleCLower = jointC.getJointLimitLower() + interiorAnglesAtZeroConfiguration[2];
+         
+         if (MathTools.isInsideBoundsExclusive(angleCLower, 0.0, Math.PI))
+         {
+            fourBarCalculator.computeMasterJointAngleGivenAngleBCD(angleCLower);
 
-         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
-            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+            if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
+               minValidMasterJointAngle = fourBarCalculator.getAngleDAB();            
+         }
       }
 
       if (jointC.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[2]);
+         double angleCUpper = jointC.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[2];
+         
+         if (MathTools.isInsideBoundsExclusive(angleCUpper, 0.0, Math.PI))
+         {
+            fourBarCalculator.computeMasterJointAngleGivenAngleBCD(angleCUpper);
 
-         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
-            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+            if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
+               maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();            
+         }
       }
 
       if (jointD.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitLower() + interiorAnglesAtZeroConfiguration[3]);
+         double angleDLower = jointD.getJointLimitLower() + interiorAnglesAtZeroConfiguration[3];
+         
+         if (MathTools.isInsideBoundsExclusive(angleDLower, 0.0, Math.PI))
+         {
+            fourBarCalculator.computeMasterJointAngleGivenAngleCDA(angleDLower);
 
-         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
-            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+            if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
+               maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();            
+         }
       }
 
       if (jointD.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[3]);
+         double angleDUpper = jointD.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[3];
 
-         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
-            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+         if (MathTools.isInsideBoundsExclusive(angleDUpper, 0.0, Math.PI))
+         {
+            fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[3]);
+
+            if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
+               minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+         }
       }
 
       masterJointA.setJointLimitLower(minValidMasterJointAngle);
