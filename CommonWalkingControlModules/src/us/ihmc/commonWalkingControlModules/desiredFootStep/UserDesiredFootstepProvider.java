@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.SdfLoader.xmlDescription.Collision;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -58,6 +60,13 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    private Footstep desiredFootstep;
    private Footstep nextFootstep;
    private Footstep nextNextFootstep;
+   private ContactablePlaneBody swingFoot;
+   private ReferenceFrame footstepReferenceFrame;
+
+   private final FramePoint footstepPosition;
+   private final FrameOrientation footstepOrientation;
+   private final FrameVector footstepOffset;
+   private final FramePose footstepPose;
 
    public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
          final WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
@@ -65,6 +74,13 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       parentRegistry.addChild(registry);
       this.bipedFeet = bipedFeet;
       this.ankleZUpReferenceFrames = ankleZUpReferenceFrames;
+
+      swingFoot = bipedFeet.get(swingSide);
+      ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide).getSoleFrame();
+      footstepPosition = new FramePoint(stanceFootFrame);
+      footstepOrientation = new FrameOrientation(stanceFootFrame);
+      footstepOffset = new FrameVector(stanceFootFrame);
+      footstepPose = new FramePose(stanceFootFrame);
 
       userStepWidth.set((walkingControllerParameters.getMaxStepWidth() + walkingControllerParameters.getMinStepWidth()) / 2);
       userStepMinWidth.set(walkingControllerParameters.getMinStepWidth());
@@ -96,42 +112,53 @@ public class UserDesiredFootstepProvider implements FootstepProvider
          userStepsTakeEm.set(false);
          controllerHasCancelledPlan.set(false);
 
-         RobotSide stepSide = userStepFirstSide.getEnumValue();
-         if (stepSide == null)
-            stepSide = RobotSide.LEFT;
+         swingSide = userStepFirstSide.getEnumValue();
+         if (swingSide == null)
+            swingSide = RobotSide.LEFT;
 
-         Footstep previousFootstep = null;
+         supportSide = swingSide.getOppositeSide();
+         previousFootstep = null;
 
          for (int i = 0; i < userStepsToTake.getIntegerValue(); i++)
          {
-            Footstep footstep;
-
+            swingFoot = bipedFeet.get(swingSide);
+            /*
             if (i == 0)
             {
-               footstep = createFirstFootstep(stepSide);
+               footstep = createFirstFootstep(swingSide);
             }
             else if (i == userStepsToTake.getIntegerValue() - 1 && userStepSquareUp.getBooleanValue())
             {
-               footstep = squareUp(previousFootstep, stepSide);
+               footstep = squareUp(previousFootstep, swingSide);
             }
             else
             {
-               footstep = createNextFootstep(previousFootstep, stepSide);
+               footstep = createNextFootstep(previousFootstep, swingSide);
+            }
+            */
+            if (i == userStepsToTake.getIntegerValue() -1 && userStepSquareUp.getBooleanValue())
+            {
+               squareUp();
+            }
+            else
+            {
+               createNextFootstep();
             }
 
-            footstepList.add(footstep);
-            previousFootstep = footstep;
-            stepSide = stepSide.getOppositeSide();
+            footstepList.add(desiredFootstep);
+            previousFootstep = desiredFootstep;
+            swingSide = swingSide.getOppositeSide();
+            supportSide = swingSide.getOppositeSide();
          }
       }
 
       if (footstepList.isEmpty())
          return null;
 
-      Footstep ret = footstepList.get(0);
+      nextFootstep = footstepList.get(0);
       footstepList.remove(0);
 
-      return ret;
+      return nextFootstep;
    }
 
    private Footstep createFirstFootstep(RobotSide swingLegSide)
@@ -144,6 +171,34 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       Footstep footstep = createFootstep(supportAnkleZUpFrame, swingLegSide);
 
       return footstep;
+   }
+
+   private void createNextFootstep()
+   {
+      if (previousFootstep != null)
+      {
+         footstepReferenceFrame = previousFootstep.getPoseReferenceFrame();
+      }
+      else
+      {
+         footstepReferenceFrame = ankleZUpReferenceFrames.get(supportSide);
+      }
+
+      createFootstep();
+   }
+
+   private void squareUp()
+   {
+      if (previousFootstep != null)
+      {
+         footstepReferenceFrame = previousFootstep.getPoseReferenceFrame();
+      }
+      else
+      {
+         footstepReferenceFrame = ankleZUpReferenceFrames.get(supportSide);
+      }
+
+      createFootstep(0.0, 0.0, 0.0, 0.0);
    }
 
    private Footstep createNextFootstep(Footstep previousFootstep, RobotSide swingLegSide)
@@ -190,8 +245,63 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       return desiredFootstep;
    }
 
-   private void createFootstep(double userStepLength, double userStepWidth, double userStepYaw)
+   private void createFootstep()
    {
+      createFootstep(userStepLength.getDoubleValue(), userStepSideways.getDoubleValue(), userStepYaw.getDoubleValue(), userStepHeight.getDoubleValue());
+
+   }
+
+   private void createFootstep(double userStepLength, double userStepSideways, double userStepYaw, double userStepHeight)
+   {
+      // Footstep Position
+      footstepPosition.setToZero(footstepReferenceFrame);
+      double stepYOffset = supportSide.negateIfLeftSide(userStepWidth.getDoubleValue()) + userStepSideways;
+      if ((supportSide == RobotSide.LEFT) && (stepYOffset > -userStepMinWidth.getDoubleValue()))
+      {
+         stepYOffset = -userStepMinWidth.getDoubleValue();
+      }
+      if ((supportSide == RobotSide.RIGHT) && (stepYOffset < userStepMinWidth.getDoubleValue()))
+      {
+         stepYOffset = userStepMinWidth.getDoubleValue();
+      }
+      footstepOffset.setToZero(footstepReferenceFrame);
+      footstepOffset.set(userStepLength, stepYOffset, userStepHeight);
+      footstepPosition.add(footstepOffset);
+
+      // Footstep Orientation
+      footstepOrientation.setToZero(footstepReferenceFrame);
+      footstepOrientation.setYawPitchRoll(userStepYaw, 0.0, 0.0);
+
+      // Create a foot Step Pose from Position and Orientation
+      footstepPose.setToZero(footstepReferenceFrame);
+      footstepPose.setPosition(footstepPosition);
+      footstepPose.setOrientation(footstepOrientation);
+      footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
+      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+
+      boolean trustHeight = false;
+      desiredFootstep = new Footstep(swingFoot.getRigidBody(), swingSide, swingFoot.getSoleFrame(), footstepPoseFrame, trustHeight);
+
+      List<FramePoint2d> contactFramePoints = swingFoot.getContactPoints2d();
+      ArrayList<Point2d> contactPoints = new ArrayList<Point2d>();
+
+      for (FramePoint2d contactFramePoint : contactFramePoints)
+      {
+         Point2d contactPoint = contactFramePoint.getPointCopy();
+
+         if (contactFramePoint.getX() > 0.0)
+         {
+            contactPoint.setX(contactPoint.getX() * userStepToePercentage.getDoubleValue());
+         }
+         else
+         {
+            contactPoint.setX(contactPoint.getX() * userStepHeelPercentage.getDoubleValue());
+         }
+
+         contactPoints.add(contactPoint);
+      }
+
+      desiredFootstep.setPredictedContactPointsFromPoint2ds(contactPoints);
    }
 
    private Footstep createFootstep(ReferenceFrame previousFootFrame, RobotSide swingLegSide)
@@ -258,9 +368,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       if (footstepList.isEmpty())
          return null;
 
-      Footstep ret = footstepList.get(0);
-
-      return ret;
+      return footstepList.get(0);
    }
 
    @Override
@@ -269,9 +377,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       if (footstepList.size() < 2)
          return null;
 
-      Footstep ret = footstepList.get(1);
-
-      return ret;
+      return footstepList.get(1);
    }
 
    @Override

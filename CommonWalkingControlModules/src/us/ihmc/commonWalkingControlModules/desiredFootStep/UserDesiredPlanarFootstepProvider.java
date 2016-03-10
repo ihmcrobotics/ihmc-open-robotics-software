@@ -44,7 +44,6 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
    private Footstep previousFootstep;
    private Footstep desiredFootstep;
    private Footstep nextFootstep;
-   private Footstep nextNextFootstep;
    private ContactablePlaneBody swingFoot;
    private ReferenceFrame footstepReferenceFrame;
 
@@ -129,19 +128,7 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
       if (footstepList.isEmpty())
          return null;
 
-      if (footstepList.size() > 0)
-      {
-         nextFootstep = footstepList.get(0);
-         if (footstepList.size() > 1)
-            nextNextFootstep = footstepList.get(1);
-         else
-            nextNextFootstep = null;
-      }
-      else
-      {
-         nextFootstep = null;
-         nextNextFootstep = null;
-      }
+      nextFootstep = footstepList.get(0);
       footstepList.remove(0);
 
       return nextFootstep;
@@ -226,13 +213,19 @@ public class UserDesiredPlanarFootstepProvider implements FootstepProvider
    @Override
    public Footstep peek()
    {
-      return nextFootstep;
+      if (footstepList.isEmpty())
+         return null;
+
+      return footstepList.get(0);
    }
 
    @Override
    public Footstep peekPeek()
    {
-      return nextNextFootstep;
+      if (footstepList.size() < 2)
+         return null;
+
+      return footstepList.get(1);
    }
 
    @Override
