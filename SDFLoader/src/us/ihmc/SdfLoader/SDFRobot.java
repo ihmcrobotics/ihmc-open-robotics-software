@@ -74,7 +74,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
    private final SDFDescriptionMutator descriptionMutator;
 
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
@@ -274,7 +274,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       return oneDoFJoints.values().toArray(new OneDegreeOfFreedomJoint[oneDoFJoints.size()]);
    }
 
-   protected void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFHumanoidJointNameMap jointNameMap)
+   protected void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFJointNameMap jointNameMap)
    {
       if(jointNameMap != null)
       {
@@ -287,14 +287,15 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       }
    }
 
-   private void addForceSensor(SDFJointHolder joint, SDFHumanoidJointNameMap jointNameMap)
+   private void addForceSensor(SDFJointHolder joint, SDFJointNameMap jointNameMap)
    {
-         String jointBeforeLeftFootName = jointNameMap.getJointBeforeFootName(RobotSide.LEFT);
-         String jointBeforeRightFootName = jointNameMap.getJointBeforeFootName(RobotSide.RIGHT);
-         
+//         String jointBeforeLeftFootName = jointNameMap.getJointBeforeFootName(RobotSide.LEFT);
+//         String jointBeforeRightFootName = jointNameMap.getJointBeforeFootName(RobotSide.RIGHT);
+         String[] jointNamesBeforeFeet = jointNameMap.getJointNamesBeforeFeet();
          if (joint.getForceSensors().size() > 0)
          {
-            String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
+            String jointName = joint.getName();
+            String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(jointName);
             OneDegreeOfFreedomJoint scsJoint = getOneDegreeOfFreedomJoint(sanitizedJointName);
    
             for (SDFForceSensor forceSensor : joint.getForceSensors())
@@ -304,7 +305,14 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    
                WrenchCalculatorInterface wrenchCalculator;
                
-               boolean jointIsParentOfFoot = joint.getName().equals(jointBeforeLeftFootName) || joint.getName().equals(jointBeforeRightFootName);
+               boolean jointIsParentOfFoot = false;
+               for(int i = 0; i < jointNamesBeforeFeet.length; i++)
+               {
+                  if(jointName.equals(jointNamesBeforeFeet[i]))
+                  {
+                     jointIsParentOfFoot = true;
+                  }
+               }
    
                if ( jointIsParentOfFoot )
                {
@@ -318,7 +326,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                   
                   Vector3d offsetToPack = new Vector3d();
                   forceSensor.getTransform().get(offsetToPack);
-                  JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(joint.getName(), offsetToPack, this);
+                  JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointName, offsetToPack, this);
                   scsJoint.addJointWrenchSensor(jointWrenchSensor);
                   
                   wrenchCalculator = new FeatherStoneJointBasedWrenchCalculator(forceSensor.getName(), scsJoint);

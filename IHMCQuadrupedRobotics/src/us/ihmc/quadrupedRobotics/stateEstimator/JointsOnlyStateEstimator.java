@@ -1,12 +1,18 @@
 package us.ihmc.quadrupedRobotics.stateEstimator;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 
-public class JointsOnlyStateEstimator implements QuadrupedStateEstimator
+public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
 {
    private final SDFFullRobotModel sdfFullRobotModel;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
@@ -21,36 +27,61 @@ public class JointsOnlyStateEstimator implements QuadrupedStateEstimator
       this.jointStateUpdater = jointStateUpdater;
    }
 
-   @Override
    public void initialize()
    {
       jointStateUpdater.initialize();
       sdfFullRobotModel.updateFrames();
    }
 
-   @Override
    public void enable()
    {
       
    }
 
-   @Override
    public void doControl()
    {
       jointStateUpdater.updateJointState();
       sdfFullRobotModel.updateFrames();
    }
 
-   @Override
    public boolean isFootInContact(RobotQuadrant quadrant)
    {
       return false;
    }
 
-   @Override
    public double getCurrentTime()
    {
       return TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp());
+   }
+
+   @Override
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return null;
+   }
+
+   @Override
+   public String getName()
+   {
+      return null;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return null;
+   }
+
+   @Override
+   public StateEstimator getStateEstimator()
+   {
+      return null;
+   }
+
+   @Override
+   public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
+   {
+      
    }
 
 }
