@@ -98,7 +98,7 @@ public class QuadrupedTeleopNode implements InputEventCallback
 
    public void update()
    {
-      double roll = exp((channels.get(InputChannel.RIGHT_TRIGGER) - channels.get(InputChannel.LEFT_TRIGGER))) * params.get(PARAM_ROLL_SCALE);
+      double roll = (channels.get(InputChannel.RIGHT_TRIGGER) - channels.get(InputChannel.LEFT_TRIGGER)) * params.get(PARAM_ROLL_SCALE);
       double pitch = exp(channels.get(InputChannel.RIGHT_STICK_Y)) * params.get(PARAM_PITCH_SCALE);
       double yaw = exp(channels.get(InputChannel.RIGHT_STICK_X)) * params.get(PARAM_YAW_SCALE);
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(yaw, pitch, roll);
