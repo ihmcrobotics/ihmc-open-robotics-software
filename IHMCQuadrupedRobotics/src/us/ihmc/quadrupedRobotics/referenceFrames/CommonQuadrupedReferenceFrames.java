@@ -6,8 +6,9 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
-public abstract class CommonQuadrupedReferenceFrames
+public abstract class CommonQuadrupedReferenceFrames implements ReferenceFrames
 {
    public abstract ReferenceFrame getBodyFrame();
 

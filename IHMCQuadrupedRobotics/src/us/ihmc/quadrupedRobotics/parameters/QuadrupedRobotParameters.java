@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFParameters;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedContactForceLimits;
@@ -12,12 +12,13 @@ public abstract class QuadrupedRobotParameters
    private final QuadrupedContactForceLimits contactForceLimits = new QuadrupedContactForceLimits();
    private final QuadrupedStandPrepParameters standPrepParameters = new DefaultQuadrupedStandPrepParameters();
    private final QuadrupedVirtualModelBasedStandParameters virtualModelBasedStandParameters = new DefaultQuadrupedVirtualModelBasedStandParameters();
+   private final QuadrupedContactPointParameters contactPointParameters = new QuadrupedContactPointParameters();
 
    public abstract SDFRobot createSdfRobot();
 
    public abstract QuadrupedJointNameMap getJointMap();
    
-   public abstract SDFFullRobotModel createFullRobotModel();
+   public abstract SDFFullQuadrupedRobotModel createFullRobotModel();
 
    public abstract String getModelName();
 
@@ -52,4 +53,10 @@ public abstract class QuadrupedRobotParameters
    {
       return virtualModelBasedStandParameters;
    }
+   
+   public QuadrupedContactPointParameters getQuadrupedContactPointParameters()
+   {
+      return contactPointParameters;
+   }
+
 }
