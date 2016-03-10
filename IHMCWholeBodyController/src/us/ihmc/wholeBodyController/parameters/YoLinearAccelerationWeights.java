@@ -109,9 +109,9 @@ public class YoLinearAccelerationWeights
       return zAccelerationWeight.getDoubleValue();
    }
 
+   private final double[] linearAccelerationWeights = new double[3];
    public double[] getLinearAccelerationWeights()
    {
-      double[] linearAccelerationWeights = new double[3];
       linearAccelerationWeights[0] = xAccelerationWeights.getDoubleValue();
       linearAccelerationWeights[1] = yAccelerationWeights.getDoubleValue();
       linearAccelerationWeights[2] = zAccelerationWeight.getDoubleValue();
