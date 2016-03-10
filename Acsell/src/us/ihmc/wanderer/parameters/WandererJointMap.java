@@ -65,6 +65,7 @@ public class WandererJointMap implements DRCRobotJointMap
    private final WandererContactPointParameters contactPointParameters;
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<String>();
+   private String[] jointNamesBeforeFeet = new String[2];
 
    public WandererJointMap()
    {
@@ -108,6 +109,9 @@ public class WandererJointMap implements DRCRobotJointMap
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
       }
+      
+      jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
+      jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
    }
 
    @Override
@@ -321,5 +325,11 @@ public class WandererJointMap implements DRCRobotJointMap
    public String getUnsanitizedRootJointInSdf()
    {
       return pelvisName;
+   }
+   
+   @Override
+   public String[] getJointNamesBeforeFeet()
+   {
+      return jointNamesBeforeFeet;
    }
 }
