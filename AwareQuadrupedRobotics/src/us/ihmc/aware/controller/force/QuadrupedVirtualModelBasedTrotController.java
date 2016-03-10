@@ -32,6 +32,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.PIDController;
@@ -97,6 +98,12 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final static String STANCE_WIDTH_NOMINAL = "stanceWidthNominal";
    private final static String STANCE_LENGTH_NOMINAL = "stanceLengthNominal";
    private final static String CONTACT_PRESSURE_THRESHOLD = "contactPressureThreshold";
+   private final static String BODY_ORIENTATION_INPUT_MIN = "bodyOrientationInputMin";
+   private final static String BODY_ORIENTATION_INPUT_MAX = "bodyOrientationInputMax";
+   private final static String COM_POSITION_INPUT_MIN = "comPositionInputMin";
+   private final static String COM_POSITION_INPUT_MAX = "comPositionInputMax";
+   private final static String PLANAR_VELOCITY_INPUT_MIN = "planarVelocityInputMin";
+   private final static String PLANAR_VELOCITY_INPUT_MAX = "planarVelocityInputMax";
 
    // utilities
    private final QuadrupedJointLimits jointLimits;
@@ -263,6 +270,12 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       params.setDefault(STANCE_WIDTH_NOMINAL, 0.4);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
       params.setDefault(CONTACT_PRESSURE_THRESHOLD, 75);
+      params.setDefault(BODY_ORIENTATION_INPUT_MIN, -Math.PI/4, -Math.PI/4, -Math.PI/4);
+      params.setDefault(BODY_ORIENTATION_INPUT_MAX, Math.PI/4, Math.PI/4, Math.PI/4);
+      params.setDefault(COM_POSITION_INPUT_MIN, 0, 0, 0.25);
+      params.setDefault(COM_POSITION_INPUT_MAX, 0, 0, 0.75);
+      params.setDefault(PLANAR_VELOCITY_INPUT_MIN, -2.0, -2.0, -2.0);
+      params.setDefault(PLANAR_VELOCITY_INPUT_MAX, 2.0, 2.0, 2.0);
 
       // utilities
       jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
@@ -476,13 +489,25 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    private void updateProviders()
    {
-      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
+      // update desired body orientation
       BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
+      double yaw = MathTools.clipToMinMax(bodyOrientationPacket.getYaw(), params.get(BODY_ORIENTATION_INPUT_MIN, 0), params.get(BODY_ORIENTATION_INPUT_MAX, 0));
+      double pitch = MathTools.clipToMinMax(bodyOrientationPacket.getPitch(), params.get(BODY_ORIENTATION_INPUT_MIN, 1), params.get(BODY_ORIENTATION_INPUT_MAX, 1));
+      double roll = MathTools.clipToMinMax(bodyOrientationPacket.getRoll(), params.get(BODY_ORIENTATION_INPUT_MIN, 2), params.get(BODY_ORIENTATION_INPUT_MAX, 2));
+      yoBodyOrientationInput.setYawPitchRoll(yaw, pitch, roll);
+
+      // update desired planar velocity
       PlanarVelocityPacket planarVelocityPacket = inputProvider.getPlanarVelocityPacket().get();
-      yoBodyOrientationInput.setYawPitchRoll(bodyOrientationPacket.getYaw(), bodyOrientationPacket.getPitch(), bodyOrientationPacket.getRoll());
-      yoBodyVelocityInput.set(planarVelocityPacket.getX(), planarVelocityPacket.getY(), 0.0);
-      yoBodyYawRateInput.set(planarVelocityPacket.getA());
-      yoComHeightInput.set(comPositionPacket.getZ());
+      double xdot = MathTools.clipToMinMax(planarVelocityPacket.getX(), params.get(PLANAR_VELOCITY_INPUT_MIN, 0), params.get(PLANAR_VELOCITY_INPUT_MAX, 0));
+      double ydot = MathTools.clipToMinMax(planarVelocityPacket.getY(), params.get(PLANAR_VELOCITY_INPUT_MIN, 1), params.get(PLANAR_VELOCITY_INPUT_MAX, 1));
+      double adot = MathTools.clipToMinMax(planarVelocityPacket.getA(), params.get(PLANAR_VELOCITY_INPUT_MIN, 2), params.get(PLANAR_VELOCITY_INPUT_MAX, 2));
+      yoBodyVelocityInput.set(xdot, ydot, 0.0);
+      yoBodyYawRateInput.set(adot);
+
+      // update desired com height
+      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
+      double comHeight = MathTools.clipToMinMax(comPositionPacket.getZ(), params.get(COM_POSITION_INPUT_MIN, 2), params.get(COM_POSITION_INPUT_MAX, 2));
+      yoComHeightInput.set(comHeight);
    }
 
    private void updateEstimates()
@@ -660,10 +685,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       yoGraphicsList.setVisible(true);
       artifactList.setVisible(true);
       virtualModelController.setVisible(true);
-
-      // initialize desired values (provider inputs)
-      yoBodyOrientationInput.setYawPitchRoll(0.0, 0.0, 0.0);
-      yoComHeightInput.set(params.get(COM_HEIGHT_NOMINAL));
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
