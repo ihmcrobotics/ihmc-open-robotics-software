@@ -1162,7 +1162,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();

@@ -79,6 +79,7 @@ public class BalanceManager
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
 
    private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint tempCapturePoint = new FramePoint();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
@@ -301,6 +302,9 @@ public class BalanceManager
       update();
       yoFinalDesiredICP.set(Double.NaN, Double.NaN);
       yoDesiredCapturePoint.setByProjectionOntoXYPlane(yoCapturePoint);
+      
+      yoCapturePoint.getFrameTupleIncludingFrame(tempCapturePoint);
+      icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
    }
 
    public void prepareForDoubleSupportPushRecovery()
