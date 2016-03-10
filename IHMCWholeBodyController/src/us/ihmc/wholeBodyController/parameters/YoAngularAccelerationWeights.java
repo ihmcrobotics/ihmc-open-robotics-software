@@ -90,9 +90,9 @@ public class YoAngularAccelerationWeights
       return rollAccelerationWeight.getDoubleValue();
    }
 
+   private final double[] orientationWeights = new double[3];
    public double[] getAngularAccelerationWeights()
    {
-      double[] orientationWeights = new double[3];
       orientationWeights[0] = yawAccelerationWeight.getDoubleValue();
       orientationWeights[1] = pitchAccelerationWeight.getDoubleValue();
       orientationWeights[2] = rollAccelerationWeight.getDoubleValue();
