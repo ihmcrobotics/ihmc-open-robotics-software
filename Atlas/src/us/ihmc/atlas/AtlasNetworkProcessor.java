@@ -22,7 +22,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 
 public class AtlasNetworkProcessor
 {
-   private static final boolean ENABLE_BEHAVIOR_MODULE = false;
+   private static final boolean ENABLE_BEHAVIOR_MODULE = true;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
