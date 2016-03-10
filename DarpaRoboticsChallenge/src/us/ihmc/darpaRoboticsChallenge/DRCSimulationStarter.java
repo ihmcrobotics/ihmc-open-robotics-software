@@ -403,7 +403,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       if (deactivateWalkingFallDetector)
          controllerFactory.setFallbackControllerForFailure(null);
 
-      controllerFactory.createdQueuedControllerCommandGenerator(controllerCommands);
+      controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
       
       scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
 
