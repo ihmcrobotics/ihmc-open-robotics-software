@@ -453,6 +453,44 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI + 1e-4, 1e-6);
    }
    
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRecomputingJointLimits_UserSetLimitsNearFourBarConstraints_UnitSquare()
+   {
+      // initialize to a square of unit length
+      elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, new RigidBodyTransform());
+      elevator = new RigidBody("elevator", elevatorFrame);
+      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d elevatorToJointA = new Vector3d();
+      Vector3d jointAtoB = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointCtoD = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointDtoA = new Vector3d(1.0, 0.0, 0.0);
+      boolean recomputeJointLimits = true;
+      
+      // the constraints of the four bar inherently restrict b, c, and d to [-180, 0]
+      
+      // joint limits for b are [-180 + eps, - eps]
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      passiveJointB.setJointLimitLower(-Math.PI + 1e-4);
+      passiveJointB.setJointLimitUpper(-1e-4);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+            recomputeJointLimits);
+      double masterJointALower = masterJointA.getJointLimitLower();
+      double masterJointAUpper = masterJointA.getJointLimitUpper();
+      assertEquals(masterJointALower, 1e-4, 1e-6);
+      assertEquals(masterJointAUpper, Math.PI - 1e-4, 1e-8);
+      
+      // joint limits for b are [-180 - eps, eps]
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      passiveJointB.setJointLimitLower(-Math.PI + 1e-4);
+      passiveJointB.setJointLimitUpper(-1e-4);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+            recomputeJointLimits);
+      masterJointAUpper = masterJointA.getJointLimitUpper();
+      assertEquals(masterJointAUpper, Math.PI, 1e-6);
+   }
+   
    private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis)
    {
       masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxis);
