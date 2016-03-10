@@ -62,6 +62,7 @@ public class IMUDriftCompensator
    private final DoubleYoVariable alphaFilterFootAngularVelocityAverage = new DoubleYoVariable("alphaFilterFootAngularVelocityAverage", registry);
    private final AlphaFilteredYoFrameVector footAngularVelocityAverageFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("footAngularVelocityAverageFiltered", "", registry, alphaFilterFootAngularVelocityAverage, yoFootAngularVelocityAverage);
    private final YoFrameVector footAngularVelocityDifferenceThresholdToEstimateIMUDrift = new YoFrameVector("footAngularVelocityDifferenceThresholdToEstimateIMUDrift", worldFrame, registry);
+   private final BooleanYoVariable areFootAngularVelocitiesCloseEnough = new BooleanYoVariable("areFootAngularVelocitiesCloseEnough", registry);
 
    private final List<RigidBody> feet = new ArrayList<>();
    private final Map<RigidBody, ReferenceFrame> footFrames;
@@ -199,35 +200,26 @@ public class IMUDriftCompensator
     * Estimate the IMU yaw drift if the feet angular velocities are low enough.
     * @param trustedSide Refers to the foot to trust, set it to null when both feet are trusted.
     */
-   public void esimtateDriftIfPossible(RigidBody trustedFoot)
+   public void esimtateDriftIfPossible(List<RigidBody> trustedFeet)
    {
-      boolean areBothFeetTrusted = trustedFoot == null;
-
       if (userForceIMUDriftCompensation.getBooleanValue())
       {
          isIMUDriftYawRateEstimated.set(true);
-         if (areBothFeetTrusted)
-         {
-            estimateIMUDriftYaw(null);
-         }
-         else
-         {
-            estimateIMUDriftYaw(trustedFoot);
-         }
+         estimateIMUDriftYaw(trustedFeet);
 
          return;
       }
 
-      if (!areBothFeetTrusted)
+      if (trustedFeet.size() < 2)
       {
          isIMUDriftYawRateEstimated.set(false);
          return;
       }
       
-      if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough() && areFeetAngularVelocitiesClose())
+      if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough() && areFeetAngularVelocitiesClose(trustedFeet))
       {
          isIMUDriftYawRateEstimated.set(true);
-         estimateIMUDriftYaw(null);
+         estimateIMUDriftYaw(trustedFeet);
       }
       else
       {
@@ -249,36 +241,40 @@ public class IMUDriftCompensator
       return areFeetLoadedEnough;
    }
 
-   private boolean areFeetAngularVelocitiesClose()
+   private boolean areFeetAngularVelocitiesClose(List<RigidBody> trustedFeet)
    {
-      for (int i = 0; i < feet.size(); i++)
+      for (int i = 0; i < trustedFeet.size(); i++)
       {
-         RigidBody foot = feet.get(i);
+         RigidBody foot = trustedFeet.get(i);
          YoFrameVector angularVelocityDifferenceFromAverage = yoFootAngularVelocityDifferencesFromAverage.get(foot);
          boolean isAngularVelocityXLowEnough = Math.abs(angularVelocityDifferenceFromAverage.getX()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getX();
          boolean isAngularVelocityYLowEnough = Math.abs(angularVelocityDifferenceFromAverage.getY()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getY();
          boolean isAngularVelocityZLowEnough = Math.abs(angularVelocityDifferenceFromAverage.getZ()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getZ();
-         
-         if(!(isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough))
-            return false;
+
+         if (!(isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough))
+         {
+            areFootAngularVelocitiesCloseEnough.set(false);
+            return areFootAngularVelocitiesCloseEnough.getBooleanValue();
+         }
       }
-      
-      return true;
+
+      areFootAngularVelocitiesCloseEnough.set(true);
+      return areFootAngularVelocitiesCloseEnough.getBooleanValue();
    }
    
    /**
     * Estimate the IMU drift yaw using the leg kinematics.
     * @param trustedSide Refers to the foot to trust, set it to null when both feet are trusted.
     */
-   private void estimateIMUDriftYaw(RigidBody trustedFoot)
+   private void estimateIMUDriftYaw(List<RigidBody> trustedFeet)
    {
-      if (trustedFoot == null)
+      if (trustedFeet.size() > 1)
       {
          imuDriftYawRate.set(footAngularVelocityAverageFiltered.getZ());
       }
       else
       {
-         imuDriftYawRate.set(footAngularVelocitiesInWorldFilteredZ.get(trustedFoot).getDoubleValue());
+         imuDriftYawRate.set(footAngularVelocitiesInWorldFilteredZ.get(trustedFeet.get(0)).getDoubleValue());
       }
       imuDriftYawRateFiltered.update();
 
@@ -386,5 +382,4 @@ public class IMUDriftCompensator
       }
       footAngularVelocityAverageFiltered.setToZero();
    }
-
 }
