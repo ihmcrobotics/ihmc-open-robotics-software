@@ -1,16 +1,18 @@
 <object-stream>
-  <long>38963645541</long>
+  <long>1457583856455</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
         <origin>AT_SOLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
-        <location>
+        <location class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
           <x>0.3</x>
           <y>0.0</y>
-          <z>0</z>
+          <z>0.0</z>
         </location>
         <orientation>
           <x>0.0</x>
@@ -24,8 +26,9 @@
     <swingTime>3.0</swingTime>
     <transferTime>1.0</transferTime>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
-  <long>40681779074</long>
+  <long>1457583856456</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
   </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>
