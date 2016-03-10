@@ -30,7 +30,7 @@ public class FourBarKinematicLoop
     *            |/      \|
     *            D--------C
     */
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final String name;
@@ -109,11 +109,11 @@ public class FourBarKinematicLoop
       // Calculator
       fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD);
 
-      // Check (and correct, if applicable) joint limits
-      verifyMasterJointLimits();
-           
       // Initialize interior angles
       setInteriorAngleOffsets();
+
+      // Check (and correct, if applicable) joint limits
+      verifyMasterJointLimits();
       
       if (DEBUG)
       {
@@ -189,17 +189,17 @@ public class FourBarKinematicLoop
       vectorCDProjected.setIncludingFrame(frameWithZAlongJointAxis, vectorCD.getX(), vectorCD.getY());
       vectorDAProjected.setIncludingFrame(frameWithZAlongJointAxis, vectorDA.getX(), vectorDA.getY());
       vectorABProjected.setIncludingFrame(frameWithZAlongJointAxis, vectorAB.getX(), vectorAB.getY());
-      
+
       if (DEBUG)
-      {  
-      System.out.println("\nJoint to joint vectors debugging:\n");
-      System.out.println("vector ab = " + vectorAB);
-      System.out.println("vector bc = " + vectorBC);
-      System.out.println("vector cd = " + vectorCD);
-      System.out.println("vector da = " + vectorDA);
+      {
+         System.out.println("\nJoint to joint vectors debugging:\n");
+         System.out.println("vector ab = " + vectorAB);
+         System.out.println("vector bc = " + vectorBC);
+         System.out.println("vector cd = " + vectorCD);
+         System.out.println("vector da = " + vectorDA);
       }
    }
-   
+
    private void setInteriorAngleOffsets()
    {
       vectorDAProjected.changeFrame(frameWithZAlongJointAxis);
@@ -246,25 +246,25 @@ public class FourBarKinematicLoop
    {
       if (jointB.getJointLimitLower() != Double.NEGATIVE_INFINITY || jointB.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitLower());
-
-         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
-            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
-
-         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitUpper());
-
+         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[1]);
+         
          if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
             maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+         
+         fourBarCalculator.computeMasterJointAngleGivenAngleABC(jointB.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[1]);
+         
+         if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
+            minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
       }
       
       if (jointC.getJointLimitLower() != Double.NEGATIVE_INFINITY || jointC.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitLower());
+         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitLower() + interiorAnglesAtZeroConfiguration[2]);
 
          if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
             minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
 
-         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitUpper());
+         fourBarCalculator.computeMasterJointAngleGivenAngleBCD(jointC.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[2]);
 
          if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
             maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
@@ -272,23 +272,26 @@ public class FourBarKinematicLoop
       
       if (jointD.getJointLimitLower() != Double.NEGATIVE_INFINITY || jointD.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitLower());
+         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitLower() + interiorAnglesAtZeroConfiguration[3]);
+         
+         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
+            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
+
+         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[3]);
 
          if (fourBarCalculator.getAngleDAB() > minValidMasterJointAngle)
             minValidMasterJointAngle = fourBarCalculator.getAngleDAB();
-
-         fourBarCalculator.computeMasterJointAngleGivenAngleCDA(jointD.getJointLimitUpper());
-
-         if (fourBarCalculator.getAngleDAB() < maxValidMasterJointAngle)
-            maxValidMasterJointAngle = fourBarCalculator.getAngleDAB();
       }
+      
+      masterJointA.setJointLimitLower(minValidMasterJointAngle);
+      masterJointA.setJointLimitUpper(maxValidMasterJointAngle);
    }
-       
+   
    private void verifyMasterJointLimits()
    {
       maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
       minValidMasterJointAngle = fourBarCalculator.getMinDAB();
-
+      
       if (DEBUG)
       {
          System.out.println("\nMax master joint angle: " + maxValidMasterJointAngle);
