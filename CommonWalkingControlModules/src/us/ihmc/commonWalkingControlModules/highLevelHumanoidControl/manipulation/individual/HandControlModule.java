@@ -42,7 +42,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.ConstantPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -63,8 +62,6 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
-import us.ihmc.robotics.trajectories.providers.CurrentPositionProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -88,7 +85,6 @@ public class HandControlModule
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final Map<OneDoFJoint, Double> defaultArmJointPositions;
 
-   private final PositionProvider currentHandPosition;
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final WrapperForPositionAndOrientationTrajectoryGenerators poseTrajectoryGenerator;
@@ -162,7 +158,6 @@ public class HandControlModule
       fullRobotModel = momentumBasedController.getFullRobotModel();
       hand = fullRobotModel.getHand(robotSide);
       chest = fullRobotModel.getChest();
-      ReferenceFrame handFrame = hand.getBodyFixedFrame();
 
       chestFrame = chest.getBodyFixedFrame();
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
@@ -180,7 +175,6 @@ public class HandControlModule
       requestedState = new EnumYoVariable<HandControlMode>(name + "RequestedState", "", registry, HandControlMode.class, true);
       requestedState.set(null);
 
-      currentHandPosition = new CurrentPositionProvider(handFrame);
       defaultArmJointPositions = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
 
       areJointsEnabled = new LinkedHashMap<>();
@@ -560,63 +554,9 @@ public class HandControlModule
    }
 
    private final FramePoint tempPosition = new FramePoint();
-   private final FramePoint tempPositionOld = new FramePoint();
    private final FrameVector tempLinearVelocity = new FrameVector();
    private final FrameVector tempAngularVelocity = new FrameVector();
    private final FrameOrientation tempOrientation = new FrameOrientation();
-   private final FrameOrientation tempOrientationOld = new FrameOrientation();
-   private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
-
-   public void moveInStraightLinesViaWayPoints(FramePose[] desiredPoses, double totalTrajectoryTime, ReferenceFrame trajectoryFrame)
-   {
-      orientationTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
-      positionTrajectoryGenerator.clear();
-      orientationTrajectoryGenerator.clear();
-
-      tempLinearVelocity.setToZero(worldFrame);
-      tempAngularVelocity.setToZero(worldFrame);
-
-      int numberOfPoses = desiredPoses.length;
-      double trajectoryTimeOfEachPose = totalTrajectoryTime / numberOfPoses;
-      double elapsedTimeSinceTrajectoryStart = 0.0;
-
-      currentHandPosition.getPosition(tempPosition);
-      tempLinearVelocity.setToZero();
-      positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
-
-      for (int i = 0; i < numberOfPoses; i++)
-      {
-         FramePose desiredPose = desiredPoses[i];
-         desiredPose.getPoseIncludingFrame(tempPosition, tempOrientation);
-
-         if ((i > 0) && (i < desiredPoses.length - 1))
-         {
-            tempLinearVelocity.sub(tempPosition, tempPositionOld);
-            tempLinearVelocity.scale(1.0 / trajectoryTimeOfEachPose);
-
-            orientationInterpolationCalculator.computeAngularVelocity(tempAngularVelocity, tempOrientationOld, tempOrientation, 1.0 / trajectoryTimeOfEachPose);
-         }
-         else
-         {
-            tempLinearVelocity.scale(0.0);
-            tempAngularVelocity.scale(0.0);
-         }
-
-         tempPositionOld.set(tempPosition);
-         tempOrientationOld.set(tempOrientation);
-
-         elapsedTimeSinceTrajectoryStart += trajectoryTimeOfEachPose;
-
-         positionTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempPosition, tempLinearVelocity);
-         orientationTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempOrientation, tempAngularVelocity);
-      }
-
-      positionTrajectoryGenerator.initialize();
-      orientationTrajectoryGenerator.initialize();
-
-      executeTaskspaceTrajectory(poseTrajectoryGenerator);
-   }
-
    private final FramePose currentDesiredPose = new FramePose();
 
    private FramePose computeDesiredFramePose(ReferenceFrame trajectoryFrame)
