@@ -9,8 +9,16 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 
 public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
@@ -29,9 +37,9 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
          ComHeightPacket comHeightPacket = (ComHeightPacket) object;
 
          PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(1);
-         double position = comHeightPacket.trajectoryTime;
+         double position = comHeightPacket.heightOffset + 0.65;
          double velocity = 0.0;
-         pelvisHeightTrajectoryMessage.setTrajectoryPoint(0, 1.0, position, velocity);
+         pelvisHeightTrajectoryMessage.setTrajectoryPoint(0, comHeightPacket.trajectoryTime, position, velocity);
          
          return pelvisHeightTrajectoryMessage;
       }
@@ -49,6 +57,37 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
          
          return footTrajectoryMessage;
       }
+      else if (object instanceof FootstepDataList)
+      {
+         FootstepDataList footstepDataList = (FootstepDataList) object;
+
+         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage(footstepDataList.swingTime, footstepDataList.transferTime);
+         
+         ArrayList<FootstepData> oldFootstepDataList = footstepDataList.footstepDataList;
+         
+         for (FootstepData footstepData : oldFootstepDataList)
+         {
+            FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstepData.robotSide, footstepData.location, footstepData.orientation);
+            footstepDataMessage.setOrigin(FootstepOrigin.AT_ANKLE_FRAME);
+            footstepDataMessage.setSwingHeight(footstepData.swingHeight);
+            footstepDataListMessage.add(footstepDataMessage);
+         }
+
+         return footstepDataListMessage;
+      }
+      else if (object instanceof PauseCommand)
+      {
+         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+         return pauseWalkingMessage;
+      }
+      else if (object instanceof EndOfScriptCommand)
+      {
+         return object;
+      }
+      else
+      {
+         System.err.println("No Transformation for objects of type " + object.getClass());
+      }
       
       return object;
    }
@@ -65,10 +104,10 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 //      paths.add("..\\IHMCHumanoidOperatorInterface\\scripts");
 //      paths.add("..\\IHMCHumanoidOperatorInterface\\resources\\finalScripts");
 
-      ArrayList<String> newPaths = moveScriptDirectories(paths, ScriptTransformer.ORIGINAL);
+//      ArrayList<String> newPaths = moveScriptDirectories(paths, ScriptTransformer.ORIGINAL);
 
       int index = 0;
-      for (String path : newPaths)
+      for (String path : paths)
       {
          System.out.println("Transforming scripts in: " + paths.get(index++));
          new RefactoringToNewPacketsScriptTransformer(path);
