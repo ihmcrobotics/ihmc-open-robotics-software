@@ -32,6 +32,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -40,6 +41,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGenerator;
+import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -194,29 +196,40 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       pelvisPosition.attachVariableChangedListener(pelvisFrameUpdater);
       pelvisOrientation.attachVariableChangedListener(pelvisFrameUpdater);
+
+      String chestPrefix = "chest";
+      String subTrajectoryName = chestPrefix + "SubTrajectory";
+      String currentOrientationVarNamePrefix = subTrajectoryName + "CurrentOrientation";
+
+      DoubleYoVariable controllerDesiredInWorldQx = (DoubleYoVariable) scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx");
+      DoubleYoVariable controllerDesiredInWorldQy = (DoubleYoVariable) scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy");
+      DoubleYoVariable controllerDesiredInWorldQz = (DoubleYoVariable) scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz");
+      DoubleYoVariable controllerDesiredInWorldQs = (DoubleYoVariable) scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs");
+      YoFrameQuaternion controllerDesiredOrientationInWorld = new YoFrameQuaternion(controllerDesiredInWorldQx, controllerDesiredInWorldQy, controllerDesiredInWorldQz, controllerDesiredInWorldQs, worldFrame);
+      FrameOrientation controllerChestDesiredFrameOrientation = new FrameOrientation();
+      
+      RigidBody chest = drcSimulationTestHelper.getControllerFullRobotModel().getChest();
+      
+      chestPrefix = chest.getName();
+      String nameSpace = chestPrefix + AxisAngleOrientationController.class.getSimpleName();
+      String varName = chestPrefix + "RotationErrorInBody";
+
+      DoubleYoVariable chestAxisAngleErrorX = (DoubleYoVariable) scs.getVariable(nameSpace, varName + "X");
+      DoubleYoVariable chestAxisAngleErrorY = (DoubleYoVariable) scs.getVariable(nameSpace, varName + "Y");
+      DoubleYoVariable chestAxisAngleErrorZ = (DoubleYoVariable) scs.getVariable(nameSpace, varName + "Z");
+      YoFrameVector chestAxisAngleError = new YoFrameVector(chestAxisAngleErrorX, chestAxisAngleErrorY, chestAxisAngleErrorZ, worldFrame);
       
       FrameOrientation desiredChestFrameOrientation = new FrameOrientation();
       Quat4d desiredChestQuat = new Quat4d();
-
-
-      DoubleYoVariable controllerDesiredInWorldQx = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qx");
-      DoubleYoVariable controllerDesiredInWorldQy = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qy");
-      DoubleYoVariable controllerDesiredInWorldQz = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qz");
-      DoubleYoVariable controllerDesiredInWorldQs = null; // (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qs");
-      YoFrameQuaternion controllerDesiredOrientationInWorld = new YoFrameQuaternion(controllerDesiredInWorldQx, controllerDesiredInWorldQy, controllerDesiredInWorldQz, controllerDesiredInWorldQs, worldFrame);
-      FrameOrientation controllerChestDesiredFrameOrientation = new FrameOrientation();
-      DoubleYoVariable chestAxisAngleErrorX = (DoubleYoVariable) scs.getVariable("chestElevatorAxisAngleOrientationController", "chestElevatorAxisAngleErrorInBody" + "X");
-      DoubleYoVariable chestAxisAngleErrorY = (DoubleYoVariable) scs.getVariable("chestElevatorAxisAngleOrientationController", "chestElevatorAxisAngleErrorInBody" + "Y");
-      DoubleYoVariable chestAxisAngleErrorZ = (DoubleYoVariable) scs.getVariable("chestElevatorAxisAngleOrientationController", "chestElevatorAxisAngleErrorInBody" + "Z");
-      YoFrameVector chestAxisAngleError = new YoFrameVector(chestAxisAngleErrorX, chestAxisAngleErrorY, chestAxisAngleErrorZ, worldFrame);
-      
       desiredChestFrameOrientation.setIncludingFrame(pelvisFrame, Math.toRadians(35.0), Math.toRadians(20.0), Math.toRadians(10.0));
       desiredChestFrameOrientation.changeFrame(worldFrame);
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
       double trajectoryTime = 0.5;
-      ChestOrientationPacket packet = new ChestOrientationPacket(desiredChestQuat, false, trajectoryTime);
-      drcSimulationTestHelper.send(packet);
+      
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredChestQuat);
+//      ChestOrientationPacket packet = new ChestOrientationPacket(desiredChestQuat, false, trajectoryTime);
+      drcSimulationTestHelper.send(chestTrajectoryMessage);
       
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
@@ -271,7 +284,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       double swingTime = 0.6;
       double transferTime = 0.25;
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
-      
+
       for (Footstep desiredFootstep : desiredFootstepList)
       {
          RobotSide robotSide = desiredFootstep.getRobotSide();
@@ -282,14 +295,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
          footstepDataList.add(footstepData);
       }
-      
+
       controllerDesiredOrientationInWorld.getFrameOrientationIncludingFrame(controllerChestDesiredFrameOrientation);
 
       assertTrue(
             "Desired chest orientation in controller does not match the desired chest orientation in the packet:\n Desired orientation from packet: "
                   + desiredChestFrameOrientation.toStringAsYawPitchRoll() + "\n Desired orientation from controller: "
                   + controllerChestDesiredFrameOrientation.toStringAsYawPitchRoll(),
-            desiredChestFrameOrientation.epsilonEquals(controllerChestDesiredFrameOrientation, 1E-10));
+            desiredChestFrameOrientation.epsilonEquals(controllerChestDesiredFrameOrientation, 1E-4));
 
       controllerChestDesiredFrameOrientation.changeFrame(pelvisZUpFrame);
 
@@ -304,10 +317,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-//      Point3d center = new Point3d(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
-//      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
-//      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-//      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      Point3d center = new Point3d(0.12, 0.21, 0.788);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
       BambooTools.reportTestFinishedMessage();
    }
