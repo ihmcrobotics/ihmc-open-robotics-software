@@ -49,13 +49,11 @@ public class ChangingHandFrameScriptTransformer extends ScriptTransformer
       paths.add("..\\IHMCHumanoidOperatorInterface\\scripts");
       paths.add("..\\IHMCHumanoidOperatorInterface\\resources\\finalScripts");
 
-      ArrayList<String> newPaths = moveScriptDirectories(paths, ScriptTransformer.ORIGINAL);
-
       int index = 0;
-      for (String path : newPaths)
+      for (String path : paths)
       {
          System.out.println("Transforming scripts in: " + paths.get(index++));
-         new RefactoringToNewPacketsScriptTransformer(path);
+         new ChangingHandFrameScriptTransformer(path);
       }
    }
 }

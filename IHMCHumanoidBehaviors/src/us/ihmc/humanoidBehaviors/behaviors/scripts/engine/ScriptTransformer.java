@@ -1,8 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -14,15 +15,10 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class ScriptTransformer
 {
-   public static final String ORIGINAL = "Original";
-
-   private static final Runtime rt = Runtime.getRuntime();
-
-   private final List<String> namesOfFilesToTransform = new ArrayList<>();
+   private final List<File> filesToTransform = new ArrayList<>();
    private final HashSet<String> listOfDirectoriesContainingAtLeastOneScript = new HashSet<>();
    private final List<String> listOfDirectoriesToCreate = new ArrayList<String>();
 
@@ -30,30 +26,39 @@ public abstract class ScriptTransformer
 
    public ScriptTransformer(String scriptDirectoryPath) throws IOException, InterruptedException
    {
-      findScripts(scriptDirectoryPath, namesOfFilesToTransform, listOfDirectoriesContainingAtLeastOneScript);
+      findScripts(scriptDirectoryPath, filesToTransform, listOfDirectoriesContainingAtLeastOneScript);
 
-      for (String directory : listOfDirectoriesContainingAtLeastOneScript)
+      for (File scriptFileToTransform : filesToTransform)
       {
-         String directoryWithTransformedScripts = directory.replaceFirst(ORIGINAL, "");
-         listOfDirectoriesToCreate.add(directoryWithTransformedScripts);
-         rt.exec(new String[] { "cmd", "/C", "mkdir " + directoryWithTransformedScripts });
-      }
+    	  if (scriptFileToTransform.isDirectory())
+    	  {
+    		  System.err.println("File should not be a director!?");
+    		  continue;
+    	  }
+    	  
+    	  File parentDirectory = scriptFileToTransform.getParentFile();
+    	  if (parentDirectory.isDirectory())
+    	  {
+    	     File subDirectoryToMoveOriginals = new File(parentDirectory, "OriginalBackups");
+    	     if (!subDirectoryToMoveOriginals.exists()) subDirectoryToMoveOriginals.mkdir();
 
-      ThreadTools.sleepSeconds(1.0);
-
-      for (String script : namesOfFilesToTransform)
-      {
-         String newScript = script.replaceFirst(ORIGINAL, "");
+    	     File scriptFileToTransformBackup = new File(subDirectoryToMoveOriginals, scriptFileToTransform.getName());
+    	     Files.copy(scriptFileToTransform.toPath(), scriptFileToTransformBackup.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    	  }
+    	  
          ArrayList<ScriptObject> scriptObjects = new ArrayList<>();
          ArrayList<Object> newScriptObjects = new ArrayList<>();
          ScriptFileLoader scriptFileLoader = null;
+         
+         String scriptName = scriptFileToTransform.getName();
+         
          try
          {
-            scriptFileLoader = new ScriptFileLoader(script);
+            scriptFileLoader = new ScriptFileLoader(scriptFileToTransform);
          }
          catch (StreamException e)
          {
-            PrintTools.error("Empty script: " + script.substring(script.lastIndexOf("\\") + 1));
+            PrintTools.error("Empty script: " + scriptName);
             continue;
          }
 
@@ -66,9 +71,9 @@ public abstract class ScriptTransformer
             catch (ConversionException | CannotResolveClassException e)
             {
                if (e.getCause() != null)
-                  PrintTools.error("In script: " + script.substring(script.lastIndexOf("\\") + 1) + ". Problem loading packet, cause: " + e.getCause().getMessage());
+                  PrintTools.error("In script: " + scriptName + ". Problem loading packet, cause: " + e.getCause().getMessage());
                else
-                  PrintTools.error("In script: " + script.substring(script.lastIndexOf("\\") + 1) + ". Problem loading packet, exception: " + e.getClass().getSimpleName() + ", message: " + e.getMessage());
+                  PrintTools.error("In script: " + scriptName + ". Problem loading packet, exception: " + e.getClass().getSimpleName() + ", message: " + e.getMessage());
                continue;
             }
             catch (IOException | StreamException e)
@@ -85,6 +90,7 @@ public abstract class ScriptTransformer
             newScriptObjects.add(newScriptObject);
          }
 
+         File newScript = new File(scriptFileToTransform.getParentFile(), scriptFileToTransform.getName());
          ScriptFileSaver scriptFileSaver = null;
          try
          {
@@ -109,60 +115,46 @@ public abstract class ScriptTransformer
          scriptFileSaver.close();
          System.out.println("Done transforming script: " + newScript);
       }
-
-      Process exec = rt.exec(new String[] { "cmd", "/C", "rmdir /Q /S " + scriptDirectoryPath});
-      ThreadTools.sleepSeconds(0.1);
    }
 
    public abstract Object transformScriptObject(Object object);
 
-   private static void findScripts(final String scriptDirectoryPath, final List<String> fileNamesToPack,
-         final Set<String> listOfDirectoriesContainingAtLeastOneScript) throws IOException
+   private static void findScripts(final String scriptDirectoryPath, final List<File> foundScriptFilesToPack,
+		   final Set<String> listOfDirectoriesContainingAtLeastOneScript) throws IOException
    {
-      final List<String> potentialSubDirectories = new ArrayList<String>();
-      final Process proc = rt.exec(new String[] { "cmd", "/C", "dir /B " + scriptDirectoryPath });
+	   final List<String> potentialSubDirectories = new ArrayList<String>();
 
-      Runnable settingsCreator = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            String temp = null;
-            InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-            BufferedReader br = new BufferedReader(isr);
-            try
-            {
-               while ((temp = br.readLine()) != null)
-               {
-                  String fileName = scriptDirectoryPath + "\\" + temp;
-                  if (temp.endsWith(".xml"))
-                  {
-                     listOfDirectoriesContainingAtLeastOneScript.add(scriptDirectoryPath);
-                     fileNamesToPack.add(fileName);
-                  }
-                  else
-                     potentialSubDirectories.add(fileName);
-               }
-            }
-            catch (IOException e)
-            {
-               e.printStackTrace();
-            }
-         }
-      };
-      new Thread(settingsCreator).start();
 
-      ThreadTools.sleepSeconds(0.1);
+	   File directory = new File(scriptDirectoryPath);
+	   if (!directory.isDirectory())
+	   {
+		   System.err.println(directory.getAbsolutePath() + " is not a directory!"); 
+		   return;
+	   }
 
-      for (int i = 0; i < potentialSubDirectories.size(); i++)
-      {
-         findScripts(potentialSubDirectories.get(i), fileNamesToPack, listOfDirectoriesContainingAtLeastOneScript);
-      }
+	   System.out.println(directory.getAbsolutePath() + " is a directory. Exploring contents");
+
+	   File[] filesInDirectory = directory.listFiles();
+
+	   for (File file : filesInDirectory)
+	   {
+		   String filename = file.getName();
+		   if (filename.endsWith(".xml"))
+		   {
+			   System.out.println("Found script file: " + filename);
+			   foundScriptFilesToPack.add(file);
+		   }
+	   }
+
+	   for (int i = 0; i < potentialSubDirectories.size(); i++)
+	   {
+		   findScripts(potentialSubDirectories.get(i), foundScriptFilesToPack, listOfDirectoriesContainingAtLeastOneScript);
+	   }
    }
 
-   public Iterable<String> getFileNames()
+   public Iterable<File> getFilesToTransform()
    {
-      return namesOfFilesToTransform;
+      return filesToTransform;
    }
 
    public Iterable<String> getListOfOriginalDirectories()
@@ -173,18 +165,6 @@ public abstract class ScriptTransformer
    public Iterable<String> getListOfNewDirectories()
    {
       return listOfDirectoriesToCreate;
-   }
-
-   public static ArrayList<String> moveScriptDirectories(ArrayList<String> paths, String original) throws IOException
-   {
-      ArrayList<String> newPaths = new ArrayList<>();
-      for (String originalPath : paths)
-      {
-         rt.exec(new String[] { "cmd", "/C", "move " + originalPath + " " + originalPath + original });
-         ThreadTools.sleepSeconds(0.1);
-         newPaths.add(originalPath + original);
-      }
-      return newPaths;
    }
   
 }
