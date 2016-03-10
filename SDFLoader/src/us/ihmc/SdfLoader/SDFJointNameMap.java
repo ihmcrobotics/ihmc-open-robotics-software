@@ -9,9 +9,10 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 
-public interface SDFJointNameMap
+public interface SDFJointNameMap extends RobotSpecificJointNames
 {
 
    String getModelName();
@@ -35,5 +36,7 @@ public interface SDFJointNameMap
    boolean isTorqueVelocityLimitsEnabled();
 
    Set<String> getLastSimulatedJoints();
+
+   String[] getJointNamesBeforeFeet();
 
 }

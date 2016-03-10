@@ -95,7 +95,6 @@ public class KickBallBehavior extends BehaviorInterface
          registry.addChild(behavior.getYoVariableRegistry());
       }
 
-      setupPipelineForKick();
    }
 
    boolean locationSet = false;
@@ -108,20 +107,19 @@ public class KickBallBehavior extends BehaviorInterface
 
    private void setupPipelineForKick()
    {
-
+	   
       BehaviorTask findBallTask = new BehaviorTask(localizeBallBehavior, yoTime, 0)
       {
 
          @Override
          protected void setBehaviorInput()
          {
-            // TODO Auto-generated method stub
 
          }
       };
 
       pipeLine.submitSingleTaskStage(findBallTask);
-
+//
       BehaviorTask walkToBallTask = new BehaviorTask(walkToLocationBehavior, yoTime, 0)
       {
 
@@ -176,10 +174,9 @@ public class KickBallBehavior extends BehaviorInterface
    public void initialize()
    {
       defaultInitialize();
-      for (BehaviorInterface behavior : behaviors)
-      {
-         behavior.initialize();
-      }
+      setupPipelineForKick();
+
+
    }
 
    @Override
@@ -199,7 +196,6 @@ public class KickBallBehavior extends BehaviorInterface
    public void stop()
    {
       defaultStop();
-
       for (BehaviorInterface behavior : behaviors)
       {
          behavior.stop();
