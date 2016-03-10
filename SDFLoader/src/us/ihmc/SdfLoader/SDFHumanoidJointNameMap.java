@@ -9,7 +9,7 @@ import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public interface SDFHumanoidJointNameMap extends RobotSpecificJointNames, SDFJointNameMap
+public interface SDFHumanoidJointNameMap extends SDFJointNameMap
 {
    public ImmutablePair<RobotSide, LegJointName> getLegJointName(String jointName);
 

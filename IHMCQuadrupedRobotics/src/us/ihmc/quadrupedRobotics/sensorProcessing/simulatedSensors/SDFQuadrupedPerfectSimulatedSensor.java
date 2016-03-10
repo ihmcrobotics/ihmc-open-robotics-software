@@ -5,18 +5,23 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
+import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedContactBasedFootSwitch;
 
-public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSensorReader implements FootSwitchOutputReadOnly
+public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSensorReader implements FootSwitchOutputReadOnly, SensorReader
 {
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
    
@@ -24,9 +29,9 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    
    private final BooleanYoVariable enableDrives;
    
-   public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullRobotModel sdfFullRobotModel, QuadrupedJointNameMap jointMap)
+   public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullRobotModel sdfFullRobotModel, CommonQuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointMap)
    {
-      super(sdfRobot, sdfFullRobotModel, null);
+      super(sdfRobot, sdfFullRobotModel, referenceFrames);
       
       sensorOneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
       
@@ -132,5 +137,23 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
          }
       }
       return false;
+   }
+
+   @Override
+   public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   {
+      return null;
+   }
+
+   @Override
+   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
+   {
+      return null;
+   }
+
+   @Override
+   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   {
+      return null;
    }
 }
