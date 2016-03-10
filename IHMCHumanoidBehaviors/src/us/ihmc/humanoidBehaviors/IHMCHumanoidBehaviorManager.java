@@ -7,6 +7,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.DrillPickUpBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.KickBallBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizeDrillBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
@@ -20,8 +21,8 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
@@ -205,7 +206,8 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(outgoingCommunicationBridge, referenceFrames, yoTime));
       
-      
+      dispatcher.addBehavior(HumanoidBehaviorType.KICK, new KickBallBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport,fullRobotModel,referenceFrames, wholeBodyControllerParameters));
+
       // TODO: Fix or remove this behavior
 //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
 //      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);

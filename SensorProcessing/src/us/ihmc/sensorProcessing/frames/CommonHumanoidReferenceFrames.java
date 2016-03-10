@@ -7,7 +7,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public interface CommonHumanoidReferenceFrames
+public interface CommonHumanoidReferenceFrames extends ReferenceFrames
 {
    public abstract ReferenceFrame getABodyAttachedZUpFrame();
 
@@ -28,8 +28,6 @@ public interface CommonHumanoidReferenceFrames
    public abstract ReferenceFrame getFootFrame(RobotSide robotSide);
 
    public abstract ReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName);
-
-   public abstract void updateFrames();
 
    public abstract EnumMap<LegJointName, ReferenceFrame> getLegJointFrames(RobotSide robotSide);
 
