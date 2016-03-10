@@ -26,10 +26,10 @@ public class QuadrupedTeleopNode implements InputEventCallback
    private static final String PARAM_PITCH_SCALE = "pitchScale";
    private static final String PARAM_YAW_SCALE = "yawScale";
 
-   private static final String PARAM_VX_SCALE = "vxScale";
-   private static final String PARAM_VY_SCALE = "vyScale";
-   private static final String PARAM_VZ_SCALE = "vzScale";
-   private static final String PARAM_WZ_SCALE = "yawRateScale";
+   private static final String PARAM_XDOT_SCALE = "xDotScale";
+   private static final String PARAM_YDOT_SCALE = "yDotScale";
+   private static final String PARAM_ZDOT_SCALE = "zDotScale";
+   private static final String PARAM_ADOT_SCALE = "yawRateScale";
 
    private static final String PARAM_EXP_ORDER = "expOrder";
 
@@ -64,13 +64,13 @@ public class QuadrupedTeleopNode implements InputEventCallback
       }
 
       params.setDefault(PARAM_ROLL_SCALE, 0.2);
-      params.setDefault(PARAM_PITCH_SCALE, 0.2);
-      params.setDefault(PARAM_YAW_SCALE, 1.0);
+      params.setDefault(PARAM_PITCH_SCALE, 0.3);
+      params.setDefault(PARAM_YAW_SCALE, 0.6);
 
-      params.setDefault(PARAM_VX_SCALE, 1.0);
-      params.setDefault(PARAM_VY_SCALE, 0.5);
-      params.setDefault(PARAM_VZ_SCALE, 0.5);
-      params.setDefault(PARAM_WZ_SCALE, 1.0);
+      params.setDefault(PARAM_XDOT_SCALE, 1.0);
+      params.setDefault(PARAM_YDOT_SCALE, 0.5);
+      params.setDefault(PARAM_ZDOT_SCALE, 0.5);
+      params.setDefault(PARAM_ADOT_SCALE, 1.0);
 
       params.setDefault(PARAM_EXP_ORDER, 3.0);
 
@@ -98,19 +98,19 @@ public class QuadrupedTeleopNode implements InputEventCallback
 
    public void update()
    {
-      double roll = exp((channels.get(InputChannel.RIGHT_TRIGGER) - channels.get(InputChannel.LEFT_TRIGGER))) * params.get(PARAM_ROLL_SCALE);
-      double pitch = exp(channels.get(InputChannel.RIGHT_STICK_Y)) * params.get(PARAM_PITCH_SCALE);
-      double yaw = exp(channels.get(InputChannel.RIGHT_STICK_X)) * params.get(PARAM_YAW_SCALE);
+      double roll = (channels.get(InputChannel.RIGHT_TRIGGER) - channels.get(InputChannel.LEFT_TRIGGER)) * params.get(PARAM_ROLL_SCALE);
+      double pitch = channels.get(InputChannel.RIGHT_STICK_Y) * params.get(PARAM_PITCH_SCALE);
+      double yaw = channels.get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_YAW_SCALE);
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(yaw, pitch, roll);
       packetCommunicator.send(orientationPacket);
 
-      double xdot = exp(channels.get(InputChannel.LEFT_STICK_Y)) * params.get(PARAM_VX_SCALE);
-      double ydot = exp(channels.get(InputChannel.LEFT_STICK_X)) * params.get(PARAM_VY_SCALE);
-      double adot = exp(channels.get(InputChannel.RIGHT_STICK_X)) * params.get(PARAM_WZ_SCALE);
+      double xdot = exp(channels.get(InputChannel.LEFT_STICK_Y)) * params.get(PARAM_XDOT_SCALE);
+      double ydot = exp(channels.get(InputChannel.LEFT_STICK_X)) * params.get(PARAM_YDOT_SCALE);
+      double adot = exp(channels.get(InputChannel.RIGHT_STICK_X)) * params.get(PARAM_ADOT_SCALE);
       PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(xdot, ydot, adot);
       packetCommunicator.send(velocityPacket);
 
-      double zdot = (channels.get(InputChannel.RIGHT_BUTTON) - channels.get(InputChannel.LEFT_BUTTON)) * params.get(PARAM_VZ_SCALE);
+      double zdot = (channels.get(InputChannel.RIGHT_BUTTON) - channels.get(InputChannel.LEFT_BUTTON)) * params.get(PARAM_ZDOT_SCALE);
       comHeight = comHeight + zdot * DT;
       ComPositionPacket comPositionPacket = new ComPositionPacket(0.0, 0.0, comHeight);
       packetCommunicator.send(comPositionPacket);

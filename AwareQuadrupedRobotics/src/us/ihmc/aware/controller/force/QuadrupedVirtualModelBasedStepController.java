@@ -4,7 +4,10 @@ import java.awt.Color;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
+import us.ihmc.aware.packets.BodyOrientationPacket;
+import us.ihmc.aware.packets.ComPositionPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
@@ -28,6 +31,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.PIDController;
@@ -89,6 +93,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final static String COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT = "comHeightGravityFeedforwardConstant";
    private final static String COM_HEIGHT_NOMINAL = "comHeightNominal";
    private final static String CONTACT_PRESSURE_THRESHOLD = "contactPressureThreshold";
+   private final static String BODY_ORIENTATION_INPUT_MIN = "bodyOrientationInputMin";
+   private final static String BODY_ORIENTATION_INPUT_MAX = "bodyOrientationInputMax";
+   private final static String COM_POSITION_INPUT_MIN = "comPositionInputMin";
+   private final static String COM_POSITION_INPUT_MAX = "comPositionInputMax";
 
    // utilities
    private final QuadrupedJointLimits jointLimits;
@@ -137,6 +145,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrantDependentList<QuadrupedTimedStep> stepCache;
    private final FrameOrientation bodyOrientationInput;
    private double comHeightInput;
+   private final QuadrupedControllerInputProvider inputProvider;
 
    // setpoints
    private final QuadrantDependentList<FramePoint> solePositionSetpoint;
@@ -216,7 +225,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    private final XGaitStepPlanner footstepPlanner;
 
-   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository)
+   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -225,6 +234,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
+      this.inputProvider = inputProvider;
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStepController.class);
@@ -249,6 +259,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 0.95);
       params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
       params.setDefault(CONTACT_PRESSURE_THRESHOLD, 75);
+      params.setDefault(BODY_ORIENTATION_INPUT_MIN, -Math.PI/4, -Math.PI/4, -Math.PI/4);
+      params.setDefault(BODY_ORIENTATION_INPUT_MAX, Math.PI/4, Math.PI/4, Math.PI/4);
+      params.setDefault(COM_POSITION_INPUT_MIN, 0, 0, 0.25);
+      params.setDefault(COM_POSITION_INPUT_MAX, 0, 0, 0.75);
 
       // utilities
       jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
@@ -570,6 +584,21 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       }
    }
 
+   private void updateProviders()
+   {
+      // update desired body orientation
+      BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
+      double yaw = MathTools.clipToMinMax(bodyOrientationPacket.getYaw(), params.get(BODY_ORIENTATION_INPUT_MIN, 0), params.get(BODY_ORIENTATION_INPUT_MAX, 0));
+      double pitch = MathTools.clipToMinMax(bodyOrientationPacket.getPitch(), params.get(BODY_ORIENTATION_INPUT_MIN, 1), params.get(BODY_ORIENTATION_INPUT_MAX, 1));
+      double roll = MathTools.clipToMinMax(bodyOrientationPacket.getRoll(), params.get(BODY_ORIENTATION_INPUT_MIN, 2), params.get(BODY_ORIENTATION_INPUT_MAX, 2));
+      yoBodyOrientationInput.setYawPitchRoll(yaw, pitch, roll);
+
+      // update desired com height
+      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
+      double comHeight = MathTools.clipToMinMax(comPositionPacket.getZ(), params.get(COM_POSITION_INPUT_MIN, 2), params.get(COM_POSITION_INPUT_MAX, 2));
+      yoComHeightInput.set(comHeight);
+   }
+
    private void updateEstimates()
    {
       // update frames and twists
@@ -719,6 +748,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    @Override public QuadrupedForceControllerEvent process()
    {
+      updateProviders();
       readYoVariables();
       handleStepEvents();
       updateEstimates();

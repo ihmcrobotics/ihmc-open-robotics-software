@@ -10,12 +10,21 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 
 public class QuadrupedControllerInputProvider
 {
-   private final AtomicReference<ComPositionPacket> comPositionPacket = new AtomicReference<>(new ComPositionPacket());
-   private final AtomicReference<BodyOrientationPacket> bodyOrientationPacket = new AtomicReference<>(new BodyOrientationPacket());
-   private final AtomicReference<PlanarVelocityPacket> planarVelocityPacket = new AtomicReference<>(new PlanarVelocityPacket());
+   private final AtomicReference<ComPositionPacket> comPositionPacket;
+   private final AtomicReference<BodyOrientationPacket> bodyOrientationPacket;
+   private final AtomicReference<PlanarVelocityPacket> planarVelocityPacket;
 
    public QuadrupedControllerInputProvider(GlobalDataProducer globalDataProducer)
    {
+      this(globalDataProducer, new ComPositionPacket(), new BodyOrientationPacket(), new PlanarVelocityPacket());
+   }
+
+   public QuadrupedControllerInputProvider(GlobalDataProducer globalDataProducer, ComPositionPacket comPositionInputPacket, BodyOrientationPacket bodyOrientationInputPacket, PlanarVelocityPacket planarVelocityInputPacket)
+   {
+      comPositionPacket = new AtomicReference<>(comPositionInputPacket);
+      bodyOrientationPacket = new AtomicReference<>(bodyOrientationInputPacket);
+      planarVelocityPacket = new AtomicReference<>(planarVelocityInputPacket);
+
       globalDataProducer.attachListener(ComPositionPacket.class, new PacketConsumer<ComPositionPacket>()
       {
          @Override
