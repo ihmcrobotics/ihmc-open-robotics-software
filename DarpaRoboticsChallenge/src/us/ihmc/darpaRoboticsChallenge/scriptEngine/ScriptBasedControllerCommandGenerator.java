@@ -9,12 +9,14 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Controlle
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -101,6 +103,13 @@ public class ScriptBasedControllerCommandGenerator
          command.set(message);
          controllerCommands.add(command);
       }
+      else if (scriptObject instanceof PauseWalkingMessage)
+      {
+         PauseWalkingMessage message = (PauseWalkingMessage) scriptObject;
+         PauseWalkingControllerCommand command = new PauseWalkingControllerCommand();
+         command.set(message);
+         controllerCommands.add(command);
+      }
       
 
 //      else if (scriptObject instanceof ArmTrajectoryMessage)
@@ -111,19 +120,6 @@ public class ScriptBasedControllerCommandGenerator
 //         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
 //      }
 
-//      else if (scriptObject instanceof PauseWalkingMessage)
-//      {
-//         PauseWalkingMessage pauseWalkingMessage = (PauseWalkingMessage) scriptObject;
-//         
-////         setupTimesForNewScriptEvent(0.5);
-//      }
-
-//      else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
-//      {
-//         PelvisHeightTrajectoryMessage comHeightPacket = (PelvisHeightTrajectoryMessage) scriptObject;
-//         pelvisHeightTrajectoryMessageSubscriber.receivedPacket(comHeightPacket);
-//         setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
-//      }
       
       else
       {
