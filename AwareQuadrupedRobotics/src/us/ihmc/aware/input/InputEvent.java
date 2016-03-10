@@ -1,5 +1,8 @@
 package us.ihmc.aware.input;
 
+/**
+ * A single event from an input device. Each event is a tuple of the source channel and the new channel value,.
+ */
 public class InputEvent
 {
    private final InputChannel channel;
