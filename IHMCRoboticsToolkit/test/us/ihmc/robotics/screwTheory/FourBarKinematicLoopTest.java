@@ -478,17 +478,64 @@ public class FourBarKinematicLoopTest
             recomputeJointLimits);
       double masterJointALower = masterJointA.getJointLimitLower();
       double masterJointAUpper = masterJointA.getJointLimitUpper();
-      assertEquals(masterJointALower, 1e-4, 1e-6);
+      assertEquals(masterJointALower, 1e-4, 1e-8);
       assertEquals(masterJointAUpper, Math.PI - 1e-4, 1e-8);
       
       // joint limits for b are [-180 - eps, eps]
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
-      passiveJointB.setJointLimitLower(-Math.PI + 1e-4);
-      passiveJointB.setJointLimitUpper(-1e-4);
+      passiveJointB.setJointLimitLower(-Math.PI - 1e-4);
+      passiveJointB.setJointLimitUpper(1e-4);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
             recomputeJointLimits);
+      masterJointALower = masterJointA.getJointLimitLower();
       masterJointAUpper = masterJointA.getJointLimitUpper();
-      assertEquals(masterJointAUpper, Math.PI, 1e-6);
+      assertEquals(masterJointALower, 0.0, 1e-8);
+      assertEquals(masterJointAUpper, Math.PI, 1e-8);
+      
+      // joint limits for c are [-180 + eps, - eps]
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      passiveJointC.setJointLimitLower(-Math.PI + 1e-4);
+      passiveJointC.setJointLimitUpper(-1e-4);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+            recomputeJointLimits);
+      masterJointALower = masterJointA.getJointLimitLower();
+      masterJointAUpper = masterJointA.getJointLimitUpper();
+      assertEquals(masterJointALower, 1e-4, 1e-8);
+      assertEquals(masterJointAUpper, Math.PI - 1e-4, 1e-8);
+      
+      // joint limits for c are [-180 - eps, eps]
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      passiveJointC.setJointLimitLower(-Math.PI - 1e-4);
+      passiveJointC.setJointLimitUpper(1e-4);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+            recomputeJointLimits);
+      masterJointALower = masterJointA.getJointLimitLower();
+      masterJointAUpper = masterJointA.getJointLimitUpper();
+      assertEquals(masterJointALower, 0.0, 1e-8);
+      assertEquals(masterJointAUpper, Math.PI, 1e-8);
+
+      // joint limits for d are [-180 + eps, - eps]
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      passiveJointC.setJointLimitLower(-Math.PI + 1e-4);
+      passiveJointC.setJointLimitUpper(-1e-4);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+            recomputeJointLimits);
+      masterJointALower = masterJointA.getJointLimitLower();
+      masterJointAUpper = masterJointA.getJointLimitUpper();
+      assertEquals(masterJointALower, 1e-4, 1e-8);
+      assertEquals(masterJointAUpper, Math.PI - 1e-4, 1e-8);
+      
+      // joint limits for d are [-180 - eps, eps]
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      passiveJointD.setJointLimitLower(-Math.PI - 1e-4);
+      passiveJointD.setJointLimitUpper(1e-4);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+            recomputeJointLimits);
+      masterJointALower = masterJointA.getJointLimitLower();
+      masterJointAUpper = masterJointA.getJointLimitUpper();
+      assertEquals(masterJointALower, 0.0, 1e-8);
+      assertEquals(masterJointAUpper, Math.PI, 1e-8);
+
    }
    
    private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis)
