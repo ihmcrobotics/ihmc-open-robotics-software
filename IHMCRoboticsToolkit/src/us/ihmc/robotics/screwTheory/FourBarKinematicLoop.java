@@ -225,9 +225,9 @@ public class FourBarKinematicLoop
       vectorCDProjected.get(tempVectorCD);
       vectorDAProjected.get(tempVectorDA);
 
-      interiorAnglesAtZeroConfiguration[1] = Math.PI - jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
-      interiorAnglesAtZeroConfiguration[2] = Math.PI - jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
-      interiorAnglesAtZeroConfiguration[3] = Math.PI - jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
+      interiorAnglesAtZeroConfiguration[1] = Math.PI + jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
+      interiorAnglesAtZeroConfiguration[2] = Math.PI + jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+      interiorAnglesAtZeroConfiguration[3] = Math.PI + jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
       
       if (DEBUG)
       {  
