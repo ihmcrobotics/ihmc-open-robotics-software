@@ -146,8 +146,11 @@ public class FourBarKinematicLoop
 
    private void checkCorrectJointOrder(RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD)
    {
-      if (masterJointA.getSuccessor() != passiveJointB.getPredecessor() || passiveJointB.getSuccessor() != passiveJointC.getPredecessor()
-            || passiveJointC.getSuccessor() != passiveJointD.getPredecessor())
+      boolean successorAisPredecessorB = masterJointA.getSuccessor() == passiveJointB.getPredecessor();
+      boolean successorBisPredecessorC = passiveJointB.getSuccessor() == passiveJointC.getPredecessor();
+      boolean succesorCisPredecessorD = passiveJointC.getSuccessor() == passiveJointD.getPredecessor();
+      
+      if (!successorAisPredecessorB || !successorBisPredecessorC || !succesorCisPredecessorD)
       {
          throw new RuntimeException("The joints that form the " + name + " four bar must be passed in clockwise or counterclockwise order");
       }
