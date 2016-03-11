@@ -138,27 +138,27 @@ public class InverseDynamicsCommandDataCopier
       localCommand.set(commandToCopy);
       inverseDynamicsCommandList.addCommand(localCommand);
    }
-   
+
    private void copyPlaneContactStateCommand(PlaneContactStateCommand commandToCopy)
    {
       PlaneContactStateCommand localCommand = planeContactStateCommands.add();
       localCommand.set(commandToCopy);
       inverseDynamicsCommandList.addCommand(localCommand);
    }
-   
+
    private void copyPlaneContactStateCommandPool(PlaneContactStateCommandPool commandToCopy)
    {
       for (int i = 0; i < commandToCopy.getNumberOfCommands(); i++)
          copyPlaneContactStateCommand(commandToCopy.getCommand(i));
    }
-   
+
    private void copyPointAcclerationCommand(PointAccelerationCommand commandToCopy)
    {
       PointAccelerationCommand localCommand = pointAccelerationCommands.add();
       localCommand.set(commandToCopy);
       inverseDynamicsCommandList.addCommand(localCommand);
    }
-   
+
    private void copySpatialAccelerationCommand(SpatialAccelerationCommand commandToCopy)
    {
       SpatialAccelerationCommand localCommand = spatialAccelerationCommands.add();
