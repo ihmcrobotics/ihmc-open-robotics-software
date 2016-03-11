@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import us.ihmc.commonWalkingControlModules.inverseKinematics.WholeBodyInverseKinematicsSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
@@ -28,6 +29,7 @@ public class WholeBodyControllerCore
 
    private final WholeBodyFeedbackController feedbackController;
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
+   private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
 
    private final ControllerCoreOuput controllerCoreOuput;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
@@ -40,6 +42,7 @@ public class WholeBodyControllerCore
 
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
       inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, momentumOptimizationSettings, registry);
+      inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, momentumOptimizationSettings, registry);
       oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsSolver.getJointsToOptimizeFors(), OneDoFJoint.class);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(oneDoFJoints, registry);
 
@@ -72,14 +75,18 @@ public class WholeBodyControllerCore
       switch (currentMode.getEnumValue())
       {
       case INVERSE_DYNAMICS:
-
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
          inverseDynamicsSolver.submitInverseDynamicsCommand(controllerCoreCommand.getInverseDynamicsCommandList());
-
-      default:
-         yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
          break;
+      case INVERSE_KINEMATICS:
+         inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
+         break;
+      case OFF:
+         break;
+      default:
+         throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
+      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
    public void compute()
@@ -95,12 +102,16 @@ public class WholeBodyControllerCore
          LowLevelOneDoFJointDesiredDataHolder solverOutput = inverseDynamicsSolver.getOutput();
          yoLowLevelOneDoFJointDesiredDataHolder.completeWith(solverOutput);
          break;
+      case INVERSE_KINEMATICS:
+         inverseKinematicsSolver.compute();
+         LowLevelOneDoFJointDesiredDataHolder inverseKinematicsOutput = inverseKinematicsSolver.getOutput();
+         yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseKinematicsOutput);
       case OFF:
          numberOfFBControllerEnabled.set(0);
          yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
          break;
       default:
-         break;
+         throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
    }
 
