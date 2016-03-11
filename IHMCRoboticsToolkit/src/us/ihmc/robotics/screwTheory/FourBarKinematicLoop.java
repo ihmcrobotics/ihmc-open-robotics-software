@@ -194,9 +194,6 @@ public class FourBarKinematicLoop
       jointCAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
       jointDAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis); 
       
-      double jointBAxisZ = jointBAxis.getZ();
-      double jointCAxisZ = jointCAxis.getZ();
-      double jointDAxisZ = jointDAxis.getZ();
       
       Vector2d tempVectorAB = new Vector2d();
       Vector2d tempVectorBC = new Vector2d();
@@ -207,11 +204,16 @@ public class FourBarKinematicLoop
       vectorBCProjected.get(tempVectorBC);
       vectorCDProjected.get(tempVectorCD);
       vectorDAProjected.get(tempVectorDA);
+      
+      double[] axisSigns = new double[3];
+      axisSigns[0] = jointBAxis.getZ();
+      axisSigns[1] = jointCAxis.getZ();
+      axisSigns[2] = jointDAxis.getZ();
 
       double[] interiorAnglesAtZeroConfiguration = new double[3];
-      interiorAnglesAtZeroConfiguration[0] = Math.PI + jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
-      interiorAnglesAtZeroConfiguration[1] = Math.PI + jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
-      interiorAnglesAtZeroConfiguration[2] = Math.PI + jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
+      interiorAnglesAtZeroConfiguration[0] = Math.PI + axisSigns[0] * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
+      interiorAnglesAtZeroConfiguration[1] = Math.PI + axisSigns[1] * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+      interiorAnglesAtZeroConfiguration[2] = Math.PI + axisSigns[2] * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
             
       if (DEBUG)
       {  
