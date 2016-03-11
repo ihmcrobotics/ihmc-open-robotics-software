@@ -39,4 +39,23 @@ public class InverseKinematicsCommandList extends InverseKinematicsCommand<Inver
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          addCommand(other.getCommand(i));
    }
+
+   @Override
+   public void setWeight(double weight)
+   {
+      for (int i = 0; i < getNumberOfCommands(); i++)
+         commandList.get(i).setWeight(weight);
+   }
+
+   @Override
+   public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   {
+      setWeight(weightLevel.getWeightValue());
+   }
+
+   @Override
+   public boolean isHardConstraint()
+   {
+      return false;
+   }
 }

@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -12,6 +14,7 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
    private final TDoubleArrayList privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
+   private final Map<OneDoFJoint, PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions = new HashMap<>(initialCapacity);
    private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
 
    private boolean enable = false;
@@ -21,7 +24,7 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
       AT_CURRENT, AT_MID_RANGE, AT_ZERO
    };
 
-   private PrivilegedConfigurationOption option;
+   private PrivilegedConfigurationOption defaultOption;
    private double defaultWeight = Double.NaN;
 
    public PrivilegedConfigurationInverseKinematicsCommand()
@@ -32,11 +35,12 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
    public void clear()
    {
       enable = false;
-      option = null;
+      defaultOption = null;
       defaultWeight = Double.NaN;
       jointNames.clear();
       joints.clear();
       privilegedOneDoFJointConfigurations.reset();
+      privilegedOneDoFJointConfigurationOptions.clear();
       weights.reset();
    }
 
@@ -58,7 +62,7 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
    public void setPrivilegedConfigurationOption(PrivilegedConfigurationOption option)
    {
       enable();
-      this.option = option;
+      this.defaultOption = option;
    }
 
    public void addJointWithPrivilegedConfigurationOnly(OneDoFJoint joint, double privilegedConfiguration)
@@ -67,6 +71,17 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joint, null);
+      weights.add(Double.NaN);
+   }
+
+   public void addJointWithPrivilegedConfigurationOnly(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
+   {
+      enable();
+      joints.add(joint);
+      jointNames.add(joint.getName());
+      privilegedOneDoFJointConfigurations.add(Double.NaN);
+      privilegedOneDoFJointConfigurationOptions.put(joint, privilegedConfiguration);
       weights.add(Double.NaN);
    }
 
@@ -76,6 +91,7 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(Double.NaN);
+      privilegedOneDoFJointConfigurationOptions.put(joint, null);
       weights.add(weight);
    }
 
@@ -85,6 +101,17 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joint, null);
+      weights.add(weight);
+   }
+
+   public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration, double weight)
+   {
+      enable();
+      joints.add(joint);
+      jointNames.add(joint.getName());
+      privilegedOneDoFJointConfigurations.add(Double.NaN);
+      privilegedOneDoFJointConfigurationOptions.put(joint, privilegedConfiguration);
       weights.add(weight);
    }
 
@@ -93,14 +120,16 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
    {
       clear();
       enable = other.enable;
-      option = other.option;
+      defaultOption = other.defaultOption;
       defaultWeight = other.defaultWeight;
 
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
-         joints.add(other.joints.get(i));
+         OneDoFJoint joint = other.joints.get(i);
+         joints.add(joint);
          jointNames.add(other.jointNames.get(i));
          privilegedOneDoFJointConfigurations.add(other.privilegedOneDoFJointConfigurations.get(i));
+         privilegedOneDoFJointConfigurationOptions.put(joint, other.privilegedOneDoFJointConfigurationOptions.get(joint));
          weights.add(other.weights.get(i));
       }
    }
@@ -130,14 +159,14 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
       return weights.get(jointIndex);
    }
 
-   public boolean hasNewPrivilegedConfigurationOption()
+   public boolean hasNewPrivilegedConfigurationDefaultOption()
    {
-      return option != null;
+      return defaultOption != null;
    }
 
-   public PrivilegedConfigurationOption getPrivilegedConfigurationOption()
+   public PrivilegedConfigurationOption getPrivilegedConfigurationDefaultOption()
    {
-      return option;
+      return defaultOption;
    }
 
    public boolean hasNewPrivilegedConfiguration(int jointIndex)
@@ -150,8 +179,36 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
       return privilegedOneDoFJointConfigurations.get(jointIndex);
    }
 
+   public boolean hasNewPrivilegedConfigurationOption(int jointIndex)
+   {
+      return getPrivilegedConfigurationOption(jointIndex) != null;
+   }
+
+   public PrivilegedConfigurationOption getPrivilegedConfigurationOption(int jointIndex)
+   {
+      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex));
+   }
+
    public int getNumberOfJoints()
    {
       return joints.size();
+   }
+
+   @Override
+   public void setWeight(double weight)
+   {
+      setDefaultWeight(weight);
+   }
+
+   @Override
+   public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   {
+      setDefaultWeight(weightLevel.getWeightValue());
+   }
+
+   @Override
+   public boolean isHardConstraint()
+   {
+      return false;
    }
 }

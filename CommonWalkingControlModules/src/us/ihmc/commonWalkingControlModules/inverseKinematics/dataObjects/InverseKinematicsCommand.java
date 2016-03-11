@@ -43,4 +43,10 @@ public abstract class InverseKinematicsCommand<T extends InverseKinematicsComman
    {
       return commandType;
    }
+
+   public abstract void setWeight(double weight);
+
+   public abstract void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel);
+
+   public abstract boolean isHardConstraint();
 }

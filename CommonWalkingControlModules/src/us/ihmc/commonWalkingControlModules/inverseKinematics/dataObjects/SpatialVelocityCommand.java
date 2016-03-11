@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
 
+import static us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand.InverseKinematicsCommandWeightLevels.HARD_CONSTRAINT;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -10,7 +12,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelocityCommand>
 {
-   private boolean hasWeight;
    private double weight;
    private final Twist spatialVelocity = new Twist();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(Twist.SIZE);
@@ -83,7 +84,6 @@ public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelo
    @Override
    public void set(SpatialVelocityCommand other)
    {
-      hasWeight = other.hasWeight;
       weight = other.weight;
 
       spatialVelocity.set(other.getSpatialVelocity());
@@ -110,9 +110,9 @@ public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelo
       this.selectionMatrix.set(selectionMatrix);
    }
 
-   public boolean getHasWeight()
+   public boolean isHardConstraint()
    {
-      return hasWeight;
+      return weight == HARD_CONSTRAINT.getWeightValue();
    }
 
    public double getWeight()
@@ -150,15 +150,21 @@ public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelo
       return endEffectorName;
    }
 
+   @Override
    public void setWeight(double weight)
    {
       this.weight = weight;
-      hasWeight = weight != Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   {
+      weight = weightLevel.getWeightValue();
    }
 
    public void removeWeight()
    {
-      setWeight(Double.POSITIVE_INFINITY);
+      setWeight(HARD_CONSTRAINT.getWeightValue());
    }
 
    @Override

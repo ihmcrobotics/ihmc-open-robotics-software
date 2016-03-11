@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
 
+import static us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand.InverseKinematicsCommandWeightLevels.HARD_CONSTRAINT;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -52,10 +55,32 @@ public class MomentumCommand extends InverseKinematicsCommand<MomentumCommand>
       MatrixTools.setDenseMatrixFromTuple3d(momentum, linearMomentum.getVector(), 3, 0);
    }
 
+   public void setLinearMomentumXY(FrameVector2d linearMomentum)
+   {
+      selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 3, 1.0);
+      selectionMatrix.set(1, 4, 1.0);
+
+      momentum.reshape(selectionMatrix.getNumCols(), 1);
+      MatrixTools.setDenseMatrixFromTuple2d(momentum, linearMomentum.getVector(), 3, 0);
+   }
+
    public void setEmpty()
    {
       selectionMatrix.reshape(0, SpatialForceVector.SIZE);
       momentum.reshape(0, 1);
+   }
+
+   @Override
+   public void setWeight(double weight)
+   {
+      setWeights(weight, weight);
+   }
+
+   @Override
+   public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   {
+      setWeight(weightLevel.getWeightValue());
    }
 
    public void setWeights(double linear, double angular)
@@ -76,12 +101,23 @@ public class MomentumCommand extends InverseKinematicsCommand<MomentumCommand>
       weightVector.set(5, 0, linearZ);
    }
 
+   @Override
+   public boolean isHardConstraint()
+   {
+      for (int i = 0; i < weightVector.getNumRows(); i++)
+      {
+         if (weightVector.get(i, 0) == HARD_CONSTRAINT.getWeightValue())
+            return true;
+      }
+      return false;
+   }
+
    public DenseMatrix64F getSelectionMatrix()
    {
       return selectionMatrix;
    }
 
-   public DenseMatrix64F getMomemtum()
+   public DenseMatrix64F getMomentum()
    {
       return momentum;
    }

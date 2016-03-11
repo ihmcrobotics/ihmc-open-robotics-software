@@ -88,6 +88,8 @@ public class InverseKinematicsOptimizationControlModule
    {
       NoConvergenceException noConvergenceException = null;
 
+      computePrivilegedJointVelocities();
+
       try
       {
          qpSolver.solve();
@@ -104,6 +106,25 @@ public class InverseKinematicsOptimizationControlModule
          throw new InverseKinematicsOptimizationException(noConvergenceException, inverseKinematicsSolution);
 
       return inverseKinematicsSolution;
+   }
+
+   private void computePrivilegedJointVelocities()
+   {
+      if (privilegedConfigurationHandler.isEnabled())
+      {
+         privilegedConfigurationHandler.compute();
+         OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
+         DenseMatrix64F privilegedJointVelocities = privilegedConfigurationHandler.getPrivilegedJointVelocities();
+         DenseMatrix64F weight = privilegedConfigurationHandler.getWeight();
+         DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
+
+         int taskSize = privilegedJointVelocities.getNumRows();
+
+         tempSelectionMatrix.reshape(taskSize, numberOfDoFs);
+         compactBlockToFullBlock(joints, selectionMatrix, tempSelectionMatrix);
+
+         qpSolver.projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(selectionMatrix, privilegedJointVelocities, weight);
+      }
    }
 
    public void submitInverseKinematicsCommand(InverseKinematicsCommand<?> command)
@@ -139,8 +160,8 @@ public class InverseKinematicsOptimizationControlModule
          return;
 
       motionQPInput.reshape(taskSize);
-      motionQPInput.setIsMotionConstraint(!command.getHasWeight());
-      if (command.getHasWeight())
+      motionQPInput.setIsMotionConstraint(command.isHardConstraint());
+      if (!command.isHardConstraint())
       {
          motionQPInput.setUseWeightScalar(true);
          motionQPInput.setWeight(command.getWeight());
@@ -172,8 +193,8 @@ public class InverseKinematicsOptimizationControlModule
          return;
 
       motionQPInput.reshape(taskSize);
-      motionQPInput.setIsMotionConstraint(!command.getHasWeight());
-      if (command.getHasWeight())
+      motionQPInput.setIsMotionConstraint(command.isHardConstraint());
+      if (!command.isHardConstraint())
       {
          motionQPInput.setUseWeightScalar(true);
          motionQPInput.setWeight(command.getWeight());
@@ -220,7 +241,7 @@ public class InverseKinematicsOptimizationControlModule
       DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumMatrixCalculator.getMatrix();
       CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInput.taskJacobian);
 
-      DenseMatrix64F momemtum = command.getMomemtum();
+      DenseMatrix64F momemtum = command.getMomentum();
 
       // Compute the task objective: p = S * h
       CommonOps.mult(selectionMatrix, momemtum, motionQPInput.taskObjective);
@@ -237,22 +258,6 @@ public class InverseKinematicsOptimizationControlModule
    private void submitPrivilegedConfigurationInverseKinematicsCommand(PrivilegedConfigurationInverseKinematicsCommand command)
    {
       privilegedConfigurationHandler.submitPrivilegedConfigurationInverseKinematicsCommand(command);
-
-      if (!privilegedConfigurationHandler.isEnabled())
-         return;
-
-      privilegedConfigurationHandler.compute();
-      OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
-      DenseMatrix64F privilegedJointVelocities = privilegedConfigurationHandler.getPrivilegedJointVelocities();
-      DenseMatrix64F weight = privilegedConfigurationHandler.getWeight();
-      DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
-
-      int taskSize = privilegedJointVelocities.getNumRows();
-
-      tempSelectionMatrix.reshape(taskSize, numberOfDoFs);
-      compactBlockToFullBlock(joints, selectionMatrix, tempSelectionMatrix);
-
-      qpSolver.projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(selectionMatrix, privilegedJointVelocities, weight);
    }
 
    private void compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
