@@ -94,28 +94,25 @@ public class YoLinearAccelerationWeights
       this.zAccelerationWeight.set(zAccelerationWeight);
    }
 
-   public double getXAccelerationWeight()
+   public void getXAccelerationWeight(double weightToPack)
    {
-      return xAccelerationWeights.getDoubleValue();
+      weightToPack = xAccelerationWeights.getDoubleValue();
    }
 
-   public double getYAccelerationWeight()
+   public void getYAccelerationWeight(double weightToPack)
    {
-      return yAccelerationWeights.getDoubleValue();
+      weightToPack = yAccelerationWeights.getDoubleValue();
    }
 
-   public double getZAccelerationWeight()
+   public void getZAccelerationWeight(double weightToPack)
    {
-      return zAccelerationWeight.getDoubleValue();
+      weightToPack = zAccelerationWeight.getDoubleValue();
    }
 
-   private final double[] linearAccelerationWeights = new double[3];
-   public double[] getLinearAccelerationWeights()
+   public void getLinearAccelerationWeights(double[] weightsToPack)
    {
-      linearAccelerationWeights[0] = xAccelerationWeights.getDoubleValue();
-      linearAccelerationWeights[1] = yAccelerationWeights.getDoubleValue();
-      linearAccelerationWeights[2] = zAccelerationWeight.getDoubleValue();
-
-      return linearAccelerationWeights;
+      weightsToPack[0] = xAccelerationWeights.getDoubleValue();
+      weightsToPack[1] = yAccelerationWeights.getDoubleValue();
+      weightsToPack[2] = zAccelerationWeight.getDoubleValue();
    }
 }
