@@ -90,11 +90,13 @@ public class FourBarKinematicLoop
       // Find the most conservative limits for the master joint angle (A) and reset them if necessary
       if (recomputeJointLimits) 
       {
-         // A) If the limits for B, C, and/or D are given and are more restrictive than those of A
+         // - If the limits for B, C, and/or D are given and are more restrictive than those of A crop the value of Amax and/or Amin. 
+         // - Else if the limits given for A are the most restrictive of all, keep them.
+         // - Else set the limits to the value given by the calculator. 
+         
          double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(passiveJointB, passiveJointC, passiveJointD);
          double minValidMasterJointAngle = computeMinValidMasterJointAngle(passiveJointB, passiveJointC, passiveJointD);
 
-         // B) If the limits for A weren't set
          masterJointA.setJointLimitLower(minValidMasterJointAngle);
          masterJointA.setJointLimitUpper(maxValidMasterJointAngle);
          System.out.println("NOTE: The master joint limits have been set to " + minValidMasterJointAngle + " and " + maxValidMasterJointAngle);
@@ -271,6 +273,16 @@ public class FourBarKinematicLoop
    {
       double minValidMasterJointAngle = fourBarCalculator.getMinDAB();
 
+      if (masterJointA.getJointLimitUpper() != Double.NEGATIVE_INFINITY)
+      {
+         double minAngleASetByUser= jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
+
+         if (MathTools.isInsideBoundsExclusive(minAngleASetByUser, 0.0, Math.PI))
+         {
+            minValidMasterJointAngle = Math.min(minAngleASetByUser, fourBarCalculator.getAngleDAB());
+         }
+      }
+      
       if (jointB.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
          double maxAngleB = jointB.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[0];
@@ -314,6 +326,16 @@ public class FourBarKinematicLoop
    {
       double maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
 
+      if (masterJointA.getJointLimitUpper() != Double.POSITIVE_INFINITY)
+      {
+         double maxAngleASetByUser= jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
+
+         if (MathTools.isInsideBoundsExclusive(maxAngleASetByUser, 0.0, Math.PI))
+         {
+            maxValidMasterJointAngle = Math.min(maxAngleASetByUser, fourBarCalculator.getAngleDAB());
+         }
+      }
+      
       if (jointB.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
          double minAngleB = jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
