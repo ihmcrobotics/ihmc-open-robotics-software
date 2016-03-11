@@ -13,12 +13,12 @@ public class InverseKinematicsMotionQPInput
    private final int numberOfDoFs;
 
    public InverseKinematicsMotionQPInput(int numberOfDoFs)
-      {
-         this.numberOfDoFs = numberOfDoFs;
-         taskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
-         taskObjective = new DenseMatrix64F(numberOfDoFs, 1);
-         taskWeightMatrix = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
-      }
+   {
+      this.numberOfDoFs = numberOfDoFs;
+      taskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
+      taskObjective = new DenseMatrix64F(numberOfDoFs, 1);
+      taskWeightMatrix = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
+   }
 
    public void reshape(int taskSize)
    {
