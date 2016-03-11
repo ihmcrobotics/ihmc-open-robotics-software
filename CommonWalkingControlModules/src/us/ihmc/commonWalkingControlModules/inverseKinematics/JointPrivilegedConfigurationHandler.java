@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.PrivilegedConfigurationInverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.PrivilegedConfigurationInverseKinematicsCommand.PrivilegedConfigurationOption;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -91,22 +92,11 @@ public class JointPrivilegedConfigurationHandler
          updateWeights();
       }
 
-      if (command.hasNewPrivilegedConfigurationOption())
+      if (command.hasNewPrivilegedConfigurationDefaultOption())
       {
-         switch (command.getPrivilegedConfigurationOption())
-         {
-         case AT_CURRENT:
-            setPrivilegedConfigurationAtCurrent();
-            break;
-         case AT_ZERO:
-            setPrivilegedConfigurationAtZero();
-            break;
-         case AT_MID_RANGE:
-            setPrivilegedConfigurationAtMidRange();
-            break;
-         default:
-            throw new RuntimeException("Cannot handle the PrivilegedConfigurationOption:" + command.getPrivilegedConfigurationOption());
-         }
+         PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
+         for (int i = 0; i < numberOfDoFs; i++)
+            setPrivilegedConfigurationFromOption(defaultOption, i);
       }
 
       for (int i = 0; i < command.getNumberOfJoints(); i++)
@@ -116,6 +106,12 @@ public class JointPrivilegedConfigurationHandler
 
          if (command.hasNewPrivilegedConfiguration(i))
             privilegedConfigurations.set(jointIndex, 0, command.getPrivilegedConfiguration(i));
+
+         if (command.hasNewPrivilegedConfigurationOption(i))
+         {
+            PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(i);
+            setPrivilegedConfigurationFromOption(option, i);
+         }
 
          if (command.hasNewWeight(i))
             weight.set(jointIndex, jointIndex, command.getWeight(i));
@@ -128,28 +124,21 @@ public class JointPrivilegedConfigurationHandler
          weight.set(i, i, defaultWeight.getDoubleValue());
    }
 
-   private void setPrivilegedConfigurationAtCurrent()
+   private void setPrivilegedConfigurationFromOption(PrivilegedConfigurationOption option, int jointIndex)
    {
-      for (int i = 0; i < numberOfDoFs; i++)
+      switch (option)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
-         privilegedConfigurations.set(i, 0, joint.getQ());
-      }
-   }
-
-   private void setPrivilegedConfigurationAtZero()
-   {
-      for (int i = 0; i < numberOfDoFs; i++)
-      {
-         privilegedConfigurations.set(i, 0, 0.0);
-      }
-   }
-
-   private void setPrivilegedConfigurationAtMidRange()
-   {
-      for (int i = 0; i < numberOfDoFs; i++)
-      {
-         privilegedConfigurations.set(i, 0, positionsAtMidRangeOfMotion.get(i));
+      case AT_CURRENT:
+         privilegedConfigurations.set(jointIndex, 0, oneDoFJoints[jointIndex].getQ());
+         break;
+      case AT_ZERO:
+         privilegedConfigurations.set(jointIndex, 0, 0.0);
+         break;
+      case AT_MID_RANGE:
+         privilegedConfigurations.set(jointIndex, 0, positionsAtMidRangeOfMotion.get(jointIndex));
+         break;
+      default:
+         throw new RuntimeException("Cannot handle the PrivilegedConfigurationOption:" + option);
       }
    }
 

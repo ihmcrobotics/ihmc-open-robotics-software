@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
 
+import static us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand.InverseKinematicsCommandWeightLevels.HARD_CONSTRAINT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointspaceVelocityCommand extends InverseKinematicsCommand<JointspaceVelocityCommand>
 {
-   private boolean hasWeight;
    private double weight;
 
    private final int initialCapacity = 15;
@@ -75,13 +76,19 @@ public class JointspaceVelocityCommand extends InverseKinematicsCommand<Jointspa
 
    public void removeWeight()
    {
-      setWeight(Double.POSITIVE_INFINITY);
+      setWeight(HARD_CONSTRAINT.getWeightValue());
    }
 
+   @Override
    public void setWeight(double weight)
    {
-      hasWeight = weight != Double.POSITIVE_INFINITY;
       this.weight = weight;
+   }
+
+   @Override
+   public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   {
+      setWeight(weightLevel.getWeightValue());
    }
 
    @Override
@@ -94,7 +101,6 @@ public class JointspaceVelocityCommand extends InverseKinematicsCommand<Jointspa
          jointNames.add(other.jointNames.get(i));
       }
       desiredVelocities.set(other.desiredVelocities);
-      hasWeight = other.hasWeight;
       weight = other.weight;
    }
 
@@ -103,9 +109,10 @@ public class JointspaceVelocityCommand extends InverseKinematicsCommand<Jointspa
       MathTools.checkIfEqual(joint.getDegreesOfFreedom(), desiredVelocity.getNumRows());
    }
 
-   public boolean getHasWeight()
+   @Override
+   public boolean isHardConstraint()
    {
-      return hasWeight;
+      return weight == HARD_CONSTRAINT.getWeightValue();
    }
 
    public double getWeight()
