@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -25,12 +24,13 @@ public class RobotJointVelocityAccelerationIntegrator
    private double maximumSixDoFJointLinearVelocity = Double.POSITIVE_INFINITY;
    private double maximumSixDoFJointAngularVelocity = Double.POSITIVE_INFINITY;
 
+   private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+
    private final Vector3d angularVelocity = new Vector3d();
    private final Vector3d linearVelocity = new Vector3d();
    private final Vector3d rotationVectorIntegrated = new Vector3d();
-   private final Matrix3d rotationIntegrated = new Matrix3d();
-   private final Matrix3d rotation = new Matrix3d();
-   private final Quat4d quaternion = new Quat4d();
+   private final Quat4d rotationIntegrated = new Quat4d();
+   private final Quat4d rotation = new Quat4d();
    private final Vector3d translationIntegrated = new Vector3d();
    private final Vector3d translation = new Vector3d();
 
@@ -78,8 +78,8 @@ public class RobotJointVelocityAccelerationIntegrator
             jointConfigurations.set(jointConfigurationStartIndex, 0, q);
             jointVelocities.set(jointStartIndex, 0, qDot);
 
-            jointStartIndex++;
             jointConfigurationStartIndex++;
+            jointStartIndex++;
          }
          else if (joints[i] instanceof SixDoFJoint)
          {
@@ -90,13 +90,13 @@ public class RobotJointVelocityAccelerationIntegrator
             if (angularVelocityMagnitude > maximumSixDoFJointAngularVelocity)
                angularVelocity.scale(maximumSixDoFJointAngularVelocity / angularVelocityMagnitude);
             rotationVectorIntegrated.scale(controlDT, angularVelocity);
-            RotationTools.convertRotationVectorToMatrix(rotationVectorIntegrated, rotationIntegrated);
+            quaternionCalculus.exp(rotationVectorIntegrated, rotationIntegrated);
 
             joint.getRotation(rotation);
             rotation.mul(rotationIntegrated);
 
             MatrixTools.extractTuple3dFromEJMLVector(linearVelocity, jointVelocitiesToIntegrate, jointStartIndex + 3);
-            rotation.transform(linearVelocity);
+            quaternionCalculus.transform(rotation, linearVelocity);
             double linearVelocityMagnitude = linearVelocity.length();
             if (linearVelocityMagnitude > maximumSixDoFJointLinearVelocity)
                linearVelocity.scale(maximumSixDoFJointLinearVelocity / linearVelocityMagnitude);
@@ -105,8 +105,7 @@ public class RobotJointVelocityAccelerationIntegrator
             joint.getTranslation(translation);
             translation.add(translationIntegrated);
 
-            RotationTools.convertMatrixToQuaternion(rotation, quaternion);
-            MatrixTools.insertQuat4dIntoEJMLVector(jointConfigurations, quaternion, jointConfigurationStartIndex);
+            MatrixTools.insertQuat4dIntoEJMLVector(jointConfigurations, rotation, jointConfigurationStartIndex);
             jointConfigurationStartIndex += 4;
             MatrixTools.insertTuple3dIntoEJMLVector(translation, jointConfigurations, jointConfigurationStartIndex);
             jointConfigurationStartIndex += 3;
