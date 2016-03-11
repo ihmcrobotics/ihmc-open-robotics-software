@@ -32,7 +32,6 @@ public class FourBarKinematicLoop
     */
    private static final boolean DEBUG = false;
 
-   private final String name;
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
    private final Vector3d closurePointFromLastPassiveJointVect;  
@@ -46,7 +45,6 @@ public class FourBarKinematicLoop
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
          PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
    {
-      this.name = name;
       this.masterJointA = masterJointA;
       this.passiveJointB = passiveJointB;
       this.passiveJointC = passiveJointC;
@@ -65,7 +63,7 @@ public class FourBarKinematicLoop
       FourBarKinematicLoopTools.checkJointAxesAreParallelAndSetJointAxis(masterAxis, jointBAxis, jointCAxis, jointDAxis);
       
       // Joint order
-      checkCorrectJointOrder(masterJointA, passiveJointB, passiveJointC, passiveJointD);
+      FourBarKinematicLoopTools.checkCorrectJointOrder(name, masterJointA, passiveJointB, passiveJointC, passiveJointD);
       
       // Go to zero configuration
       masterJointA.setQ(0.0);
@@ -118,25 +116,6 @@ public class FourBarKinematicLoop
          double qC = passiveJointC.getQ();
          double qD = passiveJointD.getQ();
          System.out.println("\nInitial joint angles debugging:\n\n" + "MasterQ: " + qA + "\njointBQ: " + qB + "\njointCQ: " + qC + "\njointDQ: " + qD + "\n");
-      }
-   }
-
-   private void checkCorrectJointOrder(RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD)
-   {
-      boolean successorAisPredecessorB = masterJointA.getSuccessor() == passiveJointB.getPredecessor();
-      boolean successorBisPredecessorC = passiveJointB.getSuccessor() == passiveJointC.getPredecessor();
-      boolean succesorCisPredecessorD = passiveJointC.getSuccessor() == passiveJointD.getPredecessor();
-      
-      if (!successorAisPredecessorB || !successorBisPredecessorC || !succesorCisPredecessorD)
-      {
-         throw new RuntimeException("The joints that form the " + name + " four bar must be passed in clockwise or counterclockwise order");
-      }
-
-      if (DEBUG)
-      {
-         System.out.println("\nDebugging  check joint order:\n\nsuccessor \t predecessor\n" + masterJointA.getSuccessor() + "\t  "
-               + passiveJointB.getPredecessor() + "\n" + passiveJointB.getSuccessor() + "\t  " + passiveJointC.getPredecessor() + "\n"
-               + passiveJointC.getSuccessor() + "\t  " + passiveJointD.getPredecessor() + "\n");
       }
    }
 
