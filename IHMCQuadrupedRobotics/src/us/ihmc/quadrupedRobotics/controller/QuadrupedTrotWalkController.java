@@ -169,6 +169,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final FrameVector jointToFootVector = new FrameVector();
    private final FrameVector vmcRequestedTorqueFromJointXYZ = new FrameVector();
    private final FrameVector jointAxis = new FrameVector();
+   private final FrameVector outputTorqueVector = new FrameVector();
    
    private final StateMachine<QuadrupedWalkingState> stateMachine;
    private final EnumYoVariable<QuadrupedWalkingState> nextState = new EnumYoVariable<QuadrupedWalkingState>("nextState", "", registry, QuadrupedWalkingState.class, false);
@@ -611,6 +612,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
          oneDoFJoint.getJointAxis(jointAxis);
          double torque = jointAxis.dot(vmcRequestedTorqueFromJointXYZ);
+         
+         outputTorqueVector.setIncludingFrame(jointAxis);
+         outputTorqueVector.scale(torque);
+         
          desiredTorques.get(oneDoFJoint.getName()).set(-torque);
          oneDoFJoint.setTau(-torque);
       }
