@@ -10,6 +10,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
@@ -779,6 +780,12 @@ public class MatrixTools
       matrixToPack.set(startRow + 0, startColumn, tuple.getX());
       matrixToPack.set(startRow + 1, startColumn, tuple.getY());
       matrixToPack.set(startRow + 2, startColumn, tuple.getZ());
+   }
+
+   public static void setDenseMatrixFromTuple2d(DenseMatrix64F matrixToPack, Tuple2d tuple, int startRow, int startColumn)
+   {
+      matrixToPack.set(startRow + 0, startColumn, tuple.getX());
+      matrixToPack.set(startRow + 1, startColumn, tuple.getY());
    }
 
    public static int denseMatrixToArrayColumnMajor(DenseMatrix64F src, int srcStartRow, int srcStartCol, int numRows, int numCols, double[] dest,
