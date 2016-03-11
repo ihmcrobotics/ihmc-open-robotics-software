@@ -94,8 +94,8 @@ public class FourBarKinematicLoop
          // - Else if the limits given for A are the most restrictive of all, keep them.
          // - Else set the limits to the value given by the calculator. 
          
-         double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(passiveJointB, passiveJointC, passiveJointD);
-         double minValidMasterJointAngle = computeMinValidMasterJointAngle(passiveJointB, passiveJointC, passiveJointD);
+         double minValidMasterJointAngle = computeMinValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
+         double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
 
          masterJointA.setJointLimitLower(minValidMasterJointAngle);
          masterJointA.setJointLimitUpper(maxValidMasterJointAngle);
@@ -269,7 +269,7 @@ public class FourBarKinematicLoop
    /**
     * Clips the min master joint angle if the lower limit for any of the joints that are passed in is more restrictive
     */
-   private double computeMinValidMasterJointAngle(PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
+   private double computeMinValidMasterJointAngle(RevoluteJoint masterJointA, PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
    {
       double minValidMasterJointAngle = fourBarCalculator.getMinDAB();
 
@@ -322,7 +322,7 @@ public class FourBarKinematicLoop
    /**
     * Clips the max master joint angle if the upper limit for any of the joints that are passed in is more restrictive
     */
-   private double computeMaxValidMasterJointAngle(PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
+   private double computeMaxValidMasterJointAngle(RevoluteJoint masterJointA, PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
    {
       double maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
 
