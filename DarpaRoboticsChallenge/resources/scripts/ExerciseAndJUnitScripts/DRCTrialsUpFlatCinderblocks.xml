@@ -1,10 +1,13 @@
 <object-stream>
-  <long>8257189988</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
+  <long>1457583856340</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.3857247225541869</x>
@@ -17,10 +20,13 @@
           <z>7.903421324758661E-6</z>
           <w>0.9999746513667703</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.37273455515276166</x>
@@ -33,10 +39,13 @@
           <z>1.605705178419112E-5</z>
           <w>0.9999554056960039</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.6476433167306346</x>
@@ -49,10 +58,13 @@
           <z>-1.6856627118425348E-5</z>
           <w>0.9999614064439701</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.6408571345760425</x>
@@ -65,29 +77,42 @@
           <z>-3.6960482390896764E-5</z>
           <w>0.99996439521172</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <swingTime>0.0</swingTime>
     <transferTime>0.0</transferTime>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
-  <long>22171635537</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+  <long>1457583856341</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
-  <long>26200571423</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+  <long>1457583856341</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
-    <heightOffset>0.05</heightOffset>
-    <trajectoryTime>0.0</trajectoryTime>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket>
-  <long>31872947145</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
+    <trajectoryPoints>
+      <us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage>
+        <uniqueId>0</uniqueId>
+        <destination>0</destination>
+        <time>0.0</time>
+        <position>0.7000000000000001</position>
+        <velocity>0.0</velocity>
+      </us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage>
+    </trajectoryPoints>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
+  <long>1457583856341</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.92652158388385</x>
@@ -100,10 +125,13 @@
           <z>-0.0032654337375413074</z>
           <w>0.999736654326496</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>1.3883324720124408</x>
@@ -116,10 +144,13 @@
           <z>-0.0032356345480065636</z>
           <w>0.999958020933384</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.744817789623096</x>
@@ -132,10 +163,13 @@
           <z>-0.00300329463014019</z>
           <w>0.9997037007204947</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>2.1442523601224193</x>
@@ -148,10 +182,13 @@
           <z>-0.0064814911856787005</z>
           <w>0.9949880423782436</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>2.24467216801725</x>
@@ -164,23 +201,28 @@
           <z>-0.0031989539432091055</z>
           <w>0.9999843320896146</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <swingTime>0.0</swingTime>
     <transferTime>0.0</transferTime>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
-  <long>47588290519</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+  <long>1457583856342</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
-  <long>74521534177</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+  <long>1457583856342</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>2.640144178017382</x>
@@ -193,10 +235,13 @@
           <z>0.02874552634619588</z>
           <w>0.99939702422323</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.025366458325539</x>
@@ -209,10 +254,13 @@
           <z>0.02856198439469203</z>
           <w>0.9995898940653227</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>3.025366458325539</x>
@@ -225,23 +273,28 @@
           <z>0.02856198439469203</z>
           <w>0.9995898940653227</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <swingTime>0.0</swingTime>
     <transferTime>0.0</transferTime>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
-  <long>47588290519</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+  <long>1457583856342</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
-  <long>74521534177</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+  <long>1457583856342</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <footstepDataList>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.4233112719642693</x>
@@ -254,10 +307,13 @@
           <z>0.028132530918458694</z>
           <w>0.9983044594364807</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>3.4233112719642693</x>
@@ -270,10 +326,13 @@
           <z>0.028132530918458694</z>
           <w>0.9983044594364807</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.8145720796515037</x>
@@ -286,10 +345,13 @@
           <z>0.027023039782683438</z>
           <w>0.9981403339413566</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+      <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
+        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>3.816103589470089</x>
@@ -302,19 +364,22 @@
           <z>0.028446092079069746</z>
           <w>0.9994448646216776</w>
         </orientation>
+        <trajectoryType>BASIC</trajectoryType>
         <swingHeight>0.0</swingHeight>
-      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
+      </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <swingTime>0.0</swingTime>
     <transferTime>0.0</transferTime>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
-  <long>87487802965</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+  <long>1457583856342</long>
+  <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <pause>true</pause>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand>
-  <long>96638458037</long>
+  </us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
+  <long>1457583856342</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
   </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>

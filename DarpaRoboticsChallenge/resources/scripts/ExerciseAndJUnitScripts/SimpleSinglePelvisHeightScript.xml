@@ -1,9 +1,11 @@
 <object-stream>
-  <long>38963645541</long>
+  <long>1457583856439</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
     <trajectoryPoints>
       <us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>2.0</time>
         <position>0.6</position>
@@ -11,8 +13,9 @@
       </us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage>
     </trajectoryPoints>
   </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
-  <long>40681779074</long>
+  <long>1457583856439</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
   </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>

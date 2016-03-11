@@ -11,6 +11,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredChestOrientationControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredFootPoseControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
@@ -67,6 +69,8 @@ public class MomentumBasedControllerFactory
    private boolean useHeadingAndVelocityScript = true;
    private boolean createControllerNetworkSubscriber = false;
    private boolean createQueuedControllerCommandGenerator = false;
+   private boolean createUserDesiredControllerCommandGenerator = true;
+   
    private ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands;
 
    private final WalkingControllerParameters walkingControllerParameters;
@@ -140,8 +144,12 @@ public class MomentumBasedControllerFactory
          createControllerNetworkSubscriber = true;
    }
 
+   private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
+   
    public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript)
    {
+      if (footstepGenerator != null) return;
+
       if (momentumBasedController != null)
       {
          SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
@@ -157,9 +165,13 @@ public class MomentumBasedControllerFactory
          this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
       }
    }
+
+   private QueuedControllerCommandGenerator queuedControllerCommandGenerator;
    
-   public void createdQueuedControllerCommandGenerator(ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands)
+   public void createQueuedControllerCommandGenerator(ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands)
    {
+      if (queuedControllerCommandGenerator != null) return;
+
       if (momentumBasedController != null)
       {
          System.out.println("In createdQueuedControllerCommandGenerator");
@@ -167,7 +179,7 @@ public class MomentumBasedControllerFactory
          SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
          double controlDT = momentumBasedController.getControlDT();
-         QueuedControllerCommandGenerator queuedControllerCommandGenerator = new QueuedControllerCommandGenerator(controllerCommands,
+         queuedControllerCommandGenerator = new QueuedControllerCommandGenerator(controllerCommands,
                commandInputManager, statusOutputManager,
                walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, registry);
 
@@ -177,6 +189,25 @@ public class MomentumBasedControllerFactory
       {
          createQueuedControllerCommandGenerator = true;
          this.controllerCommands = controllerCommands;
+      }
+   }
+   
+   private UserDesiredChestOrientationControllerCommandGenerator userDesiredControllerCommandGenerator = null;
+   
+   public void createUserDesiredControllerCommandGenerator()
+   {
+      if (userDesiredControllerCommandGenerator != null) return;
+
+      if (momentumBasedController != null)
+      {
+         double defaultTrajectoryTime = 1.0;
+         userDesiredControllerCommandGenerator = new UserDesiredChestOrientationControllerCommandGenerator(commandInputManager, defaultTrajectoryTime, registry);
+
+         new UserDesiredFootPoseControllerCommandGenerator(commandInputManager, momentumBasedController.getFullRobotModel(), 1.0, registry);
+      }
+      else
+      {
+         createUserDesiredControllerCommandGenerator = true;
       }
    }
 
@@ -215,7 +246,9 @@ public class MomentumBasedControllerFactory
       if (createComponentBasedFootstepDataMessageGenerator)
          createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
       if (createQueuedControllerCommandGenerator)
-         createdQueuedControllerCommandGenerator(controllerCommands);
+         createQueuedControllerCommandGenerator(controllerCommands);
+      if (createUserDesiredControllerCommandGenerator)
+         createUserDesiredControllerCommandGenerator();
       if (createControllerNetworkSubscriber)
          createControllerNetworkSubscriber(scheduler);
 
