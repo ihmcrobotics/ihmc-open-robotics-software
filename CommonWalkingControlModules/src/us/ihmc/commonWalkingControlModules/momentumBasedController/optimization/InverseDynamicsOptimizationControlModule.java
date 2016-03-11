@@ -104,9 +104,9 @@ public class InverseDynamicsOptimizationControlModule
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
          ScrewTools.computeIndexForJoint(jointsToOptimizeFor, listToPackIndices, joint);
-         int[] indeces = listToPackIndices.toArray();
+         int[] indices = listToPackIndices.toArray();
 
-         columnsForJoints.put(joint, indeces);
+         columnsForJoints.put(joint, indices);
       }
 
       qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
