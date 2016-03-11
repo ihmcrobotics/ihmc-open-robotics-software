@@ -58,15 +58,15 @@ public class ICPProportionalController
    
    private final FrameVector2d tempICPErrorIntegrated = new FrameVector2d(worldFrame);
 
-   private final SmartCMPProjectorTwo smartCMPProjector;
+   private final CMPProjector cmpProjector;
 
    private final boolean useRawCMP;
 
    private final BooleanYoVariable useHackToReduceFeedForward = new BooleanYoVariable("icpControlUseHackToReduceFeedForward", registry);
 
-   public ICPProportionalController(ICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPProportionalController(ICPControlGains gains, double controlDT, CMPProjector cmpProjector, YoVariableRegistry parentRegistry)
    {
-      smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry, yoGraphicsListRegistry);
+      this.cmpProjector = cmpProjector;
 
       this.controlDT = controlDT;
 
@@ -171,7 +171,8 @@ public class ICPProportionalController
       }
       else
       {
-         tempControl.scale(captureKpOrthogonalToMotion.getDoubleValue());
+         tempControl.setX(tempControl.getX() * captureKpParallelToMotion.getDoubleValue());
+         tempControl.setY(tempControl.getY() * captureKpOrthogonalToMotion.getDoubleValue());
       }
 
       icpDamping.set(icpVelocity.getX(), icpVelocity.getY());
@@ -213,7 +214,7 @@ public class ICPProportionalController
 
       if (projectIntoSupportPolygon)
       {
-         smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);
+         cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);
          capturePoint.changeFrame(worldFrame);
          desiredCMP.changeFrame(worldFrame);
          
@@ -224,7 +225,7 @@ public class ICPProportionalController
             System.err.println("ICPProportionalController: desiredCMP contained NaN. Set it to capturePoint...");
 //            throw new RuntimeException("desiredCMP.containsNaN()!");
          }
-         if (smartCMPProjector.getWasCMPProjected())
+         if (cmpProjector.getWasCMPProjected())
          {
             icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
          }
