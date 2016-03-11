@@ -29,7 +29,6 @@ public class SmartCMPPlanarProjector extends CMPProjector
       ReferenceFrame returnFrame = desiredCMPToPack.getReferenceFrame();
 
       desiredCMPToPack.changeFrame(supportPolygon.getReferenceFrame());
-      finalDesiredCapturePoint.changeFrame(supportPolygon.getReferenceFrame());
       capturePoint.changeFrame(supportPolygon.getReferenceFrame());
 
       projectedCMP.setToZero(supportPolygon.getReferenceFrame());
