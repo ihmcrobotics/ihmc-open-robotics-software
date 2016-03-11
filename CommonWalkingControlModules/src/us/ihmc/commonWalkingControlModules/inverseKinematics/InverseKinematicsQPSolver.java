@@ -4,10 +4,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -99,7 +99,7 @@ public class InverseKinematicsQPSolver
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
       MatrixTools.scaleTranspose(taskWeight, taskJ, tempJtW);
-      
+
       addMotionTaskInternal(tempJtW, taskJ, taskObjective);
    }
 
@@ -112,7 +112,7 @@ public class InverseKinematicsQPSolver
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
       CommonOps.multTransA(taskJ, taskWeight, tempJtW);
-      
+
       addMotionTaskInternal(tempJtW, taskJ, taskXDot);
    }
 
@@ -145,12 +145,13 @@ public class InverseKinematicsQPSolver
    private final DenseMatrix64F jAugmented = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F jInverseAugmented = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F nullspaceProjector = new DenseMatrix64F(1, 1);
-   
+
    private final DenseMatrix64F jacobianForPrivilegedJointVelocities = new DenseMatrix64F(1, 1);
-   
+
    private final DampedLeastSquaresSolver pseudoInverseSolver;
 
-   public void finalizeWithPrivilegedJointVelocities(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointVelocities, DenseMatrix64F weight)
+   public void projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointVelocities,
+         DenseMatrix64F weight)
    {
       jInverseAugmented.reshape(numberOfDoFs, jAugmented.getNumRows());
       pseudoInverseSolver.setA(jAugmented);
@@ -172,16 +173,26 @@ public class InverseKinematicsQPSolver
    {
       boolean firstCall = !seedFromPreviousSolution.getBooleanValue();
 
+      DenseMatrix64F H = solverInput_H;
+      DenseMatrix64F f = solverInput_f;
+      DenseMatrix64F Aeq = solverInput_Aeq;
+      DenseMatrix64F beq = solverInput_beq;
+      DenseMatrix64F Ain = solverInput_Ain;
+      DenseMatrix64F bin = solverInput_bin;
+      DenseMatrix64F lb = solverInput_lb;
+      DenseMatrix64F ub = solverInput_ub;
+      DenseMatrix64F output = desiredJointVelocities;
+
       numberOfConstraints.set(Aeq.getNumRows() + Ain.getNumRows());
 
-      numberOfIterations.set(qpSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub, desiredJointVelocities, firstCall));
-      
+      numberOfIterations.set(qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall));
+
       seedFromPreviousSolution.set(true);
    }
 
-   public void getJointVelocities(DenseMatrix64F jointVelocities)
+   public DenseMatrix64F getJointVelocities()
    {
-      jointVelocities.set(desiredJointVelocities);
+      return desiredJointVelocities;
    }
 
    public void setRegularizationWeight(double weight)
