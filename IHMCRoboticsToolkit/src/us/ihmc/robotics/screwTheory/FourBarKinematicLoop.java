@@ -97,7 +97,11 @@ public class FourBarKinematicLoop
          // B) If the limits for A weren't set
          masterJointA.setJointLimitLower(minValidMasterJointAngle);
          masterJointA.setJointLimitUpper(maxValidMasterJointAngle);
-         System.out.println("NOTE: The master joint limits have been set to " + minValidMasterJointAngle + " and " + maxValidMasterJointAngle);
+         
+         if(DEBUG)
+         {
+            System.out.println("NOTE: The master joint limits have been set to " + minValidMasterJointAngle + " and " + maxValidMasterJointAngle);            
+         }
       }
       else
       {
@@ -246,10 +250,10 @@ public class FourBarKinematicLoop
       vectorDAProjected.get(tempVectorDA);
 
       double[] interiorAnglesAtZeroConfiguration = new double[3];
-      interiorAnglesAtZeroConfiguration[0] = Math.PI - jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
-      interiorAnglesAtZeroConfiguration[1] = Math.PI - jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
-      interiorAnglesAtZeroConfiguration[2] = Math.PI - jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
-      
+      interiorAnglesAtZeroConfiguration[0] = Math.PI + jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
+      interiorAnglesAtZeroConfiguration[1] = Math.PI + jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+      interiorAnglesAtZeroConfiguration[2] = Math.PI + jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
+            
       if (DEBUG)
       {  
          System.out.println("\nOffset angle debugging:\n");
@@ -381,6 +385,8 @@ public class FourBarKinematicLoop
          throw new RuntimeException(
                masterJointA.getName() + " is set outside of its bounds [" + masterJointA.getJointLimitLower() + ", " + masterJointA.getJointLimitUpper() + "]");
       }
+      
+      System.out.println();
 
       fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
       passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[0]);
