@@ -116,43 +116,43 @@ public class YoAccelerationWeights
       yoLinearAccelerationWeights.setZAccelerationWeight(zWeight);
    }
 
-   public double getYawAccelerationWeight()
+   public void getYawAccelerationWeight(double weightToPack)
    {
-      return yoAngularAccelerationWeights.getYawAccelerationWeight();
+      yoAngularAccelerationWeights.getYawAccelerationWeight(weightToPack);
    }
 
-   public double getPitchAccelerationWeight()
+   public void getPitchAccelerationWeight(double weightToPack)
    {
-      return yoAngularAccelerationWeights.getPitchAccelerationWeight();
+      yoAngularAccelerationWeights.getPitchAccelerationWeight(weightToPack);
    }
 
-   public double getRollAccelerationWeight()
+   public void getRollAccelerationWeight(double weightToPack)
    {
-      return yoAngularAccelerationWeights.getRollAccelerationWeight();
+      yoAngularAccelerationWeights.getRollAccelerationWeight(weightToPack);
    }
 
-   public double[] getAngularAccelerationWeights()
+   public void getAngularAccelerationWeights(double[] weightsToPack)
    {
-      return yoAngularAccelerationWeights.getAngularAccelerationWeights();
+      yoAngularAccelerationWeights.getAngularAccelerationWeights(weightsToPack);
    }
 
-   public double getXAccelerationWeight()
+   public void getXAccelerationWeight(double weightToPack)
    {
-      return yoLinearAccelerationWeights.getXAccelerationWeight();
+      yoLinearAccelerationWeights.getXAccelerationWeight(weightToPack);
    }
 
-   public double getYAccelerationWeight()
+   public void getYAccelerationWeight(double weightToPack)
    {
-      return yoLinearAccelerationWeights.getYAccelerationWeight();
+      yoLinearAccelerationWeights.getYAccelerationWeight(weightToPack);
    }
 
-   public double getZAccelerationWeight()
+   public void getZAccelerationWeight(double weightToPack)
    {
-      return yoLinearAccelerationWeights.getZAccelerationWeight();
+      yoLinearAccelerationWeights.getZAccelerationWeight(weightToPack);
    }
 
-   public double[] getLinearAccelerationWeights()
+   public void getLinearAccelerationWeights(double[] weightsToPack)
    {
-      return yoLinearAccelerationWeights.getLinearAccelerationWeights();
+      yoLinearAccelerationWeights.getLinearAccelerationWeights(weightsToPack);
    }
 }
