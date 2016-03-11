@@ -131,9 +131,9 @@ public class YoAccelerationWeights
       return yoAngularAccelerationWeights.getRollAccelerationWeight();
    }
 
-   public double[] getAngularAccelerationWeights()
+   public void getAngularAccelerationWeights(double[] weightsToPack)
    {
-      return yoAngularAccelerationWeights.getAngularAccelerationWeights();
+      yoAngularAccelerationWeights.getAngularAccelerationWeights(weightsToPack);
    }
 
    public double getXAccelerationWeight()
@@ -151,8 +151,8 @@ public class YoAccelerationWeights
       return yoLinearAccelerationWeights.getZAccelerationWeight();
    }
 
-   public double[] getLinearAccelerationWeights()
+   public void getLinearAccelerationWeights(double[] weightsToPack)
    {
-      return yoLinearAccelerationWeights.getLinearAccelerationWeights();
+      yoLinearAccelerationWeights.getLinearAccelerationWeights(weightsToPack);
    }
 }

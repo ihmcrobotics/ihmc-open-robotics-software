@@ -92,11 +92,15 @@ public class FourBarKinematicLoop
           * - Else set the limits to the value given by the calculator. 
           */
          double minValidMasterJointAngle = computeMinValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
-         double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
+         double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);         
 
          masterJointA.setJointLimitLower(minValidMasterJointAngle);
          masterJointA.setJointLimitUpper(maxValidMasterJointAngle);
-         System.out.println("NOTE: The master joint limits have been set to " + minValidMasterJointAngle + " and " + maxValidMasterJointAngle);
+         
+         if(DEBUG)
+         {
+            System.out.println("NOTE: The master joint limits have been set to " + minValidMasterJointAngle + " and " + maxValidMasterJointAngle);            
+         }
       }
       else
       {
@@ -205,10 +209,10 @@ public class FourBarKinematicLoop
       vectorDAProjected.get(tempVectorDA);
 
       double[] interiorAnglesAtZeroConfiguration = new double[3];
-      interiorAnglesAtZeroConfiguration[0] = Math.PI - jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
-      interiorAnglesAtZeroConfiguration[1] = Math.PI - jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
-      interiorAnglesAtZeroConfiguration[2] = Math.PI - jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
-      
+      interiorAnglesAtZeroConfiguration[0] = Math.PI + jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
+      interiorAnglesAtZeroConfiguration[1] = Math.PI + jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+      interiorAnglesAtZeroConfiguration[2] = Math.PI + jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
+            
       if (DEBUG)
       {  
          System.out.println("\nOffset angle debugging:\n");
@@ -227,13 +231,13 @@ public class FourBarKinematicLoop
    {
       double minValidMasterJointAngle = fourBarCalculator.getMinDAB();
 
-      if (masterJointA.getJointLimitUpper() != Double.NEGATIVE_INFINITY)
+      if (masterJointA.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
-         double minAngleASetByUser= jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
+         double minAngleASetByUser = masterJointA.getJointLimitLower();
 
          if (MathTools.isInsideBoundsExclusive(minAngleASetByUser, 0.0, Math.PI))
          {
-            minValidMasterJointAngle = Math.min(minAngleASetByUser, fourBarCalculator.getAngleDAB());
+            minValidMasterJointAngle = Math.max(minAngleASetByUser, minValidMasterJointAngle);
          }
       }
       
@@ -282,11 +286,11 @@ public class FourBarKinematicLoop
 
       if (masterJointA.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         double maxAngleASetByUser= jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
+         double maxAngleASetByUser = masterJointA.getJointLimitUpper();
 
          if (MathTools.isInsideBoundsExclusive(maxAngleASetByUser, 0.0, Math.PI))
          {
-            maxValidMasterJointAngle = Math.min(maxAngleASetByUser, fourBarCalculator.getAngleDAB());
+            maxValidMasterJointAngle = Math.min(maxAngleASetByUser, maxValidMasterJointAngle);
          }
       }
       
@@ -334,7 +338,7 @@ public class FourBarKinematicLoop
          throw new RuntimeException(
                masterJointA.getName() + " is set outside of its bounds [" + masterJointA.getJointLimitLower() + ", " + masterJointA.getJointLimitUpper() + "]");
       }
-
+      
       fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
       passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[0]);
       passiveJointC.setQ(fourBarCalculator.getAngleBCD() - interiorAnglesAtZeroConfiguration[1]);

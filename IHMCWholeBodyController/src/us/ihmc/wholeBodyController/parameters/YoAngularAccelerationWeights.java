@@ -86,17 +86,15 @@ public class YoAngularAccelerationWeights
    }
 
    public double getRollAccelerationWeight()
+
    {
       return rollAccelerationWeight.getDoubleValue();
    }
 
-   public double[] getAngularAccelerationWeights()
+   public void getAngularAccelerationWeights(double[] weightsToPack)
    {
-      double[] orientationWeights = new double[3];
-      orientationWeights[0] = yawAccelerationWeight.getDoubleValue();
-      orientationWeights[1] = pitchAccelerationWeight.getDoubleValue();
-      orientationWeights[2] = rollAccelerationWeight.getDoubleValue();
-
-      return orientationWeights;
+      weightsToPack[0] = yawAccelerationWeight.getDoubleValue();
+      weightsToPack[1] = pitchAccelerationWeight.getDoubleValue();
+      weightsToPack[2] = rollAccelerationWeight.getDoubleValue();
    }
 }
