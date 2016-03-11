@@ -96,11 +96,11 @@ public class RobotJointVelocityAccelerationIntegrator
             rotation.mul(rotationIntegrated);
 
             MatrixTools.extractTuple3dFromEJMLVector(linearVelocity, jointVelocitiesToIntegrate, jointStartIndex + 3);
-            quaternionCalculus.transform(rotation, linearVelocity);
             double linearVelocityMagnitude = linearVelocity.length();
             if (linearVelocityMagnitude > maximumSixDoFJointLinearVelocity)
                linearVelocity.scale(maximumSixDoFJointLinearVelocity / linearVelocityMagnitude);
             translationIntegrated.scale(controlDT, linearVelocity);
+            quaternionCalculus.transform(rotation, translationIntegrated);
 
             joint.getTranslation(translation);
             translation.add(translationIntegrated);
