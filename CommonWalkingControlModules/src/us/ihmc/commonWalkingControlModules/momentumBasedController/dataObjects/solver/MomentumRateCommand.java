@@ -81,7 +81,7 @@ public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateComm
       return selectionMatrix;
    }
 
-   public DenseMatrix64F getMomemtumRate()
+   public DenseMatrix64F getMomentumRate()
    {
       return momentumRate;
    }
