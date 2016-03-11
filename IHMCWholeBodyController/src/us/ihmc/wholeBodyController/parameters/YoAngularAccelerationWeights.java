@@ -75,19 +75,20 @@ public class YoAngularAccelerationWeights
       rollAccelerationWeight.set(weight);
    }
 
-   public void getYawAccelerationWeight(double weightToPack)
+   public double getYawAccelerationWeight()
    {
-      weightToPack = yawAccelerationWeight.getDoubleValue();
+      return yawAccelerationWeight.getDoubleValue();
    }
 
-   public void getPitchAccelerationWeight(double weightToPack)
+   public double getPitchAccelerationWeight()
    {
-      weightToPack = pitchAccelerationWeight.getDoubleValue();
+      return pitchAccelerationWeight.getDoubleValue();
    }
 
-   public void getRollAccelerationWeight(double weightToPack)
+   public double getRollAccelerationWeight()
+
    {
-      weightToPack = rollAccelerationWeight.getDoubleValue();
+      return rollAccelerationWeight.getDoubleValue();
    }
 
    public void getAngularAccelerationWeights(double[] weightsToPack)
