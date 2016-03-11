@@ -70,19 +70,19 @@ public class RootJointDesiredConfiguration
 
    public void setDesiredConfiguration(DenseMatrix64F q, int startIndex)
    {
-      desiredConfiguration.reshape(7, 0);
+      desiredConfiguration.reshape(7, 1);
       CommonOps.extract(q, startIndex, startIndex + 7, 0, 1, desiredConfiguration, 0, 0);
    }
 
    public void setDesiredVelocity(DenseMatrix64F qd, int startIndex)
    {
-      desiredVelocity.reshape(6, 0);
+      desiredVelocity.reshape(6, 1);
       CommonOps.extract(qd, startIndex, startIndex + 6, 0, 1, desiredVelocity, 0, 0);
    }
 
    public void setDesiredAcceleration(DenseMatrix64F qdd, int startIndex)
    {
-      desiredAcceleration.reshape(6, 0);
+      desiredAcceleration.reshape(6, 1);
       CommonOps.extract(qdd, startIndex, startIndex + 6, 0, 1, desiredAcceleration, 0, 0);
    }
 
@@ -90,7 +90,7 @@ public class RootJointDesiredConfiguration
    {
       if (indices.length != 7)
          throw new RuntimeException("Unexpected number of indices: " + Arrays.toString(indices));
-      desiredConfiguration.reshape(7, 0);
+      desiredConfiguration.reshape(7, 1);
       for (int i = 0; i < indices.length; i++)
          desiredConfiguration.set(i, 0, q.get(indices[i], 0));
    }
@@ -99,7 +99,7 @@ public class RootJointDesiredConfiguration
    {
       if (indices.length != 6)
          throw new RuntimeException("Unexpected number of indices: " + Arrays.toString(indices));
-      desiredVelocity.reshape(6, 0);
+      desiredVelocity.reshape(6, 1);
       for (int i = 0; i < indices.length; i++)
          desiredVelocity.set(i, 0, qd.get(indices[i], 0));
    }
@@ -108,7 +108,7 @@ public class RootJointDesiredConfiguration
    {
       if (indices.length != 6)
          throw new RuntimeException("Unexpected number of indices: " + Arrays.toString(indices));
-      desiredAcceleration.reshape(6, 0);
+      desiredAcceleration.reshape(6, 1);
       for (int i = 0; i < indices.length; i++)
          desiredAcceleration.set(i, 0, qdd.get(indices[i], 0));
    }
@@ -128,7 +128,7 @@ public class RootJointDesiredConfiguration
       return desiredAcceleration.getNumRows() != 0;
    }
 
-   public DenseMatrix64F getDesiredPosition()
+   public DenseMatrix64F getDesiredConfiguration()
    {
       return desiredConfiguration;
    }
