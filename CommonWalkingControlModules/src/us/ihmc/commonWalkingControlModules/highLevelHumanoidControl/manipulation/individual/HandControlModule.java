@@ -74,6 +74,8 @@ public class HandControlModule
    // It was sending 14,000 variables. This and others reduces it a bit when set to false.
    private static final boolean REGISTER_YOVARIABLES = true;
 
+   private static final boolean DEBUG = false;
+
    private final YoVariableRegistry registry;
 
    private final GenericStateMachine<HandControlMode, HandControlState> stateMachine;
@@ -399,7 +401,7 @@ public class HandControlModule
       ReferenceFrame trajectoryFrame = baseForControlToReferenceFrameMap.get(base);
       if (trajectoryFrame == null)
          throw new RuntimeException("The base: " + base + " is not handled.");
-      else
+      else if (DEBUG)
          PrintTools.info(this, "Executing hand trajectory in: " + base + ", found corresponding frame: " + trajectoryFrame);
 
       if (trajectoryPointList.getTrajectoryPoint(0).getTime() > 1.0e-5)
