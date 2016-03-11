@@ -27,6 +27,7 @@ public class ControllerStatusOutputManager
       registerStatusMessage(CapturabilityBasedStatus.class);
       registerStatusMessage(FootstepStatus.class);
       registerStatusMessage(WalkingStatusMessage.class);
+      registerStatusMessage(ManipulationAbortedStatus.class);
 
       listOfSupportedMessages = new ArrayList<>(statusClassToObjectMap.keySet());
    }

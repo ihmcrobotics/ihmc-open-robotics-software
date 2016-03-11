@@ -1,10 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -88,7 +92,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-
+      assertControlErrorIsLow(scs, chest, 1.0e-2);
       assertSingleWaypointExecuted(desiredRandomChestOrientation, scs);
    }
 
@@ -180,6 +184,28 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
       return numberOfWaypoints;
+   }
+
+   public static void assertControlErrorIsLow(SimulationConstructionSet scs, RigidBody chest, double errorTolerance)
+   {
+      Vector3d error = findControlErrorRotationVector(scs, chest);
+      boolean isErrorLow = error.length() <= errorTolerance;
+      assertTrue("Error: " + error, isErrorLow);
+   }
+
+   public static Vector3d findControlErrorRotationVector(SimulationConstructionSet scs, RigidBody chest)
+   {
+      Vector3d rotationVectorError = new Vector3d();
+      
+      String chestPrefix = chest.getName();
+      String nameSpace = chestPrefix + AxisAngleOrientationController.class.getSimpleName();
+      String varName = chestPrefix + "RotationErrorInBody";
+
+      rotationVectorError.x = scs.getVariable(nameSpace, varName + "X").getValueAsDouble();
+      rotationVectorError.y = scs.getVariable(nameSpace, varName + "Y").getValueAsDouble();
+      rotationVectorError.z = scs.getVariable(nameSpace, varName + "Z").getValueAsDouble();
+
+      return rotationVectorError;
    }
 
    public static void assertSingleWaypointExecuted(FrameOrientation desiredChestOrientation, SimulationConstructionSet scs)

@@ -119,7 +119,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       
       }
       
-      double runTime = 10.18;
+      double runTime = 5.0;
 
       boolean success = drcSimulationTestHelper1.simulateAndBlockAndCatchExceptions(runTime);
       success = success && drcSimulationTestHelper2.simulateAndBlockAndCatchExceptions(runTime);

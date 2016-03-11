@@ -1,10 +1,11 @@
 <object-stream>
-  <long>38963645541</long>
+  <long>1457583856427</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
-	<robotSide>RIGHT</robotSide>
     <taskspaceTrajectoryPoints>
       <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+        <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>2.0</time>
         <position>
@@ -18,21 +19,29 @@
           <z>0.0</z>
           <w>1.0</w>
         </orientation>
-		<linearVelocity>
+        <linearVelocity>
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
         </linearVelocity>
-		<angularVelocity>
+        <angularVelocity>
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
         </angularVelocity>
+        <tempQuaternionForTransform>
+          <x>0.0</x>
+          <y>0.0</y>
+          <z>0.0</z>
+          <w>1.0</w>
+        </tempQuaternionForTransform>
       </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
     </taskspaceTrajectoryPoints>
+    <robotSide>RIGHT</robotSide>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
-  <long>40681779074</long>
+  <long>1457583856427</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
   </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>
