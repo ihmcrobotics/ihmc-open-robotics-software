@@ -90,11 +90,13 @@ public class FourBarKinematicLoop
       // Find the most conservative limits for the master joint angle (A) and reset them if necessary
       if (recomputeJointLimits) 
       {
-         // A) If the limits for B, C, and/or D are given and are more restrictive than those of A
-         double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(passiveJointB, passiveJointC, passiveJointD);
-         double minValidMasterJointAngle = computeMinValidMasterJointAngle(passiveJointB, passiveJointC, passiveJointD);
+         // - If the limits for B, C, and/or D are given and are more restrictive than those of A crop the value of Amax and/or Amin. 
+         // - Else if the limits given for A are the most restrictive of all, keep them.
+         // - Else set the limits to the value given by the calculator. 
+         
+         double minValidMasterJointAngle = computeMinValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
+         double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
 
-         // B) If the limits for A weren't set
          masterJointA.setJointLimitLower(minValidMasterJointAngle);
          masterJointA.setJointLimitUpper(maxValidMasterJointAngle);
          
@@ -150,8 +152,11 @@ public class FourBarKinematicLoop
 
    private void checkCorrectJointOrder(RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD)
    {
-      if (masterJointA.getSuccessor() != passiveJointB.getPredecessor() || passiveJointB.getSuccessor() != passiveJointC.getPredecessor()
-            || passiveJointC.getSuccessor() != passiveJointD.getPredecessor())
+      boolean successorAisPredecessorB = masterJointA.getSuccessor() == passiveJointB.getPredecessor();
+      boolean successorBisPredecessorC = passiveJointB.getSuccessor() == passiveJointC.getPredecessor();
+      boolean succesorCisPredecessorD = passiveJointC.getSuccessor() == passiveJointD.getPredecessor();
+      
+      if (!successorAisPredecessorB || !successorBisPredecessorC || !succesorCisPredecessorD)
       {
          throw new RuntimeException("The joints that form the " + name + " four bar must be passed in clockwise or counterclockwise order");
       }
@@ -268,10 +273,20 @@ public class FourBarKinematicLoop
    /**
     * Clips the min master joint angle if the lower limit for any of the joints that are passed in is more restrictive
     */
-   private double computeMinValidMasterJointAngle(PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
+   private double computeMinValidMasterJointAngle(RevoluteJoint masterJointA, PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
    {
       double minValidMasterJointAngle = fourBarCalculator.getMinDAB();
 
+      if (masterJointA.getJointLimitUpper() != Double.NEGATIVE_INFINITY)
+      {
+         double minAngleASetByUser= jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
+
+         if (MathTools.isInsideBoundsExclusive(minAngleASetByUser, 0.0, Math.PI))
+         {
+            minValidMasterJointAngle = Math.min(minAngleASetByUser, fourBarCalculator.getAngleDAB());
+         }
+      }
+      
       if (jointB.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
          double maxAngleB = jointB.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[0];
@@ -311,10 +326,20 @@ public class FourBarKinematicLoop
    /**
     * Clips the max master joint angle if the upper limit for any of the joints that are passed in is more restrictive
     */
-   private double computeMaxValidMasterJointAngle(PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
+   private double computeMaxValidMasterJointAngle(RevoluteJoint masterJointA, PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
    {
       double maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
 
+      if (masterJointA.getJointLimitUpper() != Double.POSITIVE_INFINITY)
+      {
+         double maxAngleASetByUser= jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
+
+         if (MathTools.isInsideBoundsExclusive(maxAngleASetByUser, 0.0, Math.PI))
+         {
+            maxValidMasterJointAngle = Math.min(maxAngleASetByUser, fourBarCalculator.getAngleDAB());
+         }
+      }
+      
       if (jointB.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
          double minAngleB = jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
