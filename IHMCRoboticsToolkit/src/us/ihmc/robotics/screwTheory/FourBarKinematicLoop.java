@@ -364,4 +364,19 @@ public class FourBarKinematicLoop
       passiveJointC.setQd(fourBarCalculator.getAngleDtBCD());
       passiveJointD.setQd(fourBarCalculator.getAngleDtCDA());
    }
+   
+   public PassiveRevoluteJoint getPassiveRevoluteJointB()
+   {
+      return passiveJointB;
+   }
+   
+   public PassiveRevoluteJoint getPassiveRevoluteJointC()
+   {
+      return passiveJointC;
+   }
+   
+   public PassiveRevoluteJoint getPassiveRevoluteJointD()
+   {
+      return passiveJointD;
+   }
 }
