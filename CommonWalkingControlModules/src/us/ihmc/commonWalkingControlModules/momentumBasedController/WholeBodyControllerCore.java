@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -23,7 +23,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 public class WholeBodyControllerCore
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final BooleanYoVariable isEnabled = new BooleanYoVariable("isControllerCoreEnabled", registry);
+   private final EnumYoVariable<WholeBodyControllerCoreMode> currentMode = new EnumYoVariable<>("currentWholeBodyControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final IntegerYoVariable numberOfFBControllerEnabled = new IntegerYoVariable("numberOfFBControllerEnabled", registry);
 
    private final WholeBodyFeedbackController feedbackController;
@@ -67,21 +67,26 @@ public class WholeBodyControllerCore
    {
       reset();
 
-      isEnabled.set(controllerCoreCommand.enableControllerCore());
+      currentMode.set(controllerCoreCommand.getControllerCoreMode());
 
-      if (isEnabled.getBooleanValue())
+      switch (currentMode.getEnumValue())
       {
+      case INVERSE_DYNAMICS:
+
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
          inverseDynamicsSolver.submitInverseDynamicsCommand(controllerCoreCommand.getInverseDynamicsCommandList());
-      }
 
-      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
+      default:
+         yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
+         break;
+      }
    }
 
    public void compute()
    {
-      if (isEnabled.getBooleanValue())
+      switch (currentMode.getEnumValue())
       {
+      case INVERSE_DYNAMICS:
          feedbackController.compute();
          InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
          numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
@@ -89,11 +94,13 @@ public class WholeBodyControllerCore
          inverseDynamicsSolver.compute();
          LowLevelOneDoFJointDesiredDataHolder solverOutput = inverseDynamicsSolver.getOutput();
          yoLowLevelOneDoFJointDesiredDataHolder.completeWith(solverOutput);
-      }
-      else
-      {
+         break;
+      case OFF:
          numberOfFBControllerEnabled.set(0);
          yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
+         break;
+      default:
+         break;
       }
    }
 

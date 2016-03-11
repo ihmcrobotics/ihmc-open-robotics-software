@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
@@ -12,11 +13,11 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    private final InverseDynamicsCommandList solverCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
-   private final boolean enableControllerCore;
+   private final WholeBodyControllerCoreMode controllerCoreMode;
 
-   public ControllerCoreCommand(boolean enableControllerCore)
+   public ControllerCoreCommand(WholeBodyControllerCoreMode controllerCoreMode)
    {
-      this.enableControllerCore = enableControllerCore;
+      this.controllerCoreMode = controllerCoreMode;
 
       solverCommandList = new InverseDynamicsCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
@@ -71,8 +72,8 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    @Override
-   public boolean enableControllerCore()
+   public WholeBodyControllerCoreMode getControllerCoreMode()
    {
-      return enableControllerCore;
+      return controllerCoreMode;
    }
 }

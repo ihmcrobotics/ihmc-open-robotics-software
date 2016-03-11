@@ -2,6 +2,7 @@ package us.ihmc.wholeBodyController.concurrent.controllerCoreCommands;
 
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
@@ -16,7 +17,7 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    private final FeedbackControlCommandDataCopier feedbackControlCommandDataCopier = new FeedbackControlCommandDataCopier();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private boolean enableControllerCore;
+   private WholeBodyControllerCoreMode wholeBodyControllerCoreMode;
 
    public ControllerCoreCommandDataCopier()
    {
@@ -24,6 +25,7 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
 
    public void copyDataFrom(ControllerCoreCommandInterface controllerCoreCommand)
    {
+      wholeBodyControllerCoreMode = controllerCoreCommand.getControllerCoreMode();
       inverseDynamicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseDynamicsCommandList());
       feedbackControlCommandDataCopier.copyFromOther(controllerCoreCommand.getFeedbackControlCommandList());
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
@@ -61,8 +63,8 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    }
 
    @Override
-   public boolean enableControllerCore()
+   public WholeBodyControllerCoreMode getControllerCoreMode()
    {
-      return enableControllerCore;
+      return wholeBodyControllerCoreMode;
    }
 }

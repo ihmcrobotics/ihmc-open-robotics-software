@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
@@ -9,5 +10,5 @@ public interface ControllerCoreCommandInterface
    public abstract InverseDynamicsCommandList getInverseDynamicsCommandList();
    public abstract FeedbackControlCommandList getFeedbackControlCommandList();
    public abstract LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelOneDoFJointDesiredDataHolder();
-   public abstract boolean enableControllerCore();
+   public abstract WholeBodyControllerCoreMode getControllerCoreMode();
 }
