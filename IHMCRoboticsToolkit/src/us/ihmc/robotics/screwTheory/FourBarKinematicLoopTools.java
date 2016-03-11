@@ -34,6 +34,25 @@ public class FourBarKinematicLoopTools
       }
    }
    
+   public static void checkCorrectJointOrder(String fourBarName, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD)
+   {
+      boolean successorAisPredecessorB = masterJointA.getSuccessor() == passiveJointB.getPredecessor();
+      boolean successorBisPredecessorC = passiveJointB.getSuccessor() == passiveJointC.getPredecessor();
+      boolean succesorCisPredecessorD = passiveJointC.getSuccessor() == passiveJointD.getPredecessor();
+      
+      if (!successorAisPredecessorB || !successorBisPredecessorC || !succesorCisPredecessorD)
+      {
+         throw new RuntimeException("The joints that form the " + fourBarName + " four bar must be passed in clockwise or counterclockwise order");
+      }
+
+      if (DEBUG)
+      {
+         System.out.println("\nDebugging  check joint order:\n\nsuccessor \t predecessor\n" + masterJointA.getSuccessor() + "\t  "
+               + passiveJointB.getPredecessor() + "\n" + passiveJointB.getSuccessor() + "\t  " + passiveJointC.getPredecessor() + "\n"
+               + passiveJointC.getSuccessor() + "\t  " + passiveJointD.getPredecessor() + "\n");
+      }
+   }
+   
    public static void verifyMasterJointLimits(String fourBarName, RevoluteJoint masterJointA, FourBarCalculatorFromFastRunner fourBarCalculator)
    {
       double maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
