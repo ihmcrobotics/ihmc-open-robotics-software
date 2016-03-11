@@ -285,7 +285,21 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointTwist.set(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame(), matrix, rowStart);
    }
    
-   //TODO: Test THIS!!!!
+   //FIXME: FIX THIS!!!!
+   /**
+    * The implementation for this method generates garbage and is wrong.
+    * Do not use it or fix it.
+    * 
+    * The implementation should be something like this:
+    * <p> {@code RigidBodyTransform inverseTransformToRoot = afterJointFrame.getInverseTransformToRoot();}
+    * <p> {@code inverseTransformToRoot.transform(linearVelocityInWorld);}
+    * <p> {@code jointTwist.setLinearPart(linearVelocityInWorld);}
+    *
+    * Sylvain
+    * 
+    * @deprecated
+    * @param linearVelocityInWorld
+    */
    public void setLinearVelocityInWorld(Vector3d linearVelocityInWorld)
    {
       Twist newTwist = new Twist(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), ReferenceFrame.getWorldFrame());
