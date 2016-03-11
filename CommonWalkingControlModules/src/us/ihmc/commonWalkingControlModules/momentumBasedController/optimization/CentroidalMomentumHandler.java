@@ -124,7 +124,7 @@ public class CentroidalMomentumHandler
    public DenseMatrix64F getMomentumDotEquationRightHandSide(MomentumRateCommand momentumRateCommand)
    {
       DenseMatrix64F selectionMatrix = momentumRateCommand.getSelectionMatrix();
-      DenseMatrix64F momentumRate = momentumRateCommand.getMomemtumRate();
+      DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
 
       CommonOps.mult(selectionMatrix, momentumRate, centroidalMomentumEquationRightHandSide);
       CommonOps.subtractEquals(centroidalMomentumEquationRightHandSide, adotV);

@@ -357,7 +357,7 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
       CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInput.taskJacobian);
 
-      DenseMatrix64F momemtumRate = command.getMomemtumRate();
+      DenseMatrix64F momemtumRate = command.getMomentumRate();
       DenseMatrix64F convectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
