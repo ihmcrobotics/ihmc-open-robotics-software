@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
+import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
@@ -10,35 +12,43 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.s
 
 public class ControllerCoreCommand implements ControllerCoreCommandInterface
 {
-   private final InverseDynamicsCommandList solverCommandList;
+   private final InverseDynamicsCommandList inverseDynamicsCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
+   private final InverseKinematicsCommandList inverseKinematicsCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
-   private final WholeBodyControllerCoreMode controllerCoreMode;
+   private WholeBodyControllerCoreMode controllerCoreMode;
 
    public ControllerCoreCommand(WholeBodyControllerCoreMode controllerCoreMode)
    {
       this.controllerCoreMode = controllerCoreMode;
 
-      solverCommandList = new InverseDynamicsCommandList();
+      inverseDynamicsCommandList = new InverseDynamicsCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
+      inverseKinematicsCommandList = new InverseKinematicsCommandList();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
    public void clear()
    {
-      solverCommandList.clear();
+      inverseDynamicsCommandList.clear();
       feedbackControlCommandList.clear();
+      inverseKinematicsCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
    public void addInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
    {
-      solverCommandList.addCommand(inverseDynamicsCommand);
+      inverseDynamicsCommandList.addCommand(inverseDynamicsCommand);
    }
 
    public void addFeedbackControlCommand(FeedbackControlCommand<?> feedbackControlCommand)
    {
       feedbackControlCommandList.addCommand(feedbackControlCommand);
+   }
+
+   public void addInverseKinematicsCommand(InverseKinematicsCommand<?> inverseKinematicsCommand)
+   {
+      inverseKinematicsCommandList.addCommand(inverseKinematicsCommand);
    }
 
    public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderInterface lowLevelJointData)
@@ -49,13 +59,19 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    @Override
    public InverseDynamicsCommandList getInverseDynamicsCommandList()
    {
-      return solverCommandList;
+      return inverseDynamicsCommandList;
    }
 
    @Override
    public FeedbackControlCommandList getFeedbackControlCommandList()
    {
       return feedbackControlCommandList;
+   }
+
+   @Override
+   public InverseKinematicsCommandList getInverseKinematicsCommandList()
+   {
+      return inverseKinematicsCommandList;
    }
 
    @Override
@@ -66,8 +82,10 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
 
    public void set(ControllerCoreCommand other)
    {
-      solverCommandList.set(other.solverCommandList);
+      controllerCoreMode = other.controllerCoreMode;
+      inverseDynamicsCommandList.set(other.inverseDynamicsCommandList);
       feedbackControlCommandList.set(other.feedbackControlCommandList);
+      inverseKinematicsCommandList.set(other.inverseKinematicsCommandList);
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 

@@ -2,6 +2,7 @@ package us.ihmc.wholeBodyController.concurrent.controllerCoreCommands;
 
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
@@ -15,6 +16,7 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
 {
    private final InverseDynamicsCommandDataCopier inverseDynamicsCommandDataCopier = new InverseDynamicsCommandDataCopier();
    private final FeedbackControlCommandDataCopier feedbackControlCommandDataCopier = new FeedbackControlCommandDataCopier();
+   private final InverseKinematicsCommandDataCopier inverseKinematicsCommandDataCopier = new InverseKinematicsCommandDataCopier();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private WholeBodyControllerCoreMode wholeBodyControllerCoreMode;
@@ -28,6 +30,7 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
       wholeBodyControllerCoreMode = controllerCoreCommand.getControllerCoreMode();
       inverseDynamicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseDynamicsCommandList());
       feedbackControlCommandDataCopier.copyFromOther(controllerCoreCommand.getFeedbackControlCommandList());
+      inverseKinematicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseKinematicsCommandList());
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
@@ -35,12 +38,14 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    {
       inverseDynamicsCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
       feedbackControlCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
+      inverseKinematicsCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
    }
 
    public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
    {
       inverseDynamicsCommandDataCopier.retrieveJointsFromName(nameToJointMap);
       feedbackControlCommandDataCopier.retrieveJointsFromName(nameToJointMap);
+      inverseKinematicsCommandDataCopier.retrieveJointsFromName(nameToJointMap);
       lowLevelOneDoFJointDesiredDataHolder.retrieveJointsFromName(nameToJointMap);
    }
 
@@ -54,6 +59,12 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    public FeedbackControlCommandList getFeedbackControlCommandList()
    {
       return feedbackControlCommandDataCopier.getFeedbackControlCommandList();
+   }
+
+   @Override
+   public InverseKinematicsCommandList getInverseKinematicsCommandList()
+   {
+      return inverseKinematicsCommandDataCopier.getInverseKinematicsCommandList();
    }
 
    @Override
