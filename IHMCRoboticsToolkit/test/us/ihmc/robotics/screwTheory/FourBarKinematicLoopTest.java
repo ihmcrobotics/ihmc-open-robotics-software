@@ -11,7 +11,6 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.random.RandomTools;
@@ -318,54 +317,24 @@ public class FourBarKinematicLoopTest
       double jointAMin = getInteriorAngleFromCosineRule(2.0, 1.0 + 0.5, 1.0);
       double jointAMax = getInteriorAngleFromCosineRule(2.0, 1.0, 0.5 + 1.0);
       double angleEpsilon = 1e-6;
-      
-      try
-      {
-         masterJointA.setJointLimitLower(jointAMin - angleEpsilon);
-         masterJointA.setJointLimitUpper(jointAMax - angleEpsilon);
-         new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
-               recomputeJointLimits);         
-         fail();
-      }
-      catch(Exception e)
-      {
-      }
 
-      try
-      {
-         masterJointA.setJointLimitLower(jointAMin + angleEpsilon);
-         masterJointA.setJointLimitUpper(jointAMax + angleEpsilon);
-         new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
-               recomputeJointLimits);         
-         fail();
-      }
-      catch(Exception e)
-      {
-      }
-      
-      try
-      {
-         masterJointA.setJointLimitLower(jointAMin - angleEpsilon);
-         masterJointA.setJointLimitUpper(jointAMax + angleEpsilon);
-         new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
-               recomputeJointLimits);         
-         fail();
-      }
-      catch(Exception e)
-      {
-      }
-      
-      try
-      {
-         masterJointA.setJointLimitLower(jointAMin + angleEpsilon);
-         masterJointA.setJointLimitUpper(jointAMax - angleEpsilon);
-         new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
-               recomputeJointLimits);         
-      }
-      catch(Exception e)
-      {
-         fail();
-      }
+      // test all permutations of at least one bad bound
+      masterJointA.setJointLimitLower(jointAMin - angleEpsilon);
+      masterJointA.setJointLimitUpper(jointAMax - angleEpsilon);
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA, recomputeJointLimits);
+
+      masterJointA.setJointLimitLower(jointAMin + angleEpsilon);
+      masterJointA.setJointLimitUpper(jointAMax + angleEpsilon);
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA, recomputeJointLimits);
+
+      masterJointA.setJointLimitLower(jointAMin - angleEpsilon);
+      masterJointA.setJointLimitUpper(jointAMax + angleEpsilon);
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA, recomputeJointLimits);
+
+      // test just inside bounds
+      masterJointA.setJointLimitLower(jointAMin + angleEpsilon);
+      masterJointA.setJointLimitUpper(jointAMax - angleEpsilon);
+      new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA, recomputeJointLimits);
    }
    
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -395,7 +364,7 @@ public class FourBarKinematicLoopTest
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRecomputingJointLimitsForNoLimitsAreSet_RandomQuadrilateral()
-   {      
+   {
       for(int i = 0; i < 100; i++)
       {
          // generate random quadrilateral with joint axes along z and random joint offsets along z
@@ -567,27 +536,64 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, Math.PI, 1e-8);
    }
    
-   private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testJointOrderIsChecked_PlanarSquare()
    {
-      masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxis);
-      rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
-      passiveJointB = ScrewTools.addPassiveRevoluteJoint("jointB", rigidBodyAB, jointAtoB, jointAxis, true);
-      rigidBodyBC = createAndAttachCylinderRB("rigidBodyBC", passiveJointB);
-      passiveJointC = ScrewTools.addPassiveRevoluteJoint("jointC", rigidBodyBC, jointBtoC, jointAxis, true);
-      rigidBodyCD = createAndAttachCylinderRB("rigidBodyCD", passiveJointC);
-      passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, jointCtoD, jointAxis, true);
+      // initialize to a square of unit length and random offsets out of plane
+      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d elevatorToJointA = new Vector3d();
+      Vector3d jointAtoB = new Vector3d(1.0, 0.0, random.nextDouble());
+      Vector3d jointBtoC = new Vector3d(1.0, 0.0, random.nextDouble());
+      Vector3d jointCtoD = new Vector3d(1.0, 0.0, random.nextDouble());
+      Vector3d jointDtoA = new Vector3d(1.0, 0.0, random.nextDouble());
+      boolean recomputeJointLimits = true;
+      
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      
+      // check that exception is thrown when joints are passed in out of order
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointB, passiveJointD, passiveJointC, jointDtoA, recomputeJointLimits);
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointC, passiveJointB, passiveJointD, jointDtoA, recomputeJointLimits);
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointC, passiveJointD, passiveJointB, jointDtoA, recomputeJointLimits);
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointD, passiveJointB, passiveJointC, jointDtoA, recomputeJointLimits);
+      failIfFourBarInitializesCorrectly(masterJointA, passiveJointD, passiveJointC, passiveJointB, jointDtoA, recomputeJointLimits);
+   }
+   
+   private static void failIfFourBarInitializesCorrectly(RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
+         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
+   {
+      try
+      {
+         new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, closurePointFromLastPassiveJoint, recomputeJointLimits);
+         fail();
+      }
+      catch (Exception e)
+      {
+      }
    }
 
+   private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis)
+   {
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, jointAxis, jointAxis, jointAxis);
+   }
+   
    private void initializeSquareFourBar(double sideLength, Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD)
    {
-      masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, new RigidBodyTransform(), jointAxisA);
-      rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
-      passiveJointB = ScrewTools.addPassiveRevoluteJoint("jointB", rigidBodyAB, new Vector3d(sideLength, 0.0, 0.0), jointAxisB, true);
-      rigidBodyBC = createAndAttachCylinderRB("rigidBodyBC", passiveJointB);
-      passiveJointC = ScrewTools.addPassiveRevoluteJoint("jointC", rigidBodyBC, new Vector3d(sideLength, 0.0, 0.0), jointAxisC, true);
-      rigidBodyCD = createAndAttachCylinderRB("rigidBodyCD", passiveJointC);
-      passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, new Vector3d(sideLength, 0.0, 0.0), jointAxisD, true);
+      initializeFourBar(new Vector3d(), new Vector3d(sideLength, 0.0, 0.0), new Vector3d(sideLength, 0.0, 0.0), new Vector3d(sideLength, 0.0, 0.0), jointAxisA,
+            jointAxisB, jointAxisC, jointAxisD);
    }
+   
+   private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxisA,
+         Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD)
+   {
+      masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxisA);
+      rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
+      passiveJointB = ScrewTools.addPassiveRevoluteJoint("jointB", rigidBodyAB, jointAtoB, jointAxisB, true);
+      rigidBodyBC = createAndAttachCylinderRB("rigidBodyBC", passiveJointB);
+      passiveJointC = ScrewTools.addPassiveRevoluteJoint("jointC", rigidBodyBC, jointBtoC, jointAxisC, true);
+      rigidBodyCD = createAndAttachCylinderRB("rigidBodyCD", passiveJointC);
+      passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, jointCtoD, jointAxisD, true);
+   }   
    
    private void initializeFourBar(RigidBodyTransform elevatorToJointA, RigidBodyTransform jointAtoB, RigidBodyTransform jointBtoC, RigidBodyTransform jointCtoD,
          Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD)
@@ -618,7 +624,6 @@ public class FourBarKinematicLoopTest
       passiveJointC.setJointLimitUpper(upperLimit);
       passiveJointD.setJointLimitLower(lowerLimit);
       passiveJointD.setJointLimitUpper(upperLimit);
-
    }
    
    private static double getInteriorAngleFromCosineRule(double adjacentSide1, double adjacentSide2, double oppositeSide)
@@ -643,5 +648,21 @@ public class FourBarKinematicLoopTest
       double lastSideMax = Math.min(l0 + l1 + l2, max);
       double l3 = generateDoubleInBounds(random, lastSideMin, lastSideMax);
       return new double[]{l0, l1, l2, l3};
+   }
+   
+   private void initializeARandomFourBar(Random random)
+   {
+      // joint axis is along z
+      Matrix3d worldToJointAxisRotation = RandomTools.generateRandomRotationMatrix3d(random);
+      RigidBodyTransform worldToJointAxis = new RigidBodyTransform();
+      worldToJointAxis.setRotationAndZeroTranslation(worldToJointAxisRotation);
+      ReferenceFrame frameWithZAlongJointAxis = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("frameWithZAlongJointAxis", worldFrame,
+            worldToJointAxis);
+      
+      // master joint frame
+      ReferenceFrame masterJointFrame = ReferenceFrame.generateRandomReferenceFrame("masterJointFrame", random, elevatorFrame);
+      
+      // generate random quadrilateral
+//      double[] 
    }
 }
