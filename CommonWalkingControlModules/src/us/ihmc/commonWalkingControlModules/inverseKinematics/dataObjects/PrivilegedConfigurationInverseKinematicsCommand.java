@@ -194,6 +194,11 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
       return joints.size();
    }
 
+   public OneDoFJoint getJoint(int jointIndex)
+   {
+      return joints.get(jointIndex);
+   }
+
    @Override
    public void setWeight(double weight)
    {

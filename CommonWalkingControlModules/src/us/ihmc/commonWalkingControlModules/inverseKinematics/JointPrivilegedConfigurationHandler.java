@@ -23,6 +23,8 @@ public class JointPrivilegedConfigurationHandler
 
    private final BooleanYoVariable isJointPrivilegedConfigurationEnabled = new BooleanYoVariable("isJointPrivilegedConfigurationEnabled", registry);
    private final DoubleYoVariable defaultWeight = new DoubleYoVariable("jointPrivilegedConfigurationDefaultWeight", registry);
+   private final DoubleYoVariable gains = new DoubleYoVariable("jointPrivilegedConfigurationGain", registry);
+   private final DoubleYoVariable maxVelocity = new DoubleYoVariable("jointPrivilegedConfigurationMaxVelocity", registry);
 
    private final DenseMatrix64F privilegedConfigurations;
    private final DenseMatrix64F privilegedVelocities;
@@ -67,7 +69,10 @@ public class JointPrivilegedConfigurationHandler
          positionsAtMidRangeOfMotion.set(i, 0, 0.5 * (jointLimitUpper + jointLimitLower));
       }
 
+      gains.set(5.0);
+      maxVelocity.set(0.4);
       defaultWeight.set(1.0);
+      updateWeights();
 
       parentRegistry.addChild(registry);
    }
@@ -77,7 +82,8 @@ public class JointPrivilegedConfigurationHandler
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         double qd = -2.0 * (joint.getQ() - privilegedConfigurations.get(i, 0)) / jointSquaredRangeOfMotions.get(i, 0);
+         double qd = -2.0 * gains.getDoubleValue() * (joint.getQ() - privilegedConfigurations.get(i, 0)) / jointSquaredRangeOfMotions.get(i, 0);
+         qd = MathTools.clipToMinMax(qd, maxVelocity.getDoubleValue());
          privilegedVelocities.set(i, 0, qd);
       }
    }
@@ -101,7 +107,7 @@ public class JointPrivilegedConfigurationHandler
 
       for (int i = 0; i < command.getNumberOfJoints(); i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJoint joint = command.getJoint(i);
          int jointIndex = jointIndices.get(joint).intValue();
 
          if (command.hasNewPrivilegedConfiguration(i))
@@ -110,7 +116,7 @@ public class JointPrivilegedConfigurationHandler
          if (command.hasNewPrivilegedConfigurationOption(i))
          {
             PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(i);
-            setPrivilegedConfigurationFromOption(option, i);
+            setPrivilegedConfigurationFromOption(option, jointIndex);
          }
 
          if (command.hasNewWeight(i))
