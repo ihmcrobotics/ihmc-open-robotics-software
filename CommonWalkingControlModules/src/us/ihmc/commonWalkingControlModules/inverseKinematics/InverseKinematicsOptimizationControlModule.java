@@ -17,10 +17,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJaco
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -44,16 +46,23 @@ public class InverseKinematicsOptimizationControlModule
    private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
    private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
 
+   private final DenseMatrix64F qDotMin, qDotMax;
+   private final double controlDT;
+   private final OneDoFJoint[] oneDoFJoints;
+
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+   private final DenseMatrix64F partialCentroidalMomtentumMatrix;
 
    public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
    {
+      controlDT = toolbox.getControlDT();
       jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
+      oneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
 
       InverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
@@ -62,6 +71,7 @@ public class InverseKinematicsOptimizationControlModule
       geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
       centroidalMomentumMatrixCalculator = new CentroidalMomentumMatrix(rootJoint.getPredecessor(), centerOfMassFrame);
       privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(jointsToOptimizeFor, registry);
+      partialCentroidalMomtentumMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, numberOfDoFs);
       motionQPInput = new InverseKinematicsMotionQPInput(numberOfDoFs);
 
       for (InverseDynamicsJoint joint : jointsToOptimizeFor)
@@ -72,6 +82,9 @@ public class InverseKinematicsOptimizationControlModule
 
          columnsForJoints.put(joint, indices);
       }
+
+      qDotMin = new DenseMatrix64F(numberOfDoFs, 1);
+      qDotMax = new DenseMatrix64F(numberOfDoFs, 1);
 
       qpSolver = new InverseKinematicsQPSolver(numberOfDoFs, registry);
 
@@ -89,6 +102,9 @@ public class InverseKinematicsOptimizationControlModule
       NoConvergenceException noConvergenceException = null;
 
       computePrivilegedJointVelocities();
+      computeJointVelocityLimits();
+      qpSolver.setMaxJointVelocities(qDotMax);
+      qpSolver.setMinJointVelocities(qDotMin);
 
       try
       {
@@ -108,6 +124,24 @@ public class InverseKinematicsOptimizationControlModule
       return inverseKinematicsSolution;
    }
 
+   private void computeJointVelocityLimits()
+   {
+      CommonOps.fill(qDotMin, Double.NEGATIVE_INFINITY);
+      CommonOps.fill(qDotMax, Double.POSITIVE_INFINITY);
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         int index = columnsForJoints.get(joint)[0];
+         double jointLimitLower = joint.getJointLimitLower();
+         if (Double.isFinite(jointLimitLower))
+            qDotMin.set(index, 0, (jointLimitLower - joint.getQ()) / controlDT);
+         double jointLimitUpper = joint.getJointLimitUpper();
+         if (Double.isFinite(jointLimitUpper))
+            qDotMax.set(index, 0, (jointLimitUpper - joint.getQ()) / controlDT);
+      }
+   }
+
    private void computePrivilegedJointVelocities()
    {
       if (privilegedConfigurationHandler.isEnabled())
@@ -123,7 +157,7 @@ public class InverseKinematicsOptimizationControlModule
          tempSelectionMatrix.reshape(taskSize, numberOfDoFs);
          compactBlockToFullBlock(joints, selectionMatrix, tempSelectionMatrix);
 
-         qpSolver.projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(selectionMatrix, privilegedJointVelocities, weight);
+         qpSolver.projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(tempSelectionMatrix, privilegedJointVelocities, weight);
       }
    }
 
@@ -213,6 +247,7 @@ public class InverseKinematicsOptimizationControlModule
             motionQPInput.taskJacobian.set(row, column, 1.0);
 
          CommonOps.insert(command.getDesiredVelocity(jointIndex), motionQPInput.taskObjective, row, 0);
+         row += joint.getDegreesOfFreedom();
       }
 
       qpSolver.addMotionInput(motionQPInput);
@@ -238,7 +273,7 @@ public class InverseKinematicsOptimizationControlModule
       CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInput.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
-      DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumMatrixCalculator.getMatrix();
+      DenseMatrix64F centroidalMomentumMatrix = getPartialCentroidalMomentumMatrix();
       CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInput.taskJacobian);
 
       DenseMatrix64F momemtum = command.getMomentum();
@@ -258,6 +293,20 @@ public class InverseKinematicsOptimizationControlModule
    private void submitPrivilegedConfigurationInverseKinematicsCommand(PrivilegedConfigurationInverseKinematicsCommand command)
    {
       privilegedConfigurationHandler.submitPrivilegedConfigurationInverseKinematicsCommand(command);
+   }
+
+   private DenseMatrix64F getPartialCentroidalMomentumMatrix()
+   {
+      partialCentroidalMomtentumMatrix.reshape(Momentum.SIZE, numberOfDoFs);
+      int startColumn = 0;
+      for (InverseDynamicsJoint joint : jointsToOptimizeFor)
+      {
+         int[] columnsForJoint = columnsForJoints.get(joint);
+         MatrixTools.extractColumns(centroidalMomentumMatrixCalculator.getMatrix(), columnsForJoint, partialCentroidalMomtentumMatrix, startColumn);
+         startColumn += columnsForJoint.length;
+      }
+
+      return partialCentroidalMomtentumMatrix;
    }
 
    private void compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
