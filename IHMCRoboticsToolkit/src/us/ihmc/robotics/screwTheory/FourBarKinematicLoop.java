@@ -245,18 +245,17 @@ public class FourBarKinematicLoop
       vectorCDProjected.get(tempVectorCD);
       vectorDAProjected.get(tempVectorDA);
 
-      double[] interiorAnglesAtZeroConfiguration = new double[4];
-      interiorAnglesAtZeroConfiguration[1] = Math.PI - jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
-      interiorAnglesAtZeroConfiguration[2] = Math.PI - jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
-      interiorAnglesAtZeroConfiguration[3] = Math.PI - jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
+      double[] interiorAnglesAtZeroConfiguration = new double[3];
+      interiorAnglesAtZeroConfiguration[0] = Math.PI - jointBAxisZ * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
+      interiorAnglesAtZeroConfiguration[1] = Math.PI - jointCAxisZ * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+      interiorAnglesAtZeroConfiguration[2] = Math.PI - jointDAxisZ * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
       
       if (DEBUG)
       {  
          System.out.println("\nOffset angle debugging:\n");
-         System.out.println("offset A = " + interiorAnglesAtZeroConfiguration[0]);
-         System.out.println("offset B = " + interiorAnglesAtZeroConfiguration[1]);
-         System.out.println("offset C = " + interiorAnglesAtZeroConfiguration[2]);
-         System.out.println("offset D = " + interiorAnglesAtZeroConfiguration[3]);
+         System.out.println("offset B = " + interiorAnglesAtZeroConfiguration[0]);
+         System.out.println("offset C = " + interiorAnglesAtZeroConfiguration[1]);
+         System.out.println("offset D = " + interiorAnglesAtZeroConfiguration[2]);
       }
 
       return interiorAnglesAtZeroConfiguration;
@@ -271,7 +270,7 @@ public class FourBarKinematicLoop
 
       if (jointB.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         double maxAngleB = jointB.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[1];
+         double maxAngleB = jointB.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[0];
 
          if (MathTools.isInsideBoundsExclusive(maxAngleB, 0.0, Math.PI))
          {
@@ -282,7 +281,7 @@ public class FourBarKinematicLoop
 
       if (jointC.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
-         double minAngleC = jointC.getJointLimitLower() + interiorAnglesAtZeroConfiguration[2];
+         double minAngleC = jointC.getJointLimitLower() + interiorAnglesAtZeroConfiguration[1];
          
          if (MathTools.isInsideBoundsExclusive(minAngleC, 0.0, Math.PI))
          {
@@ -293,7 +292,7 @@ public class FourBarKinematicLoop
 
       if (jointD.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         double maxAngleD = jointD.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[3];
+         double maxAngleD = jointD.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[2];
 
          if (MathTools.isInsideBoundsExclusive(maxAngleD, 0.0, Math.PI))
          {
@@ -314,7 +313,7 @@ public class FourBarKinematicLoop
 
       if (jointB.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
-         double minAngleB = jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[1];
+         double minAngleB = jointB.getJointLimitLower() + interiorAnglesAtZeroConfiguration[0];
 
          if (MathTools.isInsideBoundsExclusive(minAngleB, 0.0, Math.PI))
          {
@@ -325,7 +324,7 @@ public class FourBarKinematicLoop
 
       if (jointC.getJointLimitUpper() != Double.POSITIVE_INFINITY)
       {
-         double maxAngleC = jointC.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[2];
+         double maxAngleC = jointC.getJointLimitUpper() + interiorAnglesAtZeroConfiguration[1];
          
          if (MathTools.isInsideBoundsExclusive(maxAngleC, 0.0, Math.PI))
          {
@@ -336,7 +335,7 @@ public class FourBarKinematicLoop
 
       if (jointD.getJointLimitLower() != Double.NEGATIVE_INFINITY)
       {
-         double minAngleD = jointD.getJointLimitLower() + interiorAnglesAtZeroConfiguration[3];
+         double minAngleD = jointD.getJointLimitLower() + interiorAnglesAtZeroConfiguration[2];
          
          if (MathTools.isInsideBoundsExclusive(minAngleD, 0.0, Math.PI))
          {
@@ -384,9 +383,9 @@ public class FourBarKinematicLoop
       }
 
       fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
-      passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[1]);
-      passiveJointC.setQ(fourBarCalculator.getAngleBCD() - interiorAnglesAtZeroConfiguration[2]);
-      passiveJointD.setQ(fourBarCalculator.getAngleCDA() - interiorAnglesAtZeroConfiguration[3]);
+      passiveJointB.setQ(fourBarCalculator.getAngleABC() - interiorAnglesAtZeroConfiguration[0]);
+      passiveJointC.setQ(fourBarCalculator.getAngleBCD() - interiorAnglesAtZeroConfiguration[1]);
+      passiveJointD.setQ(fourBarCalculator.getAngleCDA() - interiorAnglesAtZeroConfiguration[2]);
       passiveJointB.setQd(fourBarCalculator.getAngleDtABC());
       passiveJointC.setQd(fourBarCalculator.getAngleDtBCD());
       passiveJointD.setQd(fourBarCalculator.getAngleDtCDA());
