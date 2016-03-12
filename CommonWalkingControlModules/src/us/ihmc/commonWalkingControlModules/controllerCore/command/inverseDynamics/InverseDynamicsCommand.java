@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 public interface InverseDynamicsCommand<T extends InverseDynamicsCommand<T>>
 {
