@@ -2,11 +2,11 @@ package us.ihmc.wholeBodyController.concurrent.controllerCoreCommands;
 
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
