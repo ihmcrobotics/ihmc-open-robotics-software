@@ -1,6 +1,6 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder.throwJointNotRegisteredException;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder.throwJointNotRegisteredException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

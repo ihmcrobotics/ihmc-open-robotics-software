@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 public interface LowLevelJointDataReadOnly
 {
