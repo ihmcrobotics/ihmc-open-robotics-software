@@ -7,6 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -98,6 +99,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setWeightForSolver(double weight)
    {
       weightForSolver = weight;
+   }
+
+   public void setWeightLevelForSolver(SolverWeightLevels weightLevel)
+   {
+      weightForSolver = weightLevel.getWeightValue();
    }
 
    public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
