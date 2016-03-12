@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
@@ -211,6 +212,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setWeightForSolver(double weight)
    {
       weightForSolver = weight;
+   }
+
+   public void setWeightLevelForSolver(SolverWeightLevels weightLevel)
+   {
+      weightForSolver = weightLevel.getWeightValue();
    }
 
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
