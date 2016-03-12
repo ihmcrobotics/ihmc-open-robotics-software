@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -50,8 +51,8 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    }
 
    @Override
-   public InverseDynamicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseDynamicsCommandType.EXTERNAL_WRENCH;
+      return ControllerCoreCommandType.EXTERNAL_WRENCH;
    }
 }

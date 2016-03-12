@@ -5,6 +5,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.inverse
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -179,9 +180,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    @Override
-   public InverseKinematicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseKinematicsCommandType.TASKSPACE;
+      return ControllerCoreCommandType.TASKSPACE;
    }
 
    @Override

@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
@@ -278,8 +279,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    @Override
-   public FeedbackControlCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return FeedbackControlCommandType.SPATIAL_CONTROL;
+      return ControllerCoreCommandType.TASKSPACE;
    }
 }

@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand.FeedbackControlCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
@@ -54,19 +54,19 @@ public class WholeBodyFeedbackController
       for (int i = 0; i < allPossibleCommands.getNumberOfCommands(); i++)
       {
          FeedbackControlCommand<?> commandExample = allPossibleCommands.getCommand(i);
-         FeedbackControlCommandType commandType = commandExample.getCommandType();
+         ControllerCoreCommandType commandType = commandExample.getCommandType();
          switch (commandType)
          {
-         case SPATIAL_CONTROL:
+         case TASKSPACE:
             registerSpatialControllers((SpatialFeedbackControlCommand) commandExample);
             break;
-         case POINT_CONTROL:
+         case POINT:
             registerPointControllers((PointFeedbackControlCommand) commandExample);
             break;
-         case ORIENTATION_CONTROL:
+         case ORIENTATION:
             registerOrientationControllers((OrientationFeedbackControlCommand) commandExample);
             break;
-         case JOINTSPACE_CONTROL:
+         case JOINTSPACE:
             registerJointspaceControllers((JointspaceFeedbackControlCommand) commandExample);
             break;
          case COMMAND_LIST:
@@ -166,19 +166,19 @@ public class WholeBodyFeedbackController
       for (int i = 0; i < feedbackControlCommandList.getNumberOfCommands(); i++)
       {
          FeedbackControlCommand<?> feedbackControlCommand = feedbackControlCommandList.getCommand(i);
-         FeedbackControlCommandType commandType = feedbackControlCommand.getCommandType();
+         ControllerCoreCommandType commandType = feedbackControlCommand.getCommandType();
          switch (commandType)
          {
-         case SPATIAL_CONTROL:
+         case TASKSPACE:
             submitSpatialFeedbackControlCommand((SpatialFeedbackControlCommand) feedbackControlCommand);
             break;
-         case POINT_CONTROL:
+         case POINT:
             submitPointFeedbackControlCommand((PointFeedbackControlCommand) feedbackControlCommand);
             break;
-         case ORIENTATION_CONTROL:
+         case ORIENTATION:
             submitOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) feedbackControlCommand);
             break;
-         case JOINTSPACE_CONTROL:
+         case JOINTSPACE:
             submitJointspaceFeedbackControlCommand((JointspaceFeedbackControlCommand) feedbackControlCommand);
             break;
          case COMMAND_LIST:

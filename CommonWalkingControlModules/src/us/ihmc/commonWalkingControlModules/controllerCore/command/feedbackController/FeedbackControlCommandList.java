@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContr
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+
 public class FeedbackControlCommandList implements FeedbackControlCommand<FeedbackControlCommandList>
 {
    private final List<FeedbackControlCommand<?>> commandList = new ArrayList<>();
@@ -40,8 +42,8 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
    }
 
    @Override
-   public FeedbackControlCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return FeedbackControlCommandType.COMMAND_LIST;
+      return ControllerCoreCommandType.COMMAND_LIST;
    }
 }

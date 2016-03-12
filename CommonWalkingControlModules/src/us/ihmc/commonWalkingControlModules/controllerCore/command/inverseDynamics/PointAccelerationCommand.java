@@ -5,6 +5,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.inverse
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -148,9 +149,9 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
    }
 
    @Override
-   public InverseDynamicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseDynamicsCommandType.TASKSPACE_POINT_MOTION;
+      return ControllerCoreCommandType.POINT;
    }
 
    @Override

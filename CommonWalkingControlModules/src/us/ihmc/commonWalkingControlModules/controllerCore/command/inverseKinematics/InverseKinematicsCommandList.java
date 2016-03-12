@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+
 public class InverseKinematicsCommandList implements InverseKinematicsCommand<InverseKinematicsCommandList>
 {
    private final List<InverseKinematicsCommand<?>> commandList = new ArrayList<>();
@@ -59,8 +61,8 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
    }
 
    @Override
-   public InverseKinematicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseKinematicsCommandType.COMMAND_LIST;
+      return ControllerCoreCommandType.COMMAND_LIST;
    }
 }

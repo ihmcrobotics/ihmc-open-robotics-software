@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -135,9 +136,9 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    }
 
    @Override
-   public InverseDynamicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseDynamicsCommandType.PLANE_CONTACT_STATE;
+      return ControllerCoreCommandType.PLANE_CONTACT_STATE;
    }
 
    @Override

@@ -83,20 +83,21 @@ public class InverseDynamicsCommandDataCopier
          case EXTERNAL_WRENCH:
             copyExternalWrenchCommand((ExternalWrenchCommand) commandToCopy);
             break;
-         case JOINTSPACE_MOTION:
+         case JOINTSPACE:
             copyJointspaceAccelerationCommand((JointspaceAccelerationCommand) commandToCopy);
             break;
-         case MOMENTUM_RATE:
+         case MOMENTUM:
             copyMomentumRateCommand((MomentumRateCommand) commandToCopy);
             break;
          case PLANE_CONTACT_STATE:
             copyPlaneContactStateCommand((PlaneContactStateCommand) commandToCopy);
             break;
-         case TASKSPACE_POINT_MOTION:
+         case POINT:
             copyPointAcclerationCommand((PointAccelerationCommand) commandToCopy);
             break;
-         case TASKSPACE_MOTION:
+         case TASKSPACE:
             copySpatialAccelerationCommand((SpatialAccelerationCommand) commandToCopy);
+            break;
          default:
             throw new RuntimeException("The command type: " + commandToCopy.getCommandType() + " is not handled.");
          }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class PrivilegedConfigurationInverseKinematicsCommand implements InverseKinematicsCommand<PrivilegedConfigurationInverseKinematicsCommand>
@@ -217,8 +218,8 @@ public class PrivilegedConfigurationInverseKinematicsCommand implements InverseK
    }
 
    @Override
-   public InverseKinematicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseKinematicsCommandType.PRIVILEGED_CONFIGURATION;
+      return ControllerCoreCommandType.PRIVILEGED_CONFIGURATION;
    }
 }
