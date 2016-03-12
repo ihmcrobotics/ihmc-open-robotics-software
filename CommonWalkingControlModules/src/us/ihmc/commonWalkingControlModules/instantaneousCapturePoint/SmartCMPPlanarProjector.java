@@ -51,10 +51,11 @@ public class SmartCMPPlanarProjector extends CMPProjector
          return;
       }
 
-      if (supportPolygon.isPointInside(desiredCMPToPack))
+      if (supportPolygon.isPointInside(projectedCMP))
+      {
          return;
-
-      if (!supportPolygon.isPointInside(projectedCMP))
+      }
+      else
       {
          supportPolygon.getClosestVertex(projectedCMP, projectedCMP);
          cmpProjected.set(true);
