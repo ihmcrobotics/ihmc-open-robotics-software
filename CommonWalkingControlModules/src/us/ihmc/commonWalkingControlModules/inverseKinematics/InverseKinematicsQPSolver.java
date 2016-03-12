@@ -92,32 +92,34 @@ public class InverseKinematicsQPSolver
          addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
    }
 
-   public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskObjective, double taskWeight)
+   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight)
    {
-      int taskSize = taskJ.getNumRows();
+      int taskSize = taskJacobian.getNumRows();
 
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
-      MatrixTools.scaleTranspose(taskWeight, taskJ, tempJtW);
+      MatrixTools.scaleTranspose(taskWeight, taskJacobian, tempJtW);
 
-      addMotionTaskInternal(tempJtW, taskJ, taskObjective);
+      addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
-   public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskXDot, DenseMatrix64F taskWeight)
+   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
-      int taskSize = taskJ.getNumRows();
-      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
-      CommonOps.insert(taskJ, jAugmented, jAugmented.getNumRows() - taskSize, 0);
+      int taskSize = taskJacobian.getNumRows();
 
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
-      CommonOps.multTransA(taskJ, taskWeight, tempJtW);
+      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
 
-      addMotionTaskInternal(tempJtW, taskJ, taskXDot);
+      addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
    private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
+      int taskSize = taskJacobian.getNumRows();
+      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
+      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
+
       // Compute: H += J^T W J
       tempTask_H.reshape(numberOfDoFs, numberOfDoFs);
       CommonOps.mult(taskJtW, taskJacobian, tempTask_H);
@@ -132,6 +134,9 @@ public class InverseKinematicsQPSolver
    public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
+      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
+      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
+
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.

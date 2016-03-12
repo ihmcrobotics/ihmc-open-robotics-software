@@ -26,10 +26,13 @@ import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MatrixTools
@@ -845,6 +848,33 @@ public class MatrixTools
       frameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
+   public static void extractYoFrameTupleFromEJMLVector(YoFrameTuple<?, ?> yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   {
+      yoFrameTuple.setX(ejmlVector.get(startIndex + 0, 0));
+      yoFrameTuple.setY(ejmlVector.get(startIndex + 1, 0));
+      yoFrameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
+   }
+
+   public static void extractYoFrameQuaternionFromEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      double x = matrix.get(index++, 0);
+      double y = matrix.get(index++, 0);
+      double z = matrix.get(index++, 0);
+      double w = matrix.get(index++, 0);
+      yoFrameQuaternion.set(x, y, z, w);
+   }
+
+   public static void extractFrameOrientationFromEJMLVector(FrameOrientation frameOrientation, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      double x = matrix.get(index++, 0);
+      double y = matrix.get(index++, 0);
+      double z = matrix.get(index++, 0);
+      double w = matrix.get(index++, 0);
+      frameOrientation.set(x, y, z, w);
+   }
+
    public static void extractQuat4dFromEJMLVector(Quat4d quaternion, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
@@ -874,6 +904,31 @@ public class MatrixTools
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());
       ejmlVector.set(startIndex + 2, 0, frameTuple.getZ());
+   }
+
+   public static void insertYoFrameTupleIntoEJMLVector(YoFrameTuple<?, ?> yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   {
+      ejmlVector.set(startIndex + 0, 0, yoFrameTuple.getX());
+      ejmlVector.set(startIndex + 1, 0, yoFrameTuple.getY());
+      ejmlVector.set(startIndex + 2, 0, yoFrameTuple.getZ());
+   }
+
+   public static void insertYoFrameQuaternionIntoEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      matrix.set(index++, 0, yoFrameQuaternion.getQx());
+      matrix.set(index++, 0, yoFrameQuaternion.getQy());
+      matrix.set(index++, 0, yoFrameQuaternion.getQz());
+      matrix.set(index++, 0, yoFrameQuaternion.getQs());
+   }
+
+   public static void insertFrameOrientationIntoEJMLVector(FrameOrientation frameOrientation, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      matrix.set(index++, 0, frameOrientation.getQx());
+      matrix.set(index++, 0, frameOrientation.getQy());
+      matrix.set(index++, 0, frameOrientation.getQz());
+      matrix.set(index++, 0, frameOrientation.getQs());
    }
 
    public static void insertQuat4dIntoEJMLVector(DenseMatrix64F matrix, Quat4d quaternion, int rowStart)

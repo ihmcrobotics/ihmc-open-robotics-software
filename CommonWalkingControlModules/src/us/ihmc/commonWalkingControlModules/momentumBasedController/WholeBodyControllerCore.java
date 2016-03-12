@@ -6,20 +6,21 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.C
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.YoLowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.YoRootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.WholeBodyInverseDynamicsSolver;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class WholeBodyControllerCore
 {
@@ -32,6 +33,7 @@ public class WholeBodyControllerCore
    private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
 
    private final ControllerCoreOuput controllerCoreOuput;
+   private final YoRootJointDesiredConfigurationData yoRootJointDesiredConfigurationData;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private OneDoFJoint[] oneDoFJoints;
@@ -44,6 +46,8 @@ public class WholeBodyControllerCore
       inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, momentumOptimizationSettings, registry);
       inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, momentumOptimizationSettings, registry);
       oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsSolver.getJointsToOptimizeFors(), OneDoFJoint.class);
+      SixDoFJoint rootJoint = toolbox.getRobotRootJoint();
+      yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(oneDoFJoints, registry);
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = inverseDynamicsSolver.getDesiredCenterOfPressureDataHolder();
@@ -56,6 +60,7 @@ public class WholeBodyControllerCore
    {
       feedbackController.initialize();
       inverseDynamicsSolver.initialize();
+      inverseKinematicsSolver.reset();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -63,6 +68,7 @@ public class WholeBodyControllerCore
    {
       feedbackController.reset();
       inverseDynamicsSolver.reset();
+      inverseKinematicsSolver.reset();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -87,6 +93,7 @@ public class WholeBodyControllerCore
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
+      yoRootJointDesiredConfigurationData.clear();
    }
 
    public void compute()
@@ -103,9 +110,12 @@ public class WholeBodyControllerCore
          yoLowLevelOneDoFJointDesiredDataHolder.completeWith(solverOutput);
          break;
       case INVERSE_KINEMATICS:
+         numberOfFBControllerEnabled.set(0);
          inverseKinematicsSolver.compute();
          LowLevelOneDoFJointDesiredDataHolder inverseKinematicsOutput = inverseKinematicsSolver.getOutput();
+         RootJointDesiredConfigurationDataReadOnly inverseKinematicsOutputForRootJoint = inverseKinematicsSolver.getOutputForRootJoint();
          yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseKinematicsOutput);
+         yoRootJointDesiredConfigurationData.completeWith(inverseKinematicsOutputForRootJoint);
       case OFF:
          numberOfFBControllerEnabled.set(0);
          yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
@@ -113,11 +123,6 @@ public class WholeBodyControllerCore
       default:
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
-   }
-
-   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2d desiredCoPToPack)
-   {
-      inverseDynamicsSolver.getDesiredCenterOfPressure(contactablePlaneBody, desiredCoPToPack);
    }
 
    public ControllerCoreOuput getOutputForHighLevelController()
@@ -128,5 +133,10 @@ public class WholeBodyControllerCore
    public LowLevelOneDoFJointDesiredDataHolderInterface getOutputForLowLevelController()
    {
       return yoLowLevelOneDoFJointDesiredDataHolder;
+   }
+
+   public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
+   {
+      return yoRootJointDesiredConfigurationData;
    }
 }

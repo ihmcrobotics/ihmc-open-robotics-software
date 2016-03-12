@@ -2,16 +2,16 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.
 
 public interface LowLevelJointDataReadOnly
 {
-   public boolean hasControlMode();
-   public boolean hasDesiredTorque();
-   public boolean hasDesiredPosition();
-   public boolean hasDesiredVelocity();
-   public boolean hasDesiredAcceleration();
-   public LowLevelJointControlMode getControlMode();
-   public double getDesiredTorque();
-   public double getDesiredPosition();
-   public double getDesiredVelocity();
-   public double getDesiredAcceleration();
-   public boolean pollResetIntegratorsRequest();
-   public boolean peekResetIntegratorsRequest();
+   public abstract boolean hasControlMode();
+   public abstract boolean hasDesiredTorque();
+   public abstract boolean hasDesiredPosition();
+   public abstract boolean hasDesiredVelocity();
+   public abstract boolean hasDesiredAcceleration();
+   public abstract LowLevelJointControlMode getControlMode();
+   public abstract double getDesiredTorque();
+   public abstract double getDesiredPosition();
+   public abstract double getDesiredVelocity();
+   public abstract double getDesiredAcceleration();
+   public abstract boolean pollResetIntegratorsRequest();
+   public abstract boolean peekResetIntegratorsRequest();
 }

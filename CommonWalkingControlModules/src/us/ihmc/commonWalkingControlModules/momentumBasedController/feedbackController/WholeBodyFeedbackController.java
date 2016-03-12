@@ -39,6 +39,10 @@ public class WholeBodyFeedbackController
    public WholeBodyFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
    {
       this.toolbox = toolbox;
+
+      if (allPossibleCommands == null)
+         return;
+
       registerControllers(allPossibleCommands);
 
       parentRegistry.addChild(registry);
