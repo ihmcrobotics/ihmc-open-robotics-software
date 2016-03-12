@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController.concurrent.controllerCoreCommands;
 
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;

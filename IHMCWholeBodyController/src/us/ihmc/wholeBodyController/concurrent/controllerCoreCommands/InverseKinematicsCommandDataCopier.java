@@ -2,11 +2,11 @@ package us.ihmc.wholeBodyController.concurrent.controllerCoreCommands;
 
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommandList;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.JointspaceVelocityCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

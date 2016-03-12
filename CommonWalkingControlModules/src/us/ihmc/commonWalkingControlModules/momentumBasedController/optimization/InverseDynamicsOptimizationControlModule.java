@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ConvectiveTermCalculator;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobianConvectiveTermCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -51,8 +53,10 @@ public class InverseDynamicsOptimizationControlModule
    private final InverseDynamicsQPSolver qpSolver;
    private final InverseDynamicsMotionQPInput motionQPInput;
    private final ExternalWrenchHandler externalWrenchHandler;
+   private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final int numberOfDoFs;
 
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
@@ -69,6 +73,7 @@ public class InverseDynamicsOptimizationControlModule
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
@@ -78,7 +83,7 @@ public class InverseDynamicsOptimizationControlModule
       InverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
-      int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
       int maxNPointsPerPlane = WholeBodyControlCoreToolbox.nContactPointsPerContactableBody;
       int maxNSupportVectors = WholeBodyControlCoreToolbox.nBasisVectorsPerContactPoint;
@@ -93,10 +98,11 @@ public class InverseDynamicsOptimizationControlModule
 
       geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
       centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, registry);
-      wrenchMatrixCalculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, maxNPointsPerPlane, maxNSupportVectors, wRho, wRhoSmoother,
+      wrenchMatrixCalculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, maxNPointsPerPlane, maxNSupportVectors, wRho, wRhoSmoother, 
             wRhoPenalizer, contactablePlaneBodies, registry);
       motionQPInput = new InverseDynamicsMotionQPInput(numberOfDoFs);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
+      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(jointsToOptimizeFor, registry);
 
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
 
@@ -123,6 +129,7 @@ public class InverseDynamicsOptimizationControlModule
 
    public MomentumModuleSolution compute() throws MomentumControlModuleException
    {
+      computePrivilegedJointAccelerations();
       wrenchMatrixCalculator.computeMatrices();
       setupRhoTasks();
       setupWrenchesEquilibriumConstraint();
@@ -158,6 +165,25 @@ public class InverseDynamicsOptimizationControlModule
       }
 
       return momentumModuleSolution;
+   }
+
+   private void computePrivilegedJointAccelerations()
+   {
+      if (privilegedConfigurationHandler.isEnabled())
+      {
+         privilegedConfigurationHandler.computePrivilegedJointAccelerations();
+         OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
+         DenseMatrix64F privilegedJointAccelerations = privilegedConfigurationHandler.getPrivilegedJointAccelerations();
+         DenseMatrix64F weight = privilegedConfigurationHandler.getWeight();
+         DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
+
+         int taskSize = privilegedJointAccelerations.getNumRows();
+
+         tempSelectionMatrix.reshape(taskSize, numberOfDoFs);
+         compactBlockToFullBlock(joints, selectionMatrix, tempSelectionMatrix);
+
+         qpSolver.projectPrivilegedJointAccelerationsInNullspaceOfPreviousTasks(tempSelectionMatrix, privilegedJointAccelerations, weight);
+      }
    }
 
    private void setupRhoTasks()

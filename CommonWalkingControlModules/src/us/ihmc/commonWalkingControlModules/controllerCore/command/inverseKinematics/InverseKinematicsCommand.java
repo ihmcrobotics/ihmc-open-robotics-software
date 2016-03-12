@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
 public interface InverseKinematicsCommand<T extends InverseKinematicsCommand<T>>
 {

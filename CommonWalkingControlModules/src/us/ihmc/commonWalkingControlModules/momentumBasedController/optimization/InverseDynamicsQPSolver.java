@@ -8,6 +8,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -86,6 +87,8 @@ public class InverseDynamicsQPSolver
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
+      pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, jointAccelerationRegularization.getDoubleValue());
+
       parentRegistry.addChild(registry);
    }
 
@@ -134,22 +137,24 @@ public class InverseDynamicsQPSolver
       addMotionTaskInternal(tempJtW, taskJ, taskObjective);
    }
 
-   public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
-      int taskSize = taskJ.getNumRows();
+      int taskSize = taskJacobian.getNumRows();
+      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
+      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
 
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
-      CommonOps.multTransA(taskJ, taskWeight, tempJtW);
+      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
       
-      addMotionTaskInternal(tempJtW, taskJ, taskObjective);
+      addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
-   private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJ, DenseMatrix64F taskObjective)
+   private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
       tempMotionTask_H.reshape(numberOfDoFs, numberOfDoFs);
-      CommonOps.mult(taskJtW, taskJ, tempMotionTask_H);
+      CommonOps.mult(taskJtW, taskJacobian, tempMotionTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, 1.0);
 
       // Compute: f += - J^T W xDot
@@ -197,16 +202,19 @@ public class InverseDynamicsQPSolver
 
    private final DenseMatrix64F tempWrenchEquilibriumRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
 
-   public void addMotionConstraint(DenseMatrix64F taskJ, DenseMatrix64F taskObjective)
+   public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
-      int taskSize = taskJ.getNumRows();
+      int taskSize = taskJacobian.getNumRows();
+      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
+      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
+
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
       solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps.insert(taskJ, solverInput_Aeq, previousSize, 0);
+      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
       CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
@@ -216,6 +224,33 @@ public class InverseDynamicsQPSolver
 
       CommonOps.mult(taskWeight, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, 1.0);
+   }
+
+   private final DenseMatrix64F jAugmented = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F jInverseAugmented = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F nullspaceProjector = new DenseMatrix64F(1, 1);
+
+   private final DenseMatrix64F jacobianForPrivilegedJointAccelerations = new DenseMatrix64F(1, 1);
+
+   private final DampedLeastSquaresSolver pseudoInverseSolver;
+
+   public void projectPrivilegedJointAccelerationsInNullspaceOfPreviousTasks(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointAccelerations,
+         DenseMatrix64F weight)
+   {
+      jInverseAugmented.reshape(numberOfDoFs, jAugmented.getNumRows());
+      pseudoInverseSolver.setA(jAugmented);
+      pseudoInverseSolver.invert(jInverseAugmented);
+
+      nullspaceProjector.reshape(numberOfDoFs, numberOfDoFs);
+      // I - J^* J
+      CommonOps.mult(-1.0, jInverseAugmented, jAugmented, nullspaceProjector);
+      for (int i = 0; i < numberOfDoFs; i++)
+         nullspaceProjector.add(i, i, 1.0);
+
+      jacobianForPrivilegedJointAccelerations.reshape(privilegedJointAccelerations.getNumRows(), numberOfDoFs);
+      CommonOps.mult(selectionMatrix, nullspaceProjector, jacobianForPrivilegedJointAccelerations);
+
+      addMotionTask(jacobianForPrivilegedJointAccelerations, privilegedJointAccelerations, weight);
    }
 
    public void solve() throws NoConvergenceException
