@@ -22,11 +22,12 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommandPool;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -71,7 +72,7 @@ public class PlaneContactWrenchMatrixCalculatorTest
          int nContactPoints = 4;
          int contactNumber = 0;
          
-         PlaneContactStateCommandPool pool = new PlaneContactStateCommandPool();
+         RecyclingArrayList<PlaneContactStateCommand> pool = new RecyclingArrayList<>(PlaneContactStateCommand.class);
 
          for (RigidBody body : bodies)
          {
@@ -92,7 +93,7 @@ public class PlaneContactWrenchMatrixCalculatorTest
             YoPlaneContactState contactState = new YoPlaneContactState("contactState" + contactNumber++, body, planeFrame, contactPoints, coefficientOfFriction,
                   registry);
             contactStates.put(body, contactState);
-            contactState.getPlaneContactStateCommand(pool.createCommand());
+            contactState.getPlaneContactStateCommand(pool.add());
             
             contactablePlaneBodies.add(new ListOfPointsContactablePlaneBody(body, planeFrame, contactPoint2ds));
          }
@@ -104,7 +105,8 @@ public class PlaneContactWrenchMatrixCalculatorTest
          double wRhoPenalizer = 0.0;
          PlaneContactWrenchMatrixCalculator calculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nContactPoints,
                nSupportVectorsPerContactPoint, wRho, wRhoSmoother, wRhoPenalizer, contactablePlaneBodies, registry);
-         calculator.setPlaneContactStateCommandPool(pool);
+         for (int i = 0; i < pool.size(); i++)
+            calculator.setPlaneContactStateCommand(pool.get(i));
          calculator.computeMatrices();
          DenseMatrix64F q = calculator.getQRho();
 

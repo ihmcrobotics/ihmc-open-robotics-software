@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -93,9 +92,6 @@ public class InverseDynamicsCommandDataCopier
          case PLANE_CONTACT_STATE:
             copyPlaneContactStateCommand((PlaneContactStateCommand) commandToCopy);
             break;
-         case PLANE_CONTACT_STATE_POOL:
-            copyPlaneContactStateCommandPool((PlaneContactStateCommandPool) commandToCopy);
-            break;
          case TASKSPACE_POINT_MOTION:
             copyPointAcclerationCommand((PointAccelerationCommand) commandToCopy);
             break;
@@ -144,12 +140,6 @@ public class InverseDynamicsCommandDataCopier
       PlaneContactStateCommand localCommand = planeContactStateCommands.add();
       localCommand.set(commandToCopy);
       inverseDynamicsCommandList.addCommand(localCommand);
-   }
-
-   private void copyPlaneContactStateCommandPool(PlaneContactStateCommandPool commandToCopy)
-   {
-      for (int i = 0; i < commandToCopy.getNumberOfCommands(); i++)
-         copyPlaneContactStateCommand(commandToCopy.getCommand(i));
    }
 
    private void copyPointAcclerationCommand(PointAccelerationCommand commandToCopy)
