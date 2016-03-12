@@ -9,7 +9,8 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.Inverse
 import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.RootJointDesiredConfiguration;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.RootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -26,7 +27,7 @@ public class WholeBodyInverseKinematicsSolver
    private final InverseKinematicsOptimizationControlModule optimizationControlModule;
    private final RobotJointVelocityAccelerationIntegrator integrator;
 
-   private final RootJointDesiredConfiguration rootJointDesiredConfiguration = new RootJointDesiredConfiguration();
+   private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    private final Map<OneDoFJoint, DoubleYoVariable> jointVelocitiesSolution = new HashMap<>();
 
@@ -111,7 +112,7 @@ public class WholeBodyInverseKinematicsSolver
       return lowLevelOneDoFJointDesiredDataHolder;
    }
 
-   public RootJointDesiredConfiguration getOutputForRootJoint()
+   public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
       return rootJointDesiredConfiguration;
    }

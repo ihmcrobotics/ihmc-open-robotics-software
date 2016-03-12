@@ -98,6 +98,14 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       getYoValuesFromFrameOrientation();
    }
 
+   public void set(double qx, double qy, double qz, double qs)
+   {
+      this.qx.set(qx);
+      this.qy.set(qy);
+      this.qz.set(qz);
+      this.qs.set(qs);
+   }
+
    public void set(FrameOrientation frameOrientation)
    {
       set(frameOrientation, true);
@@ -196,6 +204,26 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
    public DoubleYoVariable getYoQs()
    {
       return qs;
+   }
+
+   public double getQx()
+   {
+      return qx.getDoubleValue();
+   }
+
+   public double getQy()
+   {
+      return qy.getDoubleValue();
+   }
+
+   public double getQz()
+   {
+      return qz.getDoubleValue();
+   }
+
+   public double getQs()
+   {
+      return qs.getDoubleValue();
    }
 
    public void interpolate(YoFrameQuaternion yoFrameQuaternion1, YoFrameQuaternion yoFrameQuaternion2, double alpha)

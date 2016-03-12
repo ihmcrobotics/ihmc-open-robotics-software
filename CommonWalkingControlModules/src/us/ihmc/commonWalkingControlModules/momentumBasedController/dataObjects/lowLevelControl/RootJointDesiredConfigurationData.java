@@ -5,13 +5,18 @@ import java.util.Arrays;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-public class RootJointDesiredConfiguration
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+
+public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
 {
    private final DenseMatrix64F desiredConfiguration = new DenseMatrix64F(7, 0);
    private final DenseMatrix64F desiredVelocity = new DenseMatrix64F(6, 0);
    private final DenseMatrix64F desiredAcceleration = new DenseMatrix64F(6, 0);
 
-   public RootJointDesiredConfiguration()
+   public RootJointDesiredConfigurationData()
    {
       clear();
    }
@@ -23,7 +28,7 @@ public class RootJointDesiredConfiguration
       desiredAcceleration.reshape(0, 0);
    }
 
-   public void set(RootJointDesiredConfiguration other)
+   public void set(RootJointDesiredConfigurationData other)
    {
       desiredConfiguration.set(other.desiredConfiguration);
       desiredVelocity.set(other.desiredVelocity);
@@ -34,9 +39,9 @@ public class RootJointDesiredConfiguration
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
-   public void completeWith(RootJointDesiredConfiguration other)
+   public void completeWith(RootJointDesiredConfigurationData other)
    {
-      if (!hasDesiredPosition())
+      if (!hasDesiredConfiguration())
          desiredConfiguration.set(other.desiredConfiguration);
       if (!hasDesiredVelocity())
          desiredVelocity.set(other.desiredVelocity);
@@ -44,7 +49,28 @@ public class RootJointDesiredConfiguration
          desiredAcceleration.set(other.desiredAcceleration);
    }
 
-   public void setDesiredPosition(DenseMatrix64F q)
+   public void setDesiredConfiguration(FrameOrientation orientation, FramePoint position)
+   {
+      desiredConfiguration.reshape(7, 1);
+      MatrixTools.insertQuat4dIntoEJMLVector(desiredConfiguration, orientation.getQuaternion(), 0);
+      MatrixTools.insertTuple3dIntoEJMLVector(position.getPoint(), desiredConfiguration, 4);
+   }
+
+   public void setDesiredVelocity(FrameVector angularVelocity, FrameVector linearVelocity)
+   {
+      desiredVelocity.reshape(6, 1);
+      MatrixTools.insertTuple3dIntoEJMLVector(angularVelocity.getVector(), desiredVelocity, 0);
+      MatrixTools.insertTuple3dIntoEJMLVector(linearVelocity.getVector(), desiredVelocity, 3);
+   }
+
+   public void setDesiredAcceleration(FrameVector angularAcceleration, FrameVector linearAcceleration)
+   {
+      desiredAcceleration.reshape(6, 1);
+      MatrixTools.insertTuple3dIntoEJMLVector(angularAcceleration.getVector(), desiredAcceleration, 0);
+      MatrixTools.insertTuple3dIntoEJMLVector(linearAcceleration.getVector(), desiredAcceleration, 3);
+   }
+
+   public void setDesiredConfiguration(DenseMatrix64F q)
    {
       if (q.getNumRows() != 7 || q.getNumCols() != 1)
          throw new RuntimeException("Unexpected size: " + q);
@@ -113,31 +139,37 @@ public class RootJointDesiredConfiguration
          desiredAcceleration.set(i, 0, qdd.get(indices[i], 0));
    }
 
-   public boolean hasDesiredPosition()
+   @Override
+   public boolean hasDesiredConfiguration()
    {
       return desiredConfiguration.getNumRows() != 0;
    }
 
+   @Override
    public boolean hasDesiredVelocity()
    {
       return desiredVelocity.getNumRows() != 0;
    }
 
+   @Override
    public boolean hasDesiredAcceleration()
    {
       return desiredAcceleration.getNumRows() != 0;
    }
 
+   @Override
    public DenseMatrix64F getDesiredConfiguration()
    {
       return desiredConfiguration;
    }
 
+   @Override
    public DenseMatrix64F getDesiredVelocity()
    {
       return desiredVelocity;
    }
 
+   @Override
    public DenseMatrix64F getDesiredAcceleration()
    {
       return desiredAcceleration;

@@ -63,7 +63,13 @@ public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelo
       spatialVelocity.setToZero(bodyFrame, baseFrame, desiredAngularVelocity.getReferenceFrame());
       spatialVelocity.setAngularPart(desiredAngularVelocity.getVector());
 
+      setSelectionMatrixForAngularControl();
+   }
+
+   public void setSelectionMatrixForAngularControl()
+   {
       selectionMatrix.reshape(3, Twist.SIZE);
+      selectionMatrix.zero();
       selectionMatrix.set(0, 0, 1.0);
       selectionMatrix.set(1, 1, 1.0);
       selectionMatrix.set(2, 2, 1.0);
@@ -75,7 +81,13 @@ public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelo
       spatialVelocity.setLinearPart(desiredLinearVelocity.getVector());
       spatialVelocity.changeFrame(bodyFrame);
 
+      setSelectionMatrixForLinearControl();
+   }
+
+   public void setSelectionMatrixForLinearControl()
+   {
       selectionMatrix.reshape(3, Twist.SIZE);
+      selectionMatrix.zero();
       selectionMatrix.set(0, 3, 1.0);
       selectionMatrix.set(1, 4, 1.0);
       selectionMatrix.set(2, 5, 1.0);
