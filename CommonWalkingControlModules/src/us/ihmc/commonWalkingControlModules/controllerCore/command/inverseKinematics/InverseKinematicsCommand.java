@@ -28,10 +28,4 @@ public interface InverseKinematicsCommand<T extends InverseKinematicsCommand<T>>
    public abstract void set(T other);
 
    public abstract ControllerCoreCommandType getCommandType();
-
-   public abstract void setWeight(double weight);
-
-   public abstract void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel);
-
-   public abstract boolean isHardConstraint();
 }

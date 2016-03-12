@@ -60,6 +60,11 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       this.defaultWeight = defaultWeight;
    }
 
+   public void setDefaultWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   {
+      setDefaultWeight(weightLevel.getWeightValue());
+   }
+
    public void setPrivilegedConfigurationOption(PrivilegedConfigurationOption option)
    {
       enable();
@@ -198,24 +203,6 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    public OneDoFJoint getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
-   }
-
-   @Override
-   public void setWeight(double weight)
-   {
-      setDefaultWeight(weight);
-   }
-
-   @Override
-   public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
-   {
-      setDefaultWeight(weightLevel.getWeightValue());
-   }
-
-   @Override
-   public boolean isHardConstraint()
-   {
-      return false;
    }
 
    @Override

@@ -79,13 +79,11 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       setWeight(HARD_CONSTRAINT.getWeightValue());
    }
 
-   @Override
    public void setWeight(double weight)
    {
       this.weight = weight;
    }
 
-   @Override
    public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
    {
       setWeight(weightLevel.getWeightValue());
@@ -109,7 +107,6 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       MathTools.checkIfEqual(joint.getDegreesOfFreedom(), desiredVelocity.getNumRows());
    }
 
-   @Override
    public boolean isHardConstraint()
    {
       return weight == HARD_CONSTRAINT.getWeightValue();
