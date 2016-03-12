@@ -114,6 +114,8 @@ public class InverseDynamicsQPSolver
 
       solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 0);
+
+      jAugmented.reshape(0, numberOfDoFs);
    }
 
    public void addMotionInput(InverseDynamicsMotionQPInput input)
@@ -140,8 +142,6 @@ public class InverseDynamicsQPSolver
    public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
-      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
-      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
 
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
@@ -152,12 +152,16 @@ public class InverseDynamicsQPSolver
 
    private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
+      int taskSize = taskJacobian.getNumRows();
+      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
+      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
+
       // Compute: H += J^T W J
       tempMotionTask_H.reshape(numberOfDoFs, numberOfDoFs);
       CommonOps.mult(taskJtW, taskJacobian, tempMotionTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, 1.0);
 
-      // Compute: f += - J^T W xDot
+      // Compute: f += - J^T W Objective
       tempMotionTask_f.reshape(numberOfDoFs, 1);
       CommonOps.mult(taskJtW, taskObjective, tempMotionTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -1.0);

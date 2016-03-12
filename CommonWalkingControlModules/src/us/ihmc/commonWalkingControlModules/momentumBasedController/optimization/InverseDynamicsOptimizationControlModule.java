@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
@@ -222,6 +223,9 @@ public class InverseDynamicsOptimizationControlModule
       case MOMENTUM:
          submitMomentumRateCommand((MomentumRateCommand) command);
          return;
+      case PRIVILEGED_CONFIGURATION:
+         submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
+         return;
       case EXTERNAL_WRENCH:
          submitExternalWrenchCommand((ExternalWrenchCommand) command);
          return;
@@ -387,6 +391,11 @@ public class InverseDynamicsOptimizationControlModule
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInput.taskObjective);
 
       qpSolver.addMotionInput(motionQPInput);
+   }
+
+   private void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
+   {
+      privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
    }
 
    private void submitPlaneContactStateCommand(PlaneContactStateCommand command)

@@ -6,6 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -51,6 +52,16 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
       momentumRate.reshape(selectionMatrix.getNumCols(), 1);
       MatrixTools.setDenseMatrixFromTuple3d(momentumRate, linearMomentumRateOfChange.getVector(), 3, 0);
+   }
+
+   public void setLinearMomentumXYRateOfChange(FrameVector2d linearMomentumRateOfChange)
+   {
+      selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
+      selectionMatrix.set(0, 3, 1.0);
+      selectionMatrix.set(1, 4, 1.0);
+
+      momentumRate.reshape(selectionMatrix.getNumCols(), 1);
+      MatrixTools.setDenseMatrixFromTuple2d(momentumRate, linearMomentumRateOfChange.getVector(), 3, 0);
    }
 
    public void setEmpty()

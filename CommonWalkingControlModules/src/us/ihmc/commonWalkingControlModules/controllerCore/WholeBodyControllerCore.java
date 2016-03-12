@@ -102,8 +102,10 @@ public class WholeBodyControllerCore
          numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
          inverseDynamicsSolver.submitInverseDynamicsCommand(feedbackControllerOutput);
          inverseDynamicsSolver.compute();
-         LowLevelOneDoFJointDesiredDataHolder solverOutput = inverseDynamicsSolver.getOutput();
-         yoLowLevelOneDoFJointDesiredDataHolder.completeWith(solverOutput);
+         LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();
+         RootJointDesiredConfigurationDataReadOnly inverseDynamicsOutputForRootJoint = inverseDynamicsSolver.getOutputForRootJoint();
+         yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseDynamicsOutput);
+         yoRootJointDesiredConfigurationData.completeWith(inverseDynamicsOutputForRootJoint);
          break;
       case INVERSE_KINEMATICS:
          numberOfFBControllerEnabled.set(0);
