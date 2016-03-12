@@ -71,13 +71,11 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       momentum.reshape(0, 1);
    }
 
-   @Override
    public void setWeight(double weight)
    {
       setWeights(weight, weight);
    }
 
-   @Override
    public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
    {
       setWeight(weightLevel.getWeightValue());
@@ -101,7 +99,6 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       weightVector.set(5, 0, linearZ);
    }
 
-   @Override
    public boolean isHardConstraint()
    {
       for (int i = 0; i < weightVector.getNumRows(); i++)

@@ -162,13 +162,11 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       return endEffectorName;
    }
 
-   @Override
    public void setWeight(double weight)
    {
       this.weight = weight;
    }
 
-   @Override
    public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
    {
       weight = weightLevel.getWeightValue();
