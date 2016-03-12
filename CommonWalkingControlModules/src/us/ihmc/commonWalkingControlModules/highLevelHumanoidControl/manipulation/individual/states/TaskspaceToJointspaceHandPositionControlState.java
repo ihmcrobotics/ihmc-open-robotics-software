@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
