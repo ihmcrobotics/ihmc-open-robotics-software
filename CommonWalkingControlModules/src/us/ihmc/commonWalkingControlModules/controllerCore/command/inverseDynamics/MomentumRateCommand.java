@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
