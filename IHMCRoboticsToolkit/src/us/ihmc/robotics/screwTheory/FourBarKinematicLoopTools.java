@@ -57,7 +57,7 @@ public class FourBarKinematicLoopTools
    {
       double maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
       double minValidMasterJointAngle = fourBarCalculator.getMinDAB();
-
+      
       // A) Angle limits not set
       if (masterJointA.getJointLimitLower() == Double.NEGATIVE_INFINITY || masterJointA.getJointLimitUpper() == Double.POSITIVE_INFINITY)
       {
