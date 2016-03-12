@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseKinematicsOptimizationException extends NoConvergenceException

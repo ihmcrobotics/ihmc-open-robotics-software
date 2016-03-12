@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
 import java.util.ArrayList;
 import java.util.List;

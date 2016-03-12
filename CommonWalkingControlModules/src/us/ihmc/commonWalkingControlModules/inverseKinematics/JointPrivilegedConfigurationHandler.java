@@ -7,8 +7,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.PrivilegedConfigurationInverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.PrivilegedConfigurationInverseKinematicsCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationInverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationInverseKinematicsCommand.PrivilegedConfigurationOption;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -23,11 +23,14 @@ public class JointPrivilegedConfigurationHandler
 
    private final BooleanYoVariable isJointPrivilegedConfigurationEnabled = new BooleanYoVariable("isJointPrivilegedConfigurationEnabled", registry);
    private final DoubleYoVariable defaultWeight = new DoubleYoVariable("jointPrivilegedConfigurationDefaultWeight", registry);
-   private final DoubleYoVariable gains = new DoubleYoVariable("jointPrivilegedConfigurationGain", registry);
+   private final DoubleYoVariable configurationGain = new DoubleYoVariable("jointPrivilegedConfigurationGain", registry);
+   private final DoubleYoVariable velocityGain = new DoubleYoVariable("jointPrivilegedVelocityGain", registry);
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("jointPrivilegedConfigurationMaxVelocity", registry);
+   private final DoubleYoVariable maxAcceleration = new DoubleYoVariable("jointPrivilegedConfigurationMaxAcceleration", registry);
 
    private final DenseMatrix64F privilegedConfigurations;
    private final DenseMatrix64F privilegedVelocities;
+   private final DenseMatrix64F privilegedAccelerations;
    private final DenseMatrix64F weight;
    private final DenseMatrix64F selectionMatrix;
 
@@ -46,6 +49,7 @@ public class JointPrivilegedConfigurationHandler
 
       privilegedConfigurations = new DenseMatrix64F(numberOfDoFs, 1);
       privilegedVelocities = new DenseMatrix64F(numberOfDoFs, 1);
+      privilegedAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       weight = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       selectionMatrix = CommonOps.identity(numberOfDoFs);
 
@@ -69,22 +73,36 @@ public class JointPrivilegedConfigurationHandler
          positionsAtMidRangeOfMotion.set(i, 0, 0.5 * (jointLimitUpper + jointLimitLower));
       }
 
-      gains.set(5.0);
+      configurationGain.set(5.0);
+      velocityGain.set(2.0);
       maxVelocity.set(0.4);
+      maxAcceleration.set(4.0);
       defaultWeight.set(1.0);
       updateWeights();
 
       parentRegistry.addChild(registry);
    }
 
-   public void compute()
+   public void computePrivilegedJointVelocities()
    {
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         double qd = -2.0 * gains.getDoubleValue() * (joint.getQ() - privilegedConfigurations.get(i, 0)) / jointSquaredRangeOfMotions.get(i, 0);
+         double qd = 2.0 * configurationGain.getDoubleValue() * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
          qd = MathTools.clipToMinMax(qd, maxVelocity.getDoubleValue());
          privilegedVelocities.set(i, 0, qd);
+      }
+   }
+
+   public void computePrivilegedJointAccelerations()
+   {
+      computePrivilegedJointVelocities();
+      for (int i = 0; i < numberOfDoFs; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         double qdd = velocityGain.getDoubleValue() * (privilegedVelocities.get(i, 0) - joint.getQd());
+         qdd = MathTools.clipToMinMax(qdd, maxAcceleration.getDoubleValue());
+         privilegedAccelerations.set(i, 0, qdd);
       }
    }
 
@@ -156,6 +174,11 @@ public class JointPrivilegedConfigurationHandler
    public DenseMatrix64F getPrivilegedJointVelocities()
    {
       return privilegedVelocities;
+   }
+
+   public DenseMatrix64F getPrivilegedJointAccelerations()
+   {
+      return privilegedAccelerations;
    }
 
    public DenseMatrix64F getWeight()

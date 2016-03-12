@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList;

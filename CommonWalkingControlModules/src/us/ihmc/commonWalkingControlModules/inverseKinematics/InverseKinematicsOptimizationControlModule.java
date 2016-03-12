@@ -6,13 +6,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommandList;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsSolution;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.JointspaceVelocityCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.PrivilegedConfigurationInverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationInverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -146,7 +146,7 @@ public class InverseKinematicsOptimizationControlModule
    {
       if (privilegedConfigurationHandler.isEnabled())
       {
-         privilegedConfigurationHandler.compute();
+         privilegedConfigurationHandler.computePrivilegedJointVelocities();
          OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
          DenseMatrix64F privilegedJointVelocities = privilegedConfigurationHandler.getPrivilegedJointVelocities();
          DenseMatrix64F weight = privilegedConfigurationHandler.getWeight();
@@ -174,7 +174,7 @@ public class InverseKinematicsOptimizationControlModule
       case MOMENTUM:
          submitMomentumCommand((MomentumCommand) command);
          return;
-      case PRIVILIEGED_CONFIGURATION:
+      case PRIVILEGED_CONFIGURATION:
          submitPrivilegedConfigurationInverseKinematicsCommand((PrivilegedConfigurationInverseKinematicsCommand) command);
          break;
       case COMMAND_LIST:

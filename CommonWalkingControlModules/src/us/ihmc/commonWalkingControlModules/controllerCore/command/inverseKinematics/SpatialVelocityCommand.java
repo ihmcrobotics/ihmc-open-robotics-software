@@ -1,6 +1,6 @@
-package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand.InverseKinematicsCommandWeightLevels.HARD_CONSTRAINT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand.InverseKinematicsCommandWeightLevels.HARD_CONSTRAINT;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;

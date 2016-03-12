@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects.InverseKinematicsSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.RootJointDesiredConfigurationData;
