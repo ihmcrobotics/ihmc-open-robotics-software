@@ -7,6 +7,7 @@ import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -60,7 +61,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       this.defaultWeight = defaultWeight;
    }
 
-   public void setDefaultWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   public void setDefaultWeightLevel(SolverWeightLevels weightLevel)
    {
       setDefaultWeight(weightLevel.getWeightValue());
    }

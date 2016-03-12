@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand.InverseKinematicsCommandWeightLevels.HARD_CONSTRAINT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.HARD_CONSTRAINT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -84,7 +85,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       this.weight = weight;
    }
 
-   public void setWeightLevel(InverseKinematicsCommandWeightLevels weightLevel)
+   public void setWeightLevel(SolverWeightLevels weightLevel)
    {
       setWeight(weightLevel.getWeightValue());
    }
