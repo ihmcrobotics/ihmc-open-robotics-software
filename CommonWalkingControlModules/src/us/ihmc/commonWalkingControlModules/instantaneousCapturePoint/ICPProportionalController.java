@@ -171,8 +171,7 @@ public class ICPProportionalController
       }
       else
       {
-         tempControl.setX(tempControl.getX() * captureKpParallelToMotion.getDoubleValue());
-         tempControl.setY(tempControl.getY() * captureKpOrthogonalToMotion.getDoubleValue());
+         tempControl.scale(captureKpOrthogonalToMotion.getDoubleValue());
       }
 
       icpDamping.set(icpVelocity.getX(), icpVelocity.getY());
