@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInte
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommandPool;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -182,12 +181,6 @@ public class PlaneContactWrenchMatrixCalculator
          resetRhoSmootherMap.get(planeContactState).set(true);
          previousCommandId.setValue(contactStateCommand.getId());
       }
-   }
-
-   public void setPlaneContactStateCommandPool(PlaneContactStateCommandPool contactStateCommandPool)
-   {
-      for (int i = 0; i < contactStateCommandPool.getNumberOfCommands(); i++)
-         setPlaneContactStateCommand(contactStateCommandPool.getCommand(i));
    }
 
    /**

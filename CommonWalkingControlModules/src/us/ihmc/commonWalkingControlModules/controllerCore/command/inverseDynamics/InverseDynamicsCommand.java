@@ -28,7 +28,7 @@ public interface InverseDynamicsCommand<T extends InverseDynamicsCommand<T>>
       TASKSPACE_MOTION, TASKSPACE_POINT_MOTION, JOINTSPACE_MOTION, MOMENTUM_RATE,
       PRIVILEGED_CONFIGURATION,
       EXTERNAL_WRENCH, PLANE_CONTACT_STATE,
-      COMMAND_LIST, PLANE_CONTACT_STATE_POOL
+      COMMAND_LIST
    };
 
    public abstract void set(T other);

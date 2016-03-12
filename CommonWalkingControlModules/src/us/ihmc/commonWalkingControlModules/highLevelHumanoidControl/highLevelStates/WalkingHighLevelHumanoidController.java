@@ -32,7 +32,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
@@ -53,6 +52,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.State;
@@ -1103,7 +1103,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
 
    private final SideDependentList<FramePoint2d> footDesiredCoPs = new SideDependentList<FramePoint2d>(new FramePoint2d(), new FramePoint2d());
-   private final PlaneContactStateCommandPool planeContactStateCommandPool = new PlaneContactStateCommandPool();
+   private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
 
@@ -1205,12 +1205,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             controllerCoreCommand.addFeedbackControlCommand(handFeedbackControlCommand);
 
          YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
-         PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.createCommand();
+         PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          planeContactStateCommand.setWRhoSmoother(wRhoSmoother);
+         controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
-      controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommandPool);
       controllerCoreCommand.addFeedbackControlCommand(headOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(chestOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());

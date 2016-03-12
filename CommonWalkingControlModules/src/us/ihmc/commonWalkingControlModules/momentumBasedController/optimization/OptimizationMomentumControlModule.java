@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
@@ -408,9 +407,6 @@ public class OptimizationMomentumControlModule
       case PLANE_CONTACT_STATE:
          setPlaneContactStateCommand((PlaneContactStateCommand) inverseDynamicsCommand);
          return;
-      case PLANE_CONTACT_STATE_POOL:
-         setPlaneContactStateCommandPool((PlaneContactStateCommandPool) inverseDynamicsCommand);
-         return;
       case COMMAND_LIST:
          setInverseDynamicsCommandList((InverseDynamicsCommandList) inverseDynamicsCommand);
          return;
@@ -457,11 +453,6 @@ public class OptimizationMomentumControlModule
    private void setPlaneContactStateCommand(PlaneContactStateCommand contactStateCommand)
    {
       wrenchMatrixCalculator.setPlaneContactStateCommand(contactStateCommand);
-   }
-
-   private void setPlaneContactStateCommandPool(PlaneContactStateCommandPool contactStateCommandPool)
-   {
-      wrenchMatrixCalculator.setPlaneContactStateCommandPool(contactStateCommandPool);
    }
 
    private void setExternalWrenchToCompensateFor(ExternalWrenchCommand externalWrenchCommand)

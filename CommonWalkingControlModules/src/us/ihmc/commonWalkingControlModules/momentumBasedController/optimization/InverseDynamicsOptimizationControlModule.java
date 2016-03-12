@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommandPool;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
@@ -229,9 +228,6 @@ public class InverseDynamicsOptimizationControlModule
       case PLANE_CONTACT_STATE:
          submitPlaneContactStateCommand((PlaneContactStateCommand) command);
          return;
-      case PLANE_CONTACT_STATE_POOL:
-         submitPlaneContactStateCommandPool((PlaneContactStateCommandPool) command);
-         return;
       case COMMAND_LIST:
          submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
          return;
@@ -391,11 +387,6 @@ public class InverseDynamicsOptimizationControlModule
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInput.taskObjective);
 
       qpSolver.addMotionInput(motionQPInput);
-   }
-
-   private void submitPlaneContactStateCommandPool(PlaneContactStateCommandPool command)
-   {
-      wrenchMatrixCalculator.setPlaneContactStateCommandPool(command);
    }
 
    private void submitPlaneContactStateCommand(PlaneContactStateCommand command)
