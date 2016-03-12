@@ -9,7 +9,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class PrivilegedConfigurationInverseKinematicsCommand implements InverseKinematicsCommand<PrivilegedConfigurationInverseKinematicsCommand>
+public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<PrivilegedConfigurationCommand>
 {
    private final int initialCapacity = 40;
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
@@ -28,7 +28,7 @@ public class PrivilegedConfigurationInverseKinematicsCommand implements InverseK
    private PrivilegedConfigurationOption defaultOption;
    private double defaultWeight = Double.NaN;
 
-   public PrivilegedConfigurationInverseKinematicsCommand()
+   public PrivilegedConfigurationCommand()
    {
    }
 
@@ -116,7 +116,7 @@ public class PrivilegedConfigurationInverseKinematicsCommand implements InverseK
    }
 
    @Override
-   public void set(PrivilegedConfigurationInverseKinematicsCommand other)
+   public void set(PrivilegedConfigurationCommand other)
    {
       clear();
       enable = other.enable;
