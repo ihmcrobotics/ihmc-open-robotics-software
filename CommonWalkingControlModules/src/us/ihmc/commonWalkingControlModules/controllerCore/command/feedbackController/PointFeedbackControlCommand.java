@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -171,8 +172,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    @Override
-   public FeedbackControlCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return FeedbackControlCommandType.POINT_CONTROL;
+      return ControllerCoreCommandType.POINT;
    }
 }

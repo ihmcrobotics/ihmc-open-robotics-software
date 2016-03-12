@@ -389,16 +389,16 @@ public class OptimizationMomentumControlModule
    {
       switch (inverseDynamicsCommand.getCommandType())
       {
-      case TASKSPACE_MOTION:
+      case TASKSPACE:
          setDesiredSpatialAcceleration((SpatialAccelerationCommand) inverseDynamicsCommand);
          return;
-      case TASKSPACE_POINT_MOTION:
+      case POINT:
          primaryMotionConstraintHandler.submitPointAccelerationCommand((PointAccelerationCommand) inverseDynamicsCommand);
          return;
-      case JOINTSPACE_MOTION:
+      case JOINTSPACE:
          setDesiredJointAcceleration((JointspaceAccelerationCommand) inverseDynamicsCommand);
          return;
-      case MOMENTUM_RATE:
+      case MOMENTUM:
          setDesiredRateOfChangeOfMomentum((MomentumRateCommand) inverseDynamicsCommand);
          return;
       case EXTERNAL_WRENCH:

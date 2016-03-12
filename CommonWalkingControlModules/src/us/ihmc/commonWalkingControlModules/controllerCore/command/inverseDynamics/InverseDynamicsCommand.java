@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+
 public interface InverseDynamicsCommand<T extends InverseDynamicsCommand<T>>
 {
    public enum InverseDynamicsCommandWeightLevels
@@ -23,15 +25,7 @@ public interface InverseDynamicsCommand<T extends InverseDynamicsCommand<T>>
       }
    }
 
-   public enum InverseDynamicsCommandType
-   {
-      TASKSPACE_MOTION, TASKSPACE_POINT_MOTION, JOINTSPACE_MOTION, MOMENTUM_RATE,
-      PRIVILEGED_CONFIGURATION,
-      EXTERNAL_WRENCH, PLANE_CONTACT_STATE,
-      COMMAND_LIST
-   };
-
    public abstract void set(T other);
 
-   public abstract InverseDynamicsCommandType getCommandType();
+   public abstract ControllerCoreCommandType getCommandType();
 }

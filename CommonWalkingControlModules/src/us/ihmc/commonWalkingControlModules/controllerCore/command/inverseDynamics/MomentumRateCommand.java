@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -119,9 +120,9 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    }
 
    @Override
-   public InverseDynamicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseDynamicsCommandType.MOMENTUM_RATE;
+      return ControllerCoreCommandType.MOMENTUM;
    }
 
    public String toString()

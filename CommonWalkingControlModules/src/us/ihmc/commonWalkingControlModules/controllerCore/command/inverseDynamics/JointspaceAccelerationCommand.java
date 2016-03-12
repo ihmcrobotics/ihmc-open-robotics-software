@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -162,9 +163,9 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
    }
 
    @Override
-   public InverseDynamicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseDynamicsCommandType.JOINTSPACE_MOTION;
+      return ControllerCoreCommandType.JOINTSPACE;
    }
 
    public String toString()

@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.controllers.OrientationPIDGains;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -156,9 +157,9 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    @Override
-   public FeedbackControlCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return FeedbackControlCommandType.ORIENTATION_CONTROL;
+      return ControllerCoreCommandType.ORIENTATION;
    }
 
    public OrientationPIDGainsInterface getGains()

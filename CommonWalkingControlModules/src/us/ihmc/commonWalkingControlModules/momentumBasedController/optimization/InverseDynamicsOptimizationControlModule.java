@@ -210,16 +210,16 @@ public class InverseDynamicsOptimizationControlModule
    {
       switch (command.getCommandType())
       {
-      case TASKSPACE_MOTION:
+      case TASKSPACE:
          submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
          return;
-      case TASKSPACE_POINT_MOTION:
+      case POINT:
          submitPointAccelerationCommand((PointAccelerationCommand) command);
          return;
-      case JOINTSPACE_MOTION:
+      case JOINTSPACE:
          submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
          return;
-      case MOMENTUM_RATE:
+      case MOMENTUM:
          submitMomentumRateCommand((MomentumRateCommand) command);
          return;
       case EXTERNAL_WRENCH:

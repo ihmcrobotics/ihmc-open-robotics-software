@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+
 public class InverseDynamicsCommandList implements InverseDynamicsCommand<InverseDynamicsCommandList>
 {
    private final List<InverseDynamicsCommand<?>> commandList = new ArrayList<>();
@@ -40,8 +42,8 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    }
 
    @Override
-   public InverseDynamicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseDynamicsCommandType.COMMAND_LIST;
+      return ControllerCoreCommandType.COMMAND_LIST;
    }
 }

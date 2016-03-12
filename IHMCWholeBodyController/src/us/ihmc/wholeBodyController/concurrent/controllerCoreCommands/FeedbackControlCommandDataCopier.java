@@ -71,16 +71,16 @@ public class FeedbackControlCommandDataCopier
 
          switch (commandToCopy.getCommandType())
          {
-         case JOINTSPACE_CONTROL:
+         case JOINTSPACE:
             copyJointspaceFeedbackControlCommand((JointspaceFeedbackControlCommand) commandToCopy);
             break;
-         case ORIENTATION_CONTROL:
+         case ORIENTATION:
             copyOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) commandToCopy);
             break;
-         case POINT_CONTROL:
+         case POINT:
             copyPointFeedbackControlCommand((PointFeedbackControlCommand) commandToCopy);
             break;
-         case SPATIAL_CONTROL:
+         case TASKSPACE:
             copySpatialFeedbackControlCommand((SpatialFeedbackControlCommand) commandToCopy);
          default:
             throw new RuntimeException("The command type: " + commandToCopy.getCommandType() + " is not handled.");

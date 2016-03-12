@@ -5,6 +5,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.inverse
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -218,9 +219,9 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    @Override
-   public InverseDynamicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseDynamicsCommandType.TASKSPACE_MOTION;
+      return ControllerCoreCommandType.TASKSPACE;
    }
 
    @Override

@@ -5,6 +5,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.inverse
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -145,9 +146,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    @Override
-   public InverseKinematicsCommandType getCommandType()
+   public ControllerCoreCommandType getCommandType()
    {
-      return InverseKinematicsCommandType.MOMENTUM;
+      return ControllerCoreCommandType.MOMENTUM;
    }
 
    @Override
