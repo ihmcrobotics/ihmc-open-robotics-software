@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand.InverseDynamicsCommandWeightLevels.HARD_CONSTRAINT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.HARD_CONSTRAINT;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -208,7 +209,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       hasWeight = weight != HARD_CONSTRAINT.getWeightValue();
    }
 
-   public void setWeightLevel(InverseDynamicsCommandWeightLevels weightLevel)
+   public void setWeightLevel(SolverWeightLevels weightLevel)
    {
       setWeight(weightLevel.getWeightValue());
    }
