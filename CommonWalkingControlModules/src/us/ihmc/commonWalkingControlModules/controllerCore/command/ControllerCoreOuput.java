@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
+package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.geometry.FramePoint2d;
