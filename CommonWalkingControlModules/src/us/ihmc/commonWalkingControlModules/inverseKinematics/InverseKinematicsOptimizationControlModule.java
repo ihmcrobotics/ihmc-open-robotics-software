@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationInverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -175,7 +175,7 @@ public class InverseKinematicsOptimizationControlModule
          submitMomentumCommand((MomentumCommand) command);
          return;
       case PRIVILEGED_CONFIGURATION:
-         submitPrivilegedConfigurationInverseKinematicsCommand((PrivilegedConfigurationInverseKinematicsCommand) command);
+         submitPrivilegedConfigurationInverseKinematicsCommand((PrivilegedConfigurationCommand) command);
          break;
       case COMMAND_LIST:
          submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
@@ -290,7 +290,7 @@ public class InverseKinematicsOptimizationControlModule
          submitInverseKinematicsCommand(command.getCommand(i));
    }
 
-   private void submitPrivilegedConfigurationInverseKinematicsCommand(PrivilegedConfigurationInverseKinematicsCommand command)
+   private void submitPrivilegedConfigurationInverseKinematicsCommand(PrivilegedConfigurationCommand command)
    {
       privilegedConfigurationHandler.submitPrivilegedConfigurationInverseKinematicsCommand(command);
    }
