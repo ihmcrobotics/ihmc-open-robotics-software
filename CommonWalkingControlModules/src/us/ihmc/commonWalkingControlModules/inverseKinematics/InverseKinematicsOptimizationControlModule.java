@@ -175,7 +175,7 @@ public class InverseKinematicsOptimizationControlModule
          submitMomentumCommand((MomentumCommand) command);
          return;
       case PRIVILEGED_CONFIGURATION:
-         submitPrivilegedConfigurationInverseKinematicsCommand((PrivilegedConfigurationCommand) command);
+         submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
          break;
       case COMMAND_LIST:
          submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
@@ -290,9 +290,9 @@ public class InverseKinematicsOptimizationControlModule
          submitInverseKinematicsCommand(command.getCommand(i));
    }
 
-   private void submitPrivilegedConfigurationInverseKinematicsCommand(PrivilegedConfigurationCommand command)
+   private void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
-      privilegedConfigurationHandler.submitPrivilegedConfigurationInverseKinematicsCommand(command);
+      privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
    }
 
    private DenseMatrix64F getPartialCentroidalMomentumMatrix()

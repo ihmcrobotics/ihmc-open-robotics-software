@@ -106,7 +106,7 @@ public class JointPrivilegedConfigurationHandler
       }
    }
 
-   public void submitPrivilegedConfigurationInverseKinematicsCommand(PrivilegedConfigurationCommand command)
+   public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
       isJointPrivilegedConfigurationEnabled.set(command.isEnabled());
 
