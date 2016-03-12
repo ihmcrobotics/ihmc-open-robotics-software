@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.BodyFixedPointLinearAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
