@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver;
 
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand.InverseDynamicsCommandWeightLevels.HARD_CONSTRAINT;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -7,7 +9,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccelerationCommand>
+public class PointAccelerationCommand implements InverseDynamicsCommand<PointAccelerationCommand>
 {
    private boolean hasWeight;
    private double weight;
@@ -23,12 +25,10 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
 
    public PointAccelerationCommand()
    {
-      super(InverseDynamicsCommandType.TASKSPACE_POINT_MOTION);
    }
 
    public PointAccelerationCommand(FramePoint bodyFixedPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
    {
-      super(InverseDynamicsCommandType.TASKSPACE_POINT_MOTION);
       set(bodyFixedPoint, desiredAcceleration, selectionMatrix);
    }
 
@@ -89,12 +89,17 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
    public void setWeight(double weight)
    {
       this.weight = weight;
-      hasWeight = weight != Double.POSITIVE_INFINITY;
+      hasWeight = weight != HARD_CONSTRAINT.getWeightValue();
+   }
+
+   public void setWeightLevel(InverseDynamicsCommandWeightLevels weightLevel)
+   {
+      setWeight(weightLevel.getWeightValue());
    }
 
    public void removeWeight()
    {
-      setWeight(Double.POSITIVE_INFINITY);
+      setWeight(HARD_CONSTRAINT.getWeightValue());
    }
 
    public boolean getHasWeight()
@@ -140,6 +145,12 @@ public class PointAccelerationCommand extends InverseDynamicsCommand<PointAccele
    public DenseMatrix64F getSelectionMatrix()
    {
       return selectionMatrix;
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.TASKSPACE_POINT_MOTION;
    }
 
    @Override

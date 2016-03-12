@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class PointFeedbackControlCommand extends FeedbackControlCommand<PointFeedbackControlCommand>
+public class PointFeedbackControlCommand implements FeedbackControlCommand<PointFeedbackControlCommand>
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -36,7 +36,6 @@ public class PointFeedbackControlCommand extends FeedbackControlCommand<PointFee
 
    public PointFeedbackControlCommand()
    {
-      super(FeedbackControlCommandType.POINT_CONTROL);
    }
 
    public void set(RigidBody base, RigidBody endEffector)
@@ -169,5 +168,11 @@ public class PointFeedbackControlCommand extends FeedbackControlCommand<PointFee
    public PositionPIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   @Override
+   public FeedbackControlCommandType getCommandType()
+   {
+      return FeedbackControlCommandType.POINT_CONTROL;
    }
 }

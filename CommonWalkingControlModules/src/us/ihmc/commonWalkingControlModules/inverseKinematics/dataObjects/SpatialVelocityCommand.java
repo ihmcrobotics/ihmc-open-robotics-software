@@ -10,7 +10,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 
-public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelocityCommand>
+public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
    private double weight;
    private final Twist spatialVelocity = new Twist();
@@ -24,7 +24,6 @@ public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelo
 
    public SpatialVelocityCommand()
    {
-      super(InverseKinematicsCommandType.TASKSPACE);
       removeWeight();
    }
 
@@ -177,6 +176,12 @@ public class SpatialVelocityCommand extends InverseKinematicsCommand<SpatialVelo
    public void removeWeight()
    {
       setWeight(HARD_CONSTRAINT.getWeightValue());
+   }
+
+   @Override
+   public InverseKinematicsCommandType getCommandType()
+   {
+      return InverseKinematicsCommandType.TASKSPACE;
    }
 
    @Override

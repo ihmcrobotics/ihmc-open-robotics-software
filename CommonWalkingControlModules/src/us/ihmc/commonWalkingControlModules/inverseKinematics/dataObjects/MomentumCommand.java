@@ -12,7 +12,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
-public class MomentumCommand extends InverseKinematicsCommand<MomentumCommand>
+public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand>
 {
    private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -20,7 +20,6 @@ public class MomentumCommand extends InverseKinematicsCommand<MomentumCommand>
 
    public MomentumCommand()
    {
-      super(InverseKinematicsCommandType.MOMENTUM);
    }
 
    public MomentumCommand(MomentumCommand momentumCommand)
@@ -143,6 +142,12 @@ public class MomentumCommand extends InverseKinematicsCommand<MomentumCommand>
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
+   }
+
+   @Override
+   public InverseKinematicsCommandType getCommandType()
+   {
+      return InverseKinematicsCommandType.MOMENTUM;
    }
 
    @Override

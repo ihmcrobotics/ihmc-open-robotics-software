@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
-public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrenchCommand>
+public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>
 {
    private RigidBody rigidBody;
    private String rigidBodyName;
@@ -11,7 +11,6 @@ public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrench
 
    public ExternalWrenchCommand()
    {
-      super(InverseDynamicsCommandType.EXTERNAL_WRENCH);
    }
 
    public void setRigidBody(RigidBody rigidBody)
@@ -48,5 +47,11 @@ public class ExternalWrenchCommand extends InverseDynamicsCommand<ExternalWrench
       rigidBody = other.rigidBody;
       rigidBodyName = other.rigidBodyName;
       externalWrenchAppliedOnRigidBody.set(other.externalWrenchAppliedOnRigidBody);
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.EXTERNAL_WRENCH;
    }
 }

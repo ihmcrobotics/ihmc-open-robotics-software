@@ -12,7 +12,7 @@ import us.ihmc.robotics.controllers.SimplePDGainsHolder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<JointspaceFeedbackControlCommand>
+public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<JointspaceFeedbackControlCommand>
 {
    private final int initialCapacity = 15;
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
@@ -27,7 +27,6 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<Joi
 
    public JointspaceFeedbackControlCommand()
    {
-      super(FeedbackControlCommandType.JOINTSPACE_CONTROL);
       clear();
    }
 
@@ -125,6 +124,12 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommand<Joi
    public double getWeightForSolver()
    {
       return weightForSolver;
+   }
+
+   @Override
+   public FeedbackControlCommandType getCommandType()
+   {
+      return FeedbackControlCommandType.JOINTSPACE_CONTROL;
    }
 
    public String toString()

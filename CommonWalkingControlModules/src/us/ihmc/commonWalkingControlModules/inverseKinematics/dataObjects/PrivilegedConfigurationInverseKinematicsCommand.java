@@ -8,7 +8,7 @@ import java.util.Map;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKinematicsCommand<PrivilegedConfigurationInverseKinematicsCommand>
+public class PrivilegedConfigurationInverseKinematicsCommand implements InverseKinematicsCommand<PrivilegedConfigurationInverseKinematicsCommand>
 {
    private final int initialCapacity = 40;
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
@@ -29,7 +29,6 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
 
    public PrivilegedConfigurationInverseKinematicsCommand()
    {
-      super(InverseKinematicsCommandType.PRIVILIEGED_CONFIGURATION);
    }
 
    public void clear()
@@ -215,5 +214,11 @@ public class PrivilegedConfigurationInverseKinematicsCommand extends InverseKine
    public boolean isHardConstraint()
    {
       return false;
+   }
+
+   @Override
+   public InverseKinematicsCommandType getCommandType()
+   {
+      return InverseKinematicsCommandType.PRIVILEGED_CONFIGURATION;
    }
 }

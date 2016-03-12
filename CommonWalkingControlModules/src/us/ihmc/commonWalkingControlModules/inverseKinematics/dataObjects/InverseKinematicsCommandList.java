@@ -3,13 +3,12 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InverseKinematicsCommandList extends InverseKinematicsCommand<InverseKinematicsCommandList>
+public class InverseKinematicsCommandList implements InverseKinematicsCommand<InverseKinematicsCommandList>
 {
    private final List<InverseKinematicsCommand<?>> commandList = new ArrayList<>();
 
    public InverseKinematicsCommandList()
    {
-      super(InverseKinematicsCommandType.COMMAND_LIST);
    }
 
    public void addCommand(InverseKinematicsCommand<?> command)
@@ -57,5 +56,11 @@ public class InverseKinematicsCommandList extends InverseKinematicsCommand<Inver
    public boolean isHardConstraint()
    {
       return false;
+   }
+
+   @Override
+   public InverseKinematicsCommandType getCommandType()
+   {
+      return InverseKinematicsCommandType.COMMAND_LIST;
    }
 }

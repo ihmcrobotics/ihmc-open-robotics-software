@@ -13,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
-public class OrientationFeedbackControlCommand extends FeedbackControlCommand<OrientationFeedbackControlCommand>
+public class OrientationFeedbackControlCommand implements FeedbackControlCommand<OrientationFeedbackControlCommand>
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final Quat4d desiredOrientationInWorld = new Quat4d();
@@ -32,7 +32,6 @@ public class OrientationFeedbackControlCommand extends FeedbackControlCommand<Or
 
    public OrientationFeedbackControlCommand()
    {
-      super(FeedbackControlCommandType.ORIENTATION_CONTROL);
       setSelectionMatrixToIdentity();
    }
 
@@ -154,6 +153,12 @@ public class OrientationFeedbackControlCommand extends FeedbackControlCommand<Or
    public double getWeightForSolver()
    {
       return weightForSolver;
+   }
+
+   @Override
+   public FeedbackControlCommandType getCommandType()
+   {
+      return FeedbackControlCommandType.ORIENTATION_CONTROL;
    }
 
    public OrientationPIDGainsInterface getGains()
