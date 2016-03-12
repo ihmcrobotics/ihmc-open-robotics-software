@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Controlle
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredChestOrientationControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredFootPoseControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOuput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -26,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;

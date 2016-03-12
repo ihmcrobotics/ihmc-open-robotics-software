@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController;
+package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import java.util.List;
 
