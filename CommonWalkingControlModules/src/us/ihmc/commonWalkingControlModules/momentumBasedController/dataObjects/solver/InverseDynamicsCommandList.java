@@ -3,13 +3,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.
 import java.util.ArrayList;
 import java.util.List;
 
-public class InverseDynamicsCommandList extends InverseDynamicsCommand<InverseDynamicsCommandList>
+public class InverseDynamicsCommandList implements InverseDynamicsCommand<InverseDynamicsCommandList>
 {
    private final List<InverseDynamicsCommand<?>> commandList = new ArrayList<>();
 
    public InverseDynamicsCommandList()
    {
-      super(InverseDynamicsCommandType.COMMAND_LIST);
    }
 
    public void addCommand(InverseDynamicsCommand<?> command)
@@ -38,5 +37,11 @@ public class InverseDynamicsCommandList extends InverseDynamicsCommand<InverseDy
       clear();
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          addCommand(other.getCommand(i));
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.COMMAND_LIST;
    }
 }

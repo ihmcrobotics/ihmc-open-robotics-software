@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController;
 
-public abstract class FeedbackControlCommand<T extends FeedbackControlCommand<T>>
+public interface FeedbackControlCommand<T extends FeedbackControlCommand<T>>
 {
    public enum FeedbackControlCommandType
    {
@@ -9,17 +9,7 @@ public abstract class FeedbackControlCommand<T extends FeedbackControlCommand<T>
       COMMAND_LIST
    }
 
-   private final FeedbackControlCommandType commandType;
-
-   public FeedbackControlCommand(FeedbackControlCommandType commandType)
-   {
-      this.commandType = commandType;
-   }
-
    public abstract void set(T other);
 
-   public FeedbackControlCommandType getCommandType()
-   {
-      return commandType;
-   }
+   public abstract FeedbackControlCommandType getCommandType();
 }

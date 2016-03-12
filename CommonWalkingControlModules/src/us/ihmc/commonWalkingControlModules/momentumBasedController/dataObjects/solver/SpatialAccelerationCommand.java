@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver;
 
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand.InverseDynamicsCommandWeightLevels.HARD_CONSTRAINT;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -10,7 +12,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
-public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAccelerationCommand>
+public class SpatialAccelerationCommand implements InverseDynamicsCommand<SpatialAccelerationCommand>
 {
    private boolean hasWeight;
    private double weight;
@@ -27,7 +29,6 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
 
    public SpatialAccelerationCommand()
    {
-      super(InverseDynamicsCommandType.TASKSPACE_MOTION);
       removeWeight();
    }
 
@@ -203,12 +204,23 @@ public class SpatialAccelerationCommand extends InverseDynamicsCommand<SpatialAc
    public void setWeight(double weight)
    {
       this.weight = weight;
-      hasWeight = weight != Double.POSITIVE_INFINITY;
+      hasWeight = weight != HARD_CONSTRAINT.getWeightValue();
+   }
+
+   public void setWeightLevel(InverseDynamicsCommandWeightLevels weightLevel)
+   {
+      setWeight(weightLevel.getWeightValue());
    }
 
    public void removeWeight()
    {
-      setWeight(Double.POSITIVE_INFINITY);
+      setWeight(HARD_CONSTRAINT.getWeightValue());
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.TASKSPACE_MOTION;
    }
 
    @Override

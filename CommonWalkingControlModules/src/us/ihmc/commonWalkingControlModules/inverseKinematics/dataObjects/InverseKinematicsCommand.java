@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics.dataObjects;
 
-public abstract class InverseKinematicsCommand<T extends InverseKinematicsCommand<T>>
+public interface InverseKinematicsCommand<T extends InverseKinematicsCommand<T>>
 {
    public enum InverseKinematicsCommandWeightLevels
    {
@@ -26,23 +26,13 @@ public abstract class InverseKinematicsCommand<T extends InverseKinematicsComman
    public enum InverseKinematicsCommandType
    {
       JOINTSPACE, TASKSPACE, MOMENTUM,
-      PRIVILIEGED_CONFIGURATION,
+      PRIVILEGED_CONFIGURATION,
       COMMAND_LIST
    };
 
-   private final InverseKinematicsCommandType commandType;
-
-   public InverseKinematicsCommand(InverseKinematicsCommandType commandType)
-   {
-      this.commandType = commandType;
-   }
-
    public abstract void set(T other);
 
-   public InverseKinematicsCommandType getCommandType()
-   {
-      return commandType;
-   }
+   public abstract InverseKinematicsCommandType getCommandType();
 
    public abstract void setWeight(double weight);
 

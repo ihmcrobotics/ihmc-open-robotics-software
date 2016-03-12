@@ -9,7 +9,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
-public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateCommand>
+public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateCommand>
 {
    private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -17,7 +17,6 @@ public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateComm
 
    public MomentumRateCommand()
    {
-      super(InverseDynamicsCommandType.MOMENTUM_RATE);
    }
 
    public MomentumRateCommand(MomentumRateCommand momentumRateCommand)
@@ -56,6 +55,16 @@ public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateComm
    {
       selectionMatrix.reshape(0, SpatialForceVector.SIZE);
       momentumRate.reshape(0, 1);
+   }
+
+   public void setWeight(double weight)
+   {
+      setWeights(weight, weight);
+   }
+
+   public void setWeightLevel(InverseDynamicsCommandWeightLevels weightLevel)
+   {
+      setWeight(weightLevel.getWeightValue());
    }
 
    public void setWeights(double linear, double angular)
@@ -107,6 +116,12 @@ public class MomentumRateCommand extends InverseDynamicsCommand<MomentumRateComm
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.MOMENTUM_RATE;
    }
 
    public String toString()

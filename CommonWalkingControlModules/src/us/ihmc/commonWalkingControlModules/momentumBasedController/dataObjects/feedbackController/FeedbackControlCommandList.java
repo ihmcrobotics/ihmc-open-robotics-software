@@ -3,13 +3,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeedbackControlCommandList extends FeedbackControlCommand<FeedbackControlCommandList>
+public class FeedbackControlCommandList implements FeedbackControlCommand<FeedbackControlCommandList>
 {
    private final List<FeedbackControlCommand<?>> commandList = new ArrayList<>();
 
    public FeedbackControlCommandList()
    {
-      super(FeedbackControlCommandType.COMMAND_LIST);
    }
 
    public void addCommand(FeedbackControlCommand<?> command)
@@ -38,5 +37,11 @@ public class FeedbackControlCommandList extends FeedbackControlCommand<FeedbackC
       clear();
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          addCommand(other.getCommand(i));
+   }
+
+   @Override
+   public FeedbackControlCommandType getCommandType()
+   {
+      return FeedbackControlCommandType.COMMAND_LIST;
    }
 }

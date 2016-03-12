@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
-public class SpatialFeedbackControlCommand extends FeedbackControlCommand<SpatialFeedbackControlCommand>
+public class SpatialFeedbackControlCommand implements FeedbackControlCommand<SpatialFeedbackControlCommand>
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -48,7 +48,6 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
 
    public SpatialFeedbackControlCommand()
    {
-      super(FeedbackControlCommandType.SPATIAL_CONTROL);
       setSelectionMatrixToIdentity();
    }
 
@@ -276,5 +275,11 @@ public class SpatialFeedbackControlCommand extends FeedbackControlCommand<Spatia
    public SE3PIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   @Override
+   public FeedbackControlCommandType getCommandType()
+   {
+      return FeedbackControlCommandType.SPATIAL_CONTROL;
    }
 }

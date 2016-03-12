@@ -2,13 +2,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.
 
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class PlaneContactStateCommandPool extends InverseDynamicsCommand<PlaneContactStateCommandPool>
+public class PlaneContactStateCommandPool implements InverseDynamicsCommand<PlaneContactStateCommandPool>
 {
    private final RecyclingArrayList<PlaneContactStateCommand> pool = new RecyclingArrayList<>(8, PlaneContactStateCommand.class);
 
    public PlaneContactStateCommandPool()
    {
-      super(InverseDynamicsCommandType.PLANE_CONTACT_STATE_POOL);
       clear();
    }
 
@@ -38,6 +37,12 @@ public class PlaneContactStateCommandPool extends InverseDynamicsCommand<PlaneCo
       clear();
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          pool.add().set(other.getCommand(i));
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.PLANE_CONTACT_STATE_POOL;
    }
 
    @Override

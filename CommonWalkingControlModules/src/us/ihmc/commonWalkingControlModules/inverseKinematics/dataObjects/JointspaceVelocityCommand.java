@@ -13,7 +13,7 @@ import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class JointspaceVelocityCommand extends InverseKinematicsCommand<JointspaceVelocityCommand>
+public class JointspaceVelocityCommand implements InverseKinematicsCommand<JointspaceVelocityCommand>
 {
    private double weight;
 
@@ -24,7 +24,6 @@ public class JointspaceVelocityCommand extends InverseKinematicsCommand<Jointspa
 
    public JointspaceVelocityCommand()
    {
-      super(InverseKinematicsCommandType.JOINTSPACE);
       clear();
    }
 
@@ -148,6 +147,12 @@ public class JointspaceVelocityCommand extends InverseKinematicsCommand<Jointspa
    public DenseMatrixArrayList getDesiredVelocities()
    {
       return desiredVelocities;
+   }
+
+   @Override
+   public InverseKinematicsCommandType getCommandType()
+   {
+      return InverseKinematicsCommandType.JOINTSPACE;
    }
 
    @Override

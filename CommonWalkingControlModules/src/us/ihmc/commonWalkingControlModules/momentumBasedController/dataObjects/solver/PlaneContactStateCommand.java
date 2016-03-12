@@ -11,7 +11,7 @@ import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContactStateCommand>
+public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>
 {
    private RigidBody rigidBody;
    private String rigidBodyName;
@@ -24,7 +24,6 @@ public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContac
 
    public PlaneContactStateCommand()
    {
-      super(InverseDynamicsCommandType.PLANE_CONTACT_STATE);
    }
 
    public void setId(long id)
@@ -133,6 +132,12 @@ public class PlaneContactStateCommand extends InverseDynamicsCommand<PlaneContac
       coefficientOfFriction = other.coefficientOfFriction;
       contactPoints.copyFromListAndTrimSize(other.contactPoints);
       contactNormal.setIncludingFrame(other.contactNormal);
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.PLANE_CONTACT_STATE;
    }
 
    @Override

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver;
 
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand.InverseDynamicsCommandWeightLevels.HARD_CONSTRAINT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +13,7 @@ import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class JointspaceAccelerationCommand extends InverseDynamicsCommand<JointspaceAccelerationCommand>
+public class JointspaceAccelerationCommand implements InverseDynamicsCommand<JointspaceAccelerationCommand>
 {
    private boolean hasWeight;
    private double weight;
@@ -23,7 +25,6 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
 
    public JointspaceAccelerationCommand()
    {
-      super(InverseDynamicsCommandType.JOINTSPACE_MOTION);
       clear();
    }
 
@@ -87,13 +88,18 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
 
    public void removeWeight()
    {
-      setWeight(Double.POSITIVE_INFINITY);
+      setWeight(HARD_CONSTRAINT.getWeightValue());
    }
 
    public void setWeight(double weight)
    {
-      hasWeight = weight != Double.POSITIVE_INFINITY;
+      hasWeight = weight != HARD_CONSTRAINT.getWeightValue();
       this.weight = weight;
+   }
+
+   public void setWeightLevel(InverseDynamicsCommandWeightLevels weightLevel)
+   {
+      setWeight(weightLevel.getWeightValue());
    }
 
    @Override
@@ -153,6 +159,12 @@ public class JointspaceAccelerationCommand extends InverseDynamicsCommand<Joints
    public DenseMatrixArrayList getDesiredAccelerations()
    {
       return desiredAccelerations;
+   }
+
+   @Override
+   public InverseDynamicsCommandType getCommandType()
+   {
+      return InverseDynamicsCommandType.JOINTSPACE_MOTION;
    }
 
    public String toString()
