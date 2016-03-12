@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
 public interface FeedbackControlCommand<T extends FeedbackControlCommand<T>>
 {

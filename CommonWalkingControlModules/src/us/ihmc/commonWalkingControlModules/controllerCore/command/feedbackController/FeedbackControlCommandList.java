@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
