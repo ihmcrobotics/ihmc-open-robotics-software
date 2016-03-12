@@ -86,7 +86,8 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
       this.gravityZ = gravityZ;
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry, yoGraphicsListRegistry);
+      SmartCMPProjectorTwo smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry, yoGraphicsListRegistry);
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, registry);
       groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
       groundReactionMomentControlModule.setGains(10.0, 100.0); // kPelvisYaw was 0.0 for M3 video TODO: move to setGains method
 
