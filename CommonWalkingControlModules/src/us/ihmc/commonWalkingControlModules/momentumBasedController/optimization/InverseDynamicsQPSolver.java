@@ -16,6 +16,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsQPSolver
 {
+   private static final boolean HACK_RHO_LOWER_BOUND = false;
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
    private static final boolean DEBUG = true;
 
@@ -50,13 +51,13 @@ public class InverseDynamicsQPSolver
    private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfIterations", registry);
    private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
    private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
+   private final DoubleYoVariable jointJerkRegularization = new DoubleYoVariable("jointJerkRegularization", registry);
    private final DoubleYoVariable rhoRegularization = new DoubleYoVariable("rhoRegularization", registry);
 
    private final DenseMatrix64F tempJtW;
    private final DenseMatrix64F tempMotionTask_H;
    private final DenseMatrix64F tempMotionTask_f;
    private final DenseMatrix64F tempRhoTask_f;
-
 
    private final int numberOfDoFs;
    private final int rhoSize;
@@ -90,13 +91,14 @@ public class InverseDynamicsQPSolver
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
       jointAccelerationRegularization.set(0.005);
+      jointJerkRegularization.set(0.1);
       rhoRegularization.set(0.00001);
 
       solverOutput = new DenseMatrix64F(problemSize, 1);
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
-      pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, jointAccelerationRegularization.getDoubleValue());
+      pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, 0.000001);
 
       numberOfTicksBeforeDeactivatingRhoMin.set(10);
       countersActiveRhoMin = new IntegerYoVariable[rhoSize];
@@ -149,6 +151,9 @@ public class InverseDynamicsQPSolver
       solverInput_beq.reshape(0, 0);
 
       jAugmented.reshape(0, numberOfDoFs);
+
+      if (seedFromPreviousSolution.getBooleanValue())
+         addJointJerkRegularization();
    }
 
    public void addMotionInput(InverseDynamicsMotionQPInput input)
@@ -288,7 +293,16 @@ public class InverseDynamicsQPSolver
       MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, taskWeight, 0, 0, rhoSize, rhoSize, 1.0);
 
       CommonOps.mult(taskWeight, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+   }
+
+   public void addJointJerkRegularization()
+   {
+      for (int i = 0; i < numberOfDoFs; i++)
+      {
+         solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue());
+         solverInput_f.add(i, 0, - jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.getIndex(i, 0));
+      }
    }
 
    private final DenseMatrix64F jAugmented = new DenseMatrix64F(1, 1);
@@ -337,6 +351,9 @@ public class InverseDynamicsQPSolver
 
       numberOfConstraints.set(Aeq.getNumRows() + Ain.getNumRows());
 
+      if (!HACK_RHO_LOWER_BOUND)
+         CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
+
       NoConvergenceException noConvergenceException;
       try
       {
@@ -366,27 +383,30 @@ public class InverseDynamicsQPSolver
          wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
       }
 
-      for (int i = 0; i < rhoSize; i++)
+      if (HACK_RHO_LOWER_BOUND)
       {
-         IntegerYoVariable counter = countersActiveRhoMin[i];
+         for (int i = 0; i < rhoSize; i++)
+         {
+            IntegerYoVariable counter = countersActiveRhoMin[i];
 
-         if (!activeRhos[i].getBooleanValue())
-         {
-            counter.set(-1);
-         }
-         else if (solverOutput_rhos.get(i, 0) - 1.0e-5 <= rhoMin.get(i, 0))
-         {
-            counter.set(numberOfTicksBeforeDeactivatingRhoMin.getIntegerValue());
-         }
-         else
-         {
-            counter.set(Math.max(counter.getIntegerValue() - 1, -1));
-         }
+            if (!activeRhos[i].getBooleanValue())
+            {
+               counter.set(-1);
+            }
+            else if (solverOutput_rhos.get(i, 0) - 1.0e-5 <= rhoMin.get(i, 0))
+            {
+               counter.set(numberOfTicksBeforeDeactivatingRhoMin.getIntegerValue());
+            }
+            else
+            {
+               counter.set(Math.max(counter.getIntegerValue() - 1, -1));
+            }
 
-         if (counter.getIntegerValue() > 0)
-            solverInput_lb.set(numberOfDoFs + i, 0, rhoMin.get(i, 0));
-         else
-            solverInput_lb.set(numberOfDoFs + i, 0, Double.NEGATIVE_INFINITY);
+            if (counter.getIntegerValue() > 0)
+               solverInput_lb.set(numberOfDoFs + i, 0, rhoMin.get(i, 0));
+            else
+               solverInput_lb.set(numberOfDoFs + i, 0, Double.NEGATIVE_INFINITY);
+         }
       }
 
       if (noConvergenceException != null)
