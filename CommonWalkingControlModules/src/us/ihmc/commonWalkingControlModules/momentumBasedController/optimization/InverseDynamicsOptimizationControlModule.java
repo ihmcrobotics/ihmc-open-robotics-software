@@ -45,6 +45,8 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsOptimizationControlModule
 {
+   private static final boolean SETUP_RHO_TASKS = false;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final CentroidalMomentumHandler centroidalMomentumHandler;
@@ -75,10 +77,16 @@ public class InverseDynamicsOptimizationControlModule
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
+   private final double controlDT;
+   private final OneDoFJoint[] oneDoFJoints;
+   private final DenseMatrix64F qDDotMin, qDDotMax;
+
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
    {
+      controlDT = toolbox.getControlDT();
       jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
+      oneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
 
       InverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
@@ -115,6 +123,9 @@ public class InverseDynamicsOptimizationControlModule
          columnsForJoints.put(joint, indices);
       }
 
+      qDDotMin = new DenseMatrix64F(numberOfDoFs, 1);
+      qDDotMax = new DenseMatrix64F(numberOfDoFs, 1);
+
       qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
 
       parentRegistry.addChild(registry);
@@ -131,8 +142,13 @@ public class InverseDynamicsOptimizationControlModule
    {
       computePrivilegedJointAccelerations();
       wrenchMatrixCalculator.computeMatrices();
-      setupRhoTasks();
+      if (SETUP_RHO_TASKS)
+         setupRhoTasks();
       setupWrenchesEquilibriumConstraint();
+      computeJointAccelerationLimits();
+      qpSolver.setMinJointAccelerations(qDDotMin);
+      qpSolver.setMaxJointAccelerations(qDDotMax);
+      qpSolver.setActiveRhos(wrenchMatrixCalculator.getActiveRhos());
 
       NoConvergenceException noConvergenceException = null;
 
@@ -165,6 +181,31 @@ public class InverseDynamicsOptimizationControlModule
       }
 
       return momentumModuleSolution;
+   }
+
+   private void computeJointAccelerationLimits()
+   {
+      CommonOps.fill(qDDotMin, Double.NEGATIVE_INFINITY);
+      CommonOps.fill(qDDotMax, Double.POSITIVE_INFINITY);
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         int index = columnsForJoints.get(joint)[0];
+         double jointLimitLower = joint.getJointLimitLower();
+         
+         if (Double.isFinite(jointLimitLower))
+         {
+            double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
+            qDDotMin.set(index, 0, (qDotMin - joint.getQd()) / controlDT);
+         }
+         double jointLimitUpper = joint.getJointLimitUpper();
+         if (Double.isFinite(jointLimitUpper))
+         {
+            double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
+            qDDotMax.set(index, 0, (qDotMax - joint.getQd()) / controlDT);
+         }
+      }
    }
 
    private void computePrivilegedJointAccelerations()

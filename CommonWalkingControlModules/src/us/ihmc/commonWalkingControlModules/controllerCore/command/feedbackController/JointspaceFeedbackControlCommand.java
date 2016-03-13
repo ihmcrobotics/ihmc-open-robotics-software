@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.controllers.SimplePDGainsHolder;
@@ -58,11 +57,6 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
    public void setWeightForSolver(double weight)
    {
       weightForSolver = weight;
-   }
-
-   public void setWeightLevelForSolver(SolverWeightLevels weightLevel)
-   {
-      weightForSolver = weightLevel.getWeightValue();
    }
 
    public void setOneDoFJoint(int jointIndex, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
