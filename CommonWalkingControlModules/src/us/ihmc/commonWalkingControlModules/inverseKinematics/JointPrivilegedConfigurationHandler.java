@@ -80,6 +80,9 @@ public class JointPrivilegedConfigurationHandler
       defaultWeight.set(10.0);
       updateWeights();
 
+      for (int i = 0; i < numberOfDoFs; i++)
+         setPrivilegedConfigurationFromOption(PrivilegedConfigurationOption.AT_MID_RANGE, i);
+
       parentRegistry.addChild(registry);
    }
 
