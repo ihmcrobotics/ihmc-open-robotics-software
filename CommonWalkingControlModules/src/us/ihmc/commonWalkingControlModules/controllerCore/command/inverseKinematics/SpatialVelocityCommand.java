@@ -6,7 +6,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -125,7 +124,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
    public boolean isHardConstraint()
    {
-      return weight == HARD_CONSTRAINT.getWeightValue();
+      return weight == HARD_CONSTRAINT;
    }
 
    public double getWeight()
@@ -168,14 +167,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       this.weight = weight;
    }
 
-   public void setWeightLevel(SolverWeightLevels weightLevel)
-   {
-      weight = weightLevel.getWeightValue();
-   }
-
    public void removeWeight()
    {
-      setWeight(HARD_CONSTRAINT.getWeightValue());
+      setWeight(HARD_CONSTRAINT);
    }
 
    @Override

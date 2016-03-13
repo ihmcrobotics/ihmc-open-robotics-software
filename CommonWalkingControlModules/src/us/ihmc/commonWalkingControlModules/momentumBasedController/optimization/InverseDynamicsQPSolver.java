@@ -10,15 +10,27 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsQPSolver
 {
+   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
+   private static final boolean DEBUG = true;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final YoFrameVector wrenchEquilibriumForceError;
+   private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final BooleanYoVariable seedFromPreviousSolution = new BooleanYoVariable("seedFromPreviousSolution", registry);
    private final OASESConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(registry);
+
+   private final IntegerYoVariable numberOfTicksBeforeDeactivatingRhoMin = new IntegerYoVariable("numberOfTicksBeforeDeactivatingRhoMin", registry);
+   private final BooleanYoVariable[] activeRhos;
+   private final IntegerYoVariable[] countersActiveRhoMin;
+   private final DenseMatrix64F rhoMin;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -78,16 +90,37 @@ public class InverseDynamicsQPSolver
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
       jointAccelerationRegularization.set(0.005);
-      rhoRegularization.set(0.001);
-      setMinJointAccelerations(-50.0);
-      setMaxJointAccelerations(50.0);
-      setMaxRho(200.0);
+      rhoRegularization.set(0.00001);
 
       solverOutput = new DenseMatrix64F(problemSize, 1);
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
       pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, jointAccelerationRegularization.getDoubleValue());
+
+      numberOfTicksBeforeDeactivatingRhoMin.set(10);
+      countersActiveRhoMin = new IntegerYoVariable[rhoSize];
+      activeRhos = new BooleanYoVariable[rhoSize];
+
+      for (int i = 0; i < rhoSize; i++)
+      {
+         countersActiveRhoMin[i] = new IntegerYoVariable("counterActiveRhoMin_" + i, registry);
+         countersActiveRhoMin[i].set(-1);
+         activeRhos[i] = new BooleanYoVariable("activeRho_" + i, registry);
+      }
+      rhoMin = new DenseMatrix64F(rhoSize, 1);
+      
+
+      if (DEBUG)
+      {
+         wrenchEquilibriumForceError = new YoFrameVector("wrenchEquilibriumForceError", null, registry);
+         wrenchEquilibriumTorqueError = new YoFrameVector("wrenchEquilibriumTorqueError", null, registry);
+      }
+      else
+      {
+         wrenchEquilibriumForceError = null;
+         wrenchEquilibriumTorqueError = null;
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -167,6 +200,22 @@ public class InverseDynamicsQPSolver
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -1.0);
    }
 
+   public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
+      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
+
+      int previousSize = solverInput_beq.getNumRows();
+
+      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_beq.reshape(previousSize + taskSize, 1, true);
+
+      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
+      CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
+   }
+
    /**
     * Need to be called before {@link #solve()}.
     * It sets up the constraint that ensures that the solution is dynamically feasible:
@@ -186,41 +235,53 @@ public class InverseDynamicsQPSolver
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
          DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
    {
-      int constraintSize = Wrench.SIZE;
-      int previousSize = solverInput_beq.getNumRows();
 
-      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.reshape(previousSize + constraintSize, problemSize, true);
-      solverInput_beq.reshape(previousSize + constraintSize, 1, true);
+      tempWrenchConstraint_RHS.set(convectiveTerm);
+      CommonOps.subtractEquals(tempWrenchConstraint_RHS, additionalExternalWrench);
+      CommonOps.subtractEquals(tempWrenchConstraint_RHS, gravityWrench);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
-      CommonOps.insert(rhoJacobian, solverInput_Aeq, previousSize, numberOfDoFs);
+      if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
+      {
+         tempWrenchConstraint_J.reshape(Wrench.SIZE, problemSize);
+         MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, centroidalMomentumMatrix, 0, 0, Wrench.SIZE, numberOfDoFs, -1.0);
+         CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
+         
+         tempWrenchConstraintJtW.reshape(problemSize, Wrench.SIZE);
+         CommonOps.transpose(tempWrenchConstraint_J, tempWrenchConstraintJtW);
+         double weight = 150.0;
+         CommonOps.scale(weight, tempWrenchConstraintJtW);
+         tempWrenchConstraint_H.reshape(problemSize, problemSize);
+         CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_J, tempWrenchConstraint_H);
+         CommonOps.addEquals(solverInput_H, tempWrenchConstraint_H);
 
-      tempWrenchEquilibriumRightHandSide.set(convectiveTerm);
-      CommonOps.subtractEquals(tempWrenchEquilibriumRightHandSide, additionalExternalWrench);
-      CommonOps.subtractEquals(tempWrenchEquilibriumRightHandSide, gravityWrench);
-      CommonOps.insert(tempWrenchEquilibriumRightHandSide, solverInput_beq, previousSize, 0);
+         tempWrenchConstraint_f.reshape(problemSize, 1);
+         CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_RHS, tempWrenchConstraint_f);
+         CommonOps.subtractEquals(solverInput_f, tempWrenchConstraint_f);
+      }
+      else
+      {
+         int constraintSize = Wrench.SIZE;
+         int previousSize = solverInput_beq.getNumRows();
+         
+         // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+         solverInput_Aeq.reshape(previousSize + constraintSize, problemSize, true);
+         solverInput_beq.reshape(previousSize + constraintSize, 1, true);
+         
+         MatrixTools.setMatrixBlock(solverInput_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
+         CommonOps.insert(rhoJacobian, solverInput_Aeq, previousSize, numberOfDoFs);
+         
+         CommonOps.insert(tempWrenchConstraint_RHS, solverInput_beq, previousSize, 0);
+      }
 
       hasWrenchesEquilibriumConstraintBeenSetup = true;
    }
 
-   private final DenseMatrix64F tempWrenchEquilibriumRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
-
-   public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
-   {
-      int taskSize = taskJacobian.getNumRows();
-      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
-      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
-
-      int previousSize = solverInput_beq.getNumRows();
-
-      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
-      solverInput_beq.reshape(previousSize + taskSize, 1, true);
-
-      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
-      CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
-   }
+   private final DenseMatrix64F tempWrenchConstraint_H = new DenseMatrix64F(200, 200);
+   private final DenseMatrix64F tempWrenchConstraint_J = new DenseMatrix64F(Wrench.SIZE, 200);
+   private final DenseMatrix64F tempWrenchConstraint_f = new DenseMatrix64F(Wrench.SIZE, 200);
+   private final DenseMatrix64F tempWrenchConstraintJtW = new DenseMatrix64F(200, Wrench.SIZE);
+   private final DenseMatrix64F tempWrenchConstraint_LHS = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F tempWrenchConstraint_RHS = new DenseMatrix64F(Wrench.SIZE, 1);
 
    public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
@@ -293,6 +354,41 @@ public class InverseDynamicsQPSolver
       seedFromPreviousSolution.set(true);
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
+      if (DEBUG)
+      {
+         CommonOps.mult(tempWrenchConstraint_J, output, tempWrenchConstraint_LHS);
+         int index = 0;
+         wrenchEquilibriumTorqueError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+         wrenchEquilibriumTorqueError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+         wrenchEquilibriumTorqueError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+         wrenchEquilibriumForceError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+         wrenchEquilibriumForceError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+         wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+      }
+
+      for (int i = 0; i < rhoSize; i++)
+      {
+         IntegerYoVariable counter = countersActiveRhoMin[i];
+
+         if (!activeRhos[i].getBooleanValue())
+         {
+            counter.set(-1);
+         }
+         else if (solverOutput_rhos.get(i, 0) - 1.0e-5 <= rhoMin.get(i, 0))
+         {
+            counter.set(numberOfTicksBeforeDeactivatingRhoMin.getIntegerValue());
+         }
+         else
+         {
+            counter.set(Math.max(counter.getIntegerValue() - 1, -1));
+         }
+
+         if (counter.getIntegerValue() > 0)
+            solverInput_lb.set(numberOfDoFs + i, 0, rhoMin.get(i, 0));
+         else
+            solverInput_lb.set(numberOfDoFs + i, 0, Double.NEGATIVE_INFINITY);
+      }
+
       if (noConvergenceException != null)
          throw noConvergenceException;
    }
@@ -331,23 +427,31 @@ public class InverseDynamicsQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      for (int i = numberOfDoFs; i < problemSize; i++)
-         solverInput_lb.set(i, 0, rhoMin);
+      CommonOps.fill(this.rhoMin, rhoMin);
+//      for (int i = numberOfDoFs; i < problemSize; i++)
+//         solverInput_lb.set(i, 0, rhoMin);
    }
 
    public void setMinRho(DenseMatrix64F rhoMin)
    {
-      CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
+      this.rhoMin.set(rhoMin);
+//      CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
    }
 
    public void setMaxRho(double rhoMax)
    {
-      for (int i = numberOfDoFs; i < problemSize; i++)
-         solverInput_ub.set(i, 0, rhoMax);
+//      for (int i = numberOfDoFs; i < problemSize; i++)
+//         solverInput_ub.set(i, 0, rhoMax);
    }
 
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
-      CommonOps.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);
+//      CommonOps.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);
+   }
+
+   public void setActiveRhos(boolean[] activeRhos)
+   {
+      for (int i = 0; i < rhoSize; i++)
+         this.activeRhos[i].set(activeRhos[i]);
    }
 }

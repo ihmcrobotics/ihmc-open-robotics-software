@@ -1,22 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
-public enum SolverWeightLevels
+public abstract class SolverWeightLevels
 {
-   HIGH, MEDIUM, LOW, HARD_CONSTRAINT;
-
-   public double getWeightValue()
-   {
-      switch (this)
-      {
-      case HARD_CONSTRAINT:
-         return Double.POSITIVE_INFINITY;
-      case HIGH:
-         return 10.0;
-      case LOW:
-         return 0.10;
-      case MEDIUM:
-      default:
-         return 1.00;
-      }
-   }
+   public final static double HARD_CONSTRAINT = Double.POSITIVE_INFINITY;
+   public final static double VERY_HIGH = 50.0;
+   public final static double HIGH = 10.0;
+   public final static double LOW = 0.10;
+   public final static double MEDIUM = 1.00;
 }

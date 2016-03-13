@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -73,11 +72,6 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    public void setWeight(double weight)
    {
       setWeights(weight, weight);
-   }
-
-   public void setWeightLevel(SolverWeightLevels weightLevel)
-   {
-      setWeight(weightLevel.getWeightValue());
    }
 
    public void setWeights(double linear, double angular)

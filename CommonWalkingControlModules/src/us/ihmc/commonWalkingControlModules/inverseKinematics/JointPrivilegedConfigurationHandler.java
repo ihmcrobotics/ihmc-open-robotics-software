@@ -74,10 +74,10 @@ public class JointPrivilegedConfigurationHandler
       }
 
       configurationGain.set(5.0);
-      velocityGain.set(2.0);
+      velocityGain.set(50.0); //2.0);
       maxVelocity.set(0.4);
-      maxAcceleration.set(4.0);
-      defaultWeight.set(1.0);
+      maxAcceleration.set(Double.POSITIVE_INFINITY);
+      defaultWeight.set(10.0);
       updateWeights();
 
       parentRegistry.addChild(registry);
@@ -97,6 +97,7 @@ public class JointPrivilegedConfigurationHandler
    public void computePrivilegedJointAccelerations()
    {
       computePrivilegedJointVelocities();
+
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];

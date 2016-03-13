@@ -7,7 +7,6 @@ import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -61,11 +60,6 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       this.defaultWeight = defaultWeight;
    }
 
-   public void setDefaultWeightLevel(SolverWeightLevels weightLevel)
-   {
-      setDefaultWeight(weightLevel.getWeightValue());
-   }
-
    public void setPrivilegedConfigurationOption(PrivilegedConfigurationOption option)
    {
       enable();
@@ -100,6 +94,12 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       privilegedOneDoFJointConfigurations.add(Double.NaN);
       privilegedOneDoFJointConfigurationOptions.put(joint, null);
       weights.add(weight);
+   }
+
+   public void addJointsWithWeightOnly(OneDoFJoint[] joints, double weight)
+   {
+      for (int i = 0; i < joints.length; i++)
+         addJointWithWeightOnly(joints[i], weight);
    }
 
    public void addJoint(OneDoFJoint joint, double privilegedConfiguration, double weight)

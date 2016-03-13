@@ -9,7 +9,6 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -90,18 +89,13 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
 
    public void removeWeight()
    {
-      setWeight(HARD_CONSTRAINT.getWeightValue());
+      setWeight(HARD_CONSTRAINT);
    }
 
    public void setWeight(double weight)
    {
-      hasWeight = weight != HARD_CONSTRAINT.getWeightValue();
+      hasWeight = weight != HARD_CONSTRAINT;
       this.weight = weight;
-   }
-
-   public void setWeightLevel(SolverWeightLevels weightLevel)
-   {
-      setWeight(weightLevel.getWeightValue());
    }
 
    @Override
