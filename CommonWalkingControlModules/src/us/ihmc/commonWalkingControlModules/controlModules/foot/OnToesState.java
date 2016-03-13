@@ -2,14 +2,19 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
@@ -20,7 +25,9 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -38,7 +45,10 @@ public class OnToesState extends AbstractFootControlState
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
+
+   private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
 
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
@@ -65,6 +75,8 @@ public class OnToesState extends AbstractFootControlState
 
    private final FramePoint2d userDefinedContactPoint = new FramePoint2d();
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+
+   private final FramePose controlFramePose = new FramePose();
 
    private final TwistCalculator twistCalculator;
 
@@ -129,6 +141,12 @@ public class OnToesState extends AbstractFootControlState
 
       feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
       feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
+
+      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
+      spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialFeedbackControlCommand.setGains(gains);
+      MatrixTools.removeRow(selectionMatrix, 1);
+      spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
    }
 
    @Override
@@ -165,6 +183,9 @@ public class OnToesState extends AbstractFootControlState
       orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       pointFeedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
+
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
       
       if (!USE_TOEOFF_TRAJECTORY)
          kneeJointCommand.setOneDoFJointDesiredAcceleration(0, 0.0);
@@ -244,6 +265,10 @@ public class OnToesState extends AbstractFootControlState
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointPosition);
 
+      controlFramePose.setToZero(contactableFoot.getRigidBody().getBodyFixedFrame());
+      controlFramePose.setPosition(contactPointPosition);
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+
       desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       desiredContactPointPosition.changeFrame(worldFrame);
 
@@ -302,12 +327,12 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return kneeJointCommand;
+      return null;
    }
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      return feedbackControlCommandList;
+      return spatialFeedbackControlCommand;
    }
 }
