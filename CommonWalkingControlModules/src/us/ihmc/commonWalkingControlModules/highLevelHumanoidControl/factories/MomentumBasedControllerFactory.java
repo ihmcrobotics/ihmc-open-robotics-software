@@ -11,8 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredChestOrientationControllerCommandGenerator;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredFootPoseControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
@@ -192,18 +191,16 @@ public class MomentumBasedControllerFactory
       }
    }
    
-   private UserDesiredChestOrientationControllerCommandGenerator userDesiredControllerCommandGenerator = null;
+   private UserDesiredControllerCommandGenerators userDesiredControllerCommandGenerators = null;
    
    public void createUserDesiredControllerCommandGenerator()
    {
-      if (userDesiredControllerCommandGenerator != null) return;
+      if (userDesiredControllerCommandGenerators != null) return;
 
       if (momentumBasedController != null)
       {
          double defaultTrajectoryTime = 1.0;
-         userDesiredControllerCommandGenerator = new UserDesiredChestOrientationControllerCommandGenerator(commandInputManager, defaultTrajectoryTime, registry);
-
-         new UserDesiredFootPoseControllerCommandGenerator(commandInputManager, momentumBasedController.getFullRobotModel(), 1.0, registry);
+         userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager, momentumBasedController.getFullRobotModel(), defaultTrajectoryTime, registry);
       }
       else
       {
