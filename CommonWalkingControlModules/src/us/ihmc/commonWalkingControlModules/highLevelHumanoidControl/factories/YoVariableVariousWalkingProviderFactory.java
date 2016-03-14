@@ -6,9 +6,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
@@ -92,7 +90,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       SingleJointPositionProvider singleJointPositionProvider = null;
       MultiJointPositionProvider multiJointPositionProvider = null;
 
-      AbortWalkingProvider abortWalkingProvider = null;
+      AbortWalkingProvider abortWalkingProvider = new YoAbortWalkingProvider(registry);
+
       HandComplianceControlParametersProvider handComplianceControlParametersProvider = null;
 
       DesiredSteeringWheelProvider desiredSteeringWheelProvider = null;
