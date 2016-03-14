@@ -166,8 +166,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          solutionMatrix.setData(solutionWithSmallPerturbation);
          double objectiveCostWithSmallPerturbation = solver.getObjectiveCost(solutionMatrix);
 
-         assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost,
-               objectiveCostWithSmallPerturbation > objectiveCost);
+         assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost, objectiveCostWithSmallPerturbation > objectiveCost);
       }
    }
 
@@ -228,46 +227,38 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          solutionMatrix.setData(solutionWithSmallPerturbation);
 
          verifyEqualityConstraintsDoNotHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solutionMatrix);
-         DenseMatrix64F solutionMatrixProjectedOntoEqualityConstraints = projectOntoEqualityConstraints(solutionMatrix, linearEqualityConstraintsAMatrix,
-               linearEqualityConstraintsBVector);
-         verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector,
-               solutionMatrixProjectedOntoEqualityConstraints);
+         DenseMatrix64F solutionMatrixProjectedOntoEqualityConstraints = projectOntoEqualityConstraints(solutionMatrix, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+         verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solutionMatrixProjectedOntoEqualityConstraints);
 
          double objectiveCostWithSmallPerturbation = solver.getObjectiveCost(solutionMatrixProjectedOntoEqualityConstraints);
 
-         assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost,
-               objectiveCostWithSmallPerturbation > objectiveCost);
+         assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost, objectiveCostWithSmallPerturbation > objectiveCost);
       }
 
       long endTimeMillis = System.currentTimeMillis();
 
       double timePerTest = ((double) (endTimeMillis - startTimeMillis)) * 0.001 / ((double) numberOfTests);
-      
-      if (VERBOSE) 
+
+      if (VERBOSE)
       {
          System.out.println("Time per test is " + timePerTest);
       }
 
    }
 
-   private void verifyEqualityConstraintsHold(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix,
-         DenseMatrix64F linearEqualityConstraintsBVector, DenseMatrix64F solutionMatrix)
+   private void verifyEqualityConstraintsHold(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector, DenseMatrix64F solutionMatrix)
    {
-      double maxAbsoluteError = getMaxEqualityConstraintError(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector,
-            solutionMatrix);
+      double maxAbsoluteError = getMaxEqualityConstraintError(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solutionMatrix);
       assertEquals(0.0, maxAbsoluteError, 1e-5);
    }
 
-   private void verifyEqualityConstraintsDoNotHold(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix,
-         DenseMatrix64F linearEqualityConstraintsBVector, DenseMatrix64F solutionMatrix)
+   private void verifyEqualityConstraintsDoNotHold(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector, DenseMatrix64F solutionMatrix)
    {
-      double maxAbsoluteError = getMaxEqualityConstraintError(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector,
-            solutionMatrix);
+      double maxAbsoluteError = getMaxEqualityConstraintError(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solutionMatrix);
       assertTrue(maxAbsoluteError > 1e-5);
    }
 
-   private double getMaxEqualityConstraintError(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix,
-         DenseMatrix64F linearEqualityConstraintsBVector, DenseMatrix64F solutionMatrix)
+   private double getMaxEqualityConstraintError(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector, DenseMatrix64F solutionMatrix)
    {
       DenseMatrix64F checkMatrix = new DenseMatrix64F(numberOfEqualityConstraints, 1);
       CommonOps.mult(linearEqualityConstraintsAMatrix, solutionMatrix, checkMatrix);
@@ -276,8 +267,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
       return getMaxAbsoluteDataEntry(checkMatrix);
    }
 
-   private DenseMatrix64F projectOntoEqualityConstraints(DenseMatrix64F solutionMatrix, DenseMatrix64F linearEqualityConstraintsAMatrix,
-         DenseMatrix64F linearEqualityConstraintsBVector)
+   private DenseMatrix64F projectOntoEqualityConstraints(DenseMatrix64F solutionMatrix, DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
    {
       int numberOfVariables = solutionMatrix.getNumRows();
       if (linearEqualityConstraintsAMatrix.getNumCols() != numberOfVariables)
