@@ -1,6 +1,7 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -9,11 +10,14 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SimpleInefficientActiveSetQPSolverTest
 {
+   private static final boolean VERBOSE = false;
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleCasesWithNoInequalityConstraints()
    {
       SimpleInefficientActiveSetQPSolver solver = new SimpleInefficientActiveSetQPSolver();
@@ -122,7 +126,8 @@ public class SimpleInefficientActiveSetQPSolverTest
       assertEquals(2.0, objectiveCost, 1e-7);
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleCasesWithInequalityConstraints()
    {
       SimpleInefficientActiveSetQPSolver solver = new SimpleInefficientActiveSetQPSolver();
@@ -292,7 +297,8 @@ public class SimpleInefficientActiveSetQPSolverTest
    }
 
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test2DCasesWithPolygonConstraints()
    {
       SimpleInefficientActiveSetQPSolver solver = new SimpleInefficientActiveSetQPSolver();
@@ -346,7 +352,8 @@ public class SimpleInefficientActiveSetQPSolverTest
       assertEquals(0.0, lagrangeInequalityMultipliers[1], 1e-7);
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testChallengingCasesWithPolygonConstraints()
    {
       SimpleInefficientActiveSetQPSolver solver = new SimpleInefficientActiveSetQPSolver();
@@ -406,7 +413,8 @@ public class SimpleInefficientActiveSetQPSolverTest
    }
    
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCaseWithNoSolution()
    {
       SimpleInefficientActiveSetQPSolver solver = new SimpleInefficientActiveSetQPSolver();
@@ -440,7 +448,8 @@ public class SimpleInefficientActiveSetQPSolverTest
       assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[0]));
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityConstraints()
    {
       Random random = new Random(1776L);
@@ -450,7 +459,8 @@ public class SimpleInefficientActiveSetQPSolverTest
       int numberOfTests = 100;
 
       long startTimeMillis = System.currentTimeMillis();
-
+      int maxNumberOfIterations = 0;
+      
       for (int testNumber = 0; testNumber < numberOfTests; testNumber++)
       {
          solver.clear();
@@ -480,6 +490,7 @@ public class SimpleInefficientActiveSetQPSolverTest
          double[] lagrangeEqualityMultipliers = new double[numberOfEqualityConstraints];
          double[] lagrangeInequalityMultipliers = new double[numberOfInequalityConstraints];
          int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+         if (numberOfIterations > maxNumberOfIterations) maxNumberOfIterations = numberOfIterations;
 //         System.out.println("numberOfIterations = " + numberOfIterations);
          
          assertEquals(numberOfVariables, solution.length);
@@ -559,8 +570,11 @@ public class SimpleInefficientActiveSetQPSolverTest
       long endTimeMillis = System.currentTimeMillis();
 
       double timePerTest = ((double) (endTimeMillis - startTimeMillis)) * 0.001 / ((double) numberOfTests);
-      System.out.println(timePerTest);
-
+      if (VERBOSE) 
+      {
+         System.out.println("Time per test is " + timePerTest);
+         System.out.println("maxNumberOfIterations is " + maxNumberOfIterations);
+      }
    }
 
    private void verifyEqualityConstraintsHold(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix,
