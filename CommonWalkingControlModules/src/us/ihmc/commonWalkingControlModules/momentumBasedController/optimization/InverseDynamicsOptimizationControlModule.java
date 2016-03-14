@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -47,7 +48,8 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsOptimizationControlModule
 {
-   private static final boolean SETUP_RHO_TASKS = true;
+   private static final boolean SETUP_JOINT_LIMIT_CONSTRAINTS = false;
+   private static final boolean SETUP_RHO_TASKS = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -152,14 +154,18 @@ public class InverseDynamicsOptimizationControlModule
 
    public MomentumModuleSolution compute() throws MomentumControlModuleException
    {
-      computePrivilegedJointAccelerations();
       wrenchMatrixCalculator.computeMatrices();
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
       setupWrenchesEquilibriumConstraint();
       computeJointAccelerationLimits();
-      qpSolver.setMinJointAccelerations(qDDotMinMatrix);
-      qpSolver.setMaxJointAccelerations(qDDotMaxMatrix);
+
+      if (SETUP_JOINT_LIMIT_CONSTRAINTS)
+      {
+         computePrivilegedJointAccelerations();
+         qpSolver.setMinJointAccelerations(qDDotMinMatrix);
+         qpSolver.setMaxJointAccelerations(qDDotMaxMatrix);
+      }
       qpSolver.setActiveRhos(wrenchMatrixCalculator.getActiveRhos());
 
       NoConvergenceException noConvergenceException = null;
@@ -214,12 +220,14 @@ public class InverseDynamicsOptimizationControlModule
          {
             double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
             qDDotMin = (qDotMin - joint.getQd()) / controlDT;
+            qDDotMin = MathTools.clipToMinMax(qDDotMin, -100.0, 0.0);
             qDDotMinMatrix.set(index, 0, qDDotMin);
          }
          if (Double.isFinite(jointLimitUpper))
          {
             double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
             qDDotMax = (qDotMax - joint.getQd()) / controlDT;
+            qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, 100.0);
             qDDotMaxMatrix.set(index, 0, qDDotMax);
          }
 
