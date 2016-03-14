@@ -30,7 +30,7 @@ public class FourBarKinematicLoop
     *            |/      \|
     *            D--------C
     */
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
@@ -38,8 +38,8 @@ public class FourBarKinematicLoop
    
    private final FourBarCalculatorFromFastRunner fourBarCalculator;
    
-   private final double[] passiveInteriorAnglesAtZeroConfiguration;
-   private final double[] passiveJointSigns;
+   private final double[] passiveInteriorAnglesAtZeroConfiguration = new double[3];
+   private final double[] passiveJointSigns = new double[3];
    
    private final ReferenceFrame frameBeforeFourBarWithZAlongJointAxis;
    
@@ -83,9 +83,7 @@ public class FourBarKinematicLoop
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
       
       // Initialize interior angle offsets and signs
-      double[][] interiorAnglesAtZeroAndSigns = computeInteriorAnglesAtZeroConfiguration(vectorDAProjected, vectorABProjected, vectorBCProjected, vectorCDProjected);
-      passiveInteriorAnglesAtZeroConfiguration = interiorAnglesAtZeroAndSigns[0];
-      passiveJointSigns = interiorAnglesAtZeroAndSigns[1];
+      initializeInteriorAnglesAtZeroConfigurationAndJointSigns(vectorDAProjected, vectorABProjected, vectorBCProjected, vectorCDProjected);
        
       // Find the most conservative limits for the master joint angle (A) and reset them if necessary
       if (recomputeJointLimits) 
@@ -182,22 +180,17 @@ public class FourBarKinematicLoop
       return fourBarCalculator;
    }
 
-   private double[][] computeInteriorAnglesAtZeroConfiguration(FrameVector2d vectorDAProjected, FrameVector2d vectorABProjected, FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected)
+   private void initializeInteriorAnglesAtZeroConfigurationAndJointSigns(FrameVector2d vectorDAProjected, FrameVector2d vectorABProjected,
+         FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected)
    {
-      vectorDAProjected.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
-      vectorABProjected.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
-      vectorBCProjected.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
-      vectorCDProjected.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
-
       FrameVector jointBAxis = passiveJointB.getJointAxis();
       FrameVector jointCAxis = passiveJointC.getJointAxis();
       FrameVector jointDAxis = passiveJointD.getJointAxis();
 
       jointBAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
       jointCAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
-      jointDAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis); 
-      
-      
+      jointDAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
+
       Vector2d tempVectorAB = new Vector2d();
       Vector2d tempVectorBC = new Vector2d();
       Vector2d tempVectorCD = new Vector2d();
@@ -208,26 +201,23 @@ public class FourBarKinematicLoop
       vectorCDProjected.get(tempVectorCD);
       vectorDAProjected.get(tempVectorDA);
       
-      double[][] interiorAnglesAtZeroConfiguration = new double[2][3];
-      interiorAnglesAtZeroConfiguration[0][0] = Math.PI + jointBAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
-      interiorAnglesAtZeroConfiguration[0][1] = Math.PI + jointCAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
-      interiorAnglesAtZeroConfiguration[0][2] = Math.PI + jointDAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
-      interiorAnglesAtZeroConfiguration[1][0] = jointBAxis.getZ();
-      interiorAnglesAtZeroConfiguration[1][1] = jointCAxis.getZ();
-      interiorAnglesAtZeroConfiguration[1][2] = jointDAxis.getZ();
+      passiveInteriorAnglesAtZeroConfiguration[0] = Math.PI + jointBAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
+      passiveInteriorAnglesAtZeroConfiguration[1] = Math.PI + jointCAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+      passiveInteriorAnglesAtZeroConfiguration[2] = Math.PI + jointDAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
+      passiveJointSigns[0] = jointBAxis.getZ();
+      passiveJointSigns[1] = jointCAxis.getZ();
+      passiveJointSigns[2] = jointDAxis.getZ();
       
       if (DEBUG)
       {  
          System.out.println("\nOffset angle debugging:\n");
-         System.out.println("offset B = " + interiorAnglesAtZeroConfiguration[0][0]);
-         System.out.println("offset C = " + interiorAnglesAtZeroConfiguration[0][1]);
-         System.out.println("offset D = " + interiorAnglesAtZeroConfiguration[0][2]);
-         System.out.println("joint sign B = " + interiorAnglesAtZeroConfiguration[1][0]);
-         System.out.println("joint sign C = " + interiorAnglesAtZeroConfiguration[1][1]);
-         System.out.println("joint sign D = " + interiorAnglesAtZeroConfiguration[1][2]);
+         System.out.println("offset B = " + passiveInteriorAnglesAtZeroConfiguration[0]);
+         System.out.println("offset C = " + passiveInteriorAnglesAtZeroConfiguration[1]);
+         System.out.println("offset D = " + passiveInteriorAnglesAtZeroConfiguration[2]);
+         System.out.println("joint sign B = " + passiveJointSigns[0]);
+         System.out.println("joint sign C = " + passiveJointSigns[1]);
+         System.out.println("joint sign D = " + passiveJointSigns[2]);
       }
-
-      return interiorAnglesAtZeroConfiguration;
    }
    
    /**
@@ -348,7 +338,7 @@ public class FourBarKinematicLoop
       return maxValidMasterJointAngle;
    }
    
-   public void updateAnglesAndVelocities()
+   public void update()
    {
       double currentMasterJointA = masterJointA.getQ();
       if (currentMasterJointA < masterJointA.getJointLimitLower() || currentMasterJointA > masterJointA.getJointLimitUpper())
@@ -357,13 +347,19 @@ public class FourBarKinematicLoop
                masterJointA.getName() + " is set outside of its bounds [" + masterJointA.getJointLimitLower() + ", " + masterJointA.getJointLimitUpper() + "]");
       }
       
-      fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd());
+      fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd(), masterJointA.getQdd());
+      
       passiveJointB.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleABC(), 0));
       passiveJointC.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleBCD(), 1));
       passiveJointD.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleCDA(), 2));
-      passiveJointB.setQd(fourBarCalculator.getAngleDtABC());
-      passiveJointC.setQd(fourBarCalculator.getAngleDtBCD());
-      passiveJointD.setQd(fourBarCalculator.getAngleDtCDA());
+      
+      passiveJointB.setQd(passiveJointSigns[0] * fourBarCalculator.getAngleDtABC());
+      passiveJointC.setQd(passiveJointSigns[1] * fourBarCalculator.getAngleDtBCD());
+      passiveJointD.setQd(passiveJointSigns[2] * fourBarCalculator.getAngleDtCDA());
+      
+      passiveJointB.setQdd(passiveJointSigns[0] * fourBarCalculator.getAngleDt2ABC());
+      passiveJointC.setQdd(passiveJointSigns[1] * fourBarCalculator.getAngleDt2BCD());
+      passiveJointD.setQdd(passiveJointSigns[2] * fourBarCalculator.getAngleDt2CDA());
    }
    
    /**
