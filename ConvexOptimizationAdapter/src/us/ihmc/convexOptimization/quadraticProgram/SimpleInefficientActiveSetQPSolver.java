@@ -7,6 +7,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
+// Uses the algorithm and naming convention found in MIT Paper
+// "An efficiently solvable quadratic program for stabilizing dynamic locomotion"
+// by Scott Kuindersma, Frank Permenter, and Russ Tedrake.
 public class SimpleInefficientActiveSetQPSolver
 {
    private final SimpleInefficientEqualityConstrainedQPSolver equalityConstrainedSolver = new SimpleInefficientEqualityConstrainedQPSolver();
