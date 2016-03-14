@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
@@ -69,7 +70,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
-      momentumRateCommand.setWeights(2.0, 10.0);
+      momentumRateCommand.setWeights(SolverWeightLevels.MOMENTUM_WEIGHT, SolverWeightLevels.MOMENTUM_WEIGHT);
    }
 
    public void compute()

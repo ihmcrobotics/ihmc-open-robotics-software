@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
@@ -74,6 +75,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
       spatialFeedbackControlCommand.set(base, endEffector);
       spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
 
       parentRegistry.addChild(registry);
 

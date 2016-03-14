@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -56,7 +57,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       else
          legJointLimitAvoidanceControlModule = null;
 
-      spatialFeedbackControlCommand.setWeightForSolver(10.0);
+      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SWING_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setJacobianForNullspaceId(footControlHelper.getJacobianId());

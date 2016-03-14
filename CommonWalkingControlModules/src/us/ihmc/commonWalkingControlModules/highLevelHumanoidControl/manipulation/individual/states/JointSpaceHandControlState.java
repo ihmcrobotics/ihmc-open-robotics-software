@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
@@ -94,7 +95,7 @@ public class JointSpaceHandControlState extends HandControlState
 
       doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
 
-      jointspaceFeedbackControlCommand.setWeightForSolver(10.0);
+      jointspaceFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.ARM_JOINTSPACE_WEIGHT);
       jointspaceFeedbackControlCommand.setGains(gains);
 
       for (int i = 0; i < oneDoFJoints.length; i++)

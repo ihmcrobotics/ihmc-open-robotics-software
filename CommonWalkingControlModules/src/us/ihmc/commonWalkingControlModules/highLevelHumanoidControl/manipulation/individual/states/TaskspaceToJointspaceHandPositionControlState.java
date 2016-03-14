@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
@@ -150,6 +151,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          jointspaceAccelerationCommand = null;
          jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
          jointspaceFeedbackControlCommand.setGains(gains);
+         jointspaceFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.ARM_JOINTSPACE_WEIGHT);
 
          for (int i = 0; i < oneDoFJoints.length; i++)
          {

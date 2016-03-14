@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeCon
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -97,7 +98,7 @@ public class PelvisOrientationManager
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody elevator = fullRobotModel.getElevator();
       RigidBody pelvis = fullRobotModel.getPelvis();
-      orientationFeedbackControlCommand.setWeightForSolver(10.0);
+      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.PELVIS_WEIGHT);
       orientationFeedbackControlCommand.set(elevator, pelvis);
       orientationFeedbackControlCommand.setGains(pelvisOrientationControlGains);
 
