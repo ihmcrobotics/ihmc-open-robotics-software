@@ -6,13 +6,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.PauseCommandConsumer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.BatchedDesiredSteeringAngleAndSingleJointAngleProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
@@ -148,7 +142,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
       
       ObjectWeightProvider objectWeightProvider = new ObjectWeightProvider();
-      AbortWalkingProvider abortWalkingProvider = new AbortWalkingProvider();
+      ConsumerAbortWalkingProvider abortWalkingProvider = new ConsumerAbortWalkingProvider();
 
       BatchedDesiredSteeringAngleAndSingleJointAngleProvider batchedDesiredSteeringWheelAngleAndSingleJointAngleProvider = new BatchedDesiredSteeringAngleAndSingleJointAngleProvider(desiredSteeringWheelProvider.getDesiredSteeringAngleProvider(), singleJointPositionProvider);
       
