@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -14,6 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
@@ -24,6 +26,8 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
@@ -42,12 +46,15 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -737,6 +744,113 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @DeployableTestMethod(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
+   public void testArmTrajectoryPacket() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOccasionallyStraightKneesTest", "", selectedLocation, simulationTestingParameters,
+            getRobotModel());
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      SDFFullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(controllerFullRobotModel.getChest(), controllerFullRobotModel.getHand(robotSide));
+
+      int numberOfWaypoints = 3;
+      int numberOfJoints = armJoints.length;
+      ArmJointTrajectoryPacket armJointTrajectoryPacket = new ArmJointTrajectoryPacket(robotSide, numberOfWaypoints, numberOfJoints);
+
+      Random random = new Random(5165165L);
+      double deltaTime = 1.0;
+      double time = 0.0;
+
+      for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
+      {
+         JointTrajectoryPoint trajectoryPoint = armJointTrajectoryPacket.trajectoryPoints[waypointIndex];
+         time += deltaTime;
+         trajectoryPoint.time = time;
+
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         {
+            OneDoFJoint joint = armJoints[jointIndex];
+            double lowerLimit = joint.getJointLimitLower();
+            double upperLimit = joint.getJointLimitUpper();
+            double randomQd = RandomTools.generateRandomDouble(random, lowerLimit, upperLimit);
+            trajectoryPoint.positions[jointIndex] = randomQd;
+            trajectoryPoint.velocities[jointIndex] = 0.0;
+         }
+      }
+
+      drcSimulationTestHelper.send(armJointTrajectoryPacket);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(time + 1.0);
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @DeployableTestMethod(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
+   @Ignore("Manual test")
+   public void testArmTrajectoryPacketBeyondJointLimit() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOccasionallyStraightKneesTest", "", selectedLocation, simulationTestingParameters,
+            getRobotModel());
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      SDFFullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(controllerFullRobotModel.getChest(), controllerFullRobotModel.getHand(robotSide));
+
+      int numberOfWaypoints = 3;
+      int numberOfJoints = armJoints.length;
+      ArmJointTrajectoryPacket armJointTrajectoryPacket = new ArmJointTrajectoryPacket(robotSide, numberOfWaypoints, numberOfJoints);
+
+      Random random = new Random(5165165L);
+      double deltaTime = 1.0;
+      double time = 0.0;
+
+      for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
+      {
+         JointTrajectoryPoint trajectoryPoint = armJointTrajectoryPacket.trajectoryPoints[waypointIndex];
+         time += deltaTime;
+         trajectoryPoint.time = time;
+
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         {
+            OneDoFJoint joint = armJoints[jointIndex];
+            double lowerLimit = joint.getJointLimitLower();
+            double upperLimit = joint.getJointLimitUpper();
+            double randomQd = RandomTools.generateRandomDouble(random, lowerLimit, upperLimit);
+            trajectoryPoint.positions[jointIndex] = randomQd;
+            trajectoryPoint.velocities[jointIndex] = 0.0;
+         }
+      }
+
+      int badWaypointIndex = 1;
+      int badJointIndex = 1;
+      armJointTrajectoryPacket.trajectoryPoints[badWaypointIndex].positions[badJointIndex] = armJoints[badJointIndex].getJointLimitUpper() + 0.0001;
+      
+      drcSimulationTestHelper.send(armJointTrajectoryPacket);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(time + 1.0);
+      assertTrue(success);
 
       BambooTools.reportTestFinishedMessage();
    }

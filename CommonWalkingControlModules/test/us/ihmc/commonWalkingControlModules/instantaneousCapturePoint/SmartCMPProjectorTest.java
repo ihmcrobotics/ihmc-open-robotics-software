@@ -191,7 +191,7 @@ public class SmartCMPProjectorTest
       smartCMPProjector.setMinICPToCMPProjection(minICPToCMPProjection);
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -216,7 +216,7 @@ public class SmartCMPProjectorTest
       smartCMPProjector.setMinICPToCMPProjection(minICPToCMPProjection);
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -241,7 +241,7 @@ public class SmartCMPProjectorTest
       smartCMPProjector.setMinICPToCMPProjection(minICPToCMPProjection);
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
 
@@ -264,7 +264,7 @@ public class SmartCMPProjectorTest
       smartCMPProjector.setMinICPToCMPProjection(minICPToCMPProjection);
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -290,7 +290,7 @@ public class SmartCMPProjectorTest
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -316,7 +316,7 @@ public class SmartCMPProjectorTest
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -343,7 +343,7 @@ public class SmartCMPProjectorTest
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -369,7 +369,7 @@ public class SmartCMPProjectorTest
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -395,7 +395,7 @@ public class SmartCMPProjectorTest
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -420,7 +420,7 @@ public class SmartCMPProjectorTest
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
    }
@@ -450,7 +450,7 @@ public class SmartCMPProjectorTest
 
       FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
       tickAndUpdate(viz.getSimulationConstructionSet());
 
       assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
@@ -589,7 +589,7 @@ public class SmartCMPProjectorTest
          FramePoint2d desiredCMP = new FramePoint2d(worldFrame, RandomTools.generateRandomPoint2d(random, 10.0, 10.0));
          FramePoint2d projectedCMP = new FramePoint2d(desiredCMP);
 
-         smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, projectedCMP);
+         smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, projectedCMP);
 
          assertSolutionIsReasonable(cmpEdgeProjectionInside, minICPToCMPProjection, supportPolygon, capturePoint, desiredCMP, projectedCMP);
       }
@@ -694,7 +694,7 @@ public class SmartCMPProjectorTest
    {
       FramePoint2d desiredCMPProjection = new FramePoint2d(desiredCMP);
 
-      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, desiredCMPProjection);
+      smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, null, desiredCMPProjection);
       tickAndUpdate(scs);
       assertTrue(expectedCMPProjection.epsilonEquals(desiredCMPProjection, 1e-7));
    }

@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.ConsumerAbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
@@ -115,7 +116,7 @@ public class VariousWalkingProviders
 
       if (abortProvider == null)
       {
-         this.abortProvider = new AbortWalkingProvider();
+         this.abortProvider = new ConsumerAbortWalkingProvider();
       }
       else
       {
