@@ -142,7 +142,7 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
       feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
 
-      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
+      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       spatialFeedbackControlCommand.setGains(gains);
       MatrixTools.removeRow(selectionMatrix, 1);

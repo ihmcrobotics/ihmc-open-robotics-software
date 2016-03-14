@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -50,7 +51,7 @@ public class HeadOrientationManager
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
       RigidBody elevator = fullRobotModel.getElevator();
-      orientationFeedbackControlCommand.setWeightForSolver(10.0);
+      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HEAD_WEIGHT);
       orientationFeedbackControlCommand.set(elevator, head);
       orientationFeedbackControlCommand.setGains(gains);
       chestFrame = chest.getBodyFixedFrame();

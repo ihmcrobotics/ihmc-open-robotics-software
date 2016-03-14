@@ -4,6 +4,7 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -53,7 +54,7 @@ public class ChestOrientationManager
       RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
 
-      orientationFeedbackControlCommand.setWeightForSolver(10.0);
+      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.CHEST_WEIGHT);
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
 

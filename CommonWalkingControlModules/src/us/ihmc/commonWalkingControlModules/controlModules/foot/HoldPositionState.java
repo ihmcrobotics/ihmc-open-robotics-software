@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -64,7 +65,7 @@ public class HoldPositionState extends AbstractFootControlState
       FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
-      spatialFeedbackControlCommand.setWeightForSolver(10.0);
+      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
    }
 
    @Override

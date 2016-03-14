@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -27,7 +28,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
-      spatialAccelerationCommand.setWeight(10.0);
+      spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
    }
 
    @Override
