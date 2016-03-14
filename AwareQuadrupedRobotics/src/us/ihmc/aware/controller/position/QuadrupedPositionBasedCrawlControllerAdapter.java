@@ -17,7 +17,7 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
 //   private static final String PARAM_DEFAULT_COM_CLOSE_TO_FINAL_DESIRED_TRANSITION_RADIUS = "defaultCoMCloseToFinalDesiredTransitionRadius";
 
    private final ParameterMap params;
-   private final QuadrupedPositionBasedCrawlController controller;
+//   private final QuadrupedPositionBasedCrawlController controller;
 
    public QuadrupedPositionBasedCrawlControllerAdapter(QuadrupedRuntimeEnvironment environment,
          QuadrupedRobotParameters parameters, ParameterMapRepository paramMapRepository)
@@ -31,22 +31,23 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
 //      params.setDefault(PARAM_MAX_YAW_RATE, 0.2);
 //      params.setDefault(PARAM_DEFAULT_COM_CLOSE_TO_FINAL_DESIRED_TRANSITION_RADIUS, 0.10);
 
-      this.controller = new QuadrupedPositionBasedCrawlController(environment.getControlDT(), parameters,
-            environment.getFullRobotModel(), environment.getStateEstimator(), environment.getLegIkCalculator(),
-            environment.getGlobalDataProducer(), environment.getRobotTimestamp(), environment.getParentRegistry(),
-            environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
+      // TODO
+//      this.controller = new QuadrupedPositionBasedCrawlController(environment.getControlDT(), parameters,
+//            environment.getFullRobotModel(), environment.getStateEstimator(), environment.getLegIkCalculator(),
+//            environment.getGlobalDataProducer(), environment.getRobotTimestamp(), environment.getParentRegistry(),
+//            environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
    @Override
    public void onEntry()
    {
-      controller.doTransitionIntoAction();
+//      controller.doTransitionIntoAction();
    }
 
    @Override
    public QuadrupedPositionControllerEvent process()
    {
-      controller.doAction();
+//      controller.doAction();
 
       // TODO: How do we fire events from the adapted controller?
       return null;
@@ -55,6 +56,6 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
    @Override
    public void onExit()
    {
-      controller.doTransitionOutOfAction();
+//      controller.doTransitionOutOfAction();
    }
 }
