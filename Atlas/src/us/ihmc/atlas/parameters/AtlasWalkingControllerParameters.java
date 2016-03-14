@@ -890,8 +890,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
       momentumOptimizationSettings.setMomentumWeight(2.0, 1.4, 10.0, 10.0); //(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16);  //0.06 causes a little less oscillations possibly.  // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.02);  //0.06 causes a little less oscillations possibly.  // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
+      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.001);
    }
 
    @Override
