@@ -92,7 +92,7 @@ public class NetworkParameters
           {
              envVarString += "_IP";
           }
-          PrintTools.error("Could not find Network Parameter key " + key.toString() + " (Env. Variable: " + envVarString + ") . Exiting.\n" + helpText);
+          PrintTools.error("Could not find " + key.toString() + "! Please check you ini for a " + key.toString() + " and check that the key and value are seperated by a colon. You can use the NetworkParametersCreator to create this file for you. (if using Env. Variables it would be named: " + envVarString + ") . Exiting.\n" + helpText);
           System.exit(-1);
       }
       return value;
