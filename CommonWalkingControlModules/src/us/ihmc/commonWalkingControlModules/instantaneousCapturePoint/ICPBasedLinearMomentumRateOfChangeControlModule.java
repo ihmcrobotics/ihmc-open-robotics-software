@@ -57,7 +57,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry);
+      SmartCMPProjectorTwo smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry);
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, registry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.bipedSupportPolygons = bipedSupportPolygons;

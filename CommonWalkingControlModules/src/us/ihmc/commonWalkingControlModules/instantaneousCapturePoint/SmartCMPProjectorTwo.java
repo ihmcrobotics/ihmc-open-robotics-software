@@ -10,7 +10,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class SmartCMPProjectorTwo
+public class SmartCMPProjectorTwo extends CMPProjector
 {
    private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedToPushTowardFinalDesiredICP, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
@@ -38,6 +38,7 @@ public class SmartCMPProjectorTwo
     * and we can no longer push the ICP in the originally intended direction.
     * Therefore we try to direct the ICP towards the final desired ICP location (almost equivalent to the next footstep location).
     */
+   @Override
    public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
          FramePoint2d desiredCMP)
    {
@@ -110,7 +111,7 @@ public class SmartCMPProjectorTwo
       supportPolygon.orthogonalProjection(desiredCMP);
    }
 
-   public FramePoint2d findClosestIntersection(FramePoint2d[] potentialIntersections, FramePoint2d closestToPoint)
+   private FramePoint2d findClosestIntersection(FramePoint2d[] potentialIntersections, FramePoint2d closestToPoint)
    {
       FramePoint2d closestIntersection = null;
       double closestDistanceSquared = Double.POSITIVE_INFINITY;
@@ -127,6 +128,7 @@ public class SmartCMPProjectorTwo
       return closestIntersection;
    }
 
+   @Override
    public boolean getWasCMPProjected()
    {
       return (cmpProjectedAlongRay.getBooleanValue() || cmpProjectedToVertex.getBooleanValue());
