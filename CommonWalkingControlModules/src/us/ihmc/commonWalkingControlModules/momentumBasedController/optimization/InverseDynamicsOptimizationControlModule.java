@@ -158,11 +158,11 @@ public class InverseDynamicsOptimizationControlModule
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
       setupWrenchesEquilibriumConstraint();
-      computeJointAccelerationLimits();
+      computePrivilegedJointAccelerations();
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)
       {
-         computePrivilegedJointAccelerations();
+         computeJointAccelerationLimits();
          qpSolver.setMinJointAccelerations(qDDotMinMatrix);
          qpSolver.setMaxJointAccelerations(qDDotMaxMatrix);
       }
