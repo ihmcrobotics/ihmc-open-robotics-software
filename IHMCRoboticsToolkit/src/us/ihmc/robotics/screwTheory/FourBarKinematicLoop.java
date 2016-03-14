@@ -44,13 +44,13 @@ public class FourBarKinematicLoop
    private final ReferenceFrame frameBeforeFourBarWithZAlongJointAxis;
    
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
-         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
+         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJointInJointDFrame, boolean recomputeJointLimits)
    {
       this.masterJointA = masterJointA;
       this.passiveJointB = passiveJointB;
       this.passiveJointC = passiveJointC;
       this.passiveJointD = passiveJointD;
-      this.closurePointFromLastPassiveJointVect = new Vector3d(closurePointFromLastPassiveJoint);
+      this.closurePointFromLastPassiveJointVect = new Vector3d(closurePointFromLastPassiveJointInJointDFrame);
       
       // Rotation axis
       FrameVector masterJointAxis = masterJointA.getJointAxis();

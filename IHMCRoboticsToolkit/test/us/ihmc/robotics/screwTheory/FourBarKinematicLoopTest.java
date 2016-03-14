@@ -11,6 +11,8 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.random.RandomTools;
@@ -59,6 +61,110 @@ public class FourBarKinematicLoopTest
       
       initializeAllJointsToSameLimits(0.0, Math.PI);      
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoA,
+            recomputeJointLimits);
+
+      // master joint is 90 degrees, 0 velocity
+      masterJointA.setQ(0.5 * Math.PI);
+      masterJointA.setQd(0.0);
+      fourBarKinematicLoop.updateAnglesAndVelocities();
+      assertEquals(passiveJointB.getQ(), -0.5 * Math.PI, eps);
+      assertEquals(passiveJointC.getQ(), -0.5 * Math.PI, eps);
+      assertEquals(passiveJointD.getQ(), -0.5 * Math.PI, eps);
+      assertEquals(passiveJointB.getQd(), 0.0, eps);
+      assertEquals(passiveJointC.getQd(), 0.0, eps);
+      assertEquals(passiveJointD.getQd(), 0.0, eps);
+
+      // master joint is 45 degrees, non-zero velocity
+      masterJointA.setQ(0.25 * Math.PI);
+      masterJointA.setQd(1.0);
+      fourBarKinematicLoop.updateAnglesAndVelocities();
+      assertEquals(passiveJointB.getQ(), -0.25 * Math.PI, eps);
+      assertEquals(passiveJointC.getQ(), -0.75 * Math.PI, eps);
+      assertEquals(passiveJointD.getQ(), -0.25 * Math.PI, eps);
+      assertEquals(passiveJointB.getQd(), -1.0, eps);
+      assertEquals(passiveJointC.getQd(), 1.0, eps);
+      assertEquals(passiveJointD.getQd(), -1.0, eps);
+      
+      // try to set it outside of joint limits
+      try
+      {
+         masterJointA.setQ(-0.5);
+         fourBarKinematicLoop.updateAnglesAndVelocities();
+         fail();
+      }
+      catch (Exception e)
+      {
+      }
+
+      try
+      {
+         masterJointA.setQ(1.5 * Math.PI);
+         fourBarKinematicLoop.updateAnglesAndVelocities();
+         fail();
+      }
+      catch (Exception e)
+      {
+      }
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPlanarSquareWithRotatedJointFrames()
+   {
+      // initialize to a square of unit length
+      FrameVector jointAxis = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
+
+      FramePoint jointAPosition = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+      FramePoint jointBPosition = new FramePoint(worldFrame, 1.0, 0.0, 0.0);
+      FramePoint jointCPosition = new FramePoint(worldFrame, 2.0, 0.0, 0.0);
+      FramePoint jointDPosition = new FramePoint(worldFrame, 3.0, 0.0, 0.0);
+      
+      ReferenceFrame jointAFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("xFrame", jointAPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
+      ReferenceFrame jointBFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("xFrame", jointBPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
+      ReferenceFrame jointCFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("xFrame", jointCPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
+      ReferenceFrame jointDFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("xFrame", jointDPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
+      
+      FrameVector jointDtoA = new FrameVector(worldFrame, 1.0, 0.0, 0.0);
+      jointDtoA.changeFrame(jointDFrame);
+      Vector3d jointDtoAInFrameD = new Vector3d();
+      jointDtoA.get(jointDtoAInFrameD);
+      
+      Vector3d jointAxisA = new Vector3d();
+      Vector3d jointAxisB = new Vector3d();
+      Vector3d jointAxisC = new Vector3d();
+      Vector3d jointAxisD = new Vector3d();
+      
+      jointAxis.changeFrame(jointAFrame);
+      jointAxis.get(jointAxisA);
+      jointAxis.changeFrame(jointBFrame);
+      jointAxis.get(jointAxisB);
+      jointAxis.changeFrame(jointCFrame);
+      jointAxis.get(jointAxisC);
+      jointAxis.changeFrame(jointDFrame);
+      jointAxis.get(jointAxisD);
+      
+      RigidBodyTransform jointAtoElevator = jointAFrame.getTransformToDesiredFrame(elevatorFrame);
+      RigidBodyTransform jointBtoA = jointBFrame.getTransformToDesiredFrame(jointAFrame);
+      RigidBodyTransform jointCtoB = jointCFrame.getTransformToDesiredFrame(jointBFrame);
+      RigidBodyTransform jointDtoC = jointDFrame.getTransformToDesiredFrame(jointCFrame);
+      
+      initializeFourBar(jointAtoElevator, jointBtoA, jointCtoB, jointDtoC, jointAxisA, jointAxisB, jointAxisC, jointAxisD);
+      
+      boolean recomputeJointLimits = false;
+      
+      // try making a four bar with no joint limits
+      try
+      {
+         new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoAInFrameD,
+               recomputeJointLimits);
+         fail();
+      }
+      catch(Exception e)
+      {         
+      }
+      
+      initializeAllJointsToSameLimits(0.0, Math.PI);      
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointDtoAInFrameD,
             recomputeJointLimits);
 
       // master joint is 90 degrees, 0 velocity
@@ -649,8 +755,9 @@ public class FourBarKinematicLoopTest
       {
       }
    }
-   
-   private static void createFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD, boolean recomputeJointLimits)
+
+   private static void createFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxisA,
+         Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD, boolean recomputeJointLimits)
    {
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
@@ -693,16 +800,16 @@ public class FourBarKinematicLoopTest
       passiveJointD.setQ(random.nextDouble());
    }
    
-   private void initializeFourBar(RigidBodyTransform elevatorToJointA, RigidBodyTransform jointAtoB, RigidBodyTransform jointBtoC, RigidBodyTransform jointCtoD,
+   private void initializeFourBar(RigidBodyTransform jointAtoElevator, RigidBodyTransform jointBtoA, RigidBodyTransform jointCtoB, RigidBodyTransform jointDtoC,
          Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD)
    {
-      masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxisA);
+      masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, jointAtoElevator, jointAxisA);
       rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
-      passiveJointB = ScrewTools.addPassiveRevoluteJoint("jointB", rigidBodyAB, jointAtoB, jointAxisB, true);
+      passiveJointB = ScrewTools.addPassiveRevoluteJoint("jointB", rigidBodyAB, jointBtoA, jointAxisB, true);
       rigidBodyBC = createAndAttachCylinderRB("rigidBodyBC", passiveJointB);
-      passiveJointC = ScrewTools.addPassiveRevoluteJoint("jointC", rigidBodyBC, jointBtoC, jointAxisC, true);
+      passiveJointC = ScrewTools.addPassiveRevoluteJoint("jointC", rigidBodyBC, jointCtoB, jointAxisC, true);
       rigidBodyCD = createAndAttachCylinderRB("rigidBodyCD", passiveJointC);
-      passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, jointCtoD, jointAxisD, true);
+      passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, jointDtoC, jointAxisD, true);
       
       masterJointA.setQ(random.nextDouble());
       passiveJointB.setQ(random.nextDouble());
