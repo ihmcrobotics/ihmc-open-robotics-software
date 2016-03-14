@@ -10,7 +10,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 // Uses the algorithm and naming convention found in MIT Paper
 // "An efficiently solvable quadratic program for stabilizing dynamic locomotion"
 // by Scott Kuindersma, Frank Permenter, and Russ Tedrake.
-public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
+public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
 {
    private final SimpleInefficientEqualityConstrainedQPSolver equalityConstrainedSolver = new SimpleInefficientEqualityConstrainedQPSolver();
 
@@ -34,11 +34,19 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
 
    private final ArrayList<Integer> activeSetIndices = new ArrayList<>();
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#setMaxNumberOfIterations(int)
+    */
+   @Override
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
    {
       this.maxNumberOfIterations = maxNumberOfIterations;
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#clear()
+    */
+   @Override
    public void clear()
    {
       equalityConstrainedSolver.clear();
@@ -61,11 +69,19 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       activeSetIndices.clear();
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#setQuadraticCostFunction(double[][], double[], double)
+    */
+   @Override
    public void setQuadraticCostFunction(double[][] quadraticCostFunctionWMatrix, double[] quadraticCostFunctionGVector, double quadraticCostScalar)
    {
       setQuadraticCostFunction(new DenseMatrix64F(quadraticCostFunctionWMatrix), MatrixTools.createVector(quadraticCostFunctionGVector), quadraticCostScalar);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#setQuadraticCostFunction(org.ejml.data.DenseMatrix64F, org.ejml.data.DenseMatrix64F, double)
+    */
+   @Override
    public void setQuadraticCostFunction(DenseMatrix64F costQuadraticMatrix, DenseMatrix64F costLinearVector, double quadraticCostScalar)
    {
       DenseMatrix64F symCostQuadraticMatrix = new DenseMatrix64F(costQuadraticMatrix);
@@ -77,11 +93,19 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       this.quadraticCostScalar = quadraticCostScalar;
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#getObjectiveCost(org.ejml.data.DenseMatrix64F)
+    */
+   @Override
    public double getObjectiveCost(DenseMatrix64F solutionMatrix)
    {
       return equalityConstrainedSolver.getObjectiveCost(solutionMatrix);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#setLinearEqualityConstraints(double[][], double[])
+    */
+   @Override
    public void setLinearEqualityConstraints(double[][] linearEqualityConstraintsAMatrix, double[] linearEqualityConstraintsBVector)
    {
       if (linearEqualityConstraintsAMatrix.length != linearEqualityConstraintsBVector.length)
@@ -89,6 +113,10 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       setLinearEqualityConstraints(new DenseMatrix64F(linearEqualityConstraintsAMatrix), MatrixTools.createVector(linearEqualityConstraintsBVector));
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#setLinearEqualityConstraints(org.ejml.data.DenseMatrix64F, org.ejml.data.DenseMatrix64F)
+    */
+   @Override
    public void setLinearEqualityConstraints(DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
    {
       this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
@@ -96,6 +124,10 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       //      this.linearEqualityConstraintsAMatrixTranspose.set(CommonOps.transpose(linearEqualityConstraintsAMatrix, null));
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#setLinearInequalityConstraints(double[][], double[])
+    */
+   @Override
    public void setLinearInequalityConstraints(double[][] linearInequalityConstraintsCMatrix, double[] linearInqualityConstraintsDVector)
    {
       if (linearInequalityConstraintsCMatrix.length != linearInqualityConstraintsDVector.length)
@@ -103,6 +135,10 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       setLinearInequalityConstraints(new DenseMatrix64F(linearInequalityConstraintsCMatrix), MatrixTools.createVector(linearInqualityConstraintsDVector));
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#setLinearInequalityConstraints(org.ejml.data.DenseMatrix64F, org.ejml.data.DenseMatrix64F)
+    */
+   @Override
    public void setLinearInequalityConstraints(DenseMatrix64F linearInequalityConstraintCMatrix, DenseMatrix64F linearInequalityConstraintDVector)
    {
       this.linearInequalityConstraintsDVector.set(linearInequalityConstraintDVector);
@@ -110,6 +146,10 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       //      this.linearInequalityConstraintsCMatrixTranspose.set(CommonOps.transpose(linearInequalityConstraintsCMatrix, null));
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#solve(double[], double[], double[])
+    */
+   @Override
    public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack)
    {
       int numberOfVariables = quadraticCostQMatrix.getNumCols();
@@ -152,6 +192,10 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       return numberOfIterations;
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface#solve(org.ejml.data.DenseMatrix64F, org.ejml.data.DenseMatrix64F, org.ejml.data.DenseMatrix64F)
+    */
+   @Override
    public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack, DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack)
    {
       int numberOfIterations = 1;
