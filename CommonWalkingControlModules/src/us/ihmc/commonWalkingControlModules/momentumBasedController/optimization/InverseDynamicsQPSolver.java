@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleInefficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -12,6 +13,7 @@ import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsQPSolver
@@ -19,14 +21,18 @@ public class InverseDynamicsQPSolver
    private static final boolean HACK_RHO_LOWER_BOUND = false;
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
    private static final boolean DEBUG = true;
+   private static final boolean USE_JERRY_SOLVER = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 10.0, registry);
 
    private final YoFrameVector wrenchEquilibriumForceError;
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final BooleanYoVariable seedFromPreviousSolution = new BooleanYoVariable("seedFromPreviousSolution", registry);
    private final OASESConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(registry);
+   private final SimpleInefficientActiveSetQPSolver jerryQPSolver = new SimpleInefficientActiveSetQPSolver();
 
    private final IntegerYoVariable numberOfTicksBeforeDeactivatingRhoMin = new IntegerYoVariable("numberOfTicksBeforeDeactivatingRhoMin", registry);
    private final BooleanYoVariable[] activeRhos;
@@ -42,7 +48,12 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F solverInput_bin;
 
    private final DenseMatrix64F solverInput_lb;
+   private final DenseMatrix64F jerry_solverInput_lb;
    private final DenseMatrix64F solverInput_ub;
+   private final DenseMatrix64F jerry_solverInput_ub;
+
+   private final DenseMatrix64F solverInput_lagrangeEqualityConstraintMultipliers;
+   private final DenseMatrix64F solverInput_lagrangeInequalityConstraintMultipliers;
 
    private final DenseMatrix64F solverOutput;
    private final DenseMatrix64F solverOutput_jointAccelerations;
@@ -54,6 +65,8 @@ public class InverseDynamicsQPSolver
    private final DoubleYoVariable jointJerkRegularization = new DoubleYoVariable("jointJerkRegularization", registry);
    private final DoubleYoVariable rhoRegularization = new DoubleYoVariable("rhoRegularization", registry);
 
+   private final DenseMatrix64F tempIdentity;
+   private final DenseMatrix64F tempNegativeIdentity;
    private final DenseMatrix64F tempJtW;
    private final DenseMatrix64F tempMotionTask_H;
    private final DenseMatrix64F tempMotionTask_f;
@@ -80,10 +93,22 @@ public class InverseDynamicsQPSolver
 
       solverInput_lb = new DenseMatrix64F(problemSize, 1);
       solverInput_ub = new DenseMatrix64F(problemSize, 1);
+      jerry_solverInput_lb = new DenseMatrix64F(problemSize, 1);
+      jerry_solverInput_ub = new DenseMatrix64F(problemSize, 1);
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
+      solverInput_lagrangeEqualityConstraintMultipliers = new DenseMatrix64F(problemSize, 1);
+      solverInput_lagrangeInequalityConstraintMultipliers = new DenseMatrix64F(problemSize, 1);
+
+      solverOutput = new DenseMatrix64F(problemSize, 1);
+      solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
+      solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
+
+      tempIdentity = CommonOps.identity(problemSize);
+      tempNegativeIdentity = CommonOps.identity(problemSize);
+      CommonOps.scale(-1.0, tempNegativeIdentity);
       tempJtW = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       tempMotionTask_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       tempMotionTask_f = new DenseMatrix64F(numberOfDoFs, 1);
@@ -93,10 +118,6 @@ public class InverseDynamicsQPSolver
       jointAccelerationRegularization.set(0.005);
       jointJerkRegularization.set(0.1);
       rhoRegularization.set(0.00001);
-
-      solverOutput = new DenseMatrix64F(problemSize, 1);
-      solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
-      solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
       pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, 0.000001);
 
@@ -354,16 +375,69 @@ public class InverseDynamicsQPSolver
       if (!HACK_RHO_LOWER_BOUND)
          CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
 
-      NoConvergenceException noConvergenceException;
-      try
+      NoConvergenceException noConvergenceException = null;
+
+      qpSolverTimer.startMeasurement();
+
+      if (USE_JERRY_SOLVER)
       {
-         numberOfIterations.set(qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall));
-         noConvergenceException = null;
+         jerry_solverInput_lb.set(solverInput_lb);
+         jerry_solverInput_ub.set(solverInput_ub);
+         CommonOps.scale(-1.0, solverInput_lb, jerry_solverInput_lb);
+         tempNegativeIdentity.reshape(problemSize, problemSize);
+         CommonOps.setIdentity(tempNegativeIdentity);
+         CommonOps.scale(-1.0, tempNegativeIdentity);
+         tempIdentity.reshape(problemSize, problemSize);
+         CommonOps.setIdentity(tempIdentity);
+
+         int row = problemSize - 1;
+         while(row >= 0)
+         {
+            if (Double.isInfinite(jerry_solverInput_lb.get(row, 0)))
+            {
+               MatrixTools.removeRow(jerry_solverInput_lb, row);
+               MatrixTools.removeRow(tempNegativeIdentity, row);
+            }
+            row--;
+         }
+
+         row = problemSize - 1;
+         while(row >= 0)
+         {
+            if (Double.isInfinite(jerry_solverInput_ub.get(row, 0)))
+            {
+               MatrixTools.removeRow(jerry_solverInput_ub, row);
+               MatrixTools.removeRow(tempIdentity, row);
+            }
+            row--;
+         }
+
+         solverInput_Ain.reshape(jerry_solverInput_lb.getNumRows() + jerry_solverInput_ub.getNumRows(), problemSize);
+         solverInput_bin.reshape(jerry_solverInput_lb.getNumRows() + jerry_solverInput_ub.getNumRows(), 1);
+
+         CommonOps.insert(tempNegativeIdentity, solverInput_Ain, 0, 0);
+         CommonOps.insert(tempIdentity, solverInput_Ain, tempNegativeIdentity.getNumRows(), 0);
+         CommonOps.insert(jerry_solverInput_lb, solverInput_bin, 0, 0);
+         CommonOps.insert(jerry_solverInput_ub, solverInput_bin, jerry_solverInput_lb.getNumRows(), 0);
+
+         jerryQPSolver.clear();
+         jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
+         jerryQPSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+         numberOfIterations.set(jerryQPSolver.solve(solverOutput, solverInput_lagrangeEqualityConstraintMultipliers, solverInput_lagrangeInequalityConstraintMultipliers));
       }
-      catch (NoConvergenceException e)
+      else
       {
-         noConvergenceException = e;
+         try
+         {
+            numberOfIterations.set(qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall));
+         }
+         catch (NoConvergenceException e)
+         {
+            noConvergenceException = e;
+         }
       }
+
+      qpSolverTimer.stopMeasurement();
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
@@ -409,8 +483,56 @@ public class InverseDynamicsQPSolver
          }
       }
 
-      if (noConvergenceException != null)
-         throw noConvergenceException;
+      if (!USE_JERRY_SOLVER)
+      {
+         if (noConvergenceException != null)
+            throw noConvergenceException;
+      }
+   }
+
+   private void printForJerry()
+   {
+      printMatrix("H", solverInput_H);
+      printVector("f", solverInput_f);
+      printVector("C", solverInput_Ain);
+      printVector("d", solverInput_bin);
+      printVector("solution", solverOutput);
+   }
+
+   private void printMatrix(String name, DenseMatrix64F m)
+   {
+      String str = "double[][] " + name + " = new double[][]{";
+
+      for (int row = 0; row < m.getNumRows(); row ++)
+      {
+         str += "new double[]{";
+         for (int col = 0; col < m.getNumCols() - 1; col++)
+         {
+            str += m.get(col, 0);
+            if (col < m.getNumCols() - 1)
+               str += ", ";
+         }
+         str += m.get(row, m.getNumCols() - 1) + "}";
+         if (row < m.getNumRows() - 1)
+            str += ", ";
+      }
+      str += "};";
+      
+      System.out.println(str);
+   }
+
+   private void printVector(String name, DenseMatrix64F v)
+   {
+      String str = "double[] " + name + " = new double[]{";
+
+      for (int i = 0; i < v.getNumRows(); i++)
+      {
+         str += v.get(i, 0);
+         if (i < v.getNumRows() - 1)
+            str += ", ";
+      }
+      str += "};";
+      System.out.println(str);
    }
 
    public DenseMatrix64F getJointAccelerations()
