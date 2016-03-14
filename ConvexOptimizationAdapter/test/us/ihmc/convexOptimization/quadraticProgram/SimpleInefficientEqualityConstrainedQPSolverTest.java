@@ -10,11 +10,14 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SimpleInefficientEqualityConstrainedQPSolverTest
 {
+   private static final boolean VERBOSE = false;
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleCases()
    {
       SimpleInefficientEqualityConstrainedQPSolver solver = new SimpleInefficientEqualityConstrainedQPSolver();
@@ -118,7 +121,8 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
       assertEquals(2.0, objectiveCost, 1e-7);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLargeRandomProblemWithNoEqualityConstraints()
    {
       Random random = new Random(1776L);
@@ -167,7 +171,8 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLargeRandomProblemWithEqualityConstraints()
    {
       Random random = new Random(1776L);
@@ -237,7 +242,11 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
       long endTimeMillis = System.currentTimeMillis();
 
       double timePerTest = ((double) (endTimeMillis - startTimeMillis)) * 0.001 / ((double) numberOfTests);
-      System.out.println(timePerTest);
+      
+      if (VERBOSE) 
+      {
+         System.out.println("Time per test is " + timePerTest);
+      }
 
    }
 
