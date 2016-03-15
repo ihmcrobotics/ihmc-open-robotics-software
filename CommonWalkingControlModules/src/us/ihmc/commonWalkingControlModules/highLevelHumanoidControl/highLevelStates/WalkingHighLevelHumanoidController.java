@@ -220,14 +220,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          transferStates.put(robotSide, transferState);
 
-         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide);
+         StopWalkingFromTransferCondition stopWalkingFromTranferCondition = new StopWalkingFromTransferCondition(robotSide);
+         StopWalkingFromSingleSupportCondition stopWalkingFromSingleSupportCondition = new StopWalkingFromSingleSupportCondition(robotSide);
          DoneWithTransferCondition doneWithTransferCondition = new DoneWithTransferCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide, robotSide.getOppositeSide());
          SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide, robotSide);
          StartWalkingCondition startWalkingCondition = new StartWalkingCondition(robotSide);
          FlamingoStanceCondition flamingoStanceCondition = new FlamingoStanceCondition(robotSide);
 
-         StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingCondition);
+         StateTransition<WalkingState> fromTransferToDoubleSupport = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingFromTranferCondition);
+         StateTransition<WalkingState> fromSingleSupportToDoubleSupport = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingFromSingleSupportCondition);
          StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnum, doneWithTransferCondition);
          StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(oppTransferStateEnum,
                singleSupportToTransferToOppositeSideCondition);
@@ -235,11 +237,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnum, startWalkingCondition);
          StateTransition<WalkingState> toTransferForFlamingo = new StateTransition<WalkingState>(transferStateEnum, flamingoStanceCondition);
 
-         transferState.addStateTransition(toDoubleSupport);
+         transferState.addStateTransition(fromTransferToDoubleSupport);
          transferState.addStateTransition(toSingleSupport);
          singleSupportState.addStateTransition(toTransferOppositeSide);
          singleSupportState.addStateTransition(toTransferSameSide);
-         singleSupportState.addStateTransition(toDoubleSupport);
+         singleSupportState.addStateTransition(fromSingleSupportToDoubleSupport);
          doubleSupportState.addStateTransition(toTransfer);
          doubleSupportState.addStateTransition(toTransferForFlamingo);
 
@@ -1069,11 +1071,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private class StopWalkingCondition extends DoneWithSingleSupportCondition
+   private class StopWalkingFromSingleSupportCondition extends DoneWithSingleSupportCondition
    {
       private final RobotSide supportSide;
 
-      public StopWalkingCondition(RobotSide supportSide)
+      public StopWalkingFromSingleSupportCondition(RobotSide supportSide)
       {
          super(supportSide);
 
@@ -1090,6 +1092,30 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (!super.checkCondition())
             return false;
+
+         boolean noMoreFootsteps = !walkingMessageHandler.hasUpcomingFootsteps();
+         boolean noMoreFootTrajectoryMessages = !walkingMessageHandler.hasFootTrajectoryForFlamingoStance(supportSide.getOppositeSide());
+         boolean readyToStopWalking = noMoreFootsteps && noMoreFootTrajectoryMessages;
+         return readyToStopWalking;
+      }
+   }
+
+   private class StopWalkingFromTransferCondition implements StateTransitionCondition
+   {
+      private final RobotSide supportSide;
+
+      public StopWalkingFromTransferCondition(RobotSide supportSide)
+      {
+         this.supportSide = supportSide;
+      }
+
+      @Override
+      public boolean checkCondition()
+      {
+         if (abortWalkingRequested.getBooleanValue())
+         {
+            return true;
+         }
 
          boolean noMoreFootstepsForThisSide = !walkingMessageHandler.isNextFootstepFor(supportSide.getOppositeSide());
          boolean noMoreFootTrajectoryMessages = !walkingMessageHandler.hasFootTrajectoryForFlamingoStance(supportSide.getOppositeSide());
