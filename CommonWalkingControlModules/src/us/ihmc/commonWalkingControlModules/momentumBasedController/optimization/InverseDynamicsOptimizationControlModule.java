@@ -8,8 +8,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -200,84 +198,45 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench);
    }
 
-   public void submitInverseDynamicsCommand(InverseDynamicsCommand<?> command)
-   {
-      switch (command.getCommandType())
-      {
-      case TASKSPACE:
-         submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
-         return;
-      case POINT:
-         submitPointAccelerationCommand((PointAccelerationCommand) command);
-         return;
-      case JOINTSPACE:
-         submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
-         return;
-      case MOMENTUM:
-         submitMomentumRateCommand((MomentumRateCommand) command);
-         return;
-      case PRIVILEGED_CONFIGURATION:
-         submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
-         return;
-      case EXTERNAL_WRENCH:
-         submitExternalWrenchCommand((ExternalWrenchCommand) command);
-         return;
-      case PLANE_CONTACT_STATE:
-         submitPlaneContactStateCommand((PlaneContactStateCommand) command);
-         return;
-      case COMMAND_LIST:
-         submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
-         return;
-      default:
-         throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
-      }
-   }
-
-   private void submitInverseDynamicsCommandList(InverseDynamicsCommandList command)
-   {
-      while (command.getNumberOfCommands() > 0)
-         submitInverseDynamicsCommand(command.pollCommand());
-   }
-
-   private void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
+   public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
+   public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitPointAccelerationCommand(PointAccelerationCommand command)
+   public void submitPointAccelerationCommand(PointAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertPointAccelerationCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitMomentumRateCommand(MomentumRateCommand command)
+   public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
+   public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
       motionQPInputCalculator.updatePrivilegedConfiguration(command);
    }
 
-   private void submitPlaneContactStateCommand(PlaneContactStateCommand command)
+   public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
       wrenchMatrixCalculator.setPlaneContactStateCommand(command);
    }
 
-   private void submitExternalWrenchCommand(ExternalWrenchCommand command)
+   public void submitExternalWrenchCommand(ExternalWrenchCommand command)
    {
       RigidBody rigidBody = command.getRigidBody();
       Wrench wrench = command.getExternalWrench();
