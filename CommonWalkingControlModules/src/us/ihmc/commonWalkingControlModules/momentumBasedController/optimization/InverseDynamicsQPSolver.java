@@ -401,47 +401,11 @@ public class InverseDynamicsQPSolver
 
    private void printForJerry()
    {
-      printMatrix("H", solverInput_H);
-      printVector("f", solverInput_f);
-      printVector("C", solverInput_Ain);
-      printVector("d", solverInput_bin);
-      printVector("solution", solverOutput);
-   }
-
-   private void printMatrix(String name, DenseMatrix64F m)
-   {
-      String str = "double[][] " + name + " = new double[][]{";
-
-      for (int row = 0; row < m.getNumRows(); row ++)
-      {
-         str += "new double[]{";
-         for (int col = 0; col < m.getNumCols() - 1; col++)
-         {
-            str += m.get(col, 0);
-            if (col < m.getNumCols() - 1)
-               str += ", ";
-         }
-         str += m.get(row, m.getNumCols() - 1) + "}";
-         if (row < m.getNumRows() - 1)
-            str += ", ";
-      }
-      str += "};";
-      
-      System.out.println(str);
-   }
-
-   private void printVector(String name, DenseMatrix64F v)
-   {
-      String str = "double[] " + name + " = new double[]{";
-
-      for (int i = 0; i < v.getNumRows(); i++)
-      {
-         str += v.get(i, 0);
-         if (i < v.getNumRows() - 1)
-            str += ", ";
-      }
-      str += "};";
-      System.out.println(str);
+      MatrixTools.printJavaForConstruction("H", solverInput_H);
+      MatrixTools.printJavaForConstruction("f", solverInput_f);
+      MatrixTools.printJavaForConstruction("C", solverInput_Ain);
+      MatrixTools.printJavaForConstruction("d", solverInput_bin);
+      MatrixTools.printJavaForConstruction("solution", solverOutput);
    }
 
    public DenseMatrix64F getJointAccelerations()
