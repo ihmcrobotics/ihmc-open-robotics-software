@@ -26,7 +26,7 @@ public class QuadrupedSimulationController implements RobotController
    private final DRCPoseCommunicator poseCommunicator;
    private boolean firstTick = true;
    
-   public QuadrupedSimulationController(SDFRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, QuadrupedControllerManager gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
+   public QuadrupedSimulationController(SDFRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
          DRCPoseCommunicator poseCommunicator, RobotController headController)
    {
       this.sdfRobot = simulationRobot;
