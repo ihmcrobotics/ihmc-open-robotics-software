@@ -9,7 +9,7 @@ public interface DesiredFootstepCalculator
 
    public abstract void initializeDesiredFootstep(RobotSide supportLegSide);
 
-   public abstract FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep);
+   public abstract FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep, double timeFromNow);
 
    public abstract void initialize();
 

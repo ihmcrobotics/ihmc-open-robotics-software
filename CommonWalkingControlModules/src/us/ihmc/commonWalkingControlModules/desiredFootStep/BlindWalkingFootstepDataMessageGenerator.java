@@ -112,11 +112,12 @@ public class BlindWalkingFootstepDataMessageGenerator
 
    private FootstepDataListControllerCommand computeNextFootsteps(RobotSide supportLeg)
    {
+      double stepTime = 0.0; //TODO get the time right.
       FootstepDataListControllerCommand footsteps = new FootstepDataListControllerCommand();
       FootstepDataControllerCommand footstep = blindWalkingDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataControllerCommand nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep);
+      FootstepDataControllerCommand nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
       FootstepDataControllerCommand nextNextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(),
-            nextFootstep);
+            nextFootstep, 2.0 * stepTime);
 
       footsteps.addFootstep(footstep);
       footsteps.addFootstep(nextFootstep);

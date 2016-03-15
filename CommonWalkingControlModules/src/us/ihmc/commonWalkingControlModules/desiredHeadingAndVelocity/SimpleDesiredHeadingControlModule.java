@@ -1,12 +1,10 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule.DesiredHeadingFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -22,6 +20,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    private final DoubleYoVariable maxHeadingDot = new DoubleYoVariable("maxHeadingDot", "In units of rad/sec", registry);
 
    private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
+   private final DesiredHeadingFrame predictedHeadingFrame = new DesiredHeadingFrame();
 
    private final double controlDT;
 
@@ -32,8 +31,8 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
       maxHeadingDot.set(0.1);
 
-      this.desiredHeadingFinal.set(desiredHeadingfinal);
-      this.desiredHeading.set(this.desiredHeadingFinal.getDoubleValue()); // The final is the first one according to the initial setup of the robot
+      desiredHeadingFinal.set(desiredHeadingfinal);
+      desiredHeading.set(desiredHeadingFinal.getDoubleValue()); // The final is the first one according to the initial setup of the robot
 
       updateDesiredHeadingFrame();
    }
@@ -58,10 +57,11 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       simpleDesiredHeadingControlModuleVisualizer = new SimpleDesiredHeadingControlModuleVisualizer(processedSensors, registry, yoGraphicsListRegistry);
    }
 
+   @Override
    public void updateDesiredHeadingFrame()
    {
       updateDesiredHeading();
-      desiredHeadingFrame.update();
+      desiredHeadingFrame.setHeadingAngleAndUpdate(desiredHeading.getDoubleValue());
 
       if (simpleDesiredHeadingControlModuleVisualizer != null)
       {
@@ -69,11 +69,13 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       }
    }
 
+   @Override
    public double getFinalHeadingTargetAngle()
    {
       return desiredHeadingFinal.getDoubleValue();
    }
 
+   @Override
    public FrameVector2d getFinalHeadingTarget()
    {
       FrameVector2d finalHeading = new FrameVector2d(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
@@ -82,37 +84,50 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return finalHeading;
    }
 
+   @Override
    public ReferenceFrame getDesiredHeadingFrame()
    {
       return desiredHeadingFrame;
    }
 
-   public void setFinalHeadingTargetAngle(double finalHeadingTargetAngle)
+   @Override
+   public ReferenceFrame getPredictedHeadingFrame(double timeFromNow)
    {
-      this.desiredHeadingFinal.set(finalHeadingTargetAngle);
+      predictedHeadingFrame.setHeadingAngleAndUpdate(predictDesiredHeading(timeFromNow));
+      return predictedHeadingFrame;
    }
 
+   @Override
+   public void setFinalHeadingTargetAngle(double finalHeadingTargetAngle)
+   {
+      desiredHeadingFinal.set(finalHeadingTargetAngle);
+   }
+
+   @Override
    public void setFinalHeadingTarget(FrameVector2d finalHeadingTarget)
    {
       finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       setFinalHeadingTargetAngle(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
    }
 
+   @Override
    public double getDesiredHeadingAngle()
    {
       return desiredHeading.getDoubleValue();
    }
 
-   public void getDesiredHeading(FrameVector2d desiredHeadingToPack)
+   @Override
+   public void getDesiredHeading(FrameVector2d desiredHeadingToPack, double timeFromNow)
    {
-      desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
-            Math.sin(desiredHeading.getDoubleValue()));
+      double heading = predictDesiredHeading(timeFromNow);
+      desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(heading), Math.sin(heading));
    }
 
+   @Override
    public void resetHeadingAngle(double newHeading)
    {
-      this.desiredHeading.set(newHeading);
-      this.desiredHeadingFinal.set(newHeading);
+      desiredHeading.set(newHeading);
+      desiredHeadingFinal.set(newHeading);
    }
 
    private void updateDesiredHeading()
@@ -125,22 +140,13 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       desiredHeading.set(desiredHeading.getDoubleValue() + deltaHeading);
    }
 
-   private class DesiredHeadingFrame extends ReferenceFrame
+   private double predictDesiredHeading(double timeFromNow)
    {
-      private static final long serialVersionUID = 4657294310129415811L;
+      double error = desiredHeadingFinal.getDoubleValue() - desiredHeading.getDoubleValue();
+      double maximumChange = maxHeadingDot.getDoubleValue() * timeFromNow;
 
-      private final Matrix3d rotation = new Matrix3d();
+      double deltaHeading = MathTools.clipToMinMax(error, -maximumChange, maximumChange);
 
-      public DesiredHeadingFrame()
-      {
-         super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, false, true);
-      }
-
-      protected void updateTransformToParent(RigidBodyTransform transformToParent)
-      {
-         rotation.rotZ(desiredHeading.getDoubleValue());
-
-         transformToParent.setRotationAndZeroTranslation(rotation);
-      }
+      return desiredHeading.getDoubleValue() + deltaHeading;
    }
 }
