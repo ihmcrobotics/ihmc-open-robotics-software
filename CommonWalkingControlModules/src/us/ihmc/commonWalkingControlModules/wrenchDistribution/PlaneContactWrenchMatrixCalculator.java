@@ -169,7 +169,7 @@ public class PlaneContactWrenchMatrixCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void setPlaneContactStateCommand(PlaneContactStateCommand contactStateCommand)
+   public void submitPlaneContactStateCommand(PlaneContactStateCommand contactStateCommand)
    {
       YoPlaneContactState planeContactState = rigidBodyToContactStateMap.get(contactStateCommand.getContactingRigidBody());
       planeContactState.updateFromPlaneContactStateCommand(contactStateCommand);
