@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,16 +29,19 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsOptimizationControlModule
 {
+   private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_JOINT_LIMIT_CONSTRAINTS = true;
    private static final boolean SETUP_RHO_TASKS = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final PlaneContactWrenchMatrixCalculator wrenchMatrixCalculator;
+   private final BasisVectorVisualizer basisVectorVisualizer;
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final InverseDynamicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
@@ -83,6 +87,12 @@ public class InverseDynamicsOptimizationControlModule
       geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
       wrenchMatrixCalculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, maxNPointsPerPlane, maxNSupportVectors, wRho, wRhoSmoother, 
             wRhoPenalizer, contactablePlaneBodies, registry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
+      if (VISUALIZE_RHO_BASIS_VECTORS)
+         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, yoGraphicsListRegistry, registry);
+      else
+         basisVectorVisualizer = null;
+
       motionQPInput = new MotionQPInput(numberOfDoFs);
       privilegedMotionQPInput = new PrivilegedMotionQPInput(numberOfDoFs);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
@@ -114,6 +124,8 @@ public class InverseDynamicsOptimizationControlModule
    public MomentumModuleSolution compute() throws MomentumControlModuleException
    {
       wrenchMatrixCalculator.computeMatrices();
+      if (VISUALIZE_RHO_BASIS_VECTORS)
+         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getContactPoints());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getWRho());
       qpSolver.addRegularization();
       if (SETUP_RHO_TASKS)
