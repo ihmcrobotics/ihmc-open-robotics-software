@@ -382,6 +382,7 @@ public class MotionQPInputCalculator
             motionQPInputToPack.taskJacobian.set(row, column, 1.0);
 
          CommonOps.insert(commandToConvert.getDesiredAcceleration(jointIndex), motionQPInputToPack.taskObjective, row, 0);
+         row += joint.getDegreesOfFreedom();
       }
 
       return true;
