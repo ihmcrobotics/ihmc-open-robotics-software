@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -82,7 +83,7 @@ public class InverseKinematicsQPSolver
    private final DenseMatrix64F tempTask_H = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempTask_f = new DenseMatrix64F(1, 1);
 
-   public void addMotionInput(InverseKinematicsMotionQPInput input)
+   public void addMotionInput(MotionQPInput input)
    {
       if (input.isMotionConstraint())
          addMotionConstraint(input.taskJacobian, input.taskObjective);
