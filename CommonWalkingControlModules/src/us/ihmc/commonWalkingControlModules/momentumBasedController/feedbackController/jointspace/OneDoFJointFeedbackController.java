@@ -37,6 +37,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    private final DoubleYoVariable qDDFeedback;
    private final RateLimitedYoVariable qDDFeedbackRateLimited;
    private final DoubleYoVariable qDDDesired;
+   private final DoubleYoVariable qDDAchieved;
 
    private final DoubleYoVariable kp;
    private final DoubleYoVariable kd;
@@ -69,6 +70,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qDDFeedback = new DoubleYoVariable("qdd_fb_" + jointName, registry);
       qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, registry, maxFeedbackJerk, qDDFeedback, dt);
       qDDDesired = new DoubleYoVariable("qdd_d_" + jointName, registry);
+      qDDAchieved = new DoubleYoVariable("qdd_achieved_" + jointName, registry);
 
       kp = new DoubleYoVariable("kp_" + jointName, registry);
       kd = new DoubleYoVariable("kd_" + jointName, registry);
@@ -137,6 +139,12 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       qDDDesired.set(qDDFeedforward.getDoubleValue() + qDDFeedbackRateLimited.getDoubleValue());
       output.setOneDoFJointDesiredAcceleration(0, qDDDesired.getDoubleValue());
+   }
+
+   @Override
+   public void computeAchievedAcceleration()
+   {
+      qDDAchieved.set(joint.getQddDesired());
    }
 
    public OneDoFJoint getJoint()

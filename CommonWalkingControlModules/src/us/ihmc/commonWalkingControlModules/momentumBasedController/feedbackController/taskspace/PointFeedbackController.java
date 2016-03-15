@@ -17,6 +17,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
@@ -36,8 +37,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoFrameVector yoFeedForwardLinearAcceleration;
    private final YoFrameVector yoDesiredLinearAcceleration;
+   private final YoFrameVector yoAchievedLinearAcceleration;
 
    private final DoubleYoVariable weightForSolver;
+
+   private final FrameVector achievedLinearAcceleration = new FrameVector();
 
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempLinearVelocity = new FrameVector();
@@ -48,6 +52,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final PointAccelerationCommand output = new PointAccelerationCommand();
 
    private final BodyFixedPointLinearAccelerationControlModule accelerationControlModule;
+   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
 
@@ -57,6 +62,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
@@ -77,6 +83,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       
       yoFeedForwardLinearAcceleration = new YoFrameVector(endEffectorName + "FeedForwardLinearAcceleration", worldFrame, registry);
       yoDesiredLinearAcceleration = new YoFrameVector(endEffectorName + "DesiredLinearAcceleration", worldFrame, registry);
+      yoAchievedLinearAcceleration = new YoFrameVector(endEffectorName + "AchievedLinearAcceleration", worldFrame, registry);
 
       weightForSolver = new DoubleYoVariable(endEffectorName + "PointWeight", registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
@@ -158,6 +165,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       accelerationControlModule.getBodyFixedPointCurrentLinearVelocity(tempLinearVelocity);
       yoCurrentLinearVelocity.setAndMatchFrame(tempLinearVelocity);
+   }
+
+   @Override
+   public void computeAchievedAcceleration()
+   {
+      accelerationControlModule.getBodyFixedPoint(tempPosition);
+      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(achievedLinearAcceleration, base, endEffector, tempPosition);
+      yoAchievedLinearAcceleration.setAndMatchFrame(achievedLinearAcceleration);
    }
 
    @Override

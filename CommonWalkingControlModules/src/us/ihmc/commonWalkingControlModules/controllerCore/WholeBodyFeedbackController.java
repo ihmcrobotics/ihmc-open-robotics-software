@@ -161,6 +161,18 @@ public class WholeBodyFeedbackController
       }
    }
 
+   public void computeAchievedAccelerations()
+   {
+      for (int i = 0; i < allControllers.size(); i++)
+      {
+         FeedbackControllerInterface controller = allControllers.get(i);
+         if (controller.isEnabled())
+         {
+            controller.computeAchievedAcceleration();
+         }
+      }
+   }
+
    public void submitFeedbackControlCommandList(FeedbackControlCommandList feedbackControlCommandList)
    {
       while (feedbackControlCommandList.getNumberOfCommands() > 0)

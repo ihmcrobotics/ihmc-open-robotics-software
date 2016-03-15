@@ -19,6 +19,7 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
@@ -41,8 +42,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final YoFrameVector yoFeedForwardAngularAcceleration;
    private final YoFrameVector yoDesiredAngularAcceleration;
+   private final YoFrameVector yoAchievedAngularAcceleration;
 
    private final DoubleYoVariable weightForSolver;
+
+   private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
+   private final FrameVector achievedAngularAcceleration = new FrameVector();
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
@@ -55,6 +60,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
    private final RigidBodyOrientationControlModule accelerationControlModule;
+   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
    private ReferenceFrame baseFrame;
@@ -66,6 +72,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public OrientationFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "OrientationFBController");
@@ -89,6 +96,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       yoFeedForwardAngularAcceleration = new YoFrameVector(endEffectorName + "FeedForwardAngularAcceleration", worldFrame, registry);
       yoDesiredAngularAcceleration = new YoFrameVector(endEffectorName + "DesiredAngularAcceleration", worldFrame, registry);
+      yoAchievedAngularAcceleration = new YoFrameVector(endEffectorName + "AchievedAngularAcceleration", worldFrame, registry);
 
       weightForSolver = new DoubleYoVariable(endEffectorName + "OrientationWeight", registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
@@ -167,6 +175,15 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoCurrentRotationVector.scale(tempAxisAngle.getAngle());
 
       output.setAngularAcceleration(endEffectorFrame, baseFrame, desiredAngularAcceleration);
+   }
+
+   @Override
+   public void computeAchievedAcceleration()
+   {
+      spatialAccelerationCalculator.getRelativeAcceleration(endEffectorAchievedAcceleration, base, endEffector);
+      endEffectorAchievedAcceleration.getAngularPart(achievedAngularAcceleration);
+
+      yoAchievedAngularAcceleration.setAndMatchFrame(achievedAngularAcceleration);
    }
 
    @Override

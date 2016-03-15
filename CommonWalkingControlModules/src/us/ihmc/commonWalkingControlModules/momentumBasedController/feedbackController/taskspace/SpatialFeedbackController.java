@@ -22,6 +22,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
@@ -41,6 +42,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final YoFrameVector yoFeedForwardLinearAcceleration;
    private final YoFrameVector yoDesiredLinearAcceleration;
+   private final YoFrameVector yoAchievedLinearAcceleration;
 
    private final YoFrameQuaternion yoDesiredOrientation;
    private final YoFrameQuaternion yoCurrentOrientation;
@@ -53,8 +55,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final YoFrameVector yoFeedForwardAngularAcceleration;
    private final YoFrameVector yoDesiredAngularAcceleration;
+   private final YoFrameVector yoAchievedAngularAcceleration;
 
    private final DoubleYoVariable weightForSolver;
+
+   private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
+   private final FrameVector achievedAngularAcceleration = new FrameVector();
+   private final FrameVector achievedLinearAcceleration = new FrameVector();
 
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempLinearVelocity = new FrameVector();
@@ -76,6 +83,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
    private final BodyFixedPointSpatialAccelerationControlModule accelerationControlModule;
+   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
 
@@ -85,6 +93,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public SpatialFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "SpatialFBController");
@@ -105,6 +114,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       
       yoFeedForwardLinearAcceleration = new YoFrameVector(endEffectorName + "FeedForwardLinearAcceleration", worldFrame, registry);
       yoDesiredLinearAcceleration = new YoFrameVector(endEffectorName + "DesiredLinearAcceleration", worldFrame, registry);
+      yoAchievedLinearAcceleration = new YoFrameVector(endEffectorName + "AchievedLinearAcceleration", worldFrame, registry);
 
       yoDesiredOrientation = new YoFrameQuaternion(endEffectorName + "DesiredOrientation", worldFrame, registry);
       yoCurrentOrientation = new YoFrameQuaternion(endEffectorName + "CurrentOrientation", worldFrame, registry);
@@ -117,6 +127,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoFeedForwardAngularAcceleration = new YoFrameVector(endEffectorName + "FeedForwardAngularAcceleration", worldFrame, registry);
       yoDesiredAngularAcceleration = new YoFrameVector(endEffectorName + "DesiredAngularAcceleration", worldFrame, registry);
+      yoAchievedAngularAcceleration = new YoFrameVector(endEffectorName + "AchievedAngularAcceleration", worldFrame, registry);
 
       weightForSolver = new DoubleYoVariable(endEffectorName + "SpatialWeight", registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
@@ -232,6 +243,16 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoCurrentOrientation.get(tempAxisAngle);
       yoCurrentRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
       yoCurrentRotationVector.scale(tempAxisAngle.getAngle());
+   }
+
+   public void computeAchievedAcceleration()
+   {
+      spatialAccelerationCalculator.getRelativeAcceleration(endEffectorAchievedAcceleration, base, endEffector);
+      endEffectorAchievedAcceleration.getAngularPart(achievedAngularAcceleration);
+      endEffectorAchievedAcceleration.getLinearPart(achievedLinearAcceleration);
+
+      yoAchievedAngularAcceleration.setAndMatchFrame(achievedAngularAcceleration);
+      yoAchievedLinearAcceleration.setAndMatchFrame(achievedLinearAcceleration);
    }
 
    @Override
