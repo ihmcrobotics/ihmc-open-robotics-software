@@ -48,9 +48,7 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F solverInput_bin;
 
    private final DenseMatrix64F solverInput_lb;
-   private final DenseMatrix64F jerry_solverInput_lb;
    private final DenseMatrix64F solverInput_ub;
-   private final DenseMatrix64F jerry_solverInput_ub;
 
    private final DenseMatrix64F solverInput_lagrangeEqualityConstraintMultipliers;
    private final DenseMatrix64F solverInput_lagrangeInequalityConstraintMultipliers;
@@ -65,8 +63,6 @@ public class InverseDynamicsQPSolver
    private final DoubleYoVariable jointJerkRegularization = new DoubleYoVariable("jointJerkRegularization", registry);
    private final DoubleYoVariable rhoRegularization = new DoubleYoVariable("rhoRegularization", registry);
 
-   private final DenseMatrix64F tempIdentity;
-   private final DenseMatrix64F tempNegativeIdentity;
    private final DenseMatrix64F tempJtW;
    private final DenseMatrix64F tempMotionTask_H;
    private final DenseMatrix64F tempMotionTask_f;
@@ -93,8 +89,6 @@ public class InverseDynamicsQPSolver
 
       solverInput_lb = new DenseMatrix64F(problemSize, 1);
       solverInput_ub = new DenseMatrix64F(problemSize, 1);
-      jerry_solverInput_lb = new DenseMatrix64F(problemSize, 1);
-      jerry_solverInput_ub = new DenseMatrix64F(problemSize, 1);
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
@@ -106,9 +100,6 @@ public class InverseDynamicsQPSolver
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
-      tempIdentity = CommonOps.identity(problemSize);
-      tempNegativeIdentity = CommonOps.identity(problemSize);
-      CommonOps.scale(-1.0, tempNegativeIdentity);
       tempJtW = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       tempMotionTask_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       tempMotionTask_f = new DenseMatrix64F(numberOfDoFs, 1);
@@ -386,48 +377,9 @@ public class InverseDynamicsQPSolver
 
       if (USE_JERRY_SOLVER)
       {
-         jerry_solverInput_lb.set(solverInput_lb);
-         jerry_solverInput_ub.set(solverInput_ub);
-         CommonOps.scale(-1.0, solverInput_lb, jerry_solverInput_lb);
-         tempNegativeIdentity.reshape(problemSize, problemSize);
-         CommonOps.setIdentity(tempNegativeIdentity);
-         CommonOps.scale(-1.0, tempNegativeIdentity);
-         tempIdentity.reshape(problemSize, problemSize);
-         CommonOps.setIdentity(tempIdentity);
-
-         int row = problemSize - 1;
-         while(row >= 0)
-         {
-            if (Double.isInfinite(jerry_solverInput_lb.get(row, 0)))
-            {
-               MatrixTools.removeRow(jerry_solverInput_lb, row);
-               MatrixTools.removeRow(tempNegativeIdentity, row);
-            }
-            row--;
-         }
-
-         row = problemSize - 1;
-         while(row >= 0)
-         {
-            if (Double.isInfinite(jerry_solverInput_ub.get(row, 0)))
-            {
-               MatrixTools.removeRow(jerry_solverInput_ub, row);
-               MatrixTools.removeRow(tempIdentity, row);
-            }
-            row--;
-         }
-
-         solverInput_Ain.reshape(jerry_solverInput_lb.getNumRows() + jerry_solverInput_ub.getNumRows(), problemSize);
-         solverInput_bin.reshape(jerry_solverInput_lb.getNumRows() + jerry_solverInput_ub.getNumRows(), 1);
-
-         CommonOps.insert(tempNegativeIdentity, solverInput_Ain, 0, 0);
-         CommonOps.insert(tempIdentity, solverInput_Ain, tempNegativeIdentity.getNumRows(), 0);
-         CommonOps.insert(jerry_solverInput_lb, solverInput_bin, 0, 0);
-         CommonOps.insert(jerry_solverInput_ub, solverInput_bin, jerry_solverInput_lb.getNumRows(), 0);
-
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
-         jerryQPSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+//         jerryQPSolver.setBounds(solverInput_lb, solverInput_ub); TODO
          numberOfIterations.set(jerryQPSolver.solve(solverOutput, solverInput_lagrangeEqualityConstraintMultipliers, solverInput_lagrangeInequalityConstraintMultipliers));
       }
       else
