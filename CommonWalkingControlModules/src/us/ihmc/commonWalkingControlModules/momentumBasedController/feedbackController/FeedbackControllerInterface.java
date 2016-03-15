@@ -10,6 +10,8 @@ public interface FeedbackControllerInterface
 
    public abstract void compute();
 
+   public abstract void computeAchievedAcceleration();
+
    public abstract boolean isEnabled();
 
    public abstract InverseDynamicsCommand<?> getOutput();

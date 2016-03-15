@@ -8,9 +8,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -24,6 +26,8 @@ public class WholeBodyControlCoreToolbox
 
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final TwistCalculator twistCalculator;
+   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final double controlDT;
    private final FullRobotModel fullRobotModel;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -47,11 +51,23 @@ public class WholeBodyControlCoreToolbox
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       this.jointIndexHandler = new JointIndexHandler(controlledJoints);
+      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      this.spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
    }
 
    public TwistCalculator getTwistCalculator()
    {
       return twistCalculator;
+   }
+
+   public SpatialAccelerationCalculator getSpatialAccelerationCalculator()
+   {
+      return spatialAccelerationCalculator;
+   }
+
+   public InverseDynamicsCalculator getInverseDynamicsCalculator()
+   {
+      return inverseDynamicsCalculator;
    }
 
    public SixDoFJoint getRobotRootJoint()

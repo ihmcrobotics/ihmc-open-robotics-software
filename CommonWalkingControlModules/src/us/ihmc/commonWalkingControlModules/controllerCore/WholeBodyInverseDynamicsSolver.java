@@ -39,7 +39,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -67,14 +66,12 @@ public class WholeBodyInverseDynamicsSolver
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
    {
-      TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      double gravityZ = toolbox.getGravityZ();
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
       YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
 
       rootJoint = toolbox.getRobotRootJoint();
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, momentumOptimizationSettings, registry);
       optimizationControlModule.setMinRho(momentumOptimizationSettings.getRhoMinScalar());
 
