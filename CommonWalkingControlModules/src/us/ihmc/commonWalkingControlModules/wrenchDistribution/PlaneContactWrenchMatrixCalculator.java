@@ -54,7 +54,6 @@ public class PlaneContactWrenchMatrixCalculator
    private final BooleanYoVariable resetCoPPenalizer = new BooleanYoVariable("resetCoPPenalizer", registry);
    private final Map<YoPlaneContactState, BooleanYoVariable> resetRhoSmootherMap = new HashMap<>();
 
-   private final boolean[] activeRhos;
    private final DenseMatrix64F rhoMin;
    private final DenseMatrix64F qRho;
    private final DenseMatrix64F wRhoMatrix;
@@ -120,7 +119,6 @@ public class PlaneContactWrenchMatrixCalculator
 
       rhoTotal = new DoubleYoVariable(name + "RhoTotal", registry);
 
-      activeRhos = new boolean[rhoSize];
       qRho = new DenseMatrix64F(Wrench.SIZE, rhoSize);
       rhoMin = new DenseMatrix64F(rhoSize, 1);
       wRhoMatrix = new DenseMatrix64F(rhoSize, rhoSize);
@@ -222,7 +220,6 @@ public class PlaneContactWrenchMatrixCalculator
 
                if (isInContact)
                {
-                  activeRhos[iRho] = true;
                   computeBasisVector(planeContactState, contactPoint, k);
 
                 basisVector.set(currentBasisVector.getLinearPart());
@@ -237,7 +234,6 @@ public class PlaneContactWrenchMatrixCalculator
                }
                else
                {
-                  activeRhos[iRho] = false;
                   basisVector.setToZero(centerOfMassFrame);
 
                   rhoMin.set(iRho, 0, 0.0);
@@ -446,10 +442,5 @@ public class PlaneContactWrenchMatrixCalculator
    public Map<Integer, FramePoint> getContactPoints()
    {
       return contactPoints;
-   }
-
-   public boolean[] getActiveRhos()
-   {
-      return activeRhos;
    }
 }
