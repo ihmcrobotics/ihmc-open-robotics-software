@@ -24,7 +24,6 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -147,7 +146,7 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleHandTrajectoryMessages(RecyclingArrayList<HandTrajectoryControllerCommand> messages)
+   public void handleHandTrajectoryMessages(List<HandTrajectoryControllerCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {
@@ -157,7 +156,7 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleArmTrajectoryMessages(RecyclingArrayList<ArmTrajectoryControllerCommand> messages)
+   public void handleArmTrajectoryMessages(List<ArmTrajectoryControllerCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {
@@ -167,7 +166,7 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleArmDesiredAccelerationsMessages(RecyclingArrayList<ArmDesiredAccelerationsControllerCommand> messages)
+   public void handleArmDesiredAccelerationsMessages(List<ArmDesiredAccelerationsControllerCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {
@@ -177,7 +176,7 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleHandComplianceControlParametersMessages(RecyclingArrayList<HandComplianceControlParametersControllerCommand> messages)
+   public void handleHandComplianceControlParametersMessages(List<HandComplianceControlParametersControllerCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {

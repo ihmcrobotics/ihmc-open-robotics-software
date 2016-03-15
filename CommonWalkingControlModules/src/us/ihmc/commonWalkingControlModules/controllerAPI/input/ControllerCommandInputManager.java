@@ -158,7 +158,7 @@ public class ControllerCommandInputManager
 
    public EndEffectorLoadBearingControllerCommand pollAndCompileEndEffectorLoadBearingMessages()
    {
-      RecyclingArrayList<EndEffectorLoadBearingControllerCommand> messages = pollNewMessages(EndEffectorLoadBearingControllerCommand.class);
+      List<EndEffectorLoadBearingControllerCommand> messages = pollNewMessages(EndEffectorLoadBearingControllerCommand.class);
       for (int i = 1; i < messages.size(); i++)
          messages.get(0).set(messages.get(i));
       return messages.get(0);
@@ -166,7 +166,7 @@ public class ControllerCommandInputManager
 
    public GoHomeControllerCommand pollAndCompileGoHomeMessages()
    {
-      RecyclingArrayList<GoHomeControllerCommand> messages = pollNewMessages(GoHomeControllerCommand.class);
+      List<GoHomeControllerCommand> messages = pollNewMessages(GoHomeControllerCommand.class);
       for (int i = 1; i < messages.size(); i++)
          messages.get(0).set(messages.get(i));
       return messages.get(0);
@@ -210,11 +210,11 @@ public class ControllerCommandInputManager
 
    public <T extends ControllerCommand<T, ?>> T pollNewestMessage(Class<T> messageToPollClass)
    {
-      return pollNewMessages(messageToPollClass).getLast();
+      return ((RecyclingArrayList<T>) pollNewMessages(messageToPollClass)).getLast();
    }
 
    @SuppressWarnings("unchecked")
-   public <T extends ControllerCommand<T, ?>> RecyclingArrayList<T> pollNewMessages(Class<T> messageToPollClass)
+   public <T extends ControllerCommand<T, ?>> List<T> pollNewMessages(Class<T> messageToPollClass)
    {
       RecyclingArrayList<T> messages = (RecyclingArrayList<T>) controllerMessagesMap.get(messageToPollClass);
       messages.clear();
