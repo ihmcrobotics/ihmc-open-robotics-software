@@ -161,6 +161,7 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       int numberOfInequalityConstraints = linearInequalityConstraintsCMatrix.getNumRows();
 
       lagrangeEqualityConstraintMultipliersToPack.reshape(numberOfEqualityConstraints, 1);
+      lagrangeEqualityConstraintMultipliersToPack.zero();
       lagrangeInequalityConstraintMultipliersToPack.reshape(numberOfInequalityConstraints, 1);
       lagrangeInequalityConstraintMultipliersToPack.zero();
 
@@ -189,6 +190,11 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
 
    private boolean modifyActiveSetAndTryAgain(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack, DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack)
    {
+      if (containsNaN(solutionToPack))
+      {
+         return false;
+      }
+      
       boolean activeSetWasModified = false;
 
       int numberOfVariables = quadraticCostQMatrix.getNumRows();
@@ -270,6 +276,16 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       }
 
       return true;
+   }
+   
+   private boolean containsNaN(DenseMatrix64F solution)
+   {
+      for (int i=0; i<solution.getNumRows(); i++)
+      {
+         if (Double.isNaN(solution.get(i, 0))) return true;
+      }
+      
+      return false;
    }
 
 }
