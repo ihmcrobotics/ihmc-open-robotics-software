@@ -28,6 +28,14 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
       return commandList.get(commandIndex);
    }
 
+   public InverseKinematicsCommand<?> pollCommand()
+   {
+      if (commandList.isEmpty())
+         return null;
+      else
+         return commandList.remove(getNumberOfCommands() - 1);
+   }
+
    public int getNumberOfCommands()
    {
       return commandList.size();

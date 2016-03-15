@@ -28,6 +28,14 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
       return commandList.get(commandIndex);
    }
 
+   public FeedbackControlCommand<?> pollCommand()
+   {
+      if (commandList.isEmpty())
+         return null;
+      else
+         return commandList.remove(commandList.size() - 1);
+   }
+
    public int getNumberOfCommands()
    {
       return commandList.size();

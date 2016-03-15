@@ -28,6 +28,14 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
       return commandList.get(commandIndex);
    }
 
+   public InverseDynamicsCommand<?> pollCommand()
+   {
+      if (commandList.isEmpty())
+         return null;
+      else
+         return commandList.remove(getNumberOfCommands() - 1);
+   }
+
    public int getNumberOfCommands()
    {
       return commandList.size();
