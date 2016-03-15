@@ -8,7 +8,7 @@ public abstract class SolverWeightLevels
    public final static double LOW = 0.10;
    public final static double MEDIUM = 1.00;
 
-   public static final double CHEST_WEIGHT = MEDIUM;
+   public static final double CHEST_WEIGHT = HIGH;
    public static final double PELVIS_WEIGHT = MEDIUM;
    public static final double ARM_JOINTSPACE_WEIGHT = MEDIUM;
    public static final double HAND_TASKSPACE_WEIGHT = MEDIUM;
