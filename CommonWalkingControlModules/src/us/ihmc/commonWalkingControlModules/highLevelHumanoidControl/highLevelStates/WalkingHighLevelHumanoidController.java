@@ -32,6 +32,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
@@ -171,7 +173,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
-      this.footSwitches = momentumBasedController.getFootSwitches();
+      footSwitches = momentumBasedController.getFootSwitches();
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -179,7 +181,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       String namePrefix = "walking";
 
-      this.stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry); // this is used by name, and it is ugly.
+      stateMachine = new StateMachine<WalkingState>(namePrefix + "State", namePrefix + "SwitchTime", WalkingState.class, yoTime, registry); // this is used by name, and it is ugly.
 
       setupStateMachine();
 
@@ -277,11 +279,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.controllerCoreOuput = controllerCoreOuput;
    }
 
+   @Override
    public void initialize()
    {
       super.initialize();
 
       commandInputManager.flushBuffers();
+
+      PrivilegedConfigurationCommand command = new PrivilegedConfigurationCommand();
+      command.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
+      controllerCoreCommand.addInverseDynamicsCommand(command);
 
       initializeContacts();
 
@@ -349,7 +356,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public DoubleSupportState(RobotSide transferToSide)
       {
-         super((transferToSide == null) ? WalkingState.DOUBLE_SUPPORT : WalkingState.getTransferState(transferToSide));
+         super(transferToSide == null ? WalkingState.DOUBLE_SUPPORT : WalkingState.getTransferState(transferToSide));
          this.transferToSide = transferToSide;
       }
 
@@ -616,7 +623,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public SingleSupportState(RobotSide supportSide)
       {
          super(WalkingState.getSingleSupportState(supportSide));
-         this.swingSide = supportSide.getOppositeSide();
+         swingSide = supportSide.getOppositeSide();
          actualFootPoseInWorld = new FramePose(worldFrame);
       }
 
@@ -688,7 +695,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
 
-         if ((stateMachine.timeInCurrentState() - captureTime < 0.5 * walkingMessageHandler.getSwingTime())
+         if (stateMachine.timeInCurrentState() - captureTime < 0.5 * walkingMessageHandler.getSwingTime()
                && feetManager.isInSingularityNeighborhood(swingSide))
          {
             feetManager.doSingularityEscape(swingSide);
@@ -877,7 +884,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public DoubleSupportToSingleSupportConditionForDisturbanceRecovery(RobotSide robotSide)
       {
-         this.transferToSide = robotSide;
+         transferToSide = robotSide;
       }
 
       @Override
@@ -907,9 +914,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public StartWalkingCondition(RobotSide robotSide)
       {
-         this.transferToSide = robotSide;
+         transferToSide = robotSide;
       }
 
+      @Override
       public boolean checkCondition()
       {
          boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > walkingMessageHandler.getTransferTime();
@@ -949,9 +957,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public FlamingoStanceCondition(RobotSide robotSide)
       {
-         this.transferToSide = robotSide;
+         transferToSide = robotSide;
       }
 
+      @Override
       public boolean checkCondition()
       {
          boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > walkingMessageHandler.getTransferTime();
@@ -972,6 +981,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.robotSide = robotSide;
       }
 
+      @Override
       public boolean checkCondition()
       {
          boolean icpTrajectoryIsDone = balanceManager.isICPPlanDone();
@@ -1001,6 +1011,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.transferToSide = transferToSide;
       }
 
+      @Override
       public boolean checkCondition()
       {
          if (!super.checkCondition())
@@ -1020,6 +1031,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.supportSide = supportSide;
       }
 
+      @Override
       public boolean checkCondition()
       {
          RobotSide swingSide = supportSide.getOppositeSide();
@@ -1036,7 +1048,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                return true;
          }
 
-         if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
+         if (loadFoot.getBooleanValue() && yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue())
          {
             loadFoot.set(false);
             return true;
@@ -1068,6 +1080,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.supportSide = supportSide;
       }
 
+      @Override
       public boolean checkCondition()
       {
          if (abortWalkingRequested.getBooleanValue())
@@ -1107,6 +1120,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
 
+   @Override
    public void doMotionControl()
    {
       consumeHeadMessages();
@@ -1161,7 +1175,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       JointspaceFeedbackControlCommand unconstrainedJointCommand = doUnconstrainedJointControl();
 
       boolean keepCMPInsideSupportPolygon = true;
-      if ((manipulationControlModule != null) && (manipulationControlModule.isAtLeastOneHandLoadBearing()))
+      if (manipulationControlModule != null && manipulationControlModule.isAtLeastOneHandLoadBearing())
          keepCMPInsideSupportPolygon = false;
 
       balanceManager.compute(supportLeg.getEnumValue(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon);      
