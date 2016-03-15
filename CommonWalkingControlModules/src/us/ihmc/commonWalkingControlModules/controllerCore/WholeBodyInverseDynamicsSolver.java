@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,6 +45,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class WholeBodyInverseDynamicsSolver
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -61,7 +64,13 @@ public class WholeBodyInverseDynamicsSolver
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
    private final YoFrameVector desiredMomentumRateLinear;
-   private final YoFrameVector optimalMomentumRateLinear;
+   private final YoFrameVector achievedMomentumRateLinear;
+
+   private final Wrench residualRootJointWrench = new Wrench();
+   private final FrameVector residualRootJointForce = new FrameVector();
+   private final FrameVector residualRootJointTorque = new FrameVector();
+   private final YoFrameVector yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", worldFrame, registry);
+   private final YoFrameVector yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", worldFrame, registry);
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
@@ -94,7 +103,7 @@ public class WholeBodyInverseDynamicsSolver
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
       desiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
-      optimalMomentumRateLinear = new YoFrameVector("optimalMomentumRateLinear", centerOfMassFrame, registry);
+      achievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -134,7 +143,7 @@ public class WholeBodyInverseDynamicsSolver
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
       SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
 
-      optimalMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
+      achievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
 
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
@@ -148,6 +157,12 @@ public class WholeBodyInverseDynamicsSolver
       rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
+
+      rootJoint.getWrench(residualRootJointWrench);
+      residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
+      residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+      yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
+      yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
