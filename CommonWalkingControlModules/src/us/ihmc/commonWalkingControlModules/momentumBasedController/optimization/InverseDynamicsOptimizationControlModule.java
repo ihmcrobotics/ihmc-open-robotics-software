@@ -406,7 +406,7 @@ public class InverseDynamicsOptimizationControlModule
       long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
 
-      FramePoint bodyFixedPoint = command.getContactPoint();
+      FramePoint bodyFixedPoint = command.getBodyFixedPointToControl();
       FrameVector desiredAccelerationWithRespectToBase = command.getDesiredAcceleration();
 
       pointJacobian.set(jacobian, bodyFixedPoint);

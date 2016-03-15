@@ -330,7 +330,7 @@ public class MotionConstraintHandler
       long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
 
-      FramePoint bodyFixedPoint = command.getContactPoint();
+      FramePoint bodyFixedPoint = command.getBodyFixedPointToControl();
       FrameVector desiredAccelerationWithRespectToBase = command.getDesiredAcceleration();
       DenseMatrix64F selectionMatrix = command.getSelectionMatrix();
       double weight = command.getWeight();

@@ -14,7 +14,7 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
 {
    private boolean hasWeight;
    private double weight;
-   private final FramePoint contactPoint = new FramePoint();
+   private final FramePoint bodyFixedPointToControl = new FramePoint();
    private final FrameVector desiredAcceleration = new FrameVector();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(3);
 
@@ -58,7 +58,7 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
    @Override
    public void set(PointAccelerationCommand other)
    {
-      contactPoint.setIncludingFrame(other.contactPoint);
+      bodyFixedPointToControl.setIncludingFrame(other.bodyFixedPointToControl);
       desiredAcceleration.setIncludingFrame(other.desiredAcceleration);
       selectionMatrix.set(selectionMatrix);
       setWeight(other.weight);
@@ -72,7 +72,7 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
 
    public void set(FramePoint bodyFixedPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
    {
-      this.contactPoint.setIncludingFrame(bodyFixedPoint);
+      this.bodyFixedPointToControl.setIncludingFrame(bodyFixedPoint);
       this.desiredAcceleration.setIncludingFrame(desiredAcceleration);
       if (selectionMatrix != null)
          this.selectionMatrix.set(selectionMatrix);
@@ -128,9 +128,9 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
       return endEffectorName;
    }
 
-   public FramePoint getContactPoint()
+   public FramePoint getBodyFixedPointToControl()
    {
-      return contactPoint;
+      return bodyFixedPointToControl;
    }
 
    public FrameVector getDesiredAcceleration()
