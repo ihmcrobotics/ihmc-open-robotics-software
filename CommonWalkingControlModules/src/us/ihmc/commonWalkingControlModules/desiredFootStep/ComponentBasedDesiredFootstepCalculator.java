@@ -101,13 +101,13 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
 
-      FramePoint footstepPosition = getDesiredFootstepPosition(supportZUpFrame, swingLegSide, desiredHeadingFrame, footToWorldRotation);
+      FramePoint footstepPosition = getDesiredFootstepPosition(supportZUpFrame, swingLegSide, desiredHeadingFrame, footToWorldRotation, 0.0);
 
       setYoVariables(swingLegSide, footToWorldRotation, footstepPosition.getVectorCopy());
    }
 
    @Override
-   public FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep)
+   public FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep, double timeFromNow)
    {
       RobotSide futureSwingLegSide = supportLegSide;
       PoseReferenceFrame futureSupportFrame = new PoseReferenceFrame("futureSupportFrame", worldFrame);
@@ -115,10 +115,10 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       ZUpFrame futureSupportZUpFrame = new ZUpFrame(worldFrame, futureSupportFrame, "futureSupportZUpFrame");
       futureSupportZUpFrame.update();
 
-      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
+      ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getPredictedHeadingFrame(timeFromNow);
       Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
       FrameOrientation footstepOrientation = new FrameOrientation(worldFrame, footToWorldRotation);
-      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportZUpFrame, futureSwingLegSide, desiredHeadingFrame, footToWorldRotation);
+      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportZUpFrame, futureSwingLegSide, desiredHeadingFrame, footToWorldRotation, timeFromNow);
       footstepPosition.changeFrame(worldFrame);
 
       FootstepDataControllerCommand predictedFootstep = new FootstepDataControllerCommand();
@@ -129,9 +129,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    }
 
    private FramePoint getDesiredFootstepPosition(ReferenceFrame supportZUpFrame, RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame,
-         Matrix3d footToWorldRotation)
+         Matrix3d footToWorldRotation, double timeFromNow)
    {
-      FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupport(swingLegSide, desiredHeadingFrame);
+      FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupport(swingLegSide, desiredHeadingFrame, timeFromNow);
       FramePoint footstepPosition = computeDesiredFootPosition(swingLegSide, supportZUpFrame, desiredOffsetFromAnkle, footToWorldRotation);
       footstepPosition.changeFrame(worldFrame);
 
@@ -143,9 +143,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    private final FrameVector2d toLeftOfDesiredHeading = new FrameVector2d();
 
    // TODO: clean up
-   private FrameVector2d computeDesiredOffsetFromSupport(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
+   private FrameVector2d computeDesiredOffsetFromSupport(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame, double timeFromNow)
    {
-      desiredHeadingControlModule.getDesiredHeading(desiredHeading);
+      desiredHeadingControlModule.getDesiredHeading(desiredHeading, timeFromNow);
       desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
       toLeftOfDesiredHeading.setIncludingFrame(desiredHeading.getReferenceFrame(), -desiredHeading.getY(), desiredHeading.getX());
 

@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -36,6 +37,9 @@ public class ComponentBasedFootstepDataMessageGenerator
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final EnumYoVariable<RobotSide> nextSwingLeg = EnumYoVariable.create("nextSwingLeg", RobotSide.class, registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
+
+   private final DoubleYoVariable swingTime = new DoubleYoVariable("footstepGeneratorSwingTime", registry);
+   private final DoubleYoVariable transferTime = new DoubleYoVariable("footstepGeneratorTransferTime", registry);
 
    private final ComponentBasedDesiredFootstepCalculator componentBasedDesiredFootstepCalculator;
    private final ControllerCommandInputManager commandInputManager;
@@ -53,6 +57,8 @@ public class ComponentBasedFootstepDataMessageGenerator
             controlDT, useHeadingAndVelocityScript);
 
       walk.addVariableChangedListener(createVariableChangedListener());
+      swingTime.set(walkingControllerParameters.getDefaultSwingTime());
+      transferTime.set(walkingControllerParameters.getDefaultTransferTime());
 
       createFootstepStatusListener();
 
@@ -87,6 +93,8 @@ public class ComponentBasedFootstepDataMessageGenerator
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
       FootstepDataListControllerCommand footsteps = computeNextFootsteps(supportLeg);
+      footsteps.setSwingTime(swingTime.getDoubleValue());
+      footsteps.setTransferTime(transferTime.getDoubleValue());
       commandInputManager.submitModifiableMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);
@@ -129,10 +137,11 @@ public class ComponentBasedFootstepDataMessageGenerator
 
    private FootstepDataListControllerCommand computeNextFootsteps(RobotSide supportLeg)
    {
+      double stepTime = swingTime.getDoubleValue() + transferTime.getDoubleValue();
       FootstepDataListControllerCommand footsteps = new FootstepDataListControllerCommand();
       FootstepDataControllerCommand footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataControllerCommand nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep);
-      FootstepDataControllerCommand nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep);
+      FootstepDataControllerCommand nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
+      FootstepDataControllerCommand nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime);
 
       footsteps.addFootstep(footstep);
       footsteps.addFootstep(nextFootstep);

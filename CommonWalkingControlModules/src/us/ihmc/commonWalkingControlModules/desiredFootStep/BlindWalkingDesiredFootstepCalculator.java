@@ -96,7 +96,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    }
 
    @Override
-   public FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep)
+   public FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep, double timeFromNow)
    {
       RobotSide futureSwingLegSide = supportLegSide;
       PoseReferenceFrame futureSupportFrame = new PoseReferenceFrame("futureSupportFrame", worldFrame);

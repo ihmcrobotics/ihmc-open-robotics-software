@@ -102,7 +102,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    {
       //      desiredHeadingControlModule.updateDesiredHeadingFrame();
 
-      desiredHeadingControlModule.getDesiredHeading(desiredHeading);
+      desiredHeadingControlModule.getDesiredHeading(desiredHeading, 0.0);
       double previousDesiredHeadingAngle = desiredHeadingControlModule.getDesiredHeadingAngle();
 
       // State transitions:
