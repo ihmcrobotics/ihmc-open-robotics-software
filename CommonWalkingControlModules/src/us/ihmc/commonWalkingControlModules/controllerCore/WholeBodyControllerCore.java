@@ -88,8 +88,11 @@ public class WholeBodyControllerCore
       default:
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
+
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
       yoRootJointDesiredConfigurationData.clear();
+
+      controllerCoreCommand.clear();
    }
 
    public void compute()

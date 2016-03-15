@@ -163,9 +163,9 @@ public class WholeBodyFeedbackController
 
    public void submitFeedbackControlCommandList(FeedbackControlCommandList feedbackControlCommandList)
    {
-      for (int i = 0; i < feedbackControlCommandList.getNumberOfCommands(); i++)
+      while (feedbackControlCommandList.getNumberOfCommands() > 0)
       {
-         FeedbackControlCommand<?> feedbackControlCommand = feedbackControlCommandList.getCommand(i);
+         FeedbackControlCommand<?> feedbackControlCommand = feedbackControlCommandList.pollCommand();
          ControllerCoreCommandType commandType = feedbackControlCommand.getCommandType();
          switch (commandType)
          {

@@ -41,7 +41,7 @@ public class DoNothingBehavior extends HighLevelBehavior
          footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
       }
 
-      lowLevelOneDoFJointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
+      lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(allRobotJoints);
    }
 
@@ -60,6 +60,7 @@ public class DoNothingBehavior extends HighLevelBehavior
          allRobotJoints[i].setTau(0.0);
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(allRobotJoints[i], 0.0);
       }
+      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    @Override

@@ -1184,8 +1184,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       planeContactStateCommandPool.clear();
       double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded(footDesiredCoPs);
 
-      controllerCoreCommand.clear();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          InverseDynamicsCommand<?> footInverseDynamicsCommand = feetManager.getInverseDynamicsCommand(robotSide);
