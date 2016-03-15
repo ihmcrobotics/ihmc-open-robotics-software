@@ -300,6 +300,119 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testSolutionMethodsAreAllConsistent()
+   {
+      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+
+      // Minimize x^2 + y^2 subject to x + y = 2.0, y >= 0.5, y >= 3.0, y >= x-3  (-y <= -0.5, -y <= -3.0, x - y <= 3
+      solver.clear();
+      double[][] costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
+      double[] costLinearVector = new double[] { 0.0, 0.0 };
+      double quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      double[][] linearEqualityConstraintsAMatrix = new double[][] { { 1.0, 1.0 } };
+      double[] linearEqualityConstraintsBVector = new double[] { 2.0 };
+      solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+
+      double[][] linearInequalityConstraintsCMatrix = new double[][] { { 0.0, -1.0 }, { 0.0, -1.0 }, { 1.0, -1.0 } };
+      double[] linearInqualityConstraintsDVector = new double[] { -0.5, -3.0, 3.0 };
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      double[] solution = new double[2];
+      double[] lagrangeEqualityMultipliers = new double[1];
+      double[] lagrangeInequalityMultipliers = new double[3];
+      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(2, solution.length);
+      assertEquals(-1.0, solution[0], 1e-7);
+      assertEquals(3.0, solution[1], 1e-7);
+      assertEquals(2.0, lagrangeEqualityMultipliers[0], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
+      assertEquals(8.0, lagrangeInequalityMultipliers[1], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7);
+
+      DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
+      solutionMatrix.setData(solution);
+      double objectiveCost = solver.getObjectiveCost(solutionMatrix);
+      assertEquals(10.0, objectiveCost, 1e-7);
+
+      // Try with other solve method:
+      solver.clear();
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+      solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+      numberOfIterations = solver.solve(solution);
+
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(2, solution.length);
+      assertEquals(-1.0, solution[0], 1e-7);
+      assertEquals(3.0, solution[1], 1e-7);
+      assertEquals(2.0, lagrangeEqualityMultipliers[0], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
+      assertEquals(8.0, lagrangeInequalityMultipliers[1], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7);
+
+      solutionMatrix.setData(solution);
+      objectiveCost = solver.getObjectiveCost(solutionMatrix);
+      assertEquals(10.0, objectiveCost, 1e-7);
+
+      // Try with other solve method:
+      solver.clear();
+      DenseMatrix64F quadraticCostMatrix64F = new DenseMatrix64F(costQuadraticMatrix);
+      DenseMatrix64F linearCostVector64F = new DenseMatrix64F(costLinearVector.length, 1);
+      linearCostVector64F.setData(costLinearVector);
+
+      solver.setQuadraticCostFunction(quadraticCostMatrix64F, linearCostVector64F, quadraticCostScalar);
+      solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      DenseMatrix64F solutionMatrix64F = new DenseMatrix64F(quadraticCostMatrix64F.getNumRows(), 1);
+      DenseMatrix64F lagrangeEqualityMultipliers64F = new DenseMatrix64F(linearEqualityConstraintsAMatrix.length, 1);
+      DenseMatrix64F lagrangeInequalityMultipliers64F = new DenseMatrix64F(linearInequalityConstraintsCMatrix.length, 1);
+      numberOfIterations = solver.solve(solutionMatrix64F, lagrangeEqualityMultipliers64F, lagrangeInequalityMultipliers64F);
+
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(2, solutionMatrix64F.getNumRows());
+      assertEquals(-1.0, solutionMatrix64F.get(0, 0), 1e-7);
+      assertEquals(3.0, solutionMatrix64F.get(1, 0), 1e-7);
+      assertEquals(2.0, lagrangeEqualityMultipliers64F.get(0, 0), 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers64F.get(0, 0), 1e-7);
+      assertEquals(8.0, lagrangeInequalityMultipliers64F.get(1, 0), 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers64F.get(2, 0), 1e-7);
+
+      objectiveCost = solver.getObjectiveCost(solutionMatrix64F);
+      assertEquals(10.0, objectiveCost, 1e-7);
+
+      // Try with other solve method:
+      solver = createSolverToTest();
+
+      solver.setQuadraticCostFunction(quadraticCostMatrix64F, linearCostVector64F, quadraticCostScalar);
+      solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+
+      DenseMatrix64F linearInequalityConstraintsCMatrix64F = new DenseMatrix64F(linearInequalityConstraintsCMatrix);
+      DenseMatrix64F linearInqualityConstraintsDVector64F = new DenseMatrix64F(linearInqualityConstraintsDVector.length, 1);
+      linearInqualityConstraintsDVector64F.setData(linearInqualityConstraintsDVector);
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix64F, linearInqualityConstraintsDVector64F);
+
+      solutionMatrix64F.zero();
+      numberOfIterations = solver.solve(solutionMatrix64F);
+
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(2, solutionMatrix64F.getNumRows());
+      assertEquals(-1.0, solutionMatrix64F.get(0, 0), 1e-7);
+      assertEquals(3.0, solutionMatrix64F.get(1, 0), 1e-7);
+
+      objectiveCost = solver.getObjectiveCost(solutionMatrix64F);
+      assertEquals(10.0, objectiveCost, 1e-7);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test2DCasesWithPolygonConstraints()
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
