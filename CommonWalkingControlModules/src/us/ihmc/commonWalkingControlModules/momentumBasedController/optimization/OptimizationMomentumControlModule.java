@@ -452,7 +452,7 @@ public class OptimizationMomentumControlModule
 
    private void setPlaneContactStateCommand(PlaneContactStateCommand contactStateCommand)
    {
-      wrenchMatrixCalculator.setPlaneContactStateCommand(contactStateCommand);
+      wrenchMatrixCalculator.submitPlaneContactStateCommand(contactStateCommand);
    }
 
    private void setExternalWrenchToCompensateFor(ExternalWrenchCommand externalWrenchCommand)

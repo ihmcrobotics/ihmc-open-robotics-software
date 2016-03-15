@@ -106,7 +106,7 @@ public class PlaneContactWrenchMatrixCalculatorTest
          PlaneContactWrenchMatrixCalculator calculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, nContactPoints,
                nSupportVectorsPerContactPoint, wRho, wRhoSmoother, wRhoPenalizer, contactablePlaneBodies, registry);
          for (int i = 0; i < pool.size(); i++)
-            calculator.setPlaneContactStateCommand(pool.get(i));
+            calculator.submitPlaneContactStateCommand(pool.get(i));
          calculator.computeMatrices();
          DenseMatrix64F q = calculator.getQRho();
 

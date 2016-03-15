@@ -234,7 +234,7 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
-      wrenchMatrixCalculator.setPlaneContactStateCommand(command);
+      wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
    }
 
    public void submitExternalWrenchCommand(ExternalWrenchCommand command)
