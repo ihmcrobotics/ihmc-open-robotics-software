@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
@@ -42,6 +43,8 @@ public class UserControlModeState extends HandControlState
          userDesiredJointAccelerations[i] = new DoubleYoVariable("qdd_d_user_" + jointName, registry);
          jointspaceAccelerationCommand.addJoint(userControlledJoints[i], Double.NaN);
       }
+
+      jointspaceAccelerationCommand.setWeight(SolverWeightLevels.HIGH);
 
       timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfsLastUserMesage", registry);
       timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
