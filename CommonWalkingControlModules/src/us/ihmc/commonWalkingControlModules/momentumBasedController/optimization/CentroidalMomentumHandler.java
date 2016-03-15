@@ -17,6 +17,7 @@ import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -45,11 +46,11 @@ public class CentroidalMomentumHandler
    private final ReferenceFrame centerOfMassFrame;
    private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
 
-   public CentroidalMomentumHandler(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
+   public CentroidalMomentumHandler(RigidBody rootBody, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
-      this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
+      this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
 
-      this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(ScrewTools.getRootBody(rootJoint.getPredecessor()), centerOfMassFrame);
+      this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(rootBody, centerOfMassFrame);
       this.previousCentroidalMomentumMatrix = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(),
             centroidalMomentumMatrix.getMatrix().getNumCols());
       yoPreviousCentroidalMomentumMatrix = new DoubleYoVariable[previousCentroidalMomentumMatrix.getNumRows()][previousCentroidalMomentumMatrix.getNumCols()];
@@ -71,8 +72,8 @@ public class CentroidalMomentumHandler
 
       parentRegistry.addChild(registry);
 
-      this.centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(rootJoint.getPredecessor(), centerOfMassFrame, v,
-            TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()));
+      double robotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      this.centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(rootBody, centerOfMassFrame, v, robotMass);
    }
 
    public void initialize()

@@ -21,7 +21,7 @@ public class InverseDynamicsQPSolver
    private static final boolean HACK_RHO_LOWER_BOUND = false;
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
    private static final boolean DEBUG = true;
-   private static final boolean USE_JERRY_SOLVER = true;
+   private static final boolean USE_JERRY_SOLVER = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -333,6 +333,11 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F jacobianForPrivilegedJointAccelerations = new DenseMatrix64F(1, 1);
 
    private final DampedLeastSquaresSolver pseudoInverseSolver;
+
+   public void setPrivilegedMotionInput(PrivilegedMotionQPInput input)
+   {
+      projectPrivilegedJointAccelerationsInNullspaceOfPreviousTasks(input.selectionMatrix, input.privilegedJointspaceMotion, input.weightMatrix);
+   }
 
    public void projectPrivilegedJointAccelerationsInNullspaceOfPreviousTasks(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointAccelerations,
          DenseMatrix64F weight)

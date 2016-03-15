@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.PrivilegedMotionQPInput;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -155,6 +156,11 @@ public class InverseKinematicsQPSolver
    private final DenseMatrix64F jacobianForPrivilegedJointVelocities = new DenseMatrix64F(1, 1);
 
    private final DampedLeastSquaresSolver pseudoInverseSolver;
+
+   public void setPrivilegedMotionInput(PrivilegedMotionQPInput input)
+   {
+      projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(input.selectionMatrix, input.privilegedJointspaceMotion, input.weightMatrix);
+   }
 
    public void projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointVelocities,
          DenseMatrix64F weight)
