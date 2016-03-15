@@ -177,7 +177,7 @@ public class InverseDynamicsQPSolver
          addJointJerkRegularization();
    }
 
-   public void addMotionInput(InverseDynamicsMotionQPInput input)
+   public void addMotionInput(MotionQPInput input)
    {
       if (input.isMotionConstraint())
          addMotionConstraint(input.taskJacobian, input.taskObjective);

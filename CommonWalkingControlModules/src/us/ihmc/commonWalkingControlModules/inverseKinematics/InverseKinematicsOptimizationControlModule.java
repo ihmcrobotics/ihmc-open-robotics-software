@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -38,7 +39,7 @@ public class InverseKinematicsOptimizationControlModule
    private final CentroidalMomentumMatrix centroidalMomentumMatrixCalculator;
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
    private final InverseKinematicsQPSolver qpSolver;
-   private final InverseKinematicsMotionQPInput motionQPInput;
+   private final MotionQPInput motionQPInput;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final int numberOfDoFs;
@@ -72,7 +73,7 @@ public class InverseKinematicsOptimizationControlModule
       centroidalMomentumMatrixCalculator = new CentroidalMomentumMatrix(rootJoint.getPredecessor(), centerOfMassFrame);
       privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(jointsToOptimizeFor, registry);
       partialCentroidalMomtentumMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, numberOfDoFs);
-      motionQPInput = new InverseKinematicsMotionQPInput(numberOfDoFs);
+      motionQPInput = new MotionQPInput(numberOfDoFs);
 
       for (InverseDynamicsJoint joint : jointsToOptimizeFor)
       {

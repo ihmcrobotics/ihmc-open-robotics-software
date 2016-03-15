@@ -2,17 +2,17 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 
-public class InverseDynamicsMotionQPInput
+public class MotionQPInput
 {
-   final DenseMatrix64F taskJacobian;
-   final DenseMatrix64F taskObjective;
-   final DenseMatrix64F taskWeightMatrix;
+   public final DenseMatrix64F taskJacobian;
+   public final DenseMatrix64F taskObjective;
+   public final DenseMatrix64F taskWeightMatrix;
    private double taskWeightScalar;
    private boolean useWeightScalar = false;
    private boolean isMotionConstraint = false;
    private final int numberOfDoFs;
 
-   public InverseDynamicsMotionQPInput(int numberOfDoFs)
+   public MotionQPInput(int numberOfDoFs)
    {
       this.numberOfDoFs = numberOfDoFs;
       taskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);

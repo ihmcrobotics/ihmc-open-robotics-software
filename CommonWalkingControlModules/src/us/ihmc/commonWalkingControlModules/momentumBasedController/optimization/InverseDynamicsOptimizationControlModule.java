@@ -57,7 +57,7 @@ public class InverseDynamicsOptimizationControlModule
    private final PlaneContactWrenchMatrixCalculator wrenchMatrixCalculator;
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final InverseDynamicsQPSolver qpSolver;
-   private final InverseDynamicsMotionQPInput motionQPInput;
+   private final MotionQPInput motionQPInput;
    private final ExternalWrenchHandler externalWrenchHandler;
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
 
@@ -115,7 +115,7 @@ public class InverseDynamicsOptimizationControlModule
       centroidalMomentumHandler = new CentroidalMomentumHandler(rootJoint, centerOfMassFrame, registry);
       wrenchMatrixCalculator = new PlaneContactWrenchMatrixCalculator(centerOfMassFrame, rhoSize, maxNPointsPerPlane, maxNSupportVectors, wRho, wRhoSmoother, 
             wRhoPenalizer, contactablePlaneBodies, registry);
-      motionQPInput = new InverseDynamicsMotionQPInput(numberOfDoFs);
+      motionQPInput = new MotionQPInput(numberOfDoFs);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
       privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(jointsToOptimizeFor, registry);
 
