@@ -32,8 +32,8 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsOptimizationControlModule
 {
-   private static final boolean SETUP_JOINT_LIMIT_CONSTRAINTS = false;
-   private static final boolean SETUP_RHO_TASKS = true;
+   private static final boolean SETUP_JOINT_LIMIT_CONSTRAINTS = true;
+   private static final boolean SETUP_RHO_TASKS = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -52,6 +52,7 @@ public class InverseDynamicsOptimizationControlModule
    private final OneDoFJoint[] oneDoFJoints;
    private final DenseMatrix64F qDDotMinMatrix, qDDotMaxMatrix;
 
+   private final JointIndexHandler jointIndexHandler;
    private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumAccelerations = new HashMap<>();
 
@@ -59,7 +60,7 @@ public class InverseDynamicsOptimizationControlModule
          YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
-      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
@@ -166,8 +167,9 @@ public class InverseDynamicsOptimizationControlModule
       {
          OneDoFJoint joint = oneDoFJoints[i];
          
-         double qDDotMin = qDDotMinMatrix.get(i, 0);
-         double qDDotMax = qDDotMaxMatrix.get(i, 0);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         double qDDotMin = qDDotMinMatrix.get(jointIndex, 0);
+         double qDDotMax = qDDotMaxMatrix.get(jointIndex, 0);
          jointMinimumAccelerations.get(joint).set(qDDotMin);
          jointMaximumAccelerations.get(joint).set(qDDotMax);
       }
