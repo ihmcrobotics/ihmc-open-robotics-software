@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -30,9 +31,11 @@ public class WholeBodyControlCoreToolbox
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final double gravityZ;
 
-   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ,
-         GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final JointIndexHandler jointIndexHandler;
+
+   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints, CommonHumanoidReferenceFrames referenceFrames,
+         double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
+         List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
@@ -42,6 +45,8 @@ public class WholeBodyControlCoreToolbox
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+
+      this.jointIndexHandler = new JointIndexHandler(controlledJoints);
    }
 
    public TwistCalculator getTwistCalculator()
@@ -112,5 +117,10 @@ public class WholeBodyControlCoreToolbox
    public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
    {
       return contactablePlaneBodies;
+   }
+
+   public JointIndexHandler getJointIndexHandler()
+   {
+      return jointIndexHandler;
    }
 }

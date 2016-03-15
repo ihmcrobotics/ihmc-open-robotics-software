@@ -261,8 +261,8 @@ public class MomentumBasedControllerFactory
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
       walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, referenceFrames, controlDT, gravityZ, geometricJacobianHolder,
-            twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, jointsToOptimizeFor, referenceFrames, controlDT, gravityZ,
+            geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
       FeedbackControlCommandList template = variousWalkingManagers.createFeedbackControlTemplate();
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, momentumOptimizationSettings, template, registry);
       ControllerCoreOuput controllerCoreOuput = controllerCore.getOutputForHighLevelController();

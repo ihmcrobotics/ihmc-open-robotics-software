@@ -1,11 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.LinkedHashMap;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
@@ -45,8 +42,6 @@ public class MotionQPInputCalculator
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final OneDoFJoint[] oneDoFJoints;
-   private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
-   private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
 
    private final FrameVector pPointVelocity = new FrameVector();
    private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
@@ -66,25 +61,19 @@ public class MotionQPInputCalculator
 
    private final double controlDT;
 
+   private final JointIndexHandler jointIndexHandler;
+
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-         InverseDynamicsJoint[] jointsToOptimizeFor, double controlDT, YoVariableRegistry parentRegistry)
+         JointIndexHandler jointIndexHandler, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.geometricJacobianHolder = geometricJacobianHolder;
-      this.jointsToOptimizeFor = jointsToOptimizeFor;
+      this.jointIndexHandler = jointIndexHandler;
+      this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       this.controlDT = controlDT;
-      oneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
+      oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
       centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, parentRegistry);
-      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(jointsToOptimizeFor, parentRegistry);
-
-      for (InverseDynamicsJoint joint : jointsToOptimizeFor)
-      {
-         TIntArrayList listToPackIndices = new TIntArrayList();
-         ScrewTools.computeIndexForJoint(jointsToOptimizeFor, listToPackIndices, joint);
-         int[] indices = listToPackIndices.toArray();
-
-         columnsForJoints.put(joint, indices);
-      }
+      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, parentRegistry);
    }
 
    public void update()
@@ -117,7 +106,10 @@ public class MotionQPInputCalculator
       privilegedMotionQPInputToPack.setWeight(privilegedConfigurationHandler.getWeight());
 
       OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
-      compactBlockToFullBlock(joints, selectionMatrix, privilegedMotionQPInputToPack.selectionMatrix);
+      boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, privilegedMotionQPInputToPack.selectionMatrix);
+
+      if (!success)
+         return false;
 
       return true;
    }
@@ -142,7 +134,10 @@ public class MotionQPInputCalculator
       privilegedMotionQPInputToPack.setWeight(privilegedConfigurationHandler.getWeight());
 
       OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
-      compactBlockToFullBlock(joints, selectionMatrix, privilegedMotionQPInputToPack.selectionMatrix);
+      boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, privilegedMotionQPInputToPack.selectionMatrix);
+
+      if (!success)
+         return false;
 
       return true;
    }
@@ -184,7 +179,10 @@ public class MotionQPInputCalculator
 
       tempTaskJacobian.reshape(selectionMatrix.getNumRows(), pointJacobianMatrix.getNumCols());
       CommonOps.mult(selectionMatrix, pointJacobianMatrix, tempTaskJacobian);
-      compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+      boolean success = jointIndexHandler.compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
+      if (!success)
+         return false;
 
       pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
       pPointVelocity.scale(-1.0);
@@ -224,7 +222,10 @@ public class MotionQPInputCalculator
       // Compute the task Jacobian: J = S * J
       tempTaskJacobian.reshape(taskSize, jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), tempTaskJacobian);
-      compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+      boolean success = jointIndexHandler.compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
+      if (!success)
+         return false;
 
       // Compute the task objective: p = S * ( TDot - JDot qDot )
       convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, convectiveTerm);
@@ -265,7 +266,10 @@ public class MotionQPInputCalculator
       // Compute the task Jacobian: J = S * J
       tempTaskJacobian.reshape(taskSize, jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), tempTaskJacobian);
-      compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+      boolean success = jointIndexHandler.compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
+      if (!success)
+         return false;
 
       // Compute the task objective: p = S * T
       spatialVelocity.getMatrix(tempTaskObjective, 0);
@@ -371,7 +375,7 @@ public class MotionQPInputCalculator
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
          InverseDynamicsJoint joint = commandToConvert.getJoint(jointIndex);
-         int[] columns = columnsForJoints.get(joint);
+         int[] columns = jointIndexHandler.getJointIndices(joint);
          if (columns == null)
             return false;
          for (int column : columns)
@@ -408,7 +412,7 @@ public class MotionQPInputCalculator
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
          InverseDynamicsJoint joint = commandToConvert.getJoint(jointIndex);
-         int[] columns = columnsForJoints.get(joint);
+         int[] columns = jointIndexHandler.getJointIndices(joint);
          if (columns == null)
             return false;
          for (int column : columns)
@@ -429,10 +433,10 @@ public class MotionQPInputCalculator
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         int index = columnsForJoints.get(joint)[0];
+         int index = jointIndexHandler.getOneDoFJointIndex(joint);
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();
-         
+
          double qDDotMin = Double.NEGATIVE_INFINITY;
          double qDDotMax = Double.POSITIVE_INFINITY;
 
@@ -461,7 +465,7 @@ public class MotionQPInputCalculator
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         int index = columnsForJoints.get(joint)[0];
+         int index = jointIndexHandler.getOneDoFJointIndex(joint);
          double jointLimitLower = joint.getJointLimitLower();
          if (Double.isFinite(jointLimitLower))
             qDotMinToPack.set(index, 0, (jointLimitLower - joint.getQ()) / controlDT);
@@ -485,42 +489,5 @@ public class MotionQPInputCalculator
    {
       centroidalMomentumHandler.computeCentroidalMomentumRate(jointsToOptimizeFor, jointAccelerations);
       return centroidalMomentumHandler.getCentroidalMomentumRate();
-   }
-
-   private void compactBlockToFullBlock(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
-   {
-      fullMatrix.zero();
-
-      for (int index = 0; index < joints.length; index++)
-      {
-         InverseDynamicsJoint joint = joints[index];
-         indicesIntoCompactBlock.reset();
-         ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
-         int[] indicesIntoFullBlock = columnsForJoints.get(joint);
-
-         if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
-            return;
-
-         for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
-         {
-            int compactBlockIndex = indicesIntoCompactBlock.get(i);
-            int fullBlockIndex = indicesIntoFullBlock[i];
-            CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
-         }
-      }
-   }
-
-   public int getOneDoFJointIndex(OneDoFJoint joint)
-   {
-      int[] jointIndices = columnsForJoints.get(joint);
-      if (jointIndices == null)
-         return -1;
-      else
-         return jointIndices[0];
-   }
-
-   public int[] getJointIndices(InverseDynamicsJoint joint)
-   {
-      return columnsForJoints.get(joint);
    }
 }
