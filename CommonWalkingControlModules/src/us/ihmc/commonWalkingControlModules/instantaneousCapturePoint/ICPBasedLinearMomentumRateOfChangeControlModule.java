@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorT
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -52,6 +53,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
+   private final DoubleYoVariable momentumRateWeight = new DoubleYoVariable("momentumRateWeight", registry);
+
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -69,8 +72,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       this.gravityZ = gravityZ;
       parentRegistry.addChild(registry);
 
+      momentumRateWeight.set(SolverWeightLevels.MOMENTUM_WEIGHT);
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
-      momentumRateCommand.setWeights(SolverWeightLevels.MOMENTUM_WEIGHT, SolverWeightLevels.MOMENTUM_WEIGHT);
+      momentumRateCommand.setWeight(momentumRateWeight.getDoubleValue());
    }
 
    public void compute()
@@ -101,6 +105,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
       momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+      momentumRateCommand.setWeight(momentumRateWeight.getDoubleValue());
    }
 
    private final FramePoint cmp3d = new FramePoint();
