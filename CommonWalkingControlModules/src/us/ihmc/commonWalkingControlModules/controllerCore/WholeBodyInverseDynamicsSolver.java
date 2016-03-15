@@ -6,8 +6,16 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
@@ -140,9 +148,41 @@ public class WholeBodyInverseDynamicsSolver
       wrenchVisualizer.visualize(externalWrenchSolution);
    }
 
-   public void submitInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
+   public void submitInverseDynamicsCommandList(InverseDynamicsCommandList inverseDynamicsCommandList)
    {
-      optimizationControlModule.submitInverseDynamicsCommand(inverseDynamicsCommand);
+      while (inverseDynamicsCommandList.getNumberOfCommands() > 0)
+      {
+         InverseDynamicsCommand<?> command = inverseDynamicsCommandList.pollCommand();
+         switch (command.getCommandType())
+         {
+         case TASKSPACE:
+            optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
+            break;
+         case POINT:
+            optimizationControlModule.submitPointAccelerationCommand((PointAccelerationCommand) command);
+            break;
+         case JOINTSPACE:
+            optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
+            break;
+         case MOMENTUM:
+            optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
+            break;
+         case PRIVILEGED_CONFIGURATION:
+            optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
+            break;
+         case EXTERNAL_WRENCH:
+            optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
+            break;
+         case PLANE_CONTACT_STATE:
+            optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
+            break;
+         case COMMAND_LIST:
+            submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
+            break;
+         default:
+            throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
+         }
+      }
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()

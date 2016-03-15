@@ -78,7 +78,7 @@ public class WholeBodyControllerCore
       {
       case INVERSE_DYNAMICS:
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
-         inverseDynamicsSolver.submitInverseDynamicsCommand(controllerCoreCommand.getInverseDynamicsCommandList());
+         inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
          break;
       case INVERSE_KINEMATICS:
          inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
@@ -103,7 +103,7 @@ public class WholeBodyControllerCore
          feedbackController.compute();
          InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
          numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
-         inverseDynamicsSolver.submitInverseDynamicsCommand(feedbackControllerOutput);
+         inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
          inverseDynamicsSolver.compute();
          LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();
          RootJointDesiredConfigurationDataReadOnly inverseDynamicsOutputForRootJoint = inverseDynamicsSolver.getOutputForRootJoint();
