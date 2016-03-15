@@ -25,6 +25,10 @@ public interface SimpleActiveSetQPSolverInterface
 
    public abstract int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack);
 
+   public abstract int solve(double[] solutionToPack);
+
    public abstract int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack, DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack);
+
+   public abstract int solve(DenseMatrix64F solutionToPack);
 
 }

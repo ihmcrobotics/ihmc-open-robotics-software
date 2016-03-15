@@ -26,9 +26,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    private final DenseMatrix64F linearInequalityConstraintsCMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F linearInequalityConstraintsDVector = new DenseMatrix64F(0, 0);
 
-   private final DenseMatrix64F augmentedLinearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F augmentedLinearEqualityConstraintsBVector = new DenseMatrix64F(0, 0);
-
    private final ArrayList<Integer> activeSetIndices = new ArrayList<>();
 
    // Some temporary matrices:
@@ -86,9 +83,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       linearInequalityConstraintsCMatrix.reshape(0, 0);
       linearInequalityConstraintsDVector.reshape(0, 0);
-
-      augmentedLinearEqualityConstraintsAMatrix.reshape(0, 0);
-      augmentedLinearEqualityConstraintsBVector.reshape(0, 0);
 
       CBar.reshape(0, 0);
       DBar.reshape(0, 0);
@@ -165,6 +159,18 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    }
 
    @Override
+   public int solve(double[] solutionToPack)
+   {
+      int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfInequalityConstraints = linearInequalityConstraintsCMatrix.getNumRows();
+      
+      double[] lagrangeEqualityConstraintMultipliersToPack = new double[numberOfEqualityConstraints];
+      double[] lagrangeInequalityConstraintMultipliersToPack = new double[numberOfInequalityConstraints];
+      
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack);
+   }
+ 
+   @Override
    public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack)
    {
       int numberOfVariables = quadraticCostQMatrix.getNumCols();
@@ -207,6 +213,21 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       return numberOfIterations;
    }
 
+   private final DenseMatrix64F lagrangeEqualityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F lagrangeInequalityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+   
+   @Override
+   public int solve(DenseMatrix64F solutionToPack)
+   {
+      int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfInequalityConstraints = linearInequalityConstraintsCMatrix.getNumRows();
+      
+      lagrangeEqualityConstraintMultipliersToThrowAway.reshape(numberOfEqualityConstraints, 1);
+      lagrangeInequalityConstraintMultipliersToThrowAway.reshape(numberOfInequalityConstraints, 1);
+      
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToThrowAway, lagrangeInequalityConstraintMultipliersToThrowAway);
+   }
+   
    @Override
    public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack, DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack)
    {
@@ -220,9 +241,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       lagrangeEqualityConstraintMultipliersToPack.zero();
       lagrangeInequalityConstraintMultipliersToPack.reshape(numberOfInequalityConstraints, 1);
       lagrangeInequalityConstraintMultipliersToPack.zero();
-
-      augmentedLinearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
-      augmentedLinearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
 
       computeQInverseAndAQInverse();
       CBar.reshape(0, 0);
@@ -359,22 +377,12 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       // Add active set constraints as equality constraints:
       int sizeOfActiveSet = activeSetIndices.size();
 
-      augmentedLinearEqualityConstraintsAMatrix.reshape(numberOfEqualityConstraints + sizeOfActiveSet, numberOfVariables);
-      augmentedLinearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints + sizeOfActiveSet, 1);
-
       CBar.reshape(sizeOfActiveSet, numberOfVariables);
       DBar.reshape(sizeOfActiveSet, 1);
-
-      CommonOps.insert(linearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsAMatrix, 0, 0);
-      CommonOps.insert(linearEqualityConstraintsBVector, augmentedLinearEqualityConstraintsBVector, 0, 0);
 
       for (int i = 0; i < sizeOfActiveSet; i++)
       {
          Integer inequalityConstraintIndex = activeSetIndices.get(i);
-         CommonOps.extract(linearInequalityConstraintsCMatrix, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, numberOfVariables, augmentedLinearEqualityConstraintsAMatrix, numberOfEqualityConstraints + i,
-               0);
-         CommonOps.extract(linearInequalityConstraintsDVector, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, 1, augmentedLinearEqualityConstraintsBVector, numberOfEqualityConstraints + i, 0);
-
          CommonOps.extract(linearInequalityConstraintsCMatrix, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, numberOfVariables, CBar, i, 0);
          CommonOps.extract(linearInequalityConstraintsDVector, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, 1, DBar, i, 0);
       }

@@ -110,6 +110,18 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       //      this.linearInequalityConstraintsCMatrixTranspose.set(CommonOps.transpose(linearInequalityConstraintsCMatrix, null));
    }
 
+   @Override
+   public int solve(double[] solutionToPack)
+   {
+      int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfInequalityConstraints = linearInequalityConstraintsCMatrix.getNumRows();
+      
+      double[] lagrangeEqualityConstraintMultipliersToPack = new double[numberOfEqualityConstraints];
+      double[] lagrangeInequalityConstraintMultipliersToPack = new double[numberOfInequalityConstraints];
+      
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack);
+   }
+ 
    public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack)
    {
       int numberOfVariables = quadraticCostQMatrix.getNumCols();
@@ -150,6 +162,21 @@ public class SimpleInefficientActiveSetQPSolver implements SimpleActiveSetQPSolv
       }
 
       return numberOfIterations;
+   }
+
+   private final DenseMatrix64F lagrangeEqualityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F lagrangeInequalityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
+
+   @Override
+   public int solve(DenseMatrix64F solutionToPack)
+   {
+      int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfInequalityConstraints = linearInequalityConstraintsCMatrix.getNumRows();
+      
+      lagrangeEqualityConstraintMultipliersToThrowAway.reshape(numberOfEqualityConstraints, 1);
+      lagrangeInequalityConstraintMultipliersToThrowAway.reshape(numberOfInequalityConstraints, 1);
+      
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToThrowAway, lagrangeInequalityConstraintMultipliersToThrowAway);
    }
 
    public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack, DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack)
