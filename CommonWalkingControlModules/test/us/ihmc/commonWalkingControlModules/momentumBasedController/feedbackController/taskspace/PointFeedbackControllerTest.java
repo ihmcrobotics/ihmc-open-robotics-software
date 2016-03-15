@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleInefficientActiveSetQPSolver;
@@ -51,7 +52,7 @@ public class PointFeedbackControllerTest
       Vector3d[] jointAxes = new Vector3d[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
-      
+
       YoVariableRegistry registry = new YoVariableRegistry("Dummy");
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
@@ -68,7 +69,7 @@ public class PointFeedbackControllerTest
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      
+
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
@@ -76,9 +77,10 @@ public class PointFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, controlDT, 0.0, geometricJacobianHolder, twistCalculator, null, null);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, controlDT, 0.0, geometricJacobianHolder,
+            twistCalculator, null, null);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, registry);
-      
+
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);
       PositionPIDGains gains = new PositionPIDGains();
@@ -93,7 +95,9 @@ public class PointFeedbackControllerTest
       MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointsToOptimizeFor, 0.0, registry);
+      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
+            jointIndexHandler, 0.0, registry);
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
@@ -121,7 +125,7 @@ public class PointFeedbackControllerTest
          ScrewTools.setVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
          ScrewTools.setJointPositions(jointsToOptimizeFor, integrator.getJointConfigurations());
          elevator.updateFramesRecursively();
-         
+
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);
@@ -141,7 +145,7 @@ public class PointFeedbackControllerTest
       Vector3d[] jointAxes = new Vector3d[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
-      
+
       YoVariableRegistry registry = new YoVariableRegistry("Dummy");
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
@@ -158,7 +162,7 @@ public class PointFeedbackControllerTest
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      
+
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
@@ -166,9 +170,10 @@ public class PointFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, controlDT, 0.0, geometricJacobianHolder, twistCalculator, null, null);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, controlDT, 0.0, geometricJacobianHolder,
+            twistCalculator, null, null);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, registry);
-      
+
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);
       PositionPIDGains gains = new PositionPIDGains();
@@ -183,7 +188,9 @@ public class PointFeedbackControllerTest
       MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointsToOptimizeFor, 0.0, registry);
+      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
+            jointIndexHandler, 0.0, registry);
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromJerryQP = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromQPOASES = new DenseMatrix64F(numberOfDoFs, 1);
@@ -191,20 +198,19 @@ public class PointFeedbackControllerTest
 
       SimpleInefficientActiveSetQPSolver jerryQPSolver = new SimpleInefficientActiveSetQPSolver();
       OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver(registry);
-      
+
       DenseMatrix64F solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       DenseMatrix64F solverInput_f = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F solverInput_Aeq = new DenseMatrix64F(0, numberOfDoFs);
       DenseMatrix64F solverInput_beq = new DenseMatrix64F(0, 1);
       DenseMatrix64F solverInput_Ain = new DenseMatrix64F(0, numberOfDoFs);
       DenseMatrix64F solverInput_bin = new DenseMatrix64F(0, 1);
-      DenseMatrix64F solverInput_lb  = new DenseMatrix64F(numberOfDoFs, 1);
-      DenseMatrix64F solverInput_ub  = new DenseMatrix64F(numberOfDoFs, 1);
+      DenseMatrix64F solverInput_lb = new DenseMatrix64F(numberOfDoFs, 1);
+      DenseMatrix64F solverInput_ub = new DenseMatrix64F(numberOfDoFs, 1);
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
       DenseMatrix64F tempJtW = new DenseMatrix64F(numberOfDoFs, 3);
-
 
       FramePoint currentPosition = new FramePoint();
       FrameVector errorVector = new FrameVector();
@@ -222,17 +228,18 @@ public class PointFeedbackControllerTest
          motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
 
          MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
-         CommonOps.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H);  // H = J^T W J
+         CommonOps.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J
          CommonOps.mult(tempJtW, motionQPInput.taskObjective, solverInput_f); // f = - J^T W xDDot
          CommonOps.scale(-1.0, solverInput_f);
-         
+
          for (int diag = 0; diag < numberOfDoFs; diag++)
             solverInput_H.add(diag, diag, 1e-8);
-         
+
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
          jerryQPSolver.solve(jointAccelerationsFromJerryQP, new DenseMatrix64F(1, 1), new DenseMatrix64F(1, 1));
-         oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub, jointAccelerationsFromQPOASES, true);
+         oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
+               jointAccelerationsFromQPOASES, true);
 
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
@@ -243,10 +250,10 @@ public class PointFeedbackControllerTest
          ScrewTools.setVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
          ScrewTools.setJointPositions(jointsToOptimizeFor, integrator.getJointConfigurations());
          elevator.updateFramesRecursively();
-         
+
          assertArrayEquals(jointAccelerations.data, jointAccelerationsFromJerryQP.data, 1.0e-6);
          assertArrayEquals(jointAccelerations.data, jointAccelerationsFromQPOASES.data, 2.0e-1);
-         
+
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);

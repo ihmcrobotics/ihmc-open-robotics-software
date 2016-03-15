@@ -13,7 +13,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -42,9 +41,9 @@ public class JointPrivilegedConfigurationHandler
 
    private final int numberOfDoFs;
 
-   public JointPrivilegedConfigurationHandler(InverseDynamicsJoint[] jointsToOptimizeFor, YoVariableRegistry parentRegistry)
+   public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, YoVariableRegistry parentRegistry)
    {
-      oneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
+      this.oneDoFJoints = oneDoFJoints;
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
 
       privilegedConfigurations = new DenseMatrix64F(numberOfDoFs, 1);

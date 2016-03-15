@@ -59,8 +59,9 @@ public class InverseDynamicsOptimizationControlModule
          YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
-      jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
-      oneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
+      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
       InverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
@@ -85,7 +86,7 @@ public class InverseDynamicsOptimizationControlModule
       privilegedMotionQPInput = new PrivilegedMotionQPInput(numberOfDoFs);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
 
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointsToOptimizeFor, controlDT, registry);
+      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT, registry);
 
       qDDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
       qDDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);

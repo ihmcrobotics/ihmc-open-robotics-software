@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +67,9 @@ public class MotionQPInputCalculatorTest
          twistCalculator.compute();
          InverseDynamicsJoint[] jointsToOptimizeFor = new InverseDynamicsJoint[numberOfJoints];
          joints.toArray(jointsToOptimizeFor);
+         JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
          
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointsToOptimizeFor, 0.0, registry);
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, 0.0, registry);
          
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.setBase(elevator);
@@ -128,8 +129,9 @@ public class MotionQPInputCalculatorTest
          TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
          twistCalculator.compute();
          InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+         JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
          
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointsToOptimizeFor, 0.0, registry);
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, 0.0, registry);
          
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.setBase(elevator);
