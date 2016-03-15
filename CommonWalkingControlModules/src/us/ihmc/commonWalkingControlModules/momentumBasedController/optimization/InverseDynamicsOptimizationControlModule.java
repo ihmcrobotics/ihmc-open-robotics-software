@@ -113,6 +113,8 @@ public class InverseDynamicsOptimizationControlModule
    public MomentumModuleSolution compute() throws MomentumControlModuleException
    {
       wrenchMatrixCalculator.computeMatrices();
+      qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getWRho());
+      qpSolver.addRegularization();
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
       setupWrenchesEquilibriumConstraint();

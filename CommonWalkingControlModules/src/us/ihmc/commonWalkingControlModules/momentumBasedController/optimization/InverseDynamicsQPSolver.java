@@ -55,7 +55,7 @@ public class InverseDynamicsQPSolver
    private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
    private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
    private final DoubleYoVariable jointJerkRegularization = new DoubleYoVariable("jointJerkRegularization", registry);
-   private final DoubleYoVariable rhoRegularization = new DoubleYoVariable("rhoRegularization", registry);
+   private final DenseMatrix64F regularizationMatrix;
 
    private final DenseMatrix64F tempJtW;
    private final DenseMatrix64F tempMotionTask_H;
@@ -102,7 +102,13 @@ public class InverseDynamicsQPSolver
 
       jointAccelerationRegularization.set(0.005);
       jointJerkRegularization.set(0.1);
-      rhoRegularization.set(0.00001);
+      regularizationMatrix = new DenseMatrix64F(problemSize, problemSize);
+
+      for (int i = 0; i < numberOfDoFs; i++)
+         regularizationMatrix.set(i, i, jointAccelerationRegularization.getDoubleValue());
+      double defaultRhoRegularization = 0.00001;
+      for (int i = numberOfDoFs; i < problemSize; i++)
+         regularizationMatrix.set(i, i, defaultRhoRegularization);
 
       pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, 0.000001);
 
@@ -125,18 +131,17 @@ public class InverseDynamicsQPSolver
       jointAccelerationRegularization.set(weight);
    }
 
-   public void setRhoRegularizationWeight(double weight)
+   public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
-      rhoRegularization.set(weight);
+      CommonOps.insert(weight, regularizationMatrix, numberOfDoFs, numberOfDoFs);
    }
 
    public void reset()
    {
-      solverInput_H.zero();
       for (int i = 0; i < numberOfDoFs; i++)
-         solverInput_H.set(i, i, jointAccelerationRegularization.getDoubleValue());
-      for (int i = numberOfDoFs; i < problemSize; i++)
-         solverInput_H.set(i, i, rhoRegularization.getDoubleValue());
+         regularizationMatrix.set(i, i, jointAccelerationRegularization.getDoubleValue());
+
+      solverInput_H.zero();
 
       solverInput_f.zero();
 
@@ -147,6 +152,11 @@ public class InverseDynamicsQPSolver
 
       if (seedFromPreviousSolution.getBooleanValue())
          addJointJerkRegularization();
+   }
+
+   public void addRegularization()
+   {
+      CommonOps.addEquals(solverInput_H, regularizationMatrix);
    }
 
    public void addMotionInput(MotionQPInput input)
