@@ -197,8 +197,9 @@ public class PlaneContactWrenchMatrixCalculator
       {
          YoPlaneContactState planeContactState = planeContactStates.get(i);
 
-         if (planeContactState.getNumberOfContactPointsInContact() > nPointsPerPlane)
-            throw new RuntimeException("Unhandled number of contact points: " + planeContactState.getNumberOfContactPointsInContact());
+         int numberOfContactPointsInContact = planeContactState.getNumberOfContactPointsInContact();
+         if (numberOfContactPointsInContact > nPointsPerPlane)
+            throw new RuntimeException("Unhandled number of contact points: " + numberOfContactPointsInContact);
 
          if (planeContactState.inContact())
             numberOfLoadedEndEffectors.increment();
@@ -226,7 +227,7 @@ public class PlaneContactWrenchMatrixCalculator
 
                   currentBasisVector.getMatrixColumn(qRho, iRho);
                   rhoMin.set(iRho, 0, rhoMinScalar.getDoubleValue());
-                  wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue());
+                  wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue() * (double) nPointsPerPlane / (double) numberOfContactPointsInContact);
                   if (resetRhoSmootherMap.get(planeContactState).getBooleanValue())
                      wRhoSmootherMatrix.set(iRho, iRho, 0.0);
                   else
