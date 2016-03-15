@@ -25,7 +25,7 @@ public class InverseDynamicsQPSolver
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 10.0, registry);
+   private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
    private final YoFrameVector wrenchEquilibriumForceError;
    private final YoFrameVector wrenchEquilibriumTorqueError;
