@@ -147,8 +147,8 @@ public class InverseKinematicsOptimizationControlModule
 
    private void submitInverseKinematicsCommandList(InverseKinematicsCommandList command)
    {
-      for (int i = 0; i < command.getNumberOfCommands(); i++)
-         submitInverseKinematicsCommand(command.getCommand(i));
+      while (command.getNumberOfCommands() > 0)
+         submitInverseKinematicsCommand(command.pollCommand());
    }
 
    private void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)

@@ -35,7 +35,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 public class InverseDynamicsOptimizationControlModule
 {
    private static final boolean SETUP_JOINT_LIMIT_CONSTRAINTS = false;
-   private static final boolean SETUP_RHO_TASKS = false;
+   private static final boolean SETUP_RHO_TASKS = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -235,8 +235,8 @@ public class InverseDynamicsOptimizationControlModule
 
    private void submitInverseDynamicsCommandList(InverseDynamicsCommandList command)
    {
-      for (int i = 0; i < command.getNumberOfCommands(); i++)
-         submitInverseDynamicsCommand(command.getCommand(i));
+      while (command.getNumberOfCommands() > 0)
+         submitInverseDynamicsCommand(command.pollCommand());
    }
 
    private void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
