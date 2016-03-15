@@ -18,7 +18,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    private static final boolean VERBOSE = true;
 
    public abstract SimpleActiveSetQPSolverInterface createSolverToTest();
-   
+
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithNoInequalityConstraints()
@@ -413,7 +413,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(2.0, lagrangeInequalityMultipliers[1], 1e-7);
       assertEquals(0.0, lagrangeInequalityMultipliers[2], 1e-7);
    }
-   
+
    // This should pass with a good solver. But a simple one has trouble on it.  
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -438,7 +438,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       double[] lagrangeEqualityMultipliers = new double[0];
       double[] lagrangeInequalityMultipliers = new double[3];
       int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-//      assertEquals(3, numberOfIterations);
+      //      assertEquals(3, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertTrue(Double.isNaN(solution[0]));
@@ -474,7 +474,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       double[] lagrangeEqualityMultipliers = new double[1];
       double[] lagrangeInequalityMultipliers = new double[1];
       int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-//      assertEquals(maxNumberOfIterations, numberOfIterations);
+      //      assertEquals(maxNumberOfIterations, numberOfIterations);
 
       assertEquals(2, solution.length);
       assertEquals(Double.NaN, solution[0], 1e-7);
@@ -496,12 +496,21 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       long startTimeMillis = System.currentTimeMillis();
       int maxNumberOfIterations = 0;
 
+      int numberOfVariables = 80;
+      int numberOfEqualityConstraints = 10;
+      int numberOfInequalityConstraints = 36;
+
+      DenseMatrix64F solution = new DenseMatrix64F(numberOfVariables, 1);
+      DenseMatrix64F lagrangeEqualityMultipliers = new DenseMatrix64F(numberOfEqualityConstraints, 1);
+      DenseMatrix64F lagrangeInequalityMultipliers = new DenseMatrix64F(numberOfInequalityConstraints, 1);
+      double[] solutionWithSmallPerturbation = new double[numberOfVariables];
+
+      DenseMatrix64F augmentedLinearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
+      DenseMatrix64F augmentedLinearEqualityConstraintsBVector = new DenseMatrix64F(0, 0);
+
       for (int testNumber = 0; testNumber < numberOfTests; testNumber++)
       {
          solver.clear();
-         int numberOfVariables = 80;
-         int numberOfEqualityConstraints = 10;
-         int numberOfInequalityConstraints = 36;
 
          DenseMatrix64F costQuadraticMatrix = RandomTools.generateRandomMatrix(random, numberOfVariables, numberOfVariables);
          DenseMatrix64F identity = CommonOps.identity(numberOfVariables, numberOfVariables); // Add n*I to make sure it is positive definite...
@@ -521,42 +530,38 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          DenseMatrix64F linearInequalityConstraintsDVector = RandomTools.generateRandomMatrix(random, numberOfInequalityConstraints, 1);
          solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector);
 
-         double[] solution = new double[numberOfVariables];
-         double[] lagrangeEqualityMultipliers = new double[numberOfEqualityConstraints];
-         double[] lagrangeInequalityMultipliers = new double[numberOfInequalityConstraints];
          int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
          if (numberOfIterations > maxNumberOfIterations)
             maxNumberOfIterations = numberOfIterations;
          //         System.out.println("numberOfIterations = " + numberOfIterations);
 
-         assertEquals(numberOfVariables, solution.length);
-         assertEquals(numberOfEqualityConstraints, lagrangeEqualityMultipliers.length);
+         assertEquals(numberOfVariables, solution.getNumRows());
+         assertEquals(numberOfEqualityConstraints, lagrangeEqualityMultipliers.getNumRows());
 
-         DenseMatrix64F solutionMatrix = new DenseMatrix64F(numberOfVariables, 1);
-         solutionMatrix.setData(solution);
-         double objectiveCost = solver.getObjectiveCost(solutionMatrix);
+         double objectiveCost = solver.getObjectiveCost(solution);
 
          // Verify constraints hold:
-         verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solutionMatrix);
-         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solutionMatrix);
+         verifyEqualityConstraintsHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solution);
+         verifyInequalityConstraintsHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution);
 
          // Verify objective is minimized by comparing to small perturbation:
-         double[] solutionWithSmallPerturbation = new double[numberOfVariables];
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution[i] + RandomTools.generateRandomDouble(random, 1e-4);
+            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomTools.generateRandomDouble(random, 1e-4);
          }
 
-         solutionMatrix = new DenseMatrix64F(numberOfVariables, 1);
-         solutionMatrix.setData(solutionWithSmallPerturbation);
+         solution.zero();
+         solution.setData(solutionWithSmallPerturbation);
 
-         verifyEqualityConstraintsDoNotHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solutionMatrix);
-         verifyInequalityConstraintsDoNotHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solutionMatrix);
+         verifyEqualityConstraintsDoNotHold(numberOfEqualityConstraints, linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector, solution);
+
+         // Equality constraints usually do not hold. Sometimes they do, so if you run with lots of numberOfTests, comment out the following:
+         verifyInequalityConstraintsDoNotHold(numberOfInequalityConstraints, linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector, solution);
 
          int activeSetSize = 0;
          for (int i = 0; i < numberOfInequalityConstraints; i++)
          {
-            double lagrangeMultiplier = lagrangeInequalityMultipliers[i];
+            double lagrangeMultiplier = lagrangeInequalityMultipliers.get(i, 0);
 
             if (lagrangeMultiplier < 0.0)
             {
@@ -568,8 +573,8 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
             }
          }
 
-         DenseMatrix64F augmentedLinearEqualityConstraintsAMatrix = new DenseMatrix64F(numberOfEqualityConstraints + activeSetSize, numberOfVariables);
-         DenseMatrix64F augmentedLinearEqualityConstraintsBVector = new DenseMatrix64F(numberOfEqualityConstraints + activeSetSize, 1);
+         augmentedLinearEqualityConstraintsAMatrix.reshape(numberOfEqualityConstraints + activeSetSize, numberOfVariables);
+         augmentedLinearEqualityConstraintsBVector.reshape(numberOfEqualityConstraints + activeSetSize, 1);
 
          CommonOps.extract(linearEqualityConstraintsAMatrix, 0, numberOfEqualityConstraints, 0, numberOfVariables, augmentedLinearEqualityConstraintsAMatrix, 0, 0);
          CommonOps.extract(linearEqualityConstraintsBVector, 0, numberOfEqualityConstraints, 0, 1, augmentedLinearEqualityConstraintsBVector, 0, 0);
@@ -577,7 +582,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          int index = 0;
          for (int i = 0; i < numberOfInequalityConstraints; i++)
          {
-            double lagrangeMultiplier = lagrangeInequalityMultipliers[i];
+            double lagrangeMultiplier = lagrangeInequalityMultipliers.get(i, 0);
 
             if (lagrangeMultiplier < 0.0)
             {
@@ -591,7 +596,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
             }
          }
 
-         DenseMatrix64F solutionMatrixProjectedOntoEqualityConstraints = projectOntoEqualityConstraints(solutionMatrix, augmentedLinearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsBVector);
+         DenseMatrix64F solutionMatrixProjectedOntoEqualityConstraints = projectOntoEqualityConstraints(solution, augmentedLinearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsBVector);
          verifyEqualityConstraintsHold(numberOfEqualityConstraints + activeSetSize, augmentedLinearEqualityConstraintsAMatrix, augmentedLinearEqualityConstraintsBVector, solutionMatrixProjectedOntoEqualityConstraints);
 
          double objectiveCostWithSmallPerturbation = solver.getObjectiveCost(solutionMatrixProjectedOntoEqualityConstraints);
