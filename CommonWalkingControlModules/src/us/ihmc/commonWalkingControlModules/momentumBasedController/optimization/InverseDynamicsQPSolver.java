@@ -18,7 +18,6 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class InverseDynamicsQPSolver
 {
-   private static final boolean HACK_RHO_LOWER_BOUND = false;
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
    private static final boolean DEBUG = true;
    private static final boolean USE_JERRY_SOLVER = false;
@@ -33,11 +32,6 @@ public class InverseDynamicsQPSolver
    private final BooleanYoVariable seedFromPreviousSolution = new BooleanYoVariable("seedFromPreviousSolution", registry);
    private final OASESConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(registry);
    private final SimpleInefficientActiveSetQPSolver jerryQPSolver = new SimpleInefficientActiveSetQPSolver();
-
-   private final IntegerYoVariable numberOfTicksBeforeDeactivatingRhoMin = new IntegerYoVariable("numberOfTicksBeforeDeactivatingRhoMin", registry);
-   private final BooleanYoVariable[] activeRhos;
-   private final IntegerYoVariable[] countersActiveRhoMin;
-   private final DenseMatrix64F rhoMin;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -111,19 +105,6 @@ public class InverseDynamicsQPSolver
       rhoRegularization.set(0.00001);
 
       pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, 0.000001);
-
-      numberOfTicksBeforeDeactivatingRhoMin.set(10);
-      countersActiveRhoMin = new IntegerYoVariable[rhoSize];
-      activeRhos = new BooleanYoVariable[rhoSize];
-
-      for (int i = 0; i < rhoSize; i++)
-      {
-         countersActiveRhoMin[i] = new IntegerYoVariable("counterActiveRhoMin_" + i, registry);
-         countersActiveRhoMin[i].set(-1);
-         activeRhos[i] = new BooleanYoVariable("activeRho_" + i, registry);
-      }
-      rhoMin = new DenseMatrix64F(rhoSize, 1);
-      
 
       if (DEBUG)
       {
@@ -368,9 +349,6 @@ public class InverseDynamicsQPSolver
 
       numberOfConstraints.set(Aeq.getNumRows() + Ain.getNumRows());
 
-      if (!HACK_RHO_LOWER_BOUND)
-         CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
-
       NoConvergenceException noConvergenceException = null;
 
       qpSolverTimer.startMeasurement();
@@ -412,32 +390,6 @@ public class InverseDynamicsQPSolver
          wrenchEquilibriumForceError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          wrenchEquilibriumForceError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
-      }
-
-      if (HACK_RHO_LOWER_BOUND)
-      {
-         for (int i = 0; i < rhoSize; i++)
-         {
-            IntegerYoVariable counter = countersActiveRhoMin[i];
-
-            if (!activeRhos[i].getBooleanValue())
-            {
-               counter.set(-1);
-            }
-            else if (solverOutput_rhos.get(i, 0) - 1.0e-5 <= rhoMin.get(i, 0))
-            {
-               counter.set(numberOfTicksBeforeDeactivatingRhoMin.getIntegerValue());
-            }
-            else
-            {
-               counter.set(Math.max(counter.getIntegerValue() - 1, -1));
-            }
-
-            if (counter.getIntegerValue() > 0)
-               solverInput_lb.set(numberOfDoFs + i, 0, rhoMin.get(i, 0));
-            else
-               solverInput_lb.set(numberOfDoFs + i, 0, Double.NEGATIVE_INFINITY);
-         }
       }
 
       if (!USE_JERRY_SOLVER)
@@ -526,31 +478,23 @@ public class InverseDynamicsQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      CommonOps.fill(this.rhoMin, rhoMin);
-//      for (int i = numberOfDoFs; i < problemSize; i++)
-//         solverInput_lb.set(i, 0, rhoMin);
+      for (int i = numberOfDoFs; i < problemSize; i++)
+         solverInput_lb.set(i, 0, rhoMin);
    }
 
    public void setMinRho(DenseMatrix64F rhoMin)
    {
-      this.rhoMin.set(rhoMin);
-//      CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
+      CommonOps.insert(rhoMin, solverInput_lb, numberOfDoFs, 0);
    }
 
    public void setMaxRho(double rhoMax)
    {
-//      for (int i = numberOfDoFs; i < problemSize; i++)
-//         solverInput_ub.set(i, 0, rhoMax);
+      for (int i = numberOfDoFs; i < problemSize; i++)
+         solverInput_ub.set(i, 0, rhoMax);
    }
 
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
-//      CommonOps.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);
-   }
-
-   public void setActiveRhos(boolean[] activeRhos)
-   {
-      for (int i = 0; i < rhoSize; i++)
-         this.activeRhos[i].set(activeRhos[i]);
+      CommonOps.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);
    }
 }

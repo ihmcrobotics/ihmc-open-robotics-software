@@ -125,7 +125,6 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.setMinJointAccelerations(qDDotMinMatrix);
          qpSolver.setMaxJointAccelerations(qDDotMaxMatrix);
       }
-      qpSolver.setActiveRhos(wrenchMatrixCalculator.getActiveRhos());
 
       NoConvergenceException noConvergenceException = null;
 
