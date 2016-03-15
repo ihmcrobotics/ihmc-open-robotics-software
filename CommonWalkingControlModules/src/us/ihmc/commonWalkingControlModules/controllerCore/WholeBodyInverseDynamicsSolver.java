@@ -29,12 +29,16 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -56,6 +60,9 @@ public class WholeBodyInverseDynamicsSolver
 
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
+
+   private final YoFrameVector desiredMomentumRateLinear;
+   private final YoFrameVector optimalMomentumRateLinear;
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
          YoVariableRegistry parentRegistry)
@@ -87,6 +94,10 @@ public class WholeBodyInverseDynamicsSolver
 
       wrenchVisualizer = WrenchVisualizer.createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0,
             yoGraphicsListRegistry, registry);
+
+      ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
+      desiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
+      optimalMomentumRateLinear = new YoFrameVector("optimalMomentumRateLinear", centerOfMassFrame, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -124,6 +135,9 @@ public class WholeBodyInverseDynamicsSolver
       DenseMatrix64F jointAccelerations = momentumModuleSolution.getJointAccelerations();
       Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
+      SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
+
+      optimalMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
 
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
@@ -166,6 +180,7 @@ public class WholeBodyInverseDynamicsSolver
             break;
          case MOMENTUM:
             optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
+            recordMomentumRate((MomentumRateCommand) command);
             break;
          case PRIVILEGED_CONFIGURATION:
             optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
@@ -183,6 +198,12 @@ public class WholeBodyInverseDynamicsSolver
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
+   }
+
+   private void recordMomentumRate(MomentumRateCommand command)
+   {
+      DenseMatrix64F momentumRate = command.getMomentumRate();
+      MatrixTools.extractYoFrameTupleFromEJMLVector(desiredMomentumRateLinear, momentumRate, 3);
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()
