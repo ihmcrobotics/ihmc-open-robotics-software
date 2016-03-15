@@ -239,6 +239,8 @@ public class YoVariableValueDataCheckerTest
       assertTrue(yoVariableValueDataChecker.isMaxSecondDerivativeExeeded());
       assertTrue(yoVariableValueDataChecker.isMaxValueExeeded());
       assertTrue(yoVariableValueDataChecker.isMinValueExeeded());
+      
+      scs.stopSimulationThread();
    }
 
 
