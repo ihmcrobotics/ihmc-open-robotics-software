@@ -88,8 +88,8 @@ public class PlaneContactWrenchMatrixCalculator
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F tempVector = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
-   private final Map<Integer, FrameVector> basisVectors = new LinkedHashMap<Integer, FrameVector>();
-   private final Map<Integer, FramePoint> contactPoints = new LinkedHashMap<Integer, FramePoint>();
+   private final List<FrameVector> basisVectors = new ArrayList<>();
+   private final List<FramePoint> contactPoints = new ArrayList<>();
    private FrameVector basisVector;
    private FramePoint contactPoint;
 
@@ -135,8 +135,8 @@ public class PlaneContactWrenchMatrixCalculator
 
       for (int i = 0; i < rhoSize; i++)
       {
-         basisVectors.put(i, new FrameVector(centerOfMassFrame));
-         contactPoints.put(i, new FramePoint(centerOfMassFrame));
+         basisVectors.add(new FrameVector(centerOfMassFrame));
+         contactPoints.add(new FramePoint(centerOfMassFrame));
       }
 
       this.planeContactStates = new ArrayList<>(contactablePlaneBodies.size());
@@ -435,12 +435,12 @@ public class PlaneContactWrenchMatrixCalculator
       return qRho;
    }
 
-   public Map<Integer, FrameVector> getBasisVectors()
+   public List<FrameVector> getBasisVectors()
    {
       return basisVectors;
    }
 
-   public Map<Integer, FramePoint> getContactPoints()
+   public List<FramePoint> getContactPoints()
    {
       return contactPoints;
    }

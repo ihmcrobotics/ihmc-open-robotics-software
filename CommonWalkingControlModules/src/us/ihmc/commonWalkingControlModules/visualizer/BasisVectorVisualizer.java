@@ -60,7 +60,7 @@ public class BasisVectorVisualizer
       parentRegistry.addChild(registry);
    }
 
-   public void visualize(Map<Integer, FrameVector> basisVectors, Map<Integer, FramePoint> contactPoints)
+   public void visualize(List<FrameVector> basisVectors, List<FramePoint> contactPoints)
    {
       for (int i = 0; i < rhoSize; i++)
       {
