@@ -34,7 +34,7 @@ public class NetworkParameters
 
    private NetworkParameters()
    {
-      File file = new File(System.getProperty("us.ihmc.us.ihmc.networkParameterFile", defaultParameterFile)).getAbsoluteFile();
+      File file = new File(System.getProperty("us.ihmc.networkParameterFile", defaultParameterFile)).getAbsoluteFile();
       PrintTools.info("Looking for network parameters in network parameters file at " + file.getAbsolutePath());
 
       if (file.exists() && file.isFile())
