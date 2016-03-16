@@ -1,8 +1,12 @@
 package us.ihmc.robotics.lists;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
-public class RecyclingArrayList<T>
+public class RecyclingArrayList<T> implements List<T>
 {
    /**
     * Default initial capacity.
@@ -38,46 +42,91 @@ public class RecyclingArrayList<T>
       fillElementDataIfNeeded();
    }
 
+   /**
+    * Returns the number of elements in this list.
+    *
+    * @return the number of elements in this list
+    */
+   @Override
    public int size()
    {
       return size;
    }
 
+   /**
+    * Returns <tt>true</tt> if this list contains no elements.
+    *
+    * @return <tt>true</tt> if this list contains no elements
+    */
+   @Override
    public boolean isEmpty()
    {
       return size == 0;
    }
 
+   /**
+    * Sets the size of the list to 0, but does not change its capacity. This method is meant
+    * to recycle a list without allocating new backing arrays.
+    */
+   @Override
    public void clear()
    {
       size = 0;
    }
 
+   /**
+    * Add a new element at the end of this list.
+    * @return the new element.
+    */
    public T add()
    {
       return getAndGrowIfNeeded(size);
    }
 
-   public T insertAtIndex(int i)
+   /**
+    * Inserts a new element at the specified position in this
+    * list. Shifts the element currently at that position (if any) and
+    * any subsequent elements to the right (adds one to their indices).
+    *
+    * @param index index at which the new element is to be inserted
+    * @return the new inserted element
+    * @throws IndexOutOfBoundsException if the index is out of range
+    *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
+    */
+   public T insertAtIndex(int index)
    {
-      rangeCheckForInsert(i);
+      rangeCheckForInsert(index);
 
       // First add new element at last index
       T ret = add();
 
       // Then go trough the list by swapping elements two by two to reach the desired index
-      for (int index = size - 1; index > i; index--)
-         unsafeFastSwap(index, index - 1);
+      for (int i = size - 1; i > index; i--)
+         unsafeFastSwap(i, i - 1);
 
       return ret;
    }
 
+   /**
+    * Returns the element at the specified position in this list.
+    *
+    * @param  index index of the element to return
+    * @return the element at the specified position in this list
+    * @throws IndexOutOfBoundsException if the index is out of range
+     *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
+    */
+   @Override
    public T get(int i)
    {
       rangeCheck(i);
       return unsafeGet(i);
    }
 
+   /**
+    * Returns the last element of this list.
+    * If the list is empty, it returns {@code null}.
+    * @return the last element of this list
+    */
    public T getLast()
    {
       if (isEmpty())
@@ -91,15 +140,26 @@ public class RecyclingArrayList<T>
       return elementData[i];
    }
 
-   public T getAndGrowIfNeeded(int i)
+   /**
+    * Returns the element at the specified position in this list.
+    * The list will grow if the given index is greater or equal to
+    * the size this list.
+    *
+    * @param  index index of the element to return
+    * @return the element at the specified position in this list
+    * @throws IndexOutOfBoundsException if the index is negative (<tt>index &lt; 0</tt>)
+    */
+   public T getAndGrowIfNeeded(int index)
    {
-      if (i >= size)
+      positiveIndexCheck(index);
+
+      if (index >= size)
       {
-         size = i + 1;
+         size = index + 1;
          ensureCapacity(size);
       }
 
-      return elementData[i];
+      return elementData[index];
    }
 
    public void growByOne()
@@ -107,13 +167,13 @@ public class RecyclingArrayList<T>
       unsafeGrowByN(1);
    }
 
-   public void growByN(int n)
+   public void growByN(int numberOfElementsToGrow)
    {
-      if (n == 0)
+      if (numberOfElementsToGrow == 0)
          return;
-      else if (n < 0)
-         throw new RuntimeException("Cannot grow the list by a negative number. Given number for growing list:" + n);
-      unsafeGrowByN(n);
+      else if (numberOfElementsToGrow < 0)
+         throw new RuntimeException("Cannot grow the list by a negative number. Given number for growing list:" + numberOfElementsToGrow);
+      unsafeGrowByN(numberOfElementsToGrow);
    }
 
    protected void unsafeGrowByN(int n)
@@ -124,21 +184,28 @@ public class RecyclingArrayList<T>
 
    /**
     * Removes the element at the specified position in this list.
-    * This method is faster than {@code RecyclingArrayList#remove(int)} but the ith element is swapped with the last element changing the ordering of the list.
+    * This method is faster than {@link RecyclingArrayList#remove(int)} but the ith element is swapped with the last element changing the ordering of the list.
     * 
     * @param index the index of the element to be removed
     */
-   public void fastRemove(int i)
+   public void fastRemove(int index)
    {
-      if (i == size - 1)
+      if (index == size - 1)
       {
          size--;
          return;
       }
-      rangeCheck(i);
-      unsafeFastSwap(i, --size);
+      rangeCheck(index);
+      unsafeFastSwap(index, --size);
    }
 
+   /**
+    * Swap two objects of this list.
+    * @param i index of the first object to swap
+    * @param j index of the second object to swap
+    * @throws IndexOutOfBoundsException if either of the indices is out of range
+    *         (<tt>i &lt; 0 || i &gt;= size() || j &lt; 0 || j &gt;= size()</tt>)
+    */
    public void swap(int i, int j)
    {
       rangeCheck(i);
@@ -149,7 +216,8 @@ public class RecyclingArrayList<T>
 
    protected void unsafeSwap(int i, int j)
    {
-      if (i == j) return;
+      if (i == j)
+         return;
 
       unsafeFastSwap(i, j);
    }
@@ -167,13 +235,15 @@ public class RecyclingArrayList<T>
     * indices).
     * 
     * @param index the index of the element to be removed
+    * @return null.
     */
-   public void remove(int i)
+   @Override
+   public T remove(int i)
    {
       if (i == size - 1)
       {
          size--;
-         return;
+         return null;
       }
       rangeCheck(i);
 
@@ -187,6 +257,28 @@ public class RecyclingArrayList<T>
       // Do not throw away the removed element, put it at the end of the list instead.
       elementData[size - 1] = t;
       size--;
+      return null;
+   }
+
+   /**
+    * Removes the first occurrence of the specified element from this list,
+    * if it is present.  If the list does not contain the element, it is
+    * unchanged.
+    *
+    * @param object element to be removed from this list, if present
+    * @return <tt>true</tt> if this list contained the specified element
+    */
+   @Override
+   public boolean remove(Object object)
+   {
+      int index = indexOf(object);
+      if (index == -1)
+         return false;
+      else
+      {
+         remove(index);
+         return true;
+      }
    }
 
    protected void ensureCapacity(int minCapacity)
@@ -222,12 +314,70 @@ public class RecyclingArrayList<T>
    {
       if (index >= size)
          throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+      positiveIndexCheck(index);
    }
 
    protected void rangeCheckForInsert(int index)
    {
       if (index > size)
          throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+      positiveIndexCheck(index);
+   }
+
+   protected void positiveIndexCheck(int index)
+   {
+      if (index < 0)
+         throw new IndexOutOfBoundsException("Index cannot be negative: " + index);
+   }
+
+   
+
+   /**
+    * Returns <tt>true</tt> if this list contains the specified element.
+    *
+    * @param object element whose presence in this list is to be tested
+    * @return <tt>true</tt> if this list contains the specified element
+    */
+   @Override
+   public boolean contains(Object object)
+   {
+      return indexOf(object) >= 0;
+   }
+
+   /**
+    * Returns the index of the first occurrence of the specified element
+    * in this list, or -1 if this list does not contain the element.
+    */
+   @Override
+   public int indexOf(Object object)
+   {
+      if (object != null)
+      {
+         for (int i = 0; i < size; i++)
+         {
+            if (object.equals(elementData[i]))
+               return i;
+         }
+      }
+      return -1;
+   }
+
+   /**
+    * Returns the index of the last occurrence of the specified element
+    * in this list, or -1 if this list does not contain the element.
+    */
+   @Override
+   public int lastIndexOf(Object object)
+   {
+      if (object != null)
+      {
+         for (int i = size - 1; i >= 0; i--)
+         {
+            if (object.equals(elementData[i]))
+               return i;
+         }
+      }
+      return -1;
    }
 
    @Override
@@ -243,5 +393,103 @@ public class RecyclingArrayList<T>
       ret += unsafeGet(size - 1).toString();
 
       return ret;
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public Iterator<T> iterator()
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public Object[] toArray()
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public <X> X[] toArray(X[] a)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public boolean add(T e)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public boolean containsAll(Collection<?> c)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public boolean addAll(Collection<? extends T> c)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public boolean addAll(int index, Collection<? extends T> c)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public boolean removeAll(Collection<?> c)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public boolean retainAll(Collection<?> c)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public T set(int index, T element)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public void add(int index, T element)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public ListIterator<T> listIterator()
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public ListIterator<T> listIterator(int index)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   /** Unsupported operation. */
+   @Override
+   public List<T> subList(int fromIndex, int toIndex)
+   {
+      throw new UnsupportedOperationException();
    }
 }

@@ -59,18 +59,26 @@ repositories {
    }
 }
 
-task publishAllToMavenLocal(type: GradleBuild) << {
+task publishAllToMavenLocal(type: GradleBuild) {
     buildFile "build.gradle"
     def allTasks = new ArrayList<String>()
-    buildType = "LOCAL"
-    project.ext.fullVersion = "LOCAL"
+
     subprojects.each { subproject ->
-//        subproject.buildType = "LOCAL"
-        subproject.ext.fullVersion = "LOCAL"
         allTasks.add(":" + subproject.name + ":publishToMavenLocal")
     }
 
     tasks = allTasks
+}
+
+gradle.taskGraph.whenReady { TaskExecutionGraph graph ->
+    if(graph.hasTask(publishAllToMavenLocal)) {
+      buildType = "LOCAL"
+      project.ext.fullVersion = "LOCAL"
+
+      subprojects.each { subproject ->
+        subproject.ext.fullVersion = "LOCAL"
+      }
+    }
 }
 
 subprojects { subproject ->
