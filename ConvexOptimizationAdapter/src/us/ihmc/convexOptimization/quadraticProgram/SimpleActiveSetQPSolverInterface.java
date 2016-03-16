@@ -4,6 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 
 public interface SimpleActiveSetQPSolverInterface
 {
+   public abstract void setVariableBounds(double[] variableLowerBounds, double[] variableUpperBounds);
+
+   public abstract void setVariableBounds(DenseMatrix64F variableLowerBounds, DenseMatrix64F variableUpperBounds);
 
    public abstract void setMaxNumberOfIterations(int maxNumberOfIterations);
 
@@ -23,10 +26,16 @@ public interface SimpleActiveSetQPSolverInterface
 
    public abstract void setLinearInequalityConstraints(DenseMatrix64F linearInequalityConstraintCMatrix, DenseMatrix64F linearInequalityConstraintDVector);
 
+   public abstract int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack, 
+         double[] lagrangeLowerBoundMultipliersToPack, double[] lagrangeUpperBoundMultipliersToPack);
+   
    public abstract int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack);
 
    public abstract int solve(double[] solutionToPack);
 
+   public abstract int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack, DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack, 
+         DenseMatrix64F lagrangeLowerBoundMultipliersToPack, DenseMatrix64F lagrangeUpperBoundMultipliersToPack);
+   
    public abstract int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack, DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack);
 
    public abstract int solve(DenseMatrix64F solutionToPack);
