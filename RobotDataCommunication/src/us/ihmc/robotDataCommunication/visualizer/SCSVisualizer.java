@@ -190,7 +190,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
       scs.attachExitActionListener(this);
-      scs.setFastSimulate(true, 50);
+      //scs.setFastSimulate(true, 50);
 
       scs.addButton(disconnectButton);
       disconnectButton.addActionListener(new ActionListener()

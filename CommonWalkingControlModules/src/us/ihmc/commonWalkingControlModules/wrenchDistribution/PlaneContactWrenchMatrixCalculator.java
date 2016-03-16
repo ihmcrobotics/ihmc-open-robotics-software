@@ -13,17 +13,16 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -90,8 +89,8 @@ public class PlaneContactWrenchMatrixCalculator
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F tempVector = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
-   private final Map<Integer, FrameVector> basisVectors = new LinkedHashMap<Integer, FrameVector>();
-   private final Map<Integer, FramePoint> contactPoints = new LinkedHashMap<Integer, FramePoint>();
+   private final List<FrameVector> basisVectors = new ArrayList<>();
+   private final List<FramePoint> contactPoints = new ArrayList<>();
    private FrameVector basisVector;
    private FramePoint contactPoint;
 
@@ -137,8 +136,8 @@ public class PlaneContactWrenchMatrixCalculator
 
       for (int i = 0; i < rhoSize; i++)
       {
-         basisVectors.put(i, new FrameVector(centerOfMassFrame));
-         contactPoints.put(i, new FramePoint(centerOfMassFrame));
+         basisVectors.add(new FrameVector(centerOfMassFrame));
+         contactPoints.add(new FramePoint(centerOfMassFrame));
       }
       
       this.planeContactStates = new ArrayList<PlaneContactState>(planeContactStates);
@@ -438,12 +437,12 @@ public class PlaneContactWrenchMatrixCalculator
       return qFeetCoP;
    }
 
-   public Map<Integer, FrameVector> getBasisVectors()
+   public List<FrameVector> getBasisVectors()
    {
       return basisVectors;
    }
 
-   public Map<Integer, FramePoint> getContactPoints()
+   public List<FramePoint> getContactPoints()
    {
       return contactPoints;
    }
