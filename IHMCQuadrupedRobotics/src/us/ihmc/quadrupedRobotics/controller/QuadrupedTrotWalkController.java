@@ -55,6 +55,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private static final double GRAVITY = 9.81;
    private static final double ESTIMATED_MASS = 63.9; // TODO PDControl this when z-vel=0
    private static final double ESTIMATED_ROTATIONAL_INERTIA = 5.0; // TODO PDControl this when z-vel=0
+   private static final double COEFFICIENT_OF_FRICTION = 0.7;
    private final double dt;
    private final YoVariableRegistry registry = new YoVariableRegistry("TrotWalkController");
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -137,6 +138,11 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    private final IntegerYoVariable numberOfFeetInContact = new IntegerYoVariable("numberOfFeetInContact", registry);
    
+   private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
+   private final QuadrantDependentList<YoFrameVector[]> basisForceVectors = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFrameVector[]> basisTorqueVectors = new QuadrantDependentList<>();
+   private final QuadrantDependentList<double[]> rhoScalars = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoFrameVector> footToCoMVectors = new QuadrantDependentList<>();
    private YoFrameVector bodyAngularVelocity;
    private YoFrameVector bodyLinearVelocity;
    private final YoFramePoint stancePosition;
@@ -232,6 +238,18 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       for (TrotPair trotPair : TrotPair.values)
       {
          trotBetas.set(trotPair.getSide(), new DoubleYoVariable("trotBeta" + trotPair.getCamelCaseName(), parentRegistry));
+      }
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         basisForceVectors.set(robotQuadrant, new YoFrameVector[4]);
+         rhoScalars.set(robotQuadrant, new double[4]);
+         footToCoMVectors.set(robotQuadrant, new YoFrameVector("footToCoMVector" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
+         
+         for (int i = 0; i < 4; i++)
+         {
+            basisForceVectors.get(robotQuadrant)[i] = new YoFrameVector("basisVector" + robotQuadrant.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
+         }
       }
       
       for (TrotPair trotPair : TrotPair.values)
@@ -454,6 +472,14 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          copFramePoint.scale(1.0 / fzTotal);
       }
       centerOfPressure.set(copFramePoint);
+      
+      for (RobotQuadrant robotQuadrant : supportPolygon.getSupportingQuadrantsInOrder())
+      {
+         supportPolygon.setFootstep(robotQuadrant, feetLocations.get(robotQuadrant).getFrameTuple());
+         footToCoMVectors.get(robotQuadrant).set(coMPosition);
+         footToCoMVectors.get(robotQuadrant).sub(feetLocations.get(robotQuadrant));
+         calculateBasisVectors(robotQuadrant, footToCoMVectors.get(robotQuadrant));
+      }
    }
 
    private void computeFeetContactState()
@@ -473,7 +499,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    //Control X and Y using Center of Pressure on each trot line, SR and SL.
    private void doTrotControl()
-   {      
+   {
       double distanceFH = feetLocations.get(RobotQuadrant.HIND_LEFT).distance(feetLocations.get(RobotQuadrant.FRONT_LEFT));
       
       GeometryTools.averagePoints(feetLocations.get(RobotQuadrant.FRONT_LEFT).getFrameTuple(), feetLocations.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple(), frontMidPoint);
@@ -483,8 +509,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       desiredICP.add(desiredICPFromCentroid.getX(), desiredICPFromCentroid.getY(), 0.0);
       
       desiredCenterOfPressure.set(icp);
-      desiredCenterOfPressure.scale(2.0);
       desiredCenterOfPressure.sub(desiredICP);
+      desiredCenterOfPressure.scale(1.0); // K
+      desiredCenterOfPressure.add(icp);
       
       desiredBodyLinearVelocity.setToZero();
       desiredBodyAngularVelocity.setToZero();
@@ -534,7 +561,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       bodyAngularAcceleration.getYoZ().add(k_yaw.getDoubleValue() * (desiredBodyOrientation.getYaw().getDoubleValue() - q_yaw.getDoubleValue()));
       bodyAngularAcceleration.getYoZ().add(b_yaw.getDoubleValue() * (0.0 - bodyAngularVelocity.getZ()));
       
-      // Use PD Controller on Nx, Ny, Nz to control orientation of the body
       desiredBodyTorque.setToZero();
       desiredBodyTorque.add(bodyAngularAcceleration);
       desiredBodyTorque.scale(ESTIMATED_ROTATIONAL_INERTIA);
@@ -553,6 +579,23 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       desiredBodyForce.scale(ESTIMATED_MASS);
       
       desiredBodyWrench.set(desiredBodyForce.getFrameTuple(), desiredBodyTorque.getFrameTuple());
+   }
+
+   private void calculateBasisVectors(RobotQuadrant robotQuadrant, YoFrameVector footToCoMVector)
+   {
+      basisForceVectors.get(robotQuadrant)[0].set(COEFFICIENT_OF_FRICTION, 0.0, 1.0);
+      basisForceVectors.get(robotQuadrant)[0].normalize();
+      basisForceVectors.get(robotQuadrant)[1].set(0.0, COEFFICIENT_OF_FRICTION, 1.0);
+      basisForceVectors.get(robotQuadrant)[1].normalize();
+      basisForceVectors.get(robotQuadrant)[2].set(-COEFFICIENT_OF_FRICTION, 0.0, 1.0);
+      basisForceVectors.get(robotQuadrant)[2].normalize();
+      basisForceVectors.get(robotQuadrant)[3].set(0.0, -COEFFICIENT_OF_FRICTION, 1.0);
+      basisForceVectors.get(robotQuadrant)[3].normalize();
+      
+      basisTorqueVectors.get(robotQuadrant)[0].cross(footToCoMVector, basisForceVectors.get(robotQuadrant)[0]);
+      basisTorqueVectors.get(robotQuadrant)[1].cross(footToCoMVector, basisForceVectors.get(robotQuadrant)[1]);
+      basisTorqueVectors.get(robotQuadrant)[2].cross(footToCoMVector, basisForceVectors.get(robotQuadrant)[2]);
+      basisTorqueVectors.get(robotQuadrant)[3].cross(footToCoMVector, basisForceVectors.get(robotQuadrant)[3]);
    }
 
    private void computeBodyRelativePositionsVelocities()
@@ -579,6 +622,11 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 //      distributeForcesTwoDiagonalLegs(TrotPair.TROT_LEFT, desiredBodyWrenches.get(TrotPair.TROT_LEFT.getSide()));
    }
    
+   private void distributeForcesToFeet()
+   {
+      // New QP stuff here
+   }
+   
    private void distributeForcesTwoDiagonalLegs(TrotPair trotPair, Wrench desiredBodyWrench)
    {
       getFootInBodyZUpFrame(trotPair.getFrontQuadrant(), frontFootPosition);
@@ -596,6 +644,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       unknownTorqueQuantitys.get(side).cross(desiredBodyForceVectors.get(side), hindToBodyVectors.get(side));
       unknownTorqueQuantity2s.get(side).sub(desiredBodyTorqueVectors.get(side), unknownTorqueQuantitys.get(side));
       frontFootForceVectors.get(side).cross(frontFootBodyMinusHindFootBody.get(side), unknownTorqueQuantity2s.get(side));
+      frontFootForceVectors.get(side).scale(0.5);
       hindFootForceVectors.get(side).sub(desiredBodyForceVectors.get(side), frontFootForceVectors.get(side));
       
       vmcFootForces.get(trotPair.getFrontQuadrant()).setX(frontFootForceVectors.get(side).getX());
@@ -757,6 +806,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       public void doTransitionIntoAction()
       {
          trotAlpha.set(0.5);
+         
+         supportPolygon.clear();
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            supportPolygon.setFootstep(robotQuadrant, feetLocations.get(robotQuadrant).getFrameTuple());
+         }
       }
 
       @Override
@@ -791,6 +846,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       public void doTransitionIntoAction()
       {
          trotAlpha.set(1.01);
+         
+         supportPolygon.clear();
+         for (RobotQuadrant robotQuadrant : TrotPair.TROT_RIGHT.quadrants())
+         {
+            supportPolygon.setFootstep(robotQuadrant, feetLocations.get(robotQuadrant).getFrameTuple());
+         }
       }
 
       @Override
@@ -825,6 +886,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       public void doTransitionIntoAction()
       {
          trotAlpha.set(-0.01);
+         
+         supportPolygon.clear();
+         for (RobotQuadrant robotQuadrant : TrotPair.TROT_LEFT.quadrants())
+         {
+            supportPolygon.setFootstep(robotQuadrant, feetLocations.get(robotQuadrant).getFrameTuple());
+         }
       }
 
       @Override
