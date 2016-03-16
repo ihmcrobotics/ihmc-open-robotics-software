@@ -357,6 +357,21 @@ public class RandomTools
       }
       return matrixToReturn;
    }
+   
+   public static DenseMatrix64F generateRandomMatrix(Random random, int numberOfRows, int numberOfColumns, double boundaryOne, double boundaryTwo)
+   {
+      DenseMatrix64F matrixToReturn = new DenseMatrix64F(numberOfRows, numberOfColumns);
+
+      for (int row = 0; row < numberOfRows; row++)
+      {
+         for (int column = 0; column < numberOfColumns; column++)
+         {
+            double value = generateRandomDouble(random, boundaryOne, boundaryTwo);
+            matrixToReturn.set(row, column, value);
+         }
+      }
+      return matrixToReturn;
+   }
 
    public static Quat4d generateRandomQuaternion(Random random)
    {
