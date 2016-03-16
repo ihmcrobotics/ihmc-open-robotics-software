@@ -176,6 +176,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final SideDependentList<YoFrameVector> frontFootForceVectors = new SideDependentList<>();
    private final SideDependentList<YoFrameVector> hindFootForceVectors = new SideDependentList<>();
    private final SideDependentList<List<YoGraphicVector>> forceDistributionYoGraphicVectors = new SideDependentList<>();
+   private final QuadrantDependentList<YoGraphicVector[]> basisForceYoGraphicVectors = new QuadrantDependentList<>();
    private final FramePoint footInBodyZUp = new FramePoint();
    private final FramePoint jointInBodyZUp = new FramePoint();
    private final FrameVector jointToFootVector = new FrameVector();
@@ -292,10 +293,23 @@ public class QuadrupedTrotWalkController extends QuadrupedController
                                                                               desiredBodyTorqueVectors.get(side), 0.01, YoAppearance.DarkRed(), true, 0.01));
          forceDistributionYoGraphicVectors.get(side).add(new YoGraphicVector("frontFootForces" + side.getCamelCaseNameForMiddleOfExpression(),
                                                                               feetLocations.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)),
-                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)), 0.003, YoAppearance.Yellow(), true, 0.01));
+                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)), 0.007, YoAppearance.Yellow(), true, 0.01));
          forceDistributionYoGraphicVectors.get(side).add(new YoGraphicVector("hindFootForces" + side.getCamelCaseNameForMiddleOfExpression(),
                                                                               feetLocations.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())),
-                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())), 0.003, YoAppearance.Yellow(), true, 0.01));
+                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())), 0.007, YoAppearance.Yellow(), true, 0.01));
+      }
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         basisForceYoGraphicVectors.set(robotQuadrant, new YoGraphicVector[4]);
+         
+         for (int i = 0; i < 4; i++)
+         {
+            basisForceYoGraphicVectors.get(robotQuadrant)[i] = new YoGraphicVector("basisForceYoGraphicVectors" + robotQuadrant.getPascalCaseName() + i,
+                                                                                    feetLocations.get(robotQuadrant),
+                                                                                    basisForceVectors.get(robotQuadrant)[i], 0.007, YoAppearance.Red(), true, 0.01);
+            yoGraphicsListRegistry.registerYoGraphic("trotWalk", basisForceYoGraphicVectors.get(robotQuadrant)[i]);
+         }
       }
       
       desiredStancePosition = new YoFramePoint("desiredStancePosition", ReferenceFrame.getWorldFrame(), registry);
@@ -1021,14 +1035,14 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       k_y.set(10.0); // 2000.0);
       b_y.set(5.0); // 0.0);    // 50 for pace, 0 for trot.
 
-      k_roll.set(-500.0); // 4000.0
-      b_roll.set(0.0); // 50.0
+      k_roll.set(-700.0); // 4000.0
+      b_roll.set(-7.0); // 50.0
 
-      k_pitch.set(-500.0); // 4000.0 // 80.0);
-      b_pitch.set(-1.0); // 50.0 // 20.0);
+      k_pitch.set(-700.0); // 4000.0 // 80.0);
+      b_pitch.set(-7.0); // 50.0 // 20.0);
 
-      k_yaw.set(-500.0); // 3000.0 // 80.0);    // 250.0);
-      b_yaw.set(0.0); // 40.0 // 20.0);    // 100.0);
+      k_yaw.set(-700.0); // 3000.0 // 80.0);    // 250.0);
+      b_yaw.set(-7.0); // 40.0 // 20.0);    // 100.0);
       
 //      k_x.set(2000.0); // 2000.0);
 //      b_x.set(25.0);
