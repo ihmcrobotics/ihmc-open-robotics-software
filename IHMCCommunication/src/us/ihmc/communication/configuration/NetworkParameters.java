@@ -34,36 +34,12 @@ public class NetworkParameters
 
    private NetworkParameters()
    {
-      PrintTools.info("Looking for network parameters in environment variables");
-      for (NetworkParameterKeys key : NetworkParameterKeys.values())
-      {
-         String keyString = key.toString();
-         String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(keyString), '_').toUpperCase(Locale.getDefault());
-         if (key.isIPAddress())
-         {
-            envVarString += "_IP";
-         }
-
-         if (key == NetworkParameterKeys.rosURI)
-         {
-            if (System.getenv().containsKey("ROS_MASTER_URI"))
-            {
-               parameters.put(key, System.getenv("ROS_MASTER_URI"));
-            }
-         }
-         else if (System.getenv().containsKey(envVarString))
-         {
-            parameters.put(key, System.getenv(envVarString));
-         }
-      }
-
       File file = new File(System.getProperty("networkParameterFile", defaultParameterFile)).getAbsoluteFile();
       PrintTools.info("Looking for network parameters in network parameters file at " + file.getAbsolutePath());
 
       if (file.exists() && file.isFile())
       {
          PrintTools.info("Found Network parameters file at " + file.getAbsolutePath());
-         PrintTools.info("Entries in the network parameters file will overwrite any currently set IHMC networking environment variables");
          try
          {
             Properties properties = new Properties();
@@ -88,6 +64,30 @@ public class NetworkParameters
       else
       {
          PrintTools.warn("Network parameter file " + file.getAbsolutePath() + " does not exist.");
+      }
+
+      PrintTools.info("Looking for network parameters in environment variables");
+      PrintTools.info("Environment variables will override entries in the network parameters file.");
+      for (NetworkParameterKeys key : NetworkParameterKeys.values())
+      {
+         String keyString = key.toString();
+         String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(keyString), '_').toUpperCase(Locale.getDefault());
+         if (key.isIPAddress())
+         {
+            envVarString += "_IP";
+         }
+
+         if (key == NetworkParameterKeys.rosURI)
+         {
+            if (System.getenv().containsKey("ROS_MASTER_URI"))
+            {
+               parameters.put(key, System.getenv("ROS_MASTER_URI"));
+            }
+         }
+         else if (System.getenv().containsKey(envVarString))
+         {
+            parameters.put(key, System.getenv(envVarString));
+         }
       }
    }
 
