@@ -15,7 +15,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class AbstractSimpleActiveSetQPSolverTest
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    public abstract SimpleActiveSetQPSolverInterface createSolverToTest();
 
@@ -869,7 +869,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       int numberOfNaNSolutions = 0;
       for (int testNumber = 0; testNumber < numberOfTests; testNumber++)
       {
-//         System.out.println("testNumber = " + testNumber);
+         //         System.out.println("testNumber = " + testNumber);
          solver.clear();
 
          DenseMatrix64F costQuadraticMatrix = RandomTools.generateRandomMatrix(random, numberOfVariables, numberOfVariables);
@@ -898,7 +898,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          if (numberOfIterations > maxNumberOfIterations)
             maxNumberOfIterations = numberOfIterations;
 
-//         System.out.println(solution);
+         //         System.out.println(solution);
          //         System.out.println("numberOfIterations = " + numberOfIterations);
 
          assertEquals(numberOfVariables, solution.getNumRows());
@@ -912,7 +912,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
             numberOfNaNSolutions++;
             continue;
          }
-         
+
          double objectiveCost = solver.getObjectiveCost(solution);
 
          // Verify constraints hold:
@@ -1039,8 +1039,8 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          assertTrue("objectiveCostWithSmallPerturbation = " + objectiveCostWithSmallPerturbation + ", objectiveCost = " + objectiveCost, objectiveCostWithSmallPerturbation > objectiveCost);
       }
 
-      assertTrue (numberOfNaNSolutions < numberOfTests / 2);
-      
+      assertTrue(numberOfNaNSolutions < numberOfTests / 2);
+
       long endTimeMillis = System.currentTimeMillis();
 
       double timePerTest = ((double) (endTimeMillis - startTimeMillis)) * 0.001 / ((double) numberOfTests);
