@@ -17,7 +17,7 @@ public class NetworkParameters
    public static final String defaultParameterFile = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCNetworkParameters.ini";
    private static final String helpText =
          "Please set all appropriate environment variables or use NetworkParametersCreator to create a properties file and save it in " + defaultParameterFile
-               + ", or pass in -DnetworkParameterFile=[path].";
+               + ", or pass in -Dus.ihmc.networkParameterFile=[path].";
 
    private static NetworkParameters instance = null;
 
@@ -34,7 +34,7 @@ public class NetworkParameters
 
    private NetworkParameters()
    {
-      File file = new File(System.getProperty("networkParameterFile", defaultParameterFile)).getAbsoluteFile();
+      File file = new File(System.getProperty("us.ihmc.us.ihmc.networkParameterFile", defaultParameterFile)).getAbsoluteFile();
       PrintTools.info("Looking for network parameters in network parameters file at " + file.getAbsolutePath());
 
       if (file.exists() && file.isFile())
