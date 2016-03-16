@@ -1,12 +1,14 @@
 package us.ihmc.robotics.screwTheory;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class SpatialForceVector
 {
@@ -99,7 +101,26 @@ public class SpatialForceVector
       this.linearPart.set(linearPart);
       this.angularPart.cross(arm, linearPart);
    }
-   
+
+   public void setIncludingFrame(FrameVector force, FramePoint pointOfApplication)
+   {
+      force.checkReferenceFrameMatch(pointOfApplication);
+      expressedInFrame = force.getReferenceFrame();
+      force.get(linearPart);
+      pointOfApplication.get(tempVector);
+      angularPart.cross(tempVector, linearPart);
+   }
+
+   public void setIncludingFrame(FrameVector force, FrameVector moment, FramePoint pointOfApplication)
+   {
+      force.checkReferenceFrameMatch(pointOfApplication);
+      expressedInFrame = force.getReferenceFrame();
+      force.get(linearPart);
+      pointOfApplication.get(tempVector);
+      angularPart.cross(tempVector, linearPart);
+      angularPart.add(moment.getVector());
+   }
+
    /**
     * @return the frame *in which this spatial force vector is expressed
     */
