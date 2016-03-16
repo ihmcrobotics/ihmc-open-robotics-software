@@ -14,7 +14,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class,
    us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverTest.class,
-   us.ihmc.convexOptimization.quadraticProgram.SimpleInefficientActiveSetQPSolverTest.class,
    us.ihmc.convexOptimization.quadraticProgram.SimpleInefficientEqualityConstrainedQPSolverTest.class,
    us.ihmc.convexOptimization.randomSearch.RandomSearchConvexOptimizationAdapterTest.class
 })
