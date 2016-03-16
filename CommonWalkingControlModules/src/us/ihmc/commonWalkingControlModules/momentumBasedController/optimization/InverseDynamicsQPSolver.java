@@ -19,7 +19,6 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 public class InverseDynamicsQPSolver
 {
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
-   private static final boolean DEBUG = true;
    private static final boolean USE_JERRY_SOLVER = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -112,7 +111,7 @@ public class InverseDynamicsQPSolver
 
       pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, 0.000001);
 
-      if (DEBUG)
+      if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
          wrenchEquilibriumForceError = new YoFrameVector("wrenchEquilibriumForceError", null, registry);
          wrenchEquilibriumTorqueError = new YoFrameVector("wrenchEquilibriumTorqueError", null, registry);
@@ -390,7 +389,7 @@ public class InverseDynamicsQPSolver
       seedFromPreviousSolution.set(true);
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-      if (DEBUG)
+      if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
          CommonOps.mult(tempWrenchConstraint_J, output, tempWrenchConstraint_LHS);
          int index = 0;
