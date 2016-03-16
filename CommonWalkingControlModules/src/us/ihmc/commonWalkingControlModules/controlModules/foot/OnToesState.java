@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -21,6 +24,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -53,6 +57,8 @@ public class OnToesState extends AbstractFootControlState
 
    private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
+
+   private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
 
    private final DoubleYoVariable toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final DoubleYoVariable toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
@@ -130,6 +136,10 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
       feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
 
+      for (int i = 0; i < 3; i++)
+         MatrixTools.removeRow(selectionMatrix, 3); // Remove linear part
+      MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
+      orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
    }
 
    @Override
