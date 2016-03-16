@@ -42,6 +42,18 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> impl
    {
       return getFrameTuple().lengthSquared();
    }
+   
+   public void cross(FrameVector vector1, FrameVector vector2)
+   {
+      getFrameTuple().cross(vector1.getVector(), vector2.getVector());
+      getYoValuesFromFrameTuple();
+   }
+
+   public void cross(YoFrameVector yoFrameVector1, YoFrameVector yoFrameVector2)
+   {
+      getFrameTuple().cross(yoFrameVector1.getFrameTuple().getVector(), yoFrameVector2.getFrameTuple().getVector());
+      getYoValuesFromFrameTuple();
+   }
 
    public double dot(FrameVector vector)
    {
