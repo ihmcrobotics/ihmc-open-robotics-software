@@ -21,8 +21,8 @@ public class WholeBodyControlCoreToolbox
 {
    public static final int nBasisVectorsPerContactPoint = 4;
    public static final int nContactPointsPerContactableBody = 4;
-   public static final int nContactableBody = 2;
-   public static final int rhoSize = nContactableBody * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
+   public static final int nContactableBodies = 2;
+   public static final int rhoSize = nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
 
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final TwistCalculator twistCalculator;
