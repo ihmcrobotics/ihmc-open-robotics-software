@@ -57,6 +57,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
 import us.ihmc.robotics.stateMachines.StateMachine;
@@ -290,6 +291,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       PrivilegedConfigurationCommand command = new PrivilegedConfigurationCommand();
       command.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJoint anklePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+         command.addJointWithPrivilegedConfigurationOnly(anklePitch, 0.0);
+      }
+
       controllerCoreCommand.addInverseDynamicsCommand(command);
 
       initializeContacts();
