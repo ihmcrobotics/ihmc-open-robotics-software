@@ -152,7 +152,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract String[] getJointsToIgnoreInController();
 
-   public abstract void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings);
+   public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
 
    public abstract boolean doFancyOnToesControl();
 
@@ -165,4 +165,19 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getMaxICPErrorBeforeSingleSupportY();
 
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
+
+   /** 
+    * This is the duration for which the desired foot center of pressure will be
+    * drastically dampened to calm shakies. This particularly useful when
+    * dealing with bad footholds.
+    * Set to -1.0 to deactivate this feature.
+    */ 
+   public abstract double getHighCoPDampingDurationToPreventFootShakies();
+
+   /**
+    * This is complimentary information to {@link #getHighCoPDampingDurationToPreventFootShakies()}.
+    * The high CoP damping is triggered on large CoP tracking error.
+    * Set to {@link Double#POSITIVE_INFINITY} to deactivate this feature.
+    */
+   public abstract double getCoPErrorThresholdForHighCoPDamping();
 }

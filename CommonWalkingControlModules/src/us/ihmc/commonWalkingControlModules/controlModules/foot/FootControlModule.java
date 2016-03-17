@@ -185,6 +185,15 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
+   public void setWeights(double highFootWeight, double defaultFootWeight)
+   {
+      swingState.setWeight(defaultFootWeight);
+      moveViaWaypointsState.setWeight(defaultFootWeight);
+      onToesState.setWeight(highFootWeight);
+      supportState.setWeight(highFootWeight);
+      holdPositionState.setWeight(defaultFootWeight);
+   }
+
    public void replanTrajectory(Footstep footstep, double swingTime)
    {
       swingState.replanTrajectory(footstep, swingTime);

@@ -66,6 +66,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
    }
 
+   public void setWeight(double weight)
+   {
+      spatialFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
    /**
     * initializes all the trajectories
     */

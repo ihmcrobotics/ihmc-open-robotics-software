@@ -127,6 +127,11 @@ public class PelvisOrientationManager
       parentRegistry.addChild(registry);
    }
 
+   public void setWeight(double weight)
+   {
+      orientationFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
    public void setTrajectoryTime(double trajectoryTime)
    {
       pelvisOrientationTrajectoryGenerator.setTrajectoryTime(trajectoryTime);

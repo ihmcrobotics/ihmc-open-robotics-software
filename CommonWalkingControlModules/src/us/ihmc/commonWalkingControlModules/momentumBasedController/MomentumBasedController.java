@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -127,11 +126,11 @@ public class MomentumBasedController
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder, CenterOfMassJacobian centerOfMassJacobian,
-         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
-         SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
-         ArmControllerParameters armControllerParameters, WalkingControllerParameters walkingControllerParameters,
+   public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
+         CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+         SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
+         TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT,
+         ArrayList<Updatable> updatables, ArmControllerParameters armControllerParameters, WalkingControllerParameters walkingControllerParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -207,13 +206,10 @@ public class MomentumBasedController
          footContactStates.put(robotSide, yoPlaneContactStates.get(feet.get(robotSide)));
       }
 
-      InverseDynamicsJoint[] jointsToOptimizeFor = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
-      walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
+      controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
-      controlledJoints = momentumOptimizationSettings.getJointsToOptimizeFor();
-
-      ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry, registry);
+      ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList),
+            yoGraphicsListRegistry, registry);
       addUpdatable(contactPointVisualizer);
 
       desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
@@ -300,12 +296,6 @@ public class MomentumBasedController
             handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
          }
       }
-
-      enableCoPSmootherForShakies.set(momentumOptimizationSettings.getEnableCoPSmootherControlForShakies());
-      defaultWRhoSmoother.set(momentumOptimizationSettings.getRateOfChangeOfRhoPlaneContactRegularization());
-      maxWRhoSmoother.set(momentumOptimizationSettings.getMaxWRhoSmoother());
-      copSmootherControlDuration.set(momentumOptimizationSettings.getCoPSmootherDuration());
-      copSmootherErrorThreshold.set(momentumOptimizationSettings.getCopErrorThresholdToTriggerSmoother());
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
@@ -424,19 +414,17 @@ public class MomentumBasedController
       }
    }
 
-   private final BooleanYoVariable enableCoPSmootherForShakies = new BooleanYoVariable("enableCoPSmootherForShakies", registry);
-   private final DoubleYoVariable currentWRhoSmootherForShakies = new DoubleYoVariable("currentWRhoSmootherForShakies", registry);
-   private final BooleanYoVariable isCoPControlBad = new BooleanYoVariable("isCoPControlBad", registry);
-   private final BooleanYoVariable isDesiredCoPBeingSmoothened = new BooleanYoVariable("isDesiredCoPBeingSmoothened", registry);
-   private final DoubleYoVariable copSmootherErrorThreshold = new DoubleYoVariable("copSmootherErrorThreshold", registry);
-   private final DoubleYoVariable copSmootherControlStartTime = new DoubleYoVariable("copSmootherControlStartTime", registry);
-   private final DoubleYoVariable defaultWRhoSmoother = new DoubleYoVariable("defaultWRhoSmoother", registry);
-   private final DoubleYoVariable maxWRhoSmoother = new DoubleYoVariable("maxWRhoSmoother", registry);
-   private final DoubleYoVariable copSmootherControlDuration = new DoubleYoVariable("copSmootherControlDuration", registry);
-   private final DoubleYoVariable copSmootherPercent = new DoubleYoVariable("copSmootherPercent", registry);
+   private final BooleanYoVariable enableHighCoPDampingForShakies = new BooleanYoVariable("enableHighCoPDampingForShakies", registry);
+   private final BooleanYoVariable isCoPTrackingBad = new BooleanYoVariable("isCoPTrackingBad", registry);
+   private final DoubleYoVariable highCoPDampingErrorTrigger = new DoubleYoVariable("highCoPDampingErrorTrigger", registry);
+   private final DoubleYoVariable highCoPDampingStartTime = new DoubleYoVariable("highCoPDampingStartTime", registry);
+   private final DoubleYoVariable highCoPDampingDuration = new DoubleYoVariable("highCoPDampingDuration", registry);
 
-   public double smoothDesiredCoPIfNeeded(SideDependentList<FramePoint2d> desiredCoPs)
+   public boolean estimateIfHighCoPDampingNeeded(SideDependentList<FramePoint2d> desiredCoPs)
    {
+      if (!enableHighCoPDampingForShakies.getBooleanValue())
+         return false;
+
       boolean atLeastOneFootWithBadCoPControl = false;
 
       for (RobotSide robotSide : RobotSide.values)
@@ -466,40 +454,34 @@ public class MomentumBasedController
          yoCoPError.get(robotSide).set(copError);
          yoCoPErrorMagnitude.get(robotSide).set(copError.length());
 
-         if (yoCoPErrorMagnitude.get(robotSide).getDoubleValue() > copSmootherErrorThreshold.getDoubleValue())
+         footSwitch.computeAndPackFootWrench(footWrench);
+         footWrench.getLinearPartIncludingFrame(footForceVector);
+         footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
+
+         if (footForceVector.getZ() > minZForceForCoPControlScaling && yoCoPErrorMagnitude.get(robotSide).getDoubleValue() > highCoPDampingErrorTrigger.getDoubleValue())
          {
             atLeastOneFootWithBadCoPControl = true;
          }
       }
 
-      isCoPControlBad.set(atLeastOneFootWithBadCoPControl);
+      isCoPTrackingBad.set(atLeastOneFootWithBadCoPControl);
 
-      if (atLeastOneFootWithBadCoPControl && !isDesiredCoPBeingSmoothened.getBooleanValue())
+      boolean isCoPDampened = yoTime.getDoubleValue() - highCoPDampingStartTime.getDoubleValue() <= highCoPDampingDuration.getDoubleValue();
+
+      if (atLeastOneFootWithBadCoPControl && !isCoPDampened)
       {
-         isDesiredCoPBeingSmoothened.set(true);
-         copSmootherControlStartTime.set(yoTime.getDoubleValue());
+         highCoPDampingStartTime.set(yoTime.getDoubleValue());
+         isCoPDampened = true;
       }
 
-      if (isDesiredCoPBeingSmoothened.getBooleanValue())
-      {
-         double deltaTime = yoTime.getDoubleValue() - copSmootherControlStartTime.getDoubleValue();
-         double percent = MathTools.clipToMinMax(deltaTime / copSmootherControlDuration.getDoubleValue(), 0.0, 1.0);
-         copSmootherPercent.set(percent);
+      return isCoPDampened;
+   }
 
-         if (enableCoPSmootherForShakies.getBooleanValue())
-         {
-            double wRhoSmoother = percent * defaultWRhoSmoother.getDoubleValue() + (1.0 - percent) * maxWRhoSmoother.getDoubleValue();
-            currentWRhoSmootherForShakies.set(wRhoSmoother);
-         }
-
-         if (percent >= 1.0)
-         {
-            currentWRhoSmootherForShakies.set(defaultWRhoSmoother.getDoubleValue());
-            isDesiredCoPBeingSmoothened.set(false);
-         }
-      }
-
-      return currentWRhoSmootherForShakies.getDoubleValue();
+   public void setHighCoPDampingParameters(boolean enable, double duration, double copErrorThreshold)
+   {
+      enableHighCoPDampingForShakies.set(enable);
+      highCoPDampingDuration.set(duration);
+      highCoPDampingErrorTrigger.set(copErrorThreshold);
    }
 
    public void addUpdatable(Updatable updatable)

@@ -797,14 +797,10 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
-      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
-      momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      return momentumOptimizationSettings;
    }
 
    @Override
@@ -865,5 +861,19 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
    {
       return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getHighCoPDampingDurationToPreventFootShakies()
+   {
+      return -1.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getCoPErrorThresholdForHighCoPDamping()
+   {
+      return Double.POSITIVE_INFINITY;
    }
 }

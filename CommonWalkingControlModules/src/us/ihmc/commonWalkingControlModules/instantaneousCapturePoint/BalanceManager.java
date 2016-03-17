@@ -9,6 +9,8 @@ import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Yellow
 import static us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType.CROSS;
 import static us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType.ROTATED_CROSS;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
@@ -147,6 +149,11 @@ public class BalanceManager
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setMomentumWeight(Vector3d linearWeight)
+   {
+      icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
    }
 
    public void addFootstepToPlan(Footstep footstep)

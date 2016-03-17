@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,8 +34,10 @@ public class VariousWalkingManagers
          ArmControllerParameters armControlParameters, YoVariableRegistry registry)
    {
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       balanceManager = new BalanceManager(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, registry);
+      balanceManager.setMomentumWeight(momentumOptimizationSettings.getLinearMomentumWeight());
 
       centerOfMassHeightManager = new CenterOfMassHeightManager(momentumBasedController, walkingControllerParameters, registry);
 
@@ -42,7 +45,8 @@ public class VariousWalkingManagers
       {
          YoOrientationPIDGainsInterface headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
          double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
-         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains, initialHeadYawPitchRoll,
+         double headWeight = momentumOptimizationSettings.getHeadWeight();
+         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains, headWeight, initialHeadYawPitchRoll,
                registry);
       }
       else
@@ -54,7 +58,8 @@ public class VariousWalkingManagers
       {
          double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
          YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, trajectoryTimeHeadOrientation, registry);
+         double chestWeight = momentumOptimizationSettings.getChestWeight();
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, chestWeight, trajectoryTimeHeadOrientation, registry);
       }
       else
       {
@@ -65,6 +70,10 @@ public class VariousWalkingManagers
       {
          // Setup arm+hand manipulation state machines
          manipulationControlModule = new ManipulationControlModule(armControlParameters, momentumBasedController, registry);
+         double handJointspaceWeight = momentumOptimizationSettings.getHandJointspaceWeight();
+         double handTaskspaceWeight = momentumOptimizationSettings.getHandTaskspaceWeight();
+         double handUserModeWeight = momentumOptimizationSettings.getHandUserModeWeight();
+         manipulationControlModule.setWeights(handJointspaceWeight, handTaskspaceWeight, handUserModeWeight);
       }
       else
       {
@@ -72,8 +81,12 @@ public class VariousWalkingManagers
       }
 
       feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, registry);
+      double highFootWeight = momentumOptimizationSettings.getHighFootWeight();
+      double defaultFootWeight = momentumOptimizationSettings.getDefaultFootWeight();
+      feetManager.setWeights(highFootWeight, defaultFootWeight);
 
       pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, registry);
+      pelvisOrientationManager.setWeight(momentumOptimizationSettings.getPelvisWeight());
    }
 
    public void initializeManagers()
