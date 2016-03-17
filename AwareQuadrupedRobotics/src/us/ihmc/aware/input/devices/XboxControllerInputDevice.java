@@ -44,19 +44,7 @@ public class XboxControllerInputDevice extends PollingInputDevice
 
    public XboxControllerInputDevice() throws NoInputDeviceException
    {
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-
-      // Find the first controller with the matching name.
-      for (Controller controller : controllers)
-      {
-         if (controller.getName().equals(CONTROLLER_ID))
-         {
-            this.controller = controller;
-            return;
-         }
-      }
-
-      throw new NoInputDeviceException(CONTROLLER_ID);
+      this.controller = getFirstControllerByName(CONTROLLER_ID);
    }
 
    @Override
@@ -80,4 +68,19 @@ public class XboxControllerInputDevice extends PollingInputDevice
       }
    }
 
+   private Controller getFirstControllerByName(String name) throws NoInputDeviceException
+   {
+      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+
+      // Find the first controller with the matching name.
+      for (Controller controller : controllers)
+      {
+         if (controller.getName().equals(name))
+         {
+            return controller;
+         }
+      }
+
+      throw new NoInputDeviceException(name);
+   }
 }
