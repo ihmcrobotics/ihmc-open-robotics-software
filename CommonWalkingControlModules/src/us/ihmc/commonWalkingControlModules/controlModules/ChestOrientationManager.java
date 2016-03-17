@@ -4,7 +4,6 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -43,7 +42,7 @@ public class ChestOrientationManager
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, double trajectoryTime,
+   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, double weight, double trajectoryTime,
          YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();
@@ -54,7 +53,7 @@ public class ChestOrientationManager
       RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
 
-      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.CHEST_WEIGHT);
+      orientationFeedbackControlCommand.setWeightForSolver(weight);
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
 

@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -34,13 +33,13 @@ public class WholeBodyControllerCore
 
    private OneDoFJoint[] oneDoFJoints;
 
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
-         FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
+         YoVariableRegistry parentRegistry)
    {
 
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
-      inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, momentumOptimizationSettings, registry);
-      inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, momentumOptimizationSettings, registry);
+      inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
+      inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
       oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsSolver.getJointsToOptimizeFors(), OneDoFJoint.class);
       SixDoFJoint rootJoint = toolbox.getRobotRootJoint();
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);

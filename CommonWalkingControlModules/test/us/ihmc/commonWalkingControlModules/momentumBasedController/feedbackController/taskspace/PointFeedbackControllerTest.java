@@ -77,7 +77,7 @@ public class PointFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, controlDT, 0.0, geometricJacobianHolder,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, null, controlDT, 0.0, geometricJacobianHolder,
             twistCalculator, null, null);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, registry);
 
@@ -170,7 +170,7 @@ public class PointFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, controlDT, 0.0, geometricJacobianHolder,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, null, controlDT, 0.0, geometricJacobianHolder,
             twistCalculator, null, null);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, registry);
 

@@ -84,6 +84,15 @@ public class FeetManager
       parentRegistry.addChild(registry);
    }
 
+   public void setWeights(double highFootWeight, double defaultFootWeight)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.setWeights(highFootWeight, defaultFootWeight);
+      }
+   }
+
    public void compute()
    {
       for (RobotSide robotSide : RobotSide.values)

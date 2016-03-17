@@ -1,183 +1,196 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Momentum;
-
-/**
- * @author twan
- *         Date: 5/1/13
- */
 public class MomentumOptimizationSettings
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable linearMomentumXWeight = new DoubleYoVariable("linearMomentumXWeight", registry);
-   private final DoubleYoVariable linearMomentumYWeight = new DoubleYoVariable("linearMomentumYWeight", registry);
-   private final DoubleYoVariable linearMomentumZWeight = new DoubleYoVariable("linearMomentumZWeight", registry);
-   private final DoubleYoVariable angularMomentumXYWeight = new DoubleYoVariable("angularMomentumXYWeight", registry);
-   private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
-   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
-   private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.005);
+   private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
-   private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
-   private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private double wRhoPlane;
-   private double wRhoSmoother;
-   private double wRhoPenalizer;
+   private double jointAccelerationWeight = 0.005;
+   private double jointJerkWeight = 0.1;
+   private double rhoWeight = 0.00001;
+   private double rhoMin = 4.0;
+   private double rhoRateDefaultWeight = 0.001;
+   private double rhoRateHighWeight = 0.05;
+   private final Vector2d copWeight = new Vector2d(750.0, 1500.0);
+   private final Vector2d copRateDefaultWeight = new Vector2d(100000.0, 200000.0);
+   private final Vector2d copRateHighWeight = new Vector2d(2500000.0, 10000000.0);
+   private double headWeight  = 1.0;
+   private double chestWeight = 10.0;
+   private double pelvisWeight = 1.0;
+   private double defaultFootWeight = 10.0;
+   private double highFootWeight = 50.0;
+   private double handUserModeWeight = 10.0;
+   private double handJointspaceWeight = 1.0;
+   private double handTaskspaceWeight = 1.0;
 
-   private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private final Momentum tempMomentum = new Momentum(); // just to make sure that the ordering of force and torque are correct
-
-   // Parameters for shaky feet
-   private boolean enableCoPSmootherControlForShakies = false;
-   private double copErrorThresholdToTriggerSmoother = 0.10;
-   private double copSmootherDuration = 0.5;
-   private double maxWRhoSmoother = 1.5;
-
-   public MomentumOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, YoVariableRegistry parentRegistry)
+   public MomentumOptimizationSettings()
    {
-      this.jointsToOptimizeFor = jointsToOptimizeFor;
-      parentRegistry.addChild(registry);
    }
 
-   public void setMomentumWeight(double linearMomentumXWeight, double linearMomentumYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
+   public void setBodyWeights(double headWeight, double chestWeight, double pelvisWeight)
    {
-      this.linearMomentumXWeight.set(linearMomentumXWeight);
-      this.linearMomentumYWeight.set(linearMomentumYWeight);
-      this.linearMomentumZWeight.set(linearMomentumZWeight);
-      this.angularMomentumXYWeight.set(angularMomentumXYWeight);
-      this.angularMomentumZWeight.set(angularMomentumZWeight);
+      this.headWeight = headWeight;
+      this.chestWeight = chestWeight;
+      this.pelvisWeight = pelvisWeight;
    }
 
-   public void setMomentumWeight(double linearMomentumXYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
+   public void setManipulationWeights(double jointspace, double taskspace, double userMode)
    {
-      setMomentumWeight(linearMomentumXYWeight, linearMomentumXYWeight, linearMomentumZWeight, angularMomentumXYWeight, angularMomentumZWeight);
+      handJointspaceWeight = jointspace;
+      handTaskspaceWeight = taskspace;
+      handUserModeWeight = userMode;
    }
 
-   public void setRhoPlaneContactRegularization(double wRho)
+   public void setFootWeights(double support, double swing)
    {
-      this.wRhoPlane = wRho;
+      highFootWeight = support;
+      defaultFootWeight = swing;
    }
 
-   public void setDampedLeastSquaresFactor(double lambda)
+   public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY,
+         double angularMomentumWeightZ)
    {
-      this.lambda.set(lambda);
+      linearMomentumWeight.set(linearMomentumWeightX, linearMomentumWeightY, linearMomentumWeightZ);
+      angularMomentumWeight.set(angularMomentumWeightXY, angularMomentumWeightXY, angularMomentumWeightZ);
+   }
+
+   public void setMomentumWeight(double linearMomentumWeightXY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
+   {
+      setMomentumWeight(linearMomentumWeightXY, linearMomentumWeightXY, linearMomentumWeightZ, angularMomentumWeightXY, angularMomentumWeightZ);
+   }
+
+   public void setRhoPlaneContactRegularization(double rhoWeight)
+   {
+      this.rhoWeight = rhoWeight;
+   }
+
+   public void setRhoRateWeight(double defaultWeight, double highWeight)
+   {
+      this.rhoRateDefaultWeight = defaultWeight;
+      this.rhoRateHighWeight = highWeight;
+   }
+
+   public void setJointWeight(double jointAccelerationWeight, double jointJerkWeight)
+   {
+      this.jointAccelerationWeight = jointAccelerationWeight;
+      this.jointJerkWeight = jointJerkWeight;
    }
 
    public void setRhoMin(double rhoMin)
    {
-      this.rhoMin.set(rhoMin);
+      this.rhoMin = rhoMin;
    }
 
-   public DenseMatrix64F getMomentumDotWeight(DenseMatrix64F momentumSubspace)
+   public void setCoPWeight(double weightX, double weightY)
    {
-      CommonOps.multOuter(momentumSubspace, momentumSubspaceProjector);
-
-      tempMomentum.setLinearPartX(linearMomentumXWeight.getDoubleValue());
-      tempMomentum.setLinearPartY(linearMomentumYWeight.getDoubleValue());
-      tempMomentum.setLinearPartZ(linearMomentumZWeight.getDoubleValue());
-
-      tempMomentum.setAngularPartX(angularMomentumXYWeight.getDoubleValue());
-      tempMomentum.setAngularPartY(angularMomentumXYWeight.getDoubleValue());
-      tempMomentum.setAngularPartZ(angularMomentumZWeight.getDoubleValue());
-
-      tempMomentum.getMatrix(momentumWeightDiagonal);
-      CommonOps.diag(tempMatrix, Momentum.SIZE, momentumWeightDiagonal);
-
-      CommonOps.mult(momentumSubspaceProjector, tempMatrix, C);
-
-      return C;
+      copWeight.set(weightX, weightY);
    }
 
-   public double getRhoPlaneContactRegularization()
+   public void setCoPRateDefaultWeight(double weightX, double weightY)
    {
-      return wRhoPlane;
+      copRateDefaultWeight.set(weightX, weightY);
    }
 
-   public void getDampedLeastSquaresFactorMatrix(DenseMatrix64F dampedLeastSquaresFactorMatrixToPack)
+   public void setCoPRateHighWeight(double weightX, double weightY)
    {
-      CommonOps.setIdentity(dampedLeastSquaresFactorMatrixToPack);
-      CommonOps.scale(lambda.getDoubleValue(), dampedLeastSquaresFactorMatrixToPack);
+      copRateHighWeight.set(weightX, weightY);
    }
 
-   public double getRhoMinScalar()
+   public Vector3d getLinearMomentumWeight()
    {
-      return rhoMin.getDoubleValue();
+      return linearMomentumWeight;
    }
 
-   public double getDampedLeastSquaresFactor()
+   public Vector3d getAngularMomentumWeight()
    {
-      return lambda.getDoubleValue();
+      return angularMomentumWeight;
    }
 
-   public double getRateOfChangeOfRhoPlaneContactRegularization()
+   public double getJointAccelerationWeight()
    {
-      return wRhoSmoother;
+      return jointAccelerationWeight;
    }
 
-   public double getPenalizerOfRhoPlaneContactRegularization()
+   public double getJointJerkWeight()
    {
-      return wRhoPenalizer;
+      return jointJerkWeight;
    }
 
-   public void setRhoPenalizerPlaneContactRegularization(double wRhoPenalizer)
+   public double getRhoWeight()
    {
-      this.wRhoPenalizer = wRhoPenalizer;
+      return rhoWeight;
    }
 
-   public void setRateOfChangeOfRhoPlaneContactRegularization(double wRhoSmoother)
+   public double getRhoMin()
    {
-      this.wRhoSmoother = wRhoSmoother;
+      return rhoMin;
    }
 
-   public InverseDynamicsJoint[] getJointsToOptimizeFor()
+   public double getRhoRateDefaultWeight()
    {
-      return jointsToOptimizeFor;
+      return rhoRateDefaultWeight;
    }
 
-   public boolean getEnableCoPSmootherControlForShakies()
+   public double getRhoRateHighWeight()
    {
-      return enableCoPSmootherControlForShakies;
+      return rhoRateHighWeight;
    }
 
-   public void setEnableCoPSmootherControlForShakies(boolean enableCoPSmootherControlForShakies)
+   public Vector2d getCoPWeight()
    {
-      this.enableCoPSmootherControlForShakies = enableCoPSmootherControlForShakies;
+      return copWeight;
    }
 
-   public double getCopErrorThresholdToTriggerSmoother()
+   public Vector2d getCoPRateDefaultWeight()
    {
-      return copErrorThresholdToTriggerSmoother;
+      return copRateDefaultWeight;
    }
 
-   public void setCopErrorThresholdToTriggerSmoother(double copErrorThresholdToTriggerSmoother)
+   public Vector2d getCoPRateHighWeight()
    {
-      this.copErrorThresholdToTriggerSmoother = copErrorThresholdToTriggerSmoother;
+      return copRateHighWeight;
    }
 
-   public double getCoPSmootherDuration()
+   public double getHeadWeight()
    {
-      return copSmootherDuration;
+      return headWeight;
    }
 
-   public void setCopSmootherDuration(double copSmootherDuration)
+   public double getChestWeight()
    {
-      this.copSmootherDuration = copSmootherDuration;
+      return chestWeight;
    }
 
-   public double getMaxWRhoSmoother()
+   public double getPelvisWeight()
    {
-      return maxWRhoSmoother;
+      return pelvisWeight;
    }
 
-   public void setMaxWRhoSmoother(double maxWRhoSmoother)
+   public double getDefaultFootWeight()
    {
-      this.maxWRhoSmoother = maxWRhoSmoother;
+      return defaultFootWeight;
+   }
+
+   public double getHighFootWeight()
+   {
+      return highFootWeight;
+   }
+
+   public double getHandUserModeWeight()
+   {
+      return handUserModeWeight;
+   }
+
+   public double getHandJointspaceWeight()
+   {
+      return handJointspaceWeight;
+   }
+
+   public double getHandTaskspaceWeight()
+   {
+      return handTaskspaceWeight;
    }
 }

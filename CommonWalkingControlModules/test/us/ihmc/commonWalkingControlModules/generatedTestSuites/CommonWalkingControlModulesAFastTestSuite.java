@@ -27,7 +27,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPPlanarProjectorTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointToolsTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumBenchmarkTest.class,
-   us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModuleTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.SingularValueExplorationAndExamplesTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.TypicalMotionConstraintsTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CirclePoseTrajectoryGeneratorTest.class,
@@ -37,7 +36,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculatorTest.class
 })
 
 public class CommonWalkingControlModulesAFastTestSuite

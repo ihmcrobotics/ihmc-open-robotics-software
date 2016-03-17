@@ -101,6 +101,11 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
    }
 
+   public void setWeight(double weight)
+   {
+      spatialFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
    @Override
    public void doAction()
    {

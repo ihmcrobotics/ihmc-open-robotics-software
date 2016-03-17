@@ -930,14 +930,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
-      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.4, 1.4, 10.0, 10.0);
-      momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16); // 0.06);
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      return momentumOptimizationSettings;
    }
 
    @Override
@@ -981,5 +977,19 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double pelvisToAnkleThresholdForWalking()
    {
       return 0.8157;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getHighCoPDampingDurationToPreventFootShakies()
+   {
+      return -1.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getCoPErrorThresholdForHighCoPDamping()
+   {
+      return Double.POSITIVE_INFINITY;
    }
 }

@@ -108,6 +108,11 @@ public class JointSpaceHandControlState extends HandControlState
       parentRegistry.addChild(registry);
    }
 
+   public void setWeight(double weight)
+   {
+      jointspaceFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
    @Override
    public void doAction()
    {

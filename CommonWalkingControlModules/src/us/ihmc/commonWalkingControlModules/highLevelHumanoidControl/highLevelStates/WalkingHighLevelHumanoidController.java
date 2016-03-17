@@ -199,6 +199,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       alwaysIntegrateAnkleAcceleration.set(true);
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
+
+      double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
+      double coPErrorThreshold = walkingControllerParameters.getCoPErrorThresholdForHighCoPDamping();
+      boolean enableHighCoPDamping = highCoPDampingDuration > 0.0 && !Double.isInfinite(coPErrorThreshold);
+      momentumBasedController.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
    }
 
    private void setupStateMachine()
@@ -1230,7 +1235,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void submitControllerCoreCommands(JointspaceFeedbackControlCommand unconstrainedJointCommand)
    {
       planeContactStateCommandPool.clear();
-      double wRhoSmoother = momentumBasedController.smoothDesiredCoPIfNeeded(footDesiredCoPs);
+      boolean isHighCoPDampingNeeded = momentumBasedController.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -1253,7 +1258,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
-         planeContactStateCommand.setWRhoSmoother(wRhoSmoother);
+         planeContactStateCommand.setUseHighCoPDamping(isHighCoPDampingNeeded);
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 

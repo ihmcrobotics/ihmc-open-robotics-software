@@ -22,8 +22,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsOptimizationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -72,20 +72,18 @@ public class WholeBodyInverseDynamicsSolver
    private final YoFrameVector yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", worldFrame, registry);
    private final YoFrameVector yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", worldFrame, registry);
 
-   public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
-         YoVariableRegistry parentRegistry)
+   public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
       YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
 
       rootJoint = toolbox.getRobotRootJoint();
-
       inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
-      optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, momentumOptimizationSettings, registry);
-      optimizationControlModule.setMinRho(momentumOptimizationSettings.getRhoMinScalar());
+      optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, registry);
 
-      jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
-      controlledOneDoFJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
+      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 

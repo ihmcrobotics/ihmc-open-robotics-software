@@ -142,6 +142,12 @@ public class OnToesState extends AbstractFootControlState
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
    }
 
+   public void setWeight(double weight)
+   {
+      pointFeedbackControlCommand.setWeightForSolver(weight);
+      orientationFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
    @Override
    public void doSpecificAction()
    {

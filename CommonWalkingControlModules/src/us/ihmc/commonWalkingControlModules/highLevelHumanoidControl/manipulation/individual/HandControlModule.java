@@ -286,6 +286,25 @@ public class HandControlModule
       stateMachine.attachStateChangedListener(stateChangedlistener);
    }
 
+   public void setTaskspaceWeight(double weight)
+   {
+      if (taskSpacePositionControlState instanceof TaskspaceHandPositionControlState)
+         ((TaskspaceHandPositionControlState) taskSpacePositionControlState).setWeight(weight);
+   }
+
+   public void setJointspaceWeight(double weight)
+   {
+      if (taskSpacePositionControlState instanceof TaskspaceToJointspaceHandPositionControlState)
+         ((TaskspaceToJointspaceHandPositionControlState) taskSpacePositionControlState).setWeight(weight);
+      jointSpaceHandControlState.setWeight(weight);
+   }
+
+   public void setUserModeWeight(double weight)
+   {
+      if (userControlModeState != null)
+         userControlModeState.setWeight(weight);
+   }
+
    public void initialize()
    {
       for (int i = 0; i < oneDoFJoints.length; i++)

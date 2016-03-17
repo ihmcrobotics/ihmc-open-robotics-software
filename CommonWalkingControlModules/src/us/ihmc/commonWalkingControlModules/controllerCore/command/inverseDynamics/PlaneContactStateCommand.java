@@ -18,10 +18,11 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    private String rigidBodyName;
    private long id = -1L;
    private double coefficientOfFriction = Double.NaN;
-   private double wRhoSmoother = 0.0;
    private final int initialSize = 8;
    private final FrameTupleArrayList<FramePoint> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
    private final FrameVector contactNormal = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+
+   private boolean useHighCoPDamping = false;
 
    public PlaneContactStateCommand()
    {
@@ -41,11 +42,6 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    public void setCoefficientOfFriction(double coefficientOfFriction)
    {
       this.coefficientOfFriction = coefficientOfFriction;
-   }
-
-   public void setWRhoSmoother(double wRhoSmoother)
-   {
-      this.wRhoSmoother = wRhoSmoother;
    }
 
    public void clearContactPoints()
@@ -78,6 +74,11 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    public void setContactNormal(FrameVector contactNormal)
    {
       this.contactNormal.setIncludingFrame(contactNormal);
+   }
+
+   public void setUseHighCoPDamping(boolean useHighCoPDamping)
+   {
+      this.useHighCoPDamping = useHighCoPDamping;
    }
 
    public long getId()
@@ -120,9 +121,9 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       contactNormalToPack.setIncludingFrame(contactNormal);
    }
 
-   public double getWRhoSmoother()
+   public boolean isUseHighCoPDamping()
    {
-      return wRhoSmoother;
+      return useHighCoPDamping;
    }
 
    @Override
@@ -133,6 +134,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       coefficientOfFriction = other.coefficientOfFriction;
       contactPoints.copyFromListAndTrimSize(other.contactPoints);
       contactNormal.setIncludingFrame(other.contactNormal);
+      useHighCoPDamping = other.useHighCoPDamping;
    }
 
    @Override

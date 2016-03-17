@@ -68,6 +68,11 @@ public class HoldPositionState extends AbstractFootControlState
       spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
    }
 
+   public void setWeight(double weight)
+   {
+      spatialFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
    @Override
    public void doTransitionIntoAction()
    {

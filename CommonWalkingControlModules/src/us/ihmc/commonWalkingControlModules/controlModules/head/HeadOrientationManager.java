@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -43,7 +42,7 @@ public class HeadOrientationManager
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoOrientationPIDGainsInterface gains, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
+         YoOrientationPIDGainsInterface gains, double weight, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
@@ -51,7 +50,7 @@ public class HeadOrientationManager
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
       RigidBody elevator = fullRobotModel.getElevator();
-      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HEAD_WEIGHT);
+      orientationFeedbackControlCommand.setWeightForSolver(weight);
       orientationFeedbackControlCommand.set(elevator, head);
       orientationFeedbackControlCommand.setGains(gains);
       chestFrame = chest.getBodyFixedFrame();

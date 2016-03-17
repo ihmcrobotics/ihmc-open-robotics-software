@@ -70,7 +70,7 @@ public class MomentumBasedControllerFactory
    private boolean createControllerNetworkSubscriber = false;
    private boolean createQueuedControllerCommandGenerator = false;
    private boolean createUserDesiredControllerCommandGenerator = true;
-   
+
    private ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands;
 
    private final WalkingControllerParameters walkingControllerParameters;
@@ -145,10 +145,11 @@ public class MomentumBasedControllerFactory
    }
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
-   
+
    public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript)
    {
-      if (footstepGenerator != null) return;
+      if (footstepGenerator != null)
+         return;
 
       if (momentumBasedController != null)
       {
@@ -167,20 +168,20 @@ public class MomentumBasedControllerFactory
    }
 
    private QueuedControllerCommandGenerator queuedControllerCommandGenerator;
-   
+
    public void createQueuedControllerCommandGenerator(ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands)
    {
-      if (queuedControllerCommandGenerator != null) return;
+      if (queuedControllerCommandGenerator != null)
+         return;
 
       if (momentumBasedController != null)
       {
          System.out.println("In createdQueuedControllerCommandGenerator");
-         
+
          SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
          double controlDT = momentumBasedController.getControlDT();
-         queuedControllerCommandGenerator = new QueuedControllerCommandGenerator(controllerCommands,
-               commandInputManager, statusOutputManager,
+         queuedControllerCommandGenerator = new QueuedControllerCommandGenerator(controllerCommands, commandInputManager, statusOutputManager,
                walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, registry);
 
          momentumBasedController.addUpdatables(queuedControllerCommandGenerator.getModulesToUpdate());
@@ -191,17 +192,19 @@ public class MomentumBasedControllerFactory
          this.controllerCommands = controllerCommands;
       }
    }
-   
+
    private UserDesiredChestOrientationControllerCommandGenerator userDesiredControllerCommandGenerator = null;
-   
+
    public void createUserDesiredControllerCommandGenerator()
    {
-      if (userDesiredControllerCommandGenerator != null) return;
+      if (userDesiredControllerCommandGenerator != null)
+         return;
 
       if (momentumBasedController != null)
       {
          double defaultTrajectoryTime = 1.0;
-         userDesiredControllerCommandGenerator = new UserDesiredChestOrientationControllerCommandGenerator(commandInputManager, defaultTrajectoryTime, registry);
+         userDesiredControllerCommandGenerator = new UserDesiredChestOrientationControllerCommandGenerator(commandInputManager, defaultTrajectoryTime,
+               registry);
 
          new UserDesiredFootPoseControllerCommandGenerator(commandInputManager, momentumBasedController.getFullRobotModel(), 1.0, registry);
       }
@@ -238,9 +241,10 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      momentumBasedController = new MomentumBasedController(fullRobotModel, geometricJacobianHolder, centerOfMassJacobian, referenceFrames, footSwitches,
-            wristForceSensors, yoTime, gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, armControllerParameters,
-            walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
+      MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
+      momentumBasedController = new MomentumBasedController(fullRobotModel, geometricJacobianHolder, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors,
+            yoTime, gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, armControllerParameters, walkingControllerParameters,
+            yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
@@ -258,13 +262,11 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
       InverseDynamicsJoint[] jointsToOptimizeFor = MomentumBasedController.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
-      walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, jointsToOptimizeFor, referenceFrames, controlDT, gravityZ,
-            geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, jointsToOptimizeFor, momentumOptimizationSettings, referenceFrames,
+            controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
       FeedbackControlCommandList template = variousWalkingManagers.createFeedbackControlTemplate();
-      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, momentumOptimizationSettings, template, registry);
+      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
       ControllerCoreOuput controllerCoreOuput = controllerCore.getOutputForHighLevelController();
 
       /////////////////////////////////////////////////////////////////////////////////////////////

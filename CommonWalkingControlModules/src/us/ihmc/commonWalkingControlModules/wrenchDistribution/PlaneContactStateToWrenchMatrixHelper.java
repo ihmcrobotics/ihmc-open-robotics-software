@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector2d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -21,6 +22,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -37,15 +39,21 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final DenseMatrix64F rhoMatrix;
    private final DenseMatrix64F rhoJacobianMatrix;
+   private final DenseMatrix64F copJacobianMatrix;
 
-   private final DenseMatrix64F rhoMinMatrix;
+   private final DenseMatrix64F desiredCoPMatrix = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F previousCoPMatrix = new DenseMatrix64F(2, 1);
+
    private final DenseMatrix64F rhoWeightMatrix;
    private final DenseMatrix64F rhoRateWeightMatrix;
+   private final DenseMatrix64F desiredCoPWeightMatrix = new DenseMatrix64F(2, 2);
+   private final DenseMatrix64F copRateWeightMatrix = new DenseMatrix64F(2, 2);
 
    private final YoPlaneContactState yoPlaneContactState;
 
    private final LongYoVariable lastCommandId;
-   private final BooleanYoVariable resetRhoRateRegularization;
+   private final BooleanYoVariable hasReset;
+   private final BooleanYoVariable resetRequested;
 
    private final YoMatrix yoRho;
 
@@ -54,6 +62,9 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final ReferenceFrame centerOfMassFrame;
    private final ReferenceFrame planeFrame;
+
+   private final YoFramePoint desiredCoP;
+   private final YoFramePoint previousCoP;
 
    private final List<FramePoint> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector> basisVectors = new ArrayList<>();
@@ -77,8 +88,8 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       rhoMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
+      copJacobianMatrix = new DenseMatrix64F(2, rhoSize);
 
-      rhoMinMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
 
@@ -90,7 +101,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       planeFrame = contactablePlaneBody.getSoleFrame();
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
 
-      resetRhoRateRegularization = new BooleanYoVariable(namePrefix + "ResetRhoRateRegularization", registry);
+      hasReset = new BooleanYoVariable(namePrefix + "HasReset", registry);
+      resetRequested = new BooleanYoVariable(namePrefix + "ResetRequested", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
 
       yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);
@@ -101,21 +113,27 @@ public class PlaneContactStateToWrenchMatrixHelper
          basisVectorsOrigin.add(new FramePoint(centerOfMassFrame));
       }
 
+      desiredCoP = new YoFramePoint(namePrefix + "DesiredCoP", planeFrame, registry);
+      previousCoP = new YoFramePoint(namePrefix + "PreviousCoP", planeFrame, registry);
+      ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
+      wrenchFromRho.setToZero(bodyFixedFrame, centerOfMassFrame);
+
       parentRegistry.addChild(registry);
    }
 
    public void setPlaneContactStateCommand(PlaneContactStateCommand command)
    {
       yoPlaneContactState.updateFromPlaneContactStateCommand(command);
+      yoPlaneContactState.computeSupportPolygon();
 
       if (lastCommandId.getLongValue() != command.getId())
       {
-         resetRhoRateRegularization.set(true);
+         resetRequested.set(true);
          lastCommandId.set(command.getId());
       }
    }
 
-   public void computeMatrices(double rhoMin, double rhoWeight, double rhoRateWeight)
+   public void computeMatrices(double rhoWeight, double rhoRateWeight, Vector2d desiredCoPWeight, Vector2d copRateWeight)
    {
       int numberOfContactPointsInContact = yoPlaneContactState.getNumberOfContactPointsInContact();
       if (numberOfContactPointsInContact > maxNumberOfContactPoints)
@@ -135,63 +153,85 @@ public class PlaneContactStateToWrenchMatrixHelper
 
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
-            FramePoint basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
-            FrameVector basisVector = basisVectors.get(rhoIndex);
-
-            contactPoint.getPosition(basisVectorOrigin);
-
             if (inContact)
             {
-               DenseMatrix64F basisVectorMatrix = computeBasisVector(basisVectorIndex, normalContactVectorRotationMatrix, basisVectorOrigin, basisVector);
-               CommonOps.insert(basisVectorMatrix, rhoJacobianMatrix, 0, rhoIndex);
-               rhoMinMatrix.set(rhoIndex, 0, rhoMin);
+               FramePoint basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
+               FrameVector basisVector = basisVectors.get(rhoIndex);
+
+               contactPoint.getPosition(basisVectorOrigin);
+               computeBasisVector(basisVectorIndex, normalContactVectorRotationMatrix, basisVector);
+
+               DenseMatrix64F singleRhoJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector);
+               CommonOps.insert(singleRhoJacobian, rhoJacobianMatrix, 0, rhoIndex);
+
+               DenseMatrix64F singleRhoCoPJacobian = computeSingleRhoCoPJacobian(basisVectorOrigin, basisVector);
+               CommonOps.insert(singleRhoCoPJacobian, copJacobianMatrix, 0, rhoIndex);
+
                rhoWeightMatrix.set(rhoIndex, rhoIndex, rhoWeight * (double) maxNumberOfContactPoints / (double) numberOfContactPointsInContact);
 
-               if (resetRhoRateRegularization.getBooleanValue())
+               if (resetRequested.getBooleanValue())
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
                else
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, rhoRateWeight);
             }
             else
             {
-               basisVector.setToZero(centerOfMassFrame);
-
-               for (int row = 0; row < Wrench.SIZE; row++)
-                  rhoJacobianMatrix.set(row, rhoIndex, 0.0); // Set the basis vectors of the points not in contact to zero
-
-               rhoMinMatrix.set(rhoIndex, 0, Double.NEGATIVE_INFINITY);
-               rhoWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
-               rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
+               clear(rhoIndex);
             }
 
             rhoIndex++;
          }
       }
-      resetRhoRateRegularization.set(false);
 
-      // Should not get there as long as the number of contact poins of the contactable body is less or equal to maxNumberOfContactPoints.
-      for (; rhoIndex < rhoSize; rhoIndex++)
+      boolean isFootholdAreaLargeEnough = yoPlaneContactState.getFootholdArea() > 1.0e-3;
+
+      if (yoPlaneContactState.inContact() && !resetRequested.getBooleanValue() && isFootholdAreaLargeEnough)
       {
-         FramePoint basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
-         FrameVector basisVector = basisVectors.get(rhoIndex);
-
-         basisVectorOrigin.setToZero(centerOfMassFrame);
-         basisVector.setToZero(centerOfMassFrame);
-
-         for (int row = 0; row < Wrench.SIZE; row++)
-            rhoJacobianMatrix.set(row, rhoIndex, 0.0);
-
-         rhoMinMatrix.set(rhoIndex, rhoIndex, Double.NEGATIVE_INFINITY);
-         rhoWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
-         rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
+         desiredCoPMatrix.set(0, 0, desiredCoP.getX());
+         desiredCoPMatrix.set(1, 0, desiredCoP.getY());
+         desiredCoPWeightMatrix.set(0, 0, desiredCoPWeight.getX());
+         desiredCoPWeightMatrix.set(1, 1, desiredCoPWeight.getY());
+         copRateWeightMatrix.set(0, 0, copRateWeight.getX());
+         copRateWeightMatrix.set(1, 1, copRateWeight.getY());
       }
+      else
+      {
+         desiredCoPMatrix.zero();
+         desiredCoPWeightMatrix.zero();
+         copRateWeightMatrix.zero();
+      }
+
+      hasReset.set(resetRequested.getBooleanValue()); // So it is visible from SCS when the reset has been processed.
+      resetRequested.set(false);
+
+      // Should not get there as long as the number of contact points of the contactable body is less or equal to maxNumberOfContactPoints.
+      for (; rhoIndex < rhoSize; rhoIndex++)
+         clear(rhoIndex);
+   }
+
+   private void clear(int rhoIndex)
+   {
+      FramePoint basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
+      FrameVector basisVector = basisVectors.get(rhoIndex);
+
+      basisVectorOrigin.setToZero(centerOfMassFrame);
+      basisVector.setToZero(centerOfMassFrame);
+
+      for (int row = 0; row < Wrench.SIZE; row++)
+         rhoJacobianMatrix.set(row, rhoIndex, 0.0);
+
+      for (int row = 0; row < 2; row++)
+         copJacobianMatrix.set(row, rhoIndex, 0.0);
+
+      rhoWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
+      rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
    }
 
    private final Wrench wrenchFromRho = new Wrench();
    private final DenseMatrix64F totalWrenchMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F singleRhoWrenchMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
-   public Wrench computeWrenchFromRho(int startIndex, DenseMatrix64F allRobotRho)
+   public void computeWrenchFromRho(int startIndex, DenseMatrix64F allRobotRho)
    {
       CommonOps.extract(allRobotRho, startIndex, startIndex + rhoSize, 0, 1, rhoMatrix, 0, 0);
       yoRho.set(rhoMatrix);
@@ -211,13 +251,15 @@ public class PlaneContactStateToWrenchMatrixHelper
          ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();
 
          wrenchFromRho.set(bodyFixedFrame, centerOfMassFrame, totalWrenchMatrix);
+
+         CommonOps.mult(copJacobianMatrix, rhoMatrix, previousCoPMatrix);
+         previousCoP.setX(previousCoPMatrix.get(0, 0));
+         previousCoP.setY(previousCoPMatrix.get(1, 0));
       }
       else
       {
          wrenchFromRho.setToZero();
       }
-
-      return wrenchFromRho;
    }
 
    private void computeNormalContactVectorRotation(Matrix3d normalContactVectorRotationMatrixToPack)
@@ -229,16 +271,10 @@ public class PlaneContactStateToWrenchMatrixHelper
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
-   private final SpatialForceVector currentBasisSpatialVector = new SpatialForceVector();
-   private final DenseMatrix64F currentBasisVectorMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
-
-   private DenseMatrix64F computeBasisVector(int basisVectorIndex, Matrix3d normalContactVectorRotationMatrix, FramePoint basisVectorOrigin,
-         FrameVector basisVectorToPack)
+   private void computeBasisVector(int basisVectorIndex, Matrix3d normalContactVectorRotationMatrix, FrameVector basisVectorToPack)
    {
       double angle = basisVectorIndex * basisVectorAngleIncrement;
       double mu = yoPlaneContactState.getCoefficientOfFriction();
-
-      basisVectorOrigin.changeFrame(centerOfMassFrame);
 
       // Compute the linear part considering a normal contact vector pointing z-up
       basisVectorToPack.setIncludingFrame(planeFrame, Math.cos(angle) * mu, Math.sin(angle) * mu, 1.0);
@@ -246,12 +282,46 @@ public class PlaneContactStateToWrenchMatrixHelper
       // Transforming the result to consider the actual normal contact vector
       normalContactVectorRotationMatrix.transform(basisVectorToPack.getVector());
       basisVectorToPack.normalize();
-      basisVectorToPack.changeFrame(centerOfMassFrame);
+   }
+
+   private final SpatialForceVector unitSpatialForceVector = new SpatialForceVector();
+   private final DenseMatrix64F singleRhoJacobian = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+
+   private DenseMatrix64F computeSingleRhoJacobian(FramePoint basisVectorOrigin, FrameVector basisVector)
+   {
+      basisVectorOrigin.changeFrame(centerOfMassFrame);
+      basisVector.changeFrame(centerOfMassFrame);
 
       // Compute the unit wrench corresponding to the basis vector
-      currentBasisSpatialVector.setIncludingFrame(basisVectorToPack, basisVectorOrigin);
-      currentBasisSpatialVector.getMatrix(currentBasisVectorMatrix);
-      return currentBasisVectorMatrix;
+      unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
+      unitSpatialForceVector.getMatrix(singleRhoJacobian);
+      return singleRhoJacobian;
+   }
+
+   private final FrameVector forceFromRho = new FrameVector();
+   private final DenseMatrix64F singleRhoCoPJacobian = new DenseMatrix64F(2, 1);
+
+   private DenseMatrix64F computeSingleRhoCoPJacobian(FramePoint basisVectorOrigin, FrameVector basisVector)
+   {
+      wrenchFromRho.getLinearPartIncludingFrame(forceFromRho);
+      forceFromRho.changeFrame(planeFrame);
+
+      if (forceFromRho.getZ() > 1.0e-1)
+      {
+         basisVectorOrigin.changeFrame(planeFrame);
+         basisVector.changeFrame(planeFrame);
+         
+         unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
+         
+         singleRhoCoPJacobian.set(0, 0, -unitSpatialForceVector.getAngularPartY() / forceFromRho.getZ());
+         singleRhoCoPJacobian.set(1, 0, unitSpatialForceVector.getAngularPartX() / forceFromRho.getZ());
+      }
+      else
+      {
+         singleRhoCoPJacobian.zero();
+      }
+
+      return singleRhoCoPJacobian;
    }
 
    public RigidBody getRigidBody()
@@ -262,11 +332,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    public int getRhoSize()
    {
       return rhoSize;
-   }
-
-   public DenseMatrix64F getRhoMin()
-   {
-      return rhoMinMatrix;
    }
 
    public DenseMatrix64F getLastRho()
@@ -287,6 +352,36 @@ public class PlaneContactStateToWrenchMatrixHelper
    public DenseMatrix64F getRhoRateWeight()
    {
       return rhoRateWeightMatrix;
+   }
+
+   public Wrench getWrenchFromRho()
+   {
+      return wrenchFromRho;
+   }
+
+   public DenseMatrix64F getCopJacobianMatrix()
+   {
+      return copJacobianMatrix;
+   }
+
+   public DenseMatrix64F getDesiredCoPMatrix()
+   {
+      return desiredCoPMatrix;
+   }
+
+   public DenseMatrix64F getPreviousCoPMatrix()
+   {
+      return previousCoPMatrix;
+   }
+
+   public DenseMatrix64F getDesiredCoPWeightMatrix()
+   {
+      return desiredCoPWeightMatrix;
+   }
+
+   public DenseMatrix64F getCoPRateWeightMatrix()
+   {
+      return copRateWeightMatrix;
    }
 
    public List<FramePoint> getBasisVectorsOrigin()

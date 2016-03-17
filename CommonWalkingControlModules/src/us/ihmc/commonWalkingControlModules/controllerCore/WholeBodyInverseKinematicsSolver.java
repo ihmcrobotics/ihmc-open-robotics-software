@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationException;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -38,8 +37,7 @@ public class WholeBodyInverseKinematicsSolver
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final JointIndexHandler jointIndexHandler;
 
-   public WholeBodyInverseKinematicsSolver(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
-         YoVariableRegistry parentRegistry)
+   public WholeBodyInverseKinematicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       rootJoint = toolbox.getRobotRootJoint();
       jointIndexHandler = toolbox.getJointIndexHandler();
@@ -48,7 +46,7 @@ public class WholeBodyInverseKinematicsSolver
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
-      optimizationControlModule = new InverseKinematicsOptimizationControlModule(toolbox, momentumOptimizationSettings, registry);
+      optimizationControlModule = new InverseKinematicsOptimizationControlModule(toolbox, registry);
       integrator = new RobotJointVelocityAccelerationIntegrator(toolbox.getControlDT());
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)

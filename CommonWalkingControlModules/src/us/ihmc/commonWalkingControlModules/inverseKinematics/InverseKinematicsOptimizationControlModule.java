@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.PrivilegedMotionQPInput;
@@ -36,10 +35,10 @@ public class InverseKinematicsOptimizationControlModule
 
    private final DenseMatrix64F qDotMin, qDotMax;
 
-   public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, MomentumOptimizationSettings momentumOptimizationSettings,
-         YoVariableRegistry parentRegistry)
+   public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();
+      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
@@ -50,7 +49,6 @@ public class InverseKinematicsOptimizationControlModule
       double controlDT = toolbox.getControlDT();
       GeometricJacobianHolder geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT, registry);
 
       qDotMin = new DenseMatrix64F(numberOfDoFs, 1);

@@ -884,15 +884,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
-      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.00001);
-      momentumOptimizationSettings.setMomentumWeight(2.0, 1.4, 10.0, 10.0); //(1.0, 1.0, 10.0, 10.0);
-      momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);  //0.06 causes a little less oscillations possibly.  // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
-      momentumOptimizationSettings.setMaxWRhoSmoother(0.05);
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.0005);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      return momentumOptimizationSettings;
    }
 
    @Override
@@ -953,5 +948,19 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
    {
       return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getHighCoPDampingDurationToPreventFootShakies()
+   {
+      return -1.0; // 0.5;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getCoPErrorThresholdForHighCoPDamping()
+   {
+      return Double.POSITIVE_INFINITY; //0.075;
    }
 }

@@ -59,6 +59,7 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F tempJtW;
    private final DenseMatrix64F tempMotionTask_H;
    private final DenseMatrix64F tempMotionTask_f;
+   private final DenseMatrix64F tempRhoTask_H;
    private final DenseMatrix64F tempRhoTask_f;
 
    private final int numberOfDoFs;
@@ -93,10 +94,11 @@ public class InverseDynamicsQPSolver
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
-      tempJtW = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
+      tempJtW = new DenseMatrix64F(problemSize, problemSize);
       tempMotionTask_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       tempMotionTask_f = new DenseMatrix64F(numberOfDoFs, 1);
 
+      tempRhoTask_H = new DenseMatrix64F(rhoSize, rhoSize);
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
       jointAccelerationRegularization.set(0.005);
@@ -128,6 +130,11 @@ public class InverseDynamicsQPSolver
    public void setAccelerationRegularizationWeight(double weight)
    {
       jointAccelerationRegularization.set(weight);
+   }
+
+   public void setJerkRegularizationWeight(double weight)
+   {
+      jointJerkRegularization.set(weight);
    }
 
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
@@ -197,12 +204,10 @@ public class InverseDynamicsQPSolver
       CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
 
       // Compute: H += J^T W J
-      tempMotionTask_H.reshape(numberOfDoFs, numberOfDoFs);
       CommonOps.mult(taskJtW, taskJacobian, tempMotionTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, 1.0);
 
       // Compute: f += - J^T W Objective
-      tempMotionTask_f.reshape(numberOfDoFs, 1);
       CommonOps.mult(taskJtW, taskObjective, tempMotionTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -1.0);
    }
@@ -295,6 +300,22 @@ public class InverseDynamicsQPSolver
       MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, taskWeight, 0, 0, rhoSize, rhoSize, 1.0);
 
       CommonOps.mult(taskWeight, taskObjective, tempRhoTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+   }
+
+   public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      // J^T W
+      tempJtW.reshape(rhoSize, taskSize);
+      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
+      
+      // Compute: H += J^T W J
+      CommonOps.mult(tempJtW, taskJacobian, tempRhoTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
+
+      // Compute: f += - J^T W Objective
+      CommonOps.mult(tempJtW, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 

@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -53,7 +53,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
-   private final DoubleYoVariable momentumRateWeight = new DoubleYoVariable("momentumRateWeight", registry);
+   private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", null, registry);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
@@ -72,9 +72,13 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       this.gravityZ = gravityZ;
       parentRegistry.addChild(registry);
 
-      momentumRateWeight.set(SolverWeightLevels.MOMENTUM_WEIGHT);
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
-      momentumRateCommand.setWeight(momentumRateWeight.getDoubleValue());
+      momentumRateCommand.setWeights(linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ(), 0.0, 0.0, 0.0);
+   }
+
+   public void setMomentumWeight(Vector3d linearWeight)
+   {
+      linearMomentumRateWeight.set(linearWeight);
    }
 
    public void compute()
@@ -105,7 +109,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
       momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
-      momentumRateCommand.setWeight(momentumRateWeight.getDoubleValue());
+      momentumRateCommand.setWeights(linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ(), 0.0, 0.0, 0.0);
    }
 
    private final FramePoint cmp3d = new FramePoint();

@@ -31,6 +31,11 @@ public class FullyConstrainedState extends AbstractFootControlState
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
    }
 
+   public void setWeight(double weight)
+   {
+      spatialAccelerationCommand.setWeight(weight);
+   }
+
    @Override
    public void doTransitionIntoAction()
    {

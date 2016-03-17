@@ -52,6 +52,11 @@ public class UserControlModeState extends HandControlState
       yoTime = momentumBasedController.getYoTime();
    }
 
+   public void setWeight(double weight)
+   {
+      jointspaceAccelerationCommand.setWeight(weight);
+   }
+
    public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsControllerCommand message)
    {
       if (message.getNumberOfJoints() != userControlledJoints.length)

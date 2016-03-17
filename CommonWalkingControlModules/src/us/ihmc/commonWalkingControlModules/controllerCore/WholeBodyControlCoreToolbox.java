@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -35,13 +36,17 @@ public class WholeBodyControlCoreToolbox
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final double gravityZ;
 
+   private final MomentumOptimizationSettings momentumOptimizationSettings;
+
    private final JointIndexHandler jointIndexHandler;
 
-   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints, CommonHumanoidReferenceFrames referenceFrames,
-         double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-         List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
+         MomentumOptimizationSettings momentumOptimizationSettings, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ,
+         GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;
+      this.momentumOptimizationSettings = momentumOptimizationSettings;
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
@@ -53,6 +58,11 @@ public class WholeBodyControlCoreToolbox
       this.jointIndexHandler = new JointIndexHandler(controlledJoints);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
       this.spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
+   }
+
+   public MomentumOptimizationSettings getMomentumOptimizationSettings()
+   {
+      return momentumOptimizationSettings;
    }
 
    public TwistCalculator getTwistCalculator()

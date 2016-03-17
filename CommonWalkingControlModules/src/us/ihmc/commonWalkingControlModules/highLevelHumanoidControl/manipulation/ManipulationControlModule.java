@@ -71,6 +71,17 @@ public class ManipulationControlModule
       parentRegistry.addChild(registry);
    }
 
+   public void setWeights(double jointspaceWeight, double taskspaceWeight, double userControlModeWeight)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         HandControlModule handControlModule = handControlModules.get(robotSide);
+         handControlModule.setJointspaceWeight(jointspaceWeight);
+         handControlModule.setTaskspaceWeight(taskspaceWeight);
+         handControlModule.setUserModeWeight(userControlModeWeight);
+      }
+   }
+
    private void createFrameVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, FullHumanoidRobotModel fullRobotModel, String listName, boolean enable)
    {
       YoGraphicsList list = new YoGraphicsList(listName);
