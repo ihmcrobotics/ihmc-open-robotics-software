@@ -27,12 +27,12 @@ public class QuadrupedTrotWalkSliderBoardConfiguration implements EnumDependentS
       });
       
       String namespace = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.";
-      sliderBoardConfigurationManager.setSlider(1, namespace + "desiredStancePositionZ", scs, 0.4, 0.7);
-      // sliderBoardConfigurationManager.setSlider(2, namespace + "quadAlpha", scs, -0.2, 1.2);
-//      sliderBoardConfigurationManager.setSlider(3, namespace + "q_d_y", scs, -0.1, 0.1);
-      sliderBoardConfigurationManager.setSlider(4, namespace + "desiredBodyOrientationRoll", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setSlider(5, namespace + "desiredBodyOrientationPitch", scs, -0.1, 0.1);
-      sliderBoardConfigurationManager.setSlider(6, namespace + "desiredBodyOrientationYaw", scs, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(1, namespace + "desiredStanceZ", scs, 0.4, 0.7);
+      sliderBoardConfigurationManager.setSlider(2, namespace + "desiredStanceX", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(3, namespace + "desiredStanceY", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(4, namespace + "desiredStanceRoll", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(5, namespace + "desiredStancePitch", scs, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(6, namespace + "desiredStanceYaw", scs, -0.1, 0.1);
       sliderBoardConfigurationManager.setSlider(7, namespace + "desiredICPFromCentroidX", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(8, namespace + "desiredICPFromCentroidY", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setButton(1, namespace + "enableTrot", scs);
