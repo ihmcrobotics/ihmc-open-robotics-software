@@ -44,8 +44,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          QuadrupedRobotParameters parameters) throws IOException
    {
       // Set up network communication for controller inputs.
-      // TODO: Don't use touch module port
-      PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.TOUCH_MODULE_PORT,
+      PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.XBOX_CONTROLLER_TELEOP_PORT,
             runtimeEnvironment.getNetClassList());
       packetCommunicator.connect();
       GlobalDataProducer globalDataProducer = new GlobalDataProducer(packetCommunicator);
