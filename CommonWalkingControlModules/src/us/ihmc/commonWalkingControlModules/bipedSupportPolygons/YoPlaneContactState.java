@@ -329,6 +329,22 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
    }
 
+   public void computeSupportPolygon()
+   {
+      contactPointsPolygon.clear(planeFrame);
+      for (int i = 0; i < getTotalNumberOfContactPoints(); i++)
+      {
+         contactPoints.get(i).getPosition(tempContactPointPosition);
+         contactPointsPolygon.addVertexByProjectionOntoXYPlane(tempContactPointPosition);
+      }
+      contactPointsPolygon.update();
+   }
+
+   public double getFootholdArea()
+   {
+      return contactPointsPolygon.getArea();
+   }
+
    @Override
    public int getTotalNumberOfContactPoints()
    {
