@@ -120,6 +120,11 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       position.set(framePoint, notifyListeners);
       orientation.set(frameOrientation, notifyListeners);
    }
+   
+   public void set(YoFramePose yoFramePose)
+   {
+      set(yoFramePose.getPosition().getFrameTuple(), yoFramePose.getOrientation().getFrameOrientation());
+   }
 
    public void setAndMatchFrame(FramePoint framePoint, FrameOrientation frameOrientation)
    {
@@ -190,23 +195,34 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    {
       position.setZ(z);
    }
+   
+   public double getX()
+   {
+      return getPosition().getX();
+   }
+   
+   public double getY()
+   {
+      return getPosition().getY();
+   }
+   
+   public double getZ()
+   {
+      return getPosition().getZ();
+   }
+   
+   public double getRoll()
+   {
+      return getOrientation().getRoll().getDoubleValue();
+   }
+   
+   public double getPitch()
+   {
+      return getOrientation().getPitch().getDoubleValue();
+   }
+   
+   public double getYaw()
+   {
+      return getOrientation().getYaw().getDoubleValue();
+   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
