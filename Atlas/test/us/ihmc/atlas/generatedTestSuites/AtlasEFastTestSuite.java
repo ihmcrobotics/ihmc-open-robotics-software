@@ -14,7 +14,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
    us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
-   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class
 })
 
 public class AtlasEFastTestSuite

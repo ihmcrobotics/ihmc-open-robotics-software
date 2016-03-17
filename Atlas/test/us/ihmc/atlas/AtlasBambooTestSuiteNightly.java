@@ -27,7 +27,6 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class,
    us.ihmc.atlas.drcRobot.AtlasSDFVerificationTest.class,
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
-   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
    us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class,
