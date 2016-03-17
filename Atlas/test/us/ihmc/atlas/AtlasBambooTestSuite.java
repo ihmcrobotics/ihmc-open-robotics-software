@@ -7,7 +7,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
-   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
    us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
 })
