@@ -1,5 +1,8 @@
 package us.ihmc.communication.configuration;
 
+import org.apache.commons.lang3.StringUtils;
+import us.ihmc.tools.io.printing.PrintTools;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,14 +12,12 @@ import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Properties;
 
-import org.apache.commons.lang3.StringUtils;
-
-import us.ihmc.tools.io.printing.PrintTools;
-
 public class NetworkParameters
 {
    public static final String defaultParameterFile = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCNetworkParameters.ini";
-   private static final String helpText = "Please set all appropriate environment variables or use NetworkParametersCreator to create a properties file and save it in " + defaultParameterFile + ", or pass in -DnetworkParameterFile=[path].";
+   private static final String helpText =
+         "Please set all appropriate environment variables or use NetworkParametersCreator to create a properties file and save it in " + defaultParameterFile
+               + ", or pass in -Dus.ihmc.networkParameterFile=[path].";
 
    private static NetworkParameters instance = null;
 
@@ -33,11 +34,12 @@ public class NetworkParameters
 
    private NetworkParameters()
    {
-      File file = new File(System.getProperty("networkParameterFile", defaultParameterFile)).getAbsoluteFile();
+      File file = new File(System.getProperty("us.ihmc.networkParameterFile", defaultParameterFile)).getAbsoluteFile();
       PrintTools.info("Looking for network parameters in network parameters file at " + file.getAbsolutePath());
 
       if (file.exists() && file.isFile())
       {
+         PrintTools.info("Found Network parameters file at " + file.getAbsolutePath());
          try
          {
             Properties properties = new Properties();
@@ -65,42 +67,61 @@ public class NetworkParameters
       }
 
       PrintTools.info("Looking for network parameters in environment variables");
+      PrintTools.info("Environment variables will override entries in the network parameters file.");
       for (NetworkParameterKeys key : NetworkParameterKeys.values())
       {
          String keyString = key.toString();
          String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(keyString), '_').toUpperCase(Locale.getDefault());
-         if(key.isIPAddress())
+         if (key.isIPAddress())
          {
             envVarString += "_IP";
          }
 
-         if(System.getenv().containsKey(envVarString))
+         if (key == NetworkParameterKeys.rosURI)
+         {
+            if (System.getenv().containsKey("ROS_MASTER_URI"))
+            {
+               parameters.put(key, System.getenv("ROS_MASTER_URI"));
+            }
+         }
+         else if (System.getenv().containsKey(envVarString))
          {
             parameters.put(key, System.getenv(envVarString));
          }
       }
-
    }
 
    public static String getHost(NetworkParameterKeys key)
    {
       String value = getInstance().parameters.get(key);
-      if(value == null)
+      if (value == null)
       {
-          String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(key.toString()), '_').toUpperCase(Locale.getDefault());
-          if(key.isIPAddress())
-          {
-             envVarString += "_IP";
-          }
-          PrintTools.error("Could not find " + key.toString() + "! Please check you ini for a " + key.toString() + " and check that the key and value are seperated by a colon. You can use the NetworkParametersCreator to create this file for you. (if using Env. Variables it would be named: " + envVarString + ") . Exiting.\n" + helpText);
-          System.exit(-1);
+         String envVarString = "IHMC_" + StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(key.toString()), '_').toUpperCase(Locale.getDefault());
+         if (key.isIPAddress())
+         {
+            envVarString += "_IP";
+         }
+         if (key != NetworkParameterKeys.rosURI)
+         {
+            PrintTools.error("Could not find " + key.toString() + "! Please check you ini for a " + key.toString()
+                  + " and check that the key and value are seperated by a colon. You can use the NetworkParametersCreator to create this file for you. (if using Env. Variables it would be named: "
+                  + envVarString + ") . Exiting.\n" + helpText);
+         }
+         else
+         {
+            PrintTools.error(
+                  "Could not establish the ROS Master URI. Check your environment variables for ROS_MASTER_URI or set the IHMC Network key " + key.toString()
+                        + " in your ini file. Exiting.\n" + helpText);
+         }
+
+         System.exit(-1);
       }
       return value;
    }
 
    public static URI getROSURI()
    {
-      if(getHost(NetworkParameterKeys.rosURI) == null)
+      if (getHost(NetworkParameterKeys.rosURI) == null)
       {
          return null;
       }

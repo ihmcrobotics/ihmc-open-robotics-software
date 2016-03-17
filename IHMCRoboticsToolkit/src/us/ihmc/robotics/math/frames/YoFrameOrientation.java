@@ -222,6 +222,12 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
       FrameOrientation orientation = new FrameOrientation(getReferenceFrame(), yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
       return orientation;
    }
+   
+   public FrameOrientation getFrameOrientation()
+   {
+      putYoValuesIntoFrameOrientation();
+      return tempFrameOrientation;
+   }
 
    public void interpolate(YoFrameOrientation orientationOne, YoFrameOrientation orientationTwo, double alpha)
    {
