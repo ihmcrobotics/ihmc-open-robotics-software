@@ -48,6 +48,7 @@ public class ParameterMapRepository
     */
    public ParameterMap getRootParams()
    {
-      return rootParams;
+      return null;  // Temporary comment out since not compiling in order to fix Bamboo. J.Pratt March 17, 2016
+//      return rootParams;
    }
 }
