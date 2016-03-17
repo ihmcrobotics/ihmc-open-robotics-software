@@ -4,8 +4,12 @@ public class InputChannelConfig
 {
    private final InputChannel channel;
    private final boolean invert;
+
+   /**
+    * The percentage about zero within which the input value should be ignored.
+    */
+   private final double deadzone;
    private final int exponent;
-   private final double deadzone = 0.5;
 
    public InputChannelConfig(InputChannel channel, boolean invert)
    {
@@ -19,8 +23,14 @@ public class InputChannelConfig
 
    public InputChannelConfig(InputChannel channel, boolean invert, double deadzone, int exponent)
    {
+      if (exponent % 2 == 0)
+      {
+         throw new IllegalArgumentException("Only odd functions are allowed");
+      }
+
       this.channel = channel;
       this.invert = invert;
+      this.deadzone = deadzone;
       this.exponent = exponent;
    }
 
