@@ -1,5 +1,6 @@
 package us.ihmc.aware.params;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,9 +10,8 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 /**
  * A namespaced mapping of {@link String} keys to {@link DoubleYoVariable} values.
  * <p/>
- * If existing parameter values exist at the time of creation, they may be set with {@link #insert(String, double...)}.
- * A controller can then set any previously unset parameters with {@link #setDefault(String, double...)} to ensure that
- * all expected parameters contain at least default values.
+ * If existing parameter values exist at the time of creation, they may be set with {@link #insert(String, double...)}. A controller can then set any previously
+ * unset parameters with {@link #setDefault(String, double...)} to ensure that all expected parameters contain at least default values.
  * <p/>
  * At runtime, controllers can then use {@link #get(String)} to fetch the latest parameters and act accordingly.
  */
@@ -56,8 +56,8 @@ public class ParameterMap
    //   }
 
    /**
-    * Establishes a default value for the given parameter base name. If the key is not present in the map, then it will
-    * be inserted with the given value. If it is present then no action will be taken.
+    * Establishes a default value for the given parameter base name. If the key is not present in the map, then it will be inserted with the given value. If it
+    * is present then no action will be taken.
     *
     * @param name   the base parameter name
     * @param values the parameter values
@@ -95,8 +95,8 @@ public class ParameterMap
    }
 
    /**
-    * Gets a temporary array of values. The returned array is a reference to an internal buffer and is not guaranteed to
-    * remain consistent with the actual parameter values after successive {@link #set(String, double...)} calls.
+    * Gets a temporary array of values. The returned array is a reference to an internal buffer and is not guaranteed to remain consistent with the actual
+    * parameter values after successive {@link #set(String, double...)} calls.
     *
     * @param name the base parameter name
     * @return the temprary array
@@ -147,6 +147,20 @@ public class ParameterMap
       ParameterBufferPair pair = map.get(name);
 
       return pair != null && pair.variables.length > idx;
+   }
+
+   public Map<String, double[]> dump()
+   {
+      Map<String, double[]> dumped = new HashMap<>();
+      for (Map.Entry<String, ParameterBufferPair> entry : map.entrySet())
+      {
+         String name = entry.getKey();
+         double[] values = getVolatileArray(name);
+
+         dumped.put(name, Arrays.copyOf(values, values.length));
+      }
+
+      return dumped;
    }
 
    /**

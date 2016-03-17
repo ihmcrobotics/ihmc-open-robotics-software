@@ -12,6 +12,7 @@ import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
+import us.ihmc.aware.params.ParameterPersister;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
