@@ -14,6 +14,13 @@ public class HandTrajectoryControllerCommand extends SE3TrajectoryControllerComm
    {
    }
 
+   public HandTrajectoryControllerCommand(ReferenceFrame referenceFrame, RobotSide robotSide, BaseForControl baseForControl)
+   {
+      super.clear(referenceFrame);
+      this.robotSide = robotSide;
+      this.baseForControl = baseForControl;
+   }
+
    @Override
    public void clear()
    {
