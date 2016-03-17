@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleInefficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -19,7 +19,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 public class InverseDynamicsQPSolver
 {
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
-   private static final boolean USE_JERRY_SOLVER = false;
+   private static final boolean USE_JERRY_SOLVER = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -30,7 +30,7 @@ public class InverseDynamicsQPSolver
 
    private final BooleanYoVariable seedFromPreviousSolution = new BooleanYoVariable("seedFromPreviousSolution", registry);
    private final OASESConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(registry);
-   private final SimpleInefficientActiveSetQPSolver jerryQPSolver = new SimpleInefficientActiveSetQPSolver();
+   private final SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -42,9 +42,6 @@ public class InverseDynamicsQPSolver
 
    private final DenseMatrix64F solverInput_lb;
    private final DenseMatrix64F solverInput_ub;
-
-   private final DenseMatrix64F solverInput_lagrangeEqualityConstraintMultipliers;
-   private final DenseMatrix64F solverInput_lagrangeInequalityConstraintMultipliers;
 
    private final DenseMatrix64F solverOutput;
    private final DenseMatrix64F solverOutput_jointAccelerations;
@@ -86,9 +83,6 @@ public class InverseDynamicsQPSolver
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
-
-      solverInput_lagrangeEqualityConstraintMultipliers = new DenseMatrix64F(problemSize, 1);
-      solverInput_lagrangeInequalityConstraintMultipliers = new DenseMatrix64F(problemSize, 1);
 
       solverOutput = new DenseMatrix64F(problemSize, 1);
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
@@ -387,8 +381,8 @@ public class InverseDynamicsQPSolver
       {
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
-//         jerryQPSolver.setBounds(solverInput_lb, solverInput_ub); TODO
-         numberOfIterations.set(jerryQPSolver.solve(solverOutput, solverInput_lagrangeEqualityConstraintMultipliers, solverInput_lagrangeInequalityConstraintMultipliers));
+         jerryQPSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+         numberOfIterations.set(jerryQPSolver.solve(solverOutput));
       }
       else
       {
@@ -433,8 +427,8 @@ public class InverseDynamicsQPSolver
    {
       MatrixTools.printJavaForConstruction("H", solverInput_H);
       MatrixTools.printJavaForConstruction("f", solverInput_f);
-      MatrixTools.printJavaForConstruction("C", solverInput_Ain);
-      MatrixTools.printJavaForConstruction("d", solverInput_bin);
+      MatrixTools.printJavaForConstruction("lowerBounds", solverInput_lb);
+      MatrixTools.printJavaForConstruction("upperBounds", solverInput_ub);
       MatrixTools.printJavaForConstruction("solution", solverOutput);
    }
 

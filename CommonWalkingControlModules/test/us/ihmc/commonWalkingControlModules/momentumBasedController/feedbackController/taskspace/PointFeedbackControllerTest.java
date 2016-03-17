@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJaco
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleInefficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -196,7 +196,7 @@ public class PointFeedbackControllerTest
       DenseMatrix64F jointAccelerationsFromQPOASES = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
-      SimpleInefficientActiveSetQPSolver jerryQPSolver = new SimpleInefficientActiveSetQPSolver();
+      SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
       OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver(registry);
 
       DenseMatrix64F solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
@@ -251,7 +251,7 @@ public class PointFeedbackControllerTest
          ScrewTools.setJointPositions(jointsToOptimizeFor, integrator.getJointConfigurations());
          elevator.updateFramesRecursively();
 
-         assertArrayEquals(jointAccelerations.data, jointAccelerationsFromJerryQP.data, 1.0e-6);
+         assertArrayEquals(jointAccelerations.data, jointAccelerationsFromJerryQP.data, 1.0e-5);
          assertArrayEquals(jointAccelerations.data, jointAccelerationsFromQPOASES.data, 2.0e-1);
 
          currentPosition.setIncludingFrame(bodyFixedPointToControl);

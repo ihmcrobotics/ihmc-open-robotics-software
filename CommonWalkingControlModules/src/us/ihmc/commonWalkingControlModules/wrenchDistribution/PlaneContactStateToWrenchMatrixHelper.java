@@ -223,7 +223,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       for (int row = 0; row < 2; row++)
          copJacobianMatrix.set(row, rhoIndex, 0.0);
 
-      rhoWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
+      rhoWeightMatrix.set(rhoIndex, rhoIndex, 1.0);
       rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
    }
 
