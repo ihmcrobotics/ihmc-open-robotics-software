@@ -6,8 +6,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmTrajectoryControllerCommand implements ControllerCommand<ArmTrajectoryControllerCommand, ArmTrajectoryMessage>
@@ -80,20 +78,18 @@ public class ArmTrajectoryControllerCommand implements ControllerCommand<ArmTraj
       }
    }
 
-   public <T extends TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>>> void set(RobotSide robotSide,
-         RecyclingArrayList<T> trajectoryPointListArray)
+   public void set(RobotSide robotSide, RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointListArray)
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
       {
-         jointTrajectoryInputs.add().set(trajectoryPointListArray.get(i));
          set(i, trajectoryPointListArray.get(i));
       }
    }
 
-   public <T extends TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>>> void set(int jointIndex, T otherTrajectoryPointList)
+   public void set(int jointIndex, SimpleTrajectoryPoint1DList otherTrajectoryPointList)
    {
-      SimpleTrajectoryPoint1DList thisJointTrajectoryPointList = jointTrajectoryInputs.get(jointIndex);
+      SimpleTrajectoryPoint1DList thisJointTrajectoryPointList = jointTrajectoryInputs.getAndGrowIfNeeded(jointIndex);
       thisJointTrajectoryPointList.set(otherTrajectoryPointList);
    }
 

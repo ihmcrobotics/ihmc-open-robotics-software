@@ -20,15 +20,6 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
       }
    }
 
-   public <T extends TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>>> void set(T trajectory)
-   {
-      clear();
-      for (int i = 0; i < trajectory.getNumberOfTrajectoryPoints(); i++)
-      {
-         addTrajectoryPoint(trajectory.getTrajectoryPoint(i));
-      }
-   }
-
    public void addTrajectoryPoint(OneDoFTrajectoryPointInterface<?> trajectoryPoint)
    {
       trajectoryPoints.add().set(trajectoryPoint);
