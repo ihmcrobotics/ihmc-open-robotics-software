@@ -14,7 +14,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,11 +30,13 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
 
-   private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
    private final YoFrameVector controlledCoMAcceleration;
+
+   private final FrameVector2d achievedCoMAcceleration2d = new FrameVector2d();
 
    private final double totalMass;
    private final FramePoint centerOfMass;
+   private final FramePoint2d centerOfMass2d = new FramePoint2d();
    private final double gravityZ;
 
    private final BooleanYoVariable keepCMPInsideSupportPolygon = new BooleanYoVariable("keepCMPInsideSupportPolygon", registry);
@@ -81,7 +82,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       linearMomentumRateWeight.set(linearWeight);
    }
 
-   public void compute()
+   public void compute(FramePoint2d desiredCMPToPack)
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
@@ -93,8 +94,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
             desiredCapturePointVelocity, omega0, keepCMPInsideSupportPolygon.getBooleanValue(), supportPolygon);
 
-      desiredCMP.changeFrame(controlledCMP.getReferenceFrame());
-      controlledCMP.set(desiredCMP);
+      desiredCMPToPack.setIncludingFrame(desiredCMP);
+      desiredCMPToPack.changeFrame(worldFrame);
 
       supportLegPreviousTick.set(supportSide);
 
@@ -112,6 +113,23 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       momentumRateCommand.setWeights(linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ(), 0.0, 0.0, 0.0);
    }
 
+   public void computeAchievedCMP(FrameVector achievedLinearMomentumRate, FramePoint2d achievedCMPToPack)
+   {
+      if (achievedLinearMomentumRate.containsNaN())
+         return;
+
+      centerOfMass2d.setToZero(centerOfMassFrame);
+      centerOfMass2d.changeFrame(worldFrame);
+
+      achievedCoMAcceleration2d.setByProjectionOntoXYPlaneIncludingFrame(achievedLinearMomentumRate);
+      achievedCoMAcceleration2d.scale(1.0 / totalMass);
+      achievedCoMAcceleration2d.changeFrame(worldFrame);
+
+      achievedCMPToPack.set(achievedCoMAcceleration2d);
+      achievedCMPToPack.scale(- 1.0 / (omega0 * omega0));
+      achievedCMPToPack.add(centerOfMass2d);
+   }
+
    private final FramePoint cmp3d = new FramePoint();
    private final FrameVector groundReactionForce = new FrameVector();
 
@@ -125,11 +143,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       groundReactionForce.changeFrame(centerOfMassFrame);
 
       return groundReactionForce;
-   }
-
-   public void getDesiredCMP(FramePoint2d desiredCMPToPack)
-   {
-      controlledCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
    public void setSupportLeg(RobotSide newSupportSide)
