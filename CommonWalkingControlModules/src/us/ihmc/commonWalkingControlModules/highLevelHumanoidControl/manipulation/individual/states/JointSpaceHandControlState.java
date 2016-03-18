@@ -28,7 +28,8 @@ public class JointSpaceHandControlState extends HandControlState
    private final OneDoFJoint[] oneDoFJoints;
    private Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
-   private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
+   private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand;
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelJointDesiredData;
 
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
@@ -64,6 +65,17 @@ public class JointSpaceHandControlState extends HandControlState
       {
          lowLevelJointDesiredData = null;
          setDesiredJointAccelerations = null;
+         jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
+         jointspaceAccelerationCommand = null;
+
+         jointspaceFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.ARM_JOINTSPACE_WEIGHT);
+         jointspaceFeedbackControlCommand.setGains(gains);
+
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJoint joint = oneDoFJoints[i];
+            jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
+         }
 
          maxAcceleration = gains.getYoMaximumAcceleration();
          pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
@@ -84,6 +96,14 @@ public class JointSpaceHandControlState extends HandControlState
          lowLevelJointDesiredData = new LowLevelOneDoFJointDesiredDataHolder(oneDoFJoints.length);
          lowLevelJointDesiredData.registerJointsWithEmptyData(oneDoFJoints);
          lowLevelJointDesiredData.setJointsControlMode(oneDoFJoints, LowLevelJointControlMode.POSITION_CONTROL);
+         jointspaceFeedbackControlCommand = null;
+         jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            OneDoFJoint joint = oneDoFJoints[i];
+            jointspaceAccelerationCommand.addJoint(joint, Double.NaN);
+         }
+
 
          setDesiredJointAccelerations = new BooleanYoVariable(namePrefix + "SetDesiredJointAccelerations", registry);
          setDesiredJointAccelerations.set(false);
@@ -95,14 +115,10 @@ public class JointSpaceHandControlState extends HandControlState
 
       doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
 
-      jointspaceFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.ARM_JOINTSPACE_WEIGHT);
-      jointspaceFeedbackControlCommand.setGains(gains);
-
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
          doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
-         jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
       }
 
       parentRegistry.addChild(registry);
@@ -110,7 +126,8 @@ public class JointSpaceHandControlState extends HandControlState
 
    public void setWeight(double weight)
    {
-      jointspaceFeedbackControlCommand.setWeightForSolver(weight);
+      if (jointspaceFeedbackControlCommand != null)
+         jointspaceFeedbackControlCommand.setWeightForSolver(weight);
    }
 
    @Override
@@ -133,7 +150,10 @@ public class JointSpaceHandControlState extends HandControlState
          {
             enablePositionControl();
             if (!setDesiredJointAccelerations.getBooleanValue())
+            {
                feedForwardAcceleration = 0.0;
+            }
+            jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, feedForwardAcceleration);
          }
          else
          {
@@ -230,7 +250,7 @@ public class JointSpaceHandControlState extends HandControlState
    @Override
    public JointspaceAccelerationCommand getInverseDynamicsCommand()
    {
-      return null;
+      return jointspaceAccelerationCommand;
    }
 
    @Override
