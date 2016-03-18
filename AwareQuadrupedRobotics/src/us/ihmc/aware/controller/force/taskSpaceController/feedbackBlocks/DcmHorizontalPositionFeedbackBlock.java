@@ -37,7 +37,7 @@ public class DcmHorizontalPositionFeedbackBlock implements QuadrupedTaskSpaceFee
       this.dcmPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
    }
 
-   public void setDcmVelocitySetpoint(FramePoint dcmVelocitySetpoint)
+   public void setDcmVelocitySetpoint(FrameVector dcmVelocitySetpoint)
    {
       this.dcmVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
    }
