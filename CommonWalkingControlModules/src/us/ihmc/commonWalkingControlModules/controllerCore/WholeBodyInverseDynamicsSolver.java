@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -66,6 +67,7 @@ public class WholeBodyInverseDynamicsSolver
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
+   private final DoubleYoVariable alphaIntegration = new DoubleYoVariable("alphaIntegration", registry);
 
    private final YoFrameVector desiredMomentumRateLinear;
    private final YoFrameVector achievedMomentumRateLinear;
@@ -109,6 +111,8 @@ public class WholeBodyInverseDynamicsSolver
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
       desiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
       achievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
+
+      alphaIntegration.set(0.999);
 
       parentRegistry.addChild(registry);
    }
@@ -197,7 +201,13 @@ public class WholeBodyInverseDynamicsSolver
          double desiredPosition = lowLevelJointData.getDesiredPosition();
 
          desiredVelocity += desiredAcceleration * controlDT;
-         desiredPosition += desiredVelocity * controlDT + 0.5 * desiredAcceleration * controlDT * controlDT;
+         desiredPosition += desiredVelocity * controlDT;
+
+         double errorPosition = MathTools.clipToMinMax(desiredPosition - joint.getQ(), 0.2);
+         desiredPosition = joint.getQ() + errorPosition;
+         desiredPosition = MathTools.clipToMinMax(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         desiredPosition = alphaIntegration.getDoubleValue() * desiredPosition + (1.0 - alphaIntegration.getDoubleValue()) * joint.getQ();
+         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);
