@@ -42,9 +42,14 @@ public class ChestOrientationManager
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
+   private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
+
+   private final YoOrientationPIDGainsInterface gains;
+
    public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, double weight, double trajectoryTime,
          YoVariableRegistry parentRegistry)
    {
+      this.gains = gains;
       yoTime = momentumBasedController.getYoTime();
       pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
 
@@ -53,7 +58,8 @@ public class ChestOrientationManager
       RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
 
-      orientationFeedbackControlCommand.setWeightForSolver(weight);
+      chestWeight.set(weight);
+      orientationFeedbackControlCommand.setWeightForSolver(chestWeight.getDoubleValue());
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
 
@@ -95,6 +101,8 @@ public class ChestOrientationManager
       desiredAngularVelocity.setToZero(worldFrame);
       feedForwardAngularAcceleration.setToZero(worldFrame);
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.setWeightForSolver(chestWeight.getDoubleValue());
+      orientationFeedbackControlCommand.setGains(gains);
    }
 
    public void holdCurrentOrientation()
