@@ -312,6 +312,7 @@ public class BalanceManager
       
       yoCapturePoint.getFrameTupleIncludingFrame(tempCapturePoint);
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
+      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
    }
 
    public void prepareForDoubleSupportPushRecovery()
