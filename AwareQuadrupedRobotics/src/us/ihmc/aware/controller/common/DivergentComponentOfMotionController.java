@@ -13,16 +13,16 @@ public class DivergentComponentOfMotionController
    private double dt;
    private double mass;
    private double gravity;
-   private double comHeight;
+   private double naturalFrequency;
    private final ReferenceFrame comFrame;
    private final PIDController[] pidController;
 
-   public DivergentComponentOfMotionController(String suffix, ReferenceFrame comFrame, double dt, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public DivergentComponentOfMotionController(String suffix, ReferenceFrame comFrame, double dt, double mass, double gravity, double naturalFrequency, YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
       this.mass = mass;
       this.gravity = gravity;
-      this.comHeight = comHeight;
+      this.naturalFrequency = naturalFrequency;
       this.comFrame = comFrame;
 
       pidController = new PIDController[3];
@@ -31,24 +31,24 @@ public class DivergentComponentOfMotionController
       pidController[2] = new PIDController(suffix + "Z", parentRegistry);
    }
 
-   public void setComHeight(double comHeight)
+   public void setNaturalFrequency(double naturalFrequency)
    {
-      this.comHeight = Math.max(comHeight, MINIMUM_COM_HEIGHT);
-   }
-
-   public double getComHeight()
-   {
-      return comHeight;
+      this.naturalFrequency = Math.max(naturalFrequency, 0.001);
    }
 
    public double getNaturalFrequency()
    {
-      return Math.sqrt(gravity / comHeight);
+      return naturalFrequency;
    }
 
    public double getTimeConstant()
    {
-      return Math.sqrt(comHeight / gravity);
+      return 1 / naturalFrequency;
+   }
+
+   public double getComHeightConstant()
+   {
+      return gravity / (naturalFrequency * naturalFrequency);
    }
 
    public void reset()
@@ -134,7 +134,7 @@ public class DivergentComponentOfMotionController
       double vrpZ = dcmPositionEstimate.getZ() - 1 / omega * (dcmVelocitySetpoint.getZ() + pidController[2].compute(dcmPositionEstimate.getZ(), dcmPositionSetpoint.getZ(), 0, 0, dt));
       double cmpX = vrpX;
       double cmpY = vrpY;
-      double cmpZ = vrpZ - comHeight;
+      double cmpZ = vrpZ - getComHeightConstant();
       double fX = mass * Math.pow(omega, 2) * -cmpX;
       double fY = mass * Math.pow(omega, 2) * -cmpY;
       double fZ = mass * Math.pow(omega, 2) * -cmpZ;

@@ -37,16 +37,6 @@ public class QuadrupedTaskSpaceCommands
       return soleForce;
    }
 
-   public void setToZero()
-   {
-      comForce.setToZero();
-      comTorque.setToZero();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         soleForce.get(robotQuadrant).setToZero();
-      }
-   }
-
    public void changeFrame(ReferenceFrame referenceFrame)
    {
       comForce.changeFrame(referenceFrame);
@@ -54,6 +44,16 @@ public class QuadrupedTaskSpaceCommands
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          soleForce.get(robotQuadrant).changeFrame(referenceFrame);
+      }
+   }
+
+   public void setToZero()
+   {
+      comForce.setToZero();
+      comTorque.setToZero();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         soleForce.get(robotQuadrant).setToZero();
       }
    }
 

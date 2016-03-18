@@ -563,7 +563,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       dcmPositionEstimate.setY(comPositionEstimate.getY() + comVelocityEstimate.getY() / omega);
       dcmPositionEstimate.setZ(comPositionEstimate.getZ() + comVelocityEstimate.getZ() / omega);
       icpPositionEstimate.setIncludingFrame(dcmPositionEstimate);
-      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeight());
+      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeightConstant());
 
       // compute center of mass height
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -860,11 +860,11 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          dcmTrajectory.getPosition(dcmPositionSetpoint);
          dcmTrajectory.getVelocity(dcmVelocitySetpoint);
          icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
-         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
+         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeightConstant());
          icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
 
          // compute horizontal forces to track desired dcm trajectory
-         dcmPositionController.setComHeight(Math.max(comHeightSetpoint, 0.001));
+         dcmPositionController.setNaturalFrequency(Math.sqrt(gravity / Math.max(comHeightSetpoint, 0.001)));
          dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
          // compute vertical com force
@@ -973,11 +973,11 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          dcmTrajectory.getPosition(dcmPositionSetpoint);
          dcmTrajectory.getVelocity(dcmVelocitySetpoint);
          icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
-         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
+         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeightConstant());
          icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
 
          // compute horizontal forces to track desired divergent component of motion
-         dcmPositionController.setComHeight(Math.max(comHeightSetpoint, 0.001));
+         dcmPositionController.setNaturalFrequency(Math.sqrt(gravity / Math.max(comHeightSetpoint, 0.001)));
          dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
          // compute vertical com force
