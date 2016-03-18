@@ -79,4 +79,12 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
       this.set(point);
    }
 
+   /**
+    * Sets this point to the location of the origin of passed in referenceFrame.
+    */
+   @Override
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      super.setFromReferenceFrame(referenceFrame);
+   }
 }
