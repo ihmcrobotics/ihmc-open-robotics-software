@@ -96,6 +96,12 @@ public class YoSpatialVector
    {
       angularPart.scale(scaleFactor);
    }
+   
+   public void setToZero()
+   {
+      linearPart.setToZero();
+      angularPart.setToZero();
+   }
 
    public YoFrameVector getYoLinearPart()
    {
