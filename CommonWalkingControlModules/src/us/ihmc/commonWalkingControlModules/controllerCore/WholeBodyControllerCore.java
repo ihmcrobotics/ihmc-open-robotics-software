@@ -5,17 +5,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class WholeBodyControllerCore
@@ -32,7 +33,7 @@ public class WholeBodyControllerCore
    private final YoRootJointDesiredConfigurationData yoRootJointDesiredConfigurationData;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
-   private OneDoFJoint[] oneDoFJoints;
+   private OneDoFJoint[] controlledOneDoFJoints;
 
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
          YoVariableRegistry parentRegistry)
@@ -41,10 +42,11 @@ public class WholeBodyControllerCore
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
       inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
-      oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsSolver.getJointsToOptimizeFors(), OneDoFJoint.class);
+      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       SixDoFJoint rootJoint = toolbox.getRobotRootJoint();
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
-      yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(oneDoFJoints, registry);
+      yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = inverseDynamicsSolver.getDesiredCenterOfPressureDataHolder();
       controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder);
@@ -110,6 +112,23 @@ public class WholeBodyControllerCore
       default:
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
+
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = controlledOneDoFJoints[i];
+         LowLevelJointDataReadOnly lowLevelJointData = yoLowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
+         switch (lowLevelJointData.getControlMode())
+         {
+         case FORCE_CONTROL:
+            joint.setUnderPositionControl(false);
+            break;
+         case POSITION_CONTROL:
+            joint.setUnderPositionControl(true);
+            break;
+         default:
+            throw new RuntimeException("Unhandled joint control mode: " + lowLevelJointData.getControlMode());
+         }
+      }
    }
 
    private void doInverseDynamics()
@@ -140,7 +159,7 @@ public class WholeBodyControllerCore
    private void doNothing()
    {
       numberOfFBControllerEnabled.set(0);
-      yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
+      yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(controlledOneDoFJoints);
    }
 
    public ControllerCoreOutputReadOnly getOutputForHighLevelController()
