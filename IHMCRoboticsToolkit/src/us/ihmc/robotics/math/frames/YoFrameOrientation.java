@@ -161,6 +161,31 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
       pitch.set(tempYawPitchRoll[1], notifyListeners);
       roll.set(tempYawPitchRoll[2], notifyListeners);
    }
+   
+   /**
+    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
+    * 
+    * @param referenceFrame
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame, boolean notifyListeners)
+   {
+      tempFrameOrientation.setToZero(referenceFrame);
+      tempFrameOrientation.changeFrame(getReferenceFrame());
+      tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
+      yaw.set(tempYawPitchRoll[0], notifyListeners);
+      pitch.set(tempYawPitchRoll[1], notifyListeners);
+      roll.set(tempYawPitchRoll[2], notifyListeners);
+   }
+   
+   /**
+    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
+    * 
+    * @param referenceFrame
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      setFromReferenceFrame(referenceFrame, true);
+   }
 
    public void setToNaN()
    {

@@ -91,6 +91,17 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       position.set(tempFramePoint, notifyListeners);
       orientation.set(tempFrameOrientation, notifyListeners);
    }
+   
+   /**
+    * Sets this frame pose to the origin of the passed in reference frame.
+    * 
+    * @param referenceFrame
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      position.setFromReferenceFrame(referenceFrame);
+      orientation.setFromReferenceFrame(referenceFrame);
+   }
 
    public void setPosition(FramePoint framePoint)
    {
