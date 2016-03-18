@@ -100,31 +100,46 @@ public class WholeBodyControllerCore
       switch (currentMode.getEnumValue())
       {
       case INVERSE_DYNAMICS:
-         feedbackController.compute();
-         InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
-         numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
-         inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
-         inverseDynamicsSolver.compute();
-         feedbackController.computeAchievedAccelerations();
-         LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();
-         RootJointDesiredConfigurationDataReadOnly inverseDynamicsOutputForRootJoint = inverseDynamicsSolver.getOutputForRootJoint();
-         yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseDynamicsOutput);
-         yoRootJointDesiredConfigurationData.completeWith(inverseDynamicsOutputForRootJoint);
+         doInverseDynamics();
          break;
       case INVERSE_KINEMATICS:
-         numberOfFBControllerEnabled.set(0);
-         inverseKinematicsSolver.compute();
-         LowLevelOneDoFJointDesiredDataHolder inverseKinematicsOutput = inverseKinematicsSolver.getOutput();
-         RootJointDesiredConfigurationDataReadOnly inverseKinematicsOutputForRootJoint = inverseKinematicsSolver.getOutputForRootJoint();
-         yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseKinematicsOutput);
-         yoRootJointDesiredConfigurationData.completeWith(inverseKinematicsOutputForRootJoint);
+         doInverseKinematics();
       case OFF:
-         numberOfFBControllerEnabled.set(0);
-         yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
+         doNothing();
          break;
       default:
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
+   }
+
+   private void doInverseDynamics()
+   {
+      feedbackController.compute();
+      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
+      numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
+      inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
+      inverseDynamicsSolver.compute();
+      feedbackController.computeAchievedAccelerations();
+      LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();
+      RootJointDesiredConfigurationDataReadOnly inverseDynamicsOutputForRootJoint = inverseDynamicsSolver.getOutputForRootJoint();
+      yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseDynamicsOutput);
+      yoRootJointDesiredConfigurationData.completeWith(inverseDynamicsOutputForRootJoint);
+   }
+
+   private void doInverseKinematics()
+   {
+      numberOfFBControllerEnabled.set(0);
+      inverseKinematicsSolver.compute();
+      LowLevelOneDoFJointDesiredDataHolder inverseKinematicsOutput = inverseKinematicsSolver.getOutput();
+      RootJointDesiredConfigurationDataReadOnly inverseKinematicsOutputForRootJoint = inverseKinematicsSolver.getOutputForRootJoint();
+      yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseKinematicsOutput);
+      yoRootJointDesiredConfigurationData.completeWith(inverseKinematicsOutputForRootJoint);
+   }
+
+   private void doNothing()
+   {
+      numberOfFBControllerEnabled.set(0);
+      yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(oneDoFJoints);
    }
 
    public ControllerCoreOutputReadOnly getOutputForHighLevelController()
