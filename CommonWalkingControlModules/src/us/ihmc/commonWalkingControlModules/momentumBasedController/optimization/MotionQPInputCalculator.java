@@ -426,7 +426,7 @@ public class MotionQPInputCalculator
       return true;
    }
 
-   public void computeJointAccelerationLimits(DenseMatrix64F qDDotMinToPack, DenseMatrix64F qDDotMaxToPack)
+   public void computeJointAccelerationLimits(double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack, DenseMatrix64F qDDotMaxToPack)
    {
       CommonOps.fill(qDDotMinToPack, Double.NEGATIVE_INFINITY);
       CommonOps.fill(qDDotMaxToPack, Double.POSITIVE_INFINITY);
@@ -445,14 +445,14 @@ public class MotionQPInputCalculator
          {
             double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
             qDDotMin = (qDotMin - joint.getQd()) / controlDT;
-            qDDotMin = MathTools.clipToMinMax(qDDotMin, -100.0, 0.0);
+            qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
             qDDotMinToPack.set(index, 0, qDDotMin);
          }
          if (!Double.isInfinite(jointLimitUpper))
          {
             double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
             qDDotMax = (qDotMax - joint.getQd()) / controlDT;
-            qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, 100.0);
+            qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
             qDDotMaxToPack.set(index, 0, qDDotMax);
          }
       }

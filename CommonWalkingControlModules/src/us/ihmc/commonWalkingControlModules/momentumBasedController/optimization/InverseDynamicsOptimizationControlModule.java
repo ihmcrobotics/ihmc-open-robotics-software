@@ -60,6 +60,7 @@ public class InverseDynamicsOptimizationControlModule
    private final DenseMatrix64F qDDotMinMatrix, qDDotMaxMatrix;
 
    private final JointIndexHandler jointIndexHandler;
+   private final DoubleYoVariable absoluteMaximumJointAcceleration = new DoubleYoVariable("absoluteMaximumJointAcceleration", registry);
    private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumAccelerations = new HashMap<>();
 
@@ -102,6 +103,7 @@ public class InverseDynamicsOptimizationControlModule
       motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT,
             registry);
 
+      absoluteMaximumJointAcceleration.set(200.0);
       qDDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
       qDDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);
 
@@ -189,7 +191,7 @@ public class InverseDynamicsOptimizationControlModule
 
    private void computeJointAccelerationLimits()
    {
-      motionQPInputCalculator.computeJointAccelerationLimits(qDDotMinMatrix, qDDotMaxMatrix);
+      motionQPInputCalculator.computeJointAccelerationLimits(absoluteMaximumJointAcceleration.getDoubleValue(), qDDotMinMatrix, qDDotMaxMatrix);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
