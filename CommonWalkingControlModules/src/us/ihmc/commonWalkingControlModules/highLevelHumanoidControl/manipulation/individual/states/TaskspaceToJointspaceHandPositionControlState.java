@@ -173,7 +173,8 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
    public void setWeight(double weight)
    {
-      jointspaceFeedbackControlCommand.setWeightForSolver(weight);
+      if (jointspaceFeedbackControlCommand != null)
+         jointspaceFeedbackControlCommand.setWeightForSolver(weight);
    }
 
    /** Either {@link #initializeWithCurrentJointAngles()} or {@link #initializeWithDesiredJointAngles()} needs to be called before {@link #doAction()} when this class is used as a standalone controller. */
