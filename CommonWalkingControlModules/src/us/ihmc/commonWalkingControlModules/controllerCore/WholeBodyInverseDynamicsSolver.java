@@ -69,8 +69,9 @@ public class WholeBodyInverseDynamicsSolver
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
    private final DoubleYoVariable alphaIntegration = new DoubleYoVariable("alphaIntegration", registry);
 
-   private final YoFrameVector desiredMomentumRateLinear;
-   private final YoFrameVector achievedMomentumRateLinear;
+   private final YoFrameVector yoDesiredMomentumRateLinear;
+   private final YoFrameVector yoAchievedMomentumRateLinear;
+   private final FrameVector achievedMomentumRateLinear = new FrameVector();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector residualRootJointForce = new FrameVector();
@@ -109,8 +110,8 @@ public class WholeBodyInverseDynamicsSolver
             yoGraphicsListRegistry, registry);
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
-      desiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
-      achievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
+      yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
+      yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
 
       alphaIntegration.set(0.999);
 
@@ -152,7 +153,8 @@ public class WholeBodyInverseDynamicsSolver
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
       SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
 
-      achievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
+      yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
+      yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
 
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
@@ -271,7 +273,7 @@ public class WholeBodyInverseDynamicsSolver
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();
-      MatrixTools.extractYoFrameTupleFromEJMLVector(desiredMomentumRateLinear, momentumRate, 3);
+      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()
@@ -287,6 +289,11 @@ public class WholeBodyInverseDynamicsSolver
    public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
    {
       return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
+   }
+
+   public FrameVector getAchievedMomentumRateLinear()
+   {
+      return achievedMomentumRateLinear;
    }
 
    public InverseDynamicsJoint[] getJointsToOptimizeFors()
