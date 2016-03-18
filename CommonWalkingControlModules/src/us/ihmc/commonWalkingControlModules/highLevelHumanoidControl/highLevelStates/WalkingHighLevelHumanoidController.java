@@ -51,6 +51,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -1156,6 +1157,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
+   private final FrameVector achievedLinearMomentumRate = new FrameVector();
 
    @Override
    public void doMotionControl()
@@ -1168,6 +1170,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       consumeStopAllTrajectoryMessages();
       consumeFootTrajectoryMessages();
       consumeAbortWalkingMessages();
+
+      controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
+      balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
       balanceManager.getCapturePoint(capturePoint2d);
       balanceManager.getDesiredICP(desiredCapturePoint2d);

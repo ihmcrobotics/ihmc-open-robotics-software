@@ -4,6 +4,7 @@ import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Beige;
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Black;
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Blue;
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.BlueViolet;
+import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.DarkRed;
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Purple;
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Yellow;
 import static us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType.CROSS;
@@ -68,6 +69,7 @@ public class BalanceManager
 
    private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d("perfectCMP", worldFrame, registry);
    private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("desiredCMP", worldFrame, registry);
+   private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
 
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
@@ -87,6 +89,7 @@ public class BalanceManager
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
+   private final FramePoint2d achievedCMP = new FramePoint2d();
 
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
@@ -138,6 +141,7 @@ public class BalanceManager
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), ROTATED_CROSS);
          YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), CROSS);
+         YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
 
          yoGraphicsListRegistry.registerArtifact(graphicListName, centerOfMassViz.createArtifact());
@@ -145,6 +149,7 @@ public class BalanceManager
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCMPViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact(graphicListName, achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPViz.createArtifact());
       }
 
@@ -202,9 +207,7 @@ public class BalanceManager
 
       icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
 
-      icpBasedLinearMomentumRateOfChangeControlModule.compute();
-
-      icpBasedLinearMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMP);
+      icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
    }
 
@@ -251,7 +254,7 @@ public class BalanceManager
 
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
    {
-      icpBasedLinearMomentumRateOfChangeControlModule.getDesiredCMP(desiredCMPToPack);
+      yoDesiredCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
    public void getDesiredICP(FramePoint2d desiredICPToPack)
@@ -448,6 +451,12 @@ public class BalanceManager
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.setXY(capturePoint2d);
+   }
+
+   public void computeAchievedCMP(FrameVector achievedLinearMomentumRate)
+   {
+      icpBasedLinearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
+      yoAchievedCMP.setAndMatchFrame(achievedCMP);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
