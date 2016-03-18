@@ -1,12 +1,11 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -41,9 +40,9 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    private final DenseMatrix64F variableLowerBounds = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F variableUpperBounds = new DenseMatrix64F(0, 0);
 
-   private final ArrayList<Integer> activeInequalityIndices = new ArrayList<>();
-   private final ArrayList<Integer> activeUpperBoundIndices = new ArrayList<>();
-   private final ArrayList<Integer> activeLowerBoundIndices = new ArrayList<>();
+   private final TIntArrayList activeInequalityIndices = new TIntArrayList();
+   private final TIntArrayList activeUpperBoundIndices = new TIntArrayList();
+   private final TIntArrayList activeLowerBoundIndices = new TIntArrayList();
 
    // Some temporary matrices:
    private final DenseMatrix64F symmetricCostQuadraticMatrix = new DenseMatrix64F(0, 0);
@@ -87,14 +86,14 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    private final DenseMatrix64F tempVector = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F augmentedLagrangeMultipliers = new DenseMatrix64F(0, 0);
 
-   private final ArrayList<Integer> inequalityIndicesToAddToActiveSet = new ArrayList<>();
-   private final ArrayList<Integer> inequalityIndicesToRemoveFromActiveSet = new ArrayList<>();
+   private final TIntArrayList inequalityIndicesToAddToActiveSet = new TIntArrayList();
+   private final TIntArrayList inequalityIndicesToRemoveFromActiveSet = new TIntArrayList();
 
-   private final ArrayList<Integer> upperBoundIndicesToAddToActiveSet = new ArrayList<>();
-   private final ArrayList<Integer> upperBoundIndicesToRemoveFromActiveSet = new ArrayList<>();
+   private final TIntArrayList upperBoundIndicesToAddToActiveSet = new TIntArrayList();
+   private final TIntArrayList upperBoundIndicesToRemoveFromActiveSet = new TIntArrayList();
 
-   private final ArrayList<Integer> lowerBoundIndicesToAddToActiveSet = new ArrayList<>();
-   private final ArrayList<Integer> lowerBoundIndicesToRemoveFromActiveSet = new ArrayList<>();
+   private final TIntArrayList lowerBoundIndicesToAddToActiveSet = new TIntArrayList();
+   private final TIntArrayList lowerBoundIndicesToRemoveFromActiveSet = new TIntArrayList();
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
@@ -126,9 +125,9 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       DBar.reshape(0, 0);
       DHat.reshape(0, 0);
 
-      activeInequalityIndices.clear();
-      activeUpperBoundIndices.clear();
-      activeLowerBoundIndices.clear();
+      activeInequalityIndices.reset();
+      activeUpperBoundIndices.reset();
+      activeLowerBoundIndices.reset();
    }
 
    @Override
@@ -350,7 +349,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       DBar.reshape(0, 0);
       CHat.reshape(0, 0);
       DHat.reshape(0, 0);
-      activeInequalityIndices.clear();
+      activeInequalityIndices.reset();
 
       solveEqualityConstrainedSubproblemEfficiently(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundConstraintMultipliersToPack,
             lagrangeUpperBoundConstraintMultipliersToPack);
@@ -358,9 +357,9 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          return numberOfIterations;
 
       // Test the inequality constraints:
-      activeInequalityIndices.clear();
-      activeUpperBoundIndices.clear();
-      activeLowerBoundIndices.clear();
+      activeInequalityIndices.reset();
+      activeUpperBoundIndices.reset();
+      activeLowerBoundIndices.reset();
 
       for (int i = 0; i < maxNumberOfIterations - 1; i++)
       {
@@ -490,8 +489,8 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
       int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
 
-      inequalityIndicesToAddToActiveSet.clear();
-      inequalityIndicesToRemoveFromActiveSet.clear();
+      inequalityIndicesToAddToActiveSet.reset();
+      inequalityIndicesToRemoveFromActiveSet.reset();
       if (numberOfInequalityConstraints != 0)
       {
          if (linearInequalityConstraintsCMatrixO.getNumCols() != numberOfVariables)
@@ -526,7 +525,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       }
 
       // Check the Bounds
-      lowerBoundIndicesToAddToActiveSet.clear();
+      lowerBoundIndicesToAddToActiveSet.reset();
       for (int i = 0; i < numberOfLowerBoundConstraints; i++)
       {
          if (activeLowerBoundIndices.contains(i))
@@ -541,7 +540,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          }
       }
 
-      upperBoundIndicesToAddToActiveSet.clear();
+      upperBoundIndicesToAddToActiveSet.reset();
       for (int i = 0; i < numberOfUpperBoundConstraints; i++)
       {
          if (activeUpperBoundIndices.contains(i))
@@ -556,7 +555,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          }
       }
 
-      lowerBoundIndicesToRemoveFromActiveSet.clear();
+      lowerBoundIndicesToRemoveFromActiveSet.reset();
       for (int i = 0; i < activeLowerBoundIndices.size(); i++)
       {
          int indexToCheck = activeLowerBoundIndices.get(i);
@@ -569,7 +568,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          }
       }
 
-      upperBoundIndicesToRemoveFromActiveSet.clear();
+      upperBoundIndicesToRemoveFromActiveSet.reset();
       for (int i = 0; i < activeUpperBoundIndices.size(); i++)
       {
          int indexToCheck = activeUpperBoundIndices.get(i);
@@ -603,7 +602,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       for (int i = 0; i < sizeOfActiveSet; i++)
       {
-         Integer inequalityConstraintIndex = activeInequalityIndices.get(i);
+         int inequalityConstraintIndex = activeInequalityIndices.get(i);
          CommonOps.extract(linearInequalityConstraintsCMatrixO, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, numberOfVariables, CBar, i, 0);
          CommonOps.extract(linearInequalityConstraintsDVectorO, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, 1, DBar, i, 0);
       }
@@ -622,7 +621,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       for (int i = 0; i < sizeOfLowerBoundsActiveSet; i++)
       {
-         Integer lowerBoundsConstraintIndex = activeLowerBoundIndices.get(i);
+         int lowerBoundsConstraintIndex = activeLowerBoundIndices.get(i);
 
          CHat.set(i, lowerBoundsConstraintIndex, -1.0);
          DHat.set(i, 0, -variableLowerBounds.get(lowerBoundsConstraintIndex));
@@ -630,7 +629,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       for (int i = 0; i < sizeOfUpperBoundsActiveSet; i++)
       {
-         Integer upperBoundsConstraintIndex = activeUpperBoundIndices.get(i);
+         int upperBoundsConstraintIndex = activeUpperBoundIndices.get(i);
 
          CHat.set(i, upperBoundsConstraintIndex, 1.0);
          DHat.set(i, 0, variableUpperBounds.get(upperBoundsConstraintIndex));
@@ -770,7 +769,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       lagrangeInequalityConstraintMultipliersToPack.zero();
       for (int i = 0; i < numberOfActiveInequalityConstraints; i++)
       {
-         Integer inequalityConstraintIndex = activeInequalityIndices.get(i);
+         int inequalityConstraintIndex = activeInequalityIndices.get(i);
          CommonOps.extract(augmentedLagrangeMultipliers, startRow + i, startRow + i + 1, 0, 1, lagrangeInequalityConstraintMultipliersToPack, inequalityConstraintIndex, 0);
       }
 
@@ -778,7 +777,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       lagrangeLowerBoundConstraintMultipliersToPack.zero();
       for (int i = 0; i < numberOfActiveLowerBoundConstraints; i++)
       {
-         Integer lowerBoundConstraintIndex = activeLowerBoundIndices.get(i);
+         int lowerBoundConstraintIndex = activeLowerBoundIndices.get(i);
          CommonOps.extract(augmentedLagrangeMultipliers, startRow + i, startRow + i + 1, 0, 1, lagrangeLowerBoundConstraintMultipliersToPack, lowerBoundConstraintIndex, 0);
       }
 
@@ -786,7 +785,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       lagrangeUpperBoundConstraintMultipliersToPack.zero();
       for (int i = 0; i < numberOfActiveUpperBoundConstraints; i++)
       {
-         Integer upperBoundConstraintIndex = activeUpperBoundIndices.get(i);
+         int upperBoundConstraintIndex = activeUpperBoundIndices.get(i);
          CommonOps.extract(augmentedLagrangeMultipliers, startRow + i, startRow + i + 1, 0, 1, lagrangeUpperBoundConstraintMultipliersToPack, upperBoundConstraintIndex, 0);
       }
    }
