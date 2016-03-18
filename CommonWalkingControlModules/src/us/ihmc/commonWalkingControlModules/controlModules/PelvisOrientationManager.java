@@ -65,6 +65,7 @@ public class PelvisOrientationManager
    private final DoubleYoVariable yoTime;
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+   private final DoubleYoVariable pelvisWeight = new DoubleYoVariable("pelvisWeight", registry);
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
@@ -76,6 +77,8 @@ public class PelvisOrientationManager
    private final ReferenceFrame desiredPelvisFrame;
 
    private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isPelvisOrientationOffsetTrajectoryStopped", registry);
+
+   private final YoOrientationPIDGainsInterface gains;
 
    public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry parentRegistry)
@@ -94,13 +97,14 @@ public class PelvisOrientationManager
       for (RobotSide robotSide : RobotSide.values)
          pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
 
-      YoOrientationPIDGainsInterface pelvisOrientationControlGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
+      gains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody elevator = fullRobotModel.getElevator();
       RigidBody pelvis = fullRobotModel.getPelvis();
-      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.PELVIS_WEIGHT);
+      pelvisWeight.set(SolverWeightLevels.PELVIS_WEIGHT);
       orientationFeedbackControlCommand.set(elevator, pelvis);
-      orientationFeedbackControlCommand.setGains(pelvisOrientationControlGains);
+      orientationFeedbackControlCommand.setWeightForSolver(pelvisWeight.getDoubleValue());
+      orientationFeedbackControlCommand.setGains(gains);
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
       {
@@ -129,7 +133,7 @@ public class PelvisOrientationManager
 
    public void setWeight(double weight)
    {
-      orientationFeedbackControlCommand.setWeightForSolver(weight);
+      pelvisWeight.set(weight);
    }
 
    public void setTrajectoryTime(double trajectoryTime)
@@ -206,6 +210,8 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.getFrameTupleIncludingFrame(tempAngularAcceleration);
 
       orientationFeedbackControlCommand.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+      orientationFeedbackControlCommand.setWeightForSolver(pelvisWeight.getDoubleValue());
+      orientationFeedbackControlCommand.setGains(gains);
    }
 
    public void goToHomeFromCurrentDesired()
