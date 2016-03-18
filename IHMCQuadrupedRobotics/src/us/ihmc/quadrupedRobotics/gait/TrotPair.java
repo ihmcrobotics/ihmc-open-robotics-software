@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.trot;
+package us.ihmc.quadrupedRobotics.gait;
 
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
