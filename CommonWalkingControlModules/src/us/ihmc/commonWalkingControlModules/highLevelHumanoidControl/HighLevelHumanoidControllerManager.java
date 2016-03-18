@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommand
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -47,7 +47,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final ControllerCommandInputManager commandInputManager;
-   private final ControllerCoreOutput controllerCoreOutput;
+   private final ControllerCoreOutputReadOnly controllerCoreOutput;
    private final WholeBodyControllerCore controllerCore;
 
    private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
@@ -56,7 +56,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public HighLevelHumanoidControllerManager(ControllerCommandInputManager commandInputManager, WholeBodyControllerCore controllerCore,
          HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors, MomentumBasedController momentumBasedController,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOutput controllerCoreOutput, HumanoidGlobalDataProducer dataProducer)
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOutputReadOnly controllerCoreOutput, HumanoidGlobalDataProducer dataProducer)
    {
       this.commandInputManager = commandInputManager;
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
