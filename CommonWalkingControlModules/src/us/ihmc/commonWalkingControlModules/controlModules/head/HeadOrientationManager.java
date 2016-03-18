@@ -57,8 +57,6 @@ public class HeadOrientationManager
 
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
-   private final boolean neckPositionControlled;
-   private final OneDoFJoint[] neckJoints;
    private final YoOrientationPIDGainsInterface gains;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
@@ -85,8 +83,8 @@ public class HeadOrientationManager
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", true, chestFrame, registry);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
-      neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
-      neckPositionControlled = headOrientationControllerParameters.isNeckPositionControlled();
+      OneDoFJoint[] neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      boolean neckPositionControlled = headOrientationControllerParameters.isNeckPositionControlled();
 
       long neckJacobianId = momentumBasedController.getOrCreateGeometricJacobian(neckJoints, headFrame);
       neckJacobian = momentumBasedController.getJacobian(neckJacobianId);
@@ -108,12 +106,6 @@ public class HeadOrientationManager
          jointAccelerationIntegrationCommand = null;
          lowLevelOneDoFJointDesiredDataHolder = null;
       }
-   }
-
-   public void setPositionControl()
-   {
-      for (int i = 0; i < neckJoints.length; i++)
-         neckJoints[i].setUnderPositionControl(true);
    }
 
    public void initialize()
@@ -149,9 +141,6 @@ public class HeadOrientationManager
 
    public void compute()
    {
-      if (neckPositionControlled)
-         setPositionControl();
-
       if (isTrackingOrientation.getBooleanValue())
       {
          double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
