@@ -547,7 +547,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
             dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
             dcmPositionWaypoint.changeFrame(worldFrame);
             dcmPositionWaypoint.add(0, 0, comHeightSetpoint);
-            dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+            dcmTrajectory.setComHeight(dcmPositionController.getComHeightConstant());
             dcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(),
                   copPlanner.getTimeAtTransition(nTransitions - 1), dcmPositionWaypoint);
             dcmTrajectory.computeTrajectory(currentTime);
@@ -561,7 +561,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
             {
                // compute dcm trajectory to transition from standing to stepping
                double deltaTime = Math.max(startTime - currentTime, 0.001);
+               dcmPositionSetpoint.changeFrame(worldFrame);
+               dcmVelocitySetpoint.changeFrame(worldFrame);
                dcmTrajectory.getPosition(dcmPositionWaypoint);
+               dcmPositionWaypoint.changeFrame(worldFrame);
                dcmPositionWaypoint.sub(dcmPositionSetpoint);
                dcmPositionWaypoint.scale(1 / deltaTime);
                dcmVelocitySetpoint.set(dcmPositionWaypoint);
@@ -570,7 +573,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
             }
          }
          icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
-         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
+         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeightConstant());
          icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
       }
       else
@@ -579,7 +582,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          icpPositionSetpoint.setIncludingFrame(supportCentroidEstimate);
          icpVelocitySetpoint.setToZero(supportFrame);
          dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
-         dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
+         dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeightConstant());
          dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
       }
    }
@@ -652,7 +655,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmPositionEstimate.setY(comPositionEstimate.getY() + comVelocityEstimate.getY() / omega);
       dcmPositionEstimate.setZ(comPositionEstimate.getZ() + comVelocityEstimate.getZ() / omega);
       icpPositionEstimate.setIncludingFrame(dcmPositionEstimate);
-      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeight());
+      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeightConstant());
 
       // compute center of mass height
       comPositionEstimate.changeFrame(worldFrame);
@@ -666,7 +669,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // compute capture point natural frequency
       double comHeight = Math.max(comHeightSetpoint, params.get(COM_HEIGHT_NOMINAL) / 5);
-      dcmPositionController.setComHeight(comHeight);
+      dcmPositionController.setNaturalFrequency(Math.sqrt(gravity / comHeight));
 
       // compute body torque setpoints to track desired body orientation
       bodyTorqueSetpoint.changeFrame(bodyFrame);

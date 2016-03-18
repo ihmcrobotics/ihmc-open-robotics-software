@@ -460,7 +460,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionEstimate.setY(comPositionEstimate.getY() + comVelocityEstimate.getY() / omega);
       dcmPositionEstimate.setZ(comPositionEstimate.getZ() + comVelocityEstimate.getZ() / omega);
       icpPositionEstimate.setIncludingFrame(dcmPositionEstimate);
-      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeight());
+      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeightConstant());
 
       // compute center of mass height
       comPositionEstimate.changeFrame(worldFrame);
@@ -472,7 +472,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    {
       // compute capture point natural frequency
       double comHeight = Math.max(comHeightSetpoint, params.get(COM_HEIGHT_NOMINAL) / 5);
-      dcmPositionController.setComHeight(comHeight);
+      dcmPositionController.setNaturalFrequency(Math.sqrt(gravity / comHeight));
 
       // compute body torque setpoints to track desired body orientation
       bodyTorqueSetpoint.changeFrame(bodyFrame);
@@ -487,7 +487,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       icpPositionSetpoint.setIncludingFrame(supportCentroidEstimate);
       icpVelocitySetpoint.setToZero(supportFrame);
       dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
-      dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
+      dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeightConstant());
       dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
       dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
