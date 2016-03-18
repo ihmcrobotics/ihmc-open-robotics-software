@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTraje
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
@@ -730,6 +731,11 @@ public class HandControlModule
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
+   }
+
+   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData()
+   {
+      return stateMachine.getCurrentState().getLowLevelJointDesiredData();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

@@ -413,7 +413,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    }
 
    @Override
-   public LowLevelJointDataReadOnly getLowLevelJointData(OneDoFJoint joint)
+   public LowLevelJointData getLowLevelJointData(OneDoFJoint joint)
    {
       return lowLevelJointDataMap.get(joint.getName());
    }

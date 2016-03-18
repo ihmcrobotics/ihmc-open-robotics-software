@@ -6,6 +6,10 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTraje
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -15,7 +19,9 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class HeadOrientationManager
 {
@@ -41,6 +47,11 @@ public class HeadOrientationManager
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
+   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
+   private final boolean neckPositionControlled;
+   private final OneDoFJoint[] neckJoints;
+
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
          YoOrientationPIDGainsInterface gains, double weight, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
@@ -63,6 +74,32 @@ public class HeadOrientationManager
       homeOrientation.setIncludingFrame(chestFrame, initialDesiredHeadYawPitchRoll);
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", true, chestFrame, registry);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
+
+      neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      neckPositionControlled = headOrientationControllerParameters.isNeckPositionControlled();
+
+      if (neckPositionControlled)
+      {
+         jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+         lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+
+         lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(neckJoints);
+         lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(neckJoints, LowLevelJointControlMode.POSITION_CONTROL);
+
+         for (OneDoFJoint neckJoint : neckJoints)
+            jointAccelerationIntegrationCommand.addJointToComputeDesiedPositionFor(neckJoint);
+      }
+      else
+      {
+         jointAccelerationIntegrationCommand = null;
+         lowLevelOneDoFJointDesiredDataHolder = null;
+      }
+   }
+
+   public void setPositionControl()
+   {
+      for (int i = 0; i < neckJoints.length; i++)
+         neckJoints[i].setUnderPositionControl(true);
    }
 
    public void initialize()
@@ -98,6 +135,9 @@ public class HeadOrientationManager
 
    public void compute()
    {
+      if (neckPositionControlled)
+         setPositionControl();
+
       if (isTrackingOrientation.getBooleanValue())
       {
          double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
@@ -140,11 +180,16 @@ public class HeadOrientationManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      return jointAccelerationIntegrationCommand;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
+   }
+
+   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData()
+   {
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 }

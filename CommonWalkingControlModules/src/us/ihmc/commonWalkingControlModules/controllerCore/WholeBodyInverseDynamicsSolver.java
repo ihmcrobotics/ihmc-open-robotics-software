@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -17,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
@@ -62,6 +65,7 @@ public class WholeBodyInverseDynamicsSolver
 
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
+   private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
 
    private final YoFrameVector desiredMomentumRateLinear;
    private final YoFrameVector achievedMomentumRateLinear;
@@ -72,8 +76,11 @@ public class WholeBodyInverseDynamicsSolver
    private final YoFrameVector yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", worldFrame, registry);
    private final YoFrameVector yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", worldFrame, registry);
 
+   private final double controlDT;
+
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
+      controlDT = toolbox.getControlDT();
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
       YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
 
@@ -152,9 +159,7 @@ public class WholeBodyInverseDynamicsSolver
       ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
 
       inverseDynamicsCalculator.compute();
-      rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
+      updateLowLevelData();
 
       rootJoint.getWrench(residualRootJointWrench);
       residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
@@ -170,6 +175,36 @@ public class WholeBodyInverseDynamicsSolver
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       wrenchVisualizer.visualize(externalWrenchSolution);
+   }
+
+   private void updateLowLevelData()
+   {
+      rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
+
+      for (int i = 0; i < jointsToComputeDesiredPositionFor.size(); i++)
+      {
+         OneDoFJoint joint = jointsToComputeDesiredPositionFor.get(i);
+         LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
+         if (!lowLevelJointData.hasDesiredVelocity())
+            lowLevelJointData.setDesiredVelocity(joint.getQd());
+         if (!lowLevelJointData.hasDesiredPosition())
+            lowLevelJointData.setDesiredPosition(joint.getQ());
+
+         double desiredAcceleration = lowLevelJointData.getDesiredAcceleration();
+         double desiredVelocity = lowLevelJointData.getDesiredVelocity();
+         double desiredPosition = lowLevelJointData.getDesiredPosition();
+
+         desiredVelocity += desiredAcceleration * controlDT;
+         desiredPosition += desiredVelocity * controlDT + 0.5 * desiredAcceleration * controlDT * controlDT;
+
+         lowLevelJointData.setDesiredVelocity(desiredVelocity);
+         lowLevelJointData.setDesiredPosition(desiredPosition);
+
+         joint.setqDesired(desiredPosition);
+         joint.setQdDesired(desiredVelocity);
+      }
    }
 
    public void submitInverseDynamicsCommandList(InverseDynamicsCommandList inverseDynamicsCommandList)
@@ -201,12 +236,25 @@ public class WholeBodyInverseDynamicsSolver
          case PLANE_CONTACT_STATE:
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
             break;
+         case JOINT_ACCELERATION_INTEGRATION:
+            submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
+            break;
          case COMMAND_LIST:
             submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
             break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
+      }
+   }
+
+   private void submitJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand command)
+   {
+      for (int i = 0; i < command.getNumberOfJointsToComputeDesiedPositionFor(); i++)
+      {
+         OneDoFJoint jointToComputeDesiedPositionFor = command.getJointToComputeDesiedPositionFor(i);
+         if (!jointsToComputeDesiredPositionFor.contains(jointToComputeDesiedPositionFor))
+            jointsToComputeDesiredPositionFor.add(jointToComputeDesiedPositionFor);
       }
    }
 

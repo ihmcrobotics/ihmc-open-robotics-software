@@ -28,9 +28,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatus
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOuput;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
@@ -1239,21 +1237,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         InverseDynamicsCommand<?> footInverseDynamicsCommand = feetManager.getInverseDynamicsCommand(robotSide);
-         if (footInverseDynamicsCommand != null)
-            controllerCoreCommand.addInverseDynamicsCommand(footInverseDynamicsCommand);
+         controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
+         controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
 
-         FeedbackControlCommand<?> footFeedbackControlCommand = feetManager.getFeedbackControlCommand(robotSide);
-         if (footFeedbackControlCommand != null)
-            controllerCoreCommand.addFeedbackControlCommand(footFeedbackControlCommand);
-
-         InverseDynamicsCommand<?> handInverseDynamicsCommand = manipulationControlModule.getInverseDynamicsCommand(robotSide);
-         if (handInverseDynamicsCommand != null)
-            controllerCoreCommand.addInverseDynamicsCommand(handInverseDynamicsCommand);
-
-         FeedbackControlCommand<?> handFeedbackControlCommand = manipulationControlModule.getFeedbackControlCommand(robotSide);
-         if (handFeedbackControlCommand != null)
-            controllerCoreCommand.addFeedbackControlCommand(handFeedbackControlCommand);
+         controllerCoreCommand.addFeedbackControlCommand(manipulationControlModule.getFeedbackControlCommand(robotSide));
+         controllerCoreCommand.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
+         controllerCoreCommand.completeLowLevelJointData(manipulationControlModule.getLowLevelJointDesiredData(robotSide));
 
          YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
@@ -1263,7 +1252,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       controllerCoreCommand.addFeedbackControlCommand(headOrientationManager.getFeedbackControlCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
+      controllerCoreCommand.completeLowLevelJointData(headOrientationManager.getLowLevelJointDesiredData());
+      
       controllerCoreCommand.addFeedbackControlCommand(chestOrientationManager.getFeedbackControlCommand());
+      
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
 
 //      controllerCoreCommand.addInverseDynamicsCommand(getUncontrolledJointCommand());
