@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserD
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
@@ -262,7 +262,7 @@ public class MomentumBasedControllerFactory
             controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
       FeedbackControlCommandList template = variousWalkingManagers.createFeedbackControlTemplate();
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
-      ControllerCoreOutput controllerCoreOutput = controllerCore.getOutputForHighLevelController();
+      ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////

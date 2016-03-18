@@ -6,7 +6,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class ControllerCoreOutput
+public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 {
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
    private final FrameVector linearMomentumRate = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -22,6 +22,7 @@ public class ControllerCoreOutput
       centerOfPressureDataHolder.setCenterOfPressure(cop, rigidBody);
    }
 
+   @Override
    public void getDesiredCenterOfPressure(FramePoint2d copToPack, RigidBody rigidBody)
    {
       centerOfPressureDataHolder.getCenterOfPressure(copToPack, rigidBody);
@@ -38,6 +39,7 @@ public class ControllerCoreOutput
       this.linearMomentumRate.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
+   @Override
    public void getLinearMomentumRate(FrameVector linearMomentumRateToPack)
    {
       linearMomentumRateToPack.setIncludingFrame(linearMomentumRate);

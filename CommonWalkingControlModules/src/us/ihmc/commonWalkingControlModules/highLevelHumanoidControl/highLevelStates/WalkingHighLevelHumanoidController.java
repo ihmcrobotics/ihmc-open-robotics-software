@@ -27,7 +27,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTr
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -140,7 +140,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final ControllerCommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-   private ControllerCoreOutput controllerCoreOutput;
+   private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    public WalkingHighLevelHumanoidController(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
          VariousWalkingManagers variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
@@ -280,7 +280,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    @Override
-   public void setControllerCoreOutput(ControllerCoreOutput controllerCoreOutput)
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
    }
