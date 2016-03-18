@@ -40,6 +40,36 @@ public class QuadrupedTaskSpaceController
       parentRegistry.addChild(registry);
    }
 
+   public void addFeedbackBlock(QuadrupedTaskSpaceFeedbackBlock feedbackBlock)
+   {
+      feedbackBlocks.add(feedbackBlock);
+   }
+
+   public void addFilterBlock(QuadrupedTaskSpaceFilterBlock filterBlock)
+   {
+      filterBlocks.add(filterBlock);
+   }
+
+   public void removeFeedbackBlock(QuadrupedTaskSpaceFeedbackBlock feedbackBlock)
+   {
+      feedbackBlocks.remove(feedbackBlock);
+   }
+
+   public void removeFilterBlock(QuadrupedTaskSpaceFilterBlock filterBlock)
+   {
+      feedbackBlocks.remove(filterBlock);
+   }
+
+   public void clearFeedbackBlocks()
+   {
+      feedbackBlocks.clear();
+   }
+
+   public void clearFilterBlocks()
+   {
+      feedbackBlocks.clear();
+   }
+
    public void reset()
    {
       virtualModelController.reset();
