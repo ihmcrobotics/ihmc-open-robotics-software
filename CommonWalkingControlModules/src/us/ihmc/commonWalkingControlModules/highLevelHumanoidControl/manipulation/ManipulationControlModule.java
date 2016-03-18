@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTr
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
@@ -279,6 +280,11 @@ public class ManipulationControlModule
    public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
    {
       return handControlModules.get(robotSide).getFeedbackControlCommand();
+   }
+
+   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData(RobotSide robotSide)
+   {
+      return handControlModules.get(robotSide).getLowLevelJointDesiredData();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

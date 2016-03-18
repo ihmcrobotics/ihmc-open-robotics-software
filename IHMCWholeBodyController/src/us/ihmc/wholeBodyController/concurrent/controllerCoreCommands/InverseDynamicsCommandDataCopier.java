@@ -5,6 +5,7 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -26,6 +27,7 @@ public class InverseDynamicsCommandDataCopier
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, PlaneContactStateCommand.class);
    private final RecyclingArrayList<PointAccelerationCommand> pointAccelerationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, PointAccelerationCommand.class);
    private final RecyclingArrayList<SpatialAccelerationCommand> spatialAccelerationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, SpatialAccelerationCommand.class);
+   private final RecyclingArrayList<JointAccelerationIntegrationCommand> jointAccelerationIntegrationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, JointAccelerationIntegrationCommand.class);
 
    public InverseDynamicsCommandDataCopier()
    {
@@ -98,6 +100,12 @@ public class InverseDynamicsCommandDataCopier
          case TASKSPACE:
             copySpatialAccelerationCommand((SpatialAccelerationCommand) commandToCopy);
             break;
+         case JOINT_ACCELERATION_INTEGRATION:
+            copyJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToCopy);
+            break;
+         case COMMAND_LIST:
+            copyFromOther((InverseDynamicsCommandList) commandToCopy);
+            break;
          default:
             throw new RuntimeException("The command type: " + commandToCopy.getCommandType() + " is not handled.");
          }
@@ -113,6 +121,7 @@ public class InverseDynamicsCommandDataCopier
       planeContactStateCommands.clear();
       pointAccelerationCommands.clear();
       spatialAccelerationCommands.clear();
+      jointAccelerationIntegrationCommands.clear();
    }
 
    private void copyExternalWrenchCommand(ExternalWrenchCommand commandToCopy)
@@ -153,6 +162,13 @@ public class InverseDynamicsCommandDataCopier
    private void copySpatialAccelerationCommand(SpatialAccelerationCommand commandToCopy)
    {
       SpatialAccelerationCommand localCommand = spatialAccelerationCommands.add();
+      localCommand.set(commandToCopy);
+      inverseDynamicsCommandList.addCommand(localCommand);
+   }
+
+   private void copyJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand commandToCopy)
+   {
+      JointAccelerationIntegrationCommand localCommand = jointAccelerationIntegrationCommands.add();
       localCommand.set(commandToCopy);
       inverseDynamicsCommandList.addCommand(localCommand);
    }

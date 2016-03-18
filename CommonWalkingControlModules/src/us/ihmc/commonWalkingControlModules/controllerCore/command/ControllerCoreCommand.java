@@ -38,22 +38,26 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
 
    public void addInverseDynamicsCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
    {
-      inverseDynamicsCommandList.addCommand(inverseDynamicsCommand);
+      if (inverseDynamicsCommand != null)
+         inverseDynamicsCommandList.addCommand(inverseDynamicsCommand);
    }
 
    public void addFeedbackControlCommand(FeedbackControlCommand<?> feedbackControlCommand)
    {
-      feedbackControlCommandList.addCommand(feedbackControlCommand);
+      if (feedbackControlCommand != null)
+         feedbackControlCommandList.addCommand(feedbackControlCommand);
    }
 
    public void addInverseKinematicsCommand(InverseKinematicsCommand<?> inverseKinematicsCommand)
    {
-      inverseKinematicsCommandList.addCommand(inverseKinematicsCommand);
+      if (inverseKinematicsCommand != null)
+         inverseKinematicsCommandList.addCommand(inverseKinematicsCommand);
    }
 
    public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderInterface lowLevelJointData)
    {
-      lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);
+      if (lowLevelJointData != null)
+         lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);
    }
 
    @Override
