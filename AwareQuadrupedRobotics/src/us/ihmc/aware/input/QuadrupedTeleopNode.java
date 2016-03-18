@@ -60,10 +60,9 @@ public class QuadrupedTeleopNode implements InputEventCallback
       params.setDefault(PARAM_ADOT_SCALE, 1.0);
       params.setDefault(PARAM_DEFAULT_COM_HEIGHT, 0.55);
 
-      // TODO: Don't use TOUCH_MODULE_PORT
       // TODO: Don't hardcode localhost
       this.packetCommunicator = PacketCommunicator
-            .createTCPPacketCommunicatorClient("localhost", NetworkPorts.TOUCH_MODULE_PORT, netClassList);
+            .createTCPPacketCommunicatorClient("localhost", NetworkPorts.XBOX_CONTROLLER_TELEOP_PORT, netClassList);
       this.device = device;
       this.comHeight = new InputValueIntegrator(DT, params.get(PARAM_DEFAULT_COM_HEIGHT));
 
