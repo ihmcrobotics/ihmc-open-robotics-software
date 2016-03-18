@@ -43,11 +43,8 @@ public class VariousWalkingManagers
 
       if (fullRobotModel.getHead() != null)
       {
-         YoOrientationPIDGainsInterface headControlGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
-         double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
          double headWeight = momentumOptimizationSettings.getHeadWeight();
-         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headControlGains, headWeight, initialHeadYawPitchRoll,
-               registry);
+         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headWeight, registry);
       }
       else
       {
