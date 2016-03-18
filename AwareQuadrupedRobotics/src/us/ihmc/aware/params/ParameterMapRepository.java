@@ -9,13 +9,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
  * A collection of {@link ParameterMap}s indexed by their respective controller classes.
  * <p/>
  * Each controller is meant to have its own mapping of parameters. This parameter map can be accessed with {@link
- * #get(Class)}. They then share a single root parameter map, accessible by {@link #getRootParams()}.
+ * #get(Class)}.
  */
 public class ParameterMapRepository
 {
    private final YoVariableRegistry registry;
 
-   private final ParameterMap rootParams;
    private final Map<Class<?>, ParameterMap> repository;
 
    /**
@@ -24,7 +23,6 @@ public class ParameterMapRepository
    public ParameterMapRepository(YoVariableRegistry registry)
    {
       this.registry = registry;
-      this.rootParams = new ParameterMap(registry, this.getClass());
       this.repository = new HashMap<>();
    }
 
@@ -50,6 +48,7 @@ public class ParameterMapRepository
     */
    public ParameterMap getRootParams()
    {
-      return rootParams;
+      return null;  // Temporary comment out since not compiling in order to fix Bamboo. J.Pratt March 17, 2016
+//      return rootParams;
    }
 }
