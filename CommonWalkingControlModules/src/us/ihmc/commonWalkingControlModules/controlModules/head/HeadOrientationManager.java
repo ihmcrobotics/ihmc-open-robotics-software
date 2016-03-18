@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SelectionMatrixComputer;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -19,9 +22,11 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class HeadOrientationManager
 {
@@ -45,24 +50,29 @@ public class HeadOrientationManager
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
+   private final SelectionMatrixComputer selectionMatrixComputer = new SelectionMatrixComputer();
+   private final DenseMatrix64F selectionMatrix;
+   private final GeometricJacobian neckJacobian;
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private final boolean neckPositionControlled;
    private final OneDoFJoint[] neckJoints;
+   private final YoOrientationPIDGainsInterface gains;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoOrientationPIDGainsInterface gains, double weight, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
+         double weight, YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
+      gains = headOrientationControllerParameters.createHeadOrientationControlGains(registry);
+
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
-      RigidBody elevator = fullRobotModel.getElevator();
       orientationFeedbackControlCommand.setWeightForSolver(weight);
-      orientationFeedbackControlCommand.set(elevator, head);
+      orientationFeedbackControlCommand.set(chest, head);
       orientationFeedbackControlCommand.setGains(gains);
       chestFrame = chest.getBodyFixedFrame();
       headFrame = head.getBodyFixedFrame();
@@ -71,12 +81,16 @@ public class HeadOrientationManager
 
       hasBeenInitialized.set(false);
 
-      homeOrientation.setIncludingFrame(chestFrame, initialDesiredHeadYawPitchRoll);
+      homeOrientation.setIncludingFrame(chestFrame, headOrientationControllerParameters.getInitialHeadYawPitchRoll());
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("head", true, chestFrame, registry);
       waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
       neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
       neckPositionControlled = headOrientationControllerParameters.isNeckPositionControlled();
+
+      long neckJacobianId = momentumBasedController.getOrCreateGeometricJacobian(neckJoints, headFrame);
+      neckJacobian = momentumBasedController.getJacobian(neckJacobianId);
+      selectionMatrix = new DenseMatrix64F(neckJacobian.getNumberOfColumns(), SpatialMotionVector.SIZE);
 
       if (neckPositionControlled)
       {
@@ -87,7 +101,7 @@ public class HeadOrientationManager
          lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(neckJoints, LowLevelJointControlMode.POSITION_CONTROL);
 
          for (OneDoFJoint neckJoint : neckJoints)
-            jointAccelerationIntegrationCommand.addJointToComputeDesiedPositionFor(neckJoint);
+            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(neckJoint);
       }
       else
       {
@@ -148,6 +162,9 @@ public class HeadOrientationManager
       desiredAngularVelocity.setToZero(worldFrame);
       feedForwardAngularAcceleration.setToZero(worldFrame);
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      selectionMatrixComputer.computeSelectionMatrix(neckJacobian, selectionMatrix);
+      orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
+      orientationFeedbackControlCommand.setGains(gains);
    }
 
    public void handleHeadTrajectoryMessage(HeadTrajectoryControllerCommand message)

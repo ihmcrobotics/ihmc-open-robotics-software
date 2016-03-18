@@ -23,7 +23,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
       jointsToComputeDesiredPositionFor.clear();
    }
 
-   public void addJointToComputeDesiedPositionFor(OneDoFJoint joint)
+   public void addJointToComputeDesiredPositionFor(OneDoFJoint joint)
    {
       jointNamesToComputeDesiredPositionFor.add(joint.getName());
       jointsToComputeDesiredPositionFor.add(joint);
