@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOuput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
@@ -27,7 +27,7 @@ public class WholeBodyControllerCore
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
    private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
 
-   private final ControllerCoreOuput controllerCoreOuput;
+   private final ControllerCoreOutput controllerCoreOutput;
    private final YoRootJointDesiredConfigurationData yoRootJointDesiredConfigurationData;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
@@ -46,7 +46,7 @@ public class WholeBodyControllerCore
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(oneDoFJoints, registry);
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = inverseDynamicsSolver.getDesiredCenterOfPressureDataHolder();
-      controllerCoreOuput = new ControllerCoreOuput(desiredCenterOfPressureDataHolder);
+      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder);
 
       parentRegistry.addChild(registry);
    }
@@ -126,9 +126,9 @@ public class WholeBodyControllerCore
       }
    }
 
-   public ControllerCoreOuput getOutputForHighLevelController()
+   public ControllerCoreOutput getOutputForHighLevelController()
    {
-      return controllerCoreOuput;
+      return controllerCoreOutput;
    }
 
    public LowLevelOneDoFJointDesiredDataHolderInterface getOutputForLowLevelController()
