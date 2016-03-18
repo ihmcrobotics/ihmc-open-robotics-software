@@ -124,6 +124,7 @@ public class WholeBodyControllerCore
       RootJointDesiredConfigurationDataReadOnly inverseDynamicsOutputForRootJoint = inverseDynamicsSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseDynamicsOutput);
       yoRootJointDesiredConfigurationData.completeWith(inverseDynamicsOutputForRootJoint);
+      controllerCoreOutput.setAndMatchFrameLinearMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateLinear());
    }
 
    private void doInverseKinematics()
