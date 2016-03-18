@@ -27,7 +27,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final BooleanYoVariable firstCall = new BooleanYoVariable("firstCall", registry);
-   private final SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
+   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -360,14 +360,14 @@ public class InverseDynamicsQPSolver
 
       qpSolverTimer.startMeasurement();
 
-      jerryQPSolver.clear();
+      qpSolver.clear();
 
-      jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
-      jerryQPSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-      jerryQPSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
-      jerryQPSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
+      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
-      numberOfIterations.set(jerryQPSolver.solve(solverOutput));
+      numberOfIterations.set(qpSolver.solve(solverOutput));
 
       qpSolverTimer.stopMeasurement();
       
