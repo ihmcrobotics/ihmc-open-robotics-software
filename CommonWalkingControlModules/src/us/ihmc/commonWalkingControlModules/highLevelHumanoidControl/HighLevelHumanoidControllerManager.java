@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommand
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOuput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -47,7 +47,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final ControllerCommandInputManager commandInputManager;
-   private final ControllerCoreOuput controllerCoreOuput;
+   private final ControllerCoreOutput controllerCoreOutput;
    private final WholeBodyControllerCore controllerCore;
 
    private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
@@ -56,11 +56,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public HighLevelHumanoidControllerManager(ControllerCommandInputManager commandInputManager, WholeBodyControllerCore controllerCore,
          HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors, MomentumBasedController momentumBasedController,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOuput controllerCoreOuput, HumanoidGlobalDataProducer dataProducer)
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOutput controllerCoreOutput, HumanoidGlobalDataProducer dataProducer)
    {
       this.commandInputManager = commandInputManager;
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
-      this.controllerCoreOuput = controllerCoreOuput;
+      this.controllerCoreOutput = controllerCoreOutput;
       this.controllerCore = controllerCore;
 
       this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry, dataProducer);
@@ -104,7 +104,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       for (int i = 0; i < highLevelBehaviors.size(); i++)
       {
          HighLevelBehavior highLevelStateA = highLevelBehaviors.get(i);
-         highLevelStateA.setControllerCoreOuput(controllerCoreOuput);
+         highLevelStateA.setControllerCoreOutput(controllerCoreOutput);
 
          for (int j = 0; j < highLevelBehaviors.size(); j++)
          {
@@ -189,7 +189,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void addHighLevelBehavior(HighLevelBehavior highLevelBehavior, boolean transitionRequested)
    {
-      highLevelBehavior.setControllerCoreOuput(controllerCoreOuput);
+      highLevelBehavior.setControllerCoreOutput(controllerCoreOutput);
 
       // Enable transition between every existing state of the state machine
       for (HighLevelState stateEnum : HighLevelState.values)

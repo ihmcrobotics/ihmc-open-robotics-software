@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserD
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOuput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
@@ -262,7 +262,7 @@ public class MomentumBasedControllerFactory
             controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
       FeedbackControlCommandList template = variousWalkingManagers.createFeedbackControlTemplate();
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
-      ControllerCoreOuput controllerCoreOuput = controllerCore.getOutputForHighLevelController();
+      ControllerCoreOutput controllerCoreOutput = controllerCore.getOutputForHighLevelController();
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
@@ -282,7 +282,7 @@ public class MomentumBasedControllerFactory
       // This is the "highest level" controller that enables switching between
       // the different controllers (walking, multi-contact, driving, etc.)
       highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(commandInputManager, controllerCore, initialBehavior, highLevelBehaviors,
-            momentumBasedController, centerOfPressureDataHolderForEstimator, controllerCoreOuput, dataProducer);
+            momentumBasedController, centerOfPressureDataHolderForEstimator, controllerCoreOutput, dataProducer);
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
