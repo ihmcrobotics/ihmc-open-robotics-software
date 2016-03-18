@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -19,7 +18,6 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 public class InverseDynamicsQPSolver
 {
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
-   private static final boolean USE_JERRY_SOLVER = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -28,8 +26,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector wrenchEquilibriumForceError;
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
-   private final BooleanYoVariable seedFromPreviousSolution = new BooleanYoVariable("seedFromPreviousSolution", registry);
-   private final OASESConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(registry);
+   private final BooleanYoVariable firstCall = new BooleanYoVariable("firstCall", registry);
    private final SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final DenseMatrix64F solverInput_H;
@@ -150,7 +147,7 @@ public class InverseDynamicsQPSolver
 
       jAugmented.reshape(0, numberOfDoFs);
 
-      if (seedFromPreviousSolution.getBooleanValue())
+      if (!firstCall.getBooleanValue())
          addJointJerkRegularization();
    }
 
@@ -176,7 +173,7 @@ public class InverseDynamicsQPSolver
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
       MatrixTools.scaleTranspose(taskWeight, taskJ, tempJtW);
-      
+
       addMotionTaskInternal(tempJtW, taskJ, taskObjective);
    }
 
@@ -187,7 +184,7 @@ public class InverseDynamicsQPSolver
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
       CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
-      
+
       addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
@@ -251,7 +248,7 @@ public class InverseDynamicsQPSolver
          tempWrenchConstraint_J.reshape(Wrench.SIZE, problemSize);
          MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, centroidalMomentumMatrix, 0, 0, Wrench.SIZE, numberOfDoFs, -1.0);
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
-         
+
          tempWrenchConstraintJtW.reshape(problemSize, Wrench.SIZE);
          CommonOps.transpose(tempWrenchConstraint_J, tempWrenchConstraintJtW);
          double weight = 150.0;
@@ -268,14 +265,14 @@ public class InverseDynamicsQPSolver
       {
          int constraintSize = Wrench.SIZE;
          int previousSize = solverInput_beq.getNumRows();
-         
+
          // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
          solverInput_Aeq.reshape(previousSize + constraintSize, problemSize, true);
          solverInput_beq.reshape(previousSize + constraintSize, 1, true);
-         
+
          MatrixTools.setMatrixBlock(solverInput_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
          CommonOps.insert(rhoJacobian, solverInput_Aeq, previousSize, numberOfDoFs);
-         
+
          CommonOps.insert(tempWrenchConstraint_RHS, solverInput_beq, previousSize, 0);
       }
 
@@ -303,7 +300,7 @@ public class InverseDynamicsQPSolver
       // J^T W
       tempJtW.reshape(rhoSize, taskSize);
       CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
-      
+
       // Compute: H += J^T W J
       CommonOps.mult(tempJtW, taskJacobian, tempRhoTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
@@ -318,7 +315,7 @@ public class InverseDynamicsQPSolver
       for (int i = 0; i < numberOfDoFs; i++)
       {
          solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue());
-         solverInput_f.add(i, 0, - jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0));
+         solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0));
       }
    }
 
@@ -359,54 +356,34 @@ public class InverseDynamicsQPSolver
       if (!hasWrenchesEquilibriumConstraintBeenSetup)
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
 
-      boolean firstCall = !seedFromPreviousSolution.getBooleanValue();
-
-      DenseMatrix64F H = solverInput_H;
-      DenseMatrix64F f = solverInput_f;
-      DenseMatrix64F Aeq = solverInput_Aeq;
-      DenseMatrix64F beq = solverInput_beq;
-      DenseMatrix64F Ain = solverInput_Ain;
-      DenseMatrix64F bin = solverInput_bin;
-      DenseMatrix64F lb = solverInput_lb;
-      DenseMatrix64F ub = solverInput_ub;
-      DenseMatrix64F output = solverOutput;
-
-      numberOfConstraints.set(Aeq.getNumRows() + Ain.getNumRows());
-
-      NoConvergenceException noConvergenceException = null;
+      numberOfConstraints.set(solverInput_Aeq.getNumRows() + solverInput_Ain.getNumRows());
 
       qpSolverTimer.startMeasurement();
 
-      if (USE_JERRY_SOLVER)
-      {
-         jerryQPSolver.clear();
-         jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
-         jerryQPSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-         numberOfIterations.set(jerryQPSolver.solve(solverOutput));
-      }
-      else
-      {
-         try
-         {
-            numberOfIterations.set(qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall));
-         }
-         catch (NoConvergenceException e)
-         {
-            noConvergenceException = e;
-         }
-      }
+      jerryQPSolver.clear();
+
+      jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
+      jerryQPSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+      jerryQPSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      jerryQPSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+
+      numberOfIterations.set(jerryQPSolver.solve(solverOutput));
 
       qpSolverTimer.stopMeasurement();
+      
+      hasWrenchesEquilibriumConstraintBeenSetup = false;
+
+      if (MatrixTools.containsNaN(solverOutput))
+         throw new NoConvergenceException(numberOfIterations.getIntegerValue());
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
 
-      seedFromPreviousSolution.set(true);
-      hasWrenchesEquilibriumConstraintBeenSetup = false;
+      firstCall.set(false);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
-         CommonOps.mult(tempWrenchConstraint_J, output, tempWrenchConstraint_LHS);
+         CommonOps.mult(tempWrenchConstraint_J, solverOutput, tempWrenchConstraint_LHS);
          int index = 0;
          wrenchEquilibriumTorqueError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          wrenchEquilibriumTorqueError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
@@ -414,12 +391,6 @@ public class InverseDynamicsQPSolver
          wrenchEquilibriumForceError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          wrenchEquilibriumForceError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
-      }
-
-      if (!USE_JERRY_SOLVER)
-      {
-         if (noConvergenceException != null)
-            throw noConvergenceException;
       }
    }
 
