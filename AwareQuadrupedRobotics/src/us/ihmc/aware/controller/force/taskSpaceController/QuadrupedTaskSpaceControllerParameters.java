@@ -10,18 +10,33 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTaskSpaceControllerParameters
 {
-   public final QuadrupedJointLimits jointLimits = new QuadrupedJointLimits();
-   public final QuadrupedContactForceLimits contactForceLimits = new QuadrupedContactForceLimits();
-   public final QuadrupedVirtualModelControllerSettings virtualModelControllerSettings = new QuadrupedVirtualModelControllerSettings();
-   public final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
-   public final QuadrantDependentList<ContactState> contactState = new QuadrantDependentList<>();
+   public final QuadrupedJointLimits jointLimits;
+   public final QuadrupedContactForceLimits contactForceLimits;
+   public final QuadrupedVirtualModelControllerSettings virtualModelControllerSettings;
+   public final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings;
+   public final QuadrantDependentList<ContactState> contactState;
 
-   public QuadrupedTaskSpaceControllerParameters()
+   public QuadrupedTaskSpaceControllerParameters(QuadrupedJointLimits jointLimits, QuadrupedContactForceLimits contactForceLimits)
    {
+      this.jointLimits = new QuadrupedJointLimits(jointLimits);
+      this.contactForceLimits = new QuadrupedContactForceLimits(contactForceLimits);
+      this.virtualModelControllerSettings = new QuadrupedVirtualModelControllerSettings();
+      this.contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
+      this.contactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
+   }
+
+   public QuadrupedTaskSpaceControllerParameters(QuadrupedJointLimits jointLimits)
+   {
+      this(jointLimits, new QuadrupedContactForceLimits());
+   }
+
+   public QuadrupedTaskSpaceControllerParameters()
+   {
+      this(new QuadrupedJointLimits(), new QuadrupedContactForceLimits());
    }
 
    public QuadrupedJointLimits getJointLimits()

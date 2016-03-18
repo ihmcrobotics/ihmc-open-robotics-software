@@ -111,7 +111,7 @@ public class QuadrupedTaskSpaceController
          contactForceOptimization.setContactState(robotQuadrant, parameters.contactState.get(robotQuadrant));
       }
       contactForceOptimization.setComForceCommand(computedCommands.getComForce());
-      contactForceOptimization.setComTorqueCommand(computedCommands.getComForce());
+      contactForceOptimization.setComTorqueCommand(computedCommands.getComTorque());
       contactForceOptimization.solve(parameters.contactForceLimits, parameters.contactForceOptimizationSettings);
 
       // compute leg joint torques using jacobian transpose

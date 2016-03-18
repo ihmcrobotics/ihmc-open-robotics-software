@@ -58,6 +58,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final static String COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT = "comHeightGravityFeedforwardConstant";
 
    // frames
+   private final QuadrupedReferenceFrames referenceFrames;
    private final PoseReferenceFrame supportFrame;
 
    // setpoints
@@ -107,10 +108,10 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 0.95);
 
       // frames
-      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointNameMap, robotParameters.getPhysicalProperties());
+      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointNameMap, robotParameters.getPhysicalProperties());
+      supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
       ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
       ReferenceFrame bodyFrame = referenceFrames.getBodyFrame();
-      supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
 
       // setpoints
       bodyOrientationSetpoint = new FrameOrientation();
@@ -124,7 +125,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       taskSpaceEstimatorParameters = new QuadrupedTaskSpaceEstimatorParameters();
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceController = new QuadrupedTaskSpaceController(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);
-      taskSpaceControllerParameters = new QuadrupedTaskSpaceControllerParameters();
+      taskSpaceControllerParameters = new QuadrupedTaskSpaceControllerParameters(robotParameters.getQuadrupedJointLimits());
       bodyOrientationFeedbackBlock = new BodyOrientationFeedbackBlock(bodyFrame, controlDT, registry);
       dcmPositionFeedbackBlock = new DcmHorizontalPositionFeedbackBlock(comFrame, controlDT, mass, gravity, 1.0, registry);
       comHeightFeedbackBlock = new ComHeightFeedbackBlock(controlDT, mass, gravity, registry);
@@ -137,11 +138,14 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       return registry;
    }
 
+   private void updateEstimates()
+   {
+      referenceFrames.updateFrames();
+      supportFrame.setPoseAndUpdate(taskSpaceEstimates.getSupportCentroid(), taskSpaceEstimates.getSupportOrientation());
+   }
+
    private void updateSetpoints()
    {
-      // update support frame
-      supportFrame.setPoseAndUpdate(taskSpaceEstimates.getSupportCentroid(), taskSpaceEstimates.getSupportOrientation());
-
       // update desired body orientation
       BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
       double yaw = bodyOrientationPacket.getYaw();
@@ -173,6 +177,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    @Override public QuadrupedForceControllerEvent process()
    {
+      updateEstimates();
       taskSpaceEstimator.compute(taskSpaceEstimates, taskSpaceEstimatorParameters);
       updateSetpoints();
       taskSpaceController.compute(taskSpaceEstimates, taskSpaceControllerParameters);

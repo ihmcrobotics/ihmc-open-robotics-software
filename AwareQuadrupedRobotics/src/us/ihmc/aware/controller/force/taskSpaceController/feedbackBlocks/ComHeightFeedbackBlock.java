@@ -64,6 +64,7 @@ public class ComHeightFeedbackBlock implements QuadrupedTaskSpaceFeedbackBlock
       double comVerticalForceCommand = 0.0;
       comVerticalForceCommand += feedforwardConstant * mass * gravity;
       comVerticalForceCommand += comHeightController.compute(comHeightEstimate, comHeightSetpoint, comHeightVelocityEstimate, 0, controlDT);
+      commands.getComForce().changeFrame(ReferenceFrame.getWorldFrame());
       commands.getComForce().setZ(comVerticalForceCommand);
    }
 }
