@@ -70,6 +70,19 @@ public class MatrixTools
       }
    }
 
+   public static boolean containsNaN(DenseMatrix64F matrix)
+   {
+      for (int i = 0; i < matrix.numRows; i++)
+      {
+         for (int j = 0; j < matrix.numCols; j++)
+         {
+            if (Double.isNaN(matrix.unsafe_get(i, j)))
+               return true;
+         }
+      }
+      return false;
+   }
+
    /**
     * This method tries to be smart about converting the various yaml fields to DenseMatrix64F
     * @param val
