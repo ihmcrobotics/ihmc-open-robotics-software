@@ -441,14 +441,14 @@ public class MotionQPInputCalculator
          double qDDotMin = Double.NEGATIVE_INFINITY;
          double qDDotMax = Double.POSITIVE_INFINITY;
 
-         if (Double.isFinite(jointLimitLower))
+         if (!Double.isInfinite(jointLimitLower))
          {
             double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
             qDDotMin = (qDotMin - joint.getQd()) / controlDT;
             qDDotMin = MathTools.clipToMinMax(qDDotMin, -100.0, 0.0);
             qDDotMinToPack.set(index, 0, qDDotMin);
          }
-         if (Double.isFinite(jointLimitUpper))
+         if (!Double.isInfinite(jointLimitUpper))
          {
             double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
             qDDotMax = (qDotMax - joint.getQd()) / controlDT;
@@ -468,10 +468,10 @@ public class MotionQPInputCalculator
          OneDoFJoint joint = oneDoFJoints[i];
          int index = jointIndexHandler.getOneDoFJointIndex(joint);
          double jointLimitLower = joint.getJointLimitLower();
-         if (Double.isFinite(jointLimitLower))
+         if (!Double.isInfinite(jointLimitLower))
             qDotMinToPack.set(index, 0, (jointLimitLower - joint.getQ()) / controlDT);
          double jointLimitUpper = joint.getJointLimitUpper();
-         if (Double.isFinite(jointLimitUpper))
+         if (!Double.isInfinite(jointLimitUpper))
             qDotMaxToPack.set(index, 0, (jointLimitUpper - joint.getQ()) / controlDT);
       }
    }
