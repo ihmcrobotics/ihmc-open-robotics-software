@@ -8,7 +8,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -61,6 +60,8 @@ public class InverseDynamicsQPSolver
    private final int problemSize;
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
 
+   private final DampedLeastSquaresNullspaceCalculator nullspaceCalculator;
+
    public InverseDynamicsQPSolver(int numberOfDoFs, int rhoSize, YoVariableRegistry parentRegistry)
    {
       this.numberOfDoFs = numberOfDoFs;
@@ -102,7 +103,7 @@ public class InverseDynamicsQPSolver
       for (int i = numberOfDoFs; i < problemSize; i++)
          regularizationMatrix.set(i, i, defaultRhoRegularization);
 
-      pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, 0.000001);
+      nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, 0.01);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
@@ -320,12 +321,7 @@ public class InverseDynamicsQPSolver
    }
 
    private final DenseMatrix64F jAugmented = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F jInverseAugmented = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F nullspaceProjector = new DenseMatrix64F(1, 1);
-
    private final DenseMatrix64F jacobianForPrivilegedJointAccelerations = new DenseMatrix64F(1, 1);
-
-   private final DampedLeastSquaresSolver pseudoInverseSolver;
 
    public void setPrivilegedMotionInput(PrivilegedMotionQPInput input)
    {
@@ -335,19 +331,7 @@ public class InverseDynamicsQPSolver
    public void projectPrivilegedJointAccelerationsInNullspaceOfPreviousTasks(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointAccelerations,
          DenseMatrix64F weight)
    {
-      jInverseAugmented.reshape(numberOfDoFs, jAugmented.getNumRows());
-      pseudoInverseSolver.setA(jAugmented);
-      pseudoInverseSolver.invert(jInverseAugmented);
-
-      nullspaceProjector.reshape(numberOfDoFs, numberOfDoFs);
-      // I - J^* J
-      CommonOps.mult(-1.0, jInverseAugmented, jAugmented, nullspaceProjector);
-      for (int i = 0; i < numberOfDoFs; i++)
-         nullspaceProjector.add(i, i, 1.0);
-
-      jacobianForPrivilegedJointAccelerations.reshape(privilegedJointAccelerations.getNumRows(), numberOfDoFs);
-      CommonOps.mult(selectionMatrix, nullspaceProjector, jacobianForPrivilegedJointAccelerations);
-
+      nullspaceCalculator.projectOntoNullspace(selectionMatrix, jAugmented, jacobianForPrivilegedJointAccelerations);
       addMotionTask(jacobianForPrivilegedJointAccelerations, privilegedJointAccelerations, weight);
    }
 
