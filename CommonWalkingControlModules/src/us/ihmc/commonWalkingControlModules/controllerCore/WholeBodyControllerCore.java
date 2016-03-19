@@ -117,6 +117,10 @@ public class WholeBodyControllerCore
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
          LowLevelJointDataReadOnly lowLevelJointData = yoLowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
+
+         if (!lowLevelJointData.hasControlMode())
+            throw new NullPointerException("Joint: " + joint.getName() + " has no control mode.");
+
          switch (lowLevelJointData.getControlMode())
          {
          case FORCE_CONTROL:
