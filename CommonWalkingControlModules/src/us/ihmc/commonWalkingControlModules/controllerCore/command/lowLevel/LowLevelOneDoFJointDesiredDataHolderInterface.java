@@ -4,18 +4,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface LowLevelOneDoFJointDesiredDataHolderInterface
 {
-
-   /**
-    * Complete the information held in this using other.
-    * Does not overwrite the data already set in this.
-    */
-   public abstract void completeWith(LowLevelOneDoFJointDesiredDataHolderInterface other);
-
-   /**
-    * Clear this and copy the data held in other.
-    */
-   public abstract void overwriteWith(LowLevelOneDoFJointDesiredDataHolderInterface other);
-
    public abstract LowLevelJointControlMode getJointControlMode(OneDoFJoint joint);
 
    public abstract double getDesiredJointTorque(OneDoFJoint joint);
