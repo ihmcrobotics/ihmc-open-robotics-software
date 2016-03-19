@@ -619,20 +619,24 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       CHat.zero();
       DHat.zero();
 
+      int row = 0;
+
       for (int i = 0; i < sizeOfLowerBoundsActiveSet; i++)
       {
          int lowerBoundsConstraintIndex = activeLowerBoundIndices.get(i);
 
-         CHat.set(i, lowerBoundsConstraintIndex, -1.0);
-         DHat.set(i, 0, -variableLowerBounds.get(lowerBoundsConstraintIndex));
+         CHat.set(row, lowerBoundsConstraintIndex, -1.0);
+         DHat.set(row, 0, -variableLowerBounds.get(lowerBoundsConstraintIndex));
+         row++;
       }
 
       for (int i = 0; i < sizeOfUpperBoundsActiveSet; i++)
       {
          int upperBoundsConstraintIndex = activeUpperBoundIndices.get(i);
 
-         CHat.set(i, upperBoundsConstraintIndex, 1.0);
-         DHat.set(i, 0, variableUpperBounds.get(upperBoundsConstraintIndex));
+         CHat.set(row, upperBoundsConstraintIndex, 1.0);
+         DHat.set(row, 0, variableUpperBounds.get(upperBoundsConstraintIndex));
+         row++;
       }
 
       solveEqualityConstrainedSubproblemEfficiently(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundConstraintMultipliersToPack,
