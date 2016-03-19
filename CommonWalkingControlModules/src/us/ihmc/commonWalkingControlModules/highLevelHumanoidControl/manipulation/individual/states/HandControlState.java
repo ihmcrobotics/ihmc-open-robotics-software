@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.robotics.stateMachines.State;
 
@@ -17,5 +17,5 @@ public abstract class HandControlState extends State<HandControlMode>
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
-   public abstract LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData();
+   public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData();
 }

@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesire
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -124,7 +124,7 @@ public class UserControlModeState extends HandControlState
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData()
+   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
    {
       return null;
    }

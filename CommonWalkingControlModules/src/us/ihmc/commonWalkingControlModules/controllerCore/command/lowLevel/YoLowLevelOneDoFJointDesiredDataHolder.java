@@ -10,7 +10,7 @@ import java.util.Map;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderInterface
+public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderReadOnly
 {
    private final List<OneDoFJoint> jointsWithDesiredData;
    private final Map<String, YoLowLevelJointData> lowLevelJointDataMap;
@@ -140,7 +140,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
-   public void completeWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
+   public void completeWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
    {
       for (int i = 0; i < other.getNumberOfJointsWithLowLevelData(); i++)
       {
@@ -159,7 +159,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
    /**
     * Clear this and copy the data held in other.
     */
-   public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
+   public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
    {
       clear();
 
