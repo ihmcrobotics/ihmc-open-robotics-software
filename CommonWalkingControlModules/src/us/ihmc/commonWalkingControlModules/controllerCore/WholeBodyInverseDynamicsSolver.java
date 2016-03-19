@@ -67,7 +67,9 @@ public class WholeBodyInverseDynamicsSolver
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
-   private final DoubleYoVariable alphaIntegration = new DoubleYoVariable("alphaIntegration", registry);
+   private final DoubleYoVariable alphaPositionIntegration = new DoubleYoVariable("alphaPositionIntegration", registry);
+   private final DoubleYoVariable alphaVelocityIntegration = new DoubleYoVariable("alphaVelocityIntegration", registry);
+   private final DoubleYoVariable integrationMaxVelocity = new DoubleYoVariable("integrationMaxVelocity", registry);
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
@@ -113,7 +115,9 @@ public class WholeBodyInverseDynamicsSolver
       yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
       yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
 
-      alphaIntegration.set(0.999);
+      alphaPositionIntegration.set(0.9997);
+      alphaVelocityIntegration.set(0.95);
+      integrationMaxVelocity.set(0.1); // 2.0 seems reasonable.
 
       parentRegistry.addChild(registry);
    }
@@ -203,12 +207,14 @@ public class WholeBodyInverseDynamicsSolver
          double desiredPosition = lowLevelJointData.getDesiredPosition();
 
          desiredVelocity += desiredAcceleration * controlDT;
+         desiredVelocity *= alphaVelocityIntegration.getDoubleValue();
+         desiredVelocity = MathTools.clipToMinMax(desiredVelocity, integrationMaxVelocity.getDoubleValue());
          desiredPosition += desiredVelocity * controlDT;
 
          double errorPosition = MathTools.clipToMinMax(desiredPosition - joint.getQ(), 0.2);
          desiredPosition = joint.getQ() + errorPosition;
          desiredPosition = MathTools.clipToMinMax(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
-         desiredPosition = alphaIntegration.getDoubleValue() * desiredPosition + (1.0 - alphaIntegration.getDoubleValue()) * joint.getQ();
+         desiredPosition = alphaPositionIntegration.getDoubleValue() * desiredPosition + (1.0 - alphaPositionIntegration.getDoubleValue()) * joint.getQ();
          desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);

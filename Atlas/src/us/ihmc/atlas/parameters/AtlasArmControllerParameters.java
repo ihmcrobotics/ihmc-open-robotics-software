@@ -38,7 +38,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
       YoPIDGains jointspaceControlGains = new YoPIDGains("ArmJointspace", registry);
 
       double kp = runningOnRealRobot ? 40.0 : 80.0;
-      double zeta = runningOnRealRobot ? 0.0 : 0.6;
+      double zeta = runningOnRealRobot ? 0.3 : 0.6;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
