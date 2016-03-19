@@ -49,7 +49,7 @@ public class WholeBodyControllerCore
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = inverseDynamicsSolver.getDesiredCenterOfPressureDataHolder();
-      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder);
+      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints);
 
       parentRegistry.addChild(registry);
    }
@@ -133,6 +133,9 @@ public class WholeBodyControllerCore
             throw new RuntimeException("Unhandled joint control mode: " + lowLevelJointData.getControlMode());
          }
       }
+
+      controllerCoreOutput.setRootJointDesiredConfigurationData(yoRootJointDesiredConfigurationData);
+      controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(yoLowLevelOneDoFJointDesiredDataHolder);
    }
 
    private void doInverseDynamics()

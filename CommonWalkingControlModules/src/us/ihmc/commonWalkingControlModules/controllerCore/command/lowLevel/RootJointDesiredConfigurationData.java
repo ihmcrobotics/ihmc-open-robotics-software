@@ -29,11 +29,11 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
       desiredAcceleration.reshape(0, 0);
    }
 
-   public void set(RootJointDesiredConfigurationData other)
+   public void set(RootJointDesiredConfigurationDataReadOnly other)
    {
-      desiredConfiguration.set(other.desiredConfiguration);
-      desiredVelocity.set(other.desiredVelocity);
-      desiredAcceleration.set(other.desiredAcceleration);
+      desiredConfiguration.set(other.getDesiredConfiguration());
+      desiredVelocity.set(other.getDesiredVelocity());
+      desiredAcceleration.set(other.getDesiredAcceleration());
    }
 
    /**
