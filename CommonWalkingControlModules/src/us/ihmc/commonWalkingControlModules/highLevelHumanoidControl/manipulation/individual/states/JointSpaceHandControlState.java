@@ -63,7 +63,7 @@ public class JointSpaceHandControlState extends HandControlState
          lowLevelJointDesiredData.setJointsControlMode(oneDoFJoints, LowLevelJointControlMode.POSITION_CONTROL);
 
          jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-         
+
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint joint = oneDoFJoints[i];
@@ -121,9 +121,24 @@ public class JointSpaceHandControlState extends HandControlState
       return true;
    }
 
+   public double getJointDesiredPosition(OneDoFJoint joint)
+   {
+      return trajectories.get(joint).getValue();
+   }
+
+   public double getJointDesiredVelocity(OneDoFJoint joint)
+   {
+      return trajectories.get(joint).getVelocity();
+   }
+
    public void setTrajectories(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories)
    {
       this.trajectories = trajectories;
+   }
+
+   public boolean hasJointTrajectories()
+   {
+      return trajectories != null;
    }
 
    @Override

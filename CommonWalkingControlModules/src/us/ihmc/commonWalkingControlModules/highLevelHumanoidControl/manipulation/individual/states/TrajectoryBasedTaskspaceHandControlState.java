@@ -25,7 +25,7 @@ public abstract class TrajectoryBasedTaskspaceHandControlState extends HandContr
 
    public abstract void setHoldPositionDuration(double holdPositionDuration);
 
-   public abstract FramePose getDesiredPose();
+   public abstract void getDesiredPose(FramePose desiredPoseToPack);
 
    public abstract ReferenceFrame getReferenceFrame();
 

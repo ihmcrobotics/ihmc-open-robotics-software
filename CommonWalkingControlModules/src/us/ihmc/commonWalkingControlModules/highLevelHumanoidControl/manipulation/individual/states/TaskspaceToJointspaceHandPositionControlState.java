@@ -446,9 +446,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    }
 
    @Override
-   public FramePose getDesiredPose()
+   public void getDesiredPose(FramePose desiredPoseToPack)
    {
-      return desiredPose;
+      desiredPoseToPack.setIncludingFrame(desiredPose);
    }
 
    @Override

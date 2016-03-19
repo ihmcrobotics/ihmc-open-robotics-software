@@ -1162,6 +1162,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    @Override
    public void doMotionControl()
    {
+      manipulationControlModule.submitNewArmJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
+
       consumeHeadMessages();
       consumeChestMessages();
       consumePelvisHeightMessages();
