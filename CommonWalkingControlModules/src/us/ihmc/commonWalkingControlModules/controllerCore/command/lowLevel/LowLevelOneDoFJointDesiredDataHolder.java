@@ -235,8 +235,10 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
       lowLevelJointData.setResetIntegrators(reset);
    }
 
-   /** {@inheritDoc} */
-   @Override
+   /**
+    * Complete the information held in this using other.
+    * Does not overwrite the data already set in this.
+    */
    public void completeWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
    {
       if (other == null)
@@ -261,8 +263,9 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
       }
    }
 
-   /** {@inheritDoc} */
-   @Override
+   /**
+    * Clear this and copy the data held in other.
+    */
    public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
    {
       clear();

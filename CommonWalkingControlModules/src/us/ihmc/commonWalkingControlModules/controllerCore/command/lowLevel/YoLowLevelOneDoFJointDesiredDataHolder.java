@@ -136,8 +136,10 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       lowLevelJointData.set(jointData);
    }
 
-   /** {@inheritDoc} */
-   @Override
+   /**
+    * Complete the information held in this using other.
+    * Does not overwrite the data already set in this.
+    */
    public void completeWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
    {
       for (int i = 0; i < other.getNumberOfJointsWithLowLevelData(); i++)
@@ -154,8 +156,9 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       }
    }
 
-   /** {@inheritDoc} */
-   @Override
+   /**
+    * Clear this and copy the data held in other.
+    */
    public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderInterface other)
    {
       clear();
