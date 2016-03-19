@@ -206,8 +206,8 @@ public class WholeBodyInverseDynamicsSolver
          double desiredVelocity = lowLevelJointData.getDesiredVelocity();
          double desiredPosition = lowLevelJointData.getDesiredPosition();
 
-         desiredVelocity += desiredAcceleration * controlDT;
          desiredVelocity *= alphaVelocityIntegration.getDoubleValue();
+         desiredVelocity += desiredAcceleration * controlDT;
          desiredVelocity = MathTools.clipToMinMax(desiredVelocity, integrationMaxVelocity.getDoubleValue());
          desiredPosition += desiredVelocity * controlDT;
 
