@@ -115,9 +115,9 @@ public class WholeBodyInverseDynamicsSolver
       yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
       yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
 
-      alphaPositionIntegration.set(0.9997);
+      alphaPositionIntegration.set(0.9996);
       alphaVelocityIntegration.set(0.95);
-      integrationMaxVelocity.set(0.1); // 2.0 seems reasonable.
+      integrationMaxVelocity.set(2.0);
 
       parentRegistry.addChild(registry);
    }
