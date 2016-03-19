@@ -26,6 +26,8 @@ import us.ihmc.quadrupedRobotics.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.swingLegChooser.NextSwingLegChooser;
 import us.ihmc.quadrupedRobotics.trajectory.QuadrupedSwingTrajectoryGenerator;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -178,8 +180,18 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final AlphaFilteredWrappingYoVariable filteredDesiredCoMYaw = new AlphaFilteredWrappingYoVariable("filteredDesiredCoMYaw", "", registry, desiredCoMOrientation.getYaw(), filteredDesiredCoMYawAlpha, -Math.PI, Math.PI);
    private final AlphaFilteredWrappingYoVariable filteredDesiredCoMPitch = new AlphaFilteredWrappingYoVariable("filteredDesiredCoMPitch", "", registry, desiredCoMOrientation.getPitch(), filteredDesiredCoMPitchAlpha, -Math.PI, Math.PI);
    private final AlphaFilteredWrappingYoVariable filteredDesiredCoMRoll = new AlphaFilteredWrappingYoVariable("filteredDesiredCoMRoll", "", registry, desiredCoMOrientation.getRoll(), filteredDesiredCoMRollAlpha, -Math.PI, Math.PI);
-   private final YoFrameOrientation filteredDesiredCoMOrientation = new YoFrameOrientation(filteredDesiredCoMYaw, filteredDesiredCoMPitch, filteredDesiredCoMRoll, ReferenceFrame.getWorldFrame());
+   private final DoubleYoVariable desiredCoMYaw = new DoubleYoVariable("desiredCoMYaw", registry);
+   private final DoubleYoVariable desiredCoMPitch = new DoubleYoVariable("desiredCoMPitch", registry);
+   private final DoubleYoVariable desiredCoMRoll = new DoubleYoVariable("desiredCoMRoll", registry);
+   private final DoubleYoVariable actualYaw = new DoubleYoVariable("actualYaw", registry);
+   private final DoubleYoVariable actualPitch = new DoubleYoVariable("actualPitch", registry);
+   private final DoubleYoVariable actualRoll = new DoubleYoVariable("actualRoll", registry);
+   private final PIDController pitchPidController = new PIDController("pitchPidController", registry);
+   private final PIDController rollPidController = new PIDController("rollPidController", registry);
+//   private final YoFrameOrientation filteredDesiredCoMOrientation = new YoFrameOrientation(filteredDesiredCoMYaw, filteredDesiredCoMPitch, filteredDesiredCoMRoll, ReferenceFrame.getWorldFrame());
+   private final YoFrameOrientation filteredDesiredCoMOrientation = new YoFrameOrientation(desiredCoMYaw, desiredCoMPitch, desiredCoMRoll, ReferenceFrame.getWorldFrame());
    private final YoFramePose desiredCoMPose = new YoFramePose(desiredCoMPosition, filteredDesiredCoMOrientation);
+   private final BooleanYoVariable useImuFeedback = new BooleanYoVariable("useImuFeedback", registry);
 
    private final EnumYoVariable<RobotQuadrant> swingLeg = new EnumYoVariable<RobotQuadrant>("swingLeg", registry, RobotQuadrant.class, true);
    private final YoFrameVector desiredVelocity;
@@ -217,7 +229,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable swingDuration = new DoubleYoVariable("swingDuration", registry);
    private final DoubleYoVariable swingHeight = new DoubleYoVariable("swingHeight", registry);
    private final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
-
 
    private final DoubleYoVariable distanceInside = new DoubleYoVariable("distanceInside", registry);
 
@@ -348,6 +359,12 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       maxYawRate.set(quadrupedControllerParameters.getMaxYawRate());
       distanceInsideSupportPolygonBeforeSwingingLeg.set(0.02);
       turnInPlaceCoMTrajectoryBuffer.set(0.5);
+      
+      useImuFeedback.set(true);
+      pitchPidController.setProportionalGain(1.0);
+      pitchPidController.setIntegralGain(0.4);
+      rollPidController.setProportionalGain(1.0);
+      rollPidController.setIntegralGain(0.1);
       
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.HIND_LEFT);
@@ -807,7 +824,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
 	   SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 	   
-	   feedForwardRootJoint.setRotation(desiredCoMOrientation.getYaw().getDoubleValue(), desiredCoMOrientation.getPitch().getDoubleValue(), desiredCoMOrientation.getRoll().getDoubleValue());
+	   feedForwardRootJoint.setRotation(filteredDesiredCoMOrientation.getYaw().getDoubleValue(), filteredDesiredCoMOrientation.getPitch().getDoubleValue(), filteredDesiredCoMOrientation.getRoll().getDoubleValue());
 	   feedForwardFullRobotModel.updateFrames();
 	   
 //	   Vector3d rootJointPosition = new Vector3d();
@@ -871,6 +888,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       }
    }
    
+   private final double[] yawPitchRollArray = new double[3];
    private final Point3d centerOfMassOffset = new Point3d();
    private final FramePoint actualFootLocation = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
@@ -879,6 +897,12 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private void updateEstimates()
    {
+      SixDoFJoint actualRobotRootJoint = actualFullRobotModel.getRootJoint();
+      actualRobotRootJoint.getRotation(yawPitchRollArray);
+      actualYaw.set(yawPitchRollArray[0]);
+      actualPitch.set(yawPitchRollArray[1]);
+      actualRoll.set(yawPitchRollArray[2]);
+      
       filteredFeedForwardCenterOfMassOffset.update();
       filteredFeedForwardCenterOfMassOffset.get(centerOfMassOffset);
       feedForwardCenterOfMassFrame.updateTranslation(centerOfMassOffset);
@@ -939,6 +963,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    }
 
    FramePoint tempCOMTarget = new FramePoint(ReferenceFrame.getWorldFrame());
+
+
    private double computeDistanceToTrotLine2d(RobotQuadrant swingQuadrant)
    {
       comTrajectoryGenerator.getFinalPosition(tempCOMTarget);
@@ -1063,6 +1089,21 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       filteredDesiredCoMYaw.update();
       filteredDesiredCoMPitch.update();
       filteredDesiredCoMRoll.update();
+      
+      if(useImuFeedback.getBooleanValue())
+      {
+         double pitchError = pitchPidController.compute(actualPitch.getDoubleValue(), filteredDesiredCoMPitch.getDoubleValue(), 0.0, 0.0, dt);
+         desiredCoMPitch.set(filteredDesiredCoMPitch.getDoubleValue() + pitchError);
+         
+         double rollError = rollPidController.compute(actualRoll.getDoubleValue(), filteredDesiredCoMRoll.getDoubleValue(), 0.0, 0.0, dt);
+         desiredCoMRoll.set(filteredDesiredCoMRoll.getDoubleValue() + rollError);
+      }
+      else
+      {
+         desiredCoMPitch.set(filteredDesiredCoMPitch.getDoubleValue());
+         desiredCoMRoll.set(filteredDesiredCoMRoll.getDoubleValue());
+      }
+      desiredCoMYaw.set(filteredDesiredCoMYaw.getDoubleValue());
    }
    
    private void updateDesiredCoMPose()
