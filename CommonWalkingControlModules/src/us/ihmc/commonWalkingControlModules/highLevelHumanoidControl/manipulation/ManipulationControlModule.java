@@ -262,6 +262,17 @@ public class ManipulationControlModule
       }
    }
 
+   /**
+    * With the goal of having smooth transitions between control modes,
+    * the {@link ManipulationControlModule} can be aware of the most recent desireds that the low-level controllers are tracking by using this method.
+    * @param lowLevelOneDoFJointDesiredDataHolder Data that will be used to update the arm desired configuration. Only a read-only access is needed.
+    */
+   public void submitNewArmJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         handControlModules.get(robotSide).submitNewArmJointDesiredConfiguration(lowLevelOneDoFJointDesiredDataHolder);
+   }
+
    public boolean isAtLeastOneHandLoadBearing()
    {
       for (RobotSide robotSide : RobotSide.values)

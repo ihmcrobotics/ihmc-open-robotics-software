@@ -4,7 +4,10 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
@@ -18,6 +21,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -36,6 +40,8 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final String name;
    private final YoVariableRegistry registry;
 
+   private final LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder;
+   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
@@ -62,20 +68,24 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, RigidBody base, RigidBody endEffector,
-         YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+   private final YoSE3PIDGainsInterface gains;
+   private final DoubleYoVariable weight;
+
+   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, boolean doPositionControl, OneDoFJoint[] armJoints, RigidBody base, RigidBody endEffector,
+         YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
+      this.gains = gains;
 
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
+      weight = new DoubleYoVariable(namePrefix + "TaskspaceWeight", registry);
+      weight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
+
       spatialFeedbackControlCommand.set(base, endEffector);
-      spatialFeedbackControlCommand.setGains(gains);
-      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
 
       parentRegistry.addChild(registry);
 
@@ -99,11 +109,26 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
+
+      if (doPositionControl)
+      {
+         jointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+         jointDesiredDataHolder.registerJointsWithEmptyData(armJoints);
+         jointDesiredDataHolder.setJointsControlMode(armJoints, LowLevelJointControlMode.POSITION_CONTROL);
+         jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+         for (int i = 0; i < armJoints.length; i++)
+            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(armJoints[i]);
+      }
+      else
+      {
+         jointDesiredDataHolder = null;
+         jointAccelerationIntegrationCommand = null;
+      }
    }
 
    public void setWeight(double weight)
    {
-      spatialFeedbackControlCommand.setWeightForSolver(weight);
+      this.weight.set(weight);
    }
 
    @Override
@@ -120,6 +145,8 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredVelocity, desiredVelocity);
       spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setWeightForSolver(weight.getDoubleValue());
 
       updateVisualizers();
 
@@ -218,15 +245,15 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    }
 
    @Override
-   public FramePose getDesiredPose()
+   public void getDesiredPose(FramePose desiredPoseToPack)
    {
-      return desiredPose;
+      desiredPoseToPack.setIncludingFrame(desiredPose);
    }
 
    @Override
-   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      return jointAccelerationIntegrationCommand;
    }
 
    @Override
@@ -238,6 +265,6 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    @Override
    public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
    {
-      return null;
+      return jointDesiredDataHolder;
    }
 }
