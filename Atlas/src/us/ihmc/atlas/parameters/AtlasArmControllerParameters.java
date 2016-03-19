@@ -60,8 +60,8 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    {
       YoSymmetricSE3PIDGains taskspaceControlGains = new YoSymmetricSE3PIDGains("ArmTaskspace", registry);
 
-      double kp = 100.0;
-      double zeta = runningOnRealRobot ? 0.6 : 1.0;
+      double kp = runningOnRealRobot ? 40.0 :100.0;
+      double zeta = runningOnRealRobot ? 0.3 : 1.0;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
