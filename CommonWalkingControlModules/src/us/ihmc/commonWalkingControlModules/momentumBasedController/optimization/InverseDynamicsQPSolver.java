@@ -60,8 +60,6 @@ public class InverseDynamicsQPSolver
    private final int problemSize;
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-   private final DampedLeastSquaresNullspaceCalculator nullspaceCalculator;
-
    public InverseDynamicsQPSolver(int numberOfDoFs, int rhoSize, YoVariableRegistry parentRegistry)
    {
       this.numberOfDoFs = numberOfDoFs;
@@ -103,8 +101,6 @@ public class InverseDynamicsQPSolver
       for (int i = numberOfDoFs; i < problemSize; i++)
          regularizationMatrix.set(i, i, defaultRhoRegularization);
 
-      nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, 0.01);
-
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
          wrenchEquilibriumForceError = new YoFrameVector("wrenchEquilibriumForceError", null, registry);
@@ -145,8 +141,6 @@ public class InverseDynamicsQPSolver
 
       solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 0);
-
-      jAugmented.reshape(0, numberOfDoFs);
 
       if (!firstCall.getBooleanValue())
          addJointJerkRegularization();
@@ -191,10 +185,6 @@ public class InverseDynamicsQPSolver
 
    private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
-      int taskSize = taskJacobian.getNumRows();
-      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
-      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
-
       // Compute: H += J^T W J
       CommonOps.mult(taskJtW, taskJacobian, tempMotionTask_H);
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, 1.0);
@@ -207,9 +197,6 @@ public class InverseDynamicsQPSolver
    public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
-      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
-      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
-
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
@@ -318,21 +305,6 @@ public class InverseDynamicsQPSolver
          solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue());
          solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0));
       }
-   }
-
-   private final DenseMatrix64F jAugmented = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F jacobianForPrivilegedJointAccelerations = new DenseMatrix64F(1, 1);
-
-   public void setPrivilegedMotionInput(PrivilegedMotionQPInput input)
-   {
-      projectPrivilegedJointAccelerationsInNullspaceOfPreviousTasks(input.selectionMatrix, input.privilegedJointspaceMotion, input.weightMatrix);
-   }
-
-   public void projectPrivilegedJointAccelerationsInNullspaceOfPreviousTasks(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointAccelerations,
-         DenseMatrix64F weight)
-   {
-      nullspaceCalculator.projectOntoNullspace(selectionMatrix, jAugmented, jacobianForPrivilegedJointAccelerations);
-      addMotionTask(jacobianForPrivilegedJointAccelerations, privilegedJointAccelerations, weight);
    }
 
    public void solve() throws NoConvergenceException
