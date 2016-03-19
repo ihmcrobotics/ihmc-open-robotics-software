@@ -1,7 +1,6 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -10,6 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
@@ -1052,6 +1052,24 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          System.out.println("numberOfTests = " + numberOfTests);
 
       }
+   }
+
+   /**
+    *  Test with dataset from sim that revealed a bug with the variable lower/upper bounds handling.
+    */
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testFindValidSolutionForDataset20160319() throws Exception
+   {
+      ActualDatasetFrom20160319 dataset = new ActualDatasetFrom20160319();
+      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+      solver.clear();
+      solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(dataset.getVariableLowerBounds(), dataset.getVariableUpperBounds());
+      DenseMatrix64F solution = new DenseMatrix64F(dataset.getProblemSize(), 1);
+      solver.solve(solution);
+
+      assertFalse(MatrixTools.containsNaN(solution));
    }
 
    private void verifyEqualityConstraintsHold(int numberOfEqualityConstraints, DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector, DenseMatrix64F solutionMatrix)
