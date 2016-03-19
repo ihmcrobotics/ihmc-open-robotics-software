@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJaco
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.PrivilegedMotionQPInput;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -27,7 +26,6 @@ public class InverseKinematicsOptimizationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
-   private final PrivilegedMotionQPInput privilegedMotionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -44,7 +42,6 @@ public class InverseKinematicsOptimizationControlModule
 
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       motionQPInput = new MotionQPInput(numberOfDoFs);
-      privilegedMotionQPInput = new PrivilegedMotionQPInput(numberOfDoFs);
 
       double controlDT = toolbox.getControlDT();
       GeometricJacobianHolder geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
@@ -62,7 +59,7 @@ public class InverseKinematicsOptimizationControlModule
    public void initialize()
    {
       qpSolver.reset();
-      motionQPInputCalculator.update();
+      motionQPInputCalculator.initialize();
    }
 
    public InverseKinematicsSolution compute() throws InverseKinematicsOptimizationException
@@ -94,9 +91,9 @@ public class InverseKinematicsOptimizationControlModule
 
    private void computePrivilegedJointVelocities()
    {
-      boolean success = motionQPInputCalculator.computePrivilegedJointVelocities(privilegedMotionQPInput);
+      boolean success = motionQPInputCalculator.computePrivilegedJointVelocities(motionQPInput);
       if (success)
-         qpSolver.setPrivilegedMotionInput(privilegedMotionQPInput);
+         qpSolver.addMotionInput(motionQPInput);
    }
 
    public void submitInverseKinematicsCommand(InverseKinematicsCommand<?> command)

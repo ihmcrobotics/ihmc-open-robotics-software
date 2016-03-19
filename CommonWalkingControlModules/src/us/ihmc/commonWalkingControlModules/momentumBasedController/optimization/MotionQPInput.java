@@ -27,6 +27,21 @@ public class MotionQPInput
       taskWeightMatrix.reshape(taskSize, taskSize);
    }
 
+   public void setTaskJacobian(DenseMatrix64F taskJacobian)
+   {
+      this.taskJacobian.set(taskJacobian);
+   }
+
+   public void setTaskObjective(DenseMatrix64F taskObjective)
+   {
+      this.taskObjective.set(taskObjective);
+   }
+
+   public void setTaskWeightMatrix(DenseMatrix64F taskWeightMatrix)
+   {
+      this.taskWeightMatrix.set(taskWeightMatrix);
+   }
+
    public void setIsMotionConstraint(boolean isMotionConstraint)
    {
       this.isMotionConstraint = isMotionConstraint;

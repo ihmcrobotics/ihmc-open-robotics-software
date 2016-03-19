@@ -48,7 +48,6 @@ public class InverseDynamicsOptimizationControlModule
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final InverseDynamicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
-   private final PrivilegedMotionQPInput privilegedMotionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
 
@@ -97,7 +96,6 @@ public class InverseDynamicsOptimizationControlModule
          basisVectorVisualizer = null;
 
       motionQPInput = new MotionQPInput(numberOfDoFs);
-      privilegedMotionQPInput = new PrivilegedMotionQPInput(numberOfDoFs);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
 
       motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT,
@@ -126,7 +124,7 @@ public class InverseDynamicsOptimizationControlModule
    {
       qpSolver.reset();
       externalWrenchHandler.reset();
-      motionQPInputCalculator.update();
+      motionQPInputCalculator.initialize();
    }
 
    public MomentumModuleSolution compute() throws MomentumControlModuleException
@@ -207,9 +205,9 @@ public class InverseDynamicsOptimizationControlModule
 
    private void computePrivilegedJointAccelerations()
    {
-      boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(privilegedMotionQPInput);
+      boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(motionQPInput);
       if (success)
-         qpSolver.setPrivilegedMotionInput(privilegedMotionQPInput);
+         qpSolver.addMotionInput(motionQPInput);
    }
 
    private void setupRhoTasks()

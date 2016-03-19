@@ -15,6 +15,7 @@ public class JointIndexHandler
    private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
    private final LinkedHashMap<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
 
+   private final int numberOfDoFs;
    private final InverseDynamicsJoint[] indexedJoints;
    private final OneDoFJoint[] indexedOneDoFJoints;
 
@@ -22,6 +23,8 @@ public class JointIndexHandler
    {
       indexedJoints = jointsToIndex;
       indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
+
+      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
 
       for (InverseDynamicsJoint joint : jointsToIndex)
       {
@@ -85,5 +88,10 @@ public class JointIndexHandler
    public int[] getJointIndices(InverseDynamicsJoint joint)
    {
       return columnsForJoints.get(joint);
+   }
+
+   public int getNumberOfDoFs()
+   {
+      return numberOfDoFs;
    }
 }

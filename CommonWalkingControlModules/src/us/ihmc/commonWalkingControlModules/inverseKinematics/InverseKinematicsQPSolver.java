@@ -5,12 +5,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.PrivilegedMotionQPInput;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -61,8 +59,6 @@ public class InverseKinematicsQPSolver
 
       desiredJointVelocities = new DenseMatrix64F(numberOfDoFs, 1);
 
-      pseudoInverseSolver = new DampedLeastSquaresSolver(numberOfDoFs, jointVelocityRegularization.getDoubleValue());
-
       parentRegistry.addChild(registry);
    }
 
@@ -76,8 +72,6 @@ public class InverseKinematicsQPSolver
 
       solverInput_Aeq.reshape(0, numberOfDoFs);
       solverInput_beq.reshape(0, 0);
-
-      jAugmented.reshape(0, numberOfDoFs);
    }
 
    private final DenseMatrix64F tempJtW = new DenseMatrix64F(1, 1);
@@ -118,10 +112,6 @@ public class InverseKinematicsQPSolver
 
    private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
-      int taskSize = taskJacobian.getNumRows();
-      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
-      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
-
       // Compute: H += J^T W J
       tempTask_H.reshape(numberOfDoFs, numberOfDoFs);
       CommonOps.mult(taskJtW, taskJacobian, tempTask_H);
@@ -136,9 +126,6 @@ public class InverseKinematicsQPSolver
    public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
-      jAugmented.reshape(jAugmented.getNumRows() + taskSize, numberOfDoFs);
-      CommonOps.insert(taskJacobian, jAugmented, jAugmented.getNumRows() - taskSize, 0);
-
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
@@ -147,38 +134,6 @@ public class InverseKinematicsQPSolver
 
       CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
       CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
-   }
-
-   private final DenseMatrix64F jAugmented = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F jInverseAugmented = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F nullspaceProjector = new DenseMatrix64F(1, 1);
-
-   private final DenseMatrix64F jacobianForPrivilegedJointVelocities = new DenseMatrix64F(1, 1);
-
-   private final DampedLeastSquaresSolver pseudoInverseSolver;
-
-   public void setPrivilegedMotionInput(PrivilegedMotionQPInput input)
-   {
-      projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(input.selectionMatrix, input.privilegedJointspaceMotion, input.weightMatrix);
-   }
-
-   public void projectPrivilegedJointVelocitiesInNullspaceOfPreviousTasks(DenseMatrix64F selectionMatrix, DenseMatrix64F privilegedJointVelocities,
-         DenseMatrix64F weight)
-   {
-      jInverseAugmented.reshape(numberOfDoFs, jAugmented.getNumRows());
-      pseudoInverseSolver.setA(jAugmented);
-      pseudoInverseSolver.invert(jInverseAugmented);
-
-      nullspaceProjector.reshape(numberOfDoFs, numberOfDoFs);
-      // I - J^* J
-      CommonOps.mult(-1.0, jInverseAugmented, jAugmented, nullspaceProjector);
-      for (int i = 0; i < numberOfDoFs; i++)
-         nullspaceProjector.add(i, i, 1.0);
-
-      jacobianForPrivilegedJointVelocities.reshape(privilegedJointVelocities.getNumRows(), numberOfDoFs);
-      CommonOps.mult(selectionMatrix, nullspaceProjector, jacobianForPrivilegedJointVelocities);
-
-      addMotionTask(jacobianForPrivilegedJointVelocities, privilegedJointVelocities, weight);
    }
 
    public void solve() throws NoConvergenceException
