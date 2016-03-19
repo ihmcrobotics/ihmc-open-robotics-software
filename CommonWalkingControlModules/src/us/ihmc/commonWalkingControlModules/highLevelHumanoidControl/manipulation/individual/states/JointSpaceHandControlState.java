@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -139,7 +139,7 @@ public class JointSpaceHandControlState extends HandControlState
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderInterface getLowLevelJointDesiredData()
+   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
    {
       return lowLevelJointDesiredData;
    }

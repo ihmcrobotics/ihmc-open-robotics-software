@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderInterface;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class ControllerCoreCommand implements ControllerCoreCommandInterface
 {
@@ -54,7 +54,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
          inverseKinematicsCommandList.addCommand(inverseKinematicsCommand);
    }
 
-   public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderInterface lowLevelJointData)
+   public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelJointData)
    {
       if (lowLevelJointData != null)
          lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);

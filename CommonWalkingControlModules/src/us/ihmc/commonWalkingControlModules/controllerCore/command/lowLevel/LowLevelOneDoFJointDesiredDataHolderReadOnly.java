@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public interface LowLevelOneDoFJointDesiredDataHolderInterface
+public interface LowLevelOneDoFJointDesiredDataHolderReadOnly
 {
    public abstract LowLevelJointControlMode getJointControlMode(OneDoFJoint joint);
 
