@@ -76,6 +76,16 @@ public class JointIndexHandler
       return columnsForJoints.containsKey(joint);
    }
 
+   public boolean areJointsIndexed(InverseDynamicsJoint[] joints)
+   {
+      for (int i = 0; i < joints.length; i++)
+      {
+         if (!isJointIndexed(joints[i]))
+            return false;
+      }
+      return true;
+   }
+
    public int getOneDoFJointIndex(OneDoFJoint joint)
    {
       int[] jointIndices = columnsForJoints.get(joint);
