@@ -13,10 +13,10 @@ public class MomentumOptimizationSettings
    private double rhoWeight = 0.00001;
    private double rhoMin = 4.0;
    // Be careful with that guy, even 0.005 seems to make the ICP control sluggish.
-   private double rhoRateDefaultWeight = 0.001; // 0.005
+   private double rhoRateDefaultWeight = 0.002; // 0.005
    private double rhoRateHighWeight = 0.05;
    private final Vector2d copWeight = new Vector2d(100.0, 200.0); //750.0, 1500.0);
-   private final Vector2d copRateDefaultWeight = new Vector2d(1000.0, 1000.0); //100000.0, 200000.0);
+   private final Vector2d copRateDefaultWeight = new Vector2d(20000.0, 20000.0); //100000.0, 200000.0);
    private final Vector2d copRateHighWeight = new Vector2d(2500000.0, 10000000.0);
    private double headWeight  = 1.0;
    private double chestWeight = 50.0; //10.0;
