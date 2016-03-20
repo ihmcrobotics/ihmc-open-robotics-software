@@ -141,6 +141,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
+      output.setPrimaryBase(command.getBase());
 
       output.set(base, endEffector);
       jacobianForSingularityEscapeId = command.getJacobianForNullspaceId();
