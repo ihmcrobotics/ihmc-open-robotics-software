@@ -1234,6 +1234,15 @@ public class MatrixTools
       }
    }
 
+   public static void scaleColumn(double alpha, int column, DenseMatrix64F matrix)
+   {
+      if( column < 0 || column >= matrix.getNumCols())
+         throw new IllegalArgumentException("Specified column index is out of bounds: " + column + ", number of columns in matrix: " + matrix.getNumCols());
+
+      for (int row = 0; row < matrix.getNumRows(); row++)
+         matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
+   }
+
    public static void printJavaForConstruction(String name, DenseMatrix64F matrix)
    {
       StringBuffer stringBuffer = new StringBuffer();
