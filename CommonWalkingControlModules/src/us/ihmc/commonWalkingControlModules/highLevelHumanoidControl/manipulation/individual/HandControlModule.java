@@ -206,12 +206,14 @@ public class HandControlModule
       positionTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
 
+      RigidBody elevator = fullRobotModel.getElevator();
       doPositionControl = armControlParameters.doLowLevelPositionControl();
       String stateNamePrefix = namePrefix + "Hand";
+
       jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, jointsOriginal, doPositionControl, momentumBasedController, jointspaceGains,
             controlDT, registry);
       taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlMode.TASK_SPACE_POSITION, doPositionControl,
-            jointsOriginal, chest, hand, taskspaceGains, yoGraphicsListRegistry, registry);
+            jointsOriginal, elevator, hand, chest, taskspaceGains, yoGraphicsListRegistry, registry);
 
       if (doPositionControl)
       {
@@ -222,7 +224,6 @@ public class HandControlModule
       else
       {
          userControlModeState = new UserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
-         RigidBody elevator = fullRobotModel.getElevator();
          loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController, elevator, hand, registry);
       }
 

@@ -59,6 +59,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SWING_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, foot);
+      spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setJacobianForNullspaceId(footControlHelper.getJacobianId());
       FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -57,6 +58,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
 import us.ihmc.robotics.stateMachines.StateMachine;
@@ -140,6 +142,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final ControllerCommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -293,16 +296,27 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       commandInputManager.flushBuffers();
 
-      PrivilegedConfigurationCommand command = new PrivilegedConfigurationCommand();
-      command.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         OneDoFJoint anklePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-         command.addJointWithPrivilegedConfigurationOnly(anklePitch, 0.0);
+         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+         for (int i = 0; i < armJointNames.length; i++)
+            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
-      controllerCoreCommand.addInverseDynamicsCommand(command);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE), 1.0);
+
+         RigidBody chest = fullRobotModel.getChest();
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(chest, hand);
+
+         RigidBody pelvis = fullRobotModel.getPelvis();
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+      }
 
       initializeContacts();
 
@@ -1240,6 +1254,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void submitControllerCoreCommands(JointspaceFeedbackControlCommand unconstrainedJointCommand)
    {
       planeContactStateCommandPool.clear();
+
+      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      
+
       boolean isHighCoPDampingNeeded = momentumBasedController.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
       for (RobotSide robotSide : RobotSide.values)
