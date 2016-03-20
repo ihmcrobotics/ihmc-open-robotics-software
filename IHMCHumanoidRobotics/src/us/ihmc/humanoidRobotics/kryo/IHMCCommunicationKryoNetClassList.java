@@ -149,6 +149,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationT
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
@@ -301,11 +302,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(PauseWalkingMessage.class);
       registerPacketClass(FootstepStatus.class);
+      registerPacketClass(WalkingStatusMessage.class);
       registerPacketClass(TrajectoryType.class);
 
       
       registerPacketField(ArrayList.class);
       registerPacketField(FootstepStatus.Status.class);
+      registerPacketField(WalkingStatusMessage.Status.class);
       registerPacketClass(AbortWalkingMessage.class);
       
       // Head orientation
