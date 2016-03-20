@@ -9,6 +9,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<PrivilegedConfigurationCommand>, InverseDynamicsCommand<PrivilegedConfigurationCommand>
 {
@@ -17,7 +18,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
    private final TDoubleArrayList privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
    private final Map<OneDoFJoint, PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions = new HashMap<>(initialCapacity);
-   private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
+
+   private final List<RigidBody> bases = new ArrayList<>();
+   private final List<RigidBody> endEffectors = new ArrayList<>();
 
    private boolean enable = false;
 
@@ -27,22 +30,25 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    };
 
    private PrivilegedConfigurationOption defaultOption;
-   private double defaultWeight = Double.NaN;
+   private double weight = Double.NaN;
 
    public PrivilegedConfigurationCommand()
    {
+      clear();
    }
 
    public void clear()
    {
       enable = false;
       defaultOption = null;
-      defaultWeight = Double.NaN;
+      weight = Double.NaN;
       jointNames.clear();
       joints.clear();
       privilegedOneDoFJointConfigurations.reset();
       privilegedOneDoFJointConfigurationOptions.clear();
-      weights.reset();
+
+      bases.clear();
+      endEffectors.clear();
    }
 
    public void disable()
@@ -57,7 +63,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
    public void setDefaultWeight(double defaultWeight)
    {
-      this.defaultWeight = defaultWeight;
+      this.weight = defaultWeight;
    }
 
    public void setPrivilegedConfigurationOption(PrivilegedConfigurationOption option)
@@ -66,60 +72,28 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       this.defaultOption = option;
    }
 
-   public void addJointWithPrivilegedConfigurationOnly(OneDoFJoint joint, double privilegedConfiguration)
+   public void addJoint(OneDoFJoint joint, double privilegedConfiguration)
    {
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
       privilegedOneDoFJointConfigurationOptions.put(joint, null);
-      weights.add(Double.NaN);
    }
 
-   public void addJointWithPrivilegedConfigurationOnly(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
+   public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
    {
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(Double.NaN);
       privilegedOneDoFJointConfigurationOptions.put(joint, privilegedConfiguration);
-      weights.add(Double.NaN);
    }
 
-   public void addJointWithWeightOnly(OneDoFJoint joint, double weight)
+   public void applyPrivilegedConfigurationToSubChain(RigidBody base, RigidBody endEffector)
    {
-      enable();
-      joints.add(joint);
-      jointNames.add(joint.getName());
-      privilegedOneDoFJointConfigurations.add(Double.NaN);
-      privilegedOneDoFJointConfigurationOptions.put(joint, null);
-      weights.add(weight);
-   }
-
-   public void addJointsWithWeightOnly(OneDoFJoint[] joints, double weight)
-   {
-      for (int i = 0; i < joints.length; i++)
-         addJointWithWeightOnly(joints[i], weight);
-   }
-
-   public void addJoint(OneDoFJoint joint, double privilegedConfiguration, double weight)
-   {
-      enable();
-      joints.add(joint);
-      jointNames.add(joint.getName());
-      privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
-      privilegedOneDoFJointConfigurationOptions.put(joint, null);
-      weights.add(weight);
-   }
-
-   public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration, double weight)
-   {
-      enable();
-      joints.add(joint);
-      jointNames.add(joint.getName());
-      privilegedOneDoFJointConfigurations.add(Double.NaN);
-      privilegedOneDoFJointConfigurationOptions.put(joint, privilegedConfiguration);
-      weights.add(weight);
+      bases.add(base);
+      endEffectors.add(endEffector);
    }
 
    @Override
@@ -128,7 +102,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       clear();
       enable = other.enable;
       defaultOption = other.defaultOption;
-      defaultWeight = other.defaultWeight;
+      weight = other.weight;
 
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
@@ -137,7 +111,6 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
          jointNames.add(other.jointNames.get(i));
          privilegedOneDoFJointConfigurations.add(other.privilegedOneDoFJointConfigurations.get(i));
          privilegedOneDoFJointConfigurationOptions.put(joint, other.privilegedOneDoFJointConfigurationOptions.get(joint));
-         weights.add(other.weights.get(i));
       }
    }
 
@@ -146,24 +119,14 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       return enable;
    }
 
-   public boolean hasNewDefaultWeight()
+   public boolean hasNewWeight()
    {
-      return !Double.isNaN(defaultWeight);
+      return !Double.isNaN(weight);
    }
 
-   public double getDefaultWeight()
+   public double getWeight()
    {
-      return defaultWeight;
-   }
-
-   public boolean hasNewWeight(int jointIndex)
-   {
-      return !Double.isNaN(weights.get(jointIndex));
-   }
-
-   public double getWeight(int jointIndex)
-   {
-      return weights.get(jointIndex);
+      return weight;
    }
 
    public boolean hasNewPrivilegedConfigurationDefaultOption()
@@ -204,6 +167,21 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    public OneDoFJoint getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
+   }
+
+   public int getNumberOfChains()
+   {
+      return bases.size();
+   }
+
+   public RigidBody getChainBase(int chainIndex)
+   {
+      return bases.get(chainIndex);
+   }
+
+   public RigidBody getChainEndEffector(int chainIndex)
+   {
+      return endEffectors.get(chainIndex);
    }
 
    @Override

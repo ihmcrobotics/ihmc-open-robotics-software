@@ -40,9 +40,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
    private RigidBody base;
    private RigidBody endEffector;
+   private RigidBody optionalPrimaryBase;
 
    private String baseName;
    private String endEffectorName;
+   private String optionalPrimaryBaseName;
 
    private final SE3PIDGains gains = new SE3PIDGains();
    private double weightForSolver = Double.POSITIVE_INFINITY;
@@ -59,6 +61,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       endEffector = other.endEffector;
       baseName = other.baseName;
       endEffectorName = other.endEffectorName;
+      optionalPrimaryBase = other.optionalPrimaryBase;
+      optionalPrimaryBaseName = other.optionalPrimaryBaseName;
       setSelectionMatrix(other.selectionMatrix);
       setGains(other.gains);
       setWeightForSolver(other.weightForSolver);
@@ -92,6 +96,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       this.endEffector = endEffector;
       endEffectorName = endEffector.getName();
+   }
+
+   public void setPrimaryBase(RigidBody primaryBase)
+   {
+      optionalPrimaryBase = primaryBase;
+      optionalPrimaryBaseName = primaryBase.getName();
    }
 
    public void setGains(SE3PIDGainsInterface gains)
@@ -251,6 +261,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public String getEndEffectorName()
    {
       return endEffectorName;
+   }
+
+   public RigidBody getPrimaryBase()
+   {
+      return optionalPrimaryBase;
+   }
+
+   public String getPrimaryBaseName()
+   {
+      return optionalPrimaryBaseName;
    }
 
    public DenseMatrix64F getNullspaceMultipliers()

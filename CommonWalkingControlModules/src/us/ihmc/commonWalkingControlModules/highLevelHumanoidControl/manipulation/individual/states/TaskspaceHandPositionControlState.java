@@ -72,7 +72,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final DoubleYoVariable weight;
 
    public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, boolean doPositionControl, OneDoFJoint[] armJoints, RigidBody base, RigidBody endEffector,
-         YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         RigidBody primaryBase, YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
       this.gains = gains;
@@ -86,6 +86,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       weight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
 
       spatialFeedbackControlCommand.set(base, endEffector);
+      spatialFeedbackControlCommand.setPrimaryBase(primaryBase);
 
       parentRegistry.addChild(registry);
 
