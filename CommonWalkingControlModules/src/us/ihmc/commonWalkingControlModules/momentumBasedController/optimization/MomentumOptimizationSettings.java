@@ -5,21 +5,22 @@ import javax.vecmath.Vector3d;
 
 public class MomentumOptimizationSettings
 {
-   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.005);
+   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.0005);
    private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
    private double jointAccelerationWeight = 0.005;
    private double jointJerkWeight = 0.1;
    private double rhoWeight = 0.00001;
    private double rhoMin = 4.0;
-   private double rhoRateDefaultWeight = 0.005; // 0.001
+   // Be careful with that guy, even 0.005 seems to make the ICP control sluggish.
+   private double rhoRateDefaultWeight = 0.001; // 0.005
    private double rhoRateHighWeight = 0.05;
    private final Vector2d copWeight = new Vector2d(100.0, 200.0); //750.0, 1500.0);
    private final Vector2d copRateDefaultWeight = new Vector2d(1000.0, 1000.0); //100000.0, 200000.0);
    private final Vector2d copRateHighWeight = new Vector2d(2500000.0, 10000000.0);
    private double headWeight  = 1.0;
    private double chestWeight = 50.0; //10.0;
-   private double pelvisWeight = 1.0;
+   private double pelvisWeight = 5.0;
    private double defaultFootWeight = 10.0;
    private double highFootWeight = 50.0;
    private double handUserModeWeight = 10.0;
