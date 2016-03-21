@@ -22,6 +22,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.StateMachineTools;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
@@ -46,6 +48,7 @@ public class FootControlModule
    private static final double coefficientOfFriction = 0.8;
 
    private final GenericStateMachine<ConstraintType, AbstractFootControlState> stateMachine;
+   private final EnumYoVariable<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
    private final MomentumBasedController momentumBasedController;
@@ -64,8 +67,6 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
-
-   private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
@@ -90,13 +91,13 @@ public class FootControlModule
       doFancyOnToesControl = new BooleanYoVariable(contactableFoot.getName() + "DoFancyOnToesControl", registry);
       doFancyOnToesControl.set(walkingControllerParameters.doFancyOnToesControl());
 
-      waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
-
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       // set up states and state machine
       DoubleYoVariable time = momentumBasedController.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
+      requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+
       setupContactStatesMap();
 
       YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -142,15 +143,11 @@ public class FootControlModule
    private void setupStateMachine(List<AbstractFootControlState> states)
    {
       // TODO Clean that up (Sylvain)
-      FootStateTransitionAction footStateTransitionAction = new FootStateTransitionAction(footControlHelper, waitSingularityEscapeBeforeTransitionToNextState);
-      for (AbstractFootControlState state : states)
+      for (AbstractFootControlState fromState : states)
       {
-         for (AbstractFootControlState stateToTransitionTo : states)
+         for (AbstractFootControlState toState : states)
          {
-            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo, footControlHelper,
-                  waitSingularityEscapeBeforeTransitionToNextState);
-            ConstraintType nextStateEnum = stateToTransitionTo.getStateEnum();
-            state.addStateTransition(new StateTransition<ConstraintType>(nextStateEnum, footStateTransitionCondition, footStateTransitionAction));
+            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
          }
       }
 
@@ -165,7 +162,7 @@ public class FootControlModule
                return false;
             return footControlHelper.isCoPOnEdge();
          }
-      }, footStateTransitionAction));
+      }));
 
       holdPositionState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
       {
@@ -176,7 +173,7 @@ public class FootControlModule
                return false;
             return !footControlHelper.isCoPOnEdge();
          }
-      }, footStateTransitionAction));
+      }));
 
       for (AbstractFootControlState state : states)
       {
@@ -211,37 +208,6 @@ public class FootControlModule
          moveViaWaypointsState.requestStopTrajectory();
    }
 
-   public void doSingularityEscape(boolean doSingularityEscape)
-   {
-      footControlHelper.doSingularityEscape(doSingularityEscape);
-   }
-
-   public void doSingularityEscape(double temporarySingularityEscapeNullspaceMultiplier)
-   {
-      footControlHelper.doSingularityEscape(temporarySingularityEscapeNullspaceMultiplier);
-   }
-
-   public void doSingularityEscapeBeforeTransitionToNextState()
-   {
-      doSingularityEscape(true);
-      waitSingularityEscapeBeforeTransitionToNextState.set(true);
-   }
-
-   public double getJacobianDeterminant()
-   {
-      return footControlHelper.getJacobianDeterminant();
-   }
-
-   public boolean isInSingularityNeighborhood()
-   {
-      return footControlHelper.isJacobianDeterminantInRange();
-   }
-
-   public void setNullspaceMultiplier(double singularityEscapeNullspaceMultiplier)
-   {
-      footControlHelper.setNullspaceMultiplier(singularityEscapeNullspaceMultiplier);
-   }
-
    public void setContactState(ConstraintType constraintType)
    {
       setContactState(constraintType, null);
@@ -267,7 +233,7 @@ public class FootControlModule
       if (getCurrentConstraintType() == constraintType) // Use resetCurrentState() for such case
          return;
 
-      footControlHelper.requestState(constraintType);
+      requestedState.set(constraintType);
    }
 
    private boolean isFootBarelyLoaded()

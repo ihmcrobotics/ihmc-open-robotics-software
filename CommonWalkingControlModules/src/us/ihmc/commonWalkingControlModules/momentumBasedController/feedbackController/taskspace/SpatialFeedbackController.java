@@ -6,9 +6,9 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.BodyFixedPointSpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
@@ -22,7 +22,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
@@ -78,8 +77,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
 
-   private long jacobianForSingularityEscapeId = NameBasedHashCodeTools.NULL_HASHCODE;
-   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, SpatialAccelerationVector.SIZE);
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
@@ -146,8 +143,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       output.setPrimaryBase(command.getBase());
 
       output.set(base, endEffector);
-      jacobianForSingularityEscapeId = command.getJacobianForNullspaceId();
-      nullspaceMultipliers.set(command.getNullspaceMultipliers());
 
       setGains(command.getGains());
       setWeightForSolver(command.getWeightForSolver());
@@ -213,8 +208,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       updatePositionVisualization();
       updateOrientationVisualization();
 
-      output.set(desiredSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
-      output.setJacobianForNullspaceId(jacobianForSingularityEscapeId);
+      output.set(desiredSpatialAcceleration, selectionMatrix);
    }
 
    private void updatePositionVisualization()

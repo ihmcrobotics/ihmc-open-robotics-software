@@ -72,12 +72,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
-   {
-      return true;
-   }
-
-   @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
       return false;
@@ -622,18 +616,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getSupportSingularityEscapeMultiplier()
-   {
-      return 30;
-   }
-
-   @Override
-   public double getSwingSingularityEscapeMultiplier()
-   {
-      return runningOnRealRobot ? 50.0 : 200.0;
    }
 
    @Override

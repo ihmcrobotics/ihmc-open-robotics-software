@@ -121,12 +121,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
-   {
-      return true;
-   }
-
-   @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
       return true;
@@ -720,18 +714,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getSupportSingularityEscapeMultiplier()
-   {
-      return -30; // negative as knee axis are -y direction
-   }
-
-   @Override
-   public double getSwingSingularityEscapeMultiplier()
-   {
-      return -(target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 30.0 : 200.0); // negative as knee axis are -y direction
    }
 
    @Override

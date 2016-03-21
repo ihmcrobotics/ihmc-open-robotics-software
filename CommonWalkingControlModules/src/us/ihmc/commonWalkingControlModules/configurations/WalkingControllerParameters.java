@@ -47,8 +47,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
-   public abstract boolean checkTrailingLegJacobianDeterminantToTriggerToeOff();
-
    public abstract boolean checkECMPLocationToTriggerToeOff();
 
    public abstract double getMinStepLengthForToeOff();
@@ -98,10 +96,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
-
-   public abstract double getSupportSingularityEscapeMultiplier();
-
-   public abstract double getSwingSingularityEscapeMultiplier();
 
    public abstract boolean doPrepareManipulationForLocomotion();
 

@@ -107,13 +107,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return false;
    }
 
-   @Override
-   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
-   {
-      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      return !realRobot;
-   }
-
   @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
@@ -699,18 +692,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getSwingMaxHeightForPushRecoveryTrajectory()
    {
       return 0.15;
-   }
-
-   @Override
-   public double getSupportSingularityEscapeMultiplier()
-   {
-      return 30;
-   }
-
-   @Override
-   public double getSwingSingularityEscapeMultiplier()
-   {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 50.0 : 200.0;
    }
 
    @Override

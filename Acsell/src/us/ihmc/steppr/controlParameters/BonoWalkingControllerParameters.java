@@ -72,12 +72,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
-   {
-      return true;
-   }
-
-   @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
       return false;
@@ -623,18 +617,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getSupportSingularityEscapeMultiplier()
-   {
-      return 30;
-   }
-
-   @Override
-   public double getSwingSingularityEscapeMultiplier()
-   {
-      return runningOnRealRobot ? 50.0 : 200.0;
    }
 
    @Override

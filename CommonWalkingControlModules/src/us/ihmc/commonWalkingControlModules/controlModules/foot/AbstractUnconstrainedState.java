@@ -61,7 +61,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
       spatialFeedbackControlCommand.setGains(gains);
-      spatialFeedbackControlCommand.setJacobianForNullspaceId(footControlHelper.getJacobianId());
       FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
@@ -91,21 +90,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
 
       initializeTrajectory();
-
-      footControlHelper.resetSelectionMatrix();
    }
 
    @Override
    public void doSpecificAction()
    {
-      //TODO: If we reinitialize after singularity escape, we 
-      // need to do it smartly. The stuff below causes really
-      // bad swing tracking due to a huge discontinuity in the desireds.
-      //      if (footControlHelper.isDoingSingularityEscape())
-      //      {
-      //         initializeTrajectory();
-      //      }
-
       computeAndPackTrajectory();
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
@@ -128,8 +117,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      spatialFeedbackControlCommand.setSelectionMatrix(footControlHelper.getSelectionMatrix());
-      spatialFeedbackControlCommand.setNullspaceMultipliers(footControlHelper.getNullspaceMultipliers());
 
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
@@ -142,7 +129,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
       trajectoryWasReplanned = false;
-      footControlHelper.resetSelectionMatrix();
    }
 
    @Override
