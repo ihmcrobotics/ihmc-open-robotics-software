@@ -74,7 +74,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
-
    }
 
    @Override

@@ -14,4 +14,5 @@ public enum QuadrupedPositionControllerEvent
 
    REQUEST_STAND_PREP,
    REQUEST_POSITION_BASED_CRAWL,
+   REQUEST_ANIMATION,
 }
