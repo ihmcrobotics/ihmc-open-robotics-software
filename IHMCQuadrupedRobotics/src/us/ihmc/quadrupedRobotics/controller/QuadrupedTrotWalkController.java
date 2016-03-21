@@ -267,7 +267,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       swingTrajectoryGenerators = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingTrajectoryGenerators.set(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(robotQuadrant, registry, yoGraphicsListRegistry, dt));
+//         swingTrajectoryGenerators.set(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(robotQuadrant, registry, yoGraphicsListRegistry, dt));
       }
       
       yoGraphicsListRegistry.registerArtifact("trotLines", hindRightFrontLeftTrotLine);
