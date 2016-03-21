@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
- * It makes sure that the fast runner four bar calculator and the calculator used in Beast, Steppr, and Wanderer give the same result
+ * It makes sure that the four bar calculator including derivatives and the calculator used in Beast, Steppr, and Wanderer give the same result
  */
 public class FourBarCalculatorsComparisonTest
 {
@@ -73,7 +73,7 @@ public class FourBarCalculatorsComparisonTest
    private void testCalculators(double AD, double AB, double BC, double CD, double knownAngle)
    {
       // (1) Fast runner calculations
-      FourBarCalculatorFromFastRunner fastRunnerCalculator = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
+      FourBarCalculatorWithDerivatives fastRunnerCalculator = new FourBarCalculatorWithDerivatives(AD, AB, BC, CD);
       fastRunnerCalculator.updateAnglesGivenAngleDAB(knownAngle);
       double outputFastRunnerCalculator = fastRunnerCalculator.getAngleABC();
 

@@ -7,7 +7,7 @@ import static java.lang.Math.sqrt;
 import java.util.Random;
 
 /**
- * The goal is to determine which of the two four bar calculators (the one used in FastRunner and 
+ * The goal is to determine which of the two four bar calculators (the one including derivatives and 
  * the one used for Beast) is faster
  */
 
@@ -42,7 +42,7 @@ public class BenchmarkCompareFourBarCalculators
          double BC = sqrt(BF * BF + CF * CF);
          double BAD = DAE + BAE;
 
-         FourBarCalculatorFromFastRunner fastRunnerCalculator = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
+         FourBarCalculatorWithDerivatives fastRunnerCalculator = new FourBarCalculatorWithDerivatives(AD, AB, BC, CD);
          fastRunnerCalculator.updateAnglesGivenAngleDAB(BAD);
       }
       totalTimeFastRunnerCalculator = System.currentTimeMillis() - startTimeFastRunnerCalculator;

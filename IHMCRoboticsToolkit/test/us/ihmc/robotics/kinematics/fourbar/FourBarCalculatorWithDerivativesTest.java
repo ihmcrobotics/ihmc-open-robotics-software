@@ -11,11 +11,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorFromFastRunner;
+import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-public class FourBarCalculatorFromFastRunnerTest
+public class FourBarCalculatorWithDerivativesTest
 {
    private static final double eps = 1e-7;
    private static final boolean PRINT = false;
@@ -24,7 +24,7 @@ public class FourBarCalculatorFromFastRunnerTest
 	@Test(timeout = 300000)
    public void testSquare()
    {
-      FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(1.0, 1.0, 1.0, 1.0);
+      FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
       fourBar.updateAnglesGivenAngleDAB(PI / 2);
       assertEquals(PI / 2, fourBar.getAngleDAB(), eps);
       assertEquals(PI / 2, fourBar.getAngleABC(), eps);
@@ -36,7 +36,7 @@ public class FourBarCalculatorFromFastRunnerTest
 	@Test(timeout = 300000)
    public void testSquareDer()
    {
-      FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(1.0, 1.0, 1.0, 1.0);
+      FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
       fourBar.updateAnglesAndVelocitiesGivenAngleDAB(PI / 2, 1);
       assertEquals(PI / 2, fourBar.getAngleDAB(), eps);
       assertEquals(PI / 2, fourBar.getAngleABC(), eps);
@@ -52,7 +52,7 @@ public class FourBarCalculatorFromFastRunnerTest
 	@Test(timeout = 300000)
    public void testParallelogram()
    {
-      FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(1.0, 1.0, 1.0, 1.0);
+      FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
       fourBar.updateAnglesAndVelocitiesGivenAngleDAB(PI / 3, 1);
       assertEquals(PI / 3, fourBar.getAngleDAB(), eps);
       assertEquals(2 * PI / 3, fourBar.getAngleABC(), eps);
@@ -99,7 +99,7 @@ public class FourBarCalculatorFromFastRunnerTest
             System.out.println(names[i] + " = " + vals[i]);
          }
       }
-      FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(a, b, c, d);
+      FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(a, b, c, d);
       fourBar.updateAnglesAndVelocitiesGivenAngleDAB(A, 0.0);
       assertEquals(A, fourBar.getAngleDAB(), eps);
       assertEquals(B, fourBar.getAngleABC(), eps);
@@ -131,7 +131,7 @@ public class FourBarCalculatorFromFastRunnerTest
          double dADC = -dBAD;
          double dBCD = -dABC;
 
-         FourBarCalculatorFromFastRunner fourBar = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
+         FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(AD, AB, BC, CD);
          fourBar.updateAnglesAndVelocitiesGivenAngleDAB(BAD, dBAD);
          assertEquals(BAD, fourBar.getAngleDAB(), eps);
          assertEquals(ABC, fourBar.getAngleABC(), eps);
@@ -154,7 +154,7 @@ public class FourBarCalculatorFromFastRunnerTest
       double eps = 1.0e-6;
       Random rand = new Random();
       double DA, AB, BC, CD;
-      FourBarCalculatorFromFastRunner fourBar;
+      FourBarCalculatorWithDerivatives fourBar;
       boolean isQuadrilateralOK;
       int k;
 
@@ -177,7 +177,7 @@ public class FourBarCalculatorFromFastRunnerTest
          BC = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
          CD = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
          DA = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-         fourBar = new FourBarCalculatorFromFastRunner(DA, AB, BC, CD);
+         fourBar = new FourBarCalculatorWithDerivatives(DA, AB, BC, CD);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
          k = 0;
@@ -188,7 +188,7 @@ public class FourBarCalculatorFromFastRunnerTest
             BC = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
             CD = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
             DA = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-            fourBar = new FourBarCalculatorFromFastRunner(DA, AB, BC, CD);
+            fourBar = new FourBarCalculatorWithDerivatives(DA, AB, BC, CD);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
             k++;
@@ -266,7 +266,7 @@ public class FourBarCalculatorFromFastRunnerTest
       double eps = 1.0e-6;
       Random rand = new Random();
       double AD, BA, CB, DC;
-      FourBarCalculatorFromFastRunner fourBar;
+      FourBarCalculatorWithDerivatives fourBar;
       boolean isQuadrilateralOK;
       int k;
 
@@ -288,7 +288,7 @@ public class FourBarCalculatorFromFastRunnerTest
          CB = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
          DC = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
          AD = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-         fourBar = new FourBarCalculatorFromFastRunner(AD, BA, CB, DC);
+         fourBar = new FourBarCalculatorWithDerivatives(AD, BA, CB, DC);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
          k = 0;
@@ -299,7 +299,7 @@ public class FourBarCalculatorFromFastRunnerTest
             CB = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
             DC = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
             AD = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-            fourBar = new FourBarCalculatorFromFastRunner(AD, BA, CB, DC);
+            fourBar = new FourBarCalculatorWithDerivatives(AD, BA, CB, DC);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
             k++;
@@ -368,7 +368,7 @@ public class FourBarCalculatorFromFastRunnerTest
          double BC = sqrt(BF * BF + CF * CF), CBF = atan2(CF, BF), BCF = atan2(BF, CF);
          double BAD = DAE + BAE, ABC = ABE + CBF, BCD = BCF + DCF, ADC = ADE + CDF;
          
-         FourBarCalculatorFromFastRunner calculator = new FourBarCalculatorFromFastRunner(AD, AB, BC, CD);
+         FourBarCalculatorWithDerivatives calculator = new FourBarCalculatorWithDerivatives(AD, AB, BC, CD);
          
          calculator.computeMasterJointAngleGivenAngleABC(ABC);    
          assertEquals(BAD, calculator.getAngleDAB(), eps); 
