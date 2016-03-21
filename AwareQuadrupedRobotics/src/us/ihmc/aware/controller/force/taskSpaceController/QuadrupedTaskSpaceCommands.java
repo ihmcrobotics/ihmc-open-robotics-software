@@ -32,6 +32,11 @@ public class QuadrupedTaskSpaceCommands
       return comTorque;
    }
 
+   public FrameVector getSoleForce(RobotQuadrant robotQuadrant)
+   {
+      return soleForce.get(robotQuadrant);
+   }
+
    public QuadrantDependentList<FrameVector> getSoleForce()
    {
       return soleForce;
@@ -59,21 +64,21 @@ public class QuadrupedTaskSpaceCommands
 
    public void set(QuadrupedTaskSpaceCommands commands)
    {
-      this.comForce.setIncludingFrame(commands.getComForce());
-      this.comTorque.setIncludingFrame(commands.getComTorque());
+      this.comForce.setIncludingFrame(commands.comForce);
+      this.comTorque.setIncludingFrame(commands.comTorque);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         this.soleForce.get(robotQuadrant).setIncludingFrame(commands.getSoleForce().get(robotQuadrant));
+         this.soleForce.get(robotQuadrant).setIncludingFrame(commands.soleForce.get(robotQuadrant));
       }
    }
 
    public void add(QuadrupedTaskSpaceCommands commands)
    {
-      this.comForce.add(commands.getComForce());
-      this.comTorque.add(commands.getComTorque());
+      this.comForce.add(commands.comForce);
+      this.comTorque.add(commands.comTorque);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         this.soleForce.get(robotQuadrant).add(commands.getSoleForce().get(robotQuadrant));
+         this.soleForce.get(robotQuadrant).add(commands.soleForce.get(robotQuadrant));
       }
    }
 }

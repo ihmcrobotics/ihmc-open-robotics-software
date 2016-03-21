@@ -2,10 +2,10 @@ package us.ihmc.aware.controller.force.taskSpaceController;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.util.ContactState;
-import us.ihmc.aware.vmc.QuadrupedContactForceOptimization;
-import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
+import us.ihmc.aware.vmc.*;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -16,33 +16,49 @@ import java.util.ArrayList;
 
 public class QuadrupedTaskSpaceController
 {
-   private static final int FEEDBACK_BLOCK_CAPACITY = 50;
+   private static final int CONTROL_BLOCK_CAPACITY = 50;
    private static final int FILTER_BLOCK_CAPACITY = 50;
 
-   private final ArrayList<QuadrupedTaskSpaceFeedbackBlock> feedbackBlocks;
-   private final ArrayList<QuadrupedTaskSpaceFilterBlock> filterBlocks;
-   private final QuadrupedTaskSpaceCommands feedbackCommands;
-   private final QuadrupedTaskSpaceCommands computedCommands;
+   private final QuadrupedJointLimits jointLimits;
    private final QuadrupedVirtualModelController virtualModelController;
+   private final QuadrupedVirtualModelControllerSettings virtualModelControllerSettings;
+   private final QuadrupedContactForceLimits contactForceLimits;
    private final QuadrupedContactForceOptimization contactForceOptimization;
+   private final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings;
    private final FrameVector contactForceStorage;
-   private final YoVariableRegistry registry = new YoVariableRegistry("quadrupedTaskSpaceController");
+   private final QuadrupedTaskSpaceCommands controlCommands;
+   private final ArrayList<QuadrupedTaskSpaceControlBlock> controlBlocks;
+   private final ArrayList<QuadrupedTaskSpaceFilterBlock> filterBlocks;
+   private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
 
-   public QuadrupedTaskSpaceController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedTaskSpaceController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, QuadrupedJointLimits jointLimits, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      feedbackBlocks = new ArrayList<>(FEEDBACK_BLOCK_CAPACITY);
-      filterBlocks = new ArrayList<>(FILTER_BLOCK_CAPACITY);
-      feedbackCommands = new QuadrupedTaskSpaceCommands();
-      computedCommands = new QuadrupedTaskSpaceCommands();
+      this.jointLimits = jointLimits;
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, graphicsListRegistry);
+      virtualModelControllerSettings = new QuadrupedVirtualModelControllerSettings();
+      contactForceLimits = new QuadrupedContactForceLimits();
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
+      contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
       contactForceStorage = new FrameVector();
+      controlCommands = new QuadrupedTaskSpaceCommands();
+      controlBlocks = new ArrayList<>(CONTROL_BLOCK_CAPACITY);
+      filterBlocks = new ArrayList<>(FILTER_BLOCK_CAPACITY);
       parentRegistry.addChild(registry);
    }
 
-   public void addFeedbackBlock(QuadrupedTaskSpaceFeedbackBlock feedbackBlock)
+   public void addControlBlock(QuadrupedTaskSpaceControlBlock controlBlock)
    {
-      feedbackBlocks.add(feedbackBlock);
+      controlBlocks.add(controlBlock);
+   }
+
+   public void removeControlBlock(QuadrupedTaskSpaceControlBlock controlBlock)
+   {
+      controlBlocks.remove(controlBlock);
+   }
+
+   public void removeControlBlocks()
+   {
+      controlBlocks.clear();
    }
 
    public void addFilterBlock(QuadrupedTaskSpaceFilterBlock filterBlock)
@@ -50,74 +66,71 @@ public class QuadrupedTaskSpaceController
       filterBlocks.add(filterBlock);
    }
 
-   public void removeFeedbackBlock(QuadrupedTaskSpaceFeedbackBlock feedbackBlock)
-   {
-      feedbackBlocks.remove(feedbackBlock);
-   }
-
    public void removeFilterBlock(QuadrupedTaskSpaceFilterBlock filterBlock)
    {
-      feedbackBlocks.remove(filterBlock);
+      filterBlocks.remove(filterBlock);
    }
 
-   public void clearFeedbackBlocks()
+   public void removeFilterBlocks()
    {
-      feedbackBlocks.clear();
-   }
-
-   public void clearFilterBlocks()
-   {
-      feedbackBlocks.clear();
+      filterBlocks.clear();
    }
 
    public void reset()
    {
       virtualModelController.reset();
       contactForceOptimization.reset();
-      for (int i = 0; i < feedbackBlocks.size(); i++)
+      for (int i = 0; i < controlBlocks.size(); i++)
       {
-         feedbackBlocks.get(i).reset();
+         controlBlocks.get(i).reset();
+      }
+      for (int i = 0; i < filterBlocks.size(); i++)
+      {
+         filterBlocks.get(i).reset();
       }
    }
 
-   public void compute(QuadrupedTaskSpaceEstimates estimates, QuadrupedTaskSpaceControllerParameters parameters)
+   public void compute(QuadrupedTaskSpaceEstimates inputEstimates, QuadrupedTaskSpaceCommands outputCommands, QuadrupedTaskSpaceControllerSettings settings)
    {
-      // initialize commands to zero
-      computedCommands.setToZero();
-      computedCommands.changeFrame(ReferenceFrame.getWorldFrame());
+      // initialize commands
+      outputCommands.setToZero();
+      outputCommands.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // compute feedback commands
-      for (int i = 0; i < feedbackBlocks.size(); i++)
+      // compute control commands
+      for (int i = 0; i < controlBlocks.size(); i++)
       {
-         feedbackCommands.setToZero();
-         feedbackBlocks.get(i).compute(estimates, feedbackCommands);
-         feedbackCommands.changeFrame(ReferenceFrame.getWorldFrame());
-         computedCommands.add(feedbackCommands);
+         controlCommands.setToZero();
+         controlBlocks.get(i).compute(inputEstimates, controlCommands);
+         controlCommands.changeFrame(ReferenceFrame.getWorldFrame());
+         outputCommands.add(controlCommands);
       }
 
-      // apply command filters
+      // compute filtered commands
       for (int i = 0; i < filterBlocks.size(); i++)
       {
-         filterBlocks.get(i).compute(estimates, computedCommands);
+         filterBlocks.get(i).compute(outputCommands);
       }
 
       // compute optimal contact force distribution for quadrants that are in contact
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          // note: sole forces are inverted to obtain commanded reaction forces
-         computedCommands.getSoleForce().get(robotQuadrant).scale(-1.0);
-         contactForceOptimization.setContactForceCommand(robotQuadrant, computedCommands.getSoleForce().get(robotQuadrant));
-         computedCommands.getSoleForce().get(robotQuadrant).scale(-1.0);
-         contactForceOptimization.setContactState(robotQuadrant, parameters.contactState.get(robotQuadrant));
+         outputCommands.getSoleForce().get(robotQuadrant).scale(-1.0);
+         contactForceOptimization.setContactForceCommand(robotQuadrant, outputCommands.getSoleForce().get(robotQuadrant));
+         outputCommands.getSoleForce().get(robotQuadrant).scale(-1.0);
+         contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, settings.getSoleForceCommandWeights(robotQuadrant));
+         contactForceOptimization.setContactState(robotQuadrant, settings.getContactState(robotQuadrant));
       }
-      contactForceOptimization.setComForceCommand(computedCommands.getComForce());
-      contactForceOptimization.setComTorqueCommand(computedCommands.getComTorque());
-      contactForceOptimization.solve(parameters.contactForceLimits, parameters.contactForceOptimizationSettings);
+      contactForceOptimization.setComForceCommand(outputCommands.getComForce());
+      contactForceOptimizationSettings.setComForceCommandWeights(settings.getComForceCommandWeights());
+      contactForceOptimization.setComTorqueCommand(outputCommands.getComTorque());
+      contactForceOptimizationSettings.setComTorqueCommandWeights(settings.getComTorqueCommandWeights());
+      contactForceOptimization.solve(contactForceLimits, contactForceOptimizationSettings);
 
       // compute leg joint torques using jacobian transpose
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (parameters.contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         if (settings.getContactState(robotQuadrant) == ContactState.IN_CONTACT)
          {
             contactForceOptimization.getContactForceSolution(robotQuadrant, contactForceStorage);
             virtualModelController.setSoleContactForce(robotQuadrant, contactForceStorage);
@@ -126,11 +139,11 @@ public class QuadrupedTaskSpaceController
          }
          else
          {
-            virtualModelController.setSoleVirtualForce(robotQuadrant, computedCommands.getSoleForce().get(robotQuadrant));
+            virtualModelController.setSoleVirtualForce(robotQuadrant, outputCommands.getSoleForce().get(robotQuadrant));
             virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
             virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
          }
       }
-      virtualModelController.compute(parameters.jointLimits, parameters.virtualModelControllerSettings);
+      virtualModelController.compute(jointLimits, virtualModelControllerSettings);
    }
 }
