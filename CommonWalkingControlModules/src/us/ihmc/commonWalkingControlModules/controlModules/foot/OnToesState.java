@@ -9,6 +9,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -125,11 +126,11 @@ public class OnToesState extends AbstractFootControlState
       kneeJointCommand.addJoint(kneeJoint, Double.NaN);
       commandList.addCommand(kneeJointCommand);
 
-      orientationFeedbackControlCommand.setWeightForSolver(10.0);
+      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       orientationFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       orientationFeedbackControlCommand.setGains(gains.getOrientationGains());
 
-      pointFeedbackControlCommand.setWeightForSolver(10.0);
+      pointFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       pointFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       pointFeedbackControlCommand.setGains(gains.getPositionGains());
 

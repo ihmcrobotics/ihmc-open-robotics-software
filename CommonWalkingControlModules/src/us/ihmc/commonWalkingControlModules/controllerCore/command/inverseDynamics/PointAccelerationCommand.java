@@ -26,16 +26,13 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
 
    public PointAccelerationCommand()
    {
+      setSelectionMatrixToIdentity();
    }
 
-   public PointAccelerationCommand(FramePoint bodyFixedPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
+   public void set(RigidBody base, RigidBody endEffector)
    {
-      set(bodyFixedPoint, desiredAcceleration, selectionMatrix);
-   }
-
-   public PointAccelerationCommand(FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
-   {
-      this(bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
+      setBase(base);
+      setEndEffector(endEffector);
    }
 
    public void setBase(RigidBody base)
@@ -50,9 +47,20 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
       endEffectorName = endEffector.getName();
    }
 
-   public void set(FramePoint bodyFixedPoint, FrameVector desiredAccelerationWithRespectToBase)
+   public void setBodyFixedPointToControl(FramePoint bodyFixedPointInEndEffectorFrame)
    {
-      set(bodyFixedPoint, desiredAccelerationWithRespectToBase, null);
+      bodyFixedPointInEndEffectorFrame.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      bodyFixedPointToControl.setIncludingFrame(bodyFixedPointInEndEffectorFrame);
+   }
+
+   public void resetBodyFixedPoint()
+   {
+      bodyFixedPointToControl.setToZero(endEffector.getBodyFixedFrame());
+   }
+
+   public void setLinearAcceleration(FrameVector desiredAccelerationWithRespectToBase)
+   {
+      desiredAcceleration.setIncludingFrame(desiredAccelerationWithRespectToBase);
    }
 
    @Override
@@ -70,21 +78,20 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
       endEffectorName = other.endEffectorName;
    }
 
-   public void set(FramePoint bodyFixedPoint, FrameVector desiredAcceleration, DenseMatrix64F selectionMatrix)
-   {
-      this.bodyFixedPointToControl.setIncludingFrame(bodyFixedPoint);
-      this.desiredAcceleration.setIncludingFrame(desiredAcceleration);
-      if (selectionMatrix != null)
-         this.selectionMatrix.set(selectionMatrix);
-      else
-         setSelectionMatrixToIdentity();
-      removeWeight();
-   }
-
-   private void setSelectionMatrixToIdentity()
+   public void setSelectionMatrixToIdentity()
    {
       selectionMatrix.reshape(3, 3);
       CommonOps.setIdentity(selectionMatrix);
+   }
+
+   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      if (selectionMatrix.getNumRows() > 3)
+         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
+      if (selectionMatrix.getNumCols() != 3)
+         throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
+
+      this.selectionMatrix.set(selectionMatrix);
    }
 
    public void setWeight(double weight)
@@ -128,9 +135,9 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
       return endEffectorName;
    }
 
-   public FramePoint getBodyFixedPointToControl()
+   public void getBodyFixedPointIncludingFrame(FramePoint bodyFixedPointToControlToPack)
    {
-      return bodyFixedPointToControl;
+      bodyFixedPointToControlToPack.setIncludingFrame(this.bodyFixedPointToControl);
    }
 
    public FrameVector getDesiredAcceleration()

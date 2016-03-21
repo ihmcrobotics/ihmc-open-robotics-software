@@ -72,9 +72,9 @@ public class MotionQPInputCalculatorTest
          MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, 0.0, registry);
          
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
-         pointAccelerationCommand.setBase(elevator);
-         pointAccelerationCommand.setEndEffector(endEffector);
-         pointAccelerationCommand.set(bodyFixedPointToControl, desiredLinearAcceleration);
+         pointAccelerationCommand.set(elevator, endEffector);
+         pointAccelerationCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+         pointAccelerationCommand.setLinearAcceleration(desiredLinearAcceleration);
          
          MotionQPInput motionQPInput = new MotionQPInput(numberOfJoints);
          motionQPInputCalculator.convertPointAccelerationCommand(pointAccelerationCommand, motionQPInput);
@@ -134,9 +134,9 @@ public class MotionQPInputCalculatorTest
          MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, 0.0, registry);
          
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
-         pointAccelerationCommand.setBase(elevator);
-         pointAccelerationCommand.setEndEffector(endEffector);
-         pointAccelerationCommand.set(bodyFixedPointToControl, desiredLinearAcceleration);
+         pointAccelerationCommand.set(elevator, endEffector);
+         pointAccelerationCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+         pointAccelerationCommand.setLinearAcceleration(desiredLinearAcceleration);
          
          int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
          MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
