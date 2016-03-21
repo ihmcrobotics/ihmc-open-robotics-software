@@ -15,7 +15,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -44,23 +43,12 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSwingLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSwingLeg", registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg",
-         registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable(
-         "singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
-
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
-      singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
-      singularityEscapeNullspaceMultiplierSupportLeg.set(walkingControllerParameters.getSupportSingularityEscapeMultiplier());
-      singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0); // -0.5);
-
       feet = momentumBasedController.getContactableFeet();
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, footControlModules, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, registry);
 
       this.footSwitches = momentumBasedController.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
@@ -76,7 +64,6 @@ public class FeetManager
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, momentumBasedController, registry);
-         footControlModule.setNullspaceMultiplier(singularityEscapeMultiplierForSwing);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -154,21 +141,6 @@ public class FeetManager
          FootControlModule footControlModule = footControlModules.get(robotSide);
          footControlModule.requestStopTrajectoryIfPossible();
       }
-   }
-
-   public boolean isInSingularityNeighborhood(RobotSide robotSide)
-   {
-      return footControlModules.get(robotSide).isInSingularityNeighborhood();
-   }
-
-   public void doSingularityEscape(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).doSingularityEscape(true);
-   }
-
-   public void doSingularityEscape(RobotSide robotSide, double temporarySingularityEscapeNullspaceMultiplier)
-   {
-      footControlModules.get(robotSide).doSingularityEscape(temporarySingularityEscapeNullspaceMultiplier);
    }
 
    public boolean isInFlatSupportState(RobotSide robotSide)
@@ -282,7 +254,6 @@ public class FeetManager
    private void setContactStateForMoveViaWaypoints(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
-      footControlModule.doSingularityEscapeBeforeTransitionToNextState();
       footControlModule.setContactState(ConstraintType.MOVE_VIA_WAYPOINTS);
    }
 
@@ -329,16 +300,6 @@ public class FeetManager
    public boolean doToeOffIfPossibleInSingleSupport()
    {
       return walkOnTheEdgesManager.doToeOffIfPossibleInSingleSupport();
-   }
-
-   public void lockKnee(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLegLocking.getDoubleValue());
-   }
-
-   public void doSupportSingularityEscape(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLeg.getDoubleValue());
    }
 
    public void resetHeightCorrectionParametersForSingularityAvoidance()

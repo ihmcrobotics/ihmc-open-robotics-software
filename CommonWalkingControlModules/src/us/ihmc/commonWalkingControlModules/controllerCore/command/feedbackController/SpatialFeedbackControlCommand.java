@@ -8,7 +8,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -35,8 +34,6 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    private final Vector3d feedForwardAngularAccelerationInWorld = new Vector3d();
 
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 0);
-   private long jacobianForNullspaceId = GeometricJacobianHolder.NULL_JACOBIAN_ID;
 
    private RigidBody base;
    private RigidBody endEffector;
@@ -66,7 +63,6 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       setSelectionMatrix(other.selectionMatrix);
       setGains(other.gains);
       setWeightForSolver(other.weightForSolver);
-      nullspaceMultipliers.set(nullspaceMultipliers);
 
       controlFrameOriginInEndEffectorFrame.set(other.controlFrameOriginInEndEffectorFrame);
       controlFrameOrientationInEndEffectorFrame.set(other.controlFrameOrientationInEndEffectorFrame);
@@ -187,21 +183,6 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       pose.getPose(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
    }
 
-   public void resetNullspaceMultpliers()
-   {
-      nullspaceMultipliers.reshape(0, 1);
-   }
-
-   public void setNullspaceMultipliers(DenseMatrix64F nullspaceMultipliers)
-   {
-      this.nullspaceMultipliers.set(nullspaceMultipliers);
-   }
-
-   public void setJacobianForNullspaceId(long jacobianId)
-   {
-      jacobianForNullspaceId = jacobianId;
-   }
-
    public void setSelectionMatrixToIdentity()
    {
       selectionMatrix.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -271,16 +252,6 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public String getPrimaryBaseName()
    {
       return optionalPrimaryBaseName;
-   }
-
-   public DenseMatrix64F getNullspaceMultipliers()
-   {
-      return nullspaceMultipliers;
-   }
-
-   public long getJacobianForNullspaceId()
-   {
-      return jacobianForNullspaceId;
    }
 
    public DenseMatrix64F getSelectionMatrix()

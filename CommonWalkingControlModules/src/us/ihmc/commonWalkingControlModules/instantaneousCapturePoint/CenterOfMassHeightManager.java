@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
@@ -259,29 +258,6 @@ public class CenterOfMassHeightManager
       double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
 
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (feetManager.isInFlatSupportState(robotSide) && feetManager.isInSingularityNeighborhood(robotSide))
-         {
-            // Ignore the desired height acceleration only if EndEffectorControlModule is not taking care of singularity during support
-            if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
-               zddDesired = 0.0;
-
-            double zTreshold = 0.01;
-
-            if (zDesired >= zCurrent - zTreshold)
-            {
-               // Can't achieve the desired height, just lock the knee
-               feetManager.lockKnee(robotSide);
-            }
-            else
-            {
-               // Do the singularity escape before trying to achieve the desired height
-               feetManager.doSupportSingularityEscape(robotSide);
-            }
-         }
-      }
 
       // In a recovering context, accelerating upwards is just gonna make the robot fall faster. We should even consider letting the robot fall a bit.
       if (isRecoveringFromPush)

@@ -7,7 +7,6 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -36,8 +35,6 @@ public class WalkOnTheEdgesManager
    private final BooleanYoVariable doToeOffIfPossibleInSingleSupport = new BooleanYoVariable("doToeOffIfPossibleInSingleSupport", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
-   private final DoubleYoVariable jacobianDeterminantThresholdForToeOff = new DoubleYoVariable("jacobianDeterminantThresholdForToeOff", registry);
-   private final BooleanYoVariable checkRearLegJacobianDeterminant = new BooleanYoVariable("checkRearLegJacobianDeterminant", registry);
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
    private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
@@ -52,7 +49,6 @@ public class WalkOnTheEdgesManager
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final SideDependentList<FrameConvexPolygon2d> footDefaultPolygons;
    private final FrameConvexPolygon2d leadingFootSupportPolygon = new FrameConvexPolygon2d();
-   private final SideDependentList<FootControlModule> footEndEffectorControlModules;
 
    private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
 
@@ -72,26 +68,23 @@ public class WalkOnTheEdgesManager
    private final double footLength;
 
    public WalkOnTheEdgesManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<FootControlModule> footEndEffectorControlModules,
-         YoVariableRegistry parentRegistry)
+         SideDependentList<? extends ContactablePlaneBody> feet, YoVariableRegistry parentRegistry)
    {
-      this(momentumBasedController.getFullRobotModel(), walkingControllerParameters, feet, createFootContactStates(momentumBasedController), footEndEffectorControlModules, parentRegistry);
+      this(momentumBasedController.getFullRobotModel(), walkingControllerParameters, feet, createFootContactStates(momentumBasedController), parentRegistry);
    }
 
    public WalkOnTheEdgesManager(FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
          SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<YoPlaneContactState> footContactStates,
-         SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeOffIfPossibleInSingleSupport.set(walkingControllerParameters.doToeOffIfPossibleInSingleSupport());
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
-      this.checkRearLegJacobianDeterminant.set(walkingControllerParameters.checkTrailingLegJacobianDeterminantToTriggerToeOff());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
       this.fullRobotModel = fullRobotModel;
       this.feet = feet;
-      this.footEndEffectorControlModules = footEndEffectorControlModules;
 
       this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
       this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
@@ -100,7 +93,6 @@ public class WalkOnTheEdgesManager
 
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
       minStepHeightForToeOff.set(0.10);
-      jacobianDeterminantThresholdForToeOff.set(0.10);
 
       isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
       isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt", registry, isRearAnklePitchHittingLimit, 10);
@@ -208,15 +200,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      if (footEndEffectorControlModules != null && checkRearLegJacobianDeterminant.getBooleanValue())
-      {
-         FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
-         doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
-      }
-      else
-      {
          doToeOff.set(true);
-      }
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)

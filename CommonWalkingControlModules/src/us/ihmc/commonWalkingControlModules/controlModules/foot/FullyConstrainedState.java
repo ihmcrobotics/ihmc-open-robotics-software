@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FullyConstrainedState extends AbstractFootControlState
 {
@@ -29,6 +30,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
+      spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
    }
 
    public void setWeight(double weight)
@@ -60,7 +62,10 @@ public class FullyConstrainedState extends AbstractFootControlState
 
       footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
 
-      footControlHelper.submitTaskspaceConstraint(footAcceleration, spatialAccelerationCommand);
+      ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
+      footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
+      footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
+      spatialAccelerationCommand.set(footAcceleration);
    }
 
    @Override

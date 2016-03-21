@@ -57,7 +57,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -644,7 +643,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d capturePoint2d = new FramePoint2d();
 
       private Footstep nextFootstep;
-      private double captureTime;
 
       private final FramePose actualFootPoseInWorld;
 
@@ -694,7 +692,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                failureDetectionControlModule.setNextFootstep(nextFootstep);
                updateFootstepParameters();
 
-               captureTime = stateMachine.timeInCurrentState();
                feetManager.replanSwingTrajectory(swingSide, nextFootstep, estimatedTimeRemaining);
 
                walkingMessageHandler.reportWalkingAbortRequested();
@@ -720,13 +717,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             walkingMessageHandler.clearFootTrajectory();
-         }
-
-
-         if (stateMachine.timeInCurrentState() - captureTime < 0.5 * walkingMessageHandler.getSwingTime()
-               && feetManager.isInSingularityNeighborhood(swingSide))
-         {
-            feetManager.doSingularityEscape(swingSide);
          }
 
          switchToToeOffIfPossible(supportSide);
@@ -788,7 +778,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doTransitionIntoAction()
       {
          lastPlantedLeg.set(swingSide.getOppositeSide());
-         captureTime = 0.0;
          trailingLeg.set(null);
 
          RobotSide supportSide = swingSide.getOppositeSide();
@@ -884,7 +873,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             isInFlamingoStance.set(false);
          }
 
-         captureTime = 0.0;
          balanceManager.resetPushRecovery();
 
          resetLoadedLegIntegrators(swingSide);

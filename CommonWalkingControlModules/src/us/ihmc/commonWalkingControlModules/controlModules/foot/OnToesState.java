@@ -299,9 +299,6 @@ public class OnToesState extends AbstractFootControlState
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
-
-      // TODO: kind of a hack
-      footControlHelper.resetSelectionMatrix();
    }
 
    public void setPredictedToeOffDuration(double predictedToeOffDuration)
