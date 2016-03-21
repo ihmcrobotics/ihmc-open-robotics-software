@@ -49,6 +49,7 @@ public class MotionQPInputCalculator
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final OneDoFJoint[] oneDoFJoints;
 
+   private final FramePoint tempBodyFixedPoint = new FramePoint();
    private final FrameVector pPointVelocity = new FrameVector();
    private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
@@ -246,10 +247,10 @@ public class MotionQPInputCalculator
       long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
 
-      FramePoint bodyFixedPoint = commandToConvert.getBodyFixedPointToControl();
+      commandToConvert.getBodyFixedPointIncludingFrame(tempBodyFixedPoint);
       FrameVector desiredAccelerationWithRespectToBase = commandToConvert.getDesiredAcceleration();
 
-      pointJacobian.set(jacobian, bodyFixedPoint);
+      pointJacobian.set(jacobian, tempBodyFixedPoint);
       pointJacobian.compute();
 
       desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());

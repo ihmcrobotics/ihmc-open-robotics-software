@@ -4,9 +4,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -18,43 +18,22 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final Point3d bodyFixedPointToControlInEndEffectorFrame = new Point3d();
-
    private final Point3d desiredPositionInWorld = new Point3d();
    private final Vector3d desiredLinearVelocityInWorld = new Vector3d();
    private final Vector3d feedForwardLinearAccelerationInWorld = new Vector3d();
 
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(3);
-
-   private RigidBody base;
-   private RigidBody endEffector;
-
-   private String baseName;
-   private String endEffectorName;
-
    private final PositionPIDGains gains = new PositionPIDGains();
-   private double weightForSolver = Double.POSITIVE_INFINITY;
+
+   private final PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
 
    public PointFeedbackControlCommand()
    {
+      pointAccelerationCommand.setSelectionMatrixToIdentity();
    }
 
    public void set(RigidBody base, RigidBody endEffector)
    {
-      setBase(base);
-      setEndEffector(endEffector);
-   }
-
-   public void setBase(RigidBody base)
-   {
-      this.base = base;
-      baseName = base.getName();
-   }
-
-   public void setEndEffector(RigidBody endEffector)
-   {
-      this.endEffector = endEffector;
-      endEffectorName = endEffector.getName();
+      pointAccelerationCommand.set(base, endEffector);
    }
 
    public void setGains(PositionPIDGainsInterface gains)
@@ -65,39 +44,27 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    @Override
    public void set(PointFeedbackControlCommand other)
    {
-      base = other.base;
-      endEffector = other.endEffector;
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
-      setSelectionMatrix(other.selectionMatrix);
-      setGains(other.gains);
-      setWeightForSolver(other.weightForSolver);
-
-      bodyFixedPointToControlInEndEffectorFrame.set(other.bodyFixedPointToControlInEndEffectorFrame);
-
       desiredPositionInWorld.set(other.desiredPositionInWorld);
       desiredLinearVelocityInWorld.set(other.desiredLinearVelocityInWorld);
       feedForwardLinearAccelerationInWorld.set(other.feedForwardLinearAccelerationInWorld);
+      setGains(other.gains);
+
+      pointAccelerationCommand.set(other.pointAccelerationCommand);
    }
 
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(3, 3);
-      CommonOps.setIdentity(selectionMatrix);
+      pointAccelerationCommand.setSelectionMatrixToIdentity();
    }
 
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
-      if (selectionMatrix.getNumRows() > 3)
-         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-      if (selectionMatrix.getNumCols() != 3)
-         throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
-
-      this.selectionMatrix.set(selectionMatrix);
+      pointAccelerationCommand.setSelectionMatrix(selectionMatrix);
    }
+
    public void setWeightForSolver(double weight)
    {
-      weightForSolver = weight;
+      pointAccelerationCommand.setWeight(weight);
    }
 
    public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
@@ -113,14 +80,12 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    public void resetBodyFixedPoint()
    {
-      bodyFixedPointToControlInEndEffectorFrame.set(0.0, 0.0, 0.0);
+      pointAccelerationCommand.resetBodyFixedPoint();
    }
 
    public void setBodyFixedPointToControl(FramePoint bodyFixedPointInEndEffectorFrame)
    {
-      bodyFixedPointInEndEffectorFrame.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-
-      bodyFixedPointInEndEffectorFrame.get(bodyFixedPointToControlInEndEffectorFrame);
+      pointAccelerationCommand.setBodyFixedPointToControl(bodyFixedPointInEndEffectorFrame);
    }
 
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
@@ -130,40 +95,24 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       feedForwardLinearAccelerationToPack.setIncludingFrame(worldFrame, feedForwardLinearAccelerationInWorld);
    }
 
-   public void getBodyFixedPointIncludingFrame(FramePoint bodyFixedPointToControl)
+   public void getBodyFixedPointIncludingFrame(FramePoint bodyFixedPointToControlToPack)
    {
-      bodyFixedPointToControl.setIncludingFrame(endEffector.getBodyFixedFrame(), bodyFixedPointToControlInEndEffectorFrame);
+      pointAccelerationCommand.getBodyFixedPointIncludingFrame(bodyFixedPointToControlToPack);
    }
 
    public RigidBody getBase()
    {
-      return base;
-   }
-
-   public String getBaseName()
-   {
-      return baseName;
+      return pointAccelerationCommand.getBase();
    }
 
    public RigidBody getEndEffector()
    {
-      return endEffector;
+      return pointAccelerationCommand.getEndEffector();
    }
 
-   public String getEndEffectorName()
+   public PointAccelerationCommand getPointAccelerationCommand()
    {
-      return endEffectorName;
-   }
-
-   public DenseMatrix64F getSelectionMatrix()
-   {
-      return selectionMatrix;
-   }
-
-
-   public double getWeightForSolver()
-   {
-      return weightForSolver;
+      return pointAccelerationCommand;
    }
 
    public PositionPIDGainsInterface getGains()

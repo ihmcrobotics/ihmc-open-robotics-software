@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controlModules.BodyFixedPointLinearAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
@@ -10,10 +8,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -21,7 +17,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PointFeedbackController implements FeedbackControllerInterface
@@ -40,8 +35,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final YoFrameVector yoDesiredLinearAcceleration;
    private final YoFrameVector yoAchievedLinearAcceleration;
 
-   private final DoubleYoVariable weightForSolver;
-
    private final FrameVector achievedLinearAcceleration = new FrameVector();
 
    private final FramePoint tempPosition = new FramePoint();
@@ -49,7 +42,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final FrameVector feedForwardLinearAcceleration = new FrameVector();
    private final FrameVector desiredLinearAcceleration = new FrameVector();
 
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, SpatialAccelerationVector.SIZE);
    private final PointAccelerationCommand output = new PointAccelerationCommand();
 
    private final BodyFixedPointLinearAccelerationControlModule accelerationControlModule;
@@ -87,9 +79,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
       yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
 
-      weightForSolver = new DoubleYoVariable(endEffectorName + "PointWeight", registry);
-      weightForSolver.set(Double.POSITIVE_INFINITY);
-
       parentRegistry.addChild(registry);
    }
 
@@ -100,12 +89,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       base = command.getBase();
 
-      output.setBase(base);
-      output.setEndEffector(endEffector);
+      output.set(command.getPointAccelerationCommand());
 
-      setGains(command.getGains());
-      setWeightForSolver(command.getWeightForSolver());
-      selectionMatrix.set(command.getSelectionMatrix());
+      accelerationControlModule.setGains(command.getGains());
 
       command.getBodyFixedPointIncludingFrame(tempPosition);
       accelerationControlModule.setPointToControl(tempPosition);
@@ -114,17 +100,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoDesiredPosition.setAndMatchFrame(tempPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(tempLinearVelocity);
       yoFeedForwardLinearAcceleration.setAndMatchFrame(feedForwardLinearAcceleration);
-   }
-
-   public void setGains(PositionPIDGainsInterface gains)
-   {
-      accelerationControlModule.setGains(gains);
-   }
-
-   public void setWeightForSolver(double weightForSolver)
-   {
-      this.weightForSolver.set(weightForSolver);
-      output.setWeight(weightForSolver);
    }
 
    @Override
@@ -155,7 +130,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       accelerationControlModule.getBodyFixedPoint(tempPosition);
 
-      output.set(tempPosition, desiredLinearAcceleration);
+      output.setLinearAcceleration(desiredLinearAcceleration);
    }
 
    private void updatePositionVisualization()
