@@ -31,6 +31,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialAccelerationCommand.setSelectionMatrixToIdentity();
    }
 
    public void setWeight(double weight)
@@ -65,7 +66,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-      spatialAccelerationCommand.set(footAcceleration);
+      spatialAccelerationCommand.setSpatialAcceleration(footAcceleration);
    }
 
    @Override
