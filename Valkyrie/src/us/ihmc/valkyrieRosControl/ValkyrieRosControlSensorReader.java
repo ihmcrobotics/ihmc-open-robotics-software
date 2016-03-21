@@ -69,7 +69,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
    private final ValkyrieAccelerationIntegration accelerationIntegration;
 
-   @SuppressWarnings("unchecked") public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
+   @SuppressWarnings("unchecked")
+   public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
          SensorProcessingConfiguration sensorProcessingConfiguration, TimestampProvider timestampProvider,
          List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, List<YoPositionJointHandleHolder> yoPositionJointHandleHolders,
          List<YoIMUHandleHolder> yoIMUHandleHolders, List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, YoVariableRegistry registry)
@@ -167,7 +168,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       doIHMCControlRatio.set(MathTools.clipToMinMax(controlRatio, 0.0, 1.0));
    }
 
-   @Override public void read()
+   @Override
+   public void read()
    {
       readSensors();
       writeCommandsToRobot();
@@ -269,22 +271,26 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       }
    }
 
-   @Override public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
+   @Override
+   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
       return sensorProcessing;
    }
 
-   @Override public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   @Override
+   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
       return sensorProcessing;
    }
 
-   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   @Override
+   public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
    {
       return null;
    }
 
-   @Override public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
+   @Override
+   public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
    {
       ValkyrieRosControlEffortJointControlCommandCalculator jointCommandCalculator = effortJointToControlCommandCalculatorMap.get(oneDoFJoint.getName());
       if (jointCommandCalculator != null)
