@@ -2,7 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorFromFastRunner;
+import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopTools
@@ -53,7 +53,7 @@ public class FourBarKinematicLoopTools
       }
    }
    
-   public static void verifyMasterJointLimits(String fourBarName, RevoluteJoint masterJointA, FourBarCalculatorFromFastRunner fourBarCalculator)
+   public static void verifyMasterJointLimits(String fourBarName, RevoluteJoint masterJointA, FourBarCalculatorWithDerivatives fourBarCalculator)
    {
       double maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
       double minValidMasterJointAngle = fourBarCalculator.getMinDAB();

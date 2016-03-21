@@ -9,7 +9,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorFromFastRunner;
+import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoop
@@ -36,7 +36,7 @@ public class FourBarKinematicLoop
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
    private final Vector3d closurePointFromLastPassiveJointVect;  
    
-   private final FourBarCalculatorFromFastRunner fourBarCalculator;
+   private final FourBarCalculatorWithDerivatives fourBarCalculator;
    
    private final double[] passiveInteriorAnglesAtZeroConfiguration = new double[3];
    private final double[] passiveJointSigns = new double[3];
@@ -162,7 +162,7 @@ public class FourBarKinematicLoop
       }
    }
 
-   private FourBarCalculatorFromFastRunner createFourBarCalculator(FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected, FrameVector2d vectorDAProjected, FrameVector2d vectorABProjected)
+   private FourBarCalculatorWithDerivatives createFourBarCalculator(FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected, FrameVector2d vectorDAProjected, FrameVector2d vectorABProjected)
    {
       double masterLinkAB = vectorABProjected.length();
       double BC = vectorBCProjected.length();
@@ -175,7 +175,7 @@ public class FourBarKinematicLoop
          System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
 
-      FourBarCalculatorFromFastRunner fourBarCalculator = new FourBarCalculatorFromFastRunner(DA, masterLinkAB, BC, CD);
+      FourBarCalculatorWithDerivatives fourBarCalculator = new FourBarCalculatorWithDerivatives(DA, masterLinkAB, BC, CD);
 
       return fourBarCalculator;
    }

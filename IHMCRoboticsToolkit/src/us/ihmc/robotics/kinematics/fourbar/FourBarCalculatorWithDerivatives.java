@@ -16,7 +16,7 @@ import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLeng
 
 import us.ihmc.robotics.MathTools;
 
-public class FourBarCalculatorFromFastRunner
+public class FourBarCalculatorWithDerivatives
 {
    /*
     *  Representation of the four bar with name correspondences:
@@ -47,7 +47,7 @@ public class FourBarCalculatorFromFastRunner
    // Angular accelerations
    private double angleDt2DAB, angleDt2ABC, angleDt2BCD, angleDt2CDA;
 
-   public FourBarCalculatorFromFastRunner(double length_DA, double length_AB, double length_BC, double length_CD)
+   public FourBarCalculatorWithDerivatives(double length_DA, double length_AB, double length_BC, double length_CD)
    {
       this.a = abs(length_DA);
       this.b = abs(length_AB);
