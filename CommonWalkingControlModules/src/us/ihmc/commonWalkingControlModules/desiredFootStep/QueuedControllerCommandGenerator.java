@@ -24,8 +24,9 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class QueuedControllerCommandGenerator implements Updatable
 {
+   private static final boolean DEBUG = false;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-//   private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
    private boolean waitingForWalkingStatusToComplete = false;
    
@@ -69,7 +70,8 @@ public class QueuedControllerCommandGenerator implements Updatable
          return;
       }
 
-      System.out.println("Found a controller command!!!");
+      if (DEBUG)
+         System.out.println("Found a controller command!!!");
       if (controllerCommand instanceof FootstepDataListControllerCommand)
       {
          FootstepDataListControllerCommand footstepDataListControllerCommand = (FootstepDataListControllerCommand) controllerCommand;
@@ -125,8 +127,11 @@ public class QueuedControllerCommandGenerator implements Updatable
             {
             case COMPLETED:
             {
-               System.out.println("Footstep Completed!");
-               System.out.println("waitingForWalkingStatusToComplete = " + waitingForWalkingStatusToComplete);
+               if (DEBUG)
+               {
+                  System.out.println("Footstep Completed!");
+                  System.out.println("waitingForWalkingStatusToComplete = " + waitingForWalkingStatusToComplete);
+               }
 
                pollAndSubmitNextCommandIfReady();
             }
@@ -146,14 +151,16 @@ public class QueuedControllerCommandGenerator implements Updatable
             {
             case COMPLETED:
             {
-               System.out.println("Walking Completed!");
-               System.out.println("waitingForWalkingStatusToComplete = " + waitingForWalkingStatusToComplete);
+               if (DEBUG)
+               {
+                  System.out.println("Walking Completed!");
+                  System.out.println("waitingForWalkingStatusToComplete = " + waitingForWalkingStatusToComplete);
+               }
                
                waitingForWalkingStatusToComplete = false;
 
             }
             case ABORT_REQUESTED:
-//               walk.set(false);
             default:
                break;
             }
