@@ -127,6 +127,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       this.finalVelocity.set(finalVelocity);
    }
 
+   @Override
    public void initialize()
    {
       currentTime.set(0.0);
@@ -139,6 +140,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       currentAcceleration.setToZero();
    }
 
+   @Override
    public void compute(double dt)
    {
       this.currentTime.add(dt);

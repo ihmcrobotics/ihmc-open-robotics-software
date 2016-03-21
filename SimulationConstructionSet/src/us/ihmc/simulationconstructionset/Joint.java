@@ -74,7 +74,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     * and NullJoint all call this superconstructor to initialize their common parameters.
     *
     * @param name Name of the new Joint.
-    * @param offsetVec Vector3d representing the offset from the previous joint.
+    * @param offsetVec Vector3d representing the offset from the previous joint when all joints are at zero
     * @param rob Robot which this joint is a member of.
     * @param numDOF Number of degrees of freedom held by this joint.
     */
