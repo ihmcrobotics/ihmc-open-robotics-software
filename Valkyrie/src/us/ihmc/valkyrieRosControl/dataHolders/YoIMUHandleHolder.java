@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 
 
 public class YoIMUHandleHolder

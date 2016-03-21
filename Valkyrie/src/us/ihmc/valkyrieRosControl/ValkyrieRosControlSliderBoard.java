@@ -23,8 +23,8 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.rosControl.JointHandle;
-import us.ihmc.rosControl.valkyrie.IHMCValkyrieControlJavaBridge;
+import us.ihmc.rosControl.EffortJointHandle;
+import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -32,24 +32,26 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
-public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
+public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBridge
 {
 
-//   private static final String[] controlledJoints = {"torsoYaw", "torsoPitch", "torsoRoll"};
+//   private static final String[] torqueControlledJoints = {"torsoYaw", "torsoPitch", "torsoRoll"};
 
-//   private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+//   private static final String[] torqueControlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
 //       "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
 //       "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
 //       "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
 //       "rightWristPitch" };
 
-   private static final String[] controlledJoints = {
+   private static final String[] torqueControlledJoints = {
          "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
          "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
          "torsoYaw", "torsoPitch", "torsoRoll",
          "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
          "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
          };
+
+   private static final String[] positionControlledJoints = { "lowerNeckPitch", "neckYaw", "upperNeckPitch", };
 
    public static final boolean LOAD_STAND_PREP_SETPOINTS = true;
    public static final boolean LOAD_TORQUE_OFFSETS = true;
@@ -61,7 +63,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
    private final SDFFullHumanoidRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
 
-   private final ArrayList<JointHolder> jointHolders = new ArrayList<>();
+   private final ArrayList<EffortJointHolder> effortJointHolders = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()),
@@ -126,11 +128,11 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          loadTorqueOffsets();
 
       ArrayList<String> jointNames = new ArrayList<>();
-      for (String jointName : controlledJoints)
+      for (String jointName : torqueControlledJoints)
       {
          OneDoFJoint joint = sdfFullRobotModel.getOneDoFJointByName(jointName);
-         JointHandle handle = createJointHandle(jointName);
-         jointHolders.add(new JointHolder(joint, handle, registry, dt));
+         EffortJointHandle handle = createEffortJointHandle(jointName);
+         effortJointHolders.add(new EffortJointHolder(joint, handle, registry, dt));
          jointNames.add(joint.getName());
       }
 
@@ -147,7 +149,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            JointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
+            EffortJointHolder selected = effortJointHolders.get(selectedJoint.getOrdinal());
             qDesiredSelected.set(selected.q_d.getDoubleValue());
             qdDesiredSelected.set(selected.qd_d.getDoubleValue());
 
@@ -157,7 +159,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
             tauOffsetSelected.set(selected.tau_offset.getDoubleValue());
 
             if (previousSelectedJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
-               jointHolders.get(previousSelectedJoint.getOrdinal()).tau_function.set(0.0);
+               effortJointHolders.get(previousSelectedJoint.getOrdinal()).tau_function.set(0.0);
 
             if (RESET_FUNCTIONS_ON_JOINT_CHANGE || selectedJoint.getOrdinal() != secondaryJoint.getOrdinal() || previousSelectedJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
             {
@@ -247,7 +249,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       tauFunctionSelected.set(selectedFunctionGenerator.getValue());
 
       masterScaleFactor.set(MathTools.clipToMinMax(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
-      JointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
+      EffortJointHolder selected = effortJointHolders.get(selectedJoint.getOrdinal());
       selected.q_d.set(MathTools.clipToMinMax(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
       selected.qd_d.set(qdDesiredSelected.getDoubleValue());
       selected.pdController.setProportionalGain(kpSelected.getDoubleValue());
@@ -257,15 +259,15 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
 
       if (secondaryJoint.getOrdinal() != EnumYoVariable.NULL_VALUE)
       {
-         JointHolder secondary = jointHolders.get(secondaryJoint.getOrdinal());
+         EffortJointHolder secondary = effortJointHolders.get(secondaryJoint.getOrdinal());
          if (secondaryJoint.getOrdinal() != selectedJoint.getOrdinal())
             secondary.tau_function.set(secondaryFunctionGenerator.getValue());
          tauFunctionSecondary.set(secondary.tau_function.getDoubleValue());
       }
 
-      for (int i = 0; i < jointHolders.size(); i++)
+      for (int i = 0; i < effortJointHolders.size(); i++)
       {
-         JointHolder holder = jointHolders.get(i);
+         EffortJointHolder holder = effortJointHolders.get(i);
          holder.update();
       }
 
@@ -279,12 +281,12 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       yoVariableServer.update(time);
    }
 
-   private class JointHolder
+   private class EffortJointHolder
    {
       private final YoVariableRegistry registry;
       private final OneDoFJoint joint;
       private final PDController pdController;
-      private final JointHandle handle;
+      private final EffortJointHandle handle;
 
       private final DoubleYoVariable q;
       private final DoubleYoVariable qd;
@@ -298,7 +300,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCValkyrieControlJavaBridge
       private final DoubleYoVariable tau_function;
       private final DoubleYoVariable tau_d;
 
-      public JointHolder(OneDoFJoint joint, JointHandle handle, YoVariableRegistry parentRegistry, double dt)
+      public EffortJointHolder(OneDoFJoint joint, EffortJointHandle handle, YoVariableRegistry parentRegistry, double dt)
       {
          this.joint = joint;
          this.handle = handle;

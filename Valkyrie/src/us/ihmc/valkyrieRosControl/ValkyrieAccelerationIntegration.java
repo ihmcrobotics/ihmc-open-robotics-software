@@ -9,13 +9,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
 public class ValkyrieAccelerationIntegration
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("AccelerationIntegration");
 
-   private final List<YoJointHandleHolder> processedJointHandles = new ArrayList<>();
+   private final List<YoEffortJointHandleHolder> processedJointHandles = new ArrayList<>();
 
    private final DoubleYoVariable alphaAccelerationIntegration = new DoubleYoVariable("alphaAccelerationIntegration", registry);
 
@@ -36,12 +36,12 @@ public class ValkyrieAccelerationIntegration
    private final String[] legs = new String[]{"Hip", "Knee", "Ankle"};
    private final String[] arms = new String[]{"Shoulder", "Elbow"};
 
-   public ValkyrieAccelerationIntegration(List<YoJointHandleHolder> yoJointHandleHolders, double updateDT, YoVariableRegistry parentRegistry)
+   public ValkyrieAccelerationIntegration(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, double updateDT, YoVariableRegistry parentRegistry)
    {
       this.updateDT = updateDT;
       parentRegistry.addChild(registry);
 
-      for (YoJointHandleHolder jointHandle : yoJointHandleHolders)
+      for (YoEffortJointHandleHolder jointHandle : yoEffortJointHandleHolders)
       {
          OneDoFJoint joint = jointHandle.getOneDoFJoint();
          String jointName = joint.getName();
@@ -72,7 +72,7 @@ public class ValkyrieAccelerationIntegration
 
       for (int i = 0; i < processedJointHandles.size(); i++)
       {
-         YoJointHandleHolder jointHandle = processedJointHandles.get(i);
+         YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
          OneDoFJoint joint = jointHandle.getOneDoFJoint();
          String jointName = joint.getName();
 
@@ -91,7 +91,7 @@ public class ValkyrieAccelerationIntegration
    {
       for (int i = 0; i < processedJointHandles.size(); i++)
       {
-         YoJointHandleHolder jointHandle = processedJointHandles.get(i);
+         YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
          OneDoFJoint joint = jointHandle.getOneDoFJoint();
 
          boolean enabled = joint.getIntegrateDesiredAccelerations();
@@ -106,7 +106,7 @@ public class ValkyrieAccelerationIntegration
 
    private void computeAndApplyDesiredTauOffset(int index)
    {
-      YoJointHandleHolder jointHandle = processedJointHandles.get(index);
+      YoEffortJointHandleHolder jointHandle = processedJointHandles.get(index);
       OneDoFJoint joint = jointHandle.getOneDoFJoint();
       double alpha = alphaAccelerationIntegration.getDoubleValue();
       double qd = joint.getQd();

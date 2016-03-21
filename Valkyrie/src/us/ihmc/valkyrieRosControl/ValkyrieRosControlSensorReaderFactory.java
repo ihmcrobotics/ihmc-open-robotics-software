@@ -13,9 +13,10 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.rosControl.JointHandle;
-import us.ihmc.rosControl.valkyrie.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.EffortJointHandle;
+import us.ihmc.rosControl.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -23,11 +24,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
-import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
-import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
-import us.ihmc.valkyrieRosControl.dataHolders.YoMicroStrainIMUHandleHolder;
-import us.ihmc.valkyrieRosControl.dataHolders.YoSwitchableFilterModeIMUHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.*;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
@@ -36,7 +33,8 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
    private final SensorProcessingConfiguration sensorProcessingConfiguration;
 
-   private final HashMap<String, JointHandle> jointHandles;
+   private final HashMap<String, EffortJointHandle> effortJointHandles;
+   private final HashMap<String, PositionJointHandle> positionJointHandles;
    private final HashMap<String, IMUHandle> imuHandles;
    private final HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles;
 
@@ -44,13 +42,14 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    private final ValkyrieSensorInformation sensorInformation;
 
    public ValkyrieRosControlSensorReaderFactory(TimestampProvider timestampProvider, SensorProcessingConfiguration sensorProcessingConfiguration,
-         HashMap<String, JointHandle> jointHandles, HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles,
+         HashMap<String, EffortJointHandle> effortJointHandles, HashMap<String, PositionJointHandle> positionJointHandles, HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles,
          ValkyrieSensorInformation sensorInformation)
    {
       this.timestampProvider = timestampProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
 
-      this.jointHandles = jointHandles;
+      this.effortJointHandles = effortJointHandles;
+      this.positionJointHandles = positionJointHandles;
       this.imuHandles = imuHandles;
       this.forceTorqueSensorHandles = forceTorqueSensorHandles;
 
@@ -64,7 +63,8 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    {
       YoVariableRegistry sensorReaderRegistry = new YoVariableRegistry("ValkyrieRosControlSensorReader");
 
-      ArrayList<YoJointHandleHolder> yoJointHandleHolders = new ArrayList<>();
+      ArrayList<YoEffortJointHandleHolder> yoEffortJointHandleHolders = new ArrayList<>();
+      ArrayList<YoPositionJointHandleHolder> yoPositionJointHandleHolders = new ArrayList<>();
       ArrayList<YoIMUHandleHolder> yoIMUHandleHolders = new ArrayList<>();
       ArrayList<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles = new ArrayList<>();
 
@@ -76,11 +76,17 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
          {
             OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
             stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
-            if (jointHandles.containsKey(joint.getName()))
+            if (effortJointHandles.containsKey(joint.getName()))
             {
-               YoJointHandleHolder holder = new YoJointHandleHolder(jointHandles.get(joint.getName()), oneDoFJoint,
+               YoEffortJointHandleHolder holder = new YoEffortJointHandleHolder(effortJointHandles.get(joint.getName()), oneDoFJoint,
                      estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
-               yoJointHandleHolders.add(holder);
+               yoEffortJointHandleHolders.add(holder);
+            }
+            else if(positionJointHandles.containsKey(joint.getName()))
+            {
+               YoPositionJointHandleHolder holder = new YoPositionJointHandleHolder(positionJointHandles.get(joint.getName()), oneDoFJoint,
+                     estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
+               yoPositionJointHandleHolders.add(holder);
             }
          }
       }
@@ -148,7 +154,9 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
          }
       }
 
-      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, timestampProvider, yoJointHandleHolders,
+      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, timestampProvider,
+            yoEffortJointHandleHolders,
+            yoPositionJointHandleHolders,
             yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
 
       parentRegistry.addChild(sensorReaderRegistry);

@@ -1,6 +1,6 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.valkyrie.imu.MicroStrainData;
 
 import java.util.HashMap;
