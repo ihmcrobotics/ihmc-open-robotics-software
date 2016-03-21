@@ -33,6 +33,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
 
       QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(
             runtimeEnvironment);
+      QuadrupedController doNothingController = new QuadrupedPositionDoNothingController(runtimeEnvironment);
       QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, parameters,
             paramMapRepository);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
@@ -43,13 +44,16 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
             QuadrupedPositionControllerState.class, "positionControllerState", registry);
 
       builder.addState(QuadrupedPositionControllerState.JOINT_INITIALIZATION, jointInitializationController);
+      builder.addState(QuadrupedPositionControllerState.DO_NOTHING, doNothingController);
       builder.addState(QuadrupedPositionControllerState.STAND_PREP, standPrepController);
       builder.addState(QuadrupedPositionControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedPositionControllerState.CRAWL, crawlController);
 
       // TODO: Define more state transitions.
       builder.addTransition(QuadrupedPositionControllerEvent.JOINTS_INITIALIZED,
-            QuadrupedPositionControllerState.JOINT_INITIALIZATION, QuadrupedPositionControllerState.STAND_PREP);
+            QuadrupedPositionControllerState.JOINT_INITIALIZATION, QuadrupedPositionControllerState.DO_NOTHING);
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP,
+            QuadrupedPositionControllerState.DO_NOTHING, QuadrupedPositionControllerState.STAND_PREP);
       builder.addTransition(QuadrupedPositionControllerEvent.STARTING_POSE_REACHED,
             QuadrupedPositionControllerState.STAND_PREP, QuadrupedPositionControllerState.STAND_READY);
 
