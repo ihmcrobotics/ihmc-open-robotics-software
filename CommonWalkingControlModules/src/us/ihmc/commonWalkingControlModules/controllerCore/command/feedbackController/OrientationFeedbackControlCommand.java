@@ -6,13 +6,13 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.robotics.controllers.OrientationPIDGains;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class OrientationFeedbackControlCommand implements FeedbackControlCommand<OrientationFeedbackControlCommand>
 {
@@ -20,53 +20,35 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private final Quat4d desiredOrientationInWorld = new Quat4d();
    private final Vector3d desiredAngularVelocityInWorld = new Vector3d();
    private final Vector3d feedForwardAngularAccelerationInWorld = new Vector3d();
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, SpatialAccelerationVector.SIZE);
-
-   private RigidBody base;
-   private RigidBody endEffector;
-
-   private String baseName;
-   private String endEffectorName;
 
    private final OrientationPIDGains gains = new OrientationPIDGains();
-   private double weightForSolver = Double.POSITIVE_INFINITY;
+
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    public OrientationFeedbackControlCommand()
    {
-      setSelectionMatrixToIdentity();
+      spatialAccelerationCommand.setSelectionMatrixForAngularControl();
    }
 
    @Override
    public void set(OrientationFeedbackControlCommand other)
    {
-      base = other.base;
-      endEffector = other.endEffector;
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
-      setSelectionMatrix(other.selectionMatrix);
-      setGains(other.gains);
       desiredOrientationInWorld.set(other.desiredOrientationInWorld);
       desiredAngularVelocityInWorld.set(other.desiredAngularVelocityInWorld);
       feedForwardAngularAccelerationInWorld.set(other.feedForwardAngularAccelerationInWorld);
-      setWeightForSolver(other.weightForSolver);
+      gains.set(other.gains);
+
+      spatialAccelerationCommand.set(other.spatialAccelerationCommand);
    }
 
    public void set(RigidBody base, RigidBody endEffector)
    {
-      setBase(base);
-      setEndEffector(endEffector);
+      spatialAccelerationCommand.set(base, endEffector);
    }
 
-   public void setBase(RigidBody base)
+   public void setPrimaryBase(RigidBody primaryBase)
    {
-      this.base = base;
-      baseName = base.getName();
-   }
-
-   public void setEndEffector(RigidBody endEffector)
-   {
-      this.endEffector = endEffector;
-      endEffectorName = endEffector.getName();
+      spatialAccelerationCommand.setPrimaryBase(primaryBase);
    }
 
    public void setGains(OrientationPIDGainsInterface gains)
@@ -98,30 +80,20 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(3, SpatialAccelerationVector.SIZE);
-      selectionMatrix.set(0, 0, 1.0);
-      selectionMatrix.set(1, 1, 1.0);
-      selectionMatrix.set(2, 2, 1.0);
+      spatialAccelerationCommand.setSelectionMatrixToIdentity();
    }
 
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       if (selectionMatrix.getNumRows() > 3)
          throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-      if (selectionMatrix.getNumCols() != SpatialAccelerationVector.SIZE)
-         throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
 
-      this.selectionMatrix.set(selectionMatrix);
-   }
-
-   public DenseMatrix64F getSelectionMatrix()
-   {
-      return selectionMatrix;
+      spatialAccelerationCommand.setSelectionMatrix(selectionMatrix);
    }
 
    public void setWeightForSolver(double weight)
    {
-      weightForSolver = weight;
+      spatialAccelerationCommand.setWeight(weight);
    }
 
    public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack, FrameVector feedForwardAngularAccelerationToPack)
@@ -133,27 +105,27 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    public RigidBody getBase()
    {
-      return base;
-   }
-
-   public String getBaseName()
-   {
-      return baseName;
+      return spatialAccelerationCommand.getBase();
    }
 
    public RigidBody getEndEffector()
    {
-      return endEffector;
+      return spatialAccelerationCommand.getEndEffector();
    }
 
-   public String getEndEffectorName()
+   public RigidBody getPrimaryBase()
    {
-      return endEffectorName;
+      return spatialAccelerationCommand.getPrimaryBase();
    }
 
    public double getWeightForSolver()
    {
-      return weightForSolver;
+      return spatialAccelerationCommand.getWeight();
+   }
+
+   public SpatialAccelerationCommand getSpatialAccelerationCommand()
+   {
+      return spatialAccelerationCommand;
    }
 
    @Override

@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import javax.vecmath.AxisAngle4d;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controlModules.BodyFixedPointSpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
@@ -12,10 +10,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -57,8 +53,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final YoFrameVector yoDesiredAngularAcceleration;
    private final YoFrameVector yoAchievedAngularAcceleration;
 
-   private final DoubleYoVariable weightForSolver;
-
    private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
    private final FrameVector achievedAngularAcceleration = new FrameVector();
    private final FrameVector achievedLinearAcceleration = new FrameVector();
@@ -77,7 +71,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
 
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, SpatialAccelerationVector.SIZE);
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
    private final BodyFixedPointSpatialAccelerationControlModule accelerationControlModule;
@@ -128,9 +121,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoDesiredAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_ACCELERATION);
       yoAchievedAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.ANGULAR_ACCELERATION);
 
-      weightForSolver = new DoubleYoVariable(endEffectorName + "SpatialWeight", registry);
-      weightForSolver.set(Double.POSITIVE_INFINITY);
-
       parentRegistry.addChild(registry);
    }
 
@@ -140,13 +130,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
-      output.setPrimaryBase(command.getBase());
+      output.set(command.getSpatialAccelerationCommand());
 
-      output.set(base, endEffector);
-
-      setGains(command.getGains());
-      setWeightForSolver(command.getWeightForSolver());
-      selectionMatrix.set(command.getSelectionMatrix());
+      accelerationControlModule.setGains(command.getGains());
 
       command.getControlFramePoseIncludingFrame(tempPosition, tempOrientation);
       accelerationControlModule.setBodyFixedControlFrame(tempPosition, tempOrientation);
@@ -160,17 +146,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoDesiredOrientation.setAndMatchFrame(tempOrientation);
       yoDesiredAngularVelocity.setAndMatchFrame(tempAngularVelocity);
       yoFeedForwardAngularAcceleration.setAndMatchFrame(feedForwardAngularAcceleration);
-   }
-
-   public void setGains(SE3PIDGainsInterface gains)
-   {
-      accelerationControlModule.setGains(gains);
-   }
-
-   public void setWeightForSolver(double weightForSolver)
-   {
-      this.weightForSolver.set(weightForSolver);
-      output.setWeight(weightForSolver);
    }
 
    @Override
@@ -208,7 +183,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       updatePositionVisualization();
       updateOrientationVisualization();
 
-      output.set(desiredSpatialAcceleration, selectionMatrix);
+      output.setSpatialAcceleration(desiredSpatialAcceleration);
    }
 
    private void updatePositionVisualization()

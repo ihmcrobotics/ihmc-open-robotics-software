@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
@@ -16,7 +14,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.tools.FormattingTools;
 
 /**
@@ -30,7 +27,6 @@ public class LoadBearingHandControlState extends HandControlState
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final MomentumBasedController momentumBasedController;
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    private final DoubleYoVariable coefficientOfFriction;
    private final SpatialAccelerationVector handAcceleration;
@@ -51,6 +47,7 @@ public class LoadBearingHandControlState extends HandControlState
       registry = new YoVariableRegistry(name);
 
       spatialAccelerationCommand.set(elevator, endEffector);
+      spatialAccelerationCommand.setSelectionMatrixToIdentity();
 
       this.momentumBasedController = momentumBasedController;
 
@@ -104,7 +101,7 @@ public class LoadBearingHandControlState extends HandControlState
    public void doAction()
    {
       handAcceleration.setToZero(handFrame, elevatorFrame, handFrame);
-      submitDesiredAcceleration(handAcceleration);
+      spatialAccelerationCommand.setSpatialAcceleration(handAcceleration);
    }
 
    @Override
@@ -138,17 +135,6 @@ public class LoadBearingHandControlState extends HandControlState
    public boolean isDone()
    {
       return true;
-   }
-
-   private void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
-   {
-      spatialAccelerationCommand.set(handAcceleration);
-   }
-
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
-   {
-      this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
-      this.selectionMatrix.set(selectionMatrix);
    }
 
    @Override

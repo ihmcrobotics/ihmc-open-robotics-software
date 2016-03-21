@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -32,7 +33,7 @@ public class FeedbackControlCommandDataCopier
    {
       for (int i = 0; i < orientationFeedbackControlCommands.size(); i++)
       {
-         OrientationFeedbackControlCommand command = orientationFeedbackControlCommands.get(i);
+         SpatialAccelerationCommand command = orientationFeedbackControlCommands.get(i).getSpatialAccelerationCommand();
          command.setBase(nameToRigidBodyMap.get(command.getBaseName()));
          command.setEndEffector(nameToRigidBodyMap.get(command.getEndEffectorName()));
       }
@@ -46,7 +47,7 @@ public class FeedbackControlCommandDataCopier
 
       for (int i = 0; i < spatialFeedbackControlCommands.size(); i++)
       {
-         SpatialFeedbackControlCommand command = spatialFeedbackControlCommands.get(i);
+         SpatialAccelerationCommand command = spatialFeedbackControlCommands.get(i).getSpatialAccelerationCommand();
          command.setBase(nameToRigidBodyMap.get(command.getBaseName()));
          command.setEndEffector(nameToRigidBodyMap.get(command.getEndEffectorName()));
       }
