@@ -15,6 +15,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
@@ -79,7 +80,8 @@ public class PointFeedbackControllerTest
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, null, controlDT, 0.0, geometricJacobianHolder,
             twistCalculator, null, null);
-      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, registry);
+      FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);
@@ -172,7 +174,8 @@ public class PointFeedbackControllerTest
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, jointsToOptimizeFor, null, null, controlDT, 0.0, geometricJacobianHolder,
             twistCalculator, null, null);
-      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, registry);
+      FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);

@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.BodyFixedPointLinearAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
@@ -23,8 +26,6 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PointFeedbackController implements FeedbackControllerInterface
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry;
 
    private final BooleanYoVariable isEnabled;
@@ -59,7 +60,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
 
-   public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+         YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
@@ -74,16 +76,16 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
-      
-      yoDesiredPosition = new YoFramePoint(endEffectorName + "DesiredPosition", worldFrame, registry);
-      yoCurrentPosition = new YoFramePoint(endEffectorName + "CurrentPosition", worldFrame, registry);
-      
-      yoDesiredLinearVelocity = new YoFrameVector(endEffectorName + "DesiredLinearVelocity", worldFrame, registry);
-      yoCurrentLinearVelocity = new YoFrameVector(endEffectorName + "CurrentLinearVelocity", worldFrame, registry);
-      
-      yoFeedForwardLinearAcceleration = new YoFrameVector(endEffectorName + "FeedForwardLinearAcceleration", worldFrame, registry);
-      yoDesiredLinearAcceleration = new YoFrameVector(endEffectorName + "DesiredLinearAcceleration", worldFrame, registry);
-      yoAchievedLinearAcceleration = new YoFrameVector(endEffectorName + "AchievedLinearAcceleration", worldFrame, registry);
+
+      yoDesiredPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.DESIRED);
+      yoCurrentPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.CURRENT);
+
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
+      yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
+
+      yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
+      yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
+      yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
 
       weightForSolver = new DoubleYoVariable(endEffectorName + "PointWeight", registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
@@ -107,7 +109,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       command.getBodyFixedPointIncludingFrame(tempPosition);
       accelerationControlModule.setPointToControl(tempPosition);
-      
+
       command.getIncludingFrame(tempPosition, tempLinearVelocity, feedForwardLinearAcceleration);
       yoDesiredPosition.setAndMatchFrame(tempPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(tempLinearVelocity);

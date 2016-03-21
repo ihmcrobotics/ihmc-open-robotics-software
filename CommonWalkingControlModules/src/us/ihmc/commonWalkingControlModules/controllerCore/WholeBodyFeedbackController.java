@@ -35,11 +35,13 @@ public class WholeBodyFeedbackController
    private final Map<RigidBody, OrientationFeedbackController> orientationFeedbackControllerMap = new HashMap<>();
    private final Map<OneDoFJoint, OneDoFJointFeedbackController> oneDoFJointFeedbackControllerMap = new HashMap<>();
 
-   private final WholeBodyControlCoreToolbox toolbox;
+   private final WholeBodyControlCoreToolbox coreToolbox;
+   private final FeedbackControllerToolbox feedbackControllerToolbox;
 
-   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
+   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
    {
-      this.toolbox = toolbox;
+      this.coreToolbox = coreToolbox;
+      this.feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
 
       if (allPossibleCommands == null)
          return;
@@ -85,7 +87,7 @@ public class WholeBodyFeedbackController
       if (spatialFeedbackControllerMap.containsKey(endEffector))
          return;
 
-      SpatialFeedbackController controller = new SpatialFeedbackController(endEffector, toolbox, registry);
+      SpatialFeedbackController controller = new SpatialFeedbackController(endEffector, coreToolbox, feedbackControllerToolbox, registry);
       spatialFeedbackControllerMap.put(endEffector, controller);
       allControllers.add(controller);
    }
@@ -97,7 +99,7 @@ public class WholeBodyFeedbackController
       if (pointFeedbackControllerMap.containsKey(endEffector))
          return;
 
-      PointFeedbackController controller = new PointFeedbackController(endEffector, toolbox, registry);
+      PointFeedbackController controller = new PointFeedbackController(endEffector, coreToolbox, feedbackControllerToolbox, registry);
       pointFeedbackControllerMap.put(endEffector, controller);
       allControllers.add(controller);
    }
@@ -109,7 +111,7 @@ public class WholeBodyFeedbackController
       if (orientationFeedbackControllerMap.containsKey(endEffector))
          return;
 
-      OrientationFeedbackController controller = new OrientationFeedbackController(endEffector, toolbox, registry);
+      OrientationFeedbackController controller = new OrientationFeedbackController(endEffector, coreToolbox, feedbackControllerToolbox, registry);
       orientationFeedbackControllerMap.put(endEffector, controller);
       allControllers.add(controller);
    }
@@ -122,7 +124,7 @@ public class WholeBodyFeedbackController
          if (oneDoFJointFeedbackControllerMap.containsKey(joint))
             continue;
 
-         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, toolbox.getControlDT(), registry);
+         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox.getControlDT(), registry);
          oneDoFJointFeedbackControllerMap.put(joint, controller);
          allControllers.add(controller);
       }

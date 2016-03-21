@@ -5,6 +5,9 @@ import javax.vecmath.AxisAngle4d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -25,8 +28,6 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry;
 
    private final BooleanYoVariable isEnabled;
@@ -68,8 +69,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
 
-
-   public OrientationFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public OrientationFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+         YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
@@ -85,18 +86,18 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       isEnabled = new BooleanYoVariable(endEffectorName + "IsOrientationFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredOrientation = new YoFrameQuaternion(endEffectorName + "DesiredOrientation", worldFrame, registry);
-      yoCurrentOrientation = new YoFrameQuaternion(endEffectorName + "CurrentOrientation", worldFrame, registry);
+      yoDesiredOrientation = feedbackControllerToolbox.getOrCreateOrientation(endEffector, Type.DESIRED);
+      yoCurrentOrientation = feedbackControllerToolbox.getOrCreateOrientation(endEffector, Type.CURRENT);
 
-      yoDesiredRotationVector = new YoFrameVector(endEffectorName + "DesiredRotationVector", worldFrame, registry);
-      yoCurrentRotationVector = new YoFrameVector(endEffectorName + "CurrentRotationVector", worldFrame, registry);
+      yoDesiredRotationVector = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ROTATION_VECTOR);
+      yoCurrentRotationVector = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.ROTATION_VECTOR);
 
-      yoDesiredAngularVelocity = new YoFrameVector(endEffectorName + "DesiredAngularVelocity", worldFrame, registry);
-      yoCurrentAngularVelocity = new YoFrameVector(endEffectorName + "CurrentAngularVelocity", worldFrame, registry);
+      yoDesiredAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_VELOCITY);
+      yoCurrentAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.ANGULAR_VELOCITY);
 
-      yoFeedForwardAngularAcceleration = new YoFrameVector(endEffectorName + "FeedForwardAngularAcceleration", worldFrame, registry);
-      yoDesiredAngularAcceleration = new YoFrameVector(endEffectorName + "DesiredAngularAcceleration", worldFrame, registry);
-      yoAchievedAngularAcceleration = new YoFrameVector(endEffectorName + "AchievedAngularAcceleration", worldFrame, registry);
+      yoFeedForwardAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
+      yoDesiredAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_ACCELERATION);
+      yoAchievedAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.ANGULAR_ACCELERATION);
 
       weightForSolver = new DoubleYoVariable(endEffectorName + "OrientationWeight", registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
