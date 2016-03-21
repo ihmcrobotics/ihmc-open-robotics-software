@@ -2,6 +2,7 @@ package us.ihmc.aware.controller.force.taskSpaceController;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -13,10 +14,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedTaskSpaceEstimator
 {
    private final double gravity = 9.81;
+   private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
@@ -40,17 +44,18 @@ public class QuadrupedTaskSpaceEstimator
    private final YoFrameVector yoComVelocityEstimate;
    private final YoFramePoint yoDcmPositionEstimate;
    private final YoFramePoint yoIcpPositionEstimate;
-   private final DoubleYoVariable yoComHeightEstimate;
+   private final DoubleYoVariable yoLipNaturalFrequency;
 
    // solvers
    private final CenterOfMassJacobian comJacobian;
    private final TwistCalculator twistCalculator;
    private final Twist twistStorage;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("quadrupedTaskSpaceEstimator");
+   private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceEstimator");
 
-   public QuadrupedTaskSpaceEstimator(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, YoVariableRegistry parentRegistry)
+   public QuadrupedTaskSpaceEstimator(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      this.referenceFrames = referenceFrames;
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       worldFrame = referenceFrames.getWorldFrame();
@@ -88,7 +93,7 @@ public class QuadrupedTaskSpaceEstimator
       yoComVelocityEstimate = new YoFrameVector("comVelocityEstimate", worldFrame, registry);
       yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", worldFrame, registry);
       yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", worldFrame, registry);
-      yoComHeightEstimate = new DoubleYoVariable("comHeightEstimate", registry);
+      yoLipNaturalFrequency = new DoubleYoVariable("lipNaturalFrequency", registry);
 
       // solvers
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
@@ -98,9 +103,15 @@ public class QuadrupedTaskSpaceEstimator
       parentRegistry.addChild(registry);
    }
 
-   public void compute(QuadrupedTaskSpaceEstimates estimates, QuadrupedTaskSpaceEstimatorParameters estimatorParameters)
+   public QuadrupedReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
+   }
+
+   public void compute(QuadrupedTaskSpaceEstimates outputEstimates, QuadrupedTaskSpaceCommands inputCommands, QuadrupedTaskSpaceEstimatorSettings settings)
    {
       // update solvers
+      referenceFrames.updateFrames();
       twistCalculator.compute();
       comJacobian.compute();
 
@@ -109,77 +120,52 @@ public class QuadrupedTaskSpaceEstimator
       {
          twistCalculator.getTwistOfBody(twistStorage, footRigidBody.get(robotQuadrant));
          twistStorage.changeFrame(soleFrame.get(robotQuadrant));
-         twistStorage.getAngularPart(estimates.getSoleAngularVelocity().get(robotQuadrant));
-         twistStorage.getLinearPart(estimates.getSoleLinearVelocity().get(robotQuadrant));
-         estimates.getSoleOrientation().get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
-         estimates.getSolePosition().get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
+         twistStorage.getAngularPart(outputEstimates.getSoleAngularVelocity().get(robotQuadrant));
+         twistStorage.getLinearPart(outputEstimates.getSoleLinearVelocity().get(robotQuadrant));
+         outputEstimates.getSoleOrientation().get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
+         outputEstimates.getSolePosition().get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
       }
-
-      // compute support polygon
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         estimates.getSolePosition().get(robotQuadrant).changeFrame(estimates.getSupportPolygon().getReferenceFrame());
-         estimates.getSupportPolygon().setFootstep(robotQuadrant, estimates.getSolePosition().get(robotQuadrant));
-      }
-
-      // compute support frame (centroid and nominal orientation)
-      estimates.getSupportCentroid().changeFrame(estimates.getSupportPolygon().getReferenceFrame());
-      estimates.getSupportOrientation().changeFrame(estimates.getSupportPolygon().getReferenceFrame());
-      estimates.getSupportPolygon().getCentroid2d(estimates.getSupportCentroid());
-      estimates.getSupportOrientation().setYawPitchRoll(estimates.getSupportPolygon().getNominalYaw(), 0, 0);
 
       // compute body pose and twist
       twistCalculator.getTwistOfBody(twistStorage, pelvisRigidBody);
       twistStorage.changeFrame(bodyFrame);
-      twistStorage.getAngularPart(estimates.getBodyAngularVelocity());
-      twistStorage.getLinearPart(estimates.getBodyLinearVelocity());
-      estimates.getBodyOrientation().setToZero(bodyFrame);
-      estimates.getBodyPosition().setToZero(bodyFrame);
+      twistStorage.getAngularPart(outputEstimates.getBodyAngularVelocity());
+      twistStorage.getLinearPart(outputEstimates.getBodyLinearVelocity());
+      outputEstimates.getBodyOrientation().setToZero(bodyFrame);
+      outputEstimates.getBodyPosition().setToZero(bodyFrame);
 
       // compute center of mass position and velocity
-      estimates.getComPosition().setToZero(comFrame);
-      comJacobian.getCenterOfMassVelocity(estimates.getComVelocity());
+      outputEstimates.getComPosition().setToZero(comFrame);
+      comJacobian.getCenterOfMassVelocity(outputEstimates.getComVelocity());
 
       // compute divergent component of motion and instantaneous capture point
-      estimates.getComPosition().changeFrame(worldFrame);
-      estimates.getComVelocity().changeFrame(worldFrame);
-      estimates.getDcmPosition().changeFrame(worldFrame);
-      double omega = estimatorParameters.getDcmNaturalFrequency();
-      double comHeightOffset = gravity / (omega * omega);
-      estimates.getDcmPosition().setX(estimates.getComPosition().getX() + estimates.getComVelocity().getX() / omega);
-      estimates.getDcmPosition().setY(estimates.getComPosition().getY() + estimates.getComVelocity().getY() / omega);
-      estimates.getDcmPosition().setZ(estimates.getComPosition().getZ() + estimates.getComVelocity().getZ() / omega);
-      estimates.getIcpPosition().setIncludingFrame(estimates.getDcmPosition());
-      estimates.getIcpPosition().add(0, 0, -comHeightOffset);
-
-      // compute center of mass height
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         estimates.getSolePosition().get(robotQuadrant).changeFrame(worldFrame);
-      }
-      double minFrontFootHeight = Math.min(estimates.getSolePosition().get(RobotQuadrant.FRONT_LEFT).getZ(), estimates.getSolePosition().get(RobotQuadrant.FRONT_RIGHT).getZ());
-      double minHindFootHeight = Math.min(estimates.getSolePosition().get(RobotQuadrant.HIND_LEFT).getZ(), estimates.getSolePosition().get(RobotQuadrant.HIND_RIGHT).getZ());
-      estimates.getComPosition().changeFrame(worldFrame);
-      estimates.setComHeight(estimates.getComPosition().getZ() - ((minFrontFootHeight + minHindFootHeight) / 2.0));
+      double naturalFrequency = settings.getLipNaturalFrequency();
+      double comHeightConstant = gravity / (naturalFrequency * naturalFrequency);
+      outputEstimates.setLipNaturalFrequency(naturalFrequency);
+      outputEstimates.getComPosition().changeFrame(worldFrame);
+      outputEstimates.getComVelocity().changeFrame(worldFrame);
+      outputEstimates.getDcmPosition().changeFrame(worldFrame);
+      outputEstimates.getDcmPosition().setX(outputEstimates.getComPosition().getX() + outputEstimates.getComVelocity().getX() / naturalFrequency);
+      outputEstimates.getDcmPosition().setY(outputEstimates.getComPosition().getY() + outputEstimates.getComVelocity().getY() / naturalFrequency);
+      outputEstimates.getDcmPosition().setZ(outputEstimates.getComPosition().getZ() + outputEstimates.getComVelocity().getZ() / naturalFrequency);
+      outputEstimates.getIcpPosition().setIncludingFrame(outputEstimates.getDcmPosition());
+      outputEstimates.getIcpPosition().add(0, 0, -comHeightConstant);
 
       // update variables
+      yoBodyOrientationEstimate.setAndMatchFrame(outputEstimates.getBodyOrientation());
+      yoBodyAngularVelocityEstimate.setAndMatchFrame(outputEstimates.getBodyAngularVelocity());
+      yoBodyLinearVelocityEstimate.setAndMatchFrame(outputEstimates.getBodyLinearVelocity());
+      yoComPositionEstimate.setAndMatchFrame(outputEstimates.getComPosition());
+      yoComVelocityEstimate.setAndMatchFrame(outputEstimates.getComVelocity());
+      yoDcmPositionEstimate.setAndMatchFrame(outputEstimates.getDcmPosition());
+      yoIcpPositionEstimate.setAndMatchFrame(outputEstimates.getIcpPosition());
+      yoLipNaturalFrequency.set(outputEstimates.getLipNaturalFrequency());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleOrientation().get(robotQuadrant));
-         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSolePosition().get(robotQuadrant));
-         yoSoleAngularVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleAngularVelocity().get(robotQuadrant));
-         yoSoleLinearVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleLinearVelocity().get(robotQuadrant));
+         yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(outputEstimates.getSoleOrientation().get(robotQuadrant));
+         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(outputEstimates.getSolePosition().get(robotQuadrant));
+         yoSoleAngularVelocityEstimate.get(robotQuadrant).setAndMatchFrame(outputEstimates.getSoleAngularVelocity().get(robotQuadrant));
+         yoSoleLinearVelocityEstimate.get(robotQuadrant).setAndMatchFrame(outputEstimates.getSoleLinearVelocity().get(robotQuadrant));
       }
-      estimates.getSupportPolygon().packYoFrameConvexPolygon2d(yoSupportPolygonEstimate);
-      yoSupportCentroidEstimate.setAndMatchFrame(estimates.getSupportCentroid());
-      yoSupportOrientationEstimate.setAndMatchFrame(estimates.getSupportOrientation());
-      yoBodyOrientationEstimate.setAndMatchFrame(estimates.getBodyOrientation());
-      yoBodyAngularVelocityEstimate.setAndMatchFrame(estimates.getBodyAngularVelocity());
-      yoBodyLinearVelocityEstimate.setAndMatchFrame(estimates.getBodyLinearVelocity());
-      yoComPositionEstimate.setAndMatchFrame(estimates.getComPosition());
-      yoComVelocityEstimate.setAndMatchFrame(estimates.getComVelocity());
-      yoDcmPositionEstimate.setAndMatchFrame(estimates.getDcmPosition());
-      yoIcpPositionEstimate.setAndMatchFrame(estimates.getIcpPosition());
-      yoComHeightEstimate.set(estimates.getComHeight());
    }
 }
