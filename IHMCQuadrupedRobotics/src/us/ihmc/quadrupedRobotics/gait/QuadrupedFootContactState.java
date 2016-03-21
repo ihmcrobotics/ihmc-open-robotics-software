@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.gait;
 
-public enum QuadrupedGaitQuadrantState
+public enum QuadrupedFootContactState
 {
    SUPPORT,
    SWING,
