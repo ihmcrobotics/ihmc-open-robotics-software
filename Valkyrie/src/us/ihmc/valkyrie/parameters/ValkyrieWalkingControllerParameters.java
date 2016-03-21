@@ -18,7 +18,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -245,7 +244,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       
       // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
       // don't do well with redundant joints yet. We'll have to fix that later some how.
-      else return new String[] {jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+      else return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
    }
 
    @Override
@@ -532,21 +531,18 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
+      YoValkyrieHeadPIDGains gains = new YoValkyrieHeadPIDGains("HeadOrientation", registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kp = 6.5;//40.0;
+      double kpX = 5.0;
+      double kpYZ = 20.0;//40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
       double maxAccel = 18.0;
       double maxJerk = 270.0;
 
-      gains.setProportionalGain(kp);
+      gains.setProportionalGains(kpX, kpYZ);
       gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
