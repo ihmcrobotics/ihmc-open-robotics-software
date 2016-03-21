@@ -45,6 +45,9 @@ public class NetworkPorts
    public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(2148);
    public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(2149);
 
+   // Teleop ports
+   public static final NetworkPorts XBOX_CONTROLLER_TELEOP_PORT = new NetworkPorts(3001);
+
    // Dynamic ports for testing purposes
    public static NetworkPorts createMissionControlIntraprocessPort(NetworkPorts port)
    {

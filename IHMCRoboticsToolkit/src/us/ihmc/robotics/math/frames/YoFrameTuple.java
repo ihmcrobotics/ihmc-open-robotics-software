@@ -217,6 +217,24 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       this.frameTuple.changeFrame(getReferenceFrame());
       getYoValuesFromFrameTuple(notifyListeners);
    }
+   
+   /**
+    * Sets this tuple to the location of the origin of passed in referenceFrame.
+    */
+   private final void setFromReferenceFrame(ReferenceFrame referenceFrame, boolean notifyListeners)
+   {
+      this.frameTuple.setToZero(referenceFrame);
+      this.frameTuple.changeFrame(getReferenceFrame());
+      getYoValuesFromFrameTuple(notifyListeners);
+   }
+   
+   /**
+    * Sets this tuple to the location of the origin of passed in referenceFrame.
+    */
+   protected void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      setFromReferenceFrame(referenceFrame, true);
+   }
 
    public final void set(FrameTuple<?, ?> frameTuple)
    {
