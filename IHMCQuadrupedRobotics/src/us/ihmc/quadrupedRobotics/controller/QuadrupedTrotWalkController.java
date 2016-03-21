@@ -12,12 +12,13 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
+import us.ihmc.quadrupedRobotics.gait.QuadrupedSupportConfiguration;
+import us.ihmc.quadrupedRobotics.gait.QuadrupedGaitCycle;
 import us.ihmc.quadrupedRobotics.gait.TrotPair;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.quadrupedRobotics.trajectory.QuadrupedSwingTrajectoryGenerator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoTwist;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -38,7 +40,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
@@ -109,6 +110,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final YoFramePoint centerOfMassXYProjection = new YoFramePoint("centerOfMassXYProjection", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMassViz", centerOfMassXYProjection, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
    
+   // Balancing
    private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final QuadrantDependentList<YoFrameVector[]> basisForceVectors = new QuadrantDependentList<>();
@@ -139,7 +141,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final FrameVector vmcRequestedTorqueFromJointXYZ = new FrameVector();
    private final FrameVector jointAxis = new FrameVector();
    
-   private final QuadrantDependentList<QuadrupedSwingTrajectoryGenerator> swingTrajectoryGenerators;
+   // Walking
+   private final QuadrantDependentList<YoPolynomial> swingZTrajectories = new QuadrantDependentList<>();
+   private final DoubleYoVariable swingZHeight = new DoubleYoVariable("swingZHeight", registry);
+   private final DoubleYoVariable desiredGaitPeriod = new DoubleYoVariable("desiredGaitPeriod", registry);
+   private final DoubleYoVariable currentGaitCompletion = new DoubleYoVariable("currentGaitCompletion", registry);
+   private final DoubleYoVariable impactVelocityZ = new DoubleYoVariable("impactVelocityZ", registry);
    
    private final StateMachine<QuadrupedWalkingState> stateMachine;
    private final EnumYoVariable<QuadrupedWalkingState> nextState = new EnumYoVariable<QuadrupedWalkingState>("nextState", "", registry, QuadrupedWalkingState.class, false);
@@ -264,10 +271,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       hindRightFrontLeftTrotLine = new YoArtifactLine("hindRightFrontLeftTrotLine", hindRightFoot, frontLeftFoot, hindRightYoAppearance);
       hindLeftFrontRightTrotLine = new YoArtifactLine("hindLeftFrontRightTrotLine", hindLeftFoot, frontRightFoot, hindLeftYoAppearance);
       
-      swingTrajectoryGenerators = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingTrajectoryGenerators.set(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(robotQuadrant, registry, yoGraphicsListRegistry, dt));
+         swingZTrajectories.set(robotQuadrant, new YoPolynomial("swingZTrajectory" + robotQuadrant.getPascalCaseName(), 4, registry));
       }
       
       yoGraphicsListRegistry.registerArtifact("trotLines", hindRightFrontLeftTrotLine);
@@ -388,6 +394,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          footToCoMVectors.get(robotQuadrant).sub(feetLocations.get(robotQuadrant));
          calculateBasisVectors(robotQuadrant, footToCoMVectors.get(robotQuadrant));
       }
+      
+      currentGaitCompletion.add(dt / desiredGaitPeriod.getDoubleValue());
+      currentGaitCompletion.set(currentGaitCompletion.getDoubleValue() % 1.0);
    }
 
    private void computeFeetContactState()
@@ -406,7 +415,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    }
 
    //Control X and Y using Center of Pressure on each trot line, SR and SL.
-   private void doTrotControl()
+   private void doControl()
    {
       double distanceFH = feetLocations.get(RobotQuadrant.HIND_LEFT).distance(feetLocations.get(RobotQuadrant.FRONT_LEFT));
       
@@ -551,11 +560,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          computeStanceJacobianForLeg(robotQuadrant);
       }
    }
-   
-   private void applyPositionControlledSwingTorques(boolean hindLeft, boolean hindRight, boolean frontLeft, boolean frontRight)
-   {
-      
-   }
 
    private void computeStanceJacobianForLeg(RobotQuadrant robotQuadrant)
    {
@@ -599,6 +603,60 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          vmcFootForcesWorld.get(robotQuadrant).setToZero();
       }
    }
+   
+   private class Gait extends State<QuadrupedGaitCycle>
+   {
+      private QuadrupedSupportConfiguration supportConfiguration;
+      
+      public Gait(QuadrupedGaitCycle gaitType)
+      {
+         super(gaitType);
+      }
+
+      @Override
+      public void doAction()
+      {
+         computeFeetContactState();
+         
+         
+         
+         doControl();
+         distributeForcesToFeet();
+         computeStanceJacobians();
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         
+      }
+      
+      private void doSupportAndSwing()
+      {
+         supportPolygon.clear();
+         for (RobotQuadrant robotQuadrant : getStateEnum().getSupportQuadrants(currentGaitCompletion.getDoubleValue()))
+         {
+            supportPolygon.setFootstep(robotQuadrant, feetLocations.get(robotQuadrant).getFrameTuple());
+         }
+         for (RobotQuadrant robotQuadrant : getStateEnum().getSwingQuadrants(currentGaitCompletion.getDoubleValue()))
+         {
+            double timeStart = currentGaitCompletion.getDoubleValue();
+            double timePeak = getStateEnum().getRemainingSwingDuration(robotQuadrant, currentGaitCompletion.getDoubleValue()) / 2.0;
+            double timeEnd = timePeak * 2.0;
+            double zStart = 0.0;
+            double zMid = swingZHeight.getDoubleValue();
+            double zEnd = zStart;
+            double zVelocityFinal = impactVelocityZ.getDoubleValue();
+            swingZTrajectories.get(robotQuadrant).setCubicWithIntermediatePositionAndFinalVelocityConstraint(timeStart, timePeak, timeEnd, zStart, zMid, zEnd, zVelocityFinal);
+         }
+      }
+         
+      @Override
+      public void doTransitionOutOfAction()
+      {
+         
+      }
+   }
 
    private class QuadSupportState extends State<QuadrupedWalkingState>
    {
@@ -612,7 +670,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       {
          computeFeetContactState();
 
-         doTrotControl();
+         doControl();
          distributeForcesToFeet();
          
          computeStanceJacobians();
@@ -647,7 +705,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       {
          computeFeetContactState();
 
-         doTrotControl();
+         doControl();
          distributeForcesToFeet();
 
          computeStanceJacobians();
@@ -682,7 +740,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       {
          computeFeetContactState();
 
-         doTrotControl();
+         doControl();
          distributeForcesToFeet();
 
          computeStanceJacobians();
@@ -738,6 +796,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       
       enableTrot.set(false);
       timeInTrot.set(0.01);
+      desiredGaitPeriod.set(5.0);
+      swingZHeight.set(0.1);
+      impactVelocityZ.set(0.0);
 
       kp_x.set(50.0);
       kd_x.set(10.0);
