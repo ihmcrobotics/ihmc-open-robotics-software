@@ -1,7 +1,5 @@
 package us.ihmc.aware.controller.position;
 
-import java.util.Arrays;
-
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -13,7 +11,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
  */
 public class QuadrupedPositionJointInitializationController implements QuadrupedPositionController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedPositionJointInitializationController.class.getName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedPositionJointInitializationController.class.getSimpleName());
    private final FullRobotModel fullRobotModel;
 
    /**
@@ -38,11 +36,14 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
    @Override
    public void onEntry()
    {
-      Arrays.fill(initialized, false);
-
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
          joint.setUnderPositionControl(true);
+      }
+
+      for (int i = 0; i < initialized.length; i++)
+      {
+         initialized[i].set(false);
       }
    }
 
