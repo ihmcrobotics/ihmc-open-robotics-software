@@ -602,4 +602,14 @@ public enum RobotQuadrant
          }
       }
    }
+   
+   public String getPascalCaseName()
+   {
+      return getCamelCaseNameForMiddleOfExpression();
+   }
+   
+   public String getCamelCaseName()
+   {
+      return getCamelCaseNameForStartOfExpression();
+   }
 }

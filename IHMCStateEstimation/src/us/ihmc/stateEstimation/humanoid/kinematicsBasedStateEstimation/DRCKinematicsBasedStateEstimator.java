@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -242,7 +242,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
+   public void initializeEstimatorToActual(Tuple3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
       // Do nothing for the orientation since the IMU is trusted

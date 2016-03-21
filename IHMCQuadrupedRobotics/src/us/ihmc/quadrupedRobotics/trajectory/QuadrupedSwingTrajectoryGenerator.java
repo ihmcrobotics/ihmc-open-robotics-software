@@ -1,10 +1,10 @@
 package us.ihmc.quadrupedRobotics.trajectory;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 import us.ihmc.robotics.alphaToAlpha.MultipleSegmentConstantSlope;
-import us.ihmc.robotics.alphaToAlpha.StretchedSlowAtEndAlphaToAlphaFunction;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -18,8 +18,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-
-import javax.vecmath.Point2d;
 
 public class QuadrupedSwingTrajectoryGenerator
 {
