@@ -9,9 +9,12 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+import javax.vecmath.Vector3d;
+
 public class BodyOrientationControlBlock implements QuadrupedTaskSpaceControlBlock
 {
    private final ReferenceFrame bodyFrame;
+   private final Vector3d controlAxes;
    private final FrameOrientation bodyOrientationSetpoint;
    private final FrameVector bodyAngularVelocitySetpoint;
    private final FrameVector bodyTorqueFeedforwardSetpoint;
@@ -20,20 +23,26 @@ public class BodyOrientationControlBlock implements QuadrupedTaskSpaceControlBlo
    public BodyOrientationControlBlock(ReferenceFrame bodyFrame, double controlDT, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
+      controlAxes = new Vector3d(1, 1, 1);
       bodyOrientationSetpoint = new FrameOrientation();
       bodyAngularVelocitySetpoint = new FrameVector();
       bodyTorqueFeedforwardSetpoint = new FrameVector();
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
    }
 
-   public void setBodyOrientation(FrameOrientation bodyOrientationSetpoint)
+   public void setBodyOrientationSetpoint(FrameOrientation bodyOrientationSetpoint)
    {
       this.bodyOrientationSetpoint.setIncludingFrame(bodyOrientationSetpoint);
    }
 
-   public void setBodyAngularVelocity(FrameVector bodyAngularVelocitySetpoint)
+   public void setBodyAngularVelocitySetpoint(FrameVector bodyAngularVelocitySetpoint)
    {
       this.bodyAngularVelocitySetpoint.setIncludingFrame(bodyAngularVelocitySetpoint);
+   }
+
+   public void setControlAxes(int xEnable, int yEnable, int zEnable)
+   {
+      controlAxes.set(xEnable, yEnable, zEnable);
    }
 
    public void setProportionalGains(double[] proportionalGains)
@@ -69,5 +78,19 @@ public class BodyOrientationControlBlock implements QuadrupedTaskSpaceControlBlo
       bodyAngularVelocityEstimate.changeFrame(bodyFrame);
       bodyTorqueFeedforwardSetpoint.setToZero(bodyFrame);
       bodyOrientationController.compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, bodyTorqueFeedforwardSetpoint);
+
+      // apply command mask
+      if (controlAxes.getX() == 0)
+      {
+         comTorqueCommand.setX(0);
+      }
+      if (controlAxes.getY() == 0)
+      {
+         comTorqueCommand.setY(0);
+      }
+      if (controlAxes.getZ() == 0)
+      {
+         comTorqueCommand.setZ(0);
+      }
    }
 }

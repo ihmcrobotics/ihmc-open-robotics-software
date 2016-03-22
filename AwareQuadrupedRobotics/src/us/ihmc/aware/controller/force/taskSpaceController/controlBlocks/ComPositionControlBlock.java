@@ -16,8 +16,8 @@ public class ComPositionControlBlock implements QuadrupedTaskSpaceControlBlock
    private double mass;
    private double gravity;
    private double controlDT;
-   private final Vector3d commandMask;
    private final ReferenceFrame comZUpFrame;
+   private final Vector3d controlAxes;
    private final FramePoint comPositionSetpoint;
    private final FrameVector comVelocitySetpoint;
    private final FrameVector comAccelerationSetpoint;
@@ -30,7 +30,7 @@ public class ComPositionControlBlock implements QuadrupedTaskSpaceControlBlock
       this.gravity = gravity;
       this.controlDT = controlDT;
       this.comZUpFrame = comZUpFrame;
-      commandMask = new Vector3d(1, 1, 1);
+      controlAxes = new Vector3d(1, 1, 1);
       comPositionSetpoint = new FramePoint();
       comVelocitySetpoint = new FrameVector();
       comAccelerationSetpoint = new FrameVector();
@@ -38,24 +38,24 @@ public class ComPositionControlBlock implements QuadrupedTaskSpaceControlBlock
       comPositionController = new EuclideanPositionController("comPosition", comZUpFrame, controlDT, registry);
    }
 
-   public void setComPosition(FramePoint comPositionSetpoint)
+   public void setComPositionSetpoint(FramePoint comPositionSetpoint)
    {
       this.comPositionSetpoint.setIncludingFrame(comPositionSetpoint);
    }
 
-   public void setComVelocity(FrameVector comVelocitySetpoint)
+   public void setComVelocitySetpoint(FrameVector comVelocitySetpoint)
    {
       this.comVelocitySetpoint.setIncludingFrame(comVelocitySetpoint);
    }
 
-   public void setComAcceleration(FrameVector comAccelerationSetpoint)
+   public void setComAccelerationSetpoint(FrameVector comAccelerationSetpoint)
    {
       this.comAccelerationSetpoint.setIncludingFrame(comAccelerationSetpoint);
    }
 
-   public void setCommandMask(double maskX, double maskY, double maskZ)
+   public void setControlAxes(int xEnable, int yEnable, int zEnable)
    {
-      commandMask.set(maskX, maskY, maskZ);
+      controlAxes.set(xEnable, yEnable, zEnable);
    }
 
    public void setProportionalGains(double[] proportionalGains)
@@ -97,15 +97,15 @@ public class ComPositionControlBlock implements QuadrupedTaskSpaceControlBlock
       comPositionController.compute(comForceCommand, comPositionSetpoint, comVelocitySetpoint, comVelocityEstimate, comForceFeedforwardSetpoint);
 
       // apply command mask
-      if (commandMask.getX() == 0)
+      if (controlAxes.getX() == 0)
       {
          comForceCommand.setX(0);
       }
-      if (commandMask.getY() == 0)
+      if (controlAxes.getY() == 0)
       {
          comForceCommand.setY(0);
       }
-      if (commandMask.getZ() == 0)
+      if (controlAxes.getZ() == 0)
       {
          comForceCommand.setZ(0);
       }

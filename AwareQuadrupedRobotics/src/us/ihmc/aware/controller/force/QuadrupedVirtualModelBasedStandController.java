@@ -66,6 +66,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final FrameOrientation bodyOrientationSetpoint;
    private final FrameVector bodyAngularVelocitySetpoint;
    private final FramePoint comPositionSetpoint;
+   private final FrameVector comVelocitySetpoint;
    private final FramePoint dcmPositionSetpoint;
    private final FrameVector dcmVelocitySetpoint;
 
@@ -76,9 +77,9 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final QuadrupedTaskSpaceCommands taskSpaceCommands;
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
-   private final BodyOrientationControlBlock bodyOrientationFeedbackBlock;
-   private final DcmPositionControlBlock dcmPositionFeedbackBlock;
-   private final ComPositionControlBlock comPositionFeedbackBlock;
+   private final BodyOrientationControlBlock bodyOrientationControlBlock;
+   private final DcmPositionControlBlock dcmPositionControlBlock;
+   private final ComPositionControlBlock comPositionControlBlock;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -126,6 +127,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       bodyOrientationSetpoint = new FrameOrientation();
       bodyAngularVelocitySetpoint = new FrameVector();
       comPositionSetpoint = new FramePoint();
+      comVelocitySetpoint = new FrameVector();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
 
@@ -136,9 +138,9 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceController = new QuadrupedTaskSpaceController(fullRobotModel, referenceFrames, jointNameMap, robotParameters.getQuadrupedJointLimits(), registry, yoGraphicsListRegistry);
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
-      bodyOrientationFeedbackBlock = new BodyOrientationControlBlock(bodyFrame, controlDT, registry);
-      dcmPositionFeedbackBlock = new DcmPositionControlBlock(comFrame, controlDT, mass, gravity, registry);
-      comPositionFeedbackBlock = new ComPositionControlBlock(comFrame, controlDT, mass, gravity, registry);
+      bodyOrientationControlBlock = new BodyOrientationControlBlock(bodyFrame, controlDT, registry);
+      dcmPositionControlBlock = new DcmPositionControlBlock(comFrame, controlDT, mass, gravity, registry);
+      comPositionControlBlock = new ComPositionControlBlock(comFrame, controlDT, mass, gravity, registry);
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -180,21 +182,22 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       bodyOrientationSetpoint.changeFrame(supportFrame);
       bodyOrientationSetpoint.setYawPitchRoll(yaw, pitch, roll);
       bodyAngularVelocitySetpoint.setToZero(supportFrame);
-      bodyOrientationFeedbackBlock.setBodyOrientation(bodyOrientationSetpoint);
-      bodyOrientationFeedbackBlock.setBodyAngularVelocity(bodyAngularVelocitySetpoint);
+      bodyOrientationControlBlock.setBodyOrientationSetpoint(bodyOrientationSetpoint);
+      bodyOrientationControlBlock.setBodyAngularVelocitySetpoint(bodyAngularVelocitySetpoint);
 
       // update desired com height
       ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
-      comPositionSetpoint.setToZero(supportFrame);
-      comPositionSetpoint.add(0, 0, comPositionPacket.getZ());
-      comPositionFeedbackBlock.setComPosition(comPositionSetpoint);
+      comPositionSetpoint.changeFrame(supportFrame);
+      comPositionSetpoint.set(comPositionPacket.getX(), comPositionPacket.getY(), comPositionPacket.getZ());
+      comVelocitySetpoint.setToZero(supportFrame);
+      comPositionControlBlock.setComPositionSetpoint(comPositionSetpoint);
 
       // update desired dcm position
-      dcmPositionSetpoint.setToZero(supportFrame);
-      dcmPositionSetpoint.add(0, 0, comPositionPacket.getZ());
+      dcmPositionSetpoint.changeFrame(supportFrame);
+      dcmPositionSetpoint.set(comPositionPacket.getX(), comPositionPacket.getY(), comPositionPacket.getZ());
       dcmVelocitySetpoint.setToZero(supportFrame);
-      dcmPositionFeedbackBlock.setDcmPosition(dcmPositionSetpoint);
-      dcmPositionFeedbackBlock.setDcmVelocity(dcmVelocitySetpoint);
+      dcmPositionControlBlock.setDcmPositionSetpoint(dcmPositionSetpoint);
+      dcmPositionControlBlock.setDcmVelocitySetpoint(dcmVelocitySetpoint);
    }
 
    @Override public QuadrupedForceControllerEvent process()
@@ -222,26 +225,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
          }
       }
 
-      // initialize task space controller
-      taskSpaceController.removeControlBlocks();
-      taskSpaceController.addControlBlock(bodyOrientationFeedbackBlock);
-      taskSpaceController.addControlBlock(dcmPositionFeedbackBlock);
-      taskSpaceController.addControlBlock(comPositionFeedbackBlock);
-      taskSpaceController.removeFilterBlocks();
-      taskSpaceController.reset();
-
-      // initialize feedback parameters
-      bodyOrientationFeedbackBlock.setProportionalGains(params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS));
-      bodyOrientationFeedbackBlock.setIntegralGains(params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS), params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR));
-      bodyOrientationFeedbackBlock.setDerivativeGains(params.getVolatileArray(BODY_ORIENTATION_DERIVATIVE_GAINS));
-      dcmPositionFeedbackBlock.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
-      dcmPositionFeedbackBlock.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
-      dcmPositionFeedbackBlock.setCommandMask(1, 1, 0);
-      comPositionFeedbackBlock.setProportionalGains(params.getVolatileArray(COM_PROPORTIONAL_GAINS));
-      comPositionFeedbackBlock.setIntegralGains(params.getVolatileArray(COM_INTEGRAL_GAINS), params.get(COM_MAX_INTEGRAL_ERROR));
-      comPositionFeedbackBlock.setDerivativeGains(params.getVolatileArray(COM_DERIVATIVE_GAINS));
-      comPositionFeedbackBlock.setCommandMask(0, 0, 1);
-
       // initialize task space controller settings
       taskSpaceControllerSettings.setDefaults();
       taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
@@ -251,6 +234,27 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
          taskSpaceControllerSettings.setSoleForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
+
+      // initialize task space controller
+      taskSpaceController.removeControlBlocks();
+      taskSpaceController.addControlBlock(bodyOrientationControlBlock);
+      taskSpaceController.addControlBlock(dcmPositionControlBlock);
+      taskSpaceController.addControlBlock(comPositionControlBlock);
+      taskSpaceController.removeFilterBlocks();
+      taskSpaceController.reset();
+
+      // initialize control parameters
+      bodyOrientationControlBlock.setControlAxes(1, 1, 1);
+      bodyOrientationControlBlock.setProportionalGains(params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS));
+      bodyOrientationControlBlock.setIntegralGains(params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS), params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR));
+      bodyOrientationControlBlock.setDerivativeGains(params.getVolatileArray(BODY_ORIENTATION_DERIVATIVE_GAINS));
+      dcmPositionControlBlock.setControlAxes(1, 1, 0);
+      dcmPositionControlBlock.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
+      dcmPositionControlBlock.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
+      comPositionControlBlock.setControlAxes(0, 0, 1);
+      comPositionControlBlock.setProportionalGains(params.getVolatileArray(COM_PROPORTIONAL_GAINS));
+      comPositionControlBlock.setIntegralGains(params.getVolatileArray(COM_INTEGRAL_GAINS), params.get(COM_MAX_INTEGRAL_ERROR));
+      comPositionControlBlock.setDerivativeGains(params.getVolatileArray(COM_DERIVATIVE_GAINS));
    }
 
    @Override public void onExit()

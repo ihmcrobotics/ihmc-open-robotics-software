@@ -13,8 +13,8 @@ import javax.vecmath.Vector3d;
 
 public class DcmPositionControlBlock implements QuadrupedTaskSpaceControlBlock
 {
-   private final Vector3d commandMask;
    private final ReferenceFrame comZUpFrame;
+   private final Vector3d controlAxes;
    private final FramePoint dcmPositionSetpoint;
    private final FrameVector dcmVelocitySetpoint;
    private final FramePoint icpPositionSetpoint;
@@ -26,7 +26,7 @@ public class DcmPositionControlBlock implements QuadrupedTaskSpaceControlBlock
    public DcmPositionControlBlock(ReferenceFrame comZUpFrame, double controlDT, double mass, double gravity, YoVariableRegistry registry)
    {
       this.comZUpFrame = comZUpFrame;
-      commandMask = new Vector3d(1, 1, 1);
+      controlAxes = new Vector3d(1, 1, 1);
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
       icpPositionSetpoint = new FramePoint();
@@ -36,19 +36,19 @@ public class DcmPositionControlBlock implements QuadrupedTaskSpaceControlBlock
       dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comZUpFrame, controlDT, mass, gravity, 1.0, registry);
    }
 
-   public void setDcmPosition(FramePoint dcmPositionSetpoint)
+   public void setDcmPositionSetpoint(FramePoint dcmPositionSetpoint)
    {
       this.dcmPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
    }
 
-   public void setDcmVelocity(FrameVector dcmVelocitySetpoint)
+   public void setDcmVelocitySetpoint(FrameVector dcmVelocitySetpoint)
    {
       this.dcmVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
    }
 
-   public void setCommandMask(double maskX, double maskY, double maskZ)
+   public void setControlAxes(double xEnable, double yEnable, double zEnable)
    {
-      commandMask.set(maskX, maskY, maskZ);
+      controlAxes.set(xEnable, yEnable, zEnable);
    }
 
    public void setProportionalGains(double[] proportionalGains)
@@ -81,15 +81,15 @@ public class DcmPositionControlBlock implements QuadrupedTaskSpaceControlBlock
       icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
 
       // apply command mask
-      if (commandMask.getX() == 0)
+      if (controlAxes.getX() == 0)
       {
          comForceCommand.setX(0);
       }
-      if (commandMask.getY() == 0)
+      if (controlAxes.getY() == 0)
       {
          comForceCommand.setY(0);
       }
-      if (commandMask.getZ() == 0)
+      if (controlAxes.getZ() == 0)
       {
          comForceCommand.setZ(0);
       }
