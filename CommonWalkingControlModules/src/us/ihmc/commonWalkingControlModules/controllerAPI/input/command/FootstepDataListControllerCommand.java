@@ -28,10 +28,11 @@ public class FootstepDataListControllerCommand implements ControllerCommand<Foot
    @Override
    public void set(FootstepDataListMessage message)
    {
+      clear();
+
       swingTime = message.swingTime;
       transferTime = message.transferTime;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
-      clear();
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)
@@ -42,10 +43,11 @@ public class FootstepDataListControllerCommand implements ControllerCommand<Foot
    @Override
    public void set(FootstepDataListControllerCommand other)
    {
+      clear();
+
       swingTime = other.swingTime;
       transferTime = other.transferTime;
       RecyclingArrayList<FootstepDataControllerCommand> otherFootsteps = other.getFootsteps();
-      clear();
       if (otherFootsteps != null)
       {
          for (int i = 0; i < otherFootsteps.size(); i++)
