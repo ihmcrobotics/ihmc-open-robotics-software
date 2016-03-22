@@ -47,7 +47,6 @@ public class ICPPlanner
    private final BooleanYoVariable isStanding = new BooleanYoVariable(namePrefix + "IsStanding", registry);
    private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(namePrefix + "IsInitialTransfer", registry);
    private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable(namePrefix + "IsDoubleSupport", registry);
-   private final BooleanYoVariable hasBeenWokenUp = new BooleanYoVariable(namePrefix + "HasBeenWokenUp", registry);
    private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable(namePrefix + "DoubleSupportTime", registry);
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable(namePrefix + "SingleSupportTime", registry);
@@ -99,7 +98,6 @@ public class ICPPlanner
          CapturePointPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       isStanding.set(true);
-      hasBeenWokenUp.set(false);
 
       actualICPToHold.setToNaN();
       isHoldingPosition.set(false);
@@ -755,7 +753,7 @@ public class ICPPlanner
 
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
-      if (referenceCMPsCalculator.isDoneWalking())
+      if (isStanding.getBooleanValue())
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
       else
          entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
@@ -766,16 +764,6 @@ public class ICPPlanner
    public void getNextExitCMP(FramePoint entryCMPToPack)
    {
       referenceCMPsCalculator.getNextExitCMP(entryCMPToPack);
-   }
-
-   public boolean getHasBeenWokenUp()
-   {
-      return hasBeenWokenUp.getBooleanValue();
-   }
-
-   public void wakeUp()
-   {
-      hasBeenWokenUp.set(true);
    }
 
    public boolean isDone(double time)
