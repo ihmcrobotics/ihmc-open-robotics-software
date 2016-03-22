@@ -21,6 +21,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
    public MomentumRateCommand()
    {
+      CommonOps.fill(alphaTaskPriorityVector, 1.0);
    }
 
    public MomentumRateCommand(MomentumRateCommand momentumRateCommand)
@@ -116,8 +117,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
    public void resetAlphaTaskPriority()
    {
-      for (int i = 0; i < SpatialForceVector.SIZE; i++)
-         alphaTaskPriorityVector.set(i, 0, 1.0);
+      CommonOps.fill(alphaTaskPriorityVector, 1.0);
    }
 
    public DenseMatrix64F getSelectionMatrix()
