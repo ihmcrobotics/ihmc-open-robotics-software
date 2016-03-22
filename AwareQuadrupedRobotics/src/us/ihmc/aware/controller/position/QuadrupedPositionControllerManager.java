@@ -40,7 +40,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment,
             parameters, paramMapRepository);
-      QuadrupedController animationController = new QuadrupedAnimationController(runtimeEnvironment.getFullRobotModel(), runtimeEnvironment.getRobotTimestamp());
+      QuadrupedController animationController = new QuadrupedAnimationController("***REMOVED***", "***REMOVED***", parameters, runtimeEnvironment);
 
       StateMachineBuilder<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> builder = new StateMachineBuilder<>(
             QuadrupedPositionControllerState.class, "positionControllerState", registry);
@@ -68,6 +68,8 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
 
       // Transitions from controllers back to stand prep.
       builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.CRAWL,
+            QuadrupedPositionControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.ANIMATION,
             QuadrupedPositionControllerState.STAND_PREP);
 
       this.stateMachine = builder.build(QuadrupedPositionControllerState.JOINT_INITIALIZATION);
