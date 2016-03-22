@@ -7,7 +7,6 @@ import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematics
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class QuadrupedRuntimeEnvironment
 {
@@ -15,7 +14,6 @@ public class QuadrupedRuntimeEnvironment
    private final DoubleYoVariable robotTimestamp;
 
    private final SDFFullRobotModel fullRobotModel;
-   private final DRCKinematicsBasedStateEstimator stateEstimator;
 
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
@@ -27,16 +25,13 @@ public class QuadrupedRuntimeEnvironment
 
    private final NetClassList netClassList;
 
-   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp,
-         SDFFullRobotModel fullRobotModel, DRCKinematicsBasedStateEstimator stateEstimator, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
-         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator,
-         NetClassList netClassList)
+   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
+         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator, NetClassList netClassList)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
       this.fullRobotModel = fullRobotModel;
-      this.stateEstimator = stateEstimator;
       this.parentRegistry = parentRegistry;
       this.graphicsListRegistry = graphicsListRegistry;
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
@@ -58,11 +53,6 @@ public class QuadrupedRuntimeEnvironment
    public SDFFullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
-   }
-
-   public DRCKinematicsBasedStateEstimator getStateEstimator()
-   {
-      return stateEstimator;
    }
 
    public YoVariableRegistry getParentRegistry()
