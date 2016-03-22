@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 public class MomentumOptimizationSettings
 {
-   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.0005);
+   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.005);
    private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
    private double jointAccelerationWeight = 0.005;
