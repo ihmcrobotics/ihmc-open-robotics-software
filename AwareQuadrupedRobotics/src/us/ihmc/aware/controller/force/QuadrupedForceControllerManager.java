@@ -48,7 +48,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
 
       // Initialize input providers.
-      inputProvider = new QuadrupedControllerInputProvider(globalDataProducer, paramMapRepository);
+      inputProvider = new QuadrupedControllerInputProvider(globalDataProducer, paramMapRepository, registry);
 
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(
@@ -121,7 +121,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
-      inputProvider.process();
       stateMachine.process();
    }
 
