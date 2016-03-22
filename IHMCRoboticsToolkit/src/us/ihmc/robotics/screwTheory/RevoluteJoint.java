@@ -61,4 +61,10 @@ public class RevoluteJoint extends OneDoFJoint
    {
       axisToPack.setIncludingFrame(jointAxis);
    }
+   
+   @Override
+   public boolean isPassiveJoint()
+   {
+      return false;
+   }
 }
