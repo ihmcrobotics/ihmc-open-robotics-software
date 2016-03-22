@@ -24,12 +24,6 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       CommonOps.fill(alphaTaskPriorityVector, 1.0);
    }
 
-   public MomentumRateCommand(MomentumRateCommand momentumRateCommand)
-   {
-      this();
-      set(momentumRateCommand);
-   }
-
    @Override
    public void set(MomentumRateCommand other)
    {
