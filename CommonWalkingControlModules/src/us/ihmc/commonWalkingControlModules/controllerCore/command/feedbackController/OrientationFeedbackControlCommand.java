@@ -96,6 +96,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.setWeight(weight);
    }
 
+   public void setAlphaTaskPriorityForSolver(double alpha)
+   {
+      spatialAccelerationCommand.setAlphaTaskPriority(alpha);
+   }
+
    public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack, FrameVector feedForwardAngularAccelerationToPack)
    {
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
@@ -111,16 +116,6 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public RigidBody getEndEffector()
    {
       return spatialAccelerationCommand.getEndEffector();
-   }
-
-   public RigidBody getPrimaryBase()
-   {
-      return spatialAccelerationCommand.getPrimaryBase();
-   }
-
-   public double getWeightForSolver()
-   {
-      return spatialAccelerationCommand.getWeight();
    }
 
    public SpatialAccelerationCommand getSpatialAccelerationCommand()

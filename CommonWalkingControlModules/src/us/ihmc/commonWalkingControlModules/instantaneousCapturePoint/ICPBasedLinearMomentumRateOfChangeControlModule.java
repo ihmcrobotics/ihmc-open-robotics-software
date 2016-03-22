@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorT
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -55,6 +56,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
    private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", null, registry);
+   private final DoubleYoVariable linearMomentumRateAlphaTaskPriorityZ = new DoubleYoVariable("linearMomentumRateAlphaTaskPriorityZ", registry);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
@@ -74,7 +76,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
-      momentumRateCommand.setWeights(linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ(), 0.0, 0.0, 0.0);
+      linearMomentumRateAlphaTaskPriorityZ.set(1.0);
+      momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
 
    public void setMomentumWeight(Vector3d linearWeight)
@@ -110,7 +113,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
       momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
-      momentumRateCommand.setWeights(linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ(), 0.0, 0.0, 0.0);
+      momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+      momentumRateCommand.setLinearAlphaTaskPriority(1.0, 1.0, linearMomentumRateAlphaTaskPriorityZ.getDoubleValue());
    }
 
    public void computeAchievedCMP(FrameVector achievedLinearMomentumRate, FramePoint2d achievedCMPToPack)
