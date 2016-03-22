@@ -69,6 +69,8 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       // Transitions from controllers back to stand prep.
       builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.CRAWL,
             QuadrupedPositionControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.ANIMATION,
+            QuadrupedPositionControllerState.STAND_PREP);
 
       this.stateMachine = builder.build(QuadrupedPositionControllerState.JOINT_INITIALIZATION);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry,
