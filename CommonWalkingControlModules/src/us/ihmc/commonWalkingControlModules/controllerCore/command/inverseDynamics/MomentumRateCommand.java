@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -13,6 +14,7 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateCommand>
 {
+   private final DenseMatrix64F alphaTaskPriorityVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F momentumRate = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
@@ -74,7 +76,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       setWeights(weight, weight);
    }
 
-   public void setWeights(double linear, double angular)
+   public void setWeights(double angular, double linear)
    {
       for (int i = 0; i < 3; i++)
          weightVector.set(i, 0, angular);
@@ -82,7 +84,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
          weightVector.set(i, 0, linear);
    }
 
-   public void setWeights(double linearX, double linearY, double linearZ, double angularX, double angularY, double angularZ)
+   public void setWeights(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
    {
       weightVector.set(0, 0, angularX);
       weightVector.set(1, 0, angularY);
@@ -90,6 +92,32 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightVector.set(3, 0, linearX);
       weightVector.set(4, 0, linearY);
       weightVector.set(5, 0, linearZ);
+   }
+
+   public void setAlphaTaskPriority(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
+   {
+      setAngularAlphasTaskPriority(angularX, angularY, angularZ);
+      setLinearAlphaTaskPriority(linearX, linearY, linearZ);
+   }
+
+   public void setLinearAlphaTaskPriority(double linearX, double linearY, double linearZ)
+   {
+      alphaTaskPriorityVector.set(3, 0, MathTools.clipToMinMax(linearX, 0.0, 1.0));
+      alphaTaskPriorityVector.set(4, 0, MathTools.clipToMinMax(linearY, 0.0, 1.0));
+      alphaTaskPriorityVector.set(5, 0, MathTools.clipToMinMax(linearZ, 0.0, 1.0));
+   }
+
+   public void setAngularAlphasTaskPriority(double angularX, double angularY, double angularZ)
+   {
+      alphaTaskPriorityVector.set(0, 0, MathTools.clipToMinMax(angularX, 0.0, 1.0));
+      alphaTaskPriorityVector.set(1, 0, MathTools.clipToMinMax(angularY, 0.0, 1.0));
+      alphaTaskPriorityVector.set(2, 0, MathTools.clipToMinMax(angularZ, 0.0, 1.0));
+   }
+
+   public void resetAlphaTaskPriority()
+   {
+      for (int i = 0; i < SpatialForceVector.SIZE; i++)
+         alphaTaskPriorityVector.set(i, 0, 1.0);
    }
 
    public DenseMatrix64F getSelectionMatrix()
@@ -113,6 +141,11 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       CommonOps.setIdentity(weightMatrix);
       for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
          weightMatrix.set(i, i, weightVector.get(i, 0));
+   }
+
+   public DenseMatrix64F getAlphaTaskPriorityVector()
+   {
+      return alphaTaskPriorityVector;
    }
 
    public void setMomentumRate(DenseMatrix64F momentumRate)

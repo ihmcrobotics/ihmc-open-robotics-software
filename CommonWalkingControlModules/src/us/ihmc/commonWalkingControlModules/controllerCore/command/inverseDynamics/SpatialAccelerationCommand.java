@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -27,11 +28,19 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    private String baseName;
    private String endEffectorName;
    private String optionalPrimaryBaseName;
-   
+
+   /**
+    * It refers to how important this task is:
+    * <li> &alpha;=0 => the task will be ignored,
+    * <li> &alpha;=1 => (default usage) the solver will try its best to achieve the command. </li>
+    * It is useful for doing task priority without changing the actual weight in the solver.
+    */
+   private double alphaTaskPriority = 1.0;
 
    public SpatialAccelerationCommand()
    {
       removeWeight();
+      resetAlphaTaskPriority();
    }
 
    public SpatialAccelerationCommand(long jacobianId)
@@ -63,6 +72,17 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       optionalPrimaryBaseName = primaryBase.getName();
    }
 
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
+      hasWeight = weight != HARD_CONSTRAINT;
+   }
+
+   public void setAlphaTaskPriority(double alpha)
+   {
+      alphaTaskPriority = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+   }
+
    public void setSpatialAcceleration(SpatialAccelerationVector spatialAcceleration)
    {
       this.spatialAcceleration.set(spatialAcceleration);
@@ -86,6 +106,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       hasWeight = other.hasWeight;
       weight = other.weight;
+      alphaTaskPriority = other.alphaTaskPriority;
 
       spatialAcceleration.set(other.getSpatialAcceleration());
       selectionMatrix.set(other.getSelectionMatrix());
@@ -182,15 +203,19 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       return optionalPrimaryBaseName;
    }
 
-   public void setWeight(double weight)
+   public double getAlphaTaskPriority()
    {
-      this.weight = weight;
-      hasWeight = weight != HARD_CONSTRAINT;
+      return alphaTaskPriority;
    }
 
    public void removeWeight()
    {
       setWeight(HARD_CONSTRAINT);
+   }
+
+   public void resetAlphaTaskPriority()
+   {
+      alphaTaskPriority = 1.0;
    }
 
    @Override

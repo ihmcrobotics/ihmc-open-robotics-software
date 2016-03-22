@@ -1243,6 +1243,15 @@ public class MatrixTools
          matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
    }
 
+   public static void scaleRow(double alpha, int row, DenseMatrix64F matrix)
+   {
+      if( row < 0 || row >= matrix.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + row + ", number of rows in matrix: " + matrix.getNumRows());
+      
+      for (int column = 0; column < matrix.getNumCols(); column++)
+         matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
+   }
+   
    public static void printJavaForConstruction(String name, DenseMatrix64F matrix)
    {
       StringBuffer stringBuffer = new StringBuffer();

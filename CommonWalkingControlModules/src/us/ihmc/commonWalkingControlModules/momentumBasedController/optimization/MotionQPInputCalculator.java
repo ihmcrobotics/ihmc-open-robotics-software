@@ -64,6 +64,7 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempCompactJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F tempTaskAlphaTaskPriority = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
@@ -85,14 +86,16 @@ public class MotionQPInputCalculator
       this.controlDT = controlDT;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
-      centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, parentRegistry);
-      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, parentRegistry);
+      centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, registry);
+      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, registry);
 
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       secondaryTaskJointsWeight.set(0.10);
       nullspaceProjectionAlpha.set(0.01);
       nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
+
+      parentRegistry.addChild(registry);
    }
 
    public void initialize()
@@ -146,7 +149,7 @@ public class MotionQPInputCalculator
 
          // Since we know here that all the joints are indexed this method call will succeed.
          jointIndexHandler.compactBlockToFullBlock(chainJoints, tempCompactJacobian, tempTaskJacobian);
-         recordTaskJacobian(tempTaskJacobian);
+//         recordTaskJacobian(tempTaskJacobian);
 
          motionQPInputToPack.reshape(taskSize + chainNumberOfDoFs);
          CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
@@ -289,6 +292,9 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
+      if (commandToConvert.getAlphaTaskPriority() < 1.0e-5)
+         return false;
+
       motionQPInputToPack.reshape(taskSize);
       motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
       if (commandToConvert.getHasWeight())
@@ -335,14 +341,20 @@ public class MotionQPInputCalculator
       if (!success)
          return false;
 
-      recordTaskJacobian(motionQPInputToPack.taskJacobian);
-
       // Compute the task objective: p = S * ( TDot - JDot qDot )
       convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, convectiveTerm);
       convectiveTerm.getMatrix(convectiveTermMatrix, 0);
       spatialAcceleration.getMatrix(tempTaskObjective, 0);
       CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+
+      if (commandToConvert.getAlphaTaskPriority() < 1.0 - 1.0e-5)
+      {
+         CommonOps.scale(commandToConvert.getAlphaTaskPriority(), motionQPInputToPack.taskJacobian);
+         CommonOps.scale(commandToConvert.getAlphaTaskPriority(), motionQPInputToPack.taskObjective);
+      }
+
+      recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
       return true;
    }
@@ -423,6 +435,16 @@ public class MotionQPInputCalculator
       // Compute the task objective: p = S * ( hDot - ADot qDot )
       CommonOps.subtract(momemtumRate, convectiveTerm, tempTaskObjective);
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+
+      tempTaskAlphaTaskPriority.reshape(taskSize, 1);
+      CommonOps.mult(selectionMatrix, commandToConvert.getAlphaTaskPriorityVector(), tempTaskAlphaTaskPriority);
+
+      for (int i = taskSize - 1; i >= 0; i--)
+      {
+         double alpha = tempTaskAlphaTaskPriority.get(i, 0);
+         MatrixTools.scaleRow(alpha, i, motionQPInputToPack.taskJacobian);
+         MatrixTools.scaleRow(alpha, i, motionQPInputToPack.taskObjective);
+      }
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
