@@ -5,12 +5,10 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 /** {@inheritDoc} */
 public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
-   private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;
 
-   public AtlasCapturePointPlannerParameters(boolean runningOnRealRobot)
+   public AtlasCapturePointPlannerParameters()
    {
-      this.runningOnRealRobot = runningOnRealRobot;
       useTwoCMPsPerSupport = true;
    }
 
@@ -18,7 +16,7 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    @Override
    public double getDoubleSupportInitialTransferDuration()
    {
-      return runningOnRealRobot ? 2.0 : 1.0;
+      return 1.0;
    }
 
    /** {@inheritDoc} */

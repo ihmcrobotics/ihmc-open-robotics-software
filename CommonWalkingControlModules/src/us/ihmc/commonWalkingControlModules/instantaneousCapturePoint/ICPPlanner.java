@@ -359,7 +359,13 @@ public class ICPPlanner
       singleSupportInitialICP.changeFrame(finalFrame);
       singleSupportFinalICP.changeFrame(worldFrame);
 
-      DoubleYoVariable doubleSupportTimeToUse = isStanding.getBooleanValue() ? doubleSupportInitialTransferDuration : doubleSupportDuration;
+      if (isStanding.getBooleanValue() && !isDoneWalking)
+      {
+         isInitialTransfer.set(true);
+         isStanding.set(false);
+      }
+
+      DoubleYoVariable doubleSupportTimeToUse = isInitialTransfer.getBooleanValue() ? doubleSupportInitialTransferDuration : doubleSupportDuration;
 
       icpDoubleSupportTrajectoryGenerator.setTrajectoryTime(doubleSupportTimeToUse.getDoubleValue());
 
@@ -367,11 +373,6 @@ public class ICPPlanner
       icpDoubleSupportTrajectoryGenerator.setFinalConditions(singleSupportInitialICP, singleSupportInitialICPVelocity, finalFrame);
       icpDoubleSupportTrajectoryGenerator.initialize();
 
-      if (isStanding.getBooleanValue() && !isDoneWalking)
-      {
-         isInitialTransfer.set(true);
-         isStanding.set(false);
-      }
    }
 
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide)
