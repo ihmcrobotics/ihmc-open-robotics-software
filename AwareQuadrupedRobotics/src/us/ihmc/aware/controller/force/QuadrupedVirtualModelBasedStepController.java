@@ -590,16 +590,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private void updateProviders()
    {
       // update desired body orientation
-      BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
-      double yaw = MathTools.clipToMinMax(bodyOrientationPacket.getYaw(), params.get(BODY_ORIENTATION_INPUT_MIN, 0), params.get(BODY_ORIENTATION_INPUT_MAX, 0));
-      double pitch = MathTools.clipToMinMax(bodyOrientationPacket.getPitch(), params.get(BODY_ORIENTATION_INPUT_MIN, 1), params.get(BODY_ORIENTATION_INPUT_MAX, 1));
-      double roll = MathTools.clipToMinMax(bodyOrientationPacket.getRoll(), params.get(BODY_ORIENTATION_INPUT_MIN, 2), params.get(BODY_ORIENTATION_INPUT_MAX, 2));
-      yoBodyOrientationInput.setYawPitchRoll(yaw, pitch, roll);
+      yoBodyOrientationInput.set(inputProvider.getBodyOrientationInput());
 
       // update desired com height
-      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
-      double comHeight = MathTools.clipToMinMax(comPositionPacket.getZ(), params.get(COM_POSITION_INPUT_MIN, 2), params.get(COM_POSITION_INPUT_MAX, 2));
-      yoComHeightInput.set(comHeight);
+      yoComHeightInput.set(inputProvider.getComPositionInput().getZ());
    }
 
    private void updateEstimates()

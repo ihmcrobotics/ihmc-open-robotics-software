@@ -7,8 +7,6 @@ import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.controller.force.taskSpaceController.controlBlocks.BodyOrientationControlBlock;
 import us.ihmc.aware.controller.force.taskSpaceController.controlBlocks.ComPositionControlBlock;
 import us.ihmc.aware.controller.force.taskSpaceController.controlBlocks.DcmPositionControlBlock;
-import us.ihmc.aware.packets.BodyOrientationPacket;
-import us.ihmc.aware.packets.ComPositionPacket;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.util.ContactState;
@@ -168,33 +166,32 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       supportCentroidEstimate.changeFrame(ReferenceFrame.getWorldFrame());
       supportCentroidEstimate.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
       supportOrientationEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportOrientationEstimate.setYawPitchRoll(supportPolygonEstimate.getNominalYaw(), 0, 0);
+      supportOrientationEstimate.setYawPitchRoll(supportPolygonEstimate.getNominalYaw(), supportPolygonEstimate.getNominalPitch(), 0.0);
       supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
    }
 
    private void updateSetpoints()
    {
-      // update desired body orientation
-      BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
-      double yaw = bodyOrientationPacket.getYaw();
-      double pitch = bodyOrientationPacket.getPitch();
-      double roll = bodyOrientationPacket.getRoll();
+      // update desired body orientation and angular rate
       bodyOrientationSetpoint.changeFrame(supportFrame);
-      bodyOrientationSetpoint.setYawPitchRoll(yaw, pitch, roll);
-      bodyAngularVelocitySetpoint.setToZero(supportFrame);
+      bodyOrientationSetpoint.set(inputProvider.getBodyOrientationInput());
+      bodyAngularVelocitySetpoint.changeFrame(supportFrame);
+      bodyAngularVelocitySetpoint.set(inputProvider.getBodyAngularRateInput());
       bodyOrientationControlBlock.setBodyOrientationSetpoint(bodyOrientationSetpoint);
       bodyOrientationControlBlock.setBodyAngularVelocitySetpoint(bodyAngularVelocitySetpoint);
 
-      // update desired com height
-      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
+      // update desired com position and velocity
       comPositionSetpoint.changeFrame(supportFrame);
-      comPositionSetpoint.set(comPositionPacket.getX(), comPositionPacket.getY(), comPositionPacket.getZ());
-      comVelocitySetpoint.setToZero(supportFrame);
+      comPositionSetpoint.set(inputProvider.getComPositionInput());
+      comVelocitySetpoint.changeFrame(supportFrame);
+      comVelocitySetpoint.set(inputProvider.getComVelocityInput());
       comPositionControlBlock.setComPositionSetpoint(comPositionSetpoint);
 
       // update desired dcm position
       dcmPositionSetpoint.changeFrame(supportFrame);
-      dcmPositionSetpoint.set(comPositionPacket.getX(), comPositionPacket.getY(), comPositionPacket.getZ());
+      dcmPositionSetpoint.set(inputProvider.getComVelocityInput());
+      dcmPositionSetpoint.scale(1.0 / taskSpaceEstimates.getLipNaturalFrequency());
+      dcmPositionSetpoint.add(inputProvider.getComPositionInput());
       dcmVelocitySetpoint.setToZero(supportFrame);
       dcmPositionControlBlock.setDcmPositionSetpoint(dcmPositionSetpoint);
       dcmPositionControlBlock.setDcmVelocitySetpoint(dcmVelocitySetpoint);
@@ -202,8 +199,8 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
-      taskSpaceEstimatorSettings.setLipNaturalFrequency(Math.sqrt(gravity / Math.max(comPositionPacket.getZ(), 0.001)));
+      double comHeightInput = inputProvider.getComPositionInput().getZ();
+      taskSpaceEstimatorSettings.setLipNaturalFrequency(Math.sqrt(gravity / Math.max(comHeightInput, 0.001)));
       taskSpaceEstimator.compute(taskSpaceEstimates, taskSpaceCommands, taskSpaceEstimatorSettings);
       updateEstimates();
       updateSetpoints();

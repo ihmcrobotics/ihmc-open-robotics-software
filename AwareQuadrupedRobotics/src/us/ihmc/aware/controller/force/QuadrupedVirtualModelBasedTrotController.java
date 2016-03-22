@@ -489,25 +489,10 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    private void updateProviders()
    {
-      // update desired body orientation
-      BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
-      double yaw = MathTools.clipToMinMax(bodyOrientationPacket.getYaw(), params.get(BODY_ORIENTATION_INPUT_MIN, 0), params.get(BODY_ORIENTATION_INPUT_MAX, 0));
-      double pitch = MathTools.clipToMinMax(bodyOrientationPacket.getPitch(), params.get(BODY_ORIENTATION_INPUT_MIN, 1), params.get(BODY_ORIENTATION_INPUT_MAX, 1));
-      double roll = MathTools.clipToMinMax(bodyOrientationPacket.getRoll(), params.get(BODY_ORIENTATION_INPUT_MIN, 2), params.get(BODY_ORIENTATION_INPUT_MAX, 2));
-      yoBodyOrientationInput.setYawPitchRoll(yaw, pitch, roll);
-
-      // update desired planar velocity
-      PlanarVelocityPacket planarVelocityPacket = inputProvider.getPlanarVelocityPacket().get();
-      double xdot = MathTools.clipToMinMax(planarVelocityPacket.getX(), params.get(PLANAR_VELOCITY_INPUT_MIN, 0), params.get(PLANAR_VELOCITY_INPUT_MAX, 0));
-      double ydot = MathTools.clipToMinMax(planarVelocityPacket.getY(), params.get(PLANAR_VELOCITY_INPUT_MIN, 1), params.get(PLANAR_VELOCITY_INPUT_MAX, 1));
-      double adot = MathTools.clipToMinMax(planarVelocityPacket.getA(), params.get(PLANAR_VELOCITY_INPUT_MIN, 2), params.get(PLANAR_VELOCITY_INPUT_MAX, 2));
-      yoBodyVelocityInput.set(xdot, ydot, 0.0);
-      yoBodyYawRateInput.set(adot);
-
-      // update desired com height
-      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
-      double comHeight = MathTools.clipToMinMax(comPositionPacket.getZ(), params.get(COM_POSITION_INPUT_MIN, 2), params.get(COM_POSITION_INPUT_MAX, 2));
-      yoComHeightInput.set(comHeight);
+      yoBodyOrientationInput.set(inputProvider.getBodyOrientationInput());
+      yoBodyVelocityInput.set(inputProvider.getPlanarVelocityInput().getX(), inputProvider.getPlanarVelocityInput().getY(), 0.0);
+      yoBodyYawRateInput.set(inputProvider.getPlanarVelocityInput().getZ());
+      yoComHeightInput.set(inputProvider.getComPositionInput().getZ());
    }
 
    private void updateEstimates()

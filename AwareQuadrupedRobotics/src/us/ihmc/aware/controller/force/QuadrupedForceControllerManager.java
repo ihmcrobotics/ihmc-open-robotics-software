@@ -5,12 +5,8 @@ import java.io.IOException;
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
-import us.ihmc.aware.packets.BodyOrientationPacket;
-import us.ihmc.aware.packets.ComPositionPacket;
-import us.ihmc.aware.packets.PlanarVelocityPacket;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
@@ -32,10 +28,9 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
  */
 public class QuadrupedForceControllerManager implements QuadrupedControllerManager
 {
-   private final static String COM_HEIGHT_NOMINAL = "comHeightNominal";
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
+   private final QuadrupedControllerInputProvider inputProvider;
 
    private final StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
    private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
@@ -51,14 +46,9 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       // Initialize parameter map repository.
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
-      ParameterMap params = paramMapRepository.get(QuadrupedForceControllerManager.class);
-      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
 
       // Initialize input providers.
-      BodyOrientationPacket bodyOrientationInputPacket = new BodyOrientationPacket(0.0, 0.0, 0.0);
-      ComPositionPacket comPositionInputPacket = new ComPositionPacket(0.0, 0.0, params.get(COM_HEIGHT_NOMINAL));
-      PlanarVelocityPacket planarVelocityInputPacket = new PlanarVelocityPacket(0.0, 0.0, 0.0);
-      QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(globalDataProducer, comPositionInputPacket, bodyOrientationInputPacket, planarVelocityInputPacket);
+      inputProvider = new QuadrupedControllerInputProvider(globalDataProducer, paramMapRepository);
 
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(
@@ -131,6 +121,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
+      inputProvider.process();
       stateMachine.process();
    }
 
