@@ -140,7 +140,6 @@ public class QuadrupedTaskSpaceEstimator
 
       // compute divergent component of motion and instantaneous capture point
       double naturalFrequency = settings.getLipNaturalFrequency();
-      double comHeightConstant = gravity / (naturalFrequency * naturalFrequency);
       outputEstimates.setLipNaturalFrequency(naturalFrequency);
       outputEstimates.getComPosition().changeFrame(worldFrame);
       outputEstimates.getComVelocity().changeFrame(worldFrame);
@@ -149,7 +148,7 @@ public class QuadrupedTaskSpaceEstimator
       outputEstimates.getDcmPosition().setY(outputEstimates.getComPosition().getY() + outputEstimates.getComVelocity().getY() / naturalFrequency);
       outputEstimates.getDcmPosition().setZ(outputEstimates.getComPosition().getZ() + outputEstimates.getComVelocity().getZ() / naturalFrequency);
       outputEstimates.getIcpPosition().setIncludingFrame(outputEstimates.getDcmPosition());
-      outputEstimates.getIcpPosition().add(0, 0, -comHeightConstant);
+      outputEstimates.getIcpPosition().sub(0, 0, gravity / (naturalFrequency * naturalFrequency));
 
       // update variables
       yoBodyOrientationEstimate.setAndMatchFrame(outputEstimates.getBodyOrientation());

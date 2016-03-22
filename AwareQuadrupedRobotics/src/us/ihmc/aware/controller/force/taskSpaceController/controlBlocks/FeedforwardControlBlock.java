@@ -17,22 +17,22 @@ public class FeedforwardControlBlock implements QuadrupedTaskSpaceControlBlock
       feedforwardCommands = new QuadrupedTaskSpaceCommands();
    }
 
-   public void setComForce(FrameVector comForce)
+   public void setComForceSetpoint(FrameVector comForce)
    {
       feedforwardCommands.getComForce().setIncludingFrame(comForce);
    }
 
-   public void setComTorque(FrameVector comTorque)
+   public void setComTorqueSetpoint(FrameVector comTorque)
    {
       feedforwardCommands.getComTorque().setIncludingFrame(comTorque);
    }
 
-   public void setSoleForce(RobotQuadrant robotQuadrant, FrameVector soleForce)
+   public void setSoleForceSetpoint(RobotQuadrant robotQuadrant, FrameVector soleForce)
    {
       feedforwardCommands.getSoleForce(robotQuadrant).setIncludingFrame(soleForce);
    }
 
-   public void setSoleForce(QuadrantDependentList<FrameVector> soleForce)
+   public void setSoleForceSetpoint(QuadrantDependentList<FrameVector> soleForce)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
