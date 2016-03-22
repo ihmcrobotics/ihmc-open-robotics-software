@@ -43,7 +43,6 @@ public class ChestOrientationManager
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
    private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
-   private final DoubleYoVariable chestAlphaTaskPriority = new DoubleYoVariable("chestAlphaTaskPriority", registry);
 
    private final YoOrientationPIDGainsInterface gains;
 
@@ -60,7 +59,6 @@ public class ChestOrientationManager
       chestFrame = chest.getBodyFixedFrame();
 
       chestWeight.set(weight);
-      chestAlphaTaskPriority.set(1.0);
       orientationFeedbackControlCommand.setWeightForSolver(chestWeight.getDoubleValue());
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
@@ -105,7 +103,6 @@ public class ChestOrientationManager
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       orientationFeedbackControlCommand.setGains(gains);
       orientationFeedbackControlCommand.setWeightForSolver(chestWeight.getDoubleValue());
-      orientationFeedbackControlCommand.setAlphaTaskPriorityForSolver(chestAlphaTaskPriority.getDoubleValue());
    }
 
    public void holdCurrentOrientation()
