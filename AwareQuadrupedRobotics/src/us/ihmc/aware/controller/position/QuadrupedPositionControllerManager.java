@@ -61,7 +61,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       // Manually triggered events to transition to main controllers.
       builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP,
             QuadrupedPositionControllerState.DO_NOTHING, QuadrupedPositionControllerState.STAND_PREP);
-      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_POSITION_BASED_CRAWL,
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_CRAWL,
             QuadrupedPositionControllerState.STAND_READY, QuadrupedPositionControllerState.CRAWL);
       builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_ANIMATION,
             QuadrupedPositionControllerState.STAND_READY, QuadrupedPositionControllerState.ANIMATION);
