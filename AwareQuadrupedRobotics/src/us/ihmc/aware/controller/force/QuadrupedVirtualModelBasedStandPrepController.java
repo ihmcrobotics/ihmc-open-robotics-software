@@ -89,7 +89,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
             robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       this.vmcSettings = new QuadrupedVirtualModelControllerSettings();
       this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames,
-            robotParameters.getJointMap(), environment.getParentRegistry(),
+            robotParameters.getJointMap(), registry,
             environment.getGraphicsListRegistryForDetachedOverhead());
 
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStandPrepController.class);

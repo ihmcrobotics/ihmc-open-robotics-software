@@ -1,6 +1,7 @@
 package us.ihmc.aware.input;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -44,7 +45,7 @@ public class QuadrupedTeleopNode implements InputEventCallback
    private final PacketCommunicator packetCommunicator;
 
    private final PollingInputDevice device;
-   private final Map<InputChannel, Double> channels = new EnumMap<>(InputChannel.class);
+   private final Map<InputChannel, Double> channels = Collections.synchronizedMap(new EnumMap<InputChannel, Double>(InputChannel.class));
 
    private InputValueIntegrator comHeight;
 

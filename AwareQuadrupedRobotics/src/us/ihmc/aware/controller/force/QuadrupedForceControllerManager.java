@@ -8,7 +8,6 @@ import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMapRepository;
-import us.ihmc.aware.params.ParameterPersister;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
@@ -50,18 +49,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // Initialize input providers.
       inputProvider = new QuadrupedControllerInputProvider(globalDataProducer, paramMapRepository, registry);
 
-      // Initialize controllers.
-      QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(
-            runtimeEnvironment, parameters);
-      QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(
-            runtimeEnvironment, parameters, paramMapRepository);
-      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment,
-            parameters, paramMapRepository, inputProvider);
-      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters,
-            paramMapRepository, inputProvider);
-      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters,
-            paramMapRepository, inputProvider);
-
       // TODO: Hack.
       globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
       {
@@ -75,7 +62,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
-
    }
 
    @Override
