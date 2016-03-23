@@ -57,6 +57,13 @@ public class EndEffectorLoadBearingCommand implements CompilableCommand<EndEffec
    @Override
    public void set(EndEffectorLoadBearingCommand other)
    {
+      clear();
+      compile(other);
+   }
+
+   @Override
+   public void compile(EndEffectorLoadBearingCommand other)
+   {
       for (EndEffector endEffector : EndEffector.values)
       {
          if (endEffector.isRobotSideNeeded())
@@ -71,12 +78,6 @@ public class EndEffectorLoadBearingCommand implements CompilableCommand<EndEffec
             otherEndEffectorRequestMap.put(endEffector, other.getRequest(endEffector));
          }
       }
-   }
-
-   @Override
-   public void compile(EndEffectorLoadBearingCommand other)
-   {
-      set(other);
    }
 
    private LoadBearingRequest getRequest(EndEffector endEffector)

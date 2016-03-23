@@ -72,6 +72,13 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    @Override
    public void set(GoHomeCommand other)
    {
+      clear();
+      compile(other);
+   }
+
+   @Override
+   public void compile(GoHomeCommand other)
+   {
       trajectoryTime = other.trajectoryTime;
 
       for (BodyPart bodyPart : BodyPart.values)
@@ -88,12 +95,6 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
             otherBodyPartRequestMap.get(bodyPart).setValue(other.getRequest(bodyPart));
          }
       }
-   }
-
-   @Override
-   public void compile(GoHomeCommand other)
-   {
-      set(other);
    }
 
    public double getTrajectoryTime()
