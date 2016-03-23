@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -66,6 +67,7 @@ public class MomentumBasedController
    private final FullHumanoidRobotModel fullRobotModel;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CommonHumanoidReferenceFrames referenceFrames;
+   private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
    private final TwistCalculator twistCalculator;
 
    private final SideDependentList<ContactableFoot> feet;
@@ -127,7 +129,7 @@ public class MomentumBasedController
    private final BipedSupportPolygons bipedSupportPolygons;
 
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
-         CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
          TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT,
          ArrayList<Updatable> updatables, ArmControllerParameters armControllerParameters, WalkingControllerParameters walkingControllerParameters,
@@ -149,12 +151,14 @@ public class MomentumBasedController
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.fullRobotModel = fullRobotModel;
-      this.centerOfMassJacobian = centerOfMassJacobian;
       this.referenceFrames = referenceFrames;
       this.twistCalculator = twistCalculator;
       this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.yoTime = yoTime;
+
+      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
+      referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
 
       // Initialize the contactable bodies
       this.feet = feet;
@@ -337,6 +341,11 @@ public class MomentumBasedController
 
    public void update()
    {
+      twistCalculator.compute();
+      centerOfMassJacobian.compute();
+      referenceFrames.updateFrames();
+      referenceFramesVisualizer.update();
+
       updateBipedSupportPolygons();
       readWristSensorData();
 
