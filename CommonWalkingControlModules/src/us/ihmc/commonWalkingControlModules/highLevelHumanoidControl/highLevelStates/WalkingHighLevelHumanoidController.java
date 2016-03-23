@@ -25,7 +25,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHei
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -41,6 +41,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMas
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -140,12 +141,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
    private final CommandInputManager commandInputManager;
-   private final ControllerStatusOutputManager statusOutputManager;
+   private final StatusMessageOutputManager statusOutputManager;
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+   public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          VariousWalkingManagers variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
          MomentumBasedController momentumBasedController)
    {
@@ -308,10 +309,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE), 1.0);
 
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(chest, hand);
-
          RigidBody pelvis = fullRobotModel.getPelvis();
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
@@ -463,7 +460,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             manipulationControlModule.freeze();
             timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
 
-            statusOutputManager.reportManipulationAborted();
+            statusOutputManager.reportStatusMessage(new ManipulationAbortedStatus());
          }
          else
          {

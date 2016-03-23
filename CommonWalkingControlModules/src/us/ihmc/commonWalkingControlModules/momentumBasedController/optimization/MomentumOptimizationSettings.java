@@ -23,7 +23,7 @@ public class MomentumOptimizationSettings
    private double pelvisWeight = 5.0;
    private double defaultFootWeight = 10.0;
    private double highFootWeight = 50.0;
-   private double handUserModeWeight = 10.0;
+   private double handUserModeWeight = 50.0;
    private double handJointspaceWeight = 1.0;
    private double handTaskspaceWeight = 1.0;
 
