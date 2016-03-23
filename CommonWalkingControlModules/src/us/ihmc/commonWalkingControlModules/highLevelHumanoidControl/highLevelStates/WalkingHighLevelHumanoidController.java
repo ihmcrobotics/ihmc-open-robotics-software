@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AbortWalkingCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryCommand;
@@ -139,13 +139,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
-   private final ControllerCommandInputManager commandInputManager;
+   private final CommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   public WalkingHighLevelHumanoidController(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+   public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
          VariousWalkingManagers variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
          MomentumBasedController momentumBasedController)
    {

@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -24,7 +24,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
 
    private final FrameOrientation frameOrientation = new FrameOrientation();
 
-   public UserDesiredChestOrientationControllerCommandGenerator(final ControllerCommandInputManager controllerCommandInputManager, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
+   public UserDesiredChestOrientationControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
       userDesiredChestOrientation = new YoFrameOrientation("userDesiredChest", ReferenceFrame.getWorldFrame(), registry);
 

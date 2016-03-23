@@ -4,7 +4,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -37,7 +37,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
    private final FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
    
-   public UserDesiredHandPoseControllerCommandGenerator(final ControllerCommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
+   public UserDesiredHandPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
       userDesiredHandPose = new YoFramePose("userDesiredHandPose", ReferenceFrame.getWorldFrame(), registry);
 
