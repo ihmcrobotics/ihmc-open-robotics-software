@@ -17,22 +17,65 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.tools.io.printing.PrintTools;
 
+/**
+ * CommandInputManager is used to generate a thread-safe input API for a controller.
+ * {@link Packet} and {@link Command} can be submitted through the methods {@link #submitMessage(Packet)} and {@link #submitCommand(Command)}.
+ * Only registered inputs (Packet or Command) will make it through to controller side.
+ * Unregistered inputs are ignored and the user is averted by a message error with the information on the input class.
+ * 
+ * Registering inputs is done in the constructor {@link #CommandInputManager(List)}, this is how one wants to define the API.
+ * 
+ * The list of supported inputs can be accessed using {@link #getListOfSupportedMessages()} and {@link #getListOfSupportedCommands()}.
+ * 
+ * CommandInputManager assumes that the different methods for submitting a inputs are called from another thread.
+ * ABSOLUTELY NO Packet/Command should be directly passed to controller, any Packet/Command has to go through this API to ensure that multi-threading is done properly.
+ * 
+ * @author Sylvain
+ *
+ */
 public class CommandInputManager
 {
    private final int buffersCapacity = 8;
 
+   /**
+    * List of all the buffers that allows the user to easily flush all new commands using {@link #flushAllCommands()}.
+    * These buffers CANNOT be visible or accessed from outside this class.
+    */
    private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
+   /**
+    * Map from the registered commands to their associated buffer.
+    * These buffers CANNOT be visible or accessed from outside this class.
+    */
    private final Map<Class<? extends Command<?, ?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> commandClassToBufferMap = new HashMap<>();
+   /**
+    * Map from the registered messages to their associated buffer.
+    * These buffers CANNOT be visible or accessed from outside this class.
+    */
    private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> messageClassToBufferMap = new HashMap<>();
+
+   /** Controller's copy of the new commands to be processed. */
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> commandsMap = new HashMap<>();
 
+   /** Exhaustive list of all the supported commands that this API can process. */
+   private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands = new ArrayList<>();
+   /** Exhaustive list of all the supported messages that this API can process. */
    private final List<Class<? extends Packet<?>>> listOfSupportedMessages = new ArrayList<>();
 
+   /**
+    * Only constructor to build a new API. No new constructors will be tolerated.
+    * 
+    * @param commandsToRegister list of the commands that this API should support.
+    */
    public CommandInputManager(List<Class<? extends Command<?, ?>>> commandsToRegister)
    {
       registerNewCommands(commandsToRegister);
    }
 
+   /**
+    * This method has to remain private.
+    * It is used to register in the API a list of commands.
+    * @param commandClazzes
+    */
    @SuppressWarnings("unchecked")
    private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClazzes)
    {
@@ -40,17 +83,23 @@ public class CommandInputManager
          registerNewCommand((Class<C>) commandClazzes.get(i));
    }
 
-   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClazz)
+   /**
+    * This method has to remain private.
+    * It is used to register in the API a command.
+    * @param commandClazzes
+    */
+   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
    {
-      Builder<C> builer = createBuilderWithEmptyConstructor(commandClazz);
+      Builder<C> builer = createBuilderWithEmptyConstructor(commandClass);
       ConcurrentRingBuffer<C> newBuffer = new ConcurrentRingBuffer<>(builer, buffersCapacity);
       allBuffers.add(newBuffer);
       // This is retarded, but I could not find another way that is more elegant.
       Class<M> messageClass = builer.newInstance().getMessageClass();
-      commandClassToBufferMap.put(commandClazz, newBuffer);
+      commandClassToBufferMap.put(commandClass, newBuffer);
       messageClassToBufferMap.put(messageClass, newBuffer);
-      commandsMap.put(commandClazz, new RecyclingArrayList<>(buffersCapacity, commandClazz));
+      commandsMap.put(commandClass, new RecyclingArrayList<>(buffersCapacity, commandClass));
 
+      listOfSupportedCommands.add(commandClass);
       listOfSupportedMessages.add(messageClass);
    }
 
@@ -92,7 +141,7 @@ public class CommandInputManager
          return;
 
       if (command instanceof MultipleCommandHolder)
-         submitControllerCommands(((MultipleCommandHolder) command).getControllerCommands());
+         submitControllerCommands(((MultipleCommandHolder<?, ?>) command).getControllerCommands());
 
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = commandClassToBufferMap.get(command.getClass());
       if (buffer == null)
@@ -203,6 +252,11 @@ public class CommandInputManager
          }
       };
       return builder;
+   }
+
+   public List<Class<? extends Command<?, ?>>> getListOfSupportedCommands()
+   {
+      return listOfSupportedCommands;
    }
 
    public List<Class<? extends Packet<?>>> getListOfSupportedMessages()
