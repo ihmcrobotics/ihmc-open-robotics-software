@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input;
+package us.ihmc.communication.controllerAPI;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.CompilableCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.MultipleCommandHolder;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.controllerAPI.command.CompilableCommand;
+import us.ihmc.communication.controllerAPI.command.MultipleCommandHolder;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;

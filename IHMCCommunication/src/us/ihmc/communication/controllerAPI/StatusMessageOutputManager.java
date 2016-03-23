@@ -1,11 +1,10 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.output;
+package us.ihmc.communication.controllerAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.tools.io.printing.PrintTools;

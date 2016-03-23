@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager.GlobalStatusMessageListener;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.GlobalStatusMessageListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StatusPacket;

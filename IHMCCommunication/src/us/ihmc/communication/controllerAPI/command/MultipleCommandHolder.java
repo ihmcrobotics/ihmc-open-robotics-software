@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.communication.controllerAPI.command;
 
 import java.util.List;
 
