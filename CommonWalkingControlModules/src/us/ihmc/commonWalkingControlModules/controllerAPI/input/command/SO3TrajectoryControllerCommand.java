@@ -4,7 +4,7 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessa
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 
 public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
-      extends FrameSO3TrajectoryPointList implements ControllerCommand<T, M>
+      extends FrameSO3TrajectoryPointList implements Command<T, M>
 {
    public SO3TrajectoryControllerCommand()
    {

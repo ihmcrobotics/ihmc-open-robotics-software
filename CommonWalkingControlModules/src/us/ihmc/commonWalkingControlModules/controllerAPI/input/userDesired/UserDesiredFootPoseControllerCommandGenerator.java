@@ -4,7 +4,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -59,7 +59,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
                framePose.changeFrame(ReferenceFrame.getWorldFrame());
                System.out.println("framePose " + framePose);
 
-               FootTrajectoryControllerCommand footTrajectoryControllerCommand = new FootTrajectoryControllerCommand();
+               FootTrajectoryCommand footTrajectoryControllerCommand = new FootTrajectoryCommand();
                
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
                trajectoryPoint.setTime(userDesiredFootPoseTrajectoryTime.getDoubleValue());
@@ -73,7 +73,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
                footTrajectoryControllerCommand.setRobotSide(userFootPoseSide.getEnumValue());
 
                System.out.println("Submitting " + footTrajectoryControllerCommand);
-               controllerCommandInputManager.submitControllerCommand(footTrajectoryControllerCommand);
+               controllerCommandInputManager.submitCommand(footTrajectoryControllerCommand);
                
                userDoFootPose.set(false);
             }

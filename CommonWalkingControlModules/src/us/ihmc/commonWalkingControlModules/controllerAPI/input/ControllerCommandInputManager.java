@@ -7,27 +7,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AbortWalkingControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AutomaticManipulationAbortControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.EndEffectorLoadBearingControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.MultipleControllerCommandHolder;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.WholeBodyTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AbortWalkingCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AutomaticManipulationAbortCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.EndEffectorLoadBearingCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.MultipleCommandHolder;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.WholeBodyTrajectoryCommand;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
@@ -40,47 +40,47 @@ public class ControllerCommandInputManager
    private final int buffersCapacity = 8;
 
    private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
-   private final Map<Class<? extends ControllerCommand<?, ?>>, ConcurrentRingBuffer<? extends ControllerCommand<?, ?>>> commandClassToBufferMap = new HashMap<>();
-   private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends ControllerCommand<?, ?>>> messageClassToBufferMap = new HashMap<>();
-   private final Map<Class<? extends ControllerCommand<?, ?>>, RecyclingArrayList<? extends ControllerCommand<?, ?>>> controllerCommandsMap = new HashMap<>();
+   private final Map<Class<? extends Command<?, ?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> commandClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> messageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> commandsMap = new HashMap<>();
 
    private final List<Class<? extends Packet<?>>> listOfSupportedMessages;
 
    public ControllerCommandInputManager()
    {
-      registerNewControllerCommand(ArmTrajectoryControllerCommand.class);
-      registerNewControllerCommand(HandTrajectoryControllerCommand.class);
-      registerNewControllerCommand(FootTrajectoryControllerCommand.class);
-      registerNewControllerCommand(HeadTrajectoryControllerCommand.class);
-      registerNewControllerCommand(ChestTrajectoryControllerCommand.class);
-      registerNewControllerCommand(PelvisTrajectoryControllerCommand.class);
-      registerNewControllerCommand(PelvisOrientationTrajectoryControllerCommand.class);
-      registerNewControllerCommand(PelvisHeightTrajectoryControllerCommand.class);
-      registerNewControllerCommand(StopAllTrajectoryControllerCommand.class);
-      registerNewControllerCommand(FootstepDataListControllerCommand.class);
-      registerNewControllerCommand(GoHomeControllerCommand.class);
-      registerNewControllerCommand(EndEffectorLoadBearingControllerCommand.class);
-      registerNewControllerCommand(ArmDesiredAccelerationsControllerCommand.class);
-      registerNewControllerCommand(AutomaticManipulationAbortControllerCommand.class);
-      registerNewControllerCommand(HandComplianceControlParametersControllerCommand.class);
-      registerNewControllerCommand(HighLevelStateControllerCommand.class);
-      registerNewControllerCommand(AbortWalkingControllerCommand.class);
-      registerNewControllerCommand(PauseWalkingControllerCommand.class);
-      registerNewControllerCommand(WholeBodyTrajectoryControllerCommand.class);
+      registerNewCommand(ArmTrajectoryCommand.class);
+      registerNewCommand(HandTrajectoryCommand.class);
+      registerNewCommand(FootTrajectoryCommand.class);
+      registerNewCommand(HeadTrajectoryCommand.class);
+      registerNewCommand(ChestTrajectoryCommand.class);
+      registerNewCommand(PelvisTrajectoryCommand.class);
+      registerNewCommand(PelvisOrientationTrajectoryCommand.class);
+      registerNewCommand(PelvisHeightTrajectoryCommand.class);
+      registerNewCommand(StopAllTrajectoryCommand.class);
+      registerNewCommand(FootstepDataListCommand.class);
+      registerNewCommand(GoHomeCommand.class);
+      registerNewCommand(EndEffectorLoadBearingCommand.class);
+      registerNewCommand(ArmDesiredAccelerationsCommand.class);
+      registerNewCommand(AutomaticManipulationAbortCommand.class);
+      registerNewCommand(HandComplianceControlParametersCommand.class);
+      registerNewCommand(HighLevelStateCommand.class);
+      registerNewCommand(AbortWalkingCommand.class);
+      registerNewCommand(PauseWalkingCommand.class);
+      registerNewCommand(WholeBodyTrajectoryCommand.class);
 
       listOfSupportedMessages = new ArrayList<>(messageClassToBufferMap.keySet());
    }
 
-   private <T extends ControllerCommand<T, M>, M extends Packet<M>> ConcurrentRingBuffer<T> registerNewControllerCommand(Class<T> clazz)
+   private <C extends Command<C, M>, M extends Packet<M>> ConcurrentRingBuffer<C> registerNewCommand(Class<C> commandClazz)
    {
-      Builder<T> builer = createBuilderWithEmptyConstructor(clazz);
-      ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(builer, buffersCapacity);
+      Builder<C> builer = createBuilderWithEmptyConstructor(commandClazz);
+      ConcurrentRingBuffer<C> newBuffer = new ConcurrentRingBuffer<>(builer, buffersCapacity);
       allBuffers.add(newBuffer);
       // This is retarded, but I could not find another way that is more elegant.
       Class<M> messageClass = builer.newInstance().getMessageClass();
-      commandClassToBufferMap.put(clazz, newBuffer);
+      commandClassToBufferMap.put(commandClazz, newBuffer);
       messageClassToBufferMap.put(messageClass, newBuffer);
-      controllerCommandsMap.put(clazz, new RecyclingArrayList<>(buffersCapacity, clazz));
+      commandsMap.put(commandClazz, new RecyclingArrayList<>(buffersCapacity, commandClazz));
 
       return newBuffer;
    }
@@ -96,17 +96,17 @@ public class ControllerCommandInputManager
          return;
       }
 
-      ConcurrentRingBuffer<? extends ControllerCommand<?, ?>> buffer = messageClassToBufferMap.get(message.getClass());
+      ConcurrentRingBuffer<? extends Command<?, ?>> buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)
       {
          PrintTools.error(this, "The message type " + message.getClass().getSimpleName() + " is not supported.");
          return;
       }
       @SuppressWarnings("unchecked")
-      ControllerCommand<?, M> nextControllerCommand = (ControllerCommand<?, M>) buffer.next();
-      if (nextControllerCommand == null)
+      Command<?, M> nextCommand = (Command<?, M>) buffer.next();
+      if (nextCommand == null)
          return;
-      nextControllerCommand.set(message);
+      nextCommand.set(message);
       buffer.commit();
    }
 
@@ -117,79 +117,79 @@ public class ControllerCommandInputManager
          submitMessage((M) messages.get(i));
    }
 
-   public <T extends ControllerCommand<T, ?>> void submitControllerCommand(T controllerCommand)
+   public <C extends Command<C, ?>> void submitCommand(C command)
    {
-      if (!controllerCommand.isCommandValid())
+      if (!command.isCommandValid())
          return;
 
-      if (controllerCommand instanceof MultipleControllerCommandHolder)
-         submitControllerCommands(((MultipleControllerCommandHolder) controllerCommand).getControllerCommands());
+      if (command instanceof MultipleCommandHolder)
+         submitControllerCommands(((MultipleCommandHolder) command).getControllerCommands());
 
-      ConcurrentRingBuffer<? extends ControllerCommand<?, ?>> buffer = commandClassToBufferMap.get(controllerCommand.getClass());
+      ConcurrentRingBuffer<? extends Command<?, ?>> buffer = commandClassToBufferMap.get(command.getClass());
       if (buffer == null)
       {
-         PrintTools.error(this, "The message type " + controllerCommand.getClass().getSimpleName() + " is not supported.");
+         PrintTools.error(this, "The message type " + command.getClass().getSimpleName() + " is not supported.");
          return;
       }
       @SuppressWarnings("unchecked")
-      ControllerCommand<T, ?> nextModifiableMessage = (ControllerCommand<T, ?>) buffer.next();
+      Command<C, ?> nextModifiableMessage = (Command<C, ?>) buffer.next();
       if (nextModifiableMessage == null)
          return;
-      nextModifiableMessage.set(controllerCommand);
+      nextModifiableMessage.set(command);
       buffer.commit();
    }
 
    @SuppressWarnings("unchecked")
-   public <T extends ControllerCommand<T, ?>> void submitControllerCommands(List<ControllerCommand<?, ?>> controllerCommands)
+   public <C extends Command<C, ?>> void submitControllerCommands(List<Command<?, ?>> controllerCommands)
    {
       for (int i = 0; i < controllerCommands.size(); i++)
-         submitControllerCommand((T) controllerCommands.get(i));
+         submitCommand((C) controllerCommands.get(i));
    }
 
-   public boolean isNewMessageAvailable(Class<? extends ControllerCommand<?, ?>> commandClassToCheck)
+   public boolean isNewCommandAvailable(Class<? extends Command<?, ?>> commandClassToCheck)
    {
       return commandClassToBufferMap.get(commandClassToCheck).poll();
    }
 
-   public EndEffectorLoadBearingControllerCommand pollAndCompileEndEffectorLoadBearingMessages()
+   public EndEffectorLoadBearingCommand pollAndCompileEndEffectorLoadBearingCommands()
    {
-      List<EndEffectorLoadBearingControllerCommand> messages = pollNewMessages(EndEffectorLoadBearingControllerCommand.class);
-      for (int i = 1; i < messages.size(); i++)
-         messages.get(0).set(messages.get(i));
-      return messages.get(0);
+      List<EndEffectorLoadBearingCommand> commands = pollNewCommands(EndEffectorLoadBearingCommand.class);
+      for (int i = 1; i < commands.size(); i++)
+         commands.get(0).set(commands.get(i));
+      return commands.get(0);
    }
 
-   public GoHomeControllerCommand pollAndCompileGoHomeMessages()
+   public GoHomeCommand pollAndCompileGoHomeCommands()
    {
-      List<GoHomeControllerCommand> messages = pollNewMessages(GoHomeControllerCommand.class);
-      for (int i = 1; i < messages.size(); i++)
-         messages.get(0).set(messages.get(i));
-      return messages.get(0);
+      List<GoHomeCommand> commands = pollNewCommands(GoHomeCommand.class);
+      for (int i = 1; i < commands.size(); i++)
+         commands.get(0).set(commands.get(i));
+      return commands.get(0);
    }
 
    public void flushManipulationBuffers()
    {
-      flushMessages(HandTrajectoryControllerCommand.class);
-      flushMessages(ArmTrajectoryControllerCommand.class);
-      flushMessages(ArmDesiredAccelerationsControllerCommand.class);
-      flushMessages(HandComplianceControlParametersControllerCommand.class);
+      flushCommands(HandTrajectoryCommand.class);
+      flushCommands(ArmTrajectoryCommand.class);
+      flushCommands(ArmDesiredAccelerationsCommand.class);
+      flushCommands(HandComplianceControlParametersCommand.class);
    }
 
    public void flushPelvisBuffers()
    {
-      flushMessages(PelvisTrajectoryControllerCommand.class);
-      flushMessages(PelvisOrientationTrajectoryControllerCommand.class);
-      flushMessages(PelvisHeightTrajectoryControllerCommand.class);
+      flushCommands(PelvisTrajectoryCommand.class);
+      flushCommands(PelvisOrientationTrajectoryCommand.class);
+      flushCommands(PelvisHeightTrajectoryCommand.class);
    }
 
    public void flushFootstepBuffers()
    {
-      flushMessages(FootstepDataListControllerCommand.class);
+      flushCommands(FootstepDataListCommand.class);
    }
 
    public void flushFlamingoBuffers()
    {
-      flushMessages(FootTrajectoryControllerCommand.class);
+      flushCommands(FootTrajectoryCommand.class);
    }
 
    public void flushBuffers()
@@ -198,35 +198,35 @@ public class ControllerCommandInputManager
          allBuffers.get(i).flush();
    }
 
-   public <T extends ControllerCommand<T, ?>> void flushMessages(Class<T> messageToFlushClass)
+   public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
-      commandClassToBufferMap.get(messageToFlushClass).flush();
+      commandClassToBufferMap.get(commandClassToFlush).flush();
    }
 
-   public <T extends ControllerCommand<T, ?>> T pollNewestMessage(Class<T> messageToPollClass)
+   public <C extends Command<C, ?>> C pollNewestCommand(Class<C> commandClassToFlush)
    {
-      return ((RecyclingArrayList<T>) pollNewMessages(messageToPollClass)).getLast();
+      return ((RecyclingArrayList<C>) pollNewCommands(commandClassToFlush)).getLast();
    }
 
    @SuppressWarnings("unchecked")
-   public <T extends ControllerCommand<T, ?>> List<T> pollNewMessages(Class<T> messageToPollClass)
+   public <C extends Command<C, ?>> List<C> pollNewCommands(Class<C> commandClassToPoll)
    {
-      RecyclingArrayList<T> messages = (RecyclingArrayList<T>) controllerCommandsMap.get(messageToPollClass);
-      messages.clear();
-      ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) commandClassToBufferMap.get(messageToPollClass);
-      pollNewMessages(buffer, messages);
-      return messages;
+      RecyclingArrayList<C> commands = (RecyclingArrayList<C>) commandsMap.get(commandClassToPoll);
+      commands.clear();
+      ConcurrentRingBuffer<C> buffer = (ConcurrentRingBuffer<C>) commandClassToBufferMap.get(commandClassToPoll);
+      pollNewCommands(buffer, commands);
+      return commands;
    }
 
-   private static <T extends ControllerCommand<T, ?>> void pollNewMessages(ConcurrentRingBuffer<T> buffer, RecyclingArrayList<T> messagesToPack)
+   private static <C extends Command<C, ?>> void pollNewCommands(ConcurrentRingBuffer<C> buffer, RecyclingArrayList<C> commandsToPack)
    {
       if (buffer.poll())
       {
-         T message;
-         while ((message = buffer.read()) != null)
+         C command;
+         while ((command = buffer.read()) != null)
          {
-            messagesToPack.add().set(message);
-            message.clear();
+            commandsToPack.add().set(command);
+            command.clear();
          }
          buffer.flush();
       }

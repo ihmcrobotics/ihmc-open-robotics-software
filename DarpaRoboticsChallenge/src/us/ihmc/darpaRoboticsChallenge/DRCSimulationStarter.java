@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -99,7 +99,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
 
-   private final ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
    
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
@@ -424,7 +424,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       drcSimulationFactory.start();
    }
 
-   public ConcurrentLinkedQueue<ControllerCommand<?, ?>> getQueuedControllerCommands()
+   public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
    {
       return controllerCommands;
    }

@@ -8,8 +8,8 @@ import javax.vecmath.Vector3f;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandComplianceControlParametersControllerCommand
-      implements ControllerCommand<HandComplianceControlParametersControllerCommand, HandComplianceControlParametersMessage>
+public class HandComplianceControlParametersCommand
+      implements Command<HandComplianceControlParametersCommand, HandComplianceControlParametersMessage>
 {
    private RobotSide robotSide;
    private boolean enable = false;
@@ -23,7 +23,7 @@ public class HandComplianceControlParametersControllerCommand
    private double forceDeadZone = Double.NaN;
    private double torqueDeadZone = Double.NaN;
 
-   public HandComplianceControlParametersControllerCommand()
+   public HandComplianceControlParametersCommand()
    {
       clear();
    }
@@ -97,7 +97,7 @@ public class HandComplianceControlParametersControllerCommand
    }
 
    @Override
-   public void set(HandComplianceControlParametersControllerCommand other)
+   public void set(HandComplianceControlParametersCommand other)
    {
       robotSide = other.robotSide;
       enable = other.enable;

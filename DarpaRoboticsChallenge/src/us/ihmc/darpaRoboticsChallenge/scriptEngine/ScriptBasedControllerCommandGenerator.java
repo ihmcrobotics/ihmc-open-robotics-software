@@ -5,12 +5,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -24,9 +24,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class ScriptBasedControllerCommandGenerator
 {
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
-   private final ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands;
+   private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
    
-   public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands)
+   public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands)
    {
       this.controllerCommands = controllerCommands;
    }
@@ -78,35 +78,35 @@ public class ScriptBasedControllerCommandGenerator
       if (scriptObject instanceof FootstepDataListMessage)
       {
          FootstepDataListMessage message = (FootstepDataListMessage) scriptObject;
-         FootstepDataListControllerCommand command = new FootstepDataListControllerCommand();
+         FootstepDataListCommand command = new FootstepDataListCommand();
          command.set(message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof FootTrajectoryMessage)
       {
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
-         FootTrajectoryControllerCommand command = new FootTrajectoryControllerCommand();
+         FootTrajectoryCommand command = new FootTrajectoryCommand();
          command.set(message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof HandTrajectoryMessage)
       {
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
-         HandTrajectoryControllerCommand command = new HandTrajectoryControllerCommand();
+         HandTrajectoryCommand command = new HandTrajectoryCommand();
          command.set(message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
       {
          PelvisHeightTrajectoryMessage message = (PelvisHeightTrajectoryMessage) scriptObject;
-         PelvisHeightTrajectoryControllerCommand command = new PelvisHeightTrajectoryControllerCommand();
+         PelvisHeightTrajectoryCommand command = new PelvisHeightTrajectoryCommand();
          command.set(message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof PauseWalkingMessage)
       {
          PauseWalkingMessage message = (PauseWalkingMessage) scriptObject;
-         PauseWalkingControllerCommand command = new PauseWalkingControllerCommand();
+         PauseWalkingCommand command = new PauseWalkingCommand();
          command.set(message);
          controllerCommands.add(command);
       }

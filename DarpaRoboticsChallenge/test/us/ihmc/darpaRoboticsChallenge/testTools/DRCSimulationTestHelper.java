@@ -16,7 +16,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -179,7 +179,7 @@ public class DRCSimulationTestHelper
       scriptBasedControllerCommandGenerator.loadScriptFile(scriptInputStream, referenceFrame);
    }
    
-   public ConcurrentLinkedQueue<ControllerCommand<?, ?>> getQueuedControllerCommands()
+   public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
    {
       return simulationStarter.getQueuedControllerCommands();
    }

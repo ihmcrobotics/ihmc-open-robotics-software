@@ -3,11 +3,11 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class FootTrajectoryControllerCommand extends SE3TrajectoryControllerCommand<FootTrajectoryControllerCommand, FootTrajectoryMessage>
+public class FootTrajectoryCommand extends SE3TrajectoryControllerCommand<FootTrajectoryCommand, FootTrajectoryMessage>
 {
    private RobotSide robotSide;
 
-   public FootTrajectoryControllerCommand()
+   public FootTrajectoryCommand()
    {
    }
 
@@ -26,7 +26,7 @@ public class FootTrajectoryControllerCommand extends SE3TrajectoryControllerComm
    }
 
    @Override
-   public void set(FootTrajectoryControllerCommand other)
+   public void set(FootTrajectoryCommand other)
    {
       super.set(other);
       robotSide = other.robotSide;

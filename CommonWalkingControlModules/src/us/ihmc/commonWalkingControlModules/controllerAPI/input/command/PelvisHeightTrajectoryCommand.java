@@ -3,14 +3,14 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
-public class PelvisHeightTrajectoryControllerCommand extends SimpleTrajectoryPoint1DList implements ControllerCommand<PelvisHeightTrajectoryControllerCommand, PelvisHeightTrajectoryMessage>
+public class PelvisHeightTrajectoryCommand extends SimpleTrajectoryPoint1DList implements Command<PelvisHeightTrajectoryCommand, PelvisHeightTrajectoryMessage>
 {
-   public PelvisHeightTrajectoryControllerCommand()
+   public PelvisHeightTrajectoryCommand()
    {
    }
 
    @Override
-   public void set(PelvisHeightTrajectoryControllerCommand other)
+   public void set(PelvisHeightTrajectoryCommand other)
    {
       super.set(other);
    }

@@ -6,12 +6,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -35,9 +35,9 @@ public class QueuedControllerCommandGenerator implements Updatable
 
    private final List<Updatable> updatables = new ArrayList<>();
 
-   private final ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands;
+   private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
    
-   public QueuedControllerCommandGenerator(ConcurrentLinkedQueue<ControllerCommand<?, ?>> controllerCommands,
+   public QueuedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands,
          ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
@@ -63,7 +63,7 @@ public class QueuedControllerCommandGenerator implements Updatable
          return;
       }
 
-      ControllerCommand<?, ?> controllerCommand = controllerCommands.poll();
+      Command<?, ?> controllerCommand = controllerCommands.poll();
       if (controllerCommand == null) 
       {
          waitingForWalkingStatusToComplete = false;
@@ -72,35 +72,35 @@ public class QueuedControllerCommandGenerator implements Updatable
 
       if (DEBUG)
          System.out.println("Found a controller command!!!");
-      if (controllerCommand instanceof FootstepDataListControllerCommand)
+      if (controllerCommand instanceof FootstepDataListCommand)
       {
-         FootstepDataListControllerCommand footstepDataListControllerCommand = (FootstepDataListControllerCommand) controllerCommand;
-         commandInputManager.submitControllerCommand(footstepDataListControllerCommand);
+         FootstepDataListCommand footstepDataListControllerCommand = (FootstepDataListCommand) controllerCommand;
+         commandInputManager.submitCommand(footstepDataListControllerCommand);
          waitingForWalkingStatusToComplete = true;
       }
       
-      else if (controllerCommand instanceof ChestTrajectoryControllerCommand)
+      else if (controllerCommand instanceof ChestTrajectoryCommand)
       {
-         ChestTrajectoryControllerCommand chestTrajectoryControllerCommand = (ChestTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitControllerCommand(chestTrajectoryControllerCommand);
+         ChestTrajectoryCommand chestTrajectoryControllerCommand = (ChestTrajectoryCommand) controllerCommand;
+         commandInputManager.submitCommand(chestTrajectoryControllerCommand);
       }
       
-      else if (controllerCommand instanceof FootTrajectoryControllerCommand)
+      else if (controllerCommand instanceof FootTrajectoryCommand)
       {
-         FootTrajectoryControllerCommand footTrajectoryControllerCommand = (FootTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitControllerCommand(footTrajectoryControllerCommand);
+         FootTrajectoryCommand footTrajectoryControllerCommand = (FootTrajectoryCommand) controllerCommand;
+         commandInputManager.submitCommand(footTrajectoryControllerCommand);
       }
       
-      else if (controllerCommand instanceof HandTrajectoryControllerCommand)
+      else if (controllerCommand instanceof HandTrajectoryCommand)
       {
-         HandTrajectoryControllerCommand handTrajectoryControllerCommand = (HandTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitControllerCommand(handTrajectoryControllerCommand);
+         HandTrajectoryCommand handTrajectoryControllerCommand = (HandTrajectoryCommand) controllerCommand;
+         commandInputManager.submitCommand(handTrajectoryControllerCommand);
       }
       
-      else if (controllerCommand instanceof PelvisHeightTrajectoryControllerCommand)
+      else if (controllerCommand instanceof PelvisHeightTrajectoryCommand)
       {
-         PelvisHeightTrajectoryControllerCommand pelvisHeightTrajectoryControllerCommand = (PelvisHeightTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitControllerCommand(pelvisHeightTrajectoryControllerCommand);
+         PelvisHeightTrajectoryCommand pelvisHeightTrajectoryControllerCommand = (PelvisHeightTrajectoryCommand) controllerCommand;
+         commandInputManager.submitCommand(pelvisHeightTrajectoryControllerCommand);
       }
       
       else
@@ -110,7 +110,7 @@ public class QueuedControllerCommandGenerator implements Updatable
 
    }
    
-   public void addControllerCommand(ControllerCommand<?, ?> controllerCommand)
+   public void addControllerCommand(Command<?, ?> controllerCommand)
    {
       controllerCommands.add(controllerCommand);
    }

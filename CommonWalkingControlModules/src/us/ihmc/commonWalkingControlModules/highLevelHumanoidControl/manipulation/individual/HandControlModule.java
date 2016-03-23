@@ -11,10 +11,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -369,7 +369,7 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
    }
 
-   public void handleHandTrajectoryMessage(HandTrajectoryControllerCommand handTrajectoryMessage)
+   public void handleHandTrajectoryMessage(HandTrajectoryCommand handTrajectoryMessage)
    {
       if (handTrajectoryMessage.getRobotSide() != robotSide)
       {
@@ -427,7 +427,7 @@ public class HandControlModule
       executeTaskspaceTrajectory(poseTrajectoryGenerator);
    }
 
-   public void handleArmTrajectoryMessage(ArmTrajectoryControllerCommand armTrajectoryMessage)
+   public void handleArmTrajectoryMessage(ArmTrajectoryCommand armTrajectoryMessage)
    {
       if (armTrajectoryMessage.getRobotSide() != robotSide)
       {
@@ -463,7 +463,7 @@ public class HandControlModule
       executeJointspaceTrajectory(jointTrajectoryGenerators);
    }
 
-   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsControllerCommand armDesiredAccelerationsMessage)
+   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand armDesiredAccelerationsMessage)
    {
       if (!checkArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage))
          return;
@@ -487,7 +487,7 @@ public class HandControlModule
       }
    }
 
-   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersControllerCommand message)
+   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersCommand message)
    {
       PrintTools.error(this, "HandComplianceControlParametersControllerCommand is not supported anymore. Needs to be reimplememted.");
    }
@@ -519,7 +519,7 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkArmDesiredAccelerationsMessage(ArmDesiredAccelerationsControllerCommand armDesiredAccelerationsMessage)
+   private boolean checkArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand armDesiredAccelerationsMessage)
    {
       if (armDesiredAccelerationsMessage.getRobotSide() != robotSide)
       {

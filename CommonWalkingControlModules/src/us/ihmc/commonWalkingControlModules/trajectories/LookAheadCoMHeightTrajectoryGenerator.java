@@ -6,9 +6,9 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -787,7 +787,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand pelvisTrajectoryMessage)
+   public void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand pelvisTrajectoryMessage)
    {
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
@@ -820,7 +820,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       isTrajectoryOffsetStopped.set(false);
    }
 
-   public void handlePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryControllerCommand message)
+   public void handlePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryCommand message)
    {
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
@@ -850,7 +850,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       isTrajectoryOffsetStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
    {
       isTrajectoryOffsetStopped.set(message.isStopAllTrajectory());
    }

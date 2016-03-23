@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
@@ -57,7 +57,7 @@ public class UserControlModeState extends HandControlState
       jointspaceAccelerationCommand.setWeight(weight);
    }
 
-   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsControllerCommand message)
+   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand message)
    {
       if (message.getNumberOfJoints() != userControlledJoints.length)
       {

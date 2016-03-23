@@ -12,7 +12,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-public class FootstepDataControllerCommand implements ControllerCommand<FootstepDataControllerCommand, FootstepDataMessage>
+public class FootstepDataControllerCommand implements Command<FootstepDataControllerCommand, FootstepDataMessage>
 {
    private RobotSide robotSide;
    private FootstepOrigin origin;

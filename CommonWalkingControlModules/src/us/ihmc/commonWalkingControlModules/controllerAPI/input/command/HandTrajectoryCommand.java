@@ -5,16 +5,16 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandTrajectoryControllerCommand extends SE3TrajectoryControllerCommand<HandTrajectoryControllerCommand, HandTrajectoryMessage>
+public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTrajectoryCommand, HandTrajectoryMessage>
 {
    private RobotSide robotSide;
    private BaseForControl baseForControl;
 
-   public HandTrajectoryControllerCommand()
+   public HandTrajectoryCommand()
    {
    }
 
-   public HandTrajectoryControllerCommand(ReferenceFrame referenceFrame, RobotSide robotSide, BaseForControl baseForControl)
+   public HandTrajectoryCommand(ReferenceFrame referenceFrame, RobotSide robotSide, BaseForControl baseForControl)
    {
       super.clear(referenceFrame);
       this.robotSide = robotSide;
@@ -38,7 +38,7 @@ public class HandTrajectoryControllerCommand extends SE3TrajectoryControllerComm
    }
 
    @Override
-   public void set(HandTrajectoryControllerCommand other)
+   public void set(HandTrajectoryCommand other)
    {
       super.set(other);
       robotSide = other.robotSide;
