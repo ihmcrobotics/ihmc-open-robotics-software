@@ -86,7 +86,7 @@ public class CommandInputManager
    /**
     * This method has to remain private.
     * It is used to register in the API a command.
-    * @param commandClazzes
+    * @param commandClass
     */
    private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
    {
