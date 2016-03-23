@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -106,7 +106,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
 
-   private final HumanoidGlobalDataProducer globalDataProducer;
+   private final GlobalDataProducer globalDataProducer;
    
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
@@ -114,7 +114,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
          MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
-         HumanoidGlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
+         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
@@ -162,7 +162,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, threadDataSynchronizer.getControllerContactSensorHolder(),
-            centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, dataProducer, arrayOfJointsToIgnore);
+            centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, threadDataSynchronizer.getControllerRobotMotionStatusHolder());
 
@@ -203,7 +203,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity,
          ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
-         HumanoidGlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
 
@@ -240,7 +240,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
             yoGraphicsListRegistry, closeableAndDisposableRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
-            contactSensorHolder, centerOfPressureDataHolderForEstimator, dataProducer, jointsToIgnore);
+            contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
       final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
