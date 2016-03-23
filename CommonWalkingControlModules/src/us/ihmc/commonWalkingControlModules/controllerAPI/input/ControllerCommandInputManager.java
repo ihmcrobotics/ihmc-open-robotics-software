@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajec
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AutomaticManipulationAbortCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.CompilableCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.EndEffectorLoadBearingCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
@@ -151,48 +152,7 @@ public class ControllerCommandInputManager
       return commandClassToBufferMap.get(commandClassToCheck).poll();
    }
 
-   public EndEffectorLoadBearingCommand pollAndCompileEndEffectorLoadBearingCommands()
-   {
-      List<EndEffectorLoadBearingCommand> commands = pollNewCommands(EndEffectorLoadBearingCommand.class);
-      for (int i = 1; i < commands.size(); i++)
-         commands.get(0).set(commands.get(i));
-      return commands.get(0);
-   }
-
-   public GoHomeCommand pollAndCompileGoHomeCommands()
-   {
-      List<GoHomeCommand> commands = pollNewCommands(GoHomeCommand.class);
-      for (int i = 1; i < commands.size(); i++)
-         commands.get(0).set(commands.get(i));
-      return commands.get(0);
-   }
-
-   public void flushManipulationBuffers()
-   {
-      flushCommands(HandTrajectoryCommand.class);
-      flushCommands(ArmTrajectoryCommand.class);
-      flushCommands(ArmDesiredAccelerationsCommand.class);
-      flushCommands(HandComplianceControlParametersCommand.class);
-   }
-
-   public void flushPelvisBuffers()
-   {
-      flushCommands(PelvisTrajectoryCommand.class);
-      flushCommands(PelvisOrientationTrajectoryCommand.class);
-      flushCommands(PelvisHeightTrajectoryCommand.class);
-   }
-
-   public void flushFootstepBuffers()
-   {
-      flushCommands(FootstepDataListCommand.class);
-   }
-
-   public void flushFlamingoBuffers()
-   {
-      flushCommands(FootTrajectoryCommand.class);
-   }
-
-   public void flushBuffers()
+   public void flushAllCommands()
    {
       for (int i = 0; i < allBuffers.size(); i++)
          allBuffers.get(i).flush();
@@ -201,6 +161,14 @@ public class ControllerCommandInputManager
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
       commandClassToBufferMap.get(commandClassToFlush).flush();
+   }
+
+   public <C extends CompilableCommand<C, ?>> C pollAndCompileCommands(Class<C> commandClassToPoll)
+   {
+      List<C> commands = pollNewCommands(commandClassToPoll);
+      for (int i = 1; i < commands.size(); i++)
+         commands.get(0).compile(commands.get(i));
+      return commands.get(0);
    }
 
    public <C extends Command<C, ?>> C pollNewestCommand(Class<C> commandClassToFlush)
