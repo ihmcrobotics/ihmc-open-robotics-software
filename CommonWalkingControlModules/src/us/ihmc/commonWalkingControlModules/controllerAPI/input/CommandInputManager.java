@@ -7,28 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AbortWalkingCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.AutomaticManipulationAbortCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.CompilableCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.EndEffectorLoadBearingCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.MultipleCommandHolder;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.WholeBodyTrajectoryCommand;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
@@ -45,34 +26,21 @@ public class CommandInputManager
    private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> messageClassToBufferMap = new HashMap<>();
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> commandsMap = new HashMap<>();
 
-   private final List<Class<? extends Packet<?>>> listOfSupportedMessages;
+   private final List<Class<? extends Packet<?>>> listOfSupportedMessages = new ArrayList<>();
 
-   public CommandInputManager()
+   public CommandInputManager(List<Class<? extends Command<?, ?>>> commandsToRegister)
    {
-      registerNewCommand(ArmTrajectoryCommand.class);
-      registerNewCommand(HandTrajectoryCommand.class);
-      registerNewCommand(FootTrajectoryCommand.class);
-      registerNewCommand(HeadTrajectoryCommand.class);
-      registerNewCommand(ChestTrajectoryCommand.class);
-      registerNewCommand(PelvisTrajectoryCommand.class);
-      registerNewCommand(PelvisOrientationTrajectoryCommand.class);
-      registerNewCommand(PelvisHeightTrajectoryCommand.class);
-      registerNewCommand(StopAllTrajectoryCommand.class);
-      registerNewCommand(FootstepDataListCommand.class);
-      registerNewCommand(GoHomeCommand.class);
-      registerNewCommand(EndEffectorLoadBearingCommand.class);
-      registerNewCommand(ArmDesiredAccelerationsCommand.class);
-      registerNewCommand(AutomaticManipulationAbortCommand.class);
-      registerNewCommand(HandComplianceControlParametersCommand.class);
-      registerNewCommand(HighLevelStateCommand.class);
-      registerNewCommand(AbortWalkingCommand.class);
-      registerNewCommand(PauseWalkingCommand.class);
-      registerNewCommand(WholeBodyTrajectoryCommand.class);
-
-      listOfSupportedMessages = new ArrayList<>(messageClassToBufferMap.keySet());
+      registerNewCommands(commandsToRegister);
    }
 
-   private <C extends Command<C, M>, M extends Packet<M>> ConcurrentRingBuffer<C> registerNewCommand(Class<C> commandClazz)
+   @SuppressWarnings("unchecked")
+   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClazzes)
+   {
+      for (int i = 0; i < commandClazzes.size(); i++)
+         registerNewCommand((Class<C>) commandClazzes.get(i));
+   }
+
+   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClazz)
    {
       Builder<C> builer = createBuilderWithEmptyConstructor(commandClazz);
       ConcurrentRingBuffer<C> newBuffer = new ConcurrentRingBuffer<>(builer, buffersCapacity);
@@ -83,7 +51,7 @@ public class CommandInputManager
       messageClassToBufferMap.put(messageClass, newBuffer);
       commandsMap.put(commandClazz, new RecyclingArrayList<>(buffersCapacity, commandClazz));
 
-      return newBuffer;
+      listOfSupportedMessages.add(messageClass);
    }
 
    public <M extends Packet<M>> void submitMessage(M message)
