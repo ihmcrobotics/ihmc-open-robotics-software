@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class WholeBodyTrajectoryCommand implements Command<WholeBodyTrajectoryCommand, WholeBodyTrajectoryMessage>, MultipleCommandHolder
+public class WholeBodyTrajectoryCommand implements MultipleCommandHolder<WholeBodyTrajectoryCommand, WholeBodyTrajectoryMessage>
 {
    private final SideDependentList<HandTrajectoryCommand> handTrajectoryControllerCommands = new SideDependentList<>();
    private final SideDependentList<ArmTrajectoryCommand> armTrajectoryControllerCommands = new SideDependentList<>();
