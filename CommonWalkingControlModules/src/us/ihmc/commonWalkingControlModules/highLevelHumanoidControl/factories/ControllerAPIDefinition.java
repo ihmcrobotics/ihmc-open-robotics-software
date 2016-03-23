@@ -25,6 +25,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrient
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
@@ -66,6 +67,7 @@ public abstract class ControllerAPIDefinition
       statusMessages.add(FootstepStatus.class);
       statusMessages.add(WalkingStatusMessage.class);
       statusMessages.add(ManipulationAbortedStatus.class);
+      statusMessages.add(HighLevelStateChangeStatusMessage.class);
 
       supportedStatusMessages = Collections.unmodifiableList(statusMessages);
    }

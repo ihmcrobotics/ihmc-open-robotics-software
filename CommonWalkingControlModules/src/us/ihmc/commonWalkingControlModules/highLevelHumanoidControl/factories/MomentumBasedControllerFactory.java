@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
@@ -200,7 +199,8 @@ public class MomentumBasedControllerFactory
 
    public void createUserDesiredControllerCommandGenerator()
    {
-      if (userDesiredControllerCommandGenerators != null) return;
+      if (userDesiredControllerCommandGenerators != null)
+         return;
 
       if (momentumBasedController != null)
       {
@@ -245,16 +245,16 @@ public class MomentumBasedControllerFactory
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      momentumBasedController = new MomentumBasedController(fullRobotModel, geometricJacobianHolder, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors,
-            yoTime, gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, armControllerParameters, walkingControllerParameters,
-            yoGraphicsListRegistry, jointsToIgnore);
+      momentumBasedController = new MomentumBasedController(fullRobotModel, geometricJacobianHolder, centerOfMassJacobian, referenceFrames, footSwitches,
+            wristForceSensors, yoTime, gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, armControllerParameters,
+            walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
          createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
       if (createUserDesiredControllerCommandGenerator)
-      if (createQueuedControllerCommandGenerator)
-         createQueuedControllerCommandGenerator(controllerCommands);
+         if (createQueuedControllerCommandGenerator)
+            createQueuedControllerCommandGenerator(controllerCommands);
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
       if (createControllerNetworkSubscriber)
@@ -290,8 +290,8 @@ public class MomentumBasedControllerFactory
       // Setup the HighLevelHumanoidControllerManager /////////////////////////////////////////////
       // This is the "highest level" controller that enables switching between
       // the different controllers (walking, multi-contact, driving, etc.)
-      highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(commandInputManager, controllerCore, initialBehavior, highLevelBehaviors,
-            momentumBasedController, centerOfPressureDataHolderForEstimator, controllerCoreOutput, dataProducer);
+      highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(commandInputManager, statusOutputManager, controllerCore, initialBehavior,
+            highLevelBehaviors, momentumBasedController, centerOfPressureDataHolderForEstimator, controllerCoreOutput);
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -12,7 +12,7 @@ import us.ihmc.utilities.ros.RosMainNode;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class PeriodicRosHighLevelStatePublisher implements PacketConsumer<HighLevelStateChangeMessage>, Runnable
+public class PeriodicRosHighLevelStatePublisher implements PacketConsumer<HighLevelStateChangeStatusMessage>, Runnable
 {
    private final RosHighLevelStatePublisher statePublisher = new RosHighLevelStatePublisher(false);
    private final RosMainNode rosMainNode;
@@ -34,7 +34,7 @@ public class PeriodicRosHighLevelStatePublisher implements PacketConsumer<HighLe
    }
 
    @Override
-   public void receivedPacket(HighLevelStateChangeMessage packet)
+   public void receivedPacket(HighLevelStateChangeStatusMessage packet)
    {
       if (packet.getEndState() != currentState)
       {
