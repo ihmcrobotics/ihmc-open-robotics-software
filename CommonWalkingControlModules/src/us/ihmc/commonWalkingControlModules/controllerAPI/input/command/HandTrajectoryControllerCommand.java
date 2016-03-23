@@ -78,4 +78,10 @@ public class HandTrajectoryControllerCommand extends SE3TrajectoryControllerComm
    {
       return HandTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return robotSide != null && baseForControl != null && super.isCommandValid();
+   }
 }

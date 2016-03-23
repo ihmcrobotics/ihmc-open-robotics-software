@@ -1,7 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
@@ -18,7 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
       + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.")
 public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTrajectoryMessage>
-      implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>
+      implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>, MultiplePacketHolder
 {
    public HandTrajectoryMessage leftHandTrajectoryMessage, rightHandTrajectoryMessage;
    public ArmTrajectoryMessage leftArmTrajectoryMessage, rightArmTrajectoryMessage;
@@ -267,5 +271,20 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
          return errorMessage;
       }
       return null;
+   }
+
+   @Override
+   public List<Packet<?>> getPackets()
+   {
+      ArrayList<Packet<?>> wholeBodyPackets = new ArrayList<>();
+      wholeBodyPackets.add(leftHandTrajectoryMessage);
+      wholeBodyPackets.add(rightHandTrajectoryMessage);
+      wholeBodyPackets.add(leftArmTrajectoryMessage);
+      wholeBodyPackets.add(rightArmTrajectoryMessage);
+      wholeBodyPackets.add(chestTrajectoryMessage);
+      wholeBodyPackets.add(pelvisTrajectoryMessage);
+      wholeBodyPackets.add(leftFootTrajectoryMessage);
+      wholeBodyPackets.add(rightFootTrajectoryMessage);
+      return wholeBodyPackets;
    }
 }

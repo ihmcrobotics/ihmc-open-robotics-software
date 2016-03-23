@@ -10,8 +10,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class EndEffectorLoadBearingControllerCommand implements ControllerCommand<EndEffectorLoadBearingControllerCommand, EndEffectorLoadBearingMessage>
 {
-   private final SideDependentList<EnumMap<EndEffector, LoadBearingRequest>> sideDependentEndEffectorRequestMap = SideDependentList
-         .createListOfEnumMaps(EndEffector.class);
+   private final SideDependentList<EnumMap<EndEffector, LoadBearingRequest>> sideDependentEndEffectorRequestMap = SideDependentList.createListOfEnumMaps(EndEffector.class);
    private final EnumMap<EndEffector, LoadBearingRequest> otherEndEffectorRequestMap = new EnumMap<>(EndEffector.class);
 
    public EndEffectorLoadBearingControllerCommand()
@@ -93,5 +92,11 @@ public class EndEffectorLoadBearingControllerCommand implements ControllerComman
    public Class<EndEffectorLoadBearingMessage> getMessageClass()
    {
       return EndEffectorLoadBearingMessage.class;
+   }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return true;
    }
 }

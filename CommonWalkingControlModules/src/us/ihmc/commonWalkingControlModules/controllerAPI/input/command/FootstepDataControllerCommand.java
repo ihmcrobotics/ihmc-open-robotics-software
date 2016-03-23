@@ -138,4 +138,10 @@ public class FootstepDataControllerCommand implements ControllerCommand<Footstep
    {
       return FootstepDataMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return origin != null && robotSide != null;
+   }
 }

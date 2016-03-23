@@ -21,4 +21,10 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       message.getTrajectoryPoints(this);
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return getNumberOfTrajectoryPoints() > 0;
+   }
 }

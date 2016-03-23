@@ -38,7 +38,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
 
                ChestTrajectoryControllerCommand chestTrajectoryControllerCommand = new ChestTrajectoryControllerCommand();
                chestTrajectoryControllerCommand.addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation.getQuaternionCopy(), new Vector3d());
-               controllerCommandInputManager.submitModifiableMessage(chestTrajectoryControllerCommand);
+               controllerCommandInputManager.submitControllerCommand(chestTrajectoryControllerCommand);
 
                userDoChestOrientation.set(false);
             }

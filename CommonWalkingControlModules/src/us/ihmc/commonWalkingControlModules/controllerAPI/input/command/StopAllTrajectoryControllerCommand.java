@@ -39,4 +39,10 @@ public class StopAllTrajectoryControllerCommand implements ControllerCommand<Sto
    {
       return StopAllTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return true;
+   }
 }

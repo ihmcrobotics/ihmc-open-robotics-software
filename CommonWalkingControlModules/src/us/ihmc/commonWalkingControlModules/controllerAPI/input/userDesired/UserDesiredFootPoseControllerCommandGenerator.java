@@ -73,7 +73,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
                footTrajectoryControllerCommand.setRobotSide(userFootPoseSide.getEnumValue());
 
                System.out.println("Submitting " + footTrajectoryControllerCommand);
-               controllerCommandInputManager.submitModifiableMessage(footTrajectoryControllerCommand);
+               controllerCommandInputManager.submitControllerCommand(footTrajectoryControllerCommand);
                
                userDoFootPose.set(false);
             }

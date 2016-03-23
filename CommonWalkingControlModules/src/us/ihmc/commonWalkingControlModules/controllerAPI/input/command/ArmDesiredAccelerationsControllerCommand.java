@@ -84,4 +84,10 @@ public class ArmDesiredAccelerationsControllerCommand
    {
       return ArmDesiredAccelerationsMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return robotSide != null && armControlMode != null && !armDesiredJointAccelerations.isEmpty();
+   }
 }

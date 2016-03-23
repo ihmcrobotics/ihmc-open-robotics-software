@@ -154,4 +154,10 @@ public class HandComplianceControlParametersControllerCommand
    {
       return HandComplianceControlParametersMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return robotSide != null;
+   }
 }

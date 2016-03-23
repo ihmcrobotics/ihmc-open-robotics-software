@@ -95,7 +95,7 @@ public class ComponentBasedFootstepDataMessageGenerator
       FootstepDataListControllerCommand footsteps = computeNextFootsteps(supportLeg);
       footsteps.setSwingTime(swingTime.getDoubleValue());
       footsteps.setTransferTime(transferTime.getDoubleValue());
-      commandInputManager.submitModifiableMessage(footsteps);
+      commandInputManager.submitControllerCommand(footsteps);
 
       nextSwingLeg.set(supportLeg);
    }

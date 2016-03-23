@@ -43,4 +43,10 @@ public class PauseWalkingControllerCommand implements ControllerCommand<PauseWal
    {
       return PauseWalkingMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return true;
+   }
 }

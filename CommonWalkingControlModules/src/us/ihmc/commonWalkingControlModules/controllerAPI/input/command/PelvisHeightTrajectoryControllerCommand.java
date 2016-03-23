@@ -26,4 +26,10 @@ public class PelvisHeightTrajectoryControllerCommand extends SimpleTrajectoryPoi
    {
       return PelvisHeightTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return getNumberOfTrajectoryPoints() > 0;
+   }
 }

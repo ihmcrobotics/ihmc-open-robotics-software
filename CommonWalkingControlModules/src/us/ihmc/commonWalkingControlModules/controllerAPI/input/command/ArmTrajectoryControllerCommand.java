@@ -128,4 +128,10 @@ public class ArmTrajectoryControllerCommand implements ControllerCommand<ArmTraj
    {
       return ArmTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return robotSide != null && getNumberOfJoints() > 0;
+   }
 }

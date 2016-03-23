@@ -42,4 +42,10 @@ public class AutomaticManipulationAbortControllerCommand implements ControllerCo
    {
       return AutomaticManipulationAbortMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return true;
+   }
 }
