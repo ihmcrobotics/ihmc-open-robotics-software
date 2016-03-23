@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
@@ -25,10 +25,10 @@ public class BlindWalkingFootstepDataMessageGenerator
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
 
    private final BlindWalkingDesiredFootstepCalculator blindWalkingDesiredFootstepCalculator;
-   private final ControllerCommandInputManager commandInputManager;
+   private final CommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
 
-   public BlindWalkingFootstepDataMessageGenerator(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+   public BlindWalkingFootstepDataMessageGenerator(CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          YoVariableRegistry parentRegistry)
    {

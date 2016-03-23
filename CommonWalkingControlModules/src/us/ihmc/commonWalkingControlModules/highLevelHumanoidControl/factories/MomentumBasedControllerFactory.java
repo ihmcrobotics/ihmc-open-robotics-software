@@ -8,7 +8,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
@@ -62,7 +62,7 @@ public class MomentumBasedControllerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ControllerCommandInputManager commandInputManager = new ControllerCommandInputManager();
+   private final CommandInputManager commandInputManager = new CommandInputManager();
    private final ControllerStatusOutputManager statusOutputManager = new ControllerStatusOutputManager();
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
@@ -452,7 +452,7 @@ public class MomentumBasedControllerFactory
       return registry;
    }
 
-   public ControllerCommandInputManager getCommandInputManager()
+   public CommandInputManager getCommandInputManager()
    {
       return commandInputManager;
    }

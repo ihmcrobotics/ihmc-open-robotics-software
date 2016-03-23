@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -46,7 +46,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final BooleanYoVariable isListeningToHighLevelStateMessage = new BooleanYoVariable("isListeningToHighLevelStateMessage", registry);
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
-   private final ControllerCommandInputManager commandInputManager;
+   private final CommandInputManager commandInputManager;
    private final ControllerCoreOutputReadOnly controllerCoreOutput;
    private final WholeBodyControllerCore controllerCore;
 
@@ -54,7 +54,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public static final AtomicReference<HighLevelState> currentStateForOpenSource = new AtomicReference<HighLevelState>(HighLevelState.DO_NOTHING_BEHAVIOR);
 
-   public HighLevelHumanoidControllerManager(ControllerCommandInputManager commandInputManager, WholeBodyControllerCore controllerCore,
+   public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, WholeBodyControllerCore controllerCore,
          HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors, MomentumBasedController momentumBasedController,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOutputReadOnly controllerCoreOutput, HumanoidGlobalDataProducer dataProducer)
    {

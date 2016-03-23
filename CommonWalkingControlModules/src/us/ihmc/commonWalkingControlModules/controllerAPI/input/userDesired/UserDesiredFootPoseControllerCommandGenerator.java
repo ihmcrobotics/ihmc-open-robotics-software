@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -34,7 +34,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
 
    private final FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
    
-   public UserDesiredFootPoseControllerCommandGenerator(final ControllerCommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
+   public UserDesiredFootPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
       userDesiredFootPose = new YoFramePose("userDesiredFootPose", ReferenceFrame.getWorldFrame(), registry);
 

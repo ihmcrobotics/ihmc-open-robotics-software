@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -34,7 +34,7 @@ public class ControllerStatusOutputManager
 
    private <T extends StatusPacket<T>> void registerStatusMessage(Class<T> statusMessageClass)
    {
-      Builder<T> builer = ControllerCommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
+      Builder<T> builer = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
       statusClassToObjectMap.put(statusMessageClass, builer.newInstance());
    }
 

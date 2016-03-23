@@ -21,7 +21,7 @@ import us.ihmc.util.PeriodicThreadScheduler;
 public class ControllerNetworkSubscriber implements Runnable, CloseableAndDisposable
 {
    private final int buffersCapacity = 16;
-   private final ControllerCommandInputManager controllerCommandInputManager;
+   private final CommandInputManager controllerCommandInputManager;
    private final ControllerStatusOutputManager controllerStatusOutputManager;
    private final HumanoidGlobalDataProducer globalDataProducer;
    private final PeriodicThreadScheduler scheduler;
@@ -30,7 +30,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final Map<Class<? extends StatusPacket<?>>, ConcurrentRingBuffer<? extends StatusPacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
    private final Map<Class<? extends StatusPacket<?>>, Builder<? extends StatusPacket<?>>> statusMessageClassToBuilderMap = new HashMap<>();
 
-   public ControllerNetworkSubscriber(ControllerCommandInputManager controllerCommandInputManager, ControllerStatusOutputManager controllerStatusOutputManager,
+   public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, ControllerStatusOutputManager controllerStatusOutputManager,
          CloseableAndDisposableRegistry closeAndDisposeRegistry, PeriodicThreadScheduler scheduler, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
@@ -53,10 +53,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       for (int i = 0; i < listOfSupportedMessages.size(); i++)
       {
          Class<T> statusMessageClass = (Class<T>) listOfSupportedMessages.get(i);
-         Builder<T> builder = ControllerCommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
+         Builder<T> builder = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
          ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
          statusMessageClassToBufferMap.put(statusMessageClass, newBuffer);
-         statusMessageClassToBuilderMap.put(statusMessageClass, ControllerCommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass));
+         statusMessageClassToBuilderMap.put(statusMessageClass, CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass));
       }
    }
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
@@ -42,12 +42,12 @@ public class ComponentBasedFootstepDataMessageGenerator
    private final DoubleYoVariable transferTime = new DoubleYoVariable("footstepGeneratorTransferTime", registry);
 
    private final ComponentBasedDesiredFootstepCalculator componentBasedDesiredFootstepCalculator;
-   private final ControllerCommandInputManager commandInputManager;
+   private final CommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
 
    private final List<Updatable> updatables = new ArrayList<>();
 
-   public ComponentBasedFootstepDataMessageGenerator(ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+   public ComponentBasedFootstepDataMessageGenerator(CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
    {

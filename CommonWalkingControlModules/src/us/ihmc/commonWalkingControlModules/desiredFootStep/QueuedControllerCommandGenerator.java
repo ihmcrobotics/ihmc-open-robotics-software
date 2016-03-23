@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
@@ -30,7 +30,7 @@ public class QueuedControllerCommandGenerator implements Updatable
 
    private boolean waitingForWalkingStatusToComplete = false;
    
-   private final ControllerCommandInputManager commandInputManager;
+   private final CommandInputManager commandInputManager;
    private final ControllerStatusOutputManager statusOutputManager;
 
    private final List<Updatable> updatables = new ArrayList<>();
@@ -38,7 +38,7 @@ public class QueuedControllerCommandGenerator implements Updatable
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
    
    public QueuedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands,
-         ControllerCommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+         CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
    {

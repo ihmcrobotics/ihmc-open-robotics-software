@@ -36,7 +36,7 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class ControllerCommandInputManager
+public class CommandInputManager
 {
    private final int buffersCapacity = 8;
 
@@ -47,7 +47,7 @@ public class ControllerCommandInputManager
 
    private final List<Class<? extends Packet<?>>> listOfSupportedMessages;
 
-   public ControllerCommandInputManager()
+   public CommandInputManager()
    {
       registerNewCommand(ArmTrajectoryCommand.class);
       registerNewCommand(HandTrajectoryCommand.class);
