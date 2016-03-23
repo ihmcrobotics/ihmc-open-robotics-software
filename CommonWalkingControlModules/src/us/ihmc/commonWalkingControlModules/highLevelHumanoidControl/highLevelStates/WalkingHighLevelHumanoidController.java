@@ -1161,6 +1161,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    @Override
    public void doMotionControl()
    {
+      momentumBasedController.update();
+
       manipulationControlModule.submitNewArmJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
 
       consumeHeadMessages();
@@ -1195,8 +1197,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (balanceManager.isPushRecoveryEnabled() && balanceManager.isRobotBackToSafeState())
             balanceManager.disablePushRecovery();
       }
-
-      momentumBasedController.update();
 
       balanceManager.update();
 
