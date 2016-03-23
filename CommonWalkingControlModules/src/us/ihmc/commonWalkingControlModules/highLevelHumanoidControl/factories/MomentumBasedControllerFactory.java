@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwi
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -66,7 +67,6 @@ public class MomentumBasedControllerFactory
    private final StatusMessageOutputManager statusOutputManager;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
-   private boolean createControllerNetworkSubscriber = false;
    private boolean createQueuedControllerCommandGenerator = false;
    private boolean createUserDesiredControllerCommandGenerator = true;
 
@@ -100,9 +100,7 @@ public class MomentumBasedControllerFactory
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
 
-   private HumanoidGlobalDataProducer globalDataProducer;
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
-   private PeriodicThreadScheduler scheduler;
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
@@ -137,13 +135,9 @@ public class MomentumBasedControllerFactory
       momentumBasedController.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
-   public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler)
+   public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
    {
-      this.scheduler = scheduler;
-      if (globalDataProducer != null)
-         new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, closeableAndDisposableRegistry, scheduler, globalDataProducer);
-      else
-         createControllerNetworkSubscriber = true;
+      new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, closeableAndDisposableRegistry, scheduler, packetCommunicator);
    }
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
@@ -225,7 +219,6 @@ public class MomentumBasedControllerFactory
    {
       closeableAndDisposableRegistry.registerChild(this.closeableAndDisposableRegistry);
 
-      this.globalDataProducer = dataProducer;
       SideDependentList<ContactableFoot> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
       double gravityZ = Math.abs(gravity);
@@ -258,8 +251,6 @@ public class MomentumBasedControllerFactory
             createQueuedControllerCommandGenerator(controllerCommands);
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
-      if (createControllerNetworkSubscriber)
-         createControllerNetworkSubscriber(scheduler);
 
       variousWalkingManagers = new VariousWalkingManagers(statusOutputManager, momentumBasedController, walkingControllerParameters,
             capturePointPlannerParameters, armControllerParameters, registry);
