@@ -75,32 +75,32 @@ public class QueuedControllerCommandGenerator implements Updatable
       if (controllerCommand instanceof FootstepDataListControllerCommand)
       {
          FootstepDataListControllerCommand footstepDataListControllerCommand = (FootstepDataListControllerCommand) controllerCommand;
-         commandInputManager.submitModifiableMessage(footstepDataListControllerCommand);
+         commandInputManager.submitControllerCommand(footstepDataListControllerCommand);
          waitingForWalkingStatusToComplete = true;
       }
       
       else if (controllerCommand instanceof ChestTrajectoryControllerCommand)
       {
          ChestTrajectoryControllerCommand chestTrajectoryControllerCommand = (ChestTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitModifiableMessage(chestTrajectoryControllerCommand);
+         commandInputManager.submitControllerCommand(chestTrajectoryControllerCommand);
       }
       
       else if (controllerCommand instanceof FootTrajectoryControllerCommand)
       {
          FootTrajectoryControllerCommand footTrajectoryControllerCommand = (FootTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitModifiableMessage(footTrajectoryControllerCommand);
+         commandInputManager.submitControllerCommand(footTrajectoryControllerCommand);
       }
       
       else if (controllerCommand instanceof HandTrajectoryControllerCommand)
       {
          HandTrajectoryControllerCommand handTrajectoryControllerCommand = (HandTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitModifiableMessage(handTrajectoryControllerCommand);
+         commandInputManager.submitControllerCommand(handTrajectoryControllerCommand);
       }
       
       else if (controllerCommand instanceof PelvisHeightTrajectoryControllerCommand)
       {
          PelvisHeightTrajectoryControllerCommand pelvisHeightTrajectoryControllerCommand = (PelvisHeightTrajectoryControllerCommand) controllerCommand;
-         commandInputManager.submitModifiableMessage(pelvisHeightTrajectoryControllerCommand);
+         commandInputManager.submitControllerCommand(pelvisHeightTrajectoryControllerCommand);
       }
       
       else

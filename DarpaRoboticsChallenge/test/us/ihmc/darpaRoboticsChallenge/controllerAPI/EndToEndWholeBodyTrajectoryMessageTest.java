@@ -30,7 +30,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -38,7 +37,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 
 public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -53,7 +51,6 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       BambooTools.reportTestStartedMessage();
 
       Random random = new Random(564574L);
-      double epsilon = 1.0e-10;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 

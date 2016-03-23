@@ -115,4 +115,10 @@ public class GoHomeControllerCommand implements ControllerCommand<GoHomeControll
    {
       return GoHomeMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return true;
+   }
 }

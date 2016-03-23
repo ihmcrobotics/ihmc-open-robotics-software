@@ -35,4 +35,10 @@ public class HighLevelStateControllerCommand implements ControllerCommand<HighLe
    {
       return HighLevelStateMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return highLevelState != null;
+   }
 }

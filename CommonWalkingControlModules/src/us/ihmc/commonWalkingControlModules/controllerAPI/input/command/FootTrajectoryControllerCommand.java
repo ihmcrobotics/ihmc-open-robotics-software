@@ -47,4 +47,10 @@ public class FootTrajectoryControllerCommand extends SE3TrajectoryControllerComm
    {
       return FootTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return robotSide != null && super.isCommandValid();
+   }
 }

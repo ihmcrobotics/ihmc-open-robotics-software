@@ -70,7 +70,7 @@ public class BlindWalkingFootstepDataMessageGenerator
       blindWalkingDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
       FootstepDataListControllerCommand footsteps = computeNextFootsteps(supportLeg);
-      commandInputManager.submitModifiableMessage(footsteps);
+      commandInputManager.submitControllerCommand(footsteps);
 
       nextSwingLeg.set(supportLeg);
    }

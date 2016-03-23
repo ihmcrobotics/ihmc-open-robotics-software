@@ -93,7 +93,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
                
 
                System.out.println("Submitting " + handTrajectoryControllerCommand);
-               controllerCommandInputManager.submitModifiableMessage(handTrajectoryControllerCommand);
+               controllerCommandInputManager.submitControllerCommand(handTrajectoryControllerCommand);
                
                userDoHandPose.set(false);
             }

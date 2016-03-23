@@ -22,4 +22,10 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
       message.getTrajectoryPoints(this);
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return getNumberOfTrajectoryPoints() > 0;
+   }
 }

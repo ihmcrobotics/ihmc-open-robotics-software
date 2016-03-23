@@ -105,4 +105,10 @@ public class FootstepDataListControllerCommand implements ControllerCommand<Foot
    {
       return FootstepDataListMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return getNumberOfFootsteps() > 0;
+   }
 }

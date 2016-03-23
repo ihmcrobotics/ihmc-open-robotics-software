@@ -34,4 +34,10 @@ public class AbortWalkingControllerCommand implements ControllerCommand<AbortWal
    {
       return AbortWalkingMessage.class;
    }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return true;
+   }
 }
