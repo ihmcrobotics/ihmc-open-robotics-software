@@ -41,6 +41,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMas
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -459,7 +460,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             manipulationControlModule.freeze();
             timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
 
-            statusOutputManager.reportManipulationAborted();
+            statusOutputManager.reportStatusMessage(new ManipulationAbortedStatus());
          }
          else
          {

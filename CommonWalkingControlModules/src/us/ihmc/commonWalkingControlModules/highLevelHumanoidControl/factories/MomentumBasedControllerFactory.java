@@ -63,7 +63,7 @@ public class MomentumBasedControllerFactory
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final CommandInputManager commandInputManager;
-   private final ControllerStatusOutputManager statusOutputManager = new ControllerStatusOutputManager();
+   private final ControllerStatusOutputManager statusOutputManager;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
    private boolean createControllerNetworkSubscriber = false;
@@ -119,6 +119,7 @@ public class MomentumBasedControllerFactory
       this.capturePointPlannerParameters = capturePointPlannerParameters;
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
+      statusOutputManager = new ControllerStatusOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
    }
 
    public void addUpdatable(Updatable updatable)

@@ -24,10 +24,17 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOri
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.WholeBodyTrajectoryCommand;
+import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 
 public abstract class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> supportedCommands;
+
+   private static final List<Class<? extends StatusPacket<?>>> supportedStatusMessages;
 
    static
    {
@@ -53,10 +60,23 @@ public abstract class ControllerAPIDefinition
       commands.add(WholeBodyTrajectoryCommand.class);
 
       supportedCommands = Collections.unmodifiableList(commands);
+
+      List<Class<? extends StatusPacket<?>>> statusMessages = new ArrayList<>();
+      statusMessages.add(CapturabilityBasedStatus.class);
+      statusMessages.add(FootstepStatus.class);
+      statusMessages.add(WalkingStatusMessage.class);
+      statusMessages.add(ManipulationAbortedStatus.class);
+
+      supportedStatusMessages = Collections.unmodifiableList(statusMessages);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
    {
       return supportedCommands;
+   }
+
+   public static List<Class<? extends StatusPacket<?>>> getControllerSupportedStatusMessages()
+   {
+      return supportedStatusMessages;
    }
 }

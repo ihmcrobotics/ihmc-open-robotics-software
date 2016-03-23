@@ -8,34 +8,33 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class ControllerStatusOutputManager
 {
    private final Map<Class<? extends StatusPacket<?>>, StatusPacket<?>> statusClassToObjectMap = new HashMap<>();
-   private final List<Class<? extends StatusPacket<?>>> listOfSupportedMessages;
+   private final List<Class<? extends StatusPacket<?>>> listOfSupportedMessages = new ArrayList<>();
 
    private final Map<Class<? extends StatusPacket<?>>, List<StatusMessageListener<?>>> specificStatusMessageListenerMap = new HashMap<>();
    private final List<GlobalStatusMessageListener> globalStatusMessageListeners = new ArrayList<>();
 
-   public ControllerStatusOutputManager()
+   public ControllerStatusOutputManager(List<Class<? extends StatusPacket<?>>> statusMessagesToRegister)
    {
-      registerStatusMessage(CapturabilityBasedStatus.class);
-      registerStatusMessage(FootstepStatus.class);
-      registerStatusMessage(WalkingStatusMessage.class);
-      registerStatusMessage(ManipulationAbortedStatus.class);
+      registerStatusMessages(statusMessagesToRegister);
+   }
 
-      listOfSupportedMessages = new ArrayList<>(statusClassToObjectMap.keySet());
+   @SuppressWarnings("unchecked")
+   private <T extends StatusPacket<T>> void registerStatusMessages(List<Class<? extends StatusPacket<?>>> statusMessageClasses)
+   {
+      for (int i = 0; i < statusMessageClasses.size(); i++)
+         registerStatusMessage((Class<T>) statusMessageClasses.get(i));
    }
 
    private <T extends StatusPacket<T>> void registerStatusMessage(Class<T> statusMessageClass)
    {
       Builder<T> builer = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
       statusClassToObjectMap.put(statusMessageClass, builer.newInstance());
+      listOfSupportedMessages.add(statusMessageClass);
    }
 
    public void attachGlobalStatusMessageListener(GlobalStatusMessageListener globalStatusMessageListener)
@@ -103,21 +102,6 @@ public class ControllerStatusOutputManager
          GlobalStatusMessageListener globalStatusMessageListener = globalStatusMessageListeners.get(i);
          globalStatusMessageListener.receivedNewMessageStatus(statusMessageClone);
       }
-   }
-
-   public void reportManipulationAborted()
-   {
-      reportStatusMessage(new ManipulationAbortedStatus());
-   }
-
-   public void reportFootstepStatus(FootstepStatus statusMessage)
-   {
-      reportStatusMessage(statusMessage);
-   }
-
-   public void reportCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
-   {
-      reportStatusMessage(capturabilityBasedStatus);
    }
 
    public List<Class<? extends StatusPacket<?>>> getListOfSupportedMessages()
