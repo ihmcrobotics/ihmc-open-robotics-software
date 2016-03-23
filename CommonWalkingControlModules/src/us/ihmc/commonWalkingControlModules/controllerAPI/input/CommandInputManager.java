@@ -56,7 +56,7 @@ public class CommandInputManager
 
    public <M extends Packet<M>> void submitMessage(M message)
    {
-      if (message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
+      if (message == null || message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
          return;
 
       if (message instanceof MultiplePacketHolder)
