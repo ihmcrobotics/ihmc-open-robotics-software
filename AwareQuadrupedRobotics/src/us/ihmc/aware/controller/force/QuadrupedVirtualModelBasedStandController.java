@@ -3,10 +3,8 @@ package us.ihmc.aware.controller.force;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
+import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
-import us.ihmc.aware.controller.force.taskSpaceController.controlBlocks.BodyOrientationControlBlock;
-import us.ihmc.aware.controller.force.taskSpaceController.controlBlocks.ComPositionControlBlock;
-import us.ihmc.aware.controller.force.taskSpaceController.controlBlocks.DcmPositionControlBlock;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.util.ContactState;
@@ -43,41 +41,35 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final static String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
    private final static String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
    private final static String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
-   private final static String DCM_PROPORTIONAL_GAINS = "dcmProportionalGains";
-   private final static String DCM_INTEGRAL_GAINS = "dcmIntegralGains";
-   private final static String DCM_MAX_INTEGRAL_ERROR = "dcmMaxIntegralError";
-   private final static String COM_PROPORTIONAL_GAINS = "comProportionalGains";
-   private final static String COM_DERIVATIVE_GAINS = "comDerivativeGains";
-   private final static String COM_INTEGRAL_GAINS = "comIntegralGains";
-   private final static String COM_MAX_INTEGRAL_ERROR = "comMaxIntegralError";
+   private final static String DCM_POSITION_PROPORTIONAL_GAINS = "dcmPositionProportionalGains";
+   private final static String DCM_POSITION_DERIVATIVE_GAINS = "dcmPositionDerivativeGains";
+   private final static String DCM_POSITION_INTEGRAL_GAINS = "dcmPositionIntegralGains";
+   private final static String DCM_POSITION_MAX_INTEGRAL_ERROR = "dcmPositionMaxIntegralError";
+   private final static String COM_POSITION_PROPORTIONAL_GAINS = "comPositionProportionalGains";
+   private final static String COM_POSITION_DERIVATIVE_GAINS = "comPositionDerivativeGains";
+   private final static String COM_POSITION_INTEGRAL_GAINS = "comPositionIntegralGains";
+   private final static String COM_POSITION_MAX_INTEGRAL_ERROR = "comPositionMaxIntegralError";
 
    // frames
    private final QuadrupedReferenceFrames referenceFrames;
    private final PoseReferenceFrame supportFrame;
+   QuadrupedSupportPolygon supportPolygon;
+   FramePoint supportCentroid;
+   FrameOrientation supportOrientation;
 
-   // estimates
-   QuadrupedSupportPolygon supportPolygonEstimate;
-   FramePoint supportCentroidEstimate;
-   FrameOrientation supportOrientationEstimate;
-
-   // setpoints
-   private final FrameOrientation bodyOrientationSetpoint;
-   private final FrameVector bodyAngularVelocitySetpoint;
-   private final FramePoint comPositionSetpoint;
-   private final FrameVector comVelocitySetpoint;
+   // dcm controller
+   private final FramePoint dcmPositionEstimate;
    private final FramePoint dcmPositionSetpoint;
    private final FrameVector dcmVelocitySetpoint;
+   private final DivergentComponentOfMotionController dcmPositionController;
 
-   // controllers
+   // task space controller
+   private final QuadrupedTaskSpaceCommands taskSpaceCommands;
+   private final QuadrupedTaskSpaceSetpoints taskSpaceSetpoints;
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
-   private final QuadrupedTaskSpaceEstimatorSettings taskSpaceEstimatorSettings;
-   private final QuadrupedTaskSpaceCommands taskSpaceCommands;
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
-   private final BodyOrientationControlBlock bodyOrientationControlBlock;
-   private final DcmPositionControlBlock dcmPositionControlBlock;
-   private final ComPositionControlBlock comPositionControlBlock;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -98,47 +90,42 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(DCM_PROPORTIONAL_GAINS, 2, 2, 0);
-      params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
-      params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(COM_PROPORTIONAL_GAINS, 0, 0, 5000);
-      params.setDefault(COM_DERIVATIVE_GAINS, 0, 0, 750);
-      params.setDefault(COM_INTEGRAL_GAINS, 0, 0, 0);
-      params.setDefault(COM_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(DCM_POSITION_PROPORTIONAL_GAINS, 2, 2, 0);
+      params.setDefault(DCM_POSITION_DERIVATIVE_GAINS, 0, 0, 0);
+      params.setDefault(DCM_POSITION_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(DCM_POSITION_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(COM_POSITION_PROPORTIONAL_GAINS, 0, 0, 5000);
+      params.setDefault(COM_POSITION_DERIVATIVE_GAINS, 0, 0, 750);
+      params.setDefault(COM_POSITION_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(COM_POSITION_MAX_INTEGRAL_ERROR, 0);
 
       // frames
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointNameMap, robotParameters.getPhysicalProperties());
       ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
-      ReferenceFrame bodyFrame = referenceFrames.getBodyFrame();
       supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
 
-      // estimates
-      supportPolygonEstimate = new QuadrupedSupportPolygon();
-      supportCentroidEstimate = new FramePoint();
-      supportOrientationEstimate = new FrameOrientation();
+      // support
+      supportPolygon = new QuadrupedSupportPolygon();
+      supportCentroid = new FramePoint();
+      supportOrientation = new FrameOrientation();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         supportPolygonEstimate.setFootstep(robotQuadrant, new FramePoint());
+         supportPolygon.setFootstep(robotQuadrant, new FramePoint());
       }
 
-      // setpoints
-      bodyOrientationSetpoint = new FrameOrientation();
-      bodyAngularVelocitySetpoint = new FrameVector();
-      comPositionSetpoint = new FramePoint();
-      comVelocitySetpoint = new FrameVector();
+      // dcm controller
+      dcmPositionEstimate = new FramePoint();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
+      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
 
-      // controllers
+      // task space controllers
+      taskSpaceCommands = new QuadrupedTaskSpaceCommands();
+      taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);
-      taskSpaceEstimatorSettings = new QuadrupedTaskSpaceEstimatorSettings();
-      taskSpaceCommands = new QuadrupedTaskSpaceCommands();
-      taskSpaceController = new QuadrupedTaskSpaceController(fullRobotModel, referenceFrames, jointNameMap, robotParameters.getQuadrupedJointLimits(), registry, yoGraphicsListRegistry);
+      taskSpaceController = new QuadrupedTaskSpaceController(fullRobotModel, referenceFrames, jointNameMap, robotParameters.getQuadrupedJointLimits(), controlDT, registry, yoGraphicsListRegistry);
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
-      bodyOrientationControlBlock = new BodyOrientationControlBlock(bodyFrame, controlDT, registry);
-      dcmPositionControlBlock = new DcmPositionControlBlock(comFrame, controlDT, mass, gravity, registry);
-      comPositionControlBlock = new ComPositionControlBlock(comFrame, controlDT, mass, gravity, registry);
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -150,61 +137,69 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    private void updateEstimates()
    {
-      // compute support polygon
+      // update task space estimates
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+
+      // update dcm estimate
+      taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
+      taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
+      dcmPositionEstimate.setIncludingFrame(taskSpaceEstimates.getComVelocity());
+      dcmPositionEstimate.setIncludingFrame(taskSpaceEstimates.getComPosition());
+
+      // compute support frame
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(supportPolygonEstimate.getReferenceFrame());
-         supportPolygonEstimate.setFootstep(robotQuadrant, taskSpaceEstimates.getSolePosition().get(robotQuadrant));
+         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(supportPolygon.getReferenceFrame());
+         supportPolygon.setFootstep(robotQuadrant, taskSpaceEstimates.getSolePosition().get(robotQuadrant));
          taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       }
       double minFrontFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_RIGHT).getZ());
       double minHindFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_RIGHT).getZ());
 
       // compute support frame (centroid and nominal orientation)
-      supportCentroidEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportPolygonEstimate.getCentroid2d(supportCentroidEstimate);
-      supportCentroidEstimate.changeFrame(ReferenceFrame.getWorldFrame());
-      supportCentroidEstimate.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
-      supportOrientationEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportOrientationEstimate.setYawPitchRoll(supportPolygonEstimate.getNominalYaw(), supportPolygonEstimate.getNominalPitch(), 0.0);
-      supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
+      supportCentroid.changeFrame(supportPolygon.getReferenceFrame());
+      supportPolygon.getCentroid2d(supportCentroid);
+      supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
+      supportCentroid.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
+      supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
+      supportOrientation.setYawPitchRoll(supportPolygon.getNominalYaw(), 0.0, 0.0);
+      supportFrame.setPoseAndUpdate(supportCentroid, supportOrientation);
    }
 
    private void updateSetpoints()
    {
-      // update desired body orientation and angular rate
-      bodyOrientationSetpoint.changeFrame(supportFrame);
-      bodyOrientationSetpoint.set(inputProvider.getBodyOrientationInput());
-      bodyAngularVelocitySetpoint.changeFrame(supportFrame);
-      bodyAngularVelocitySetpoint.set(inputProvider.getBodyAngularRateInput());
-      bodyOrientationControlBlock.setBodyOrientationSetpoint(bodyOrientationSetpoint);
-      bodyOrientationControlBlock.setBodyAngularVelocitySetpoint(bodyAngularVelocitySetpoint);
-
-      // update desired com position and velocity
-      comPositionSetpoint.changeFrame(supportFrame);
-      comPositionSetpoint.set(inputProvider.getComPositionInput());
-      comVelocitySetpoint.changeFrame(supportFrame);
-      comVelocitySetpoint.set(inputProvider.getComVelocityInput());
-      comPositionControlBlock.setComPositionSetpoint(comPositionSetpoint);
-
       // update desired dcm position
       dcmPositionSetpoint.changeFrame(supportFrame);
       dcmPositionSetpoint.set(inputProvider.getComVelocityInput());
-      dcmPositionSetpoint.scale(1.0 / taskSpaceEstimates.getLipNaturalFrequency());
+      dcmPositionSetpoint.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionSetpoint.add(inputProvider.getComPositionInput());
       dcmVelocitySetpoint.setToZero(supportFrame);
-      dcmPositionControlBlock.setDcmPositionSetpoint(dcmPositionSetpoint);
-      dcmPositionControlBlock.setDcmVelocitySetpoint(dcmVelocitySetpoint);
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      dcmPositionController.compute(taskSpaceSetpoints.getComForceFeedforward(), dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
+
+      // update desired com position and velocity
+      taskSpaceSetpoints.getComPosition().changeFrame(supportFrame);
+      taskSpaceSetpoints.getComPosition().set(inputProvider.getComPositionInput());
+      taskSpaceSetpoints.getComVelocity().changeFrame(supportFrame);
+      taskSpaceSetpoints.getComVelocity().set(inputProvider.getComVelocityInput());
+      taskSpaceSetpoints.getComForceFeedforward().changeFrame(supportFrame);
+      taskSpaceSetpoints.getComForceFeedforward().setZ(mass * gravity);
+
+      // update desired body orientation and angular rate
+      taskSpaceSetpoints.getBodyOrientation().changeFrame(supportFrame);
+      taskSpaceSetpoints.getBodyOrientation().set(inputProvider.getBodyOrientationInput());
+      taskSpaceSetpoints.getBodyAngularVelocity().changeFrame(supportFrame);
+      taskSpaceSetpoints.getBodyAngularVelocity().set(inputProvider.getBodyAngularRateInput());
+
+      // update joint setpoints
+      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceSetpoints, taskSpaceEstimates, taskSpaceCommands);
+
    }
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      double comHeightInput = inputProvider.getComPositionInput().getZ();
-      taskSpaceEstimatorSettings.setLipNaturalFrequency(Math.sqrt(gravity / Math.max(comHeightInput, 0.001)));
-      taskSpaceEstimator.compute(taskSpaceEstimates, taskSpaceCommands, taskSpaceEstimatorSettings);
       updateEstimates();
       updateSetpoints();
-      taskSpaceController.compute(taskSpaceEstimates, taskSpaceCommands, taskSpaceControllerSettings);
       return null;
    }
 
@@ -222,36 +217,41 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
          }
       }
 
-      // initialize task space controller settings
-      taskSpaceControllerSettings.setDefaults();
+      // initialize dcm controller settings
+      dcmPositionController.setGains(
+            params.getVolatileArray(DCM_POSITION_PROPORTIONAL_GAINS),
+            params.getVolatileArray(DCM_POSITION_DERIVATIVE_GAINS),
+            params.getVolatileArray(DCM_POSITION_INTEGRAL_GAINS),
+            params.get(DCM_POSITION_MAX_INTEGRAL_ERROR));
+      dcmPositionController.reset();
+
+      // initialize task space controller
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+      taskSpaceSetpoints.initialize(taskSpaceEstimates);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         taskSpaceSetpoints.setContactState(robotQuadrant, ContactState.IN_CONTACT);
+      }
+      taskSpaceControllerSettings.initialize();
       taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
       taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setSoleForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
-
-      // initialize task space controller
-      taskSpaceController.removeControlBlocks();
-      taskSpaceController.addControlBlock(bodyOrientationControlBlock);
-      taskSpaceController.addControlBlock(dcmPositionControlBlock);
-      taskSpaceController.addControlBlock(comPositionControlBlock);
-      taskSpaceController.removeFilterBlocks();
+      taskSpaceControllerSettings.setBodyOrientationFeedbackGains(
+            params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS),
+            params.getVolatileArray(BODY_ORIENTATION_DERIVATIVE_GAINS),
+            params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS),
+            params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR)
+      );
+      taskSpaceControllerSettings.setComPositionFeedbackGains(
+            params.getVolatileArray(COM_POSITION_PROPORTIONAL_GAINS),
+            params.getVolatileArray(COM_POSITION_DERIVATIVE_GAINS),
+            params.getVolatileArray(COM_POSITION_INTEGRAL_GAINS),
+            params.get(COM_POSITION_MAX_INTEGRAL_ERROR)
+      );
       taskSpaceController.reset();
-
-      // initialize control parameters
-      bodyOrientationControlBlock.setControlAxes(1, 1, 1);
-      bodyOrientationControlBlock.setProportionalGains(params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS));
-      bodyOrientationControlBlock.setIntegralGains(params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS), params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR));
-      bodyOrientationControlBlock.setDerivativeGains(params.getVolatileArray(BODY_ORIENTATION_DERIVATIVE_GAINS));
-      dcmPositionControlBlock.setControlAxes(1, 1, 0);
-      dcmPositionControlBlock.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
-      dcmPositionControlBlock.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
-      comPositionControlBlock.setControlAxes(0, 0, 1);
-      comPositionControlBlock.setProportionalGains(params.getVolatileArray(COM_PROPORTIONAL_GAINS));
-      comPositionControlBlock.setIntegralGains(params.getVolatileArray(COM_INTEGRAL_GAINS), params.get(COM_MAX_INTEGRAL_ERROR));
-      comPositionControlBlock.setDerivativeGains(params.getVolatileArray(COM_DERIVATIVE_GAINS));
    }
 
    @Override public void onExit()
