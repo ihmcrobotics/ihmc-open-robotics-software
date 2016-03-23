@@ -180,6 +180,7 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
    }
 
    private List<FramePoint2d> contactFramePoints;
+   private FramePoint2d contactFramePoint;
    private RecyclingArrayList<Point2d> contactPoints = new RecyclingArrayList<Point2d>(4, Point2d.class);
    private Point2d contactPoint;
 
@@ -207,8 +208,9 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
       contactFramePoints = swingFoot.getContactPoints2d();
       contactPoints.clear();
 
-      for (FramePoint2d contactFramePoint : contactFramePoints)
+      for (int i = 0; i < contactFramePoints.size(); i++)
       {
+         contactFramePoint = contactFramePoints.get(i);
          contactPoint = contactFramePoint.getPointCopy();
 
          if (contactFramePoint.getX() > 0.0)
@@ -216,7 +218,7 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
          else
             contactPoint.setX(contactPoint.getX() * stepHeelPercentage.getDoubleValue());
 
-         contactPoints.add(contactPoint);
+         contactPoints.add().set(contactPoint);
       }
 
       desiredFootstepCommand.setPose(desiredPosition.getPoint(), desiredOrientation.getQuaternion());

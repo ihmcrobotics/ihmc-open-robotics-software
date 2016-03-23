@@ -101,8 +101,9 @@ public class FootstepDataControllerCommand implements Command<FootstepDataContro
 
    public void setPredictedContactPoints(RecyclingArrayList<Point2d> predictedContactPoints)
    {
+      this.predictedContactPoints.clear();
       for(int i = 0; i < predictedContactPoints.size(); i++)
-         this.predictedContactPoints.set(i, predictedContactPoints.get(i));
+         this.predictedContactPoints.add().set(predictedContactPoints.get(i));
    }
 
    public RobotSide getRobotSide()
