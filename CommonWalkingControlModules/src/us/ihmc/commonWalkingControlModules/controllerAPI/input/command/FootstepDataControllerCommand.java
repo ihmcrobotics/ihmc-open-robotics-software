@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -96,6 +97,12 @@ public class FootstepDataControllerCommand implements Command<FootstepDataContro
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public void setPredictedContactPoints(RecyclingArrayList<Point2d> predictedContactPoints)
+   {
+      for(int i = 0; i < predictedContactPoints.size(); i++)
+         this.predictedContactPoints.set(i, predictedContactPoints.get(i));
    }
 
    public RobotSide getRobotSide()

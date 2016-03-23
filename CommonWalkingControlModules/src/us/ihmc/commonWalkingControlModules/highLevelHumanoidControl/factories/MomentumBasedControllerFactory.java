@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
@@ -203,7 +204,11 @@ public class MomentumBasedControllerFactory
       if (momentumBasedController != null)
       {
          double defaultTrajectoryTime = 1.0;
-         userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager, momentumBasedController.getFullRobotModel(), defaultTrajectoryTime, registry);
+         SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
+         userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager, momentumBasedController.getFullRobotModel(),
+               contactableFeet, walkingControllerParameters, defaultTrajectoryTime, registry);
+
+         momentumBasedController.addUpdatables(userDesiredControllerCommandGenerators.getUpdatables());
       }
       else
       {
@@ -246,6 +251,7 @@ public class MomentumBasedControllerFactory
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
          createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
+      if (createUserDesiredControllerCommandGenerator)
       if (createQueuedControllerCommandGenerator)
          createQueuedControllerCommandGenerator(controllerCommands);
       if (createUserDesiredControllerCommandGenerator)
