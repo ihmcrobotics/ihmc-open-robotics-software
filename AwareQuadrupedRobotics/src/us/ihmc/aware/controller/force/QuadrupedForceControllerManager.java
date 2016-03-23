@@ -12,9 +12,7 @@ import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -36,20 +34,14 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters) throws IOException
    {
-      // Set up network communication for controller inputs.
-      PacketCommunicator packetCommunicator = PacketCommunicator
-            .createTCPPacketCommunicatorServer(NetworkPorts.XBOX_CONTROLLER_TELEOP_PORT, runtimeEnvironment.getNetClassList());
-      packetCommunicator.connect();
-      GlobalDataProducer globalDataProducer = new GlobalDataProducer(packetCommunicator);
-
       // Initialize parameter map repository.
-
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
 
       // Initialize input providers.
-      inputProvider = new QuadrupedControllerInputProvider(globalDataProducer, paramMapRepository, registry);
+      inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), paramMapRepository, registry);
 
       // TODO: Hack.
+      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
       globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
       {
          @Override

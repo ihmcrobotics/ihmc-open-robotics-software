@@ -63,8 +63,7 @@ public class QuadrupedTeleopNode implements InputEventCallback
       params.setDefault(PARAM_DEFAULT_COM_HEIGHT, 0.55);
 
       // TODO: Don't hardcode localhost
-      this.packetCommunicator = PacketCommunicator
-            .createTCPPacketCommunicatorClient("localhost", NetworkPorts.XBOX_CONTROLLER_TELEOP_PORT, netClassList);
+      this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.CONTROLLER_PORT, netClassList);
       this.device = device;
       this.comHeight = new InputValueIntegrator(DT, params.get(PARAM_DEFAULT_COM_HEIGHT));
 
@@ -127,8 +126,7 @@ public class QuadrupedTeleopNode implements InputEventCallback
       case HOME_BUTTON:
          if (get(InputChannel.HOME_BUTTON) > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(
-                  QuadrupedForceControllerEvent.REQUEST_TROT);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_TROT);
             packetCommunicator.send(eventPacket);
          }
          break;
