@@ -308,10 +308,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE), 1.0);
 
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(chest, hand);
-
          RigidBody pelvis = fullRobotModel.getPelvis();
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);

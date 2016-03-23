@@ -5,7 +5,9 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
@@ -44,6 +46,8 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
    // viz stuff:
    private final YoGraphicReferenceFrame dynamicGraphicReferenceFrame;
@@ -111,6 +115,9 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
 
+      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(primaryBase, endEffector);
+      inverseDynamicsCommandList.addCommand(privilegedConfigurationCommand);
+
       if (doPositionControl)
       {
          jointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -119,6 +126,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
          jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
          for (int i = 0; i < armJoints.length; i++)
             jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(armJoints[i]);
+         inverseDynamicsCommandList.addCommand(jointAccelerationIntegrationCommand);
       }
       else
       {
@@ -254,7 +262,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return jointAccelerationIntegrationCommand;
+      return inverseDynamicsCommandList;
    }
 
    @Override

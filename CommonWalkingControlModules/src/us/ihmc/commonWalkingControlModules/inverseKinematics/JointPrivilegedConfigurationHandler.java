@@ -97,6 +97,12 @@ public class JointPrivilegedConfigurationHandler
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      chainBases.clear();
+      chainEndEffectors.clear();
+   }
+
    public void computePrivilegedJointVelocities()
    {
       for (int i = 0; i < numberOfDoFs; i++)
@@ -156,9 +162,6 @@ public class JointPrivilegedConfigurationHandler
             setPrivilegedConfigurationFromOption(option, jointIndex);
          }
       }
-
-      chainBases.clear();
-      chainEndEffectors.clear();
 
       for (int chainIndex = 0; chainIndex < command.getNumberOfChains(); chainIndex++)
       {
