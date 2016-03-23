@@ -101,7 +101,7 @@ public class MomentumBasedControllerFactory
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
 
    private HumanoidGlobalDataProducer globalDataProducer;
-   private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
+   private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
    private PeriodicThreadScheduler scheduler;
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
@@ -223,7 +223,8 @@ public class MomentumBasedControllerFactory
          ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, HumanoidGlobalDataProducer dataProducer,
          InverseDynamicsJoint... jointsToIgnore)
    {
-      this.closeableAndDisposableRegistry = closeableAndDisposableRegistry;
+      closeableAndDisposableRegistry.registerChild(this.closeableAndDisposableRegistry);
+
       this.globalDataProducer = dataProducer;
       SideDependentList<ContactableFoot> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
