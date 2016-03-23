@@ -293,7 +293,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       super.initialize();
 
-      commandInputManager.flushBuffers();
+      commandInputManager.flushAllCommands();
 
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
@@ -1348,7 +1348,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {
-         commandInputManager.flushManipulationBuffers();
+         commandInputManager.flushCommands(HandTrajectoryCommand.class);
+         commandInputManager.flushCommands(ArmTrajectoryCommand.class);
+         commandInputManager.flushCommands(ArmDesiredAccelerationsCommand.class);
+         commandInputManager.flushCommands(HandComplianceControlParametersCommand.class);
          return;
       }
 
@@ -1363,7 +1366,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (!commandInputManager.isNewCommandAvailable(GoHomeCommand.class))
          return;
 
-      GoHomeCommand message = commandInputManager.pollAndCompileGoHomeCommands();
+      GoHomeCommand message = commandInputManager.pollAndCompileCommands(GoHomeCommand.class);
       manipulationControlModule.handleGoHomeMessage(message);
 
       pelvisOrientationManager.handleGoHomeMessage(message);
@@ -1376,7 +1379,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (!commandInputManager.isNewCommandAvailable(EndEffectorLoadBearingCommand.class))
          return;
 
-      EndEffectorLoadBearingCommand message = commandInputManager.pollAndCompileEndEffectorLoadBearingCommands();
+      EndEffectorLoadBearingCommand message = commandInputManager.pollAndCompileCommands(EndEffectorLoadBearingCommand.class);
       manipulationControlModule.handleEndEffectorLoadBearingMessage(message);
       State<WalkingState> currentState = stateMachine.getCurrentState();
       if (currentState instanceof SingleSupportState)

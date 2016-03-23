@@ -8,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBea
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class EndEffectorLoadBearingCommand implements Command<EndEffectorLoadBearingCommand, EndEffectorLoadBearingMessage>
+public class EndEffectorLoadBearingCommand implements CompilableCommand<EndEffectorLoadBearingCommand, EndEffectorLoadBearingMessage>
 {
    private final SideDependentList<EnumMap<EndEffector, LoadBearingRequest>> sideDependentEndEffectorRequestMap = SideDependentList.createListOfEnumMaps(EndEffector.class);
    private final EnumMap<EndEffector, LoadBearingRequest> otherEndEffectorRequestMap = new EnumMap<>(EndEffector.class);
@@ -71,6 +71,12 @@ public class EndEffectorLoadBearingCommand implements Command<EndEffectorLoadBea
             otherEndEffectorRequestMap.put(endEffector, other.getRequest(endEffector));
          }
       }
+   }
+
+   @Override
+   public void compile(EndEffectorLoadBearingCommand other)
+   {
+      set(other);
    }
 
    private LoadBearingRequest getRequest(EndEffector endEffector)
