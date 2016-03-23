@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
@@ -69,8 +69,8 @@ public class BlindWalkingFootstepDataMessageGenerator
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
       blindWalkingDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-      FootstepDataListControllerCommand footsteps = computeNextFootsteps(supportLeg);
-      commandInputManager.submitControllerCommand(footsteps);
+      FootstepDataListCommand footsteps = computeNextFootsteps(supportLeg);
+      commandInputManager.submitCommand(footsteps);
 
       nextSwingLeg.set(supportLeg);
    }
@@ -110,10 +110,10 @@ public class BlindWalkingFootstepDataMessageGenerator
       statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusListener);
    }
 
-   private FootstepDataListControllerCommand computeNextFootsteps(RobotSide supportLeg)
+   private FootstepDataListCommand computeNextFootsteps(RobotSide supportLeg)
    {
       double stepTime = 0.0; //TODO get the time right.
-      FootstepDataListControllerCommand footsteps = new FootstepDataListControllerCommand();
+      FootstepDataListCommand footsteps = new FootstepDataListCommand();
       FootstepDataControllerCommand footstep = blindWalkingDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
       FootstepDataControllerCommand nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
       FootstepDataControllerCommand nextNextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(),

@@ -7,10 +7,10 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -41,7 +41,7 @@ public class WalkingMessageHandler
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
 
-   private FootTrajectoryControllerCommand nextFootTrajectoryForFlamingoStance;
+   private FootTrajectoryCommand nextFootTrajectoryForFlamingoStance;
 
    private final ControllerStatusOutputManager statusOutputManager;
 
@@ -86,7 +86,7 @@ public class WalkingMessageHandler
       parentRegistry.addChild(registry);
    }
 
-   public void handleFootstepDataListMessage(FootstepDataListControllerCommand message)
+   public void handleFootstepDataListMessage(FootstepDataListCommand message)
    {
       if (message.getNumberOfFootsteps() > 0)
       {
@@ -114,12 +114,12 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
-   public void handlePauseWalkingMessage(PauseWalkingControllerCommand message)
+   public void handlePauseWalkingMessage(PauseWalkingCommand message)
    {
       isWalkingPaused.set(message.isPauseRequested());
    }
 
-   public void handleFootTrajectoryMessage(FootTrajectoryControllerCommand message)
+   public void handleFootTrajectoryMessage(FootTrajectoryCommand message)
    {
       nextFootTrajectoryForFlamingoStance = message;
    }
@@ -145,14 +145,14 @@ public class WalkingMessageHandler
       }
    }
 
-   public FootTrajectoryControllerCommand pollFootTrajectoryForFlamingoStance()
+   public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance()
    {
-      FootTrajectoryControllerCommand ret = nextFootTrajectoryForFlamingoStance;
+      FootTrajectoryCommand ret = nextFootTrajectoryForFlamingoStance;
       nextFootTrajectoryForFlamingoStance = null;
       return ret;
    }
 
-   public FootTrajectoryControllerCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
+   public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
    {
       if (!hasFootTrajectoryForFlamingoStance(swingSide))
          return null;

@@ -6,13 +6,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class FootstepDataListControllerCommand implements ControllerCommand<FootstepDataListControllerCommand, FootstepDataListMessage>
+public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>
 {
    private double swingTime;
    private double transferTime = 0.0;
    private final RecyclingArrayList<FootstepDataControllerCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataControllerCommand.class);
 
-   public FootstepDataListControllerCommand()
+   public FootstepDataListCommand()
    {
       clear();
    }
@@ -41,7 +41,7 @@ public class FootstepDataListControllerCommand implements ControllerCommand<Foot
    }
 
    @Override
-   public void set(FootstepDataListControllerCommand other)
+   public void set(FootstepDataListCommand other)
    {
       clear();
 

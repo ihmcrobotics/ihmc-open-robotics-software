@@ -18,11 +18,11 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -484,7 +484,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 	      
 	      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, null, selectedLocation, simulationTestingParameters, getRobotModel());
-	      ConcurrentLinkedQueue<ControllerCommand<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
+	      ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
 	      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
 	      setupCameraForWalkingUpToRamp();
@@ -495,7 +495,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 //	      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
 //	      walk.set(true);
 	      
-	      FootstepDataListControllerCommand footstepList = new FootstepDataListControllerCommand();
+	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
          FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
          
          Point3d position = new Point3d(0.0, 0.2, 0.0);
@@ -530,7 +530,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      
 	      
 	      
-	      footstepList = new FootstepDataListControllerCommand();
+	      footstepList = new FootstepDataListCommand();
          footstepCommand = new FootstepDataControllerCommand();
          
          position = new Point3d(1.0, 0.2, 0.0);
@@ -594,7 +594,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
         
         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, null, selectedLocation, simulationTestingParameters, getRobotModel());
-        ConcurrentLinkedQueue<ControllerCommand<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
+        ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
         SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
         setupCameraForWalkingUpToRamp();
@@ -605,7 +605,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 //      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
 //      walk.set(true);
         
-        FootstepDataListControllerCommand footstepList = new FootstepDataListControllerCommand();
+        FootstepDataListCommand footstepList = new FootstepDataListCommand();
         FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
         
         Point3d position = new Point3d(0.3, 0.2, 0.0);
@@ -625,7 +625,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         queuedControllerCommands.add(footstepList);
         
         // Some chest motions. These will continue during the steps to come afterwards:
-        ChestTrajectoryControllerCommand chestCommand = new ChestTrajectoryControllerCommand();
+        ChestTrajectoryCommand chestCommand = new ChestTrajectoryCommand();
         FrameSO3TrajectoryPointList chestTrajectoryPointList = new FrameSO3TrajectoryPointList();
         chestTrajectoryPointList.addTrajectoryPoint(0.0, new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d());
         chestTrajectoryPointList.addTrajectoryPoint(1.0, new Quat4d(0.2, 0.0, 0.0, 1.0), new Vector3d());
@@ -635,7 +635,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         queuedControllerCommands.add(chestCommand);
 
         // Some more steps:
-        footstepList = new FootstepDataListControllerCommand();
+        footstepList = new FootstepDataListCommand();
         footstepCommand = new FootstepDataControllerCommand();
         
         position = new Point3d(0.65, 0.2, 0.0);
@@ -669,7 +669,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         queuedControllerCommands.add(footstepList);
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0);
         
-        FootTrajectoryControllerCommand footTrajectoryCommand = new FootTrajectoryControllerCommand();
+        FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
         
         FrameSE3TrajectoryPointList footPointList = new FrameSE3TrajectoryPointList();
         footPointList.addTrajectoryPoint(0.2, new Point3d(1.1, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
@@ -710,7 +710,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
         
         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, null, selectedLocation, simulationTestingParameters, getRobotModel());
-        ConcurrentLinkedQueue<ControllerCommand<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
+        ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
         SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
         setupCameraForWalkingUpToRamp();
@@ -721,7 +721,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 //      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
 //      walk.set(true);
         
-        FootTrajectoryControllerCommand footTrajectoryCommand = new FootTrajectoryControllerCommand();
+        FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
         
         FrameSE3TrajectoryPointList footPointList = new FrameSE3TrajectoryPointList();
         footPointList.addTrajectoryPoint(1.0, new Point3d(0.0, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
@@ -736,7 +736,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
         
         
-        footTrajectoryCommand = new FootTrajectoryControllerCommand();
+        footTrajectoryCommand = new FootTrajectoryCommand();
         
         footPointList = new FrameSE3TrajectoryPointList();
         footPointList.addTrajectoryPoint(1.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.1, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());

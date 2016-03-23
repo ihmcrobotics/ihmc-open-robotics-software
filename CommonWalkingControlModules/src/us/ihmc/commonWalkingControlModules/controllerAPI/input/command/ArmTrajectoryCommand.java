@@ -8,12 +8,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ArmTrajectoryControllerCommand implements ControllerCommand<ArmTrajectoryControllerCommand, ArmTrajectoryMessage>
+public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTrajectoryMessage>
 {
    private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
    private RobotSide robotSide;
 
-   public ArmTrajectoryControllerCommand()
+   public ArmTrajectoryCommand()
    {
       clear();
    }
@@ -62,7 +62,7 @@ public class ArmTrajectoryControllerCommand implements ControllerCommand<ArmTraj
    }
 
    @Override
-   public void set(ArmTrajectoryControllerCommand other)
+   public void set(ArmTrajectoryCommand other)
    {
       set(other.robotSide, other.getTrajectoryPointLists());
    }

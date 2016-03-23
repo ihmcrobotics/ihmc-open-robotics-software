@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
@@ -135,17 +135,17 @@ public class CenterOfMassHeightManager
       centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryControllerCommand message)
+   public void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand message)
    {
       centerOfMassTrajectoryGenerator.handlePelvisTrajectoryMessage(message);
    }
 
-   public void handlePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryControllerCommand message)
+   public void handlePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryCommand message)
    {
       centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryMessage(message);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
    {
       centerOfMassTrajectoryGenerator.handleStopAllTrajectoryMessage(message);
    }

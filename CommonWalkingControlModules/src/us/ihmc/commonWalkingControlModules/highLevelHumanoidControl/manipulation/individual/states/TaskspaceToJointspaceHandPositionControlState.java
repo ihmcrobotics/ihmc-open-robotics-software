@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
@@ -463,7 +463,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       return taskspaceToJointspaceCalculator.getControlFrame();
    }
 
-   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersControllerCommand message)
+   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersCommand message)
    {
       setEnableCompliantControl(message.isEnable());
       handCompliantControlHelper.handleHandComplianceControlParametersMessage(message);

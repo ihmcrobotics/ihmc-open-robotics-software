@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HeadTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -142,7 +142,7 @@ public class HeadOrientationManager
       orientationFeedbackControlCommand.setGains(gains);
    }
 
-   public void handleHeadTrajectoryMessage(HeadTrajectoryControllerCommand message)
+   public void handleHeadTrajectoryMessage(HeadTrajectoryCommand message)
    {
       if (message == null)
          return;

@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ChestTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -119,7 +119,7 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleChestTrajectoryMessage(ChestTrajectoryControllerCommand message)
+   public void handleChestTrajectoryMessage(ChestTrajectoryCommand message)
    {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
@@ -146,12 +146,12 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
    {
       isTrajectoryStopped.set(message.isStopAllTrajectory());
    }
 
-   public void handleGoHomeMessage(GoHomeControllerCommand message)
+   public void handleGoHomeMessage(GoHomeCommand message)
    {
       if (message.getRequest(BodyPart.CHEST))
          goToHomeFromCurrentDesired(message.getTrajectoryTime());

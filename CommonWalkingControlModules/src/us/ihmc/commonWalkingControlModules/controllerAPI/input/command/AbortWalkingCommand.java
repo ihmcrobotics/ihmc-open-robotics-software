@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 
-public class AbortWalkingControllerCommand implements ControllerCommand<AbortWalkingControllerCommand, AbortWalkingMessage>
+public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWalkingMessage>
 {
    private boolean abortWalkingRequested = false;
 
@@ -13,7 +13,7 @@ public class AbortWalkingControllerCommand implements ControllerCommand<AbortWal
    }
 
    @Override
-   public void set(AbortWalkingControllerCommand other)
+   public void set(AbortWalkingCommand other)
    {
       abortWalkingRequested = other.isAbortWalkingRequested();
    }

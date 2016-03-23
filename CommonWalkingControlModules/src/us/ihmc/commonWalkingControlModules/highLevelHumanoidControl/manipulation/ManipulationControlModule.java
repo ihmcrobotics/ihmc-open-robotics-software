@@ -5,13 +5,13 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.EndEffectorLoadBearingControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.ArmTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.EndEffectorLoadBearingCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.GoHomeCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -129,7 +129,7 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleEndEffectorLoadBearingMessage(EndEffectorLoadBearingControllerCommand message)
+   public void handleEndEffectorLoadBearingMessage(EndEffectorLoadBearingCommand message)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -141,7 +141,7 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryControllerCommand message)
+   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
    {
       if (!message.isStopAllTrajectory())
          return;
@@ -149,7 +149,7 @@ public class ManipulationControlModule
          handControlModules.get(robotSide).holdPositionInJointSpace();
    }
 
-   public void handleGoHomeMessage(GoHomeControllerCommand message)
+   public void handleGoHomeMessage(GoHomeCommand message)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -158,41 +158,41 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleHandTrajectoryMessages(List<HandTrajectoryControllerCommand> messages)
+   public void handleHandTrajectoryMessages(List<HandTrajectoryCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {
-         HandTrajectoryControllerCommand message = messages.get(i);
+         HandTrajectoryCommand message = messages.get(i);
          RobotSide robotSide = message.getRobotSide();
          handControlModules.get(robotSide).handleHandTrajectoryMessage(message);
       }
    }
 
-   public void handleArmTrajectoryMessages(List<ArmTrajectoryControllerCommand> messages)
+   public void handleArmTrajectoryMessages(List<ArmTrajectoryCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {
-         ArmTrajectoryControllerCommand message = messages.get(i);
+         ArmTrajectoryCommand message = messages.get(i);
          RobotSide robotSide = message.getRobotSide();
          handControlModules.get(robotSide).handleArmTrajectoryMessage(message);
       }
    }
 
-   public void handleArmDesiredAccelerationsMessages(List<ArmDesiredAccelerationsControllerCommand> messages)
+   public void handleArmDesiredAccelerationsMessages(List<ArmDesiredAccelerationsCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {
-         ArmDesiredAccelerationsControllerCommand message = messages.get(i);
+         ArmDesiredAccelerationsCommand message = messages.get(i);
          RobotSide robotSide = message.getRobotSide();
          handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(message);
       }
    }
 
-   public void handleHandComplianceControlParametersMessages(List<HandComplianceControlParametersControllerCommand> messages)
+   public void handleHandComplianceControlParametersMessages(List<HandComplianceControlParametersCommand> messages)
    {
       for (int i = 0; i < messages.size(); i++)
       {
-         HandComplianceControlParametersControllerCommand message = messages.get(i);
+         HandComplianceControlParametersCommand message = messages.get(i);
          RobotSide robotSide = message.getRobotSide();
          handControlModules.get(robotSide).handleHandComplianceControlParametersMessage(message);
       }

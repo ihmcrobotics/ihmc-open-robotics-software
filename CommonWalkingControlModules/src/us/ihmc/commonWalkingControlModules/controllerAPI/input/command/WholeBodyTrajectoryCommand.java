@@ -13,23 +13,23 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class WholeBodyTrajectoryControllerCommand implements ControllerCommand<WholeBodyTrajectoryControllerCommand, WholeBodyTrajectoryMessage>, MultipleControllerCommandHolder
+public class WholeBodyTrajectoryCommand implements Command<WholeBodyTrajectoryCommand, WholeBodyTrajectoryMessage>, MultipleCommandHolder
 {
-   private final SideDependentList<HandTrajectoryControllerCommand> handTrajectoryControllerCommands = new SideDependentList<>();
-   private final SideDependentList<ArmTrajectoryControllerCommand> armTrajectoryControllerCommands = new SideDependentList<>();
-   private final ChestTrajectoryControllerCommand chestTrajectoryControllerCommand = new ChestTrajectoryControllerCommand();
-   private final PelvisTrajectoryControllerCommand pelvisTrajectoryControllerCommand = new PelvisTrajectoryControllerCommand();
-   private final SideDependentList<FootTrajectoryControllerCommand> footTrajectoryControllerCommands = new SideDependentList<>();
+   private final SideDependentList<HandTrajectoryCommand> handTrajectoryControllerCommands = new SideDependentList<>();
+   private final SideDependentList<ArmTrajectoryCommand> armTrajectoryControllerCommands = new SideDependentList<>();
+   private final ChestTrajectoryCommand chestTrajectoryControllerCommand = new ChestTrajectoryCommand();
+   private final PelvisTrajectoryCommand pelvisTrajectoryControllerCommand = new PelvisTrajectoryCommand();
+   private final SideDependentList<FootTrajectoryCommand> footTrajectoryControllerCommands = new SideDependentList<>();
 
-   private final ArrayList<ControllerCommand<?, ?>> allControllerCommands = new ArrayList<>();
+   private final ArrayList<Command<?, ?>> allControllerCommands = new ArrayList<>();
 
-   public WholeBodyTrajectoryControllerCommand()
+   public WholeBodyTrajectoryCommand()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         HandTrajectoryControllerCommand handTrajectoryControllerCommand = new HandTrajectoryControllerCommand();
-         ArmTrajectoryControllerCommand armTrajectoryControllerCommand = new ArmTrajectoryControllerCommand();
-         FootTrajectoryControllerCommand footTrajectoryControllerCommand = new FootTrajectoryControllerCommand();
+         HandTrajectoryCommand handTrajectoryControllerCommand = new HandTrajectoryCommand();
+         ArmTrajectoryCommand armTrajectoryControllerCommand = new ArmTrajectoryCommand();
+         FootTrajectoryCommand footTrajectoryControllerCommand = new FootTrajectoryCommand();
 
          handTrajectoryControllerCommands.put(robotSide, handTrajectoryControllerCommand);
          armTrajectoryControllerCommands.put(robotSide, armTrajectoryControllerCommand);
@@ -58,7 +58,7 @@ public class WholeBodyTrajectoryControllerCommand implements ControllerCommand<W
    }
 
    @Override
-   public void set(WholeBodyTrajectoryControllerCommand other)
+   public void set(WholeBodyTrajectoryCommand other)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -102,7 +102,7 @@ public class WholeBodyTrajectoryControllerCommand implements ControllerCommand<W
    }
 
    @Override
-   public List<ControllerCommand<?, ?>> getControllerCommands()
+   public List<Command<?, ?>> getControllerCommands()
    {
       return allControllerCommands;
    }

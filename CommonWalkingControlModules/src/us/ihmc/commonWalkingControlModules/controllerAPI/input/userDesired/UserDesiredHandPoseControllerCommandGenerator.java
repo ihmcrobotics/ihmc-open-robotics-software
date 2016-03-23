@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -80,7 +80,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 //               framePose.changeFrame(ReferenceFrame.getWorldFrame());
 //               System.out.println("framePose " + framePose);
 
-               HandTrajectoryControllerCommand handTrajectoryControllerCommand = new HandTrajectoryControllerCommand(referenceFrame, userHandPoseSide.getEnumValue(), userHandPoseBaseForControl.getEnumValue());
+               HandTrajectoryCommand handTrajectoryControllerCommand = new HandTrajectoryCommand(referenceFrame, userHandPoseSide.getEnumValue(), userHandPoseBaseForControl.getEnumValue());
                 
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(referenceFrame);
                trajectoryPoint.setTime(userDesiredHandPoseTrajectoryTime.getDoubleValue());
@@ -93,7 +93,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
                
 
                System.out.println("Submitting " + handTrajectoryControllerCommand);
-               controllerCommandInputManager.submitControllerCommand(handTrajectoryControllerCommand);
+               controllerCommandInputManager.submitCommand(handTrajectoryControllerCommand);
                
                userDoHandPose.set(false);
             }

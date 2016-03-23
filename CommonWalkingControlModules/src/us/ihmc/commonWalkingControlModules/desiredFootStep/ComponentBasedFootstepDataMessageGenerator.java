@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
@@ -92,10 +92,10 @@ public class ComponentBasedFootstepDataMessageGenerator
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-      FootstepDataListControllerCommand footsteps = computeNextFootsteps(supportLeg);
+      FootstepDataListCommand footsteps = computeNextFootsteps(supportLeg);
       footsteps.setSwingTime(swingTime.getDoubleValue());
       footsteps.setTransferTime(transferTime.getDoubleValue());
-      commandInputManager.submitControllerCommand(footsteps);
+      commandInputManager.submitCommand(footsteps);
 
       nextSwingLeg.set(supportLeg);
    }
@@ -135,10 +135,10 @@ public class ComponentBasedFootstepDataMessageGenerator
       statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusListener);
    }
 
-   private FootstepDataListControllerCommand computeNextFootsteps(RobotSide supportLeg)
+   private FootstepDataListCommand computeNextFootsteps(RobotSide supportLeg)
    {
       double stepTime = swingTime.getDoubleValue() + transferTime.getDoubleValue();
-      FootstepDataListControllerCommand footsteps = new FootstepDataListControllerCommand();
+      FootstepDataListCommand footsteps = new FootstepDataListCommand();
       FootstepDataControllerCommand footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
       FootstepDataControllerCommand nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
       FootstepDataControllerCommand nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime);

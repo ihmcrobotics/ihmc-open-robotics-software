@@ -4,7 +4,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersControllerCommand;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandComplianceControlParametersCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -292,7 +292,7 @@ public class HandCompliantControlHelper
       desiredOrientation.changeFrame(originalFrame);
    }
 
-   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersControllerCommand message)
+   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersCommand message)
    {
       setEnableLinearCompliance(message.getEnableLinearCompliance());
       setEnableAngularCompliance(message.getEnableAngularCompliance());

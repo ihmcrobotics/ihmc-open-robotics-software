@@ -4,7 +4,7 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessa
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 
 public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryControllerCommand<T, M>, M extends AbstractSE3TrajectoryMessage<M>>
-      extends FrameSE3TrajectoryPointList implements ControllerCommand<T, M>
+      extends FrameSE3TrajectoryPointList implements Command<T, M>
 {
 
    public SE3TrajectoryControllerCommand()

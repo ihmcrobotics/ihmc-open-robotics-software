@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 
-public class HighLevelStateControllerCommand implements ControllerCommand<HighLevelStateControllerCommand, HighLevelStateMessage>
+public class HighLevelStateCommand implements Command<HighLevelStateCommand, HighLevelStateMessage>
 {
    private HighLevelState highLevelState;
 
@@ -14,7 +14,7 @@ public class HighLevelStateControllerCommand implements ControllerCommand<HighLe
    }
 
    @Override
-   public void set(HighLevelStateControllerCommand other)
+   public void set(HighLevelStateCommand other)
    {
       highLevelState = other.getHighLevelState();
    }
