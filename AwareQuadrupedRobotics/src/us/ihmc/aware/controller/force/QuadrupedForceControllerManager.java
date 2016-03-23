@@ -1,6 +1,7 @@
 package us.ihmc.aware.controller.force;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
@@ -32,6 +33,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
    private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
 
+   private final AtomicReference<QuadrupedForceControllerEvent> requestedEvent = new AtomicReference<>();
+
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters) throws IOException
    {
       // Initialize parameter map repository.
@@ -40,15 +43,13 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // Initialize input providers.
       inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), paramMapRepository, registry);
 
-      // TODO: Hack.
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
       globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
       {
          @Override
          public void receivedPacket(QuadrupedForceControllerEventPacket packet)
          {
-            // TODO: Make this thread-safe
-            stateMachine.trigger(packet.get());
+            requestedEvent.set(packet.get());
          }
       });
 
@@ -65,6 +66,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
+      QuadrupedForceControllerEvent reqEvent = requestedEvent.getAndSet(null);
+      if (reqEvent != null)
+      {
+         stateMachine.trigger(reqEvent);
+      }
+
       stateMachine.process();
    }
 
