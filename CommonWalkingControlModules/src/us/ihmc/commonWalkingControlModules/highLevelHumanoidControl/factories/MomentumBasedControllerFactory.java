@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManag
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.Command;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -64,7 +64,7 @@ public class MomentumBasedControllerFactory
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final CommandInputManager commandInputManager;
-   private final ControllerStatusOutputManager statusOutputManager = new ControllerStatusOutputManager();
+   private final StatusMessageOutputManager statusOutputManager;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
    private boolean createControllerNetworkSubscriber = false;
@@ -120,6 +120,7 @@ public class MomentumBasedControllerFactory
       this.capturePointPlannerParameters = capturePointPlannerParameters;
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
+      statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
    }
 
    public void addUpdatable(Updatable updatable)

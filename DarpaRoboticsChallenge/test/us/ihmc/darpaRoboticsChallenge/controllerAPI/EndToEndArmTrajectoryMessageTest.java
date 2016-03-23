@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -204,28 +205,30 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    public static double[] findControllerDesiredPositions(RobotSide robotSide, OneDoFJoint[] armJoints, int numberOfJoints, SimulationConstructionSet scs)
    {
-      String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-
       double[] controllerDesiredJointPositions = new double[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
       {
-         OneDoFJoint joint = armJoints[i];
-         DoubleYoVariable q_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "q_d_" + joint.getName() + HandControlModule.class.getSimpleName());
-         controllerDesiredJointPositions[i] = q_d_HCM.getDoubleValue();
+         String jointName = armJoints[i].getName();
+         String subTrajectory = "SubTrajectory";
+         String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
+         String variableName = jointName + subTrajectory + "CurrentValue";
+         DoubleYoVariable q_d = (DoubleYoVariable) scs.getVariable(subTrajectoryName, variableName);
+         controllerDesiredJointPositions[i] = q_d.getDoubleValue();
       }
       return controllerDesiredJointPositions;
    }
 
    public static double[] findControllerDesiredVelocities(RobotSide robotSide, OneDoFJoint[] armJoints, int numberOfJoints, SimulationConstructionSet scs)
    {
-      String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-
       double[] controllerDesiredJointVelocities = new double[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
       {
-         OneDoFJoint joint = armJoints[i];
-         DoubleYoVariable qd_d_HCM = (DoubleYoVariable) scs.getVariable(handControlModuleName, "qd_d_" + joint.getName() + HandControlModule.class.getSimpleName());
-         controllerDesiredJointVelocities[i] = qd_d_HCM.getDoubleValue();
+         String jointName = armJoints[i].getName();
+         String subTrajectory = "SubTrajectory";
+         String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
+         String variableName = jointName + subTrajectory + "CurrentVelocity";
+         DoubleYoVariable qd_d = (DoubleYoVariable) scs.getVariable(subTrajectoryName, variableName);
+         controllerDesiredJointVelocities[i] = qd_d.getDoubleValue();
       }
       return controllerDesiredJointVelocities;
    }

@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTraje
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HandTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -31,14 +31,14 @@ public class QueuedControllerCommandGenerator implements Updatable
    private boolean waitingForWalkingStatusToComplete = false;
    
    private final CommandInputManager commandInputManager;
-   private final ControllerStatusOutputManager statusOutputManager;
+   private final StatusMessageOutputManager statusOutputManager;
 
    private final List<Updatable> updatables = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
    
    public QueuedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands,
-         CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+         CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
    {

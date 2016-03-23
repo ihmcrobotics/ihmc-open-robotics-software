@@ -9,12 +9,23 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+/**
+ * Upon receiving a {@link GoHomeCommand} the controller will bring the given part of the body back to a default configuration called 'home'.
+ * It is useful to get back to a safe configuration before walking.
+ * 
+ * 
+ * @author Sylvain
+ *
+ */
 public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMessage>
 {
    private final SideDependentList<EnumMap<BodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(BodyPart.class);
    private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
    private double trajectoryTime = 1.0;
 
+   /**
+    * 
+    */
    public GoHomeCommand()
    {
       for (BodyPart bodyPart : BodyPart.values)
@@ -33,6 +44,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void clear()
    {
@@ -52,6 +64,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void set(GoHomeMessage message)
    {
@@ -69,8 +82,17 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void set(GoHomeCommand other)
+   {
+      clear();
+      compile(other);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void compile(GoHomeCommand other)
    {
       trajectoryTime = other.trajectoryTime;
 
@@ -90,17 +112,21 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
       }
    }
 
-   @Override
-   public void compile(GoHomeCommand other)
-   {
-      set(other);
-   }
-
+   /**
+    * @return the duration for going back to the home configuration.
+    */
    public double getTrajectoryTime()
    {
       return trajectoryTime;
    }
 
+   /**
+    * Get the request for going home for a given body part.
+    * This method is to use only for body parts that are not side dependent, like the pelvis.
+    * @param bodyPart body part to check the request for.
+    * @return true if the go home is requested, false otherwise.
+    * @throws RuntimeException if the robot side is need for the given body part.
+    */
    public boolean getRequest(BodyPart bodyPart)
    {
       if (bodyPart.isRobotSideNeeded())
@@ -108,6 +134,13 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
       return otherBodyPartRequestMap.get(bodyPart).booleanValue();
    }
 
+   /**
+    * Get the request for going home for a given body part.
+    * This method is to use for body parts that are side dependent, like a foot.
+    * @param robotSide which side the body part belongs to.
+    * @param bodyPart body part to check the request for.
+    * @return true if the go home is requested, false otherwise.
+    */
    public boolean getRequest(RobotSide robotSide, BodyPart bodyPart)
    {
       if (bodyPart.isRobotSideNeeded())
@@ -116,12 +149,14 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
          return getRequest(bodyPart);
    }
 
+   /** {@inheritDoc} */
    @Override
    public Class<GoHomeMessage> getMessageClass()
    {
       return GoHomeMessage.class;
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean isCommandValid()
    {

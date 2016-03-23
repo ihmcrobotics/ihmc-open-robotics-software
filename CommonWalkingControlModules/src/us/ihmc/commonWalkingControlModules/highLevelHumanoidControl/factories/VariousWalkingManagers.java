@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManage
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
@@ -29,7 +29,7 @@ public class VariousWalkingManagers
    private final FeetManager feetManager;
    private final PelvisOrientationManager pelvisOrientationManager;
 
-   public VariousWalkingManagers(ControllerStatusOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
+   public VariousWalkingManagers(StatusMessageOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
          ArmControllerParameters armControlParameters, YoVariableRegistry registry)
    {

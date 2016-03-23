@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootTraje
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PauseWalkingCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -43,7 +43,7 @@ public class WalkingMessageHandler
 
    private FootTrajectoryCommand nextFootTrajectoryForFlamingoStance;
 
-   private final ControllerStatusOutputManager statusOutputManager;
+   private final StatusMessageOutputManager statusOutputManager;
 
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
    private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
@@ -58,7 +58,7 @@ public class WalkingMessageHandler
    private final FootstepListVisualizer footstepListVisualizer;
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         ControllerStatusOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
@@ -218,7 +218,7 @@ public class WalkingMessageHandler
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)
    {
       actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
-      statusOutputManager.reportFootstepStatus(new FootstepStatus(FootstepStatus.Status.COMPLETED, currentFootstepIndex.getIntegerValue(),
+      statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.COMPLETED, currentFootstepIndex.getIntegerValue(),
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
    }
 
