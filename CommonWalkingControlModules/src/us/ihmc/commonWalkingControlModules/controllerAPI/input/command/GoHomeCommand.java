@@ -23,6 +23,9 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
    private double trajectoryTime = 1.0;
 
+   /**
+    * 
+    */
    public GoHomeCommand()
    {
       for (BodyPart bodyPart : BodyPart.values)

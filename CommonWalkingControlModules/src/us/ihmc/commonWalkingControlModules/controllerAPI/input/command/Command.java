@@ -9,6 +9,8 @@ import us.ihmc.communication.packets.Packet;
  * Unlike a {@link Packet}, a Command HAS to be garbage free, and to be able to copy the data held in a message through the {@link #set(Packet)} method.
  * When a new {@link Packet} is created and one wants it to be consumed by the controller, the corresponding Command has to be created and registered to the input API.
  * 
+ * Any implementation of {@link Command} MUST have only ONE EMPTY constructor.
+ * 
  * @author Sylvain
  *
  * @param <C> Type of the final implementation of this Command. It is used for the copy method {@link #set(Command)}.
