@@ -102,6 +102,7 @@ public class MotionQPInputCalculator
    {
       centroidalMomentumHandler.compute();
       allTaskJacobian.reshape(0, numberOfDoFs);
+      privilegedConfigurationHandler.reset();
    }
 
    public void updatePrivilegedConfiguration(PrivilegedConfigurationCommand command)
