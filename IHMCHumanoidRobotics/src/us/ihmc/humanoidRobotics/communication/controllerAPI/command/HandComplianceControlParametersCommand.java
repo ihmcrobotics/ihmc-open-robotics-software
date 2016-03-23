@@ -1,10 +1,11 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Arrays;
 
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 

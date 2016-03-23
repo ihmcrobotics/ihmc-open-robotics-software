@@ -1,9 +1,10 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.EnumMap;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import us.ihmc.communication.controllerAPI.command.CompilableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;
