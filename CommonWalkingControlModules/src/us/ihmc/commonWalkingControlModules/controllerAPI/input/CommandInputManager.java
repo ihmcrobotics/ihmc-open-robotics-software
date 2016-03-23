@@ -103,6 +103,14 @@ public class CommandInputManager
       listOfSupportedMessages.add(messageClass);
    }
 
+   /**
+    * Submit a new {@link Packet} to be processed by the controller.
+    * This method can be called from any thread.
+    * The message is first copied locally and only the copy will be visible for the controller.
+    * No reference of this message will be held after calling this method.
+    * The user is free to modify the message afterwards.
+    * @param message message to be submitted to the controller.
+    */
    public <M extends Packet<M>> void submitMessage(M message)
    {
       if (message == null || message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
@@ -128,6 +136,14 @@ public class CommandInputManager
       buffer.commit();
    }
 
+   /**
+    * Submit a new list of {@link Packet} to be processed by the controller.
+    * This method can be called from any thread.
+    * The message is first copied locally and only the copy will be visible for the controller.
+    * No reference of this message will be held after calling this method.
+    * The user is free to modify the message afterwards.
+    * @param messages list of messages to be submitted to the controller.
+    */
    @SuppressWarnings("unchecked")
    public <M extends Packet<M>> void submitMessages(List<Packet<?>> messages)
    {
@@ -135,6 +151,14 @@ public class CommandInputManager
          submitMessage((M) messages.get(i));
    }
 
+   /**
+    * Submit a new {@link Command} to be processed by the controller.
+    * This method can be called from any thread.
+    * The command is first copied locally and only the copy will be visible for the controller.
+    * No reference of this command will be held after calling this method.
+    * The user is free to modify the command afterwards.
+    * @param command command to be submitted to the controller.
+    */
    public <C extends Command<C, ?>> void submitCommand(C command)
    {
       if (!command.isCommandValid())
@@ -157,54 +181,104 @@ public class CommandInputManager
       buffer.commit();
    }
 
+   /**
+    * Submit a new list of {@link Command} to be processed by the controller.
+    * This method can be called from any thread.
+    * The command is first copied locally and only the copy will be visible for the controller.
+    * No reference of this command will be held after calling this method.
+    * The user is free to modify the command afterwards.
+    * @param commands list of commands to be submitted to the controller.
+    */
    @SuppressWarnings("unchecked")
-   public <C extends Command<C, ?>> void submitControllerCommands(List<Command<?, ?>> controllerCommands)
+   public <C extends Command<C, ?>> void submitControllerCommands(List<Command<?, ?>> commands)
    {
-      for (int i = 0; i < controllerCommands.size(); i++)
-         submitCommand((C) controllerCommands.get(i));
+      for (int i = 0; i < commands.size(); i++)
+         submitCommand((C) commands.get(i));
    }
 
+   /**
+    * Check if a new command to be processed is available.
+    * @param commandClassToCheck class of the command to check availability.
+    * @return true if at least one new command is available.
+    */
    public boolean isNewCommandAvailable(Class<? extends Command<?, ?>> commandClassToCheck)
    {
       return commandClassToBufferMap.get(commandClassToCheck).poll();
    }
 
+   /**
+    * Throw away any new available commands.
+    */
    public void flushAllCommands()
    {
       for (int i = 0; i < allBuffers.size(); i++)
          allBuffers.get(i).flush();
    }
 
+   /**
+    * Throw away any new available commands of a certain type.
+    * @param commandClassToFlush Used to know what type of command is to be thrown away.
+    */
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
       commandClassToBufferMap.get(commandClassToFlush).flush();
    }
 
+   /**
+    * Poll all new available commands and combine them into one command.
+    * After calling this method, no new command will be available.
+    * @param commandClassToPoll Used to know what type of command is to be polled.
+    * @return the new command to be processed, returns null if there is no new available command.
+    */
    public <C extends CompilableCommand<C, ?>> C pollAndCompileCommands(Class<C> commandClassToPoll)
    {
       List<C> commands = pollNewCommands(commandClassToPoll);
+
+      if (commands.isEmpty())
+         return null;
+
       for (int i = 1; i < commands.size(); i++)
          commands.get(0).compile(commands.get(i));
       return commands.get(0);
    }
 
-   public <C extends Command<C, ?>> C pollNewestCommand(Class<C> commandClassToFlush)
+   /**
+    * Poll the most recent available command.
+    * After calling this method, no new command will be available.
+    * @param commandClassToPoll Used to know what type of command is to be polled.
+    * @return the new command to be processed, returns null if there is no new available command.
+    */
+   public <C extends Command<C, ?>> C pollNewestCommand(Class<C> commandClassToPoll)
    {
-      return ((RecyclingArrayList<C>) pollNewCommands(commandClassToFlush)).getLast();
+      return ((RecyclingArrayList<C>) pollNewCommands(commandClassToPoll)).getLast();
    }
 
+   /**
+    * Poll all the new available commands.
+    * After calling this method, no new command will be available.
+    * @param commandClassToPoll Used to know what type of command is to be polled.
+    * @return the new commands to be processed stored in a list, returns an empty list if there is no new available command.
+    */
    @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> List<C> pollNewCommands(Class<C> commandClassToPoll)
    {
       RecyclingArrayList<C> commands = (RecyclingArrayList<C>) commandsMap.get(commandClassToPoll);
-      commands.clear();
       ConcurrentRingBuffer<C> buffer = (ConcurrentRingBuffer<C>) commandClassToBufferMap.get(commandClassToPoll);
       pollNewCommands(buffer, commands);
       return commands;
    }
 
+   /**
+    * This method has to remain private.
+    * Reads all the new available commands from a buffer and copy them in a list.
+    * 
+    * @param buffer Buffer in which the new available commands are stored.
+    * @param commandsToPack Used to copy and store all the new available commands. This list will be empty is there is no new available command.
+    */
    private static <C extends Command<C, ?>> void pollNewCommands(ConcurrentRingBuffer<C> buffer, RecyclingArrayList<C> commandsToPack)
    {
+      commandsToPack.clear();
+
       if (buffer.poll())
       {
          C command;
@@ -217,6 +291,13 @@ public class CommandInputManager
       }
    }
 
+   /**
+    * This method has to remain private.
+    * Method to help creating a {@link ConcurrentRingBuffer} for a given class.
+    * The class has to have an empty constructor.
+    * @param clazz For which a new builder needs to be created.
+    * @return The new builder.
+    */
    public static <U> Builder<U> createBuilderWithEmptyConstructor(Class<U> clazz)
    {
       final Constructor<U> emptyConstructor;
@@ -254,11 +335,17 @@ public class CommandInputManager
       return builder;
    }
 
+   /**
+    * @return The list of all the commands supported by this API. 
+    */
    public List<Class<? extends Command<?, ?>>> getListOfSupportedCommands()
    {
       return listOfSupportedCommands;
    }
 
+   /**
+    * @return The list of all the messages supported by this API. 
+    */
    public List<Class<? extends Packet<?>>> getListOfSupportedMessages()
    {
       return listOfSupportedMessages;
