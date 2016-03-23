@@ -10,15 +10,16 @@ import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class ControllerStatusOutputManager
+public class StatusMessageOutputManager
 {
    private final Map<Class<? extends StatusPacket<?>>, StatusPacket<?>> statusClassToObjectMap = new HashMap<>();
+
    private final List<Class<? extends StatusPacket<?>>> listOfSupportedMessages = new ArrayList<>();
 
    private final Map<Class<? extends StatusPacket<?>>, List<StatusMessageListener<?>>> specificStatusMessageListenerMap = new HashMap<>();
    private final List<GlobalStatusMessageListener> globalStatusMessageListeners = new ArrayList<>();
 
-   public ControllerStatusOutputManager(List<Class<? extends StatusPacket<?>>> statusMessagesToRegister)
+   public StatusMessageOutputManager(List<Class<? extends StatusPacket<?>>> statusMessagesToRegister)
    {
       registerStatusMessages(statusMessagesToRegister);
    }

@@ -4,8 +4,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.StatusMessageListener;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -26,9 +26,9 @@ public class BlindWalkingFootstepDataMessageGenerator
 
    private final BlindWalkingDesiredFootstepCalculator blindWalkingDesiredFootstepCalculator;
    private final CommandInputManager commandInputManager;
-   private final ControllerStatusOutputManager statusOutputManager;
+   private final StatusMessageOutputManager statusOutputManager;
 
-   public BlindWalkingFootstepDataMessageGenerator(CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+   public BlindWalkingFootstepDataMessageGenerator(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          YoVariableRegistry parentRegistry)
    {

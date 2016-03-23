@@ -25,7 +25,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisHei
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.PelvisTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.StopAllTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -141,12 +141,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
 
    private final CommandInputManager commandInputManager;
-   private final ControllerStatusOutputManager statusOutputManager;
+   private final StatusMessageOutputManager statusOutputManager;
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, ControllerStatusOutputManager statusOutputManager,
+   public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          VariousWalkingManagers variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
          MomentumBasedController momentumBasedController)
    {

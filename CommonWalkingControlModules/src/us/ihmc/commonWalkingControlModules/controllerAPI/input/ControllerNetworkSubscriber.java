@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager.GlobalStatusMessageListener;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
+import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager.GlobalStatusMessageListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StatusPacket;
@@ -22,7 +22,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 {
    private final int buffersCapacity = 16;
    private final CommandInputManager controllerCommandInputManager;
-   private final ControllerStatusOutputManager controllerStatusOutputManager;
+   private final StatusMessageOutputManager controllerStatusOutputManager;
    private final HumanoidGlobalDataProducer globalDataProducer;
    private final PeriodicThreadScheduler scheduler;
 
@@ -30,7 +30,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final Map<Class<? extends StatusPacket<?>>, ConcurrentRingBuffer<? extends StatusPacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
    private final Map<Class<? extends StatusPacket<?>>, Builder<? extends StatusPacket<?>>> statusMessageClassToBuilderMap = new HashMap<>();
 
-   public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, ControllerStatusOutputManager controllerStatusOutputManager,
+   public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
          CloseableAndDisposableRegistry closeAndDisposeRegistry, PeriodicThreadScheduler scheduler, HumanoidGlobalDataProducer globalDataProducer)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
