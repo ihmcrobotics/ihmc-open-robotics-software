@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.sliderboard;
 
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
+import us.ihmc.quadrupedRobotics.gait.QuadrupedGaitCycle;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -27,15 +28,17 @@ public class QuadrupedTrotWalkSliderBoardConfiguration implements EnumDependentS
       });
       
       String namespace = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.";
-      sliderBoardConfigurationManager.setSlider(1, namespace + "desiredStanceZ", scs, 0.4, 0.7);
-      sliderBoardConfigurationManager.setSlider(2, namespace + "desiredStanceX", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setSlider(3, namespace + "desiredStanceY", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setSlider(4, namespace + "desiredStanceRoll", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setSlider(5, namespace + "desiredStancePitch", scs, -0.1, 0.1);
-      sliderBoardConfigurationManager.setSlider(6, namespace + "desiredStanceYaw", scs, -0.3, 0.3);
+      sliderBoardConfigurationManager.setSlider(1, namespace + "desiredStanceOffsetZ", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(2, namespace + "desiredStanceOffsetX", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(3, namespace + "desiredStanceOffsetY", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(4, namespace + "desiredStanceOffsetRoll", scs, -0.2, 0.2);
+      sliderBoardConfigurationManager.setSlider(5, namespace + "desiredStanceOffsetPitch", scs, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(6, namespace + "desiredStanceOffsetYaw", scs, -0.3, 0.3);
       sliderBoardConfigurationManager.setSlider(7, namespace + "desiredICPFromCentroidX", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(8, namespace + "desiredICPFromCentroidY", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setButton(1, namespace + "enableTrot", scs);
+//      sliderBoardConfigurationManager.setButtonEnum(1, namespace + "desiredGait", scs, QuadrupedGaitCycle.STAND);
+//      sliderBoardConfigurationManager.setButtonEnum(2, namespace + "desiredGait", scs, QuadrupedGaitCycle.SAFE_WALK);
+//      sliderBoardConfigurationManager.setButtonEnum(3, namespace + "desiredGait", scs, QuadrupedGaitCycle.WALKING_TROT);
       sliderBoardConfigurationManager.saveConfiguration(QuadrupedSliderBoardMode.TROT_WALK.toString());
    }
 
