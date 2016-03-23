@@ -74,13 +74,13 @@ public class CommandInputManager
    /**
     * This method has to remain private.
     * It is used to register in the API a list of commands.
-    * @param commandClazzes
+    * @param commandClasses
     */
    @SuppressWarnings("unchecked")
-   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClazzes)
+   private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommands(List<Class<? extends Command<?, ?>>> commandClasses)
    {
-      for (int i = 0; i < commandClazzes.size(); i++)
-         registerNewCommand((Class<C>) commandClazzes.get(i));
+      for (int i = 0; i < commandClasses.size(); i++)
+         registerNewCommand((Class<C>) commandClasses.get(i));
    }
 
    /**
@@ -292,7 +292,6 @@ public class CommandInputManager
    }
 
    /**
-    * This method has to remain private.
     * Method to help creating a {@link ConcurrentRingBuffer} for a given class.
     * The class has to have an empty constructor.
     * @param clazz For which a new builder needs to be created.
