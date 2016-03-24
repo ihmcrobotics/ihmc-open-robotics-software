@@ -14,9 +14,6 @@ public class QuadrupedTaskSpaceEstimates
    private final FrameVector bodyAngularVelocity;
    private final FramePoint comPosition;
    private final FrameVector comVelocity;
-   private final FramePoint dcmPosition;
-   private final FramePoint icpPosition;
-   private double lipNaturalFrequency;
    private final QuadrantDependentList<FrameOrientation> soleOrientation;
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<FrameVector> soleAngularVelocity;
@@ -30,13 +27,10 @@ public class QuadrupedTaskSpaceEstimates
       bodyAngularVelocity = new FrameVector();
       comPosition = new FramePoint();
       comVelocity = new FrameVector();
-      dcmPosition = new FramePoint();
-      icpPosition = new FramePoint();
       soleOrientation = new QuadrantDependentList<>();
       solePosition = new QuadrantDependentList<>();
       soleAngularVelocity = new QuadrantDependentList<>();
       soleLinearVelocity = new QuadrantDependentList<>();
-      lipNaturalFrequency = Math.sqrt(9.81 / 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          soleOrientation.set(robotQuadrant, new FrameOrientation());
@@ -74,26 +68,6 @@ public class QuadrupedTaskSpaceEstimates
    public FrameVector getComVelocity()
    {
       return comVelocity;
-   }
-
-   public FramePoint getDcmPosition()
-   {
-      return dcmPosition;
-   }
-
-   public FramePoint getIcpPosition()
-   {
-      return icpPosition;
-   }
-
-   public double getLipNaturalFrequency()
-   {
-      return lipNaturalFrequency;
-   }
-
-   public void setLipNaturalFrequency(double lipNaturalFrequency)
-   {
-      this.lipNaturalFrequency = lipNaturalFrequency;
    }
 
    public FrameOrientation getSoleOrientation(RobotQuadrant robotQuadrant)
