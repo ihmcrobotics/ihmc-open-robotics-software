@@ -991,7 +991,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       currentSupportPolygon.set(fourFootSupportPolygon);
       if (swingQuadrant != null) currentSupportPolygon.removeFootstep(swingQuadrant); 
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      distanceInside.set(currentSupportPolygon.distanceInside2d(centerOfMassFramePoint));
+      distanceInside.set(currentSupportPolygon.getDistanceInside2d(centerOfMassFramePoint));
    }
 
    private void updateGraphics()
@@ -1941,7 +1941,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          centerOfMassFramePoint.getFramePoint2d(centerOfMassPoint2d);
          fourFootSupportPolygon.getAndRemoveFootstep(temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg, swingLeg);
 //         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.isInside(centerOfMassFramePoint);
-         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.distanceInside2d(centerOfMassFramePoint) > distanceInsideSupportPolygonBeforeSwingingLeg.getDoubleValue();
+         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.getDistanceInside2d(centerOfMassFramePoint) > distanceInsideSupportPolygonBeforeSwingingLeg.getDoubleValue();
       }
       
       public boolean isCoMCloseToFinalDesired(double distanceToCheck)
@@ -2104,7 +2104,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          currentSupportPolygon.set(fourFootSupportPolygon);
          if (swingQuadrant != null) currentSupportPolygon.removeFootstep(swingQuadrant);
          cOMTarget.changeFrame(ReferenceFrame.getWorldFrame());
-         double distanceInside = currentSupportPolygon.distanceInside2d(cOMTarget);
+         double distanceInside = currentSupportPolygon.getDistanceInside2d(cOMTarget);
          return distanceInside > thresholdDistance;
       }
       
