@@ -166,8 +166,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final FrameVector dcmVelocitySetpoint;
    private final FramePoint icpPositionSetpoint;
    private final FrameVector icpVelocitySetpoint;
-   private final FramePoint cmpPositionSetpoint;
-   private final FramePoint vrpPositionSetpoint;
    private final FrameVector comForceSetpoint;
    private double comHeightSetpoint;
 
@@ -204,8 +202,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final YoFrameVector yoBodyTorqueFeedforwardSetpoint;
    private final YoFrameVector yoBodyTorqueSetpoint;
    private final YoFramePoint yoIcpPositionSetpoint;
-   private final YoFramePoint yoCmpPositionSetpoint;
-   private final YoFramePoint yoVrpPositionSetpoint;
    private final YoFrameVector yoComForceSetpoint;
    private final DoubleYoVariable yoComHeightSetpoint;
    private final QuadrantDependentList<YoFrameOrientation> yoSoleOrientationEstimate;
@@ -357,8 +353,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       dcmVelocitySetpoint = new FrameVector(worldFrame);
       icpPositionSetpoint = new FramePoint(worldFrame);
       icpVelocitySetpoint = new FrameVector(worldFrame);
-      cmpPositionSetpoint = new FramePoint(worldFrame);
-      vrpPositionSetpoint = new FramePoint(worldFrame);
       comForceSetpoint = new FrameVector(worldFrame);
       comHeightSetpoint = params.get(COM_HEIGHT_NOMINAL);
 
@@ -413,8 +407,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       yoBodyTorqueFeedforwardSetpoint = new YoFrameVector("bodyTorqueFeedforwardSetpoint", worldFrame, registry);
       yoBodyTorqueSetpoint = new YoFrameVector("bodyTorqueSetpoint", worldFrame, registry);
       yoIcpPositionSetpoint = new YoFramePoint("icpPositionSetpoint", worldFrame, registry);
-      yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", worldFrame, registry);
-      yoVrpPositionSetpoint = new YoFramePoint("vrpPositionSetpoint", worldFrame, registry);
       yoComForceSetpoint = new YoFrameVector("comForceSetpoint", worldFrame, registry);
       yoComHeightSetpoint = new DoubleYoVariable("comHeightSetpoint", registry);
       yoSoleOrientationEstimate = new QuadrantDependentList<>();
@@ -430,8 +422,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          yoSoleLinearVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", worldFrame, registry));
       }
       yoSupportPolygonEstimate = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 4, registry);
-      yoSupportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
-      yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientationEstimate", worldFrame, registry);
+      yoSupportCentroidEstimate = new YoFramePoint("supportCentroid", worldFrame, registry);
+      yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientation", worldFrame, registry);
       yoBodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
       yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
       yoBodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
@@ -471,43 +463,25 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
       YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition(prefix + "icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
-      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Chartreuse());
       yoGraphicsList.add(yoComPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionSetpointViz);
-      yoGraphicsList.add(yoCmpPositionSetpointViz);
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       YoArtifactPolygon yoSupportPolygonArtifact = new YoArtifactPolygon(prefix + "supportPolygon", yoSupportPolygonEstimate, Color.BLACK, false);
       artifactList.add(yoComPositionEstimateViz.createArtifact());
       artifactList.add(yoIcpPositionEstimateViz.createArtifact());
       artifactList.add(yoIcpPositionSetpointViz.createArtifact());
-      artifactList.add(yoCmpPositionSetpointViz.createArtifact());
       artifactList.add(yoSupportPolygonArtifact);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    private void updateProviders()
    {
-      // update desired body orientation
-      BodyOrientationPacket bodyOrientationPacket = inputProvider.getBodyOrientationPacket().get();
-      double yaw = MathTools.clipToMinMax(bodyOrientationPacket.getYaw(), params.get(BODY_ORIENTATION_INPUT_MIN, 0), params.get(BODY_ORIENTATION_INPUT_MAX, 0));
-      double pitch = MathTools.clipToMinMax(bodyOrientationPacket.getPitch(), params.get(BODY_ORIENTATION_INPUT_MIN, 1), params.get(BODY_ORIENTATION_INPUT_MAX, 1));
-      double roll = MathTools.clipToMinMax(bodyOrientationPacket.getRoll(), params.get(BODY_ORIENTATION_INPUT_MIN, 2), params.get(BODY_ORIENTATION_INPUT_MAX, 2));
-      yoBodyOrientationInput.setYawPitchRoll(yaw, pitch, roll);
-
-      // update desired planar velocity
-      PlanarVelocityPacket planarVelocityPacket = inputProvider.getPlanarVelocityPacket().get();
-      double xdot = MathTools.clipToMinMax(planarVelocityPacket.getX(), params.get(PLANAR_VELOCITY_INPUT_MIN, 0), params.get(PLANAR_VELOCITY_INPUT_MAX, 0));
-      double ydot = MathTools.clipToMinMax(planarVelocityPacket.getY(), params.get(PLANAR_VELOCITY_INPUT_MIN, 1), params.get(PLANAR_VELOCITY_INPUT_MAX, 1));
-      double adot = MathTools.clipToMinMax(planarVelocityPacket.getA(), params.get(PLANAR_VELOCITY_INPUT_MIN, 2), params.get(PLANAR_VELOCITY_INPUT_MAX, 2));
-      yoBodyVelocityInput.set(xdot, ydot, 0.0);
-      yoBodyYawRateInput.set(adot);
-
-      // update desired com height
-      ComPositionPacket comPositionPacket = inputProvider.getComPositionPacket().get();
-      double comHeight = MathTools.clipToMinMax(comPositionPacket.getZ(), params.get(COM_POSITION_INPUT_MIN, 2), params.get(COM_POSITION_INPUT_MAX, 2));
-      yoComHeightInput.set(comHeight);
+      yoBodyOrientationInput.set(inputProvider.getBodyOrientationInput());
+      yoBodyVelocityInput.set(inputProvider.getPlanarVelocityInput().getX(), inputProvider.getPlanarVelocityInput().getY(), 0.0);
+      yoBodyYawRateInput.set(inputProvider.getPlanarVelocityInput().getZ());
+      yoComHeightInput.set(inputProvider.getComPositionInput().getZ());
    }
 
    private void updateEstimates()
@@ -643,8 +617,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       yoBodyTorqueFeedforwardSetpoint.setAndMatchFrame(bodyTorqueFeedforwardSetpoint);
       yoBodyTorqueSetpoint.setAndMatchFrame(bodyTorqueSetpoint);
       yoIcpPositionSetpoint.setAndMatchFrame(icpPositionSetpoint);
-      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
-      yoVrpPositionSetpoint.setAndMatchFrame(vrpPositionSetpoint);
       yoComForceSetpoint.setAndMatchFrame(comForceSetpoint);
       yoComHeightSetpoint.set(comHeightSetpoint);
 
@@ -864,8 +836,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
 
          // compute horizontal forces to track desired dcm trajectory
-         dcmPositionController.setComHeight(Math.max(comHeightSetpoint, 0.001));
-         dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
+         dcmPositionController.setComHeight(comHeightSetpoint);
+         dcmPositionController.compute(comForceSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
          // compute vertical com force
          comHeightSetpoint = comHeightInput;
@@ -977,8 +949,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
 
          // compute horizontal forces to track desired divergent component of motion
-         dcmPositionController.setComHeight(Math.max(comHeightSetpoint, 0.001));
-         dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
+         dcmPositionController.setComHeight(comHeightSetpoint);
+         dcmPositionController.compute(comForceSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
          // compute vertical com force
          comHeightSetpoint = comHeightInput;

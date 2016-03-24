@@ -4,23 +4,23 @@ import us.ihmc.communication.packets.Packet;
 
 import javax.vecmath.Vector3d;
 
-public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket>
+public class ComVelocityPacket extends Packet<ComVelocityPacket>
 {
    private final Vector3d velocity;
 
-   public PlanarVelocityPacket()
+   public ComVelocityPacket()
    {
       this.velocity = new Vector3d();
    }
 
-   public PlanarVelocityPacket(Vector3d velocity)
+   public ComVelocityPacket(Vector3d velocity)
    {
       this.velocity = new Vector3d(velocity);
    }
 
-   public PlanarVelocityPacket(double vx, double vy, double wz)
+   public ComVelocityPacket(double vx, double vy, double vz)
    {
-      this.velocity = new Vector3d(vx, vy, wz);
+      this.velocity = new Vector3d(vx, vy, vz);
    }
 
    public void get(Vector3d velocity)
@@ -43,7 +43,7 @@ public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket>
       return velocity.getZ();
    }
 
-   @Override public boolean epsilonEquals(PlanarVelocityPacket other, double epsilon)
+   @Override public boolean epsilonEquals(ComVelocityPacket other, double epsilon)
    {
       return this.velocity.epsilonEquals(other.velocity, epsilon);
    }

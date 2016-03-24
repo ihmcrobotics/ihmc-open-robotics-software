@@ -1,5 +1,6 @@
 package us.ihmc.aware.controller.position;
 
+import us.ihmc.aware.animation.QuadrupedAnimationController;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -39,6 +40,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment,
             parameters, paramMapRepository);
+      QuadrupedController animationController = new QuadrupedAnimationController("***REMOVED***", "***REMOVED***", parameters, runtimeEnvironment);
 
       StateMachineBuilder<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> builder = new StateMachineBuilder<>(
             QuadrupedPositionControllerState.class, "positionControllerState", registry);
@@ -48,21 +50,26 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       builder.addState(QuadrupedPositionControllerState.STAND_PREP, standPrepController);
       builder.addState(QuadrupedPositionControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedPositionControllerState.CRAWL, crawlController);
+      builder.addState(QuadrupedPositionControllerState.ANIMATION, animationController);
 
       // TODO: Define more state transitions.
       builder.addTransition(QuadrupedPositionControllerEvent.JOINTS_INITIALIZED,
             QuadrupedPositionControllerState.JOINT_INITIALIZATION, QuadrupedPositionControllerState.DO_NOTHING);
-      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP,
-            QuadrupedPositionControllerState.DO_NOTHING, QuadrupedPositionControllerState.STAND_PREP);
       builder.addTransition(QuadrupedPositionControllerEvent.STARTING_POSE_REACHED,
             QuadrupedPositionControllerState.STAND_PREP, QuadrupedPositionControllerState.STAND_READY);
 
       // Manually triggered events to transition to main controllers.
-      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_POSITION_BASED_CRAWL,
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP,
+            QuadrupedPositionControllerState.DO_NOTHING, QuadrupedPositionControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_CRAWL,
             QuadrupedPositionControllerState.STAND_READY, QuadrupedPositionControllerState.CRAWL);
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_ANIMATION,
+            QuadrupedPositionControllerState.STAND_READY, QuadrupedPositionControllerState.ANIMATION);
 
       // Transitions from controllers back to stand prep.
       builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.CRAWL,
+            QuadrupedPositionControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedPositionControllerEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.ANIMATION,
             QuadrupedPositionControllerState.STAND_PREP);
 
       this.stateMachine = builder.build(QuadrupedPositionControllerState.JOINT_INITIALIZATION);

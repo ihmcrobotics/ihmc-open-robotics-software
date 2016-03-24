@@ -8,8 +8,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DivergentComponentOfMotionController
 {
-   public final static double MINIMUM_COM_HEIGHT = 0.01;
-
    private double dt;
    private double mass;
    private double gravity;
@@ -31,9 +29,9 @@ public class DivergentComponentOfMotionController
       pidController[2] = new PIDController(suffix + "Z", parentRegistry);
    }
 
-   public void setComHeight(double comHeight)
+   public void setComHeight(double naturalFrequency)
    {
-      this.comHeight = Math.max(comHeight, MINIMUM_COM_HEIGHT);
+      this.comHeight = Math.max(comHeight, 0.001);
    }
 
    public double getComHeight()
@@ -48,7 +46,7 @@ public class DivergentComponentOfMotionController
 
    public double getTimeConstant()
    {
-      return Math.sqrt(comHeight / gravity);
+      return 1.0 / getNaturalFrequency();
    }
 
    public void reset()
@@ -67,6 +65,28 @@ public class DivergentComponentOfMotionController
       }
    }
 
+   public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
+   {
+      pidController[0].setProportionalGain(proportionalGainX);
+      pidController[1].setProportionalGain(proportionalGainY);
+      pidController[2].setProportionalGain(proportionalGainZ);
+   }
+
+   public void setDerivativeGains(double[] derivativeGains)
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         pidController[i].setDerivativeGain(derivativeGains[i]);
+      }
+   }
+
+   public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
+   {
+      pidController[0].setDerivativeGain(derivativeGainX);
+      pidController[1].setDerivativeGain(derivativeGainY);
+      pidController[2].setDerivativeGain(derivativeGainZ);
+   }
+
    public void setIntegralGains(double[] integralGains, double maxIntegralError)
    {
       for (int i = 0; i < 3; i++)
@@ -74,22 +94,6 @@ public class DivergentComponentOfMotionController
          pidController[i].setIntegralGain(integralGains[i]);
          pidController[i].setMaxIntegralError(maxIntegralError);
       }
-   }
-
-   public void setIntegralGains(double[] integralGains, double[] maxIntegralErrors)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         pidController[i].setIntegralGain(integralGains[i]);
-         pidController[i].setMaxIntegralError(maxIntegralErrors[i]);
-      }
-   }
-
-   public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
-   {
-      pidController[0].setProportionalGain(proportionalGainX);
-      pidController[1].setProportionalGain(proportionalGainY);
-      pidController[2].setProportionalGain(proportionalGainZ);
    }
 
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
@@ -102,28 +106,21 @@ public class DivergentComponentOfMotionController
       pidController[2].setMaxIntegralError(maxIntegralError);
    }
 
-   public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralErrorX, double maxIntegralErrorY, double maxIntegralErrorZ)
+   public void setGains(double[] proportionalGains, double[] derivativeGains, double[] integralGains, double maxIntegralError)
    {
-      pidController[0].setIntegralGain(integralGainX);
-      pidController[1].setIntegralGain(integralGainY);
-      pidController[2].setIntegralGain(integralGainZ);
-      pidController[0].setMaxIntegralError(maxIntegralErrorX);
-      pidController[1].setMaxIntegralError(maxIntegralErrorY);
-      pidController[2].setMaxIntegralError(maxIntegralErrorZ);
+      setProportionalGains(proportionalGains);
+      setDerivativeGains(derivativeGains);
+      setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void compute(FrameVector comForceOutput, FramePoint vrpPositionOutput, FramePoint cmpPositionOutput, FramePoint dcmPositionSetpoint, FrameVector dcmVelocitySetpoint, FramePoint dcmPositionEstimate)
+   public void compute(FrameVector comForceCommand, FramePoint dcmPositionSetpoint, FrameVector dcmVelocitySetpoint, FramePoint dcmPositionEstimate)
    {
-      ReferenceFrame comForceOutputFrame = comForceOutput.getReferenceFrame();
-      ReferenceFrame vrpPositionOutputFrame = vrpPositionOutput.getReferenceFrame();
-      ReferenceFrame cmpPositionOutputFrame = cmpPositionOutput.getReferenceFrame();
+      ReferenceFrame comForceCommandFrame = comForceCommand.getReferenceFrame();
       ReferenceFrame dcmPositionSetpointFrame = dcmPositionSetpoint.getReferenceFrame();
       ReferenceFrame dcmPositionVelocityFrame = dcmVelocitySetpoint.getReferenceFrame();
       ReferenceFrame dcmPositionEstimateFrame = dcmPositionEstimate.getReferenceFrame();
 
-      comForceOutput.changeFrame(comFrame);
-      vrpPositionOutput.changeFrame(comFrame);
-      cmpPositionOutput.changeFrame(comFrame);
+      comForceCommand.changeFrame(comFrame);
       dcmPositionSetpoint.changeFrame(comFrame);
       dcmVelocitySetpoint.changeFrame(comFrame);
       dcmPositionEstimate.changeFrame(comFrame);
@@ -134,17 +131,13 @@ public class DivergentComponentOfMotionController
       double vrpZ = dcmPositionEstimate.getZ() - 1 / omega * (dcmVelocitySetpoint.getZ() + pidController[2].compute(dcmPositionEstimate.getZ(), dcmPositionSetpoint.getZ(), 0, 0, dt));
       double cmpX = vrpX;
       double cmpY = vrpY;
-      double cmpZ = vrpZ - comHeight;
+      double cmpZ = vrpZ - getComHeight();
       double fX = mass * Math.pow(omega, 2) * -cmpX;
       double fY = mass * Math.pow(omega, 2) * -cmpY;
       double fZ = mass * Math.pow(omega, 2) * -cmpZ;
-      comForceOutput.set(fX, fY, fZ);
-      cmpPositionOutput.set(cmpX, cmpY, cmpZ);
-      vrpPositionOutput.set(vrpX, vrpY, vrpZ);
+      comForceCommand.set(fX, fY, fZ);
 
-      comForceOutput.changeFrame(comForceOutputFrame);
-      vrpPositionOutput.changeFrame(vrpPositionOutputFrame);
-      cmpPositionOutput.changeFrame(cmpPositionOutputFrame);
+      comForceCommand.changeFrame(comForceCommandFrame);
       dcmPositionSetpoint.changeFrame(dcmPositionSetpointFrame);
       dcmVelocitySetpoint.changeFrame(dcmPositionVelocityFrame);
       dcmPositionEstimate.changeFrame(dcmPositionEstimateFrame);

@@ -1,25 +1,19 @@
 package us.ihmc.aware.controller.force;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
-import us.ihmc.aware.packets.BodyOrientationPacket;
-import us.ihmc.aware.packets.ComPositionPacket;
-import us.ihmc.aware.packets.PlanarVelocityPacket;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
-import us.ihmc.aware.params.ParameterPersister;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -32,50 +26,35 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
  */
 public class QuadrupedForceControllerManager implements QuadrupedControllerManager
 {
-   private final static String COM_HEIGHT_NOMINAL = "comHeightNominal";
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
+   private final QuadrupedControllerInputProvider inputProvider;
 
    private final StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
    private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
 
+   private final AtomicReference<QuadrupedForceControllerEvent> requestedEvent = new AtomicReference<>();
+
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters) throws IOException
    {
-      // Set up network communication for controller inputs.
-      PacketCommunicator packetCommunicator = PacketCommunicator
-            .createTCPPacketCommunicatorServer(NetworkPorts.XBOX_CONTROLLER_TELEOP_PORT, runtimeEnvironment.getNetClassList());
-      packetCommunicator.connect();
-      GlobalDataProducer globalDataProducer = new GlobalDataProducer(packetCommunicator);
-
       // Initialize parameter map repository.
-
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
 
-      ParameterMap params = paramMapRepository.get(QuadrupedForceControllerManager.class);
-      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
-
       // Initialize input providers.
-      BodyOrientationPacket bodyOrientationInputPacket = new BodyOrientationPacket(0.0, 0.0, 0.0);
-      ComPositionPacket comPositionInputPacket = new ComPositionPacket(0.0, 0.0, params.get(COM_HEIGHT_NOMINAL));
-      PlanarVelocityPacket planarVelocityInputPacket = new PlanarVelocityPacket(0.0, 0.0, 0.0);
-      QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(globalDataProducer, comPositionInputPacket,
-            bodyOrientationInputPacket, planarVelocityInputPacket);
+      inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), paramMapRepository, registry);
 
-      // TODO: Hack.
+      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
       globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
       {
          @Override
          public void receivedPacket(QuadrupedForceControllerEventPacket packet)
          {
-            // TODO: Make this thread-safe
-            stateMachine.trigger(packet.get());
+            requestedEvent.set(packet.get());
          }
       });
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
-
    }
 
    @Override
@@ -87,6 +66,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
+      QuadrupedForceControllerEvent reqEvent = requestedEvent.getAndSet(null);
+      if (reqEvent != null)
+      {
+         stateMachine.trigger(reqEvent);
+      }
+
       stateMachine.process();
    }
 
