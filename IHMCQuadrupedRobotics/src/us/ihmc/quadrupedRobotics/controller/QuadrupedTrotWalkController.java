@@ -108,7 +108,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final DenseMatrix64F basisMatrix = new DenseMatrix64F(6, 16);
    private final DenseMatrix64F rhoMatrix = new DenseMatrix64F(16, 1);
    private final SolvePseudoInverseSvd solver = new SolvePseudoInverseSvd();
-   private final QuadrantDependentList<YoFrameVector> vmcFootForcesWorld = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFrameVector> vmcFootForces = new QuadrantDependentList<>();
    private final YoFramePose bodyPoseWorld;
    private final YoTwist bodyTwist;
@@ -123,10 +122,11 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final YoTwist desiredBodyTwist;
    private final SideDependentList<List<YoGraphicVector>> forceDistributionYoGraphicVectors = new SideDependentList<>();
    private final QuadrantDependentList<YoGraphicVector[]> basisForceYoGraphicVectors = new QuadrantDependentList<>();
-   private final FramePoint footInBodyZUp = new FramePoint();
-   private final FramePoint jointInBodyZUp = new FramePoint();
+   
+   // Jacobian
+   private final FramePoint jointPosition = new FramePoint();
    private final FrameVector jointToFootVector = new FrameVector();
-   private final FrameVector vmcRequestedTorqueFromJointXYZ = new FrameVector();
+   private final FrameVector vmcRequestedTorqueFromJoint = new FrameVector();
    private final FrameVector jointAxis = new FrameVector();
    
    // Walking
@@ -187,8 +187,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         vmcFootForcesWorld.set(robotQuadrant, new YoFrameVector("vmcFootForcesWorld" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
-         vmcFootForces.set(robotQuadrant, new YoFrameVector("vmcFootForces" + robotQuadrant.getPascalCaseName(), referenceFrames.getCenterOfMassZUpFrame(), registry));
+         vmcFootForces.set(robotQuadrant, new YoFrameVector("vmcFootForces" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
       }
 
       yoGraphicsListRegistry.registerArtifact("icpViz", icpViz.createArtifact());
@@ -226,10 +225,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          forceDistributionYoGraphicVectors.set(side, new ArrayList<YoGraphicVector>());
          forceDistributionYoGraphicVectors.get(side).add(new YoGraphicVector("frontFootForces" + side.getCamelCaseNameForMiddleOfExpression(),
                                                                               footPositions.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)),
-                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)), 0.007, YoAppearance.Yellow(), true, 0.01));
+                                                                              vmcFootForces.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)), 0.007, YoAppearance.Yellow(), true, 0.01));
          forceDistributionYoGraphicVectors.get(side).add(new YoGraphicVector("hindFootForces" + side.getCamelCaseNameForMiddleOfExpression(),
                                                                               footPositions.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())),
-                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())), 0.007, YoAppearance.Yellow(), true, 0.01));
+                                                                              vmcFootForces.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())), 0.007, YoAppearance.Yellow(), true, 0.01));
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -665,17 +664,13 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    {
       for (RobotQuadrant robotQuadrant : currentGaitPhase.getEnumValue().swingQuadrants())
       {
-         vmcFootForcesWorld.get(robotQuadrant).setToZero();
-         vmcFootForcesWorld.get(robotQuadrant).getYoX().add(kp_swing.getX() * (desiredFootPositions.get(robotQuadrant).getX() - footPositions.get(robotQuadrant).getX()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoX().add(kd_swing.getX() * (desiredFootVelocities.get(robotQuadrant).getX() - footVelocities.get(robotQuadrant).getX()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoY().add(kp_swing.getY() * (desiredFootPositions.get(robotQuadrant).getY() - footPositions.get(robotQuadrant).getY()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoY().add(kd_swing.getY() * (desiredFootVelocities.get(robotQuadrant).getY() - footVelocities.get(robotQuadrant).getY()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoZ().add(kp_swing.getZ() * (desiredFootPositions.get(robotQuadrant).getZ() - footPositions.get(robotQuadrant).getZ()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoZ().add(kd_swing.getZ() * (desiredFootVelocities.get(robotQuadrant).getZ() - footVelocities.get(robotQuadrant).getZ()));
-         
-         FrameVector frameTupleForFrameChange = vmcFootForcesWorld.get(robotQuadrant).getFrameTuple();
-         frameTupleForFrameChange.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
-         vmcFootForces.get(robotQuadrant).set(frameTupleForFrameChange);
+         vmcFootForces.get(robotQuadrant).setToZero();
+         vmcFootForces.get(robotQuadrant).getYoX().add(kp_swing.getX() * (desiredFootPositions.get(robotQuadrant).getX() - footPositions.get(robotQuadrant).getX()));
+         vmcFootForces.get(robotQuadrant).getYoX().add(kd_swing.getX() * (desiredFootVelocities.get(robotQuadrant).getX() - footVelocities.get(robotQuadrant).getX()));
+         vmcFootForces.get(robotQuadrant).getYoY().add(kp_swing.getY() * (desiredFootPositions.get(robotQuadrant).getY() - footPositions.get(robotQuadrant).getY()));
+         vmcFootForces.get(robotQuadrant).getYoY().add(kd_swing.getY() * (desiredFootVelocities.get(robotQuadrant).getY() - footVelocities.get(robotQuadrant).getY()));
+         vmcFootForces.get(robotQuadrant).getYoZ().add(kp_swing.getZ() * (desiredFootPositions.get(robotQuadrant).getZ() - footPositions.get(robotQuadrant).getZ()));
+         vmcFootForces.get(robotQuadrant).getYoZ().add(kd_swing.getZ() * (desiredFootVelocities.get(robotQuadrant).getZ() - footVelocities.get(robotQuadrant).getZ()));
       }
    }
    
@@ -723,10 +718,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          for (int basisIndex = 0; basisIndex < 4; basisIndex++)
          {
             basisForceVectors.get(robotQuadrant)[basisIndex].scale(rhoScalars.get(robotQuadrant)[basisIndex]);
-            vmcFootForcesWorld.get(robotQuadrant).add(basisForceVectors.get(robotQuadrant)[basisIndex]);
-            FrameVector frameTupleForFrameChange = vmcFootForcesWorld.get(robotQuadrant).getFrameTuple();
-            frameTupleForFrameChange.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
-            vmcFootForces.get(robotQuadrant).set(frameTupleForFrameChange);
+            vmcFootForces.get(robotQuadrant).add(basisForceVectors.get(robotQuadrant)[basisIndex]);
          }
       }
    }
@@ -741,36 +733,25 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    private void computeStanceJacobianForLeg(RobotQuadrant robotQuadrant)
    {
-      getFootInBodyZUpFrame(robotQuadrant, footInBodyZUp);
-
       for (int i = 0; i < oneDofJoints.get(robotQuadrant).size(); i++)
       {
          OneDoFJoint oneDoFJoint = oneDofJoints.get(robotQuadrant).get(i);
-         ReferenceFrame jointFrame = oneDoFJoint.getFrameBeforeJoint();
          
-         jointInBodyZUp.setToZero(jointFrame);
-         jointInBodyZUp.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
+         jointPosition.setFromReferenceFrame(oneDoFJoint.getFrameBeforeJoint());
 
-         jointToFootVector.setIncludingFrame(footInBodyZUp);
-         jointToFootVector.sub(jointInBodyZUp);
+         jointToFootVector.set(footPositions.get(robotQuadrant).getFrameTuple());
+         jointToFootVector.sub(jointPosition);
 
-         vmcRequestedTorqueFromJointXYZ.setToZero(referenceFrames.getCenterOfMassZUpFrame());
-         vmcRequestedTorqueFromJointXYZ.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
-         vmcRequestedTorqueFromJointXYZ.changeFrame(jointFrame);
+         vmcRequestedTorqueFromJoint.setToZero();
+         vmcRequestedTorqueFromJoint.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
 
          oneDoFJoint.getJointAxis(jointAxis);
-         double torque = jointAxis.dot(vmcRequestedTorqueFromJointXYZ);
+         jointAxis.changeFrame(ReferenceFrame.getWorldFrame());
+         double torque = jointAxis.dot(vmcRequestedTorqueFromJoint);
          
          desiredTorques.get(oneDoFJoint.getName()).set(-torque);
          oneDoFJoint.setTau(-torque);
       }
-   }
-
-   private void getFootInBodyZUpFrame(RobotQuadrant footQuadrant, FramePoint framePointToPack)
-   {
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(footQuadrant);
-      framePointToPack.setToZero(footFrame);
-      framePointToPack.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
    }
 
    private void clipForces(double max)
@@ -780,7 +761,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          if (vmcFootForces.get(robotQuadrant).getFrameTuple().length() > max)
          {
             vmcFootForces.get(robotQuadrant).scale(max / vmcFootForces.get(robotQuadrant).getFrameTuple().length());
-            vmcFootForcesWorld.get(robotQuadrant).scale(max / vmcFootForcesWorld.get(robotQuadrant).getFrameTuple().length());
          }
       }
    }
@@ -790,7 +770,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          vmcFootForces.get(robotQuadrant).setToZero();
-         vmcFootForcesWorld.get(robotQuadrant).setToZero();
       }
    }
       
