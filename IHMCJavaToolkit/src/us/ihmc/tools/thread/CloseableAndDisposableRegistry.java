@@ -1,6 +1,7 @@
 package us.ihmc.tools.thread;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * CloseableAndDisposableRegistry is a registry for CloseableAndDisposable objects.
@@ -13,25 +14,45 @@ import java.util.ArrayList;
  */
 public class CloseableAndDisposableRegistry
 {
-   private ArrayList<CloseableAndDisposable> closeableAndDisposables = new ArrayList<CloseableAndDisposable>();
-   
+   private List<CloseableAndDisposable> closeableAndDisposables = new ArrayList<>();
+   private List<CloseableAndDisposableRegistry> children = new ArrayList<>();
+
    public CloseableAndDisposableRegistry()
    {
    }
-   
+
    public void registerCloseableAndDisposable(CloseableAndDisposable closeable)
    {
       this.closeableAndDisposables.add(closeable);
    }
-   
+
+   public void registerCloseablesAndDisposables(List<CloseableAndDisposable> closeables)
+   {
+      for (int i = 0; i < closeables.size(); i++)
+         registerCloseableAndDisposable(closeables.get(i));
+   }
+
+   public void registerChild(CloseableAndDisposableRegistry other)
+   {
+      children.add(other);
+   }
+
    public void closeAndDispose()
    {
       for (CloseableAndDisposable closeableAndDisposable : closeableAndDisposables)
       {
          closeableAndDisposable.closeAndDispose();
       }
-      
+
       closeableAndDisposables.clear();
       closeableAndDisposables = null;
+
+      for (CloseableAndDisposableRegistry closeableAndDisposableRegistry : children)
+      {
+         closeableAndDisposableRegistry.closeAndDispose();
+      }
+
+      children.clear();
+      children = null;
    }
 }

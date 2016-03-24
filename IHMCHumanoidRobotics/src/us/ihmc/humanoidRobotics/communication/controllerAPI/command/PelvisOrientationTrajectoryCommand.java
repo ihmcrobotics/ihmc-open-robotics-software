@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 

@@ -1,8 +1,10 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.controllerAPI.command.MultipleCommandHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;

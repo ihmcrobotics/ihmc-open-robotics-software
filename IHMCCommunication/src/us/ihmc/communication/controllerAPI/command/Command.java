@@ -1,6 +1,5 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.communication.controllerAPI.command;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
 
 /**

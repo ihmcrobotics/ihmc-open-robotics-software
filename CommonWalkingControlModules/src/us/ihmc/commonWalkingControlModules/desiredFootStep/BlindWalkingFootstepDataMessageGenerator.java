@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataListCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.output.StatusMessageOutputManager.StatusMessageListener;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
