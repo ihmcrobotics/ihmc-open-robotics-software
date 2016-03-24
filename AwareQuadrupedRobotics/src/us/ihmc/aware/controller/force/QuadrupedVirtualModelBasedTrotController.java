@@ -430,8 +430,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          yoSoleLinearVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", worldFrame, registry));
       }
       yoSupportPolygonEstimate = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 4, registry);
-      yoSupportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
-      yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientationEstimate", worldFrame, registry);
+      yoSupportCentroidEstimate = new YoFramePoint("supportCentroid", worldFrame, registry);
+      yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientation", worldFrame, registry);
       yoBodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
       yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
       yoBodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
