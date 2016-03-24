@@ -361,7 +361,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public void yawAboutCentroid(double yaw)
    {
-      getCentroid2d(temporaryFramePoint);
+      getCentroid(temporaryFramePoint);
    
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -468,7 +468,7 @@ public class QuadrupedSupportPolygon implements Serializable
       return closestQuadrant;
    }
 
-   public void getCentroid2d(FramePoint centroidToPack)
+   public void getCentroid(FramePoint centroidToPack)
    {
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       

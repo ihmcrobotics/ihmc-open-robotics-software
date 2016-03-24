@@ -1043,7 +1043,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private void updateDesiredYaw()
    {
-      fourFootSupportPolygon.getCentroid2d(centroidFramePoint);
+      fourFootSupportPolygon.getCentroid(centroidFramePoint);
       nominalYaw.set(fourFootSupportPolygon.getNominalYaw());
       
       centroidFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(centroidFramePoint);
