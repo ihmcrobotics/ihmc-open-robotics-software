@@ -18,7 +18,7 @@ import us.ihmc.quadrupedRobotics.gait.TrotPair;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.supportPolygon.YoQuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -110,7 +110,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final SolvePseudoInverseSvd solver = new SolvePseudoInverseSvd();
    private final QuadrantDependentList<YoFrameVector> vmcFootForcesWorld = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFrameVector> vmcFootForces = new QuadrantDependentList<>();
-   private YoFramePose bodyPoseWorld;
+   private final YoFramePose bodyPoseWorld;
    private final YoTwist bodyTwist;
    private final YoFramePose stancePose;
    private final YoFramePose desiredStancePose;
@@ -148,9 +148,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final BooleanYoVariable gaitCompleted = new BooleanYoVariable("gaitCompleted", registry);
    private final DoubleYoVariable impactVelocityZ = new DoubleYoVariable("impactVelocityZ", registry);
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
-   private final QuadrupedSupportPolygon previousSupportPolygon = new QuadrupedSupportPolygon();
-   private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
-   private final QuadrupedSupportPolygon nextPhaseSupportPolygon = new QuadrupedSupportPolygon();
+   private final YoQuadrupedSupportPolygon previousSupportPolygon = new YoQuadrupedSupportPolygon("previousSupportPolygon", registry);
+   private final YoQuadrupedSupportPolygon currentSupportPolygon = new YoQuadrupedSupportPolygon("currentSupportPolygon", registry);
+   private final YoQuadrupedSupportPolygon nextPhaseSupportPolygon = new YoQuadrupedSupportPolygon("nextPhaseSupportPolygon", registry);
    private final VelocityConstrainedPositionTrajectoryGenerator icpTrajectory = new VelocityConstrainedPositionTrajectoryGenerator("icpTrajectory", ReferenceFrame.getWorldFrame(), registry);
    
    // Swing PD Controllers
@@ -298,10 +298,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    public void initialize()
    {
-      supportPolygon.clear();
+      currentSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         supportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       
       updateEstimates();
@@ -330,7 +330,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       nextGait.set(QuadrupedGaitCycle.SAFE_WALK);
       swingZHeight.set(0.1);
       impactVelocityZ.set(0.0);
-      previousSupportPolygon.set(supportPolygon);
+      previousSupportPolygon.setWithoutChecks(currentSupportPolygon);
       previousGaitPhase.set(QuadrupedSupportConfiguration.ALL_FOURS);
       currentGaitPhase.set(QuadrupedSupportConfiguration.ALL_FOURS);
       currentGaitCompletion.set(0.0);
@@ -393,9 +393,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          footVelocities.get(robotQuadrant).scale(-1.0 / dt);
       }
       
-      for (RobotQuadrant robotQuadrant : supportPolygon.getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
-         supportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       
       bodyPoseWorld.setFromReferenceFrame(referenceFrames.getBodyFrame());
@@ -417,7 +417,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       centerOfMassVelocity.set(tempVector.getX(), tempVector.getY(), tempVector.getZ());
       
       FramePoint frameTuple = centroid.getFrameTuple();
-      supportPolygon.getCentroid(frameTuple);
+      currentSupportPolygon.getCentroid(frameTuple);
       centroid.set(frameTuple.getX(), frameTuple.getY(), frameTuple.getZ());
 
       // compute instantaneous capture point
@@ -448,7 +448,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       }
       centerOfPressure.set(tempCenterOfPressure.getX(), tempCenterOfPressure.getY(), tempCenterOfPressure.getZ());
       
-      for (RobotQuadrant robotQuadrant : supportPolygon.getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
          footToCoMVectors.get(robotQuadrant).set(centerOfMass);
          footToCoMVectors.get(robotQuadrant).sub(footPositions.get(robotQuadrant));
@@ -528,14 +528,14 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       }
       
       // Update support polygons
-      previousSupportPolygon.set(supportPolygon);
-      supportPolygon.clear();
+      previousSupportPolygon.setWithoutChecks(currentSupportPolygon);
+      currentSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : currentGaitPhase.getEnumValue().supportQuadrants())
       {
-         supportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       FramePoint frameTuple = centroid.getFrameTuple();
-      supportPolygon.getCentroid(frameTuple);
+      currentSupportPolygon.getCentroid(frameTuple);
       centroid.set(frameTuple.getX(), frameTuple.getY(), frameTuple.getZ());
       nextPhaseSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : nextGaitPhase.getEnumValue().supportQuadrants())
@@ -553,7 +553,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       }
       else
       {
-         supportPolygon.getCentroid(nextCentroid);
+         currentSupportPolygon.getCentroid(nextCentroid);
       }
       icpTrajectory.getFinalPosition().set(nextCentroid.getX(), nextCentroid.getY(), 0.0);
       icpTrajectory.getInitialVelocity().setToZero();
@@ -689,12 +689,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       bodyWrenchMatrix.set(4, 0, desiredBodyWrench.getAngularPartY());
       bodyWrenchMatrix.set(5, 0, desiredBodyWrench.getAngularPartZ());
       
-      basisMatrix.reshape(6, supportPolygon.size() * 4);
-      rhoMatrix.reshape(supportPolygon.size() * 4, 1);
+      basisMatrix.reshape(6, currentSupportPolygon.size() * 4);
+      rhoMatrix.reshape(currentSupportPolygon.size() * 4, 1);
       
-      for (int quadrantIndex = 0; quadrantIndex < supportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
+      for (int quadrantIndex = 0; quadrantIndex < currentSupportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
       {
-         RobotQuadrant robotQuadrant = supportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
+         RobotQuadrant robotQuadrant = currentSupportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
          for (int basisIndex = 0; basisIndex < 4; basisIndex++)
          {
             basisMatrix.set(0, quadrantIndex * 4 + basisIndex, basisForceVectors.get(robotQuadrant)[basisIndex].getX());
@@ -709,16 +709,16 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       solver.setA(basisMatrix);
       solver.solve(bodyWrenchMatrix, rhoMatrix);
       
-      for (int quadrantIndex = 0; quadrantIndex < supportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
+      for (int quadrantIndex = 0; quadrantIndex < currentSupportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
       {
-         RobotQuadrant robotQuadrant = supportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
+         RobotQuadrant robotQuadrant = currentSupportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
          for (int basisIndex = 0; basisIndex < 4; basisIndex++)
          {
             rhoScalars.get(robotQuadrant)[basisIndex] = rhoMatrix.get(quadrantIndex * 4 + basisIndex, 0);
          }
       }
       
-      for (RobotQuadrant robotQuadrant : supportPolygon.getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
          for (int basisIndex = 0; basisIndex < 4; basisIndex++)
          {
