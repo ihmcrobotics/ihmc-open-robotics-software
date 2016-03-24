@@ -115,6 +115,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.outputProcessor = robotModel.getOutputProcessor(controllerFullRobotModel);
       this.globalDataProducer = dataProducer;
 
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
+
       if (ALLOW_MODEL_CORRUPTION)
       {
          fullRobotModelCorruptor = new FullRobotModelCorruptor(controllerFullRobotModel, registry);
@@ -208,7 +210,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry,
-            closeableAndDisposableRegistry, forceSensorDataHolderForController, contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
+            forceSensorDataHolderForController, contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);

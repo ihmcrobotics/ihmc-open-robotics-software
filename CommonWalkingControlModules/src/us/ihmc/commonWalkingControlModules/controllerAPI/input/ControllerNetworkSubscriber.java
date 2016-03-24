@@ -16,7 +16,6 @@ import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 public class ControllerNetworkSubscriber implements Runnable, CloseableAndDisposable
@@ -32,7 +31,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final Map<Class<? extends StatusPacket<?>>, Builder<? extends StatusPacket<?>>> statusMessageClassToBuilderMap = new HashMap<>();
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
-         CloseableAndDisposableRegistry closeAndDisposeRegistry, PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+         PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
@@ -46,7 +45,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       createAllStatusMessageBuffers();
 
       scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
-      closeAndDisposeRegistry.registerCloseableAndDisposable(this);
    }
 
    @SuppressWarnings("unchecked")

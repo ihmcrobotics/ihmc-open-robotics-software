@@ -287,6 +287,12 @@ public class YoGraphicsListRegistry
       registerArtifactList(list);
    }
 
+   public void registerYoGraphicsAndArtifactsFromOtherRegistry(YoGraphicsListRegistry other)
+   {
+      registerYoGraphicsLists(other.yoGraphicsLists);
+      registerArtifactLists(other.artifactLists);
+   }
+
    public void hideYoGraphics()
    {
       int numberOfElements = yoGraphicsLists.size();
