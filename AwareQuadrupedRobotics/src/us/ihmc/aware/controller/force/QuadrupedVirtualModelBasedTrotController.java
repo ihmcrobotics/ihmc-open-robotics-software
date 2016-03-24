@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.packets.BodyOrientationPacket;
 import us.ihmc.aware.packets.ComPositionPacket;
@@ -26,6 +25,7 @@ import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -146,7 +146,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
    // provider inputs
-   private final QuadrupedControllerInputProvider inputProvider;
+   private final QuadrupedControllerInputProviderInterface inputProvider;
    private double bodyYawRateInput;
    private double bodyYawRateIntegral;
    private final FrameVector bodyVelocityInput;
@@ -228,7 +228,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final Twist twistStorage = new Twist();
 
    public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters,
-         ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider)
+         ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
