@@ -70,7 +70,7 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
    @Override
    public HeadTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      HeadTrajectoryMessage transformedHeadTrajectoryMessage = new HeadTrajectoryMessage(getNumberOfTrajectoryPoints());
+      HeadTrajectoryMessage transformedHeadTrajectoryMessage = new HeadTrajectoryMessage(this);
       transformedHeadTrajectoryMessage.applyTransform(transform);
       return transformedHeadTrajectoryMessage;
    }

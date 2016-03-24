@@ -18,17 +18,29 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 
+/**
+ * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet communicator and the controller API.
+ * It automatically creates all the {@link PacketConsumer} for all the messages supported by the {@link CommandInputManager}.
+ * The status messages are send to the network communicator on a separate thread to avoid any delay in the controller thread.
+ * @author Sylvain
+ *
+ */
 public class ControllerNetworkSubscriber implements Runnable, CloseableAndDisposable
 {
    private final int buffersCapacity = 16;
+   /** The input API to which the received messages should be submitted. */
    private final CommandInputManager controllerCommandInputManager;
+   /** The output API that provides the status messages to send to the packet communicator. */
    private final StatusMessageOutputManager controllerStatusOutputManager;
+   /** Communicator from which commands are received and status messages can send to. */
    private final PacketCommunicator packetCommunicator;
+   /** Used to schedule status message sending. */
    private final PeriodicThreadScheduler scheduler;
 
+   /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends StatusPacket<?>>> listOfSupportedStatusMessages;
+   /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
    private final Map<Class<? extends StatusPacket<?>>, ConcurrentRingBuffer<? extends StatusPacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
-   private final Map<Class<? extends StatusPacket<?>>, Builder<? extends StatusPacket<?>>> statusMessageClassToBuilderMap = new HashMap<>();
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
          PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
@@ -56,7 +68,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
          Builder<T> builder = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
          ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
          statusMessageClassToBufferMap.put(statusMessageClass, newBuffer);
-         statusMessageClassToBuilderMap.put(statusMessageClass, CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass));
       }
    }
 
