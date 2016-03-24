@@ -162,7 +162,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // compute support frame (centroid and nominal orientation)
       supportCentroid.changeFrame(supportPolygon.getReferenceFrame());
-      supportPolygon.getCentroid2d(supportCentroid);
+      supportPolygon.getCentroid(supportCentroid);
       supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
       supportCentroid.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
       supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
