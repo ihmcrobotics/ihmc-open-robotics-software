@@ -1,9 +1,9 @@
 package us.ihmc.aware.controller.force.taskSpaceController;
 
+import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -13,6 +13,9 @@ public class QuadrupedTaskSpaceControllerSettings
    {
       public double value;
    }
+
+   // contact state
+   private final QuadrantDependentList<ContactState> contactState;
 
    // command weights
    private final double[] comTorqueCommandWeights;
@@ -37,6 +40,13 @@ public class QuadrupedTaskSpaceControllerSettings
 
    public QuadrupedTaskSpaceControllerSettings()
    {
+      // contact state
+      contactState = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactState.set(robotQuadrant, ContactState.NO_CONTACT);
+      }
+
       // command weights
       comTorqueCommandWeights = new double[3];
       comForceCommandWeights = new double[3];
@@ -70,6 +80,10 @@ public class QuadrupedTaskSpaceControllerSettings
 
    public void initialize()
    {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         setContactState(robotQuadrant, ContactState.NO_CONTACT);
+      }
       setComForceCommandWeights(1.0, 1.0, 1.0);
       setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -83,6 +97,20 @@ public class QuadrupedTaskSpaceControllerSettings
          setSolePositionFeedbackGainsToZero(robotQuadrant);
       }
    }
+
+   public void setContactState(RobotQuadrant robotQuadrant, ContactState contactState)
+   {
+      this.contactState.set(robotQuadrant, contactState);
+   }
+
+   public void setContactState(QuadrantDependentList<ContactState> contactState)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         this.contactState.set(robotQuadrant, contactState.get(robotQuadrant));
+      }
+   }
+
 
    public void setComTorqueCommandWeights(double[] weights)
    {
@@ -220,6 +248,16 @@ public class QuadrupedTaskSpaceControllerSettings
          solePositionIntegralGains.get(robotQuadrant)[i] = integralGains[i];
       }
       solePositionMaxIntegralError.get(robotQuadrant).value = maxIntegralError;
+   }
+
+   public ContactState getContactState(RobotQuadrant robotQuadrant)
+   {
+      return contactState.get(robotQuadrant);
+   }
+
+   public QuadrantDependentList<ContactState> getContactState()
+   {
+      return contactState;
    }
 
    public void getContactForceOptimizationSettings(QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings)
