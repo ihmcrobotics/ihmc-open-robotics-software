@@ -56,10 +56,11 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
 
-public class MomentumBasedControllerFactory
+public class MomentumBasedControllerFactory implements CloseableAndDisposable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -125,11 +126,6 @@ public class MomentumBasedControllerFactory
       this.updatables.add(updatable);
    }
 
-   public HighLevelHumanoidControllerManager getHighLevelHumanoidControllerManager()
-   {
-      return highLevelHumanoidControllerManager;
-   }
-
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       momentumBasedController.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
@@ -137,7 +133,9 @@ public class MomentumBasedControllerFactory
 
    public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
    {
-      new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, closeableAndDisposableRegistry, scheduler, packetCommunicator);
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, scheduler,
+            packetCommunicator);
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
    }
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
@@ -211,13 +209,16 @@ public class MomentumBasedControllerFactory
       }
    }
 
+   @Override
+   public void closeAndDispose()
+   {
+      closeableAndDisposableRegistry.closeAndDispose();
+   }
+
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, DoubleYoVariable yoTime,
-         YoGraphicsListRegistry yoGraphicsListRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry,
-         ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder,
+         YoGraphicsListRegistry yoGraphicsListRegistry, ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, InverseDynamicsJoint... jointsToIgnore)
    {
-      closeableAndDisposableRegistry.registerChild(this.closeableAndDisposableRegistry);
-
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
 
@@ -450,9 +451,9 @@ public class MomentumBasedControllerFactory
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(fallbackController);
    }
 
-   public YoVariableRegistry getRegistry()
+   public HighLevelState getCurrentHighLevelState()
    {
-      return registry;
+      return highLevelHumanoidControllerManager.getCurrentHighLevelState();
    }
 
    public CommandInputManager getCommandInputManager()
