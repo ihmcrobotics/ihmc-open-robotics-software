@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
@@ -30,6 +29,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoTwist;
+import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -40,7 +40,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -90,7 +89,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final DoubleYoVariable kd_yaw = new DoubleYoVariable("b_yaw", registry);
 
    private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
-   private final HashMap<String, DoubleYoVariable> desiredTorques = new HashMap<>();
 
    private final IntegerYoVariable numberOfFeetInContact = new IntegerYoVariable("numberOfFeetInContact", registry);
    
@@ -116,9 +114,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final YoFramePose desiredStancePoseOffset;
    private final YoFrameVector bodyLinearAcceleration;
    private final YoFrameVector bodyAngularAcceleration;
-   private final YoFrameVector desiredBodyForce;
-   private final YoFrameVector desiredBodyTorque;
-   private final Wrench desiredBodyWrench;
+   private final YoWrench desiredBodyWrench;
    private final YoTwist desiredBodyTwist;
    private final SideDependentList<List<YoGraphicVector>> forceDistributionYoGraphicVectors = new SideDependentList<>();
    private final QuadrantDependentList<YoGraphicVector[]> basisForceYoGraphicVectors = new QuadrantDependentList<>();
@@ -179,10 +175,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          OneDoFJoint oneDoFJointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
          fullRobotModel.getOneDoFJointsFromRootToHere(oneDoFJointBeforeFoot, jointsToControl);
          oneDofJoints.set(robotQuadrant, jointsToControl);
-         for (OneDoFJoint joint : jointsToControl)
-         {
-            desiredTorques.put(joint.getName(), new DoubleYoVariable(joint.getName() + "_tau_d", registry));
-         }
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -250,9 +242,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       stancePose = new YoFramePose("stance", ReferenceFrame.getWorldFrame(), registry);
       bodyLinearAcceleration = new YoFrameVector("bodyLinearAcceleration", ReferenceFrame.getWorldFrame(), registry);
       bodyAngularAcceleration = new YoFrameVector("bodyAngularAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      desiredBodyForce = new YoFrameVector("desiredBodyForce", ReferenceFrame.getWorldFrame(), registry);
-      desiredBodyTorque = new YoFrameVector("desiredBodyTorque", ReferenceFrame.getWorldFrame(), registry);
-      desiredBodyWrench = new Wrench(referenceFrames.getBodyZUpFrame(), ReferenceFrame.getWorldFrame());
+      desiredBodyWrench = new YoWrench("desiredBodyWrench", referenceFrames.getBodyZUpFrame(), ReferenceFrame.getWorldFrame(), registry);
       desiredBodyTwist = new YoTwist("desiredBodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
       bodyTwist = new YoTwist("bodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
       
@@ -599,8 +589,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       desiredStancePose.add(desiredStancePoseOffset);
       
       desiredBodyTwist.setToZero();
-      FrameVector icpVelocity = desiredBodyTwist.getYoLinearPart().getFrameTuple();
-      desiredBodyTwist.getYoLinearPart().set(icpVelocity.getX(), icpVelocity.getY(), 0.0);
       
       bodyLinearAcceleration.setToZero();
       bodyLinearAcceleration.getYoX().add(kp_x.getDoubleValue() * (desiredStancePose.getX() - stancePose.getX()));
@@ -610,11 +598,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       bodyLinearAcceleration.getYoZ().add(kp_z.getDoubleValue() * (desiredStancePose.getZ() - stancePose.getZ()));
       bodyLinearAcceleration.getYoZ().add(kd_z.getDoubleValue() * (desiredBodyTwist.getLinearPartZ() - bodyTwist.getLinearPartZ()));
       
-      desiredBodyForce.setToZero();
-      desiredBodyForce.add(0.0, 0.0, GRAVITY);
-      desiredBodyForce.add(bodyLinearAcceleration);
-      desiredBodyForce.scale(ESTIMATED_MASS);
-      
       bodyAngularAcceleration.setToZero();
       bodyAngularAcceleration.getYoX().add(kp_roll.getDoubleValue() * (desiredStancePose.getRoll() - stancePose.getRoll()));
       bodyAngularAcceleration.getYoX().add(kd_roll.getDoubleValue() * (desiredBodyTwist.getAngularPartX() - bodyTwist.getAngularPartX()));
@@ -623,11 +606,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       bodyAngularAcceleration.getYoZ().add(kp_yaw.getDoubleValue() * (desiredStancePose.getYaw() - stancePose.getYaw()));
       bodyAngularAcceleration.getYoZ().add(kd_yaw.getDoubleValue() * (desiredBodyTwist.getAngularPartZ() - bodyTwist.getAngularPartZ()));
       
-      desiredBodyTorque.setToZero();
-      desiredBodyTorque.add(bodyAngularAcceleration);
-      desiredBodyTorque.scale(ESTIMATED_ROTATIONAL_INERTIA);
-      
-      desiredBodyWrench.set(desiredBodyForce.getFrameTuple(), desiredBodyTorque.getFrameTuple());
+      desiredBodyWrench.setToZero();
+      desiredBodyWrench.getYoLinearPart().add(0.0, 0.0, GRAVITY);
+      desiredBodyWrench.getYoLinearPart().add(bodyLinearAcceleration);
+      desiredBodyWrench.getYoLinearPart().scale(ESTIMATED_MASS);
+      desiredBodyWrench.getYoAngularPart().add(bodyAngularAcceleration);
+      desiredBodyWrench.getYoAngularPart().scale(ESTIMATED_ROTATIONAL_INERTIA);
    }
 
    private void calculateBasisVectors(RobotQuadrant robotQuadrant, YoFrameVector footToCoMVector)
@@ -733,24 +717,20 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    private void computeStanceJacobianForLeg(RobotQuadrant robotQuadrant)
    {
-      for (int i = 0; i < oneDofJoints.get(robotQuadrant).size(); i++)
+      for (OneDoFJoint oneDoFJoint : oneDofJoints.get(robotQuadrant))
       {
-         OneDoFJoint oneDoFJoint = oneDofJoints.get(robotQuadrant).get(i);
-         
          jointPosition.setFromReferenceFrame(oneDoFJoint.getFrameBeforeJoint());
-
-         jointToFootVector.set(footPositions.get(robotQuadrant).getFrameTuple());
-         jointToFootVector.sub(jointPosition);
-
-         vmcRequestedTorqueFromJoint.setToZero();
-         vmcRequestedTorqueFromJoint.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
-
+         
          oneDoFJoint.getJointAxis(jointAxis);
          jointAxis.changeFrame(ReferenceFrame.getWorldFrame());
-         double torque = jointAxis.dot(vmcRequestedTorqueFromJoint);
          
-         desiredTorques.get(oneDoFJoint.getName()).set(-torque);
-         oneDoFJoint.setTau(-torque);
+         jointToFootVector.set(footPositions.get(robotQuadrant).getFrameTuple());
+         jointToFootVector.sub(jointPosition);
+         
+         vmcRequestedTorqueFromJoint.setToZero();
+         vmcRequestedTorqueFromJoint.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
+         
+         oneDoFJoint.setTau(-jointAxis.dot(vmcRequestedTorqueFromJoint));
       }
    }
 
