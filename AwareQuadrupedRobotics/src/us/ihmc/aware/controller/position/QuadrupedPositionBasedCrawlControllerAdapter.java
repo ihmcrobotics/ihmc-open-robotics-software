@@ -16,13 +16,13 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
 //   private static final String PARAM_MAX_YAW_RATE = "maxYawRate";
 //   private static final String PARAM_DEFAULT_COM_CLOSE_TO_FINAL_DESIRED_TRANSITION_RADIUS = "defaultCoMCloseToFinalDesiredTransitionRadius";
 
-   private final ParameterMap params;
-//   private final QuadrupedPositionBasedCrawlController controller;
+//   private final ParameterMap params;
+   private final QuadrupedPositionBasedCrawlController controller;
 
    public QuadrupedPositionBasedCrawlControllerAdapter(QuadrupedRuntimeEnvironment environment,
          QuadrupedRobotParameters parameters, ParameterMapRepository paramMapRepository)
    {
-      this.params = paramMapRepository.get(QuadrupedPositionBasedCrawlControllerAdapter.class);
+//      this.params = paramMapRepository.get(QuadrupedPositionBasedCrawlControllerAdapter.class);
 
 //      params.setDefault(PARAM_INITIAL_COM_HEIGHT, 0.55);
 //      params.setDefault(PARAM_DEFAULT_SWING_HEIGHT, 0.1);
@@ -31,23 +31,23 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
 //      params.setDefault(PARAM_MAX_YAW_RATE, 0.2);
 //      params.setDefault(PARAM_DEFAULT_COM_CLOSE_TO_FINAL_DESIRED_TRANSITION_RADIUS, 0.10);
 
-      // TODO
-//      this.controller = new QuadrupedPositionBasedCrawlController(environment.getControlDT(), parameters,
-//            environment.getFullRobotModel(), environment.getStateEstimator(), environment.getLegIkCalculator(),
-//            environment.getGlobalDataProducer(), environment.getRobotTimestamp(), environment.getParentRegistry(),
-//            environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
+      // TODO: null foot switches
+      this.controller = new QuadrupedPositionBasedCrawlController(environment.getControlDT(), parameters,
+            environment.getFullRobotModel(), null, environment.getLegIkCalculator(),
+            environment.getGlobalDataProducer(), environment.getRobotTimestamp(), environment.getParentRegistry(),
+            environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
    @Override
    public void onEntry()
    {
-//      controller.doTransitionIntoAction();
+      controller.doTransitionIntoAction();
    }
 
    @Override
    public QuadrupedPositionControllerEvent process()
    {
-//      controller.doAction();
+      controller.doAction();
 
       // TODO: How do we fire events from the adapted controller?
       return null;
@@ -56,6 +56,6 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
    @Override
    public void onExit()
    {
-//      controller.doTransitionOutOfAction();
+      controller.doTransitionOutOfAction();
    }
 }

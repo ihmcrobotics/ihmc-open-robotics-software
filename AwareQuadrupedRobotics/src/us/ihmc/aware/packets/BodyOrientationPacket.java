@@ -30,11 +30,6 @@ public class BodyOrientationPacket extends Packet<BodyOrientationPacket>
       orientation.set(this.orientation);
    }
 
-   public void getOrientation(Quat4d orientation)
-   {
-      orientation.set(this.orientation);
-   }
-
    public double getYaw()
    {
       return RotationTools.computeYaw(this.orientation);

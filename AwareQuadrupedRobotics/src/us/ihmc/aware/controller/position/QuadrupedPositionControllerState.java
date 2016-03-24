@@ -6,5 +6,6 @@ public enum QuadrupedPositionControllerState
    DO_NOTHING,
    STAND_PREP,
    STAND_READY,
-   CRAWL
+   CRAWL,
+   ANIMATION
 }

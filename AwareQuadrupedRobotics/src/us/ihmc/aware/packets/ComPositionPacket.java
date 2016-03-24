@@ -28,11 +28,6 @@ public class ComPositionPacket extends Packet<ComPositionPacket>
       position.set(this.position);
    }
 
-   public void getPosition(Point3d position)
-   {
-      position.set(this.position);
-   }
-
    public double getX()
    {
       return this.position.getX();
