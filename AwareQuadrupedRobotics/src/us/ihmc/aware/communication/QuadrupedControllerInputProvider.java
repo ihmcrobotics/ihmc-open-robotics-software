@@ -7,6 +7,7 @@ import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -16,7 +17,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class QuadrupedControllerInputProvider
+public class QuadrupedControllerInputProvider implements QuadrupedControllerInputProviderInterface
 {
    private final static String COM_HEIGHT_NOMINAL = "comHeightNominal";
    private final static String COM_POSITION_LOWER_LIMITS = "comPositionLowerLimits";
@@ -163,30 +164,35 @@ public class QuadrupedControllerInputProvider
       });
    }
 
+   @Override
    public Point3d getComPositionInput()
    {
       comPositionInput.set(yoComPositionInputX.getDoubleValue(), yoComPositionInputY.getDoubleValue(), yoComPositionInputZ.getDoubleValue());
       return comPositionInput;
    }
 
+   @Override
    public Vector3d getComVelocityInput()
    {
       comVelocityInput.set(yoComVelocityInputX.getDoubleValue(), yoComVelocityInputY.getDoubleValue(), yoComVelocityInputZ.getDoubleValue());
       return comVelocityInput;
    }
 
+   @Override
    public Quat4d getBodyOrientationInput()
    {
       RotationTools.convertYawPitchRollToQuaternion(yoBodyOrientationInputYaw.getDoubleValue(), yoBodyOrientationInputPitch.getDoubleValue(), yoBodyOrientationInputRoll.getDoubleValue(), bodyOrientationInput);
       return bodyOrientationInput;
    }
 
+   @Override
    public Vector3d getBodyAngularRateInput()
    {
       bodyAngularRateInput.set(yoBodyAngularRateInputX.getDoubleValue(), yoBodyAngularRateInputY.getDoubleValue(), yoBodyAngularRateInputZ.getDoubleValue());
       return bodyAngularRateInput;
    }
 
+   @Override
    public Vector3d getPlanarVelocityInput()
    {
       planarVelocityInput.set(yoPlanarVelocityInputX.getDoubleValue(), yoPlanarVelocityInputY.getDoubleValue(), yoPlanarVelocityInputZ.getDoubleValue());
