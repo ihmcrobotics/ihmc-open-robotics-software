@@ -293,10 +293,10 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon simplePolygon = createSimplePolygon();
       FramePoint centroid = new FramePoint();
-      simplePolygon.getCentroid2d(centroid);
+      simplePolygon.getCentroid(centroid);
       FramePoint expected = new FramePoint(WORLD, 0.5, 0.5, 0.0);
       assertTrue("not equal expected " + expected + " actual " + centroid, expected.epsilonEquals(centroid, 1e-7));
-      simplePolygon.getCentroid2d(centroid);
+      simplePolygon.getCentroid(centroid);
       assertTrue("not equal expected " + expected + " actual " + centroid, expected.epsilonEquals(centroid, 1e-7));
    }
    
@@ -596,13 +596,13 @@ public class QuadrupedSupportPolygonTest
       QuadrupedSupportPolygon poly = createSimplePolygon();
       FramePoint centroidToPack2d = new FramePoint();
       FramePoint2d centroid2dToPack2d = new FramePoint2d();
-      poly.getCentroid2d(centroidToPack2d);
+      poly.getCentroid(centroidToPack2d);
       poly.getCentroid2d(centroid2dToPack2d);
       assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3d(0.5, 0.5, 0.0), 1e-7));
       assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(0.5, 0.5), 1e-7));
       
       poly.translate(new Vector3d(2.0, -2.0, 0.0));
-      poly.getCentroid2d(centroidToPack2d);
+      poly.getCentroid(centroidToPack2d);
       poly.getCentroid2d(centroid2dToPack2d);
       assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3d(2.5, -1.5, 0.0), 1e-7));
       assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(2.5, -1.5), 1e-7));
@@ -1240,7 +1240,7 @@ public class QuadrupedSupportPolygonTest
       
       for (int i = 0; i < reps; i++)
       {
-         createSimplePolygon.getCentroid2d(framePoint);
+         createSimplePolygon.getCentroid(framePoint);
       }
    }
    
@@ -1252,7 +1252,7 @@ public class QuadrupedSupportPolygonTest
       
       for (int i = 0; i < reps; i++)
       {
-         createSimplePolygon.getCentroid2d(framePoint);
+         createSimplePolygon.getCentroid(framePoint);
       }
    }
    

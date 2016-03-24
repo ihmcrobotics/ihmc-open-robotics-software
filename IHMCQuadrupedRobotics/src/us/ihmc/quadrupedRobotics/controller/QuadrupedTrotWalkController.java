@@ -417,7 +417,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       centerOfMassVelocity.set(tempVector.getX(), tempVector.getY(), tempVector.getZ());
       
       FramePoint frameTuple = centroid.getFrameTuple();
-      supportPolygon.getCentroid2d(frameTuple);
+      supportPolygon.getCentroid(frameTuple);
       centroid.set(frameTuple.getX(), frameTuple.getY(), frameTuple.getZ());
 
       // compute instantaneous capture point
@@ -535,7 +535,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          supportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       FramePoint frameTuple = centroid.getFrameTuple();
-      supportPolygon.getCentroid2d(frameTuple);
+      supportPolygon.getCentroid(frameTuple);
       centroid.set(frameTuple.getX(), frameTuple.getY(), frameTuple.getZ());
       nextPhaseSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : nextGaitPhase.getEnumValue().supportQuadrants())
@@ -549,11 +549,11 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       FramePoint nextCentroid = icpTrajectory.getFinalPosition().getFrameTuple();
       if (currentGaitPhase.getEnumValue() == QuadrupedSupportConfiguration.ALL_FOURS)
       {
-         nextPhaseSupportPolygon.getCentroid2d(nextCentroid);
+         nextPhaseSupportPolygon.getCentroid(nextCentroid);
       }
       else
       {
-         supportPolygon.getCentroid2d(nextCentroid);
+         supportPolygon.getCentroid(nextCentroid);
       }
       icpTrajectory.getFinalPosition().set(nextCentroid.getX(), nextCentroid.getY(), 0.0);
       icpTrajectory.getInitialVelocity().setToZero();
