@@ -8,8 +8,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DivergentComponentOfMotionController
 {
-   public final static double MINIMUM_COM_HEIGHT = 0.01;
-
    private double dt;
    private double mass;
    private double gravity;
@@ -67,6 +65,28 @@ public class DivergentComponentOfMotionController
       }
    }
 
+   public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
+   {
+      pidController[0].setProportionalGain(proportionalGainX);
+      pidController[1].setProportionalGain(proportionalGainY);
+      pidController[2].setProportionalGain(proportionalGainZ);
+   }
+
+   public void setDerivativeGains(double[] derivativeGains)
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         pidController[i].setDerivativeGain(derivativeGains[i]);
+      }
+   }
+
+   public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
+   {
+      pidController[0].setDerivativeGain(derivativeGainX);
+      pidController[1].setDerivativeGain(derivativeGainY);
+      pidController[2].setDerivativeGain(derivativeGainZ);
+   }
+
    public void setIntegralGains(double[] integralGains, double maxIntegralError)
    {
       for (int i = 0; i < 3; i++)
@@ -74,22 +94,6 @@ public class DivergentComponentOfMotionController
          pidController[i].setIntegralGain(integralGains[i]);
          pidController[i].setMaxIntegralError(maxIntegralError);
       }
-   }
-
-   public void setIntegralGains(double[] integralGains, double[] maxIntegralErrors)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         pidController[i].setIntegralGain(integralGains[i]);
-         pidController[i].setMaxIntegralError(maxIntegralErrors[i]);
-      }
-   }
-
-   public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
-   {
-      pidController[0].setProportionalGain(proportionalGainX);
-      pidController[1].setProportionalGain(proportionalGainY);
-      pidController[2].setProportionalGain(proportionalGainZ);
    }
 
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
@@ -102,19 +106,10 @@ public class DivergentComponentOfMotionController
       pidController[2].setMaxIntegralError(maxIntegralError);
    }
 
-   public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralErrorX, double maxIntegralErrorY, double maxIntegralErrorZ)
-   {
-      pidController[0].setIntegralGain(integralGainX);
-      pidController[1].setIntegralGain(integralGainY);
-      pidController[2].setIntegralGain(integralGainZ);
-      pidController[0].setMaxIntegralError(maxIntegralErrorX);
-      pidController[1].setMaxIntegralError(maxIntegralErrorY);
-      pidController[2].setMaxIntegralError(maxIntegralErrorZ);
-   }
-
-   public void setGains(double[] proportionalGains, double[] integralGains, double maxIntegralError)
+   public void setGains(double[] proportionalGains, double[] derivativeGains, double[] integralGains, double maxIntegralError)
    {
       setProportionalGains(proportionalGains);
+      setDerivativeGains(derivativeGains);
       setIntegralGains(integralGains, maxIntegralError);
    }
 

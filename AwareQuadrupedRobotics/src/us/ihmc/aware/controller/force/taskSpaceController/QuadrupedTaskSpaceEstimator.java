@@ -86,11 +86,6 @@ public class QuadrupedTaskSpaceEstimator
       parentRegistry.addChild(registry);
    }
 
-   public QuadrupedReferenceFrames getReferenceFrames()
-   {
-      return referenceFrames;
-   }
-
    public void compute(QuadrupedTaskSpaceEstimates estimates)
    {
       // update solvers

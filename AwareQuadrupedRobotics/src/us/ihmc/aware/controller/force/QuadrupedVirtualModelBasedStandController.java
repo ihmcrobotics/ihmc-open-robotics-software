@@ -53,6 +53,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    // frames
    private final QuadrupedReferenceFrames referenceFrames;
    private final PoseReferenceFrame supportFrame;
+   private final ReferenceFrame worldFrame;
    QuadrupedSupportPolygon supportPolygon;
    FramePoint supportCentroid;
    FrameOrientation supportOrientation;
@@ -103,6 +104,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointNameMap, robotParameters.getPhysicalProperties());
       ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
       supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
+      worldFrame = ReferenceFrame.getWorldFrame();
 
       // support
       supportPolygon = new QuadrupedSupportPolygon();
@@ -143,8 +145,10 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // update dcm estimate
       taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
       taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
-      dcmPositionEstimate.setIncludingFrame(taskSpaceEstimates.getComVelocity());
-      dcmPositionEstimate.setIncludingFrame(taskSpaceEstimates.getComPosition());
+      dcmPositionEstimate.changeFrame(worldFrame);
+      dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
+      dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
+      dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
 
       // compute support frame
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -174,7 +178,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionSetpoint.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionSetpoint.add(inputProvider.getComPositionInput());
       dcmVelocitySetpoint.setToZero(supportFrame);
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       dcmPositionController.compute(taskSpaceSetpoints.getComForceFeedforward(), dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
       // update desired com position and velocity
@@ -198,6 +201,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    @Override public QuadrupedForceControllerEvent process()
    {
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
       updateSetpoints();
       return null;
@@ -228,16 +232,13 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // initialize task space controller
       taskSpaceEstimator.compute(taskSpaceEstimates);
       taskSpaceSetpoints.initialize(taskSpaceEstimates);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         taskSpaceSetpoints.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-      }
       taskSpaceControllerSettings.initialize();
       taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
       taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setSoleForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
+         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
       taskSpaceControllerSettings.setBodyOrientationFeedbackGains(
             params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS),
