@@ -109,7 +109,7 @@ public class QuadrupedTaskSpaceController
          commands.getSoleForce().get(robotQuadrant).scale(-1.0);
          contactForceOptimization.setContactForceCommand(robotQuadrant, commands.getSoleForce().get(robotQuadrant));
          commands.getSoleForce().get(robotQuadrant).scale(-1.0);
-         contactForceOptimization.setContactState(robotQuadrant, setpoints.getContactState(robotQuadrant));
+         contactForceOptimization.setContactState(robotQuadrant, settings.getContactState(robotQuadrant));
       }
       contactForceOptimization.setComForceCommand(commands.getComForce());
       contactForceOptimization.setComTorqueCommand(commands.getComTorque());
@@ -118,7 +118,7 @@ public class QuadrupedTaskSpaceController
       // compute leg joint torques using jacobian transpose
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (setpoints.getContactState(robotQuadrant) == ContactState.IN_CONTACT)
+         if (settings.getContactState(robotQuadrant) == ContactState.IN_CONTACT)
          {
             contactForceOptimization.getContactForceSolution(robotQuadrant, contactForceStorage);
             virtualModelController.setSoleContactForce(robotQuadrant, contactForceStorage);

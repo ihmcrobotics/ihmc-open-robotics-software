@@ -1,6 +1,5 @@
 package us.ihmc.aware.controller.force.taskSpaceController;
 
-import us.ihmc.aware.util.ContactState;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -18,7 +17,6 @@ public class QuadrupedTaskSpaceSetpoints
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<FrameVector> soleLinearVelocity;
    private final QuadrantDependentList<FrameVector> soleForceFeedforward;
-   private final QuadrantDependentList<ContactState> contactState;
 
    public QuadrupedTaskSpaceSetpoints()
    {
@@ -31,13 +29,11 @@ public class QuadrupedTaskSpaceSetpoints
       solePosition = new QuadrantDependentList<>();
       soleLinearVelocity = new QuadrantDependentList<>();
       soleForceFeedforward = new QuadrantDependentList<>();
-      contactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.set(robotQuadrant, new FramePoint());
          soleLinearVelocity.set(robotQuadrant, new FrameVector());
          soleForceFeedforward.set(robotQuadrant, new FrameVector());
-         contactState.set(robotQuadrant, ContactState.NO_CONTACT);
       }
    }
 
@@ -102,16 +98,6 @@ public class QuadrupedTaskSpaceSetpoints
       return soleForceFeedforward.get(robotQuadrant);
    }
 
-   public ContactState getContactState(RobotQuadrant robotQuadrant)
-   {
-      return contactState.get(robotQuadrant);
-   }
-
-   public void setContactState(RobotQuadrant robotQuadrant, ContactState contactState)
-   {
-      this.contactState.set(robotQuadrant, contactState);
-   }
-
    public QuadrantDependentList<FramePoint> getSolePosition()
    {
       return solePosition;
@@ -125,18 +111,5 @@ public class QuadrupedTaskSpaceSetpoints
    public QuadrantDependentList<FrameVector> getSoleForceFeedforward()
    {
       return soleForceFeedforward;
-   }
-
-   public QuadrantDependentList<ContactState> getContactState()
-   {
-      return contactState;
-   }
-
-   public void setContactState(QuadrantDependentList<ContactState> contactState)
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         this.contactState.set(robotQuadrant, contactState.get(robotQuadrant));
-      }
    }
 }
