@@ -7,12 +7,9 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.*;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -21,11 +18,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 import java.util.List;
 
-public class UserDesiredFootstepDataMessageGenerator implements Updatable
+public class UserDesiredFootstepDataMessageGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -79,8 +74,8 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
    private final FootstepDataControllerCommand desiredFootstepCommand = new FootstepDataControllerCommand();
    private final FootstepDataListCommand footstepCommandList = new FootstepDataListCommand();
 
-   public UserDesiredFootstepDataMessageGenerator(SideDependentList<ContactableFoot> bipedFeet, CommandInputManager commandInputManager,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+   public UserDesiredFootstepDataMessageGenerator(final CommandInputManager commandInputManager, final SideDependentList<ContactableFoot> bipedFeet,
+         final WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.bipedFeet = bipedFeet;
       this.commandInputManager = commandInputManager;
@@ -103,55 +98,63 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
       stepHeelPercentage.set(1.0);
       stepToePercentage.set(1.0);
 
+      sendSteps.addVariableChangedListener(new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (sendSteps.getBooleanValue())
+            {
+               createStepPlan();
+            }
+         }
+      });
+
       parentRegistry.addChild(registry);
    }
 
-   public void update(double time)
+   public void createStepPlan()
    {
       desiredFootstepCommand.clear();
       footstepCommandList.clear();
 
-      if (sendSteps.getBooleanValue())
+      sendSteps.set(false);
+
+      swingSide = firstStepSide.getEnumValue();
+      if (swingSide == null)
+         swingSide = RobotSide.LEFT;
+
+      supportSide = swingSide.getOppositeSide();
+      previousPoseFrame = null;
+
+      for (int i = 0; i < stepsToTake.getIntegerValue(); i++)
       {
-         sendSteps.set(false);
+         swingFoot = bipedFeet.get(swingSide);
 
-         swingSide = firstStepSide.getEnumValue();
-         if (swingSide == null)
-            swingSide = RobotSide.LEFT;
+         desiredFootstepCommand.clear();
+         desiredFootstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         desiredFootstepCommand.setRobotSide(swingSide);
+         desiredFootstepCommand.setSwingHeight(swingHeight.getDoubleValue());
 
-         supportSide = swingSide.getOppositeSide();
-         previousPoseFrame = null;
-
-         for (int i = 0; i < stepsToTake.getIntegerValue(); i++)
+         if ((i == stepsToTake.getIntegerValue()-1) && stepSquareUp.getBooleanValue())
          {
-            swingFoot = bipedFeet.get(swingSide);
-
-            desiredFootstepCommand.clear();
-            desiredFootstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-            desiredFootstepCommand.setRobotSide(swingSide);
-            desiredFootstepCommand.setSwingHeight(swingHeight.getDoubleValue());
-
-            if ((i == stepsToTake.getIntegerValue()-1) && stepSquareUp.getBooleanValue())
-            {
-               squareUp();
-            }
-            else
-            {
-               createNextFootstep();
-            }
-
-            footstepCommandList.addFootstep(desiredFootstepCommand);
-
-            previousPoseFrame = footstepPoseFrame;
-            swingSide = swingSide.getOppositeSide();
-            supportSide = swingSide.getOppositeSide();
+            squareUp();
+         }
+         else
+         {
+            createNextFootstep();
          }
 
-         footstepCommandList.setSwingTime(swingTime.getDoubleValue());
-         footstepCommandList.setTransferTime(transferTime.getDoubleValue());
+         footstepCommandList.addFootstep(desiredFootstepCommand);
 
-         commandInputManager.submitCommand(footstepCommandList);
+         previousPoseFrame = footstepPoseFrame;
+         swingSide = swingSide.getOppositeSide();
+         supportSide = swingSide.getOppositeSide();
       }
+
+      footstepCommandList.setSwingTime(swingTime.getDoubleValue());
+      footstepCommandList.setTransferTime(transferTime.getDoubleValue());
+
+      commandInputManager.submitCommand(footstepCommandList);
    }
 
    private void createNextFootstep()

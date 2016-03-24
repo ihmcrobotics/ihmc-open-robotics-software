@@ -202,8 +202,6 @@ public class MomentumBasedControllerFactory
          SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
          userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager, momentumBasedController.getFullRobotModel(),
                contactableFeet, walkingControllerParameters, defaultTrajectoryTime, registry);
-
-         momentumBasedController.addUpdatables(userDesiredControllerCommandGenerators.getUpdatables());
       }
       else
       {
