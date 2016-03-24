@@ -1,7 +1,8 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.EnumMap;
 
+import us.ihmc.communication.controllerAPI.command.CompilableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;

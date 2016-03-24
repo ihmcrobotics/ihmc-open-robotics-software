@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.CommandInputManager;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.HighLevelStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelStateCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -47,23 +47,26 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final CommandInputManager commandInputManager;
+   private final StatusMessageOutputManager statusMessageOutputManager;
    private final ControllerCoreOutputReadOnly controllerCoreOutput;
    private final WholeBodyControllerCore controllerCore;
 
    private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
 
-   public static final AtomicReference<HighLevelState> currentStateForOpenSource = new AtomicReference<HighLevelState>(HighLevelState.DO_NOTHING_BEHAVIOR);
+   private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
 
-   public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, WholeBodyControllerCore controllerCore,
-         HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors, MomentumBasedController momentumBasedController,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ControllerCoreOutputReadOnly controllerCoreOutput, HumanoidGlobalDataProducer dataProducer)
+   public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
+         WholeBodyControllerCore controllerCore, HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
+         MomentumBasedController momentumBasedController, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+         ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.commandInputManager = commandInputManager;
+      this.statusMessageOutputManager = statusMessageOutputManager;
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       this.controllerCoreOutput = controllerCoreOutput;
       this.controllerCore = controllerCore;
 
-      this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry, dataProducer);
+      this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry);
       requestedHighLevelState.set(initialBehavior);
 
       isListeningToHighLevelStateMessage.set(true);
@@ -95,7 +98,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    }
 
    private GenericStateMachine<HighLevelState, HighLevelBehavior> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime,
-         YoVariableRegistry registry, final HumanoidGlobalDataProducer dataProducer)
+         YoVariableRegistry registry)
    {
       GenericStateMachine<HighLevelState, HighLevelBehavior> highLevelStateMachine = new GenericStateMachine<>("highLevelState", "switchTimeName",
             HighLevelState.class, yoTime, registry);
@@ -125,9 +128,8 @@ public class HighLevelHumanoidControllerManager implements RobotController
          @Override
          public void stateChanged(State<HighLevelState> oldState, State<HighLevelState> newState, double time)
          {
-            currentStateForOpenSource.set(newState.getStateEnum());
-            if (dataProducer != null)
-               dataProducer.queueDataToSend(new HighLevelStateChangeMessage(oldState.getStateEnum(), newState.getStateEnum()));
+            highLevelStateChangeStatusMessage.setStateChange(oldState.getStateEnum(), newState.getStateEnum());
+            statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
          }
       });
 

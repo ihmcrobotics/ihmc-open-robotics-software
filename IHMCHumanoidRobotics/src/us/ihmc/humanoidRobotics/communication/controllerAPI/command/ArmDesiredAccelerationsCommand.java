@@ -1,6 +1,7 @@
-package us.ihmc.commonWalkingControlModules.controllerAPI.input.command;
+package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.robotics.robotSide.RobotSide;

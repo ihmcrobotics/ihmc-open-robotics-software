@@ -49,7 +49,7 @@ import ihmc_msgs.SingleJointAnglePacketMessage;
 import ihmc_msgs.StopMotionPacketMessage;
 import ihmc_msgs.WholeBodyTrajectoryPacketMessage;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
@@ -114,8 +114,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((AtlasDesiredPumpPSIPacket) packet);
       else if (packet instanceof AtlasWristSensorCalibrationRequestPacket)
          return convertToRosMessage((AtlasWristSensorCalibrationRequestPacket) packet);
-      else if (packet instanceof HighLevelStateChangeMessage)
-         return convertToRosMessage((HighLevelStateChangeMessage) packet);
+      else if (packet instanceof HighLevelStateChangeStatusMessage)
+         return convertToRosMessage((HighLevelStateChangeStatusMessage) packet);
       else if (packet instanceof MultiJointAnglePacket)
          return convertToRosMessage((MultiJointAnglePacket) packet);
       else if (packet instanceof HandComplianceControlParametersMessage)
@@ -766,7 +766,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStateChangePacketMessage convertToRosMessage(HighLevelStateChangeMessage packet)
+   public static HighLevelStateChangePacketMessage convertToRosMessage(HighLevelStateChangeStatusMessage packet)
    {
       HighLevelStateChangePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HighLevelStateChangePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -776,9 +776,9 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStateChangeMessage convertToPacket(HighLevelStateChangePacketMessage message)
+   public static HighLevelStateChangeStatusMessage convertToPacket(HighLevelStateChangePacketMessage message)
    {
-      HighLevelStateChangeMessage ret = new HighLevelStateChangeMessage(convertByteToEnum(HighLevelState.class, message.getInitialState()),
+      HighLevelStateChangeStatusMessage ret = new HighLevelStateChangeStatusMessage(convertByteToEnum(HighLevelState.class, message.getInitialState()),
             convertByteToEnum(HighLevelState.class, message.getEndState()));
 
       return ret;

@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
