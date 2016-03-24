@@ -72,7 +72,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    @Override
    public PelvisTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      PelvisTrajectoryMessage transformedPelvisTrajectoryMessage = new PelvisTrajectoryMessage(getNumberOfTrajectoryPoints());
+      PelvisTrajectoryMessage transformedPelvisTrajectoryMessage = new PelvisTrajectoryMessage(this);
       transformedPelvisTrajectoryMessage.applyTransform(transform);
       return transformedPelvisTrajectoryMessage;
    }

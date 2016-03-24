@@ -9,7 +9,6 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends IHMCRosApiMessage<T> implements TransformableDataObject<T>, Transformable 
