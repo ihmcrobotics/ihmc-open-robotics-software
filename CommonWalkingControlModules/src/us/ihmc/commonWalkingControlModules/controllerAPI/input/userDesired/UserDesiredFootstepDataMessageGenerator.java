@@ -57,6 +57,10 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
    private final BooleanYoVariable sendSteps = new BooleanYoVariable(namePrefix + "Send", registry);
 
+   private List<FramePoint2d> contactFramePoints;
+   private RecyclingArrayList<Point2d> contactPoints = new RecyclingArrayList<Point2d>(4, Point2d.class);
+   private Point2d contactPoint;
+
    private final SideDependentList<ContactableFoot> bipedFeet;
    private ContactableFoot swingFoot;
    private RobotSide swingSide = RobotSide.LEFT;
@@ -64,11 +68,9 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
    private final CommandInputManager commandInputManager;
 
-   private Footstep previousFootstep;
-   private Footstep desiredFootstep;
-
+   private final PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", new FramePose());
    private ReferenceFrame newStepReferenceFrame;
-   private ReferenceFrame previousFootFrame;
+   private PoseReferenceFrame previousPoseFrame;
 
    private FrameVector desiredOffset;
    private FramePoint desiredPosition;
@@ -89,12 +91,6 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
       desiredOffset = new FrameVector(stanceFootFrame);
       desiredPosition = new FramePoint(stanceFootFrame);
       desiredOrientation = new FrameOrientation(stanceFootFrame);
-
-      // fixme remove this
-      stepsToTake.set(10);
-      stepLength.set(0.3);
-      stepYaw.set(-0.1);
-      sendSteps.set(true);
 
       firstStepSide.set(supportSide);
       minimumWidth.set(walkingControllerParameters.getMinStepWidth());
@@ -124,7 +120,7 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
             swingSide = RobotSide.LEFT;
 
          supportSide = swingSide.getOppositeSide();
-         previousFootstep = null;
+         previousPoseFrame = null;
 
          for (int i = 0; i < stepsToTake.getIntegerValue(); i++)
          {
@@ -146,7 +142,7 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
             footstepCommandList.addFootstep(desiredFootstepCommand);
 
-            previousFootstep = desiredFootstep;
+            previousPoseFrame = footstepPoseFrame;
             swingSide = swingSide.getOppositeSide();
             supportSide = swingSide.getOppositeSide();
          }
@@ -160,30 +156,11 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
    private void createNextFootstep()
    {
-      if (previousFootstep != null)
-      {
-         newStepReferenceFrame = previousFootstep.getPoseReferenceFrame();
-      }
-      else
-      {
-         newStepReferenceFrame = bipedFeet.get(supportSide).getSoleFrame();
-      }
-
       createFootstep();
    }
 
    private void squareUp()
    {
-      if (previousFootstep != null)
-      {
-         newStepReferenceFrame = previousFootstep.getPoseReferenceFrame();
-      }
-      else
-      {
-         newStepReferenceFrame = bipedFeet.get(supportSide).getSoleFrame();
-         desiredPosition.setToZero(newStepReferenceFrame);
-      }
-
       createFootstep(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
 
@@ -193,17 +170,18 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
             stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
    }
 
-   private List<FramePoint2d> contactFramePoints;
-   private FramePoint2d contactFramePoint;
-   private RecyclingArrayList<Point2d> contactPoints = new RecyclingArrayList<Point2d>(4, Point2d.class);
-   private Point2d contactPoint;
-   private FramePose footstepPose = new FramePose();
-   private PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-   private Point3d position = new Point3d();
-   private Quat4d orientation = new Quat4d();
 
    private void createFootstep(double stepLength, double stepSideways, double stepHeight, double stepYaw, double stepPitch, double stepRoll)
    {
+      if (previousPoseFrame != null)
+      {
+         newStepReferenceFrame = previousPoseFrame;
+      }
+      else
+      {
+         newStepReferenceFrame = bipedFeet.get(supportSide).getSoleFrame();
+      }
+
       // Footstep Position
       desiredPosition.setToZero(newStepReferenceFrame);
       desiredOffset.setToZero(newStepReferenceFrame);
@@ -219,29 +197,22 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
       }
       desiredOffset.set(stepLength, stepYOffset, stepHeight);
       desiredPosition.add(desiredOffset);
+      desiredPosition.changeFrame(worldFrame);
 
       // Footstep orientation
       desiredOrientation.setToZero(newStepReferenceFrame);
       desiredOrientation.setYawPitchRoll(stepYaw, 0.0, 0.0);
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), stepPitch, stepRoll);
-      desiredOrientation.changeFrame(newStepReferenceFrame);
 
-      // Assemble footstep
-      footstepPose.setToZero(newStepReferenceFrame);
-      footstepPose.setPose(desiredPosition, desiredOrientation);
-      footstepPose.changeFrame(worldFrame);
-      footstepPoseFrame.setPoseAndUpdate(footstepPose);
-
-      desiredFootstep = new Footstep(swingFoot.getRigidBody(), swingSide, swingFoot.getSoleFrame(), footstepPoseFrame, false);
+      footstepPoseFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
+      desiredFootstepCommand.setPose(desiredPosition.getPoint(), desiredOrientation.getQuaternion());
 
       // set contact points
       contactFramePoints = swingFoot.getContactPoints2d();
       contactPoints.clear();
-
-      for (int i = 0; i < contactFramePoints.size(); i++)
+      for (FramePoint2d contactFramePoint : contactFramePoints)
       {
-         contactFramePoint = contactFramePoints.get(i);
          contactPoint = contactFramePoint.getPointCopy();
 
          if (contactFramePoint.getX() > 0.0)
@@ -251,9 +222,6 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
          contactPoints.add().set(contactPoint);
       }
-
-      footstepPose.getPose(position, orientation);
-      desiredFootstepCommand.setPose(position, orientation);
       desiredFootstepCommand.setPredictedContactPoints(contactPoints);
    }
 }
