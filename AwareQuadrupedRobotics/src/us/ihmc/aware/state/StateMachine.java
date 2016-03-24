@@ -40,6 +40,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
       this.transitions = transitions;
       this.initialState = initialState;
       this.state = new EnumYoVariable<>(yoVariableName, registry, enumType);
+      this.state.set(initialState);
    }
 
    /**

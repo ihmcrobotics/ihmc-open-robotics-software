@@ -160,8 +160,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final FrameVector dcmVelocitySetpoint;
    private final FramePoint icpPositionSetpoint;
    private final FrameVector icpVelocitySetpoint;
-   private final FramePoint cmpPositionSetpoint;
-   private final FramePoint vrpPositionSetpoint;
    private final FrameVector comForceSetpoint;
    private double comHeightSetpoint;
 
@@ -196,8 +194,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final YoFrameVector yoBodyTorqueFeedforwardSetpoint;
    private final YoFrameVector yoBodyTorqueSetpoint;
    private final YoFramePoint yoIcpPositionSetpoint;
-   private final YoFramePoint yoCmpPositionSetpoint;
-   private final YoFramePoint yoVrpPositionSetpoint;
    private final YoFrameVector yoComForceSetpoint;
    private final DoubleYoVariable yoComHeightSetpoint;
    private final QuadrantDependentList<YoFrameOrientation> yoSoleOrientationEstimate;
@@ -354,8 +350,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmVelocitySetpoint = new FrameVector(worldFrame);
       icpPositionSetpoint = new FramePoint(worldFrame);
       icpVelocitySetpoint = new FrameVector(worldFrame);
-      cmpPositionSetpoint = new FramePoint(worldFrame);
-      vrpPositionSetpoint = new FramePoint(worldFrame);
       comForceSetpoint = new FrameVector(worldFrame);
       comHeightSetpoint = params.get(COM_HEIGHT_NOMINAL);
 
@@ -408,8 +402,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoBodyTorqueFeedforwardSetpoint = new YoFrameVector("bodyTorqueFeedforwardSetpoint", worldFrame, registry);
       yoBodyTorqueSetpoint = new YoFrameVector("bodyTorqueSetpoint", worldFrame, registry);
       yoIcpPositionSetpoint = new YoFramePoint("icpPositionSetpoint", worldFrame, registry);
-      yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", worldFrame, registry);
-      yoVrpPositionSetpoint = new YoFramePoint("vrpPositionSetpoint", worldFrame, registry);
       yoComForceSetpoint = new YoFrameVector("comForceSetpoint", worldFrame, registry);
       yoComHeightSetpoint = new DoubleYoVariable("comHeightSetpoint", registry);
       yoSoleOrientationEstimate = new QuadrantDependentList<>();
@@ -425,8 +417,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          yoSoleLinearVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", worldFrame, registry));
       }
       yoSupportPolygonEstimate = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 4, registry);
-      yoSupportCentroidEstimate = new YoFramePoint("supportCentroidEstimate", worldFrame, registry);
-      yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientationEstimate", worldFrame, registry);
+      yoSupportCentroidEstimate = new YoFramePoint("supportCentroid", worldFrame, registry);
+      yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientation", worldFrame, registry);
       yoBodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
       yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
       yoBodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
@@ -496,21 +488,18 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private void registerGraphics()
    {
       String prefix = getClass().getSimpleName();
-      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "pcomPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "comPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
       YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition(prefix + "icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
-      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition(prefix + "cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Chartreuse());
       yoGraphicsList.add(yoComPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       yoGraphicsList.add(yoIcpPositionSetpointViz);
-      yoGraphicsList.add(yoCmpPositionSetpointViz);
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       YoArtifactPolygon yoSupportPolygonArtifact = new YoArtifactPolygon(prefix + "supportPolygon", yoSupportPolygonEstimate, Color.BLACK, false);
       artifactList.add(yoComPositionEstimateViz.createArtifact());
       artifactList.add(yoIcpPositionEstimateViz.createArtifact());
       artifactList.add(yoIcpPositionSetpointViz.createArtifact());
-      artifactList.add(yoCmpPositionSetpointViz.createArtifact());
       artifactList.add(yoSupportPolygonArtifact);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
@@ -547,7 +536,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
             dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
             dcmPositionWaypoint.changeFrame(worldFrame);
             dcmPositionWaypoint.add(0, 0, comHeightSetpoint);
-            dcmTrajectory.setComHeight(dcmPositionController.getComHeightConstant());
+            dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
             dcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(),
                   copPlanner.getTimeAtTransition(nTransitions - 1), dcmPositionWaypoint);
             dcmTrajectory.computeTrajectory(currentTime);
@@ -573,7 +562,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
             }
          }
          icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
-         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeightConstant());
+         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
          icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
       }
       else
@@ -582,7 +571,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
          icpPositionSetpoint.setIncludingFrame(supportCentroidEstimate);
          icpVelocitySetpoint.setToZero(supportFrame);
          dcmPositionSetpoint.setIncludingFrame(icpPositionSetpoint);
-         dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeightConstant());
+         dcmPositionSetpoint.add(0, 0, dcmPositionController.getComHeight());
          dcmVelocitySetpoint.setIncludingFrame(icpVelocitySetpoint);
       }
    }
@@ -624,7 +613,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // compute support frame (centroid and nominal orientation)
       supportCentroidEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
       supportOrientationEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportPolygonEstimate.getCentroid2d(supportCentroidEstimate);
+      supportPolygonEstimate.getCentroid(supportCentroidEstimate);
       supportOrientationEstimate.setYawPitchRoll(supportPolygonEstimate.getNominalYaw(), 0, 0);
       supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
 
@@ -649,7 +638,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmPositionEstimate.setY(comPositionEstimate.getY() + comVelocityEstimate.getY() / omega);
       dcmPositionEstimate.setZ(comPositionEstimate.getZ() + comVelocityEstimate.getZ() / omega);
       icpPositionEstimate.setIncludingFrame(dcmPositionEstimate);
-      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeightConstant());
+      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeight());
 
       // compute center of mass height
       comPositionEstimate.changeFrame(worldFrame);
@@ -663,7 +652,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // compute capture point natural frequency
       double comHeight = Math.max(comHeightSetpoint, params.get(COM_HEIGHT_NOMINAL) / 5);
-      dcmPositionController.setNaturalFrequency(Math.sqrt(gravity / comHeight));
+      dcmPositionController.setComHeight(comHeight);
 
       // compute body torque setpoints to track desired body orientation
       bodyTorqueSetpoint.changeFrame(bodyFrame);
@@ -676,7 +665,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // compute horizontal forces to track desired instantaneous capture point
       computeDcmPositionAndVelocitySetpoints();
-      dcmPositionController.compute(comForceSetpoint, vrpPositionSetpoint, cmpPositionSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
+      dcmPositionController.compute(comForceSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
       // compute vertical force to track desired center of mass height
       comHeightSetpoint = comHeightInput;
@@ -719,8 +708,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoBodyTorqueFeedforwardSetpoint.setAndMatchFrame(bodyTorqueFeedforwardSetpoint);
       yoBodyTorqueSetpoint.setAndMatchFrame(bodyTorqueSetpoint);
       yoIcpPositionSetpoint.setAndMatchFrame(icpPositionSetpoint);
-      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
-      yoVrpPositionSetpoint.setAndMatchFrame(vrpPositionSetpoint);
       yoComForceSetpoint.setAndMatchFrame(comForceSetpoint);
       yoComHeightSetpoint.set(comHeightSetpoint);
 
