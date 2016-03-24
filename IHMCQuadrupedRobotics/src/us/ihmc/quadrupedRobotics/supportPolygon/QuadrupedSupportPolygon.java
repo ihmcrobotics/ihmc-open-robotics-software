@@ -542,7 +542,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public boolean isInside(FramePoint point)
    {
-      if (distanceInside2d(point) > 0.0)
+      if (getDistanceInside2d(point) > 0.0)
       {
          return true;
       }
@@ -561,7 +561,7 @@ public class QuadrupedSupportPolygon implements Serializable
    public boolean isInside(FramePoint2d point)
    {
       temporaryFramePoint.setXY(point);
-      if (distanceInside2d(temporaryFramePoint) > 0.0)
+      if (getDistanceInside2d(temporaryFramePoint) > 0.0)
       {
          return true;
       }
@@ -579,7 +579,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public double distanceInside2d(FramePoint point)
+   public double getDistanceInside2d(FramePoint point)
    {
       if (size() == 1)
       {
@@ -600,7 +600,7 @@ public class QuadrupedSupportPolygon implements Serializable
             FramePoint pointOne = getFootstep(robotQuadrant);
             FramePoint pointTwo = getFootstep(getNextClockwiseSupportingQuadrant(robotQuadrant));
             
-            double distance = computeDistanceToSideOfSegment(point, pointOne, pointTwo);
+            double distance = getDistanceToSideOfSegment(point, pointOne, pointTwo);
             if (distance < closestDistance)
             {
                closestDistance = distance;
@@ -611,7 +611,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
    
-   private double computeDistanceToSideOfSegment(FramePoint point, FramePoint pointOne, FramePoint pointTwo)
+   private double getDistanceToSideOfSegment(FramePoint point, FramePoint pointOne, FramePoint pointTwo)
    {
       double x0 = point.getX();
       double y0 = point.getY();
@@ -728,7 +728,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point
     * @return distance
     */
-   public double distanceInsideInCircle2d(FramePoint point)
+   public double getDistanceInsideInCircle2d(FramePoint point)
    {
       double inCircleRadius = getInCircle2d(tempInCircleCenter);
       double distanceToInCircleCenter = point.getXYPlaneDistance(tempInCircleCenter);
