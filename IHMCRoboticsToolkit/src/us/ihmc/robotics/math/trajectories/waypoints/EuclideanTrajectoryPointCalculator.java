@@ -110,6 +110,10 @@ public class EuclideanTrajectoryPointCalculator
       if (numberOfTrajectoryPoints < 3)
          throw new RuntimeException("Need at least 3 trajectory points.");
 
+      FrameEuclideanTrajectoryPoint firstTrajectoryPoint;
+      FrameEuclideanTrajectoryPoint secondTrajectoryPoint;
+      FrameEuclideanTrajectoryPoint thirdTrajectoryPoint;
+
       if (startAndFinishWithZeroVelocity)
       {
          trajectoryPoints.get(0).setLinearVelocityToZero();
@@ -117,34 +121,43 @@ public class EuclideanTrajectoryPointCalculator
 
          if (numberOfTrajectoryPoints == 3)
          {
-            computedLinearVelocity.setToZero(trajectoryPoints.get(1).getReferenceFrame());
-            compute2ndTrajectoryPointVelocityWithVelocityConstraint(trajectoryPoints.get(0), trajectoryPoints.get(1), trajectoryPoints.get(2),
-                  computedLinearVelocity);
-            trajectoryPoints.get(1).setLinearVelocity(computedLinearVelocity);
+            firstTrajectoryPoint = trajectoryPoints.get(0);
+            secondTrajectoryPoint = trajectoryPoints.get(1);
+            thirdTrajectoryPoint = trajectoryPoints.get(2);
+
+            computedLinearVelocity.setToZero(secondTrajectoryPoint.getReferenceFrame());
+            compute2ndTrajectoryPointVelocityWithVelocityConstraint(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, computedLinearVelocity);
+            secondTrajectoryPoint.setLinearVelocity(computedLinearVelocity);
             return;
          }
       }
       else
       {
-         computedLinearVelocity.setToZero(trajectoryPoints.get(0).getReferenceFrame());
-         computeTrajectoryPointVelocity(trajectoryPoints.get(0), trajectoryPoints.get(1), trajectoryPoints.get(2), TrajectoryPoint.FIRST,
-               computedLinearVelocity);
-         trajectoryPoints.get(0).setLinearVelocity(computedLinearVelocity);
+         firstTrajectoryPoint = trajectoryPoints.get(0);
+         secondTrajectoryPoint = trajectoryPoints.get(1);
+         thirdTrajectoryPoint = trajectoryPoints.get(2);
 
-         computedLinearVelocity.setToZero(trajectoryPoints.get(numberOfTrajectoryPoints - 1).getReferenceFrame());
-         computeTrajectoryPointVelocity(trajectoryPoints.get(numberOfTrajectoryPoints - 3), trajectoryPoints.get(numberOfTrajectoryPoints - 2),
-               trajectoryPoints.get(numberOfTrajectoryPoints - 1), TrajectoryPoint.THIRD, computedLinearVelocity);
-         trajectoryPoints.get(numberOfTrajectoryPoints - 1).setLinearVelocity(computedLinearVelocity);
+         computedLinearVelocity.setToZero(firstTrajectoryPoint.getReferenceFrame());
+         computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.FIRST, computedLinearVelocity);
+         firstTrajectoryPoint.setLinearVelocity(computedLinearVelocity);
+
+         firstTrajectoryPoint = trajectoryPoints.get(numberOfTrajectoryPoints - 3);
+         secondTrajectoryPoint = trajectoryPoints.get(numberOfTrajectoryPoints - 2);
+         thirdTrajectoryPoint = trajectoryPoints.get(numberOfTrajectoryPoints - 1);
+
+         computedLinearVelocity.setToZero(thirdTrajectoryPoint.getReferenceFrame());
+         computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.THIRD, computedLinearVelocity);
+         thirdTrajectoryPoint.setLinearVelocity(computedLinearVelocity);
       }
 
       for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
       {
-         FrameEuclideanTrajectoryPoint firstTrajectoryPoint = trajectoryPoints.get(i - 1);
-         FrameEuclideanTrajectoryPoint secondTrajectoryPoint = trajectoryPoints.get(i);
-         FrameEuclideanTrajectoryPoint thirdTrajectoryPoint = trajectoryPoints.get(i + 1);
+         firstTrajectoryPoint = trajectoryPoints.get(i - 1);
+         secondTrajectoryPoint = trajectoryPoints.get(i);
+         thirdTrajectoryPoint = trajectoryPoints.get(i + 1);
          computedLinearVelocity.setToZero(trajectoryPoints.get(i).getReferenceFrame());
          computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.SECOND, computedLinearVelocity);
-         trajectoryPoints.get(i).setLinearVelocity(computedLinearVelocity);
+         secondTrajectoryPoint.setLinearVelocity(computedLinearVelocity);
       }
    }
 
@@ -230,7 +243,7 @@ public class EuclideanTrajectoryPointCalculator
       return trajectoryPoints.size();
    }
 
-   public RecyclingArrayList<? extends EuclideanTrajectoryPointInterface<?>> getTrajectoryPoints()
+   public RecyclingArrayList<FrameEuclideanTrajectoryPoint> getTrajectoryPoints()
    {
       return trajectoryPoints;
    }
