@@ -7,6 +7,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -14,15 +15,20 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import java.util.List;
 
 public class UserDesiredFootstepDataMessageGenerator implements Updatable
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final String namePrefix = "userDesiredStep";
@@ -58,12 +64,15 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
    private final CommandInputManager commandInputManager;
 
+   private Footstep previousFootstep;
+   private Footstep desiredFootstep;
+
    private ReferenceFrame newStepReferenceFrame;
+   private ReferenceFrame previousFootFrame;
+
    private FrameVector desiredOffset;
    private FramePoint desiredPosition;
-   private FramePoint previousPosition;
    private FrameOrientation desiredOrientation;
-   private FrameOrientation previousOrientation;
 
    private final FootstepDataControllerCommand desiredFootstepCommand = new FootstepDataControllerCommand();
    private final FootstepDataListCommand footstepCommandList = new FootstepDataListCommand();
@@ -80,6 +89,12 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
       desiredOffset = new FrameVector(stanceFootFrame);
       desiredPosition = new FramePoint(stanceFootFrame);
       desiredOrientation = new FrameOrientation(stanceFootFrame);
+
+      // fixme remove this
+      stepsToTake.set(10);
+      stepLength.set(0.3);
+      stepYaw.set(-0.1);
+      sendSteps.set(true);
 
       firstStepSide.set(supportSide);
       minimumWidth.set(walkingControllerParameters.getMinStepWidth());
@@ -109,8 +124,7 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
             swingSide = RobotSide.LEFT;
 
          supportSide = swingSide.getOppositeSide();
-         previousPosition = null;
-         previousOrientation = null;
+         previousFootstep = null;
 
          for (int i = 0; i < stepsToTake.getIntegerValue(); i++)
          {
@@ -132,8 +146,7 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
             footstepCommandList.addFootstep(desiredFootstepCommand);
 
-            previousPosition = desiredPosition;
-            previousOrientation = desiredOrientation;
+            previousFootstep = desiredFootstep;
             swingSide = swingSide.getOppositeSide();
             supportSide = swingSide.getOppositeSide();
          }
@@ -147,9 +160,9 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
    private void createNextFootstep()
    {
-      if (previousPosition != null)
+      if (previousFootstep != null)
       {
-         newStepReferenceFrame = previousPosition.getReferenceFrame();
+         newStepReferenceFrame = previousFootstep.getPoseReferenceFrame();
       }
       else
       {
@@ -161,13 +174,14 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
 
    private void squareUp()
    {
-      if (previousPosition != null)
+      if (previousFootstep != null)
       {
-         newStepReferenceFrame = previousPosition.getReferenceFrame();
+         newStepReferenceFrame = previousFootstep.getPoseReferenceFrame();
       }
       else
       {
          newStepReferenceFrame = bipedFeet.get(supportSide).getSoleFrame();
+         desiredPosition.setToZero(newStepReferenceFrame);
       }
 
       createFootstep(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -183,11 +197,17 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
    private FramePoint2d contactFramePoint;
    private RecyclingArrayList<Point2d> contactPoints = new RecyclingArrayList<Point2d>(4, Point2d.class);
    private Point2d contactPoint;
+   private FramePose footstepPose = new FramePose();
+   private PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+   private Point3d position = new Point3d();
+   private Quat4d orientation = new Quat4d();
 
    private void createFootstep(double stepLength, double stepSideways, double stepHeight, double stepYaw, double stepPitch, double stepRoll)
    {
       // Footstep Position
       desiredPosition.setToZero(newStepReferenceFrame);
+      desiredOffset.setToZero(newStepReferenceFrame);
+
       double stepYOffset = supportSide.negateIfLeftSide(stepWidth.getDoubleValue()) + stepSideways;
       if ((supportSide == RobotSide.LEFT) && (stepYOffset > -minimumWidth.getDoubleValue()))
       {
@@ -197,14 +217,25 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
       {
          stepYOffset = minimumWidth.getDoubleValue();
       }
-      desiredOffset.setToZero(newStepReferenceFrame);
       desiredOffset.set(stepLength, stepYOffset, stepHeight);
       desiredPosition.add(desiredOffset);
 
-      // Footstep Orientation
+      // Footstep orientation
       desiredOrientation.setToZero(newStepReferenceFrame);
-      desiredOrientation.setYawPitchRoll(stepYaw, stepPitch, stepRoll);
+      desiredOrientation.setYawPitchRoll(stepYaw, 0.0, 0.0);
+      desiredOrientation.changeFrame(worldFrame);
+      desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), stepPitch, stepRoll);
+      desiredOrientation.changeFrame(newStepReferenceFrame);
 
+      // Assemble footstep
+      footstepPose.setToZero(newStepReferenceFrame);
+      footstepPose.setPose(desiredPosition, desiredOrientation);
+      footstepPose.changeFrame(worldFrame);
+      footstepPoseFrame.setPoseAndUpdate(footstepPose);
+
+      desiredFootstep = new Footstep(swingFoot.getRigidBody(), swingSide, swingFoot.getSoleFrame(), footstepPoseFrame, false);
+
+      // set contact points
       contactFramePoints = swingFoot.getContactPoints2d();
       contactPoints.clear();
 
@@ -221,7 +252,8 @@ public class UserDesiredFootstepDataMessageGenerator implements Updatable
          contactPoints.add().set(contactPoint);
       }
 
-      desiredFootstepCommand.setPose(desiredPosition.getPoint(), desiredOrientation.getQuaternion());
+      footstepPose.getPose(position, orientation);
+      desiredFootstepCommand.setPose(position, orientation);
       desiredFootstepCommand.setPredictedContactPoints(contactPoints);
    }
 }
