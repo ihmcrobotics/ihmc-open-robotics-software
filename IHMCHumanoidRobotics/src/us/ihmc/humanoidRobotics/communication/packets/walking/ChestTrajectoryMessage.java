@@ -62,7 +62,7 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
    @Override
    public ChestTrajectoryMessage transform(RigidBodyTransform transform)
    {
-      ChestTrajectoryMessage transformedChestTrajectoryMessage = new ChestTrajectoryMessage(getNumberOfTrajectoryPoints());
+      ChestTrajectoryMessage transformedChestTrajectoryMessage = new ChestTrajectoryMessage(this);
       transformedChestTrajectoryMessage.applyTransform(transform);
       return transformedChestTrajectoryMessage;
    }
