@@ -13,7 +13,7 @@ public abstract class SolverWeightLevels
    public static final double PELVIS_WEIGHT = MEDIUM;
    public static final double ARM_JOINTSPACE_WEIGHT = MEDIUM;
    public static final double HAND_TASKSPACE_WEIGHT = MEDIUM;
-   public static final double HEAD_WEIGHT = MEDIUM;
+   public static final double HEAD_WEIGHT = 200.0;
    public static final double FOOT_SWING_WEIGHT = HIGH;
    public static final double FOOT_SUPPORT_WEIGHT = VERY_HIGH;
 

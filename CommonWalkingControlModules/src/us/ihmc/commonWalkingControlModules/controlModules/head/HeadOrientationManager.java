@@ -49,6 +49,8 @@ public class HeadOrientationManager
 
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
+
+   private final DoubleYoVariable headWeight = new DoubleYoVariable("headWeight", registry);
    private final YoOrientationPIDGainsInterface gains;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
@@ -59,11 +61,11 @@ public class HeadOrientationManager
 
       gains = headOrientationControllerParameters.createHeadOrientationControlGains(registry);
 
+      headWeight.set(weight);
+
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
-      orientationFeedbackControlCommand.setWeightForSolver(weight);
       orientationFeedbackControlCommand.set(chest, head);
-      orientationFeedbackControlCommand.setGains(gains);
       chestFrame = chest.getBodyFixedFrame();
       headFrame = head.getBodyFixedFrame();
 
@@ -140,6 +142,7 @@ public class HeadOrientationManager
       feedForwardAngularAcceleration.setToZero(worldFrame);
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       orientationFeedbackControlCommand.setGains(gains);
+      orientationFeedbackControlCommand.setWeightForSolver(headWeight.getDoubleValue());
    }
 
    public void handleHeadTrajectoryMessage(HeadTrajectoryCommand message)

@@ -911,6 +911,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      // The weight for the head needs to be pretty high to counter the privileged configuration task.
+      // This seems to be specific to Val's, probably because of its particular kinematics.
+      // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
+      momentumOptimizationSettings.setHeadWeight(500.0);
       return momentumOptimizationSettings;
    }
 
