@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.rosControl.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder.DesiredJointData;
 
 public class YoPositionJointHandleHolder

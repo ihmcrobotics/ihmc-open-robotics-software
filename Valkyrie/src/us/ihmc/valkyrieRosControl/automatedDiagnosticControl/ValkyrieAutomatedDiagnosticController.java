@@ -24,7 +24,7 @@ import us.ihmc.robotics.sensors.*;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;

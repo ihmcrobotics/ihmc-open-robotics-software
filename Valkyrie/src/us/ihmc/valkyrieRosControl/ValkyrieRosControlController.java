@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;

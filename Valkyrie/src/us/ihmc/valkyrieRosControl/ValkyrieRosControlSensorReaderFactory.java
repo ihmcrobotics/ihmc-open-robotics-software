@@ -14,7 +14,7 @@ import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
