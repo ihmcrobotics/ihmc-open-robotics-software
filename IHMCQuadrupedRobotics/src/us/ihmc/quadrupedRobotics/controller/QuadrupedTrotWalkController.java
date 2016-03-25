@@ -25,6 +25,7 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -46,6 +47,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
 public class QuadrupedTrotWalkController extends QuadrupedController
 {
@@ -66,8 +68,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    private final YoFramePoint icp = new YoFramePoint("icp", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition icpViz = new YoGraphicPosition("icpViz", icp, 0.01, YoAppearance.DarkSlateBlue(), GraphicType.SQUARE);
-   private final YoArtifactLine hindRightFrontLeftTrotLine;
-   private final YoArtifactLine hindLeftFrontRightTrotLine;
 
    private final YoFramePoint centerOfPressure = new YoFramePoint("centerOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint desiredICP = new YoFramePoint("desiredICP", ReferenceFrame.getWorldFrame(), registry);
@@ -146,7 +146,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final YoQuadrupedSupportPolygon previousSupportPolygon = new YoQuadrupedSupportPolygon("previousSupportPolygon", registry);
    private final YoQuadrupedSupportPolygon currentSupportPolygon = new YoQuadrupedSupportPolygon("currentSupportPolygon", registry);
-   private final YoQuadrupedSupportPolygon nextPhaseSupportPolygon = new YoQuadrupedSupportPolygon("nextPhaseSupportPolygon", registry);
+   private final YoQuadrupedSupportPolygon nextSupportPolygon = new YoQuadrupedSupportPolygon("nextSupportPolygon", registry);
+   private final YoFrameConvexPolygon2d previousYoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("previousYoFrameConvexPolygon2d", ReferenceFrame.getWorldFrame(), 4, registry);
+   private final YoFrameConvexPolygon2d currentYoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("currentYoFrameConvexPolygon2d", ReferenceFrame.getWorldFrame(), 4, registry);
+   private final YoFrameConvexPolygon2d nextYoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("nextYoFrameConvexPolygon2d", ReferenceFrame.getWorldFrame(), 4, registry);
    private final VelocityConstrainedPositionTrajectoryGenerator icpTrajectory = new VelocityConstrainedPositionTrajectoryGenerator("icpTrajectory", ReferenceFrame.getWorldFrame(), registry);
    
    // Swing PD Controllers
@@ -254,14 +257,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          }
       }
       
-      YoFramePoint hindRightFoot = footPositions.get(RobotQuadrant.HIND_RIGHT);
-      YoFramePoint hindLeftFoot = footPositions.get(RobotQuadrant.HIND_LEFT);
-      YoFramePoint frontLeftFoot = footPositions.get(RobotQuadrant.FRONT_LEFT);
-      YoFramePoint frontRightFoot = footPositions.get(RobotQuadrant.FRONT_RIGHT);
-      Color hindRightYoAppearance = RobotQuadrant.HIND_RIGHT.getColor();
-      Color hindLeftYoAppearance = RobotQuadrant.HIND_LEFT.getColor();
-      hindRightFrontLeftTrotLine = new YoArtifactLine("hindRightFrontLeftTrotLine", hindRightFoot, frontLeftFoot, hindRightYoAppearance);
-      hindLeftFrontRightTrotLine = new YoArtifactLine("hindLeftFrontRightTrotLine", hindLeftFoot, frontRightFoot, hindLeftYoAppearance);
+      yoGraphicsListRegistry.registerArtifact("icpTrajectory", new YoArtifactLine("icpTrajectory", icpTrajectory.getInitialPosition(), icpTrajectory.getFinalPosition(), Color.BLUE));
+      yoGraphicsListRegistry.registerArtifact("trotWalkPolygons", new YoArtifactPolygon("previousYoArtifactPolygon", previousYoFrameConvexPolygon2d, Color.GRAY, false, 1));
+      yoGraphicsListRegistry.registerArtifact("trotWalkPolygons", new YoArtifactPolygon("currentYoArtifactPolygon", currentYoFrameConvexPolygon2d, Color.BLUE, false, 2));
+      yoGraphicsListRegistry.registerArtifact("trotWalkPolygons", new YoArtifactPolygon("nextYoArtifactPolygon", nextYoFrameConvexPolygon2d, new Color(0, 100, 0), false, 3));
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -272,9 +271,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          desiredFootPositions.set(robotQuadrant, new YoFramePoint("desiredFootPosition" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
          desiredFootVelocities.set(robotQuadrant, new YoFrameVector("desiredFootVelocity" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
       }
-      
-      yoGraphicsListRegistry.registerArtifact("trotLines", hindRightFrontLeftTrotLine);
-      yoGraphicsListRegistry.registerArtifact("trotLines", hindLeftFrontRightTrotLine);
       
       parentRegistry.addChild(registry);
    }
@@ -287,10 +283,14 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    public void initialize()
    {
+      previousSupportPolygon.clear();
       currentSupportPolygon.clear();
+      nextSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         previousSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
          currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         nextSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       
       updateEstimates();
@@ -386,6 +386,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       {
          currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
+      
+      previousSupportPolygon.packYoFrameConvexPolygon2d(previousYoFrameConvexPolygon2d);
+      currentSupportPolygon.packYoFrameConvexPolygon2d(currentYoFrameConvexPolygon2d);
+      nextSupportPolygon.packYoFrameConvexPolygon2d(nextYoFrameConvexPolygon2d);
       
       bodyPoseWorld.setFromReferenceFrame(referenceFrames.getBodyFrame());
       
@@ -526,10 +530,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       FramePoint frameTuple = centroid.getFrameTuple();
       currentSupportPolygon.getCentroid(frameTuple);
       centroid.set(frameTuple.getX(), frameTuple.getY(), frameTuple.getZ());
-      nextPhaseSupportPolygon.clear();
+      nextSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : nextGaitPhase.getEnumValue().supportQuadrants())
       {
-         nextPhaseSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         nextSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       
       // Update desired ICP trajectory
@@ -538,7 +542,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       FramePoint nextCentroid = icpTrajectory.getFinalPosition().getFrameTuple();
       if (currentGaitPhase.getEnumValue() == QuadrupedSupportConfiguration.ALL_FOURS)
       {
-         nextPhaseSupportPolygon.getCentroid(nextCentroid);
+         nextSupportPolygon.getCentroid(nextCentroid);
       }
       else
       {
