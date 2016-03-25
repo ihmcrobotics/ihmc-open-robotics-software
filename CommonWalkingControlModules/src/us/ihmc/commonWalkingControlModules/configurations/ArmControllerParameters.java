@@ -17,11 +17,7 @@ public interface ArmControllerParameters
 
    public abstract YoSE3PIDGainsInterface createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry);
 
-   public abstract boolean useInverseKinematicsTaskspaceControl();
-
-   public abstract boolean doLowLevelPositionControl();
+   public abstract String[] getPositionControlledJointNames(RobotSide robotSide);
 
    public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide);
-
-   public abstract double getWristHandCenterOffset();
 }

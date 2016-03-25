@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -29,8 +28,8 @@ public class JointSpaceHandControlState extends HandControlState
    private final YoPIDGains gains;
    private final DoubleYoVariable weight;
 
-   public JointSpaceHandControlState(String namePrefix, OneDoFJoint[] controlledJoints, boolean doPositionControl,
-         MomentumBasedController momentumBasedController, YoPIDGains gains, double dt, YoVariableRegistry parentRegistry)
+   public JointSpaceHandControlState(String namePrefix, OneDoFJoint[] controlledJoints, OneDoFJoint[] positionControlledJoints, YoPIDGains gains, double dt,
+         YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.JOINT_SPACE);
       this.gains = gains;
@@ -51,22 +50,22 @@ public class JointSpaceHandControlState extends HandControlState
          jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
       }
 
-      if (!doPositionControl)
+      if (positionControlledJoints.length == 0)
       {
          lowLevelJointDesiredData = null;
          jointAccelerationIntegrationCommand = null;
       }
       else
       {
-         lowLevelJointDesiredData = new LowLevelOneDoFJointDesiredDataHolder(oneDoFJoints.length);
-         lowLevelJointDesiredData.registerJointsWithEmptyData(oneDoFJoints);
-         lowLevelJointDesiredData.setJointsControlMode(oneDoFJoints, LowLevelJointControlMode.POSITION_CONTROL);
+         lowLevelJointDesiredData = new LowLevelOneDoFJointDesiredDataHolder(positionControlledJoints.length);
+         lowLevelJointDesiredData.registerJointsWithEmptyData(positionControlledJoints);
+         lowLevelJointDesiredData.setJointsControlMode(positionControlledJoints, LowLevelJointControlMode.POSITION_CONTROL);
 
          jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
 
-         for (int i = 0; i < oneDoFJoints.length; i++)
+         for (int i = 0; i < positionControlledJoints.length; i++)
          {
-            OneDoFJoint joint = oneDoFJoints[i];
+            OneDoFJoint joint = positionControlledJoints[i];
             jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
          }
       }

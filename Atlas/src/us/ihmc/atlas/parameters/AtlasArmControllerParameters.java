@@ -14,22 +14,18 @@ import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 
 public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
-   private final double handCenterOffset;
+   private final DRCRobotJointMap jointMap;
 
-   public AtlasArmControllerParameters()
-   {
-      this(false, 0.0);
-   }
-
-   public AtlasArmControllerParameters(boolean runningOnRealRobot, double handCenterOffset)
+   public AtlasArmControllerParameters(boolean runningOnRealRobot, DRCRobotJointMap jointMap)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      this.handCenterOffset = handCenterOffset;
+      this.jointMap = jointMap;
    }
 
    @Override
@@ -99,15 +95,23 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public boolean useInverseKinematicsTaskspaceControl()
+   public String[] getPositionControlledJointNames(RobotSide robotSide)
    {
-      return true;
-   }
+      if (runningOnRealRobot)
+      {
+         ArmJointName[] armJointNames = jointMap.getArmJointNames();
+         int numberOfArmJoints = armJointNames.length;
+         String[] positionControlledJointNames = new String[numberOfArmJoints];
 
-   @Override
-   public boolean doLowLevelPositionControl()
-   {
-      return runningOnRealRobot; // Set to false for torque control
+         for (int i  = 0; i < numberOfArmJoints; i++)
+            positionControlledJointNames[i] = jointMap.getArmJointName(robotSide, armJointNames[i]);
+
+         return positionControlledJointNames;
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override
@@ -124,11 +128,5 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH), robotSide.negateIfRightSide(0.0));
 
       return jointPositions;
-   }
-
-   @Override
-   public double getWristHandCenterOffset()
-   {
-      return handCenterOffset;
    }
 }

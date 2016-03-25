@@ -48,26 +48,13 @@ public class BonoArmControlParameters implements ArmControllerParameters
    }
 
    @Override
-   public boolean useInverseKinematicsTaskspaceControl()
+   public String[] getPositionControlledJointNames(RobotSide robotSide)
    {
-      return false;
-   }
-
-   @Override
-   public boolean doLowLevelPositionControl()
-   {
-      return false;
+      return null;
    }
    @Override
    public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide)
    {
       return new LinkedHashMap<OneDoFJoint, Double>();
-   }
-
-   @Override
-   public double getWristHandCenterOffset()
-   {
-      // TODO Auto-generated method stub
-      return 0.0;
    }
 }

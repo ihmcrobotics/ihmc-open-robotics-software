@@ -13,15 +13,18 @@ import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 
 public class ValkyrieArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
+   private final DRCRobotJointMap jointMap;
 
-   public ValkyrieArmControllerParameters(boolean runningOnRealRobot)
+   public ValkyrieArmControllerParameters(boolean runningOnRealRobot, DRCRobotJointMap jointMap)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+      this.jointMap = jointMap;
    }
 
    @Override
@@ -79,15 +82,23 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public boolean useInverseKinematicsTaskspaceControl()
+   public String[] getPositionControlledJointNames(RobotSide robotSide)
    {
-      return false;
-   }
+      if (runningOnRealRobot)
+      {
+         String[] positionControlledJointNames = new String[3];
 
-   @Override
-   public boolean doLowLevelPositionControl()
-   {
-      return false;
+         int i = 0;
+         positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL);
+         positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH);
+         positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL);
+
+         return positionControlledJointNames;
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override
@@ -105,12 +116,5 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
 
       
       return jointPositions;
-   }
-
-   @Override
-   public double getWristHandCenterOffset()
-   {
-      // TODO Auto-generated method stub
-      return 0.0;
    }
 }
