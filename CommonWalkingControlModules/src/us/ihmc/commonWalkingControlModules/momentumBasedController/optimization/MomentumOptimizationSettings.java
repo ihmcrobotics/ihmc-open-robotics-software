@@ -31,6 +31,11 @@ public class MomentumOptimizationSettings
    {
    }
 
+   public void setHeadWeight(double weight)
+   {
+      headWeight = weight;
+   }
+
    public void setBodyWeights(double headWeight, double chestWeight, double pelvisWeight)
    {
       this.headWeight = headWeight;
