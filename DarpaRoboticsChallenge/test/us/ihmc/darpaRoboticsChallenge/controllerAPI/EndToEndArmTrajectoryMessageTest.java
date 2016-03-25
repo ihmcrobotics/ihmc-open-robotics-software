@@ -92,7 +92,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-         assertSingleWaypointExecuted(robotSide, armJoints, numberOfJoints, desiredJointPositions, desiredJointVelcoties, epsilon, scs);
+         assertSingleWaypointExecuted(robotSide, armJoints, desiredJointPositions, desiredJointVelcoties, epsilon, scs);
       }
    }
 
@@ -120,7 +120,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
-         int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
+         int numberOfJoints = armJoints.length;
          double[] desiredJointPositions = new double[numberOfJoints];
 
          for (int i = 0; i < numberOfJoints; i++)
@@ -153,8 +153,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          HandControlMode controllerState = findControllerState(robotSide, scs);
          double switchTime = findControllerSwitchTime(robotSide, scs);
-         double[] controllerDesiredJointPositions = findControllerDesiredPositions(robotSide, armJoints, numberOfJoints, scs);
-         double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(robotSide, armJoints, numberOfJoints, scs);
+         double[] controllerDesiredJointPositions = findControllerDesiredPositions(robotSide, armJoints, scs);
+         double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(robotSide, armJoints, scs);
 
          assertEquals(HandControlMode.JOINT_SPACE, controllerState);
          assertEquals(timeStopSent, switchTime, getRobotModel().getControllerDT());
@@ -163,18 +163,18 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   public static void assertSingleWaypointExecuted(RobotSide robotSide, OneDoFJoint[] armJoints, int numberOfJoints, double[] desiredJointPositions,
-         double[] desiredJointVelcoties, double epsilon, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(RobotSide robotSide, OneDoFJoint[] armJoints, double[] desiredJointPositions, double[] desiredJointVelcoties,
+         double epsilon, SimulationConstructionSet scs)
    {
-      double[] controllerDesiredJointPositions = findControllerDesiredPositions(robotSide, armJoints, numberOfJoints, scs);
-      double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(robotSide, armJoints, numberOfJoints, scs);
+      double[] controllerDesiredJointPositions = findControllerDesiredPositions(robotSide, armJoints, scs);
+      double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(robotSide, armJoints, scs);
 
       assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
       assertArrayEquals(desiredJointVelcoties, controllerDesiredJointVelocities, epsilon);
 
       if (DEBUG)
       {
-         for (int i = 0; i < numberOfJoints; i++)
+         for (int i = 0; i < armJoints.length; i++)
          {
             OneDoFJoint joint = armJoints[i];
             double q_err = desiredJointPositions[i] - joint.getQ();
@@ -182,7 +182,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                   + desiredJointPositions[i] + ", q = " + joint.getQ());
          }
 
-         for (int i = 0; i < numberOfJoints; i++)
+         for (int i = 0; i < armJoints.length; i++)
          {
             OneDoFJoint joint = armJoints[i];
             System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
@@ -203,10 +203,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return scs.getVariable(handControlModuleName, handControlModuleName + "SwitchTime").getValueAsDouble();
    }
 
-   public static double[] findControllerDesiredPositions(RobotSide robotSide, OneDoFJoint[] armJoints, int numberOfJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredPositions(RobotSide robotSide, OneDoFJoint[] armJoints, SimulationConstructionSet scs)
    {
-      double[] controllerDesiredJointPositions = new double[numberOfJoints];
-      for (int i = 0; i < numberOfJoints; i++)
+      double[] controllerDesiredJointPositions = new double[armJoints.length];
+      for (int i = 0; i < armJoints.length; i++)
       {
          String jointName = armJoints[i].getName();
          String subTrajectory = "SubTrajectory";
@@ -218,10 +218,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return controllerDesiredJointPositions;
    }
 
-   public static double[] findControllerDesiredVelocities(RobotSide robotSide, OneDoFJoint[] armJoints, int numberOfJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredVelocities(RobotSide robotSide, OneDoFJoint[] armJoints, SimulationConstructionSet scs)
    {
-      double[] controllerDesiredJointVelocities = new double[numberOfJoints];
-      for (int i = 0; i < numberOfJoints; i++)
+      double[] controllerDesiredJointVelocities = new double[armJoints.length];
+      for (int i = 0; i < armJoints.length; i++)
       {
          String jointName = armJoints[i].getName();
          String subTrajectory = "SubTrajectory";

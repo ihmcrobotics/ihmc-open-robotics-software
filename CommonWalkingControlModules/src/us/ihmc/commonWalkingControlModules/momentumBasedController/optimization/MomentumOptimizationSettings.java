@@ -18,7 +18,9 @@ public class MomentumOptimizationSettings
    private final Vector2d copWeight = new Vector2d(100.0, 200.0); //750.0, 1500.0);
    private final Vector2d copRateDefaultWeight = new Vector2d(20000.0, 20000.0); //100000.0, 200000.0);
    private final Vector2d copRateHighWeight = new Vector2d(2500000.0, 10000000.0);
-   private double headWeight  = 1.0;
+   private double headJointspaceWeight  = 1.0;
+   private double headTaskspaceWeight  = 1.0;
+   private double headUserModeWeight  = 1.0;
    private double chestWeight = 50.0; //10.0;
    private double pelvisWeight = 5.0;
    private double defaultFootWeight = 10.0;
@@ -31,14 +33,15 @@ public class MomentumOptimizationSettings
    {
    }
 
-   public void setHeadWeight(double weight)
+   public void setHeadWeights(double jointspace, double taskspace, double userMode)
    {
-      headWeight = weight;
+      headJointspaceWeight = jointspace;
+      headTaskspaceWeight = taskspace;
+      headUserModeWeight = userMode;
    }
 
-   public void setBodyWeights(double headWeight, double chestWeight, double pelvisWeight)
+   public void setBodyWeights(double chestWeight, double pelvisWeight)
    {
-      this.headWeight = headWeight;
       this.chestWeight = chestWeight;
       this.pelvisWeight = pelvisWeight;
    }
@@ -160,9 +163,19 @@ public class MomentumOptimizationSettings
       return copRateHighWeight;
    }
 
-   public double getHeadWeight()
+   public double getHeadUserModeWeight()
    {
-      return headWeight;
+      return headUserModeWeight;
+   }
+
+   public double getHeadJointspaceWeight()
+   {
+      return headJointspaceWeight;
+   }
+
+   public double getHeadTaskspaceWeight()
+   {
+      return headTaskspaceWeight;
    }
 
    public double getChestWeight()

@@ -157,8 +157,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
          double switchTime = EndToEndArmTrajectoryMessageTest.findControllerSwitchTime(robotSide, scs);
-         double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(robotSide, armJoints, numberOfJoints, scs);
-         double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(robotSide, armJoints, numberOfJoints, scs);
+         double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(robotSide, armJoints, scs);
+         double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(robotSide, armJoints, scs);
 
          assertEquals(HandControlMode.JOINT_SPACE, controllerState);
          assertEquals(timeStopSent, switchTime, getRobotModel().getControllerDT());

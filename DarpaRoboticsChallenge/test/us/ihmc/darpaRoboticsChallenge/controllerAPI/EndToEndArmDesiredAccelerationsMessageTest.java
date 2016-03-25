@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.UserControlModeState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -90,7 +90,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(UserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
          assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
@@ -115,7 +115,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
    public static double[] findControllerDesiredJointAccelerations(RobotSide robotSide, OneDoFJoint[] armJoints, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[armJoints.length];
-      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + "Hand" + UserControlModeState.class.getSimpleName();
+      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + "Hand" + HandUserControlModeState.class.getSimpleName();
 
       for (int i = 0; i < armJoints.length; i++)
       {

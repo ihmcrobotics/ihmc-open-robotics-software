@@ -17,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -545,6 +546,26 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   {
+      YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      double kp = 40.0;
+      double zeta = realRobot ? 0.4 : 0.8;
+      double maxAccel = 18.0;
+      double maxJerk = 270.0;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
+      return gains;
+   }
+
+   @Override
    public double getTrajectoryTimeHeadOrientation()
    {
       return 2.0;
@@ -914,7 +935,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       // The weight for the head needs to be pretty high to counter the privileged configuration task.
       // This seems to be specific to Val's, probably because of its particular kinematics.
       // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
-      momentumOptimizationSettings.setHeadWeight(500.0);
+      momentumOptimizationSettings.setHeadWeights(5.0, 500.0, 50.0);
       return momentumOptimizationSettings;
    }
 

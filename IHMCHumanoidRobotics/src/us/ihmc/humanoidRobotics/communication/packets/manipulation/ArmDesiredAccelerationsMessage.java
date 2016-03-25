@@ -28,7 +28,7 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
          case IHMC_CONTROL_MODE:
             return "The IHMC controller controls the arm joints to execute desired inputs given from ArmTrajectoryMessage, HandTrajectoryMessage, and WholeBodyTrajectoryMessage."
                   + " PD controllers are run for the given inputs and will either compute the desired hand spatial acceleration or arm joint desired accelerations."
-                  + "The desired joint torques to achieve there desired accelerations are computed by the IHMC QP solver & inverse dynamics calculator.";
+                  + "The desired joint torques to achieve these desired accelerations are computed by the IHMC QP solver & inverse dynamics calculator.";
          case USER_CONTROL_MODE:
             return "The user directly sets what the arm joint desired accelerations have to be."
                   + " The IHMC controller will stop tracking positions and the user desired accelerations will be fed to the IHMC QP solver & inverse dynamics to compute the desired joint torques.";
@@ -112,9 +112,9 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
       switch (armControlMode)
       {
       case IHMC_CONTROL_MODE:
-         return "ArmControlMode == " + armControlMode + ".";
+         return ArmControlMode.class.getSimpleName() + " == " + armControlMode + ".";
       case USER_CONTROL_MODE:
-         String ret = "ArmControlMode == " + armControlMode + ", desired qccelerations = [";
+         String ret = ArmControlMode.class.getSimpleName() + " == " + armControlMode + ", desired accelerations = [";
          NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
          for (int i = 0; i < getNumberOfJoints(); i++)
          {
@@ -125,7 +125,7 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
          }
          return ret + "].";
       default:
-         return "Invalid ArmControlMode: " + armControlMode;
+         return "Invalid " + ArmControlMode.class.getSimpleName() + ": " + armControlMode;
       }
    }
 

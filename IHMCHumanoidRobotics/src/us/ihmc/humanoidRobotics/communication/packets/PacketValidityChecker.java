@@ -7,10 +7,10 @@ import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
@@ -20,6 +20,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage.NeckControlMode;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
@@ -314,17 +317,17 @@ public abstract class PacketValidityChecker
       int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
       if (numberOfJoints == 0)
       {
-         errorMessage = "ArmJointTrajectoryPacket does not contain any points";
+         errorMessage = ArmTrajectoryMessage.class.getSimpleName() + " is empty.";
          return errorMessage;
       }
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         ArmOneJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         errorMessage = validateArmOneJointTrajectoryMessage(jointTrajectory1DMessage, false);
+         OneJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
+         errorMessage = validateOneJointTrajectoryMessage(jointTrajectory1DMessage, false);
          if (errorMessage != null)
          {
-            errorMessage = "Error with the " + jointIndex + " jointTrajectory1DMessage: " + errorMessage;
+            errorMessage = "Error with the " + jointIndex + " " + OneJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
             return errorMessage;
          }
       }
@@ -355,6 +358,68 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + i + "th " + errorMessage;
             return errorMessage;
          }
+      }
+
+      return null;
+   }
+
+   public static String validateNeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
+   {
+      String errorMessage = validatePacket(neckTrajectoryMessage, true);
+      if (errorMessage != null)
+         return errorMessage;
+
+      if (neckTrajectoryMessage.jointTrajectoryMessages == null)
+      {
+         errorMessage = "Trajectory points are empty.";
+         return errorMessage;
+      }
+
+      int numberOfJoints = neckTrajectoryMessage.getNumberOfJoints();
+      if (numberOfJoints == 0)
+      {
+         errorMessage = NeckTrajectoryMessage.class.getSimpleName() + " is empty.";
+         return errorMessage;
+      }
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneJointTrajectoryMessage oneJointTrajectoryMessage = neckTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
+         errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
+         if (errorMessage != null)
+         {
+            errorMessage = "Error with the " + jointIndex + " " + OneJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
+            return errorMessage;
+         }
+      }
+
+      return null;
+   }
+
+   public static String validateNeckDesiredAccelerationsMessage(NeckDesiredAccelerationsMessage neckDesiredAccelerationsMessage)
+   {
+      String errorMessage = validatePacket(neckDesiredAccelerationsMessage, true);
+      if (errorMessage != null)
+         return errorMessage;
+
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(neckDesiredAccelerationsMessage.neckControlMode);
+      if (packetFieldErrorType != null)
+      {
+         errorMessage = "armControlMode field" + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      boolean isInUserControlMode = neckDesiredAccelerationsMessage.neckControlMode == NeckControlMode.USER_CONTROL_MODE;
+      if (isInUserControlMode && neckDesiredAccelerationsMessage.neckDesiredJointAccelerations == null)
+      {
+         errorMessage = "The field with desired joint acceleration is empty.";
+         return errorMessage;
+      }
+
+      if (isInUserControlMode && neckDesiredAccelerationsMessage.getNumberOfJoints() == 0)
+      {
+         errorMessage = "The field with desired joint acceleration is empty.";
+         return errorMessage;
       }
 
       return null;
@@ -702,28 +767,28 @@ public abstract class PacketValidityChecker
 
    private final static double MAX_ACCEPTED_JOINT_VELOCITY = 100.0;
 
-   public static String validateArmOneJointTrajectoryMessage(ArmOneJointTrajectoryMessage armOneJointTrajectoryMessage, boolean checkId)
+   public static String validateOneJointTrajectoryMessage(OneJointTrajectoryMessage oneJointTrajectoryMessage, boolean checkId)
    {
-      String errorMessage = validatePacket(armOneJointTrajectoryMessage, checkId);
+      String errorMessage = validatePacket(oneJointTrajectoryMessage, checkId);
       if (errorMessage != null)
          return errorMessage;
 
       TrajectoryPoint1DMessage previousTrajectoryPoint = null;
 
-      if (armOneJointTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
+      if (oneJointTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
          return "The joint trajectory message has no waypoint.";
 
-      for (int i = 0; i < armOneJointTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < oneJointTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
       {
-         TrajectoryPoint1DMessage waypoint = armOneJointTrajectoryMessage.getTrajectoryPoint(i);
+         TrajectoryPoint1DMessage waypoint = oneJointTrajectoryMessage.getTrajectoryPoint(i);
          errorMessage = validateTrajectoryPoint1DMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
             return "The " + i + "th " + errorMessage;
       }
 
-      for (int waypointIndex = 0; waypointIndex < armOneJointTrajectoryMessage.getNumberOfTrajectoryPoints(); waypointIndex++)
+      for (int waypointIndex = 0; waypointIndex < oneJointTrajectoryMessage.getNumberOfTrajectoryPoints(); waypointIndex++)
       {
-         TrajectoryPoint1DMessage waypoint = armOneJointTrajectoryMessage.getTrajectoryPoint(waypointIndex);
+         TrajectoryPoint1DMessage waypoint = oneJointTrajectoryMessage.getTrajectoryPoint(waypointIndex);
          double waypointPosition = waypoint.getPosition();
 
          if (Math.abs(waypointPosition) > Math.PI)

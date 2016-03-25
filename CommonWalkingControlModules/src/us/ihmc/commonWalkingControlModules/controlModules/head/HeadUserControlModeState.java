@@ -1,41 +1,38 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
+package us.ihmc.commonWalkingControlModules.controlModules.head;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public class UserControlModeState extends HandControlState
+public class HeadUserControlModeState extends HeadControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
-   private final RobotSide robotSide;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final DoubleYoVariable weight = new DoubleYoVariable("headUserControlModeWeight", registry);
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+
    private final OneDoFJoint[] userControlledJoints;
    private final DoubleYoVariable[] userDesiredJointAccelerations;
+
    private final DoubleYoVariable timeOfLastUserMesage;
    private final DoubleYoVariable timeSinceLastUserMesage;
    private final BooleanYoVariable abortUserControlMode;
    private final DoubleYoVariable yoTime;
-   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
-   public UserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController,
-         YoVariableRegistry parentRegistry)
+   public HeadUserControlModeState(OneDoFJoint[] userControlledJoints, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(HandControlMode.USER_CONTROL_MODE);
+      super(HeadControlMode.USER_CONTROL_MODE);
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      parentRegistry.addChild(registry);
-
-      this.robotSide = robotSide;
       this.userControlledJoints = userControlledJoints;
+      this.yoTime = yoTime;
+
       userDesiredJointAccelerations = new DoubleYoVariable[userControlledJoints.length];
       for (int i = 0; i < userControlledJoints.length; i++)
       {
@@ -44,35 +41,29 @@ public class UserControlModeState extends HandControlState
          jointspaceAccelerationCommand.addJoint(userControlledJoints[i], Double.NaN);
       }
 
-      jointspaceAccelerationCommand.setWeight(SolverWeightLevels.HIGH);
+      timeOfLastUserMesage = new DoubleYoVariable("HeadTimeOfsLastUserMesage", registry);
+      timeSinceLastUserMesage = new DoubleYoVariable("HeadTimeSinceLastUserMesage", registry);
+      abortUserControlMode = new BooleanYoVariable("HeadAbortUserControlMode", registry);
 
-      timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfsLastUserMesage", registry);
-      timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
-      abortUserControlMode = new BooleanYoVariable(namePrefix + "AbortUserControlMode", registry);
-      yoTime = momentumBasedController.getYoTime();
+      parentRegistry.addChild(registry);
    }
 
+   @Override
    public void setWeight(double weight)
    {
-      jointspaceAccelerationCommand.setWeight(weight);
+      this.weight.set(weight);
    }
 
-   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand message)
+   public void handleNeckDesiredAccelerationsMessage(NeckDesiredAccelerationsCommand command)
    {
-      if (message.getNumberOfJoints() != userControlledJoints.length)
-      {
-         abortUserControlMode.set(true);
-         return;
-      }
-
-      if (message.getRobotSide() != robotSide)
+      if (command.getNumberOfJoints() != userControlledJoints.length)
       {
          abortUserControlMode.set(true);
          return;
       }
 
       for (int i = 0; i < userControlledJoints.length; i++)
-         userDesiredJointAccelerations[i].set(message.getArmDesiredJointAcceleration(i));
+         userDesiredJointAccelerations[i].set(command.getNeckDesiredJointAcceleration(i));
       timeSinceLastUserMesage.set(0.0);
       timeOfLastUserMesage.set(yoTime.getDoubleValue());
    }
@@ -112,19 +103,13 @@ public class UserControlModeState extends HandControlState
    }
 
    @Override
-   public JointspaceAccelerationCommand getInverseDynamicsCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return jointspaceAccelerationCommand;
    }
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
-   {
-      return null;
-   }
-
-   @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
    {
       return null;
    }

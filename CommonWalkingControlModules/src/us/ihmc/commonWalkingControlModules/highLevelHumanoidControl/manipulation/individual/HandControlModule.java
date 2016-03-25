@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.UserControlModeState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
@@ -93,7 +93,7 @@ public class HandControlModule
    private final TaskspaceHandPositionControlState taskSpacePositionControlState;
    private final JointSpaceHandControlState jointSpaceHandControlState;
    private final LoadBearingHandControlState loadBearingControlState;
-   private final UserControlModeState userControlModeState;
+   private final HandUserControlModeState userControlModeState;
 
    private final EnumYoVariable<HandControlMode> requestedState;
    private final OneDoFJoint[] jointsOriginal;
@@ -223,7 +223,7 @@ public class HandControlModule
       }
       else
       {
-         userControlModeState = new UserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
+         userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
          loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController, elevator, hand, registry);
       }
 
