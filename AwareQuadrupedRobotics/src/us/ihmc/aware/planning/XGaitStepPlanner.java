@@ -238,7 +238,7 @@ public class XGaitStepPlanner
       tf.rotZ(nominalYaw);
 
       FramePoint centroid = pool.lease(FramePoint.class);
-      polygon.getCentroid2d(centroid);
+      polygon.getCentroid(centroid);
 
       // Compute the stride vector and rotate it to the new yaw angle.
       FrameVector stride = pool.lease(FrameVector.class);
