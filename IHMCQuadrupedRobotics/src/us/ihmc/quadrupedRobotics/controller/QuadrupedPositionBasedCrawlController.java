@@ -124,6 +124,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final SwingTargetGenerator swingTargetGenerator;
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
    private final SDFFullRobotModel actualFullRobotModel;
+   private final SixDoFJoint actualRobotRootJoint;
+   
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CenterOfMassJacobian feedForwardCenterOfMassJacobian;
@@ -368,8 +370,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       useImuFeedback.set(true);
       pitchPidController.setProportionalGain(1.0);
       pitchPidController.setIntegralGain(0.4);
+      pitchPidController.setMaxIntegralError(0.1);
+      
       rollPidController.setProportionalGain(1.0);
       rollPidController.setIntegralGain(0.1);
+      rollPidController.setMaxIntegralError(0.1);
       
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.HIND_LEFT);
@@ -385,6 +390,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       
+      actualRobotRootJoint = actualFullRobotModel.getRootJoint();
       referenceFrames.updateFrames();
       comFrame = referenceFrames.getCenterOfMassFrame();
       
@@ -715,7 +721,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       updateDesiredCoMTrajectory();
       updateDesiredHeight();
       updateDesiredYaw();
-      alphaFilterDesiredBodyOrientation();
+      updateDesiredBodyOrientation();
       updateDesiredCoMPose();
       updateLegsBasedOnDesiredCoM();
       computeDesiredPositionsAndStoreInFullRobotModel(actualFullRobotModel);
@@ -766,9 +772,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       actualFullRobotModel.updateFrames();
       
       SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
-      SixDoFJoint rootJoint = actualFullRobotModel.getRootJoint();
       
-      rootJoint.getJointTransform3D(rootJointPose);
+      actualRobotRootJoint.getJointTransform3D(rootJointPose);
       feedForwardRootJoint.setPositionAndRotation(rootJointPose);
       
       feedForwardReferenceFrames.updateFrames();
@@ -858,23 +863,22 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    }
 
    private double lastProvidedDesiredYawRate = 0.0;
-   private Vector3d bodyOrienation = new Vector3d();
    
    private void pollDataProviders()
    {
       
       if(inputProvider != null)
       {
-         inputProvider.getComPositionInput();// support z up
          inputProvider.getComVelocityInput();// support z up
          
          //body velocity
          Vector3d planarVelocityInput = inputProvider.getPlanarVelocityInput();//Frame up to controller - feedForwardBodyFrame
          desiredVelocity.setVector(planarVelocityInput);
+         desiredVelocity.setY(0.0);
+         desiredVelocity.setZ(0.0);
          
          //yaw rate
-         Vector3d bodyAngularRateInput = inputProvider.getBodyAngularRateInput();// support z up
-         double providedDesiredYawRate = bodyAngularRateInput.getZ();
+         double providedDesiredYawRate = planarVelocityInput.getZ();
          providedDesiredYawRate = MathTools.clipToMinMax(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
          if (providedDesiredYawRate != lastProvidedDesiredYawRate)
          {
@@ -885,8 +889,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          //body orientation
          Quat4d bodyOrientationInput = inputProvider.getBodyOrientationInput();// support z up
 //            double providedDesiredYawInPlace = desiredYawInPlaceProvider.getValue();
-         RotationTools.convertQuaternionToRotationVector(bodyOrientationInput, bodyOrienation);
-         double providedDesiredYawInPlace = bodyOrienation.getZ();
+         double providedDesiredYawInPlace = RotationTools.computeYaw(bodyOrientationInput);
          providedDesiredYawInPlace = MathTools.clipToMinMax(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
          if (isDesiredVelocityAndYawRateZero())
          {
@@ -896,6 +899,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          {
             desiredYawInPlaceProvider.setToZero();
          }
+         
+         desiredCoMOrientation.setPitch(RotationTools.computePitch(bodyOrientationInput));
+         desiredCoMOrientation.setRoll(RotationTools.computeRoll(bodyOrientationInput));
+         
+         //com height
+         Point3d comPositionInput = inputProvider.getComPositionInput();// support z up
+         desiredCoMHeight.set(comPositionInput.getZ());
       }
       else
       {
@@ -937,12 +947,14 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final Point3d centerOfMassOffset = new Point3d();
    private final FramePoint actualFootLocation = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
+
+
+   
    /**
     * uses feedback to update the CoM Velocity, ICP, and Actual Foot Positions
     */
    private void updateEstimates()
    {
-      SixDoFJoint actualRobotRootJoint = actualFullRobotModel.getRootJoint();
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);
       actualPitch.set(yawPitchRollArray[1]);
@@ -1129,7 +1141,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       desiredCoMPosition.setZ(zHeight);
    }
    
-   private void alphaFilterDesiredBodyOrientation()
+   private void updateDesiredBodyOrientation()
    {
       filteredDesiredCoMYaw.update();
       filteredDesiredCoMPitch.update();
