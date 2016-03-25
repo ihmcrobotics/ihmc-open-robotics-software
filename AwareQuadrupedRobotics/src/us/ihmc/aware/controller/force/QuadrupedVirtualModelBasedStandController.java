@@ -2,7 +2,6 @@ package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.params.ParameterMap;
@@ -11,6 +10,7 @@ import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -33,7 +33,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final double controlDT;
    private final double gravity;
    private final double mass;
-   private final QuadrupedControllerInputProvider inputProvider;
+   private final QuadrupedControllerInputProviderInterface inputProvider;
 
    // parameters
    private final ParameterMap params;
@@ -75,7 +75,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
+   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -162,7 +162,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // compute support frame (centroid and nominal orientation)
       supportCentroid.changeFrame(supportPolygon.getReferenceFrame());
-      supportPolygon.getCentroid2d(supportCentroid);
+      supportPolygon.getCentroid(supportCentroid);
       supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
       supportCentroid.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
       supportOrientation.changeFrame(supportPolygon.getReferenceFrame());

@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.packets.BodyOrientationPacket;
 import us.ihmc.aware.packets.ComPositionPacket;
@@ -25,6 +24,7 @@ import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -145,7 +145,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrantDependentList<QuadrupedTimedStep> stepCache;
    private final FrameOrientation bodyOrientationInput;
    private double comHeightInput;
-   private final QuadrupedControllerInputProvider inputProvider;
+   private final QuadrupedControllerInputProviderInterface inputProvider;
 
    // setpoints
    private final QuadrantDependentList<FramePoint> solePositionSetpoint;
@@ -221,7 +221,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    private final XGaitStepPlanner footstepPlanner;
 
-   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider)
+   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -613,7 +613,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // compute support frame (centroid and nominal orientation)
       supportCentroidEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
       supportOrientationEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportPolygonEstimate.getCentroid2d(supportCentroidEstimate);
+      supportPolygonEstimate.getCentroid(supportCentroidEstimate);
       supportOrientationEstimate.setYawPitchRoll(supportPolygonEstimate.getNominalYaw(), 0, 0);
       supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
 
