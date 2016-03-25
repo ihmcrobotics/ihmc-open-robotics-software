@@ -75,10 +75,10 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    private final YoSE3PIDGainsInterface gains;
    private final DoubleYoVariable weight;
 
-   public TaskspaceHandPositionControlState(String namePrefix, HandControlMode stateEnum, boolean doPositionControl, OneDoFJoint[] armJoints, RigidBody base, RigidBody endEffector,
+   public TaskspaceHandPositionControlState(String namePrefix, OneDoFJoint[] positionControlledJoints, RigidBody base, RigidBody endEffector,
          RigidBody primaryBase, YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum);
+      super(HandControlMode.TASK_SPACE_POSITION);
       this.gains = gains;
 
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
@@ -118,14 +118,14 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(primaryBase, endEffector);
       inverseDynamicsCommandList.addCommand(privilegedConfigurationCommand);
 
-      if (doPositionControl)
+      if (positionControlledJoints.length > 0)
       {
          jointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-         jointDesiredDataHolder.registerJointsWithEmptyData(armJoints);
-         jointDesiredDataHolder.setJointsControlMode(armJoints, LowLevelJointControlMode.POSITION_CONTROL);
+         jointDesiredDataHolder.registerJointsWithEmptyData(positionControlledJoints);
+         jointDesiredDataHolder.setJointsControlMode(positionControlledJoints, LowLevelJointControlMode.POSITION_CONTROL);
          jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-         for (int i = 0; i < armJoints.length; i++)
-            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(armJoints[i]);
+         for (int i = 0; i < positionControlledJoints.length; i++)
+            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(positionControlledJoints[i]);
          inverseDynamicsCommandList.addCommand(jointAccelerationIntegrationCommand);
       }
       else

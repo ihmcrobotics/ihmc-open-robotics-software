@@ -117,7 +117,7 @@ public class HandControlModule
 
    private final BooleanYoVariable areAllArmJointEnabled;
 
-   private final boolean doPositionControl;
+   private final boolean isAtLeastOneJointPositionControlled;
 
    private final FramePose currentDesiredPose = new FramePose();
 
@@ -204,23 +204,31 @@ public class HandControlModule
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
 
       RigidBody elevator = fullRobotModel.getElevator();
-      doPositionControl = armControlParameters.doLowLevelPositionControl();
+      String[] positionControlledJointNames = armControlParameters.getPositionControlledJointNames(robotSide);
+      isAtLeastOneJointPositionControlled = positionControlledJointNames != null && positionControlledJointNames.length > 0;
+
+      OneDoFJoint[] positionControlledJoints;
+      if (isAtLeastOneJointPositionControlled)
+         positionControlledJoints = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(jointsOriginal, positionControlledJointNames), OneDoFJoint.class);
+      else
+         positionControlledJoints = new OneDoFJoint[0];
+
       String stateNamePrefix = namePrefix + "Hand";
 
-      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, jointsOriginal, doPositionControl, momentumBasedController, jointspaceGains,
-            controlDT, registry);
-      taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlMode.TASK_SPACE_POSITION, doPositionControl,
-            jointsOriginal, elevator, hand, chest, taskspaceGains, yoGraphicsListRegistry, registry);
+      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, jointsOriginal, positionControlledJoints, jointspaceGains, controlDT,
+            registry);
+      taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, positionControlledJoints, elevator, hand, chest, taskspaceGains,
+            yoGraphicsListRegistry, registry);
+      userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, positionControlledJoints, momentumBasedController,
+            registry);
 
-      if (doPositionControl)
+      if (isAtLeastOneJointPositionControlled)
       {
          // TODO Not implemented for position control.
          loadBearingControlState = null;
-         userControlModeState = null;
       }
       else
       {
-         userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
          loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController, elevator, hand, registry);
       }
 
@@ -249,7 +257,7 @@ public class HandControlModule
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
 
-      if (!doPositionControl)
+      if (!isAtLeastOneJointPositionControlled)
       {
          addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, loadBearingControlState);
          addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
@@ -282,8 +290,7 @@ public class HandControlModule
 
    public void setUserModeWeight(double weight)
    {
-      if (userControlModeState != null)
-         userControlModeState.setWeight(weight);
+      userControlModeState.setWeight(weight);
    }
 
    public void initialize()
@@ -461,9 +468,6 @@ public class HandControlModule
       if (!checkArmDesiredAccelerationsCommand(command))
          return;
 
-      if (userControlModeState == null)
-         return;
-
       switch (command.getArmControlMode())
       {
       case IHMC_CONTROL_MODE:
@@ -625,7 +629,7 @@ public class HandControlModule
 
    public void requestLoadBearing()
    {
-      if (doPositionControl)
+      if (isAtLeastOneJointPositionControlled)
       {
          PrintTools.error("Cannot do load bearing when the arms are position controlled.");
          return;
@@ -642,7 +646,7 @@ public class HandControlModule
 
    public boolean isLoadBearing()
    {
-      if (doPositionControl)
+      if (isAtLeastOneJointPositionControlled)
          return false;
       return stateMachine.getCurrentStateEnum() == HandControlMode.LOAD_BEARING;
    }

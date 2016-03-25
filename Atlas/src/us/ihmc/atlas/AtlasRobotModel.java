@@ -158,7 +158,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters();
       sensorInformation = new AtlasSensorInformation(target);
-      armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, selectedVersion.getDistanceAttachmentPlateHand());
+      armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
