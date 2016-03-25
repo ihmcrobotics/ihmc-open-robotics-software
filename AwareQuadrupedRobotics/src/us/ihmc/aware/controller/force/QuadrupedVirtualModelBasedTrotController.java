@@ -1,14 +1,10 @@
 package us.ihmc.aware.controller.force;
 
-import java.awt.Color;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
-import us.ihmc.aware.packets.BodyOrientationPacket;
-import us.ihmc.aware.packets.ComPositionPacket;
-import us.ihmc.aware.packets.PlanarVelocityPacket;
+import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
@@ -20,46 +16,22 @@ import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
-import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
-import us.ihmc.aware.vmc.QuadrupedContactForceOptimization;
-import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
-import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
-import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.controllers.EuclideanPositionController;
-import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
 public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceController
 {
@@ -70,6 +42,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final double controlDT;
    private final double gravity;
    private final double mass;
+   private final QuadrupedControllerInputProvider inputProvider;
 
    // parameters
    private final ParameterMap params;
@@ -78,157 +51,67 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final static String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
    private final static String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
    private final static String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
+   private final static String DCM_POSITION_PROPORTIONAL_GAINS = "dcmPositionProportionalGains";
+   private final static String DCM_POSITION_DERIVATIVE_GAINS = "dcmPositionDerivativeGains";
+   private final static String DCM_POSITION_INTEGRAL_GAINS = "dcmPositionIntegralGains";
+   private final static String DCM_POSITION_MAX_INTEGRAL_ERROR = "dcmPositionMaxIntegralError";
+   private final static String COM_POSITION_PROPORTIONAL_GAINS = "comPositionProportionalGains";
+   private final static String COM_POSITION_DERIVATIVE_GAINS = "comPositionDerivativeGains";
+   private final static String COM_POSITION_INTEGRAL_GAINS = "comPositionIntegralGains";
+   private final static String COM_POSITION_MAX_INTEGRAL_ERROR = "comPositionMaxIntegralError";
    private final static String SWING_POSITION_PROPORTIONAL_GAINS = "swingPositionProportionalGains";
    private final static String SWING_POSITION_DERIVATIVE_GAINS = "swingPositionDerivativeGains";
    private final static String SWING_POSITION_INTEGRAL_GAINS = "swingPositionIntegralGains";
    private final static String SWING_POSITION_MAX_INTEGRAL_ERROR = "swingPositionMaxIntegralError";
-   private final static String SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE = "swingPositionGravityFeedforwardForce";
    private final static String SWING_TRAJECTORY_GROUND_CLEARANCE = "swingTrajectoryGroundClearance";
-   private final static String DCM_PROPORTIONAL_GAINS = "dcmProportionalGains";
-   private final static String DCM_INTEGRAL_GAINS = "dcmIntegralGains";
-   private final static String DCM_MAX_INTEGRAL_ERROR = "dcmMaxIntegralError";
-   private final static String COM_HEIGHT_PROPORTIONAL_GAIN = "comHeightProportionalGain";
-   private final static String COM_HEIGHT_DERIVATIVE_GAIN = "comHeightDerivativeGain";
-   private final static String COM_HEIGHT_INTEGRAL_GAIN = "comHeightIntegralGain";
-   private final static String COM_HEIGHT_MAX_INTEGRAL_ERROR = "comHeightMaxIntegralError";
-   private final static String COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT = "comHeightGravityFeedforwardConstant";
-   private final static String COM_HEIGHT_NOMINAL = "comHeightNominal";
    private final static String QUAD_SUPPORT_DURATION = "quadSupportDuration";
    private final static String DOUBLE_SUPPORT_DURATION = "doubleSupportDuration";
    private final static String STANCE_WIDTH_NOMINAL = "stanceWidthNominal";
    private final static String STANCE_LENGTH_NOMINAL = "stanceLengthNominal";
    private final static String CONTACT_PRESSURE_THRESHOLD = "contactPressureThreshold";
-   private final static String BODY_ORIENTATION_INPUT_MIN = "bodyOrientationInputMin";
-   private final static String BODY_ORIENTATION_INPUT_MAX = "bodyOrientationInputMax";
-   private final static String COM_POSITION_INPUT_MIN = "comPositionInputMin";
-   private final static String COM_POSITION_INPUT_MAX = "comPositionInputMax";
-   private final static String PLANAR_VELOCITY_INPUT_MIN = "planarVelocityInputMin";
-   private final static String PLANAR_VELOCITY_INPUT_MAX = "planarVelocityInputMax";
 
-   // utilities
-   private final QuadrupedJointLimits jointLimits;
-   private final QuadrupedContactForceLimits contactForceLimits;
-   private final QuadrupedReferenceFrames referenceFrames;
-   private final ReferenceFrame worldFrame;
-   private final ReferenceFrame bodyFrame;
-   private final ReferenceFrame comFrame;
+   // frames
    private final PoseReferenceFrame supportFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrame;
-   private final QuadrantDependentList<RigidBody> footRigidBody;
-   private final OneDoFJoint[] oneDoFJoints;
-   private final CenterOfMassJacobian comJacobian;
-   private final TwistCalculator twistCalculator;
-   private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
-   private final QuadrantDependentList<ContactState> contactState;
+   private final ReferenceFrame worldFrame;
 
-   // controllers
-   private final QuadrupedVirtualModelController virtualModelController;
-   private final QuadrupedVirtualModelControllerSettings virtualModelControllerSettings;
-   private final QuadrupedContactForceOptimization contactForceOptimization;
-   private final QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings;
-   private final PIDController comHeightController;
-   private final AxisAngleOrientationController bodyOrientationController;
+   // support
+   QuadrupedSupportPolygon supportPolygon;
+   FramePoint supportCentroid;
+   FrameOrientation supportOrientation;
+
+   // dcm controller
+   private final FramePoint dcmPositionEstimate;
+   private final FramePoint dcmPositionSetpoint;
+   private final FrameVector dcmVelocitySetpoint;
    private final DivergentComponentOfMotionController dcmPositionController;
-   private final QuadrantDependentList<EuclideanPositionController> swingPositionController;
-   private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
 
-   // state machines
+   // task space controller
+   private final QuadrupedTaskSpaceCommands taskSpaceCommands;
+   private final QuadrupedTaskSpaceSetpoints taskSpaceSetpoints;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
+   private final QuadrupedTaskSpaceController taskSpaceController;
+   private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
+
+   // trajectories
+   private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
+   private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
+
+   // state machine
    public enum TrotState
    {
       QUAD_SUPPORT, HIND_LEFT_FRONT_RIGHT_SUPPORT, HIND_RIGHT_FRONT_LEFT_SUPPORT
    }
-
    public enum TrotEvent
    {
       TIMEOUT
    }
-
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
-   // provider inputs
-   private final QuadrupedControllerInputProvider inputProvider;
-   private double bodyYawRateInput;
-   private double bodyYawRateIntegral;
-   private final FrameVector bodyVelocityInput;
-   private final FrameOrientation bodyOrientationInput;
-   private double comHeightInput;
-
-   // setpoints
-   private final QuadrantDependentList<FramePoint> solePositionSetpoint;
-   private final QuadrantDependentList<FrameVector> soleLinearVelocitySetpoint;
-   private final QuadrantDependentList<FrameVector> soleForceFeedforwardSetpoint;
-   private final QuadrantDependentList<FrameVector> soleForceSetpoint;
-   private final FrameOrientation bodyOrientationSetpoint;
-   private final FrameVector bodyAngularVelocitySetpoint;
-   private final FrameVector bodyTorqueFeedforwardSetpoint;
-   private final FrameVector bodyTorqueSetpoint;
-   private final FramePoint dcmPositionSetpoint;
-   private final FrameVector dcmVelocitySetpoint;
-   private final FramePoint icpPositionSetpoint;
-   private final FrameVector icpVelocitySetpoint;
-   private final FrameVector comForceSetpoint;
-   private double comHeightSetpoint;
-
-   // estimates
-   private final QuadrantDependentList<FrameOrientation> soleOrientationEstimate;
-   private final QuadrantDependentList<FramePoint> solePositionEstimate;
-   private final QuadrantDependentList<FrameVector> soleAngularVelocityEstimate;
-   private final QuadrantDependentList<FrameVector> soleLinearVelocityEstimate;
-   private final QuadrupedSupportPolygon supportPolygonEstimate;
-   private final FramePoint supportCentroidEstimate;
-   private final FrameOrientation supportOrientationEstimate;
-   private final FrameOrientation bodyOrientationEstimate;
-   private final FramePoint bodyPositionEstimate;
-   private final FrameVector bodyLinearVelocityEstimate;
-   private final FrameVector bodyAngularVelocityEstimate;
-   private final FramePoint comPositionEstimate;
-   private final FrameVector comVelocityEstimate;
-   private final FramePoint dcmPositionEstimate;
-   private final FramePoint icpPositionEstimate;
-   private double comHeightEstimate;
-
-   // YoVariables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameVector yoBodyVelocityInput;
-   private final DoubleYoVariable yoBodyYawRateInput;
-   private final YoFrameOrientation yoBodyOrientationInput;
-   private final DoubleYoVariable yoComHeightInput;
-   private final QuadrantDependentList<YoFramePoint> yoSolePositionSetpoint;
-   private final QuadrantDependentList<YoFrameVector> yoSoleLinearVelocitySetpoint;
-   private final QuadrantDependentList<YoFrameVector> yoSoleForceFeedforwardSetpoint;
-   private final QuadrantDependentList<YoFrameVector> yoSoleForceSetpoint;
-   private final YoFrameOrientation yoBodyOrientationSetpoint;
-   private final YoFrameVector yoBodyAngularVelocitySetpoint;
-   private final YoFrameVector yoBodyTorqueFeedforwardSetpoint;
-   private final YoFrameVector yoBodyTorqueSetpoint;
-   private final YoFramePoint yoIcpPositionSetpoint;
-   private final YoFrameVector yoComForceSetpoint;
-   private final DoubleYoVariable yoComHeightSetpoint;
-   private final QuadrantDependentList<YoFrameOrientation> yoSoleOrientationEstimate;
-   private final QuadrantDependentList<YoFramePoint> yoSolePositionEstimate;
-   private final QuadrantDependentList<YoFrameVector> yoSoleAngularVelocityEstimate;
-   private final QuadrantDependentList<YoFrameVector> yoSoleLinearVelocityEstimate;
-   private final YoFrameConvexPolygon2d yoSupportPolygonEstimate;
-   private final YoFramePoint yoSupportCentroidEstimate;
-   private final YoFrameOrientation yoSupportOrientationEstimate;
-   private final YoFrameOrientation yoBodyOrientationEstimate;
-   private final YoFramePoint yoBodyPositionEstimate;
-   private final YoFrameVector yoBodyAngularVelocityEstimate;
-   private final YoFrameVector yoBodyLinearVelocityEstimate;
-   private final YoFramePoint yoComPositionEstimate;
-   private final YoFrameVector yoComVelocityEstimate;
-   private final YoFramePoint yoIcpPositionEstimate;
-   private final DoubleYoVariable yoComHeightEstimate;
-
-   // YoGraphics
-   private final YoGraphicsList yoGraphicsList;
-   private final ArtifactList artifactList;
-
-   // temporary
-   private final Twist twistStorage = new Twist();
 
    public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters,
-         ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider)
+         ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -238,6 +121,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
       this.inputProvider = inputProvider;
+      this.taskSpaceEstimator = taskSpaceEstimator;
+      this.taskSpaceController = taskSpaceController;
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedTrotController.class);
@@ -246,77 +131,60 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 750);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(COM_POSITION_PROPORTIONAL_GAINS, 0, 0, 5000);
+      params.setDefault(COM_POSITION_DERIVATIVE_GAINS, 0, 0, 750);
+      params.setDefault(COM_POSITION_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(COM_POSITION_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(DCM_POSITION_PROPORTIONAL_GAINS, 1, 1, 0);
+      params.setDefault(DCM_POSITION_DERIVATIVE_GAINS, 0, 0, 0);
+      params.setDefault(DCM_POSITION_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(DCM_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 50000, 50000, 100000);
       params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 500, 500, 500);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE, 0);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.10);
-      params.setDefault(DCM_PROPORTIONAL_GAINS, 1.0, 1.0, 0);
-      params.setDefault(DCM_INTEGRAL_GAINS, 0, 0, 0);
-      params.setDefault(DCM_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(COM_HEIGHT_PROPORTIONAL_GAIN, 5000);
-      params.setDefault(COM_HEIGHT_DERIVATIVE_GAIN, 750);
-      params.setDefault(COM_HEIGHT_INTEGRAL_GAIN, 0);
-      params.setDefault(COM_HEIGHT_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT, 1.00);
-      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
       params.setDefault(DOUBLE_SUPPORT_DURATION, 0.33);
       params.setDefault(STANCE_WIDTH_NOMINAL, 0.4);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
       params.setDefault(CONTACT_PRESSURE_THRESHOLD, 75);
-      params.setDefault(BODY_ORIENTATION_INPUT_MIN, -Math.PI/4, -Math.PI/4, -Math.PI/4);
-      params.setDefault(BODY_ORIENTATION_INPUT_MAX, Math.PI/4, Math.PI/4, Math.PI/4);
-      params.setDefault(COM_POSITION_INPUT_MIN, 0, 0, 0.25);
-      params.setDefault(COM_POSITION_INPUT_MAX, 0, 0, 0.75);
-      params.setDefault(PLANAR_VELOCITY_INPUT_MIN, -2.0, -2.0, -2.0);
-      params.setDefault(PLANAR_VELOCITY_INPUT_MAX, 2.0, 2.0, 2.0);
 
-      // utilities
-      jointLimits = new QuadrupedJointLimits(robotParameters.getQuadrupedJointLimits());
-      contactForceLimits = new QuadrupedContactForceLimits();
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointNameMap, robotParameters.getPhysicalProperties());
-      comFrame = referenceFrames.getCenterOfMassZUpFrame();
-      bodyFrame = referenceFrames.getBodyFrame();
-      worldFrame = referenceFrames.getWorldFrame();
-      supportFrame = new PoseReferenceFrame("SupportFrame", referenceFrames.getWorldFrame());
-      soleFrame = referenceFrames.getFootReferenceFrames();
-      footRigidBody = new QuadrantDependentList<>();
+      // frames
+      ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
+      worldFrame = ReferenceFrame.getWorldFrame();
+
+      // support
+      supportPolygon = new QuadrupedSupportPolygon();
+      supportCentroid = new FramePoint();
+      supportOrientation = new FrameOrientation();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String jointBeforeFootName = robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant);
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
-         footRigidBody.set(robotQuadrant, jointBeforeFoot.getSuccessor());
+         supportPolygon.setFootstep(robotQuadrant, new FramePoint());
       }
-      oneDoFJoints = fullRobotModel.getOneDoFJoints();
-      comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
+
+      // dcm controller
+      dcmPositionEstimate = new FramePoint();
+      dcmPositionSetpoint = new FramePoint();
+      dcmVelocitySetpoint = new FrameVector();
+      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
+
+      // task space controllers
+      taskSpaceCommands = new QuadrupedTaskSpaceCommands();
+      taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
+      taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+
+      // trajectories
       swingFootTrajectory = new QuadrantDependentList<>();
-      contactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
-         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
-      nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, params.get(COM_HEIGHT_NOMINAL), null);
+      nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ(), null);
 
-      // controllers
-      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);
-      virtualModelControllerSettings = new QuadrupedVirtualModelControllerSettings();
-      contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
-      contactForceOptimizationSettings = new QuadrupedContactForceOptimizationSettings();
-      comHeightController = new PIDController("bodyHeight", registry);
-      bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
-      dcmPositionController = new DivergentComponentOfMotionController("dcm", comFrame, controlDT, mass, gravity, params.get(COM_HEIGHT_NOMINAL), registry);
-      swingPositionController = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression() + "SwingState";
-         swingPositionController.set(robotQuadrant, new EuclideanPositionController(prefix, soleFrame.get(robotQuadrant), controlDT, registry));
-      }
-
-      // state machines
+      // state machine
       StateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new StateMachineBuilder<>(TrotState.class, "TrotState", registry);
       stateMachineBuilder.addState(TrotState.QUAD_SUPPORT, new QuadSupportState());
       stateMachineBuilder.addState(TrotState.HIND_LEFT_FRONT_RIGHT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT));
@@ -326,118 +194,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       stateMachineBuilder.addTransition(TrotEvent.TIMEOUT, TrotState.HIND_RIGHT_FRONT_LEFT_SUPPORT, TrotState.HIND_LEFT_FRONT_RIGHT_SUPPORT);
       trotStateMachine = stateMachineBuilder.build(TrotState.QUAD_SUPPORT);
 
-      // provider inputs
-      bodyYawRateInput = 0.0;
-      bodyYawRateIntegral = 0.0;
-      bodyVelocityInput = new FrameVector(worldFrame);
-      bodyOrientationInput = new FrameOrientation(worldFrame);
-      comHeightInput = params.get(COM_HEIGHT_NOMINAL);
-
-      // setpoints
-      solePositionSetpoint = new QuadrantDependentList<>();
-      soleLinearVelocitySetpoint = new QuadrantDependentList<>();
-      soleForceFeedforwardSetpoint = new QuadrantDependentList<>();
-      soleForceSetpoint = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         solePositionSetpoint.set(robotQuadrant, new FramePoint(worldFrame));
-         soleLinearVelocitySetpoint.set(robotQuadrant, new FrameVector(worldFrame));
-         soleForceFeedforwardSetpoint.set(robotQuadrant, new FrameVector(worldFrame));
-         soleForceSetpoint.set(robotQuadrant, new FrameVector(worldFrame));
-      }
-      bodyOrientationSetpoint = new FrameOrientation(worldFrame);
-      bodyAngularVelocitySetpoint = new FrameVector(worldFrame);
-      bodyTorqueFeedforwardSetpoint = new FrameVector(worldFrame);
-      bodyTorqueSetpoint = new FrameVector(worldFrame);
-      dcmPositionSetpoint = new FramePoint(worldFrame);
-      dcmVelocitySetpoint = new FrameVector(worldFrame);
-      icpPositionSetpoint = new FramePoint(worldFrame);
-      icpVelocitySetpoint = new FrameVector(worldFrame);
-      comForceSetpoint = new FrameVector(worldFrame);
-      comHeightSetpoint = params.get(COM_HEIGHT_NOMINAL);
-
-      // estimates
-      soleOrientationEstimate = new QuadrantDependentList<>();
-      solePositionEstimate = new QuadrantDependentList<>();
-      soleAngularVelocityEstimate = new QuadrantDependentList<>();
-      soleLinearVelocityEstimate = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         soleOrientationEstimate.set(robotQuadrant, new FrameOrientation(worldFrame));
-         solePositionEstimate.set(robotQuadrant, new FramePoint(worldFrame));
-         soleAngularVelocityEstimate.set(robotQuadrant, new FrameVector(worldFrame));
-         soleLinearVelocityEstimate.set(robotQuadrant, new FrameVector(worldFrame));
-      }
-      supportPolygonEstimate = new QuadrupedSupportPolygon();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         supportPolygonEstimate.setFootstep(robotQuadrant, new FramePoint(worldFrame));
-      }
-      supportCentroidEstimate = new FramePoint(worldFrame);
-      supportOrientationEstimate = new FrameOrientation(worldFrame);
-      bodyOrientationEstimate = new FrameOrientation(worldFrame);
-      bodyPositionEstimate = new FramePoint(worldFrame);
-      bodyAngularVelocityEstimate = new FrameVector(worldFrame);
-      bodyLinearVelocityEstimate = new FrameVector(worldFrame);
-      comPositionEstimate = new FramePoint(worldFrame);
-      comVelocityEstimate = new FrameVector(worldFrame);
-      dcmPositionEstimate = new FramePoint(worldFrame);
-      icpPositionEstimate = new FramePoint(worldFrame);
-      comHeightEstimate = params.get(COM_HEIGHT_NOMINAL);
-
-      // YoVariables
-      yoBodyYawRateInput = new DoubleYoVariable("bodyYawRateInput", registry);
-      yoBodyVelocityInput = new YoFrameVector("bodyVelocityInput", worldFrame, registry);
-      yoBodyOrientationInput = new YoFrameOrientation("bodyOrientationInput", worldFrame, registry);
-      yoComHeightInput = new DoubleYoVariable("comHeightInput", registry);
-      yoSolePositionSetpoint = new QuadrantDependentList<>();
-      yoSoleLinearVelocitySetpoint = new QuadrantDependentList<>();
-      yoSoleForceFeedforwardSetpoint = new QuadrantDependentList<>();
-      yoSoleForceSetpoint = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         yoSolePositionSetpoint.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionSetpoint", worldFrame, registry));
-         yoSoleLinearVelocitySetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", worldFrame, registry));
-         yoSoleForceFeedforwardSetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleForceFeedforwardSetpoint", worldFrame, registry));
-         yoSoleForceSetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleForceSetpoint", worldFrame, registry));
-      }
-      yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", worldFrame, registry);
-      yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", worldFrame, registry);
-      yoBodyTorqueFeedforwardSetpoint = new YoFrameVector("bodyTorqueFeedforwardSetpoint", worldFrame, registry);
-      yoBodyTorqueSetpoint = new YoFrameVector("bodyTorqueSetpoint", worldFrame, registry);
-      yoIcpPositionSetpoint = new YoFramePoint("icpPositionSetpoint", worldFrame, registry);
-      yoComForceSetpoint = new YoFrameVector("comForceSetpoint", worldFrame, registry);
-      yoComHeightSetpoint = new DoubleYoVariable("comHeightSetpoint", registry);
-      yoSoleOrientationEstimate = new QuadrantDependentList<>();
-      yoSolePositionEstimate = new QuadrantDependentList<>();
-      yoSoleAngularVelocityEstimate = new QuadrantDependentList<>();
-      yoSoleLinearVelocityEstimate = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         yoSoleOrientationEstimate.set(robotQuadrant, new YoFrameOrientation(prefix + "SoleOrientationEstimate", worldFrame, registry));
-         yoSolePositionEstimate.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionEstimate", worldFrame, registry));
-         yoSoleAngularVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleAngularVelocityEstimate", worldFrame, registry));
-         yoSoleLinearVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", worldFrame, registry));
-      }
-      yoSupportPolygonEstimate = new YoFrameConvexPolygon2d("supportPolygon", "", worldFrame, 4, registry);
-      yoSupportCentroidEstimate = new YoFramePoint("supportCentroid", worldFrame, registry);
-      yoSupportOrientationEstimate = new YoFrameOrientation("supportOrientation", worldFrame, registry);
-      yoBodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
-      yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
-      yoBodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
-      yoBodyLinearVelocityEstimate = new YoFrameVector("bodyLinearVelocityEstimate", worldFrame, registry);
-      yoComPositionEstimate = new YoFramePoint("comPositionEstimate", worldFrame, registry);
-      yoComVelocityEstimate = new YoFrameVector("comVelocityEstimate", worldFrame, registry);
-      yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", worldFrame, registry);
-      yoComHeightEstimate = new DoubleYoVariable("comHeightEstimate", registry);
-
-      // YoGraphics
-      yoGraphicsList = new YoGraphicsList(getClass().getSimpleName() + "Graphics");
-      artifactList = new ArtifactList(getClass().getSimpleName() + "Artifacts");
-      registerGraphics();
-
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
 
@@ -446,218 +202,81 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       return registry;
    }
 
-   public YoGraphicsList getYoGraphicsList()
-   {
-      return yoGraphicsList;
-   }
-
-   public ArtifactList getArtifactList()
-   {
-      return artifactList;
-   }
-
-   private void registerGraphics()
-   {
-      String prefix = getClass().getSimpleName();
-      YoGraphicPosition yoComPositionEstimateViz = new YoGraphicPosition(prefix + "pcomPositionEstimate", yoComPositionEstimate, 0.025, YoAppearance.Black(),
-            GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition(prefix + "icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
-      YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition(prefix + "icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
-      yoGraphicsList.add(yoComPositionEstimateViz);
-      yoGraphicsList.add(yoIcpPositionEstimateViz);
-      yoGraphicsList.add(yoIcpPositionSetpointViz);
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
-
-      YoArtifactPolygon yoSupportPolygonArtifact = new YoArtifactPolygon(prefix + "supportPolygon", yoSupportPolygonEstimate, Color.BLACK, false);
-      artifactList.add(yoComPositionEstimateViz.createArtifact());
-      artifactList.add(yoIcpPositionEstimateViz.createArtifact());
-      artifactList.add(yoIcpPositionSetpointViz.createArtifact());
-      artifactList.add(yoSupportPolygonArtifact);
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
-   }
-
-   private void updateProviders()
-   {
-      yoBodyOrientationInput.set(inputProvider.getBodyOrientationInput());
-      yoBodyVelocityInput.set(inputProvider.getPlanarVelocityInput().getX(), inputProvider.getPlanarVelocityInput().getY(), 0.0);
-      yoBodyYawRateInput.set(inputProvider.getPlanarVelocityInput().getZ());
-      yoComHeightInput.set(inputProvider.getComPositionInput().getZ());
-   }
-
    private void updateEstimates()
    {
-      // update frames and twists
-      referenceFrames.updateFrames();
-      twistCalculator.compute();
-      comJacobian.compute();
+      // update task space estimates
+      taskSpaceEstimator.compute(taskSpaceEstimates);
 
-      // compute sole poses and twists
+      // update dcm estimate
+      taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
+      taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
+      dcmPositionEstimate.changeFrame(worldFrame);
+      dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
+      dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
+      dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+
+      // compute support frame
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         twistCalculator.getTwistOfBody(twistStorage, footRigidBody.get(robotQuadrant));
-         twistStorage.changeFrame(soleFrame.get(robotQuadrant));
-         twistStorage.getAngularPart(soleAngularVelocityEstimate.get(robotQuadrant));
-         twistStorage.getLinearPart(soleLinearVelocityEstimate.get(robotQuadrant));
-         soleOrientationEstimate.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
-         solePositionEstimate.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
+         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(supportPolygon.getReferenceFrame());
+         supportPolygon.setFootstep(robotQuadrant, taskSpaceEstimates.getSolePosition().get(robotQuadrant));
+         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       }
-
-      // compute support polygon
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         solePositionEstimate.get(robotQuadrant).changeFrame(supportPolygonEstimate.getReferenceFrame());
-         supportPolygonEstimate.setFootstep(robotQuadrant, solePositionEstimate.get(robotQuadrant));
-      }
+      double minFrontFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_RIGHT).getZ());
+      double minHindFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_RIGHT).getZ());
 
       // compute support frame (centroid and nominal orientation)
-      supportCentroidEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportOrientationEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportPolygonEstimate.getCentroid2d(supportCentroidEstimate);
-      supportOrientationEstimate.setYawPitchRoll(supportPolygonEstimate.getNominalYaw(), 0, 0);
-      supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
-
-      // compute body pose and twist
-      twistCalculator.getTwistOfBody(twistStorage, fullRobotModel.getPelvis());
-      twistStorage.changeFrame(bodyFrame);
-      twistStorage.getAngularPart(bodyAngularVelocityEstimate);
-      twistStorage.getLinearPart(bodyLinearVelocityEstimate);
-      bodyOrientationEstimate.setToZero(bodyFrame);
-      bodyPositionEstimate.setToZero(bodyFrame);
-
-      // compute center of mass position and velocity
-      comPositionEstimate.setToZero(comFrame);
-      comJacobian.getCenterOfMassVelocity(comVelocityEstimate);
-
-      // compute divergent component of motion and instantaneous capture point
-      comPositionEstimate.changeFrame(worldFrame);
-      comVelocityEstimate.changeFrame(worldFrame);
-      dcmPositionEstimate.changeFrame(worldFrame);
-      double omega = dcmPositionController.getNaturalFrequency();
-      dcmPositionEstimate.setX(comPositionEstimate.getX() + comVelocityEstimate.getX() / omega);
-      dcmPositionEstimate.setY(comPositionEstimate.getY() + comVelocityEstimate.getY() / omega);
-      dcmPositionEstimate.setZ(comPositionEstimate.getZ() + comVelocityEstimate.getZ() / omega);
-      icpPositionEstimate.setIncludingFrame(dcmPositionEstimate);
-      icpPositionEstimate.add(0, 0, -dcmPositionController.getComHeight());
-
-      // compute center of mass height
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         solePositionEstimate.get(robotQuadrant).changeFrame(worldFrame);
-      }
-      double minFrontFootHeight = Math.min(solePositionEstimate.get(RobotQuadrant.FRONT_LEFT).getZ(), solePositionEstimate.get(RobotQuadrant.FRONT_RIGHT).getZ());
-      double minHindFootHeight = Math.min(solePositionEstimate.get(RobotQuadrant.HIND_LEFT).getZ(), solePositionEstimate.get(RobotQuadrant.HIND_RIGHT).getZ());
-      comPositionEstimate.changeFrame(worldFrame);
-      comHeightEstimate = comPositionEstimate.getZ() - ((minFrontFootHeight + minHindFootHeight) / 2.0);
+      supportCentroid.changeFrame(supportPolygon.getReferenceFrame());
+      supportPolygon.getCentroid2d(supportCentroid);
+      supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
+      supportCentroid.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
+      supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
+      supportOrientation.setYawPitchRoll(supportPolygon.getNominalYaw(), 0.0, 0.0);
+      supportFrame.setPoseAndUpdate(supportCentroid, supportOrientation);
    }
 
    private void updateSetpoints()
    {
-      // compute com forces and swing foot forces
+      // update desired dcm and sole setpoints
       trotStateMachine.process();
 
-      // compute body torques
-      bodyOrientationSetpoint.changeFrame(bodyOrientationInput.getReferenceFrame());
-      bodyOrientationSetpoint.setYawPitchRoll(bodyYawRateIntegral, bodyOrientationInput.getPitch() + supportPolygonEstimate.getNominalPitch(), bodyOrientationInput.getRoll());
-      bodyOrientationSetpoint.changeFrame(bodyFrame);
-      bodyAngularVelocitySetpoint.setToZero(bodyFrame);
-      bodyAngularVelocityEstimate.changeFrame(bodyFrame);
-      bodyTorqueFeedforwardSetpoint.setToZero(bodyFrame);
-      bodyTorqueSetpoint.changeFrame(bodyFrame);
-      bodyOrientationController
-            .compute(bodyTorqueSetpoint, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, bodyTorqueFeedforwardSetpoint);
+      // update desired horizontal com forces
+      dcmPositionController.compute(taskSpaceSetpoints.getComForceFeedforward(), dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
 
-      // compute optimal contact forces
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      // update desired com position, velocity, and vertical force
+      taskSpaceSetpoints.getComPosition().changeFrame(supportFrame);
+      taskSpaceSetpoints.getComPosition().set(inputProvider.getComPositionInput());
+      taskSpaceSetpoints.getComVelocity().setToZero();
+      taskSpaceSetpoints.getComForceFeedforward().changeFrame(worldFrame);
+      taskSpaceSetpoints.getComForceFeedforward().setZ(mass * gravity);
+
+      // update desired body orientation, angular velocity, and torque
+      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
+      double bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw();
+      double bodyPitch = RotationTools.computePitch(inputProvider.getBodyOrientationInput());
+      double bodyRoll = RotationTools.computeRoll(inputProvider.getBodyOrientationInput());
+      if (trotStateMachine.getState() != TrotState.QUAD_SUPPORT)
       {
-         contactForceOptimization.setContactState(robotQuadrant, contactState.get(robotQuadrant));
+         bodyYaw += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
       }
-      contactForceOptimization.setComForceCommand(comForceSetpoint);
-      contactForceOptimization.setComTorqueCommand(bodyTorqueSetpoint);
-      contactForceOptimization.solve(contactForceLimits, contactForceOptimizationSettings);
+      taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
+      taskSpaceSetpoints.getBodyAngularVelocity().setToZero();
+      taskSpaceSetpoints.getComTorqueFeedforward().setToZero();
 
-      // compute leg joint torques using virtual model control
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
-         {
-            contactForceOptimization.getContactForceSolution(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-            virtualModelController.setSoleContactForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-            virtualModelController.setSoleContactForceVisible(robotQuadrant, true);
-            virtualModelController.setSoleVirtualForceVisible(robotQuadrant, false);
-         }
-         else
-         {
-            virtualModelController.setSoleVirtualForce(robotQuadrant, soleForceSetpoint.get(robotQuadrant));
-            virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
-            virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
-         }
-      }
-      virtualModelController.compute(jointLimits, virtualModelControllerSettings);
-   }
-
-   private void readYoVariables()
-   {
-      bodyYawRateInput = yoBodyYawRateInput.getDoubleValue();
-      yoBodyVelocityInput.getFrameTupleIncludingFrame(bodyVelocityInput);
-      yoBodyOrientationInput.getFrameOrientationIncludingFrame(bodyOrientationInput);
-      comHeightInput = yoComHeightInput.getDoubleValue();
-   }
-
-   private void writeYoVariables()
-   {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         yoSolePositionSetpoint.get(robotQuadrant).setAndMatchFrame(solePositionSetpoint.get(robotQuadrant));
-         yoSoleLinearVelocitySetpoint.get(robotQuadrant).setAndMatchFrame(soleLinearVelocitySetpoint.get(robotQuadrant));
-         yoSoleForceFeedforwardSetpoint.get(robotQuadrant).setAndMatchFrame(soleForceFeedforwardSetpoint.get(robotQuadrant));
-         yoSoleForceSetpoint.get(robotQuadrant).setAndMatchFrame(soleForceSetpoint.get(robotQuadrant));
-      }
-      yoBodyOrientationSetpoint.setAndMatchFrame(bodyOrientationSetpoint);
-      yoBodyAngularVelocitySetpoint.setAndMatchFrame(bodyAngularVelocitySetpoint);
-      yoBodyTorqueFeedforwardSetpoint.setAndMatchFrame(bodyTorqueFeedforwardSetpoint);
-      yoBodyTorqueSetpoint.setAndMatchFrame(bodyTorqueSetpoint);
-      yoIcpPositionSetpoint.setAndMatchFrame(icpPositionSetpoint);
-      yoComForceSetpoint.setAndMatchFrame(comForceSetpoint);
-      yoComHeightSetpoint.set(comHeightSetpoint);
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(soleOrientationEstimate.get(robotQuadrant));
-         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(solePositionEstimate.get(robotQuadrant));
-         yoSoleAngularVelocityEstimate.get(robotQuadrant).setAndMatchFrame(soleAngularVelocityEstimate.get(robotQuadrant));
-         yoSoleLinearVelocityEstimate.get(robotQuadrant).setAndMatchFrame(soleLinearVelocityEstimate.get(robotQuadrant));
-      }
-      supportPolygonEstimate.packYoFrameConvexPolygon2d(yoSupportPolygonEstimate);
-      yoSupportCentroidEstimate.setAndMatchFrame(supportCentroidEstimate);
-      yoSupportOrientationEstimate.setAndMatchFrame(supportOrientationEstimate);
-      yoBodyOrientationEstimate.setAndMatchFrame(bodyOrientationEstimate);
-      yoBodyAngularVelocityEstimate.setAndMatchFrame(bodyAngularVelocityEstimate);
-      yoBodyLinearVelocityEstimate.setAndMatchFrame(bodyLinearVelocityEstimate);
-      yoComPositionEstimate.setAndMatchFrame(comPositionEstimate);
-      yoComVelocityEstimate.setAndMatchFrame(comVelocityEstimate);
-      yoIcpPositionEstimate.setAndMatchFrame(icpPositionEstimate);
-      yoComHeightEstimate.set(comHeightEstimate);
+      // update joint setpoints
+      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceSetpoints, taskSpaceEstimates, taskSpaceCommands);
    }
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      updateProviders();
-      readYoVariables();
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
       updateSetpoints();
-      writeYoVariables();
       return null;
    }
 
    @Override public void onEntry()
    {
-      // show graphics
-      yoGraphicsListRegistry.hideYoGraphics();
-      yoGraphicsListRegistry.hideArtifacts();
-      yoGraphicsList.setVisible(true);
-      artifactList.setVisible(true);
-      virtualModelController.setVisible(true);
-
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          for (int i = 0; i < jointNameMap.getLegJointNames().length; i++)
@@ -669,69 +288,63 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             joint.setUnderPositionControl(false);
          }
       }
+      // initialize dcm controller settings
+      dcmPositionController.setGains(
+            params.getVolatileArray(DCM_POSITION_PROPORTIONAL_GAINS),
+            params.getVolatileArray(DCM_POSITION_DERIVATIVE_GAINS),
+            params.getVolatileArray(DCM_POSITION_INTEGRAL_GAINS),
+            params.get(DCM_POSITION_MAX_INTEGRAL_ERROR));
+      dcmPositionController.reset();
 
-      // initialize controllers and state machines
-      virtualModelController.reset();
-      for (OneDoFJoint joint : oneDoFJoints)
-      {
-         QuadrupedJointName jointName = jointNameMap.getJointNameForSDFName(joint.getName());
-         virtualModelControllerSettings.setJointDamping(jointName, params.get(JOINT_DAMPING));
-      }
-      contactForceOptimization.reset();
-      contactForceOptimizationSettings.setDefaults();
+      // initialize task space controller
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+      taskSpaceSetpoints.initialize(taskSpaceEstimates);
+      taskSpaceControllerSettings.initialize();
+      taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
+      taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactForceOptimization.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-         contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
+         taskSpaceControllerSettings.setSoleForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
+         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
+         taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(robotQuadrant);
       }
-      contactForceOptimizationSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
-      contactForceOptimizationSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
-      bodyOrientationController.reset();
-      bodyOrientationController.setProportionalGains(params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS));
-      bodyOrientationController.setIntegralGains(params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS), params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR));
-      bodyOrientationController.setDerivativeGains(params.getVolatileArray(BODY_ORIENTATION_DERIVATIVE_GAINS));
-      comHeightController.resetIntegrator();
-      comHeightController.setProportionalGain(params.get(COM_HEIGHT_PROPORTIONAL_GAIN));
-      comHeightController.setIntegralGain(params.get(COM_HEIGHT_INTEGRAL_GAIN));
-      comHeightController.setMaxIntegralError(params.get(COM_HEIGHT_MAX_INTEGRAL_ERROR));
-      comHeightController.setDerivativeGain(params.get(COM_HEIGHT_DERIVATIVE_GAIN));
-      dcmPositionController.reset();
-      dcmPositionController.setProportionalGains(params.getVolatileArray(DCM_PROPORTIONAL_GAINS));
-      dcmPositionController.setIntegralGains(params.getVolatileArray(DCM_INTEGRAL_GAINS), params.get(DCM_MAX_INTEGRAL_ERROR));
-      trotStateMachine.reset();
+      taskSpaceControllerSettings.setBodyOrientationFeedbackGains(
+            params.getVolatileArray(BODY_ORIENTATION_PROPORTIONAL_GAINS),
+            params.getVolatileArray(BODY_ORIENTATION_DERIVATIVE_GAINS),
+            params.getVolatileArray(BODY_ORIENTATION_INTEGRAL_GAINS),
+            params.get(BODY_ORIENTATION_MAX_INTEGRAL_ERROR)
+      );
+      taskSpaceControllerSettings.setComPositionFeedbackGains(
+            params.getVolatileArray(COM_POSITION_PROPORTIONAL_GAINS),
+            params.getVolatileArray(COM_POSITION_DERIVATIVE_GAINS),
+            params.getVolatileArray(COM_POSITION_INTEGRAL_GAINS),
+            params.get(COM_POSITION_MAX_INTEGRAL_ERROR)
+      );
+      taskSpaceController.reset();
 
-      // initialize setpoints
-      updateEstimates();
-      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
-      dcmVelocitySetpoint.setToZero();
-      bodyOrientationEstimate.changeFrame(worldFrame);
-      bodyYawRateIntegral = bodyOrientationEstimate.getYaw();
+      trotStateMachine.reset();
    }
 
    @Override public void onExit()
    {
-      // hide graphics
-      yoGraphicsList.setVisible(false);
-      artifactList.setVisible(false);
-      virtualModelController.setVisible(false);
    }
 
    private void computeNominalCmpPositionAtSoS(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant, FramePoint nominalCmpPositionAtSoS)
    {
-      solePositionEstimate.get(hindSupportQuadrant).changeFrame(worldFrame);
-      solePositionEstimate.get(frontSupportQuadrant).changeFrame(worldFrame);
+      taskSpaceEstimates.getSolePosition(hindSupportQuadrant).changeFrame(worldFrame);
+      taskSpaceEstimates.getSolePosition(frontSupportQuadrant).changeFrame(worldFrame);
       nominalCmpPositionAtSoS.setToZero(worldFrame);
-      nominalCmpPositionAtSoS.add(solePositionEstimate.get(hindSupportQuadrant));
-      nominalCmpPositionAtSoS.add(solePositionEstimate.get(frontSupportQuadrant));
+      nominalCmpPositionAtSoS.add(taskSpaceEstimates.getSolePosition(hindSupportQuadrant));
+      nominalCmpPositionAtSoS.add(taskSpaceEstimates.getSolePosition(frontSupportQuadrant));
       nominalCmpPositionAtSoS.scale(0.5);
    }
 
    private void computeNominalCmpPositionAtEoS(FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
    {
-      bodyVelocityInput.changeFrame(worldFrame);
-      double bodyYaw = bodyYawRateIntegral;
-      double xStride = bodyVelocityInput.getX() * params.get(DOUBLE_SUPPORT_DURATION);
-      double yStride = bodyVelocityInput.getY() * params.get(DOUBLE_SUPPORT_DURATION);
+      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
+      double bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw();
+      double xStride = inputProvider.getPlanarVelocityInput().getX() * params.get(DOUBLE_SUPPORT_DURATION);
+      double yStride = inputProvider.getPlanarVelocityInput().getY() * params.get(DOUBLE_SUPPORT_DURATION);
       double xOffset = Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
       double yOffset = Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       nominalCmpPositionAtEoS.setIncludingFrame(nominalCmpPositionAtSoS);
@@ -742,8 +355,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private void computeNominalPeriodicDcmTrajectory(FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
    {
       double timeAtEoS = params.get(DOUBLE_SUPPORT_DURATION);
-      double relativeYawAtEoS = bodyYawRateInput * timeAtEoS;
-      nominalPeriodicDcmTrajectory.setComHeight(Math.max(comHeightInput, 0.001));
+      double relativeYawAtEoS = inputProvider.getPlanarVelocityInput().getZ() * timeAtEoS;
+      nominalPeriodicDcmTrajectory.setComHeight(inputProvider.getComPositionInput().getZ());
       nominalPeriodicDcmTrajectory.initializeTrajectory(0.0, nominalCmpPositionAtSoS, timeAtEoS, nominalCmpPositionAtEoS, relativeYawAtEoS);
    }
 
@@ -767,7 +380,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       double xOffset, yOffset;
 
       // compute foothold position based on the nominal stance and desired cmp
-      solePositionEstimate.get(robotQuadrant).changeFrame(worldFrame);
+      taskSpaceEstimates.getSolePosition(robotQuadrant).changeFrame(worldFrame);
       double xStance = robotQuadrant.getEnd().negateIfHindEnd(params.get(STANCE_LENGTH_NOMINAL) / 2);
       double yStance = robotQuadrant.getSide().negateIfRightSide(params.get(STANCE_WIDTH_NOMINAL) / 2);
       xOffset = Math.cos(bodyYaw) * xStance - Math.sin(bodyYaw) * yStance;
@@ -777,14 +390,14 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       footholdPosition.add(xOffset, yOffset, 0.0);
 
       // compute foothold height based on estimated ground slope
-      solePositionEstimate.get(robotQuadrant).changeFrame(worldFrame);
-      double xStride = footholdPosition.getX() - solePositionEstimate.get(robotQuadrant).getX();
-      double yStride = footholdPosition.getY() - solePositionEstimate.get(robotQuadrant).getY();
+      taskSpaceEstimates.getSolePosition(robotQuadrant).changeFrame(worldFrame);
+      double xStride = footholdPosition.getX() - taskSpaceEstimates.getSolePosition(robotQuadrant).getX();
+      double yStride = footholdPosition.getY() - taskSpaceEstimates.getSolePosition(robotQuadrant).getY();
       xOffset = Math.cos(-bodyYaw) * xStride - Math.sin(-bodyYaw) * yStride;
       yOffset = Math.sin(-bodyYaw) * xStride + Math.cos(-bodyYaw) * yStride;
-      footholdPosition.setZ(solePositionEstimate.get(robotQuadrant).getZ());
-      footholdPosition.add(0, 0, -xOffset * Math.tan(supportPolygonEstimate.getNominalPitch()));
-      footholdPosition.add(0, 0, yOffset * Math.tan(supportPolygonEstimate.getNominalRoll()));
+      footholdPosition.setZ(taskSpaceEstimates.getSolePosition(robotQuadrant).getZ());
+      footholdPosition.add(0, 0, -xOffset * Math.tan(supportPolygon.getNominalPitch()));
+      footholdPosition.add(0, 0, yOffset * Math.tan(supportPolygon.getNominalRoll()));
    }
 
    private class QuadSupportState implements StateMachineState<TrotEvent>
@@ -819,7 +432,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          // initialize contact state
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            contactState.set(robotQuadrant, ContactState.IN_CONTACT);
+            taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
          }
       }
 
@@ -831,19 +444,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          dcmTrajectory.computeTrajectory(currentTime - initialTime);
          dcmTrajectory.getPosition(dcmPositionSetpoint);
          dcmTrajectory.getVelocity(dcmVelocitySetpoint);
-         icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
-         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
-         icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
-
-         // compute horizontal forces to track desired dcm trajectory
-         dcmPositionController.setComHeight(comHeightSetpoint);
-         dcmPositionController.compute(comForceSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
-
-         // compute vertical com force
-         comHeightSetpoint = comHeightInput;
-         double comForceZ = params.get(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT) * mass * gravity + comHeightController.compute(comHeightEstimate, comHeightSetpoint, comVelocityEstimate.getZ(), 0, controlDT);
-         comForceSetpoint.changeFrame(worldFrame);
-         comForceSetpoint.setZ(comForceZ);
 
          // trigger touch down event
          if (currentTime > initialTime + params.get(QUAD_SUPPORT_DURATION))
@@ -875,7 +475,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          initialTime = 0.0;
          supportQuadrants = new RobotQuadrant[] {hindSupportQuadrant, frontSupportQuadrant};
          swingQuadrants = new RobotQuadrant[] {hindSupportQuadrant.getAcrossBodyQuadrant(), frontSupportQuadrant.getAcrossBodyQuadrant()};
-         dcmTrajectory = new PiecewiseForwardDcmTrajectory(1, gravity, params.get(COM_HEIGHT_NOMINAL), null);
+         dcmTrajectory = new PiecewiseForwardDcmTrajectory(1, gravity, dcmPositionController.getComHeight(), null);
          cmpPositionAtSoSNominal = new FramePoint(worldFrame);
          cmpPositionAtEoSNominal = new FramePoint(worldFrame);
          dcmPositionAtEoSNominal = new FramePoint(worldFrame);
@@ -895,7 +495,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
          // compute desired dcm trajectory
          dcmPositionEstimate.changeFrame(worldFrame);
-         dcmTrajectory.setComHeight(Math.max(comHeightSetpoint, 0.001));
+         dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
          dcmTrajectory.initializeTrajectory(initialTime, cmpPositionAtSoSNominal, dcmPositionEstimate);
          dcmTrajectory.computeTrajectory(initialTime + params.get(DOUBLE_SUPPORT_DURATION));
          dcmTrajectory.getPosition(dcmPositionAtEoS);
@@ -907,7 +507,9 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          cmpPositionAtEoS.setZ(cmpPositionAtSoSNominal.getZ());
 
          // compute desired body yaw at end of step
-         double bodyYawAtEoS = bodyYawRateIntegral + bodyYawRateInput * params.get(DOUBLE_SUPPORT_DURATION);
+         taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
+         double bodyYawAtSoS = taskSpaceSetpoints.getBodyOrientation().getYaw();
+         double bodyYawAtEoS = bodyYawAtSoS + inputProvider.getPlanarVelocityInput().getZ() * params.get(DOUBLE_SUPPORT_DURATION);
 
          for (int i = 0; i < 2; i++)
          {
@@ -918,18 +520,23 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             computeFootholdPosition(swingQuadrant, cmpPositionAtEoS, bodyYawAtEoS, footholdPosition);
 
             // initialize swing foot trajectory
-            FramePoint solePosition = solePositionEstimate.get(swingQuadrant);
+            FramePoint solePosition = taskSpaceEstimates.getSolePosition(swingQuadrant);
             solePosition.changeFrame(footholdPosition.getReferenceFrame());
             swingFootTrajectory.get(swingQuadrant).initializeTrajectory(solePosition, footholdPosition,
                params.get(SWING_TRAJECTORY_GROUND_CLEARANCE), params.get(DOUBLE_SUPPORT_DURATION));
-            swingPositionController.get(swingQuadrant).reset();
-            swingPositionController.get(swingQuadrant).setProportionalGains(params.getVolatileArray(SWING_POSITION_PROPORTIONAL_GAINS));
-            swingPositionController.get(swingQuadrant).setIntegralGains(params.getVolatileArray(SWING_POSITION_INTEGRAL_GAINS), params.get(SWING_POSITION_MAX_INTEGRAL_ERROR));
-            swingPositionController.get(swingQuadrant).setDerivativeGains(params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS));
+
+            // initialize sole position feedback gains
+            taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(supportQuadrant);
+            taskSpaceControllerSettings.setSolePositionFeedbackGains(swingQuadrant,
+                  params.getVolatileArray(SWING_POSITION_PROPORTIONAL_GAINS),
+                  params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS),
+                  params.getVolatileArray(SWING_POSITION_INTEGRAL_GAINS),
+                  params.get(SWING_POSITION_MAX_INTEGRAL_ERROR)
+            );
 
             // initialize contact state
-            contactState.set(swingQuadrant, ContactState.NO_CONTACT);
-            contactState.set(supportQuadrant, ContactState.IN_CONTACT);
+            taskSpaceControllerSettings.setContactState(swingQuadrant, ContactState.NO_CONTACT);
+            taskSpaceControllerSettings.setContactState(supportQuadrant, ContactState.IN_CONTACT);
          }
       }
 
@@ -937,26 +544,10 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       {
          double currentTime = robotTimestamp.getDoubleValue();
 
-         // integrate body yaw rate
-         bodyYawRateIntegral += bodyYawRateInput * controlDT;
-
          // compute dcm setpoint
          dcmTrajectory.computeTrajectory(currentTime);
          dcmTrajectory.getPosition(dcmPositionSetpoint);
          dcmTrajectory.getVelocity(dcmVelocitySetpoint);
-         icpPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
-         icpPositionSetpoint.sub(0, 0, dcmPositionController.getComHeight());
-         icpVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);
-
-         // compute horizontal forces to track desired divergent component of motion
-         dcmPositionController.setComHeight(comHeightSetpoint);
-         dcmPositionController.compute(comForceSetpoint, dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
-
-         // compute vertical com force
-         comHeightSetpoint = comHeightInput;
-         double comForceZ = params.get(COM_HEIGHT_GRAVITY_FEEDFORWARD_CONSTANT) * mass * gravity + comHeightController.compute(comHeightEstimate, comHeightSetpoint, comVelocityEstimate.getZ(), 0, controlDT);
-         comForceSetpoint.changeFrame(worldFrame);
-         comForceSetpoint.setZ(comForceZ);
 
          for (int i = 0; i < 2; i++)
          {
@@ -964,41 +555,22 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
             // compute nominal sole position setpoint
             swingFootTrajectory.get(swingQuadrant).computeTrajectory(currentTime - initialTime);
-            swingFootTrajectory.get(swingQuadrant).getPosition(solePositionSetpoint.get(swingQuadrant));
+            swingFootTrajectory.get(swingQuadrant).getPosition(taskSpaceSetpoints.getSolePosition(swingQuadrant));
 
             // shift the swing foot trajectory in the direction of the dcm tracking error
             dcmPositionEstimate.changeFrame(worldFrame);
             dcmPositionSetpoint.changeFrame(worldFrame);
-            solePositionSetpoint.get(swingQuadrant).changeFrame(worldFrame);
-            solePositionSetpoint.get(swingQuadrant).add(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
-            solePositionSetpoint.get(swingQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
+            taskSpaceSetpoints.getSolePosition(swingQuadrant).changeFrame(worldFrame);
+            taskSpaceSetpoints.getSolePosition(swingQuadrant).add(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
+            taskSpaceSetpoints.getSolePosition(swingQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
 
-            // compute sole force setpoint
-            soleForceSetpoint.get(swingQuadrant).setToZero();
-            soleForceSetpoint.get(swingQuadrant).changeFrame(soleFrame.get(swingQuadrant));
-            solePositionSetpoint.get(swingQuadrant).changeFrame(soleFrame.get(swingQuadrant));
-            soleLinearVelocitySetpoint.get(swingQuadrant).setToZero(soleFrame.get(swingQuadrant));
-            soleLinearVelocityEstimate.get(swingQuadrant).changeFrame(soleFrame.get(swingQuadrant));
-            soleForceFeedforwardSetpoint.get(swingQuadrant).changeFrame(worldFrame);
-            soleForceFeedforwardSetpoint.get(swingQuadrant).set(0, 0, params.get(SWING_POSITION_GRAVITY_FEEDFORWARD_FORCE));
-            soleForceFeedforwardSetpoint.get(swingQuadrant).changeFrame(soleFrame.get(swingQuadrant));
-            swingPositionController.get(swingQuadrant)
-                  .compute(soleForceSetpoint.get(swingQuadrant), solePositionSetpoint.get(swingQuadrant), soleLinearVelocitySetpoint.get(swingQuadrant),
-                        soleLinearVelocityEstimate.get(swingQuadrant), soleForceFeedforwardSetpoint.get(swingQuadrant));
-
-            // limit sole force setpoint if contact pressure threshold is exceeded
-            soleForceSetpoint.get(swingQuadrant).changeFrame(comFrame);
-            double fx = soleForceSetpoint.get(swingQuadrant).getX();
-            double fy = soleForceSetpoint.get(swingQuadrant).getY();
-            double fz = soleForceSetpoint.get(swingQuadrant).getZ();
-            if (fz < -params.get(CONTACT_PRESSURE_THRESHOLD))
+            // disable swing foot position feedback if contact pressure threshold is exceeded
+            taskSpaceCommands.getSoleForce(swingQuadrant).changeFrame(worldFrame);
+            if ((currentTime - initialTime > params.get(DOUBLE_SUPPORT_DURATION))
+            && (taskSpaceCommands.getSoleForce(swingQuadrant).getZ() < -params.get(CONTACT_PRESSURE_THRESHOLD)))
             {
-               double mu = 0.7;
-               soleForceSetpoint.get(swingQuadrant).setX(Math.min(fx, mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
-               soleForceSetpoint.get(swingQuadrant).setX(Math.max(fx,-mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
-               soleForceSetpoint.get(swingQuadrant).setY(Math.min(fy, mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
-               soleForceSetpoint.get(swingQuadrant).setY(Math.max(fy,-mu * params.get(CONTACT_PRESSURE_THRESHOLD) / Math.sqrt(2)));
-               soleForceSetpoint.get(swingQuadrant).setZ(-params.get(CONTACT_PRESSURE_THRESHOLD));
+               taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(swingQuadrant);
+               taskSpaceSetpoints.getSoleForceFeedforward(swingQuadrant).set(0, 0, -params.get(CONTACT_PRESSURE_THRESHOLD));
             }
          }
 
@@ -1011,15 +583,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
       @Override public void onExit()
       {
-         // change setpoints to world frame when not in use
-         for (int i = 0; i < 2; i++)
-         {
-            RobotQuadrant swingQuadrant = swingQuadrants[i];
-            soleForceSetpoint.get(swingQuadrant).changeFrame(worldFrame);
-            solePositionSetpoint.get(swingQuadrant).changeFrame(worldFrame);
-            soleLinearVelocitySetpoint.get(swingQuadrant).changeFrame(worldFrame);
-            soleForceFeedforwardSetpoint.get(swingQuadrant).changeFrame(worldFrame);
-         }
       }
    }
 }

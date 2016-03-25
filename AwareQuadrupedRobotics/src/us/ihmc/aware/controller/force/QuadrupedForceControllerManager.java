@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
+import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceController;
+import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimator;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMapRepository;
@@ -15,6 +17,7 @@ import us.ihmc.aware.state.StateMachineYoVariableTrigger;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -101,13 +104,19 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedRobotParameters parameters, ParameterMapRepository paramMapRepository, QuadrupedControllerInputProvider inputProvider)
    {
+      // Initialize controller components.
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), parameters.getJointMap(), parameters.getPhysicalProperties());
+      QuadrupedTaskSpaceEstimator taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), registry, runtimeEnvironment.getGraphicsListRegistry());
+      QuadrupedTaskSpaceController taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), parameters.getQuadrupedJointLimits(), runtimeEnvironment.getControlDT(),
+            registry, runtimeEnvironment.getGraphicsListRegistry());
+
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(runtimeEnvironment, parameters);
       QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, parameters,
             paramMapRepository);
-      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
+      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
       QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
-      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
+      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
 
       StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(QuadrupedForceControllerState.class,
             "forceControllerState", registry);
