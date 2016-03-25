@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
@@ -18,7 +17,7 @@ import us.ihmc.quadrupedRobotics.gait.TrotPair;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.supportPolygon.YoQuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,6 +29,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoTwist;
+import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -40,7 +40,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -56,6 +55,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private static final double ESTIMATED_ROTATIONAL_INERTIA = 5.0; // TODO PDControl this when z-vel=0
    private static final double COEFFICIENT_OF_FRICTION = 0.7;
    private final double dt;
+   private final DoubleYoVariable yoTime;
    private final YoVariableRegistry registry = new YoVariableRegistry("TrotWalkController");
    private final QuadrupedReferenceFrames referenceFrames;
    private final SDFFullRobotModel fullRobotModel;
@@ -89,7 +89,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final DoubleYoVariable kd_yaw = new DoubleYoVariable("b_yaw", registry);
 
    private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
-   private final HashMap<String, DoubleYoVariable> desiredTorques = new HashMap<>();
 
    private final IntegerYoVariable numberOfFeetInContact = new IntegerYoVariable("numberOfFeetInContact", registry);
    
@@ -107,25 +106,23 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final DenseMatrix64F basisMatrix = new DenseMatrix64F(6, 16);
    private final DenseMatrix64F rhoMatrix = new DenseMatrix64F(16, 1);
    private final SolvePseudoInverseSvd solver = new SolvePseudoInverseSvd();
-   private final QuadrantDependentList<YoFrameVector> vmcFootForcesWorld = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFrameVector> vmcFootForces = new QuadrantDependentList<>();
-   private YoFramePose bodyPoseWorld;
+   private final YoFramePose bodyPoseWorld;
    private final YoTwist bodyTwist;
    private final YoFramePose stancePose;
    private final YoFramePose desiredStancePose;
    private final YoFramePose desiredStancePoseOffset;
    private final YoFrameVector bodyLinearAcceleration;
    private final YoFrameVector bodyAngularAcceleration;
-   private final YoFrameVector desiredBodyForce;
-   private final YoFrameVector desiredBodyTorque;
-   private final Wrench desiredBodyWrench;
+   private final YoWrench desiredBodyWrench;
    private final YoTwist desiredBodyTwist;
    private final SideDependentList<List<YoGraphicVector>> forceDistributionYoGraphicVectors = new SideDependentList<>();
    private final QuadrantDependentList<YoGraphicVector[]> basisForceYoGraphicVectors = new QuadrantDependentList<>();
-   private final FramePoint footInBodyZUp = new FramePoint();
-   private final FramePoint jointInBodyZUp = new FramePoint();
+   
+   // Jacobian
+   private final FramePoint jointPosition = new FramePoint();
    private final FrameVector jointToFootVector = new FrameVector();
-   private final FrameVector vmcRequestedTorqueFromJointXYZ = new FrameVector();
+   private final FrameVector vmcRequestedTorqueFromJoint = new FrameVector();
    private final FrameVector jointAxis = new FrameVector();
    
    // Walking
@@ -136,6 +133,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final QuadrantDependentList<DoubleYoVariable> swingInitialZHeights = new QuadrantDependentList<>();
    private final QuadrantDependentList<DoubleYoVariable> swingStartTimes = new QuadrantDependentList<>();
    private final DoubleYoVariable phaseStartTime = new DoubleYoVariable("phaseStartTime", registry);
+   private final DoubleYoVariable gaitStartTime = new DoubleYoVariable("gaitStartTime", registry);
    private final QuadrantDependentList<DoubleYoVariable> swingDurations = new QuadrantDependentList<>();
    private final EnumYoVariable<QuadrupedSupportConfiguration> previousGaitPhase = new EnumYoVariable<>("previousGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
    private final EnumYoVariable<QuadrupedSupportConfiguration> currentGaitPhase = new EnumYoVariable<>("currentGaitPhase", registry, QuadrupedSupportConfiguration.class, false);
@@ -146,9 +144,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final BooleanYoVariable gaitCompleted = new BooleanYoVariable("gaitCompleted", registry);
    private final DoubleYoVariable impactVelocityZ = new DoubleYoVariable("impactVelocityZ", registry);
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
-   private final QuadrupedSupportPolygon previousSupportPolygon = new QuadrupedSupportPolygon();
-   private final QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
-   private final QuadrupedSupportPolygon nextPhaseSupportPolygon = new QuadrupedSupportPolygon();
+   private final YoQuadrupedSupportPolygon previousSupportPolygon = new YoQuadrupedSupportPolygon("previousSupportPolygon", registry);
+   private final YoQuadrupedSupportPolygon currentSupportPolygon = new YoQuadrupedSupportPolygon("currentSupportPolygon", registry);
+   private final YoQuadrupedSupportPolygon nextPhaseSupportPolygon = new YoQuadrupedSupportPolygon("nextPhaseSupportPolygon", registry);
    private final VelocityConstrainedPositionTrajectoryGenerator icpTrajectory = new VelocityConstrainedPositionTrajectoryGenerator("icpTrajectory", ReferenceFrame.getWorldFrame(), registry);
    
    // Swing PD Controllers
@@ -165,6 +163,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       this.footSwitches = footSwitches;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       this.dt = DT;
+      this.yoTime = yoTime;
       
       centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       QuadrupedJointNameMap quadrupedJointMap = robotParameters.getJointMap();
@@ -176,16 +175,11 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          OneDoFJoint oneDoFJointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
          fullRobotModel.getOneDoFJointsFromRootToHere(oneDoFJointBeforeFoot, jointsToControl);
          oneDofJoints.set(robotQuadrant, jointsToControl);
-         for (OneDoFJoint joint : jointsToControl)
-         {
-            desiredTorques.put(joint.getName(), new DoubleYoVariable(joint.getName() + "_tau_d", registry));
-         }
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         vmcFootForcesWorld.set(robotQuadrant, new YoFrameVector("vmcFootForcesWorld" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
-         vmcFootForces.set(robotQuadrant, new YoFrameVector("vmcFootForces" + robotQuadrant.getPascalCaseName(), referenceFrames.getCenterOfMassZUpFrame(), registry));
+         vmcFootForces.set(robotQuadrant, new YoFrameVector("vmcFootForces" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
       }
 
       yoGraphicsListRegistry.registerArtifact("icpViz", icpViz.createArtifact());
@@ -223,10 +217,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          forceDistributionYoGraphicVectors.set(side, new ArrayList<YoGraphicVector>());
          forceDistributionYoGraphicVectors.get(side).add(new YoGraphicVector("frontFootForces" + side.getCamelCaseNameForMiddleOfExpression(),
                                                                               footPositions.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)),
-                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)), 0.007, YoAppearance.Yellow(), true, 0.01));
+                                                                              vmcFootForces.get(RobotQuadrant.getQuadrant(RobotEnd.FRONT, side)), 0.007, YoAppearance.Yellow(), true, 0.01));
          forceDistributionYoGraphicVectors.get(side).add(new YoGraphicVector("hindFootForces" + side.getCamelCaseNameForMiddleOfExpression(),
                                                                               footPositions.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())),
-                                                                              vmcFootForcesWorld.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())), 0.007, YoAppearance.Yellow(), true, 0.01));
+                                                                              vmcFootForces.get(RobotQuadrant.getQuadrant(RobotEnd.HIND, side.getOppositeSide())), 0.007, YoAppearance.Yellow(), true, 0.01));
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -248,9 +242,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       stancePose = new YoFramePose("stance", ReferenceFrame.getWorldFrame(), registry);
       bodyLinearAcceleration = new YoFrameVector("bodyLinearAcceleration", ReferenceFrame.getWorldFrame(), registry);
       bodyAngularAcceleration = new YoFrameVector("bodyAngularAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      desiredBodyForce = new YoFrameVector("desiredBodyForce", ReferenceFrame.getWorldFrame(), registry);
-      desiredBodyTorque = new YoFrameVector("desiredBodyTorque", ReferenceFrame.getWorldFrame(), registry);
-      desiredBodyWrench = new Wrench(referenceFrames.getBodyZUpFrame(), ReferenceFrame.getWorldFrame());
+      desiredBodyWrench = new YoWrench("desiredBodyWrench", referenceFrames.getBodyZUpFrame(), ReferenceFrame.getWorldFrame(), registry);
       desiredBodyTwist = new YoTwist("desiredBodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
       bodyTwist = new YoTwist("bodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
       
@@ -295,10 +287,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    public void initialize()
    {
-      supportPolygon.clear();
+      currentSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         supportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       
       updateEstimates();
@@ -327,7 +319,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       nextGait.set(QuadrupedGaitCycle.SAFE_WALK);
       swingZHeight.set(0.1);
       impactVelocityZ.set(0.0);
-      previousSupportPolygon.set(supportPolygon);
+      previousSupportPolygon.setWithoutChecks(currentSupportPolygon);
       previousGaitPhase.set(QuadrupedSupportConfiguration.ALL_FOURS);
       currentGaitPhase.set(QuadrupedSupportConfiguration.ALL_FOURS);
       currentGaitCompletion.set(0.0);
@@ -352,10 +344,10 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       kp_z.set(300.0);
       kd_z.set(25.0);
       
-      kp_swing.setX(-100.0);
-      kd_swing.setX(-2.0);
-      kp_swing.setY(-100.0);
-      kd_swing.setY(-2.0);
+      kp_swing.setX(-600.0);
+      kd_swing.setX(-5.0);
+      kp_swing.setY(-600.0);
+      kd_swing.setY(-5.0);
       kp_swing.setZ(-600.0);
       kd_swing.setZ(-5.0);
    }
@@ -390,9 +382,9 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          footVelocities.get(robotQuadrant).scale(-1.0 / dt);
       }
       
-      for (RobotQuadrant robotQuadrant : supportPolygon.getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
-         supportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       
       bodyPoseWorld.setFromReferenceFrame(referenceFrames.getBodyFrame());
@@ -414,7 +406,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       centerOfMassVelocity.set(tempVector.getX(), tempVector.getY(), tempVector.getZ());
       
       FramePoint frameTuple = centroid.getFrameTuple();
-      supportPolygon.getCentroid2d(frameTuple);
+      currentSupportPolygon.getCentroid(frameTuple);
       centroid.set(frameTuple.getX(), frameTuple.getY(), frameTuple.getZ());
 
       // compute instantaneous capture point
@@ -445,14 +437,14 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       }
       centerOfPressure.set(tempCenterOfPressure.getX(), tempCenterOfPressure.getY(), tempCenterOfPressure.getZ());
       
-      for (RobotQuadrant robotQuadrant : supportPolygon.getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
          footToCoMVectors.get(robotQuadrant).set(centerOfMass);
          footToCoMVectors.get(robotQuadrant).sub(footPositions.get(robotQuadrant));
          calculateBasisVectors(robotQuadrant, footToCoMVectors.get(robotQuadrant));
       }
       
-      currentGaitCompletion.add(dt / desiredGaitPeriod.getDoubleValue());
+      currentGaitCompletion.set((yoTime.getDoubleValue() - gaitStartTime.getDoubleValue()) / desiredGaitPeriod.getDoubleValue());
       if (currentGaitCompletion.getDoubleValue() >= 1.0)
       {
          gaitCompleted.set(true);
@@ -491,13 +483,14 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private void handleGaitChange()
    {
       gaitCompleted.set(false);
+      gaitStartTime.set(yoTime.getDoubleValue());
       currentGait.set(nextGait.getEnumValue());
    }
 
    private void handlePhaseChange()
    {
       // Update phases
-      phaseStartTime.set(currentGaitCompletion.getDoubleValue());
+      phaseStartTime.set(yoTime.getDoubleValue());
       previousGaitPhase.set(currentGaitPhase.getEnumValue());
       currentGaitPhase.set(currentGait.getEnumValue().getGaitPhase(currentGaitCompletion.getDoubleValue()));
       if (currentGait.getEnumValue().isLastPhase(currentGaitCompletion.getDoubleValue()))
@@ -524,14 +517,14 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       }
       
       // Update support polygons
-      previousSupportPolygon.set(supportPolygon);
-      supportPolygon.clear();
+      previousSupportPolygon.setWithoutChecks(currentSupportPolygon);
+      currentSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : currentGaitPhase.getEnumValue().supportQuadrants())
       {
-         supportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       FramePoint frameTuple = centroid.getFrameTuple();
-      supportPolygon.getCentroid2d(frameTuple);
+      currentSupportPolygon.getCentroid(frameTuple);
       centroid.set(frameTuple.getX(), frameTuple.getY(), frameTuple.getZ());
       nextPhaseSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : nextGaitPhase.getEnumValue().supportQuadrants())
@@ -545,11 +538,11 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       FramePoint nextCentroid = icpTrajectory.getFinalPosition().getFrameTuple();
       if (currentGaitPhase.getEnumValue() == QuadrupedSupportConfiguration.ALL_FOURS)
       {
-         nextPhaseSupportPolygon.getCentroid2d(nextCentroid);
+         nextPhaseSupportPolygon.getCentroid(nextCentroid);
       }
       else
       {
-         supportPolygon.getCentroid2d(nextCentroid);
+         currentSupportPolygon.getCentroid(nextCentroid);
       }
       icpTrajectory.getFinalPosition().set(nextCentroid.getX(), nextCentroid.getY(), 0.0);
       icpTrajectory.getInitialVelocity().setToZero();
@@ -580,10 +573,11 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          }
          
          desiredFootPositions.get(robotQuadrant).setZ(swingZTrajectories.get(robotQuadrant).getPosition());
-         desiredFootVelocities.get(robotQuadrant).setZ(swingZTrajectories.get(robotQuadrant).getVelocity());
+//         desiredFootVelocities.get(robotQuadrant).setZ(swingZTrajectories.get(robotQuadrant).getVelocity());
+         desiredFootVelocities.get(robotQuadrant).setToZero();
       }
       
-      icpTrajectory.compute(currentGaitCompletion.getDoubleValue() - phaseStartTime.getDoubleValue());
+      icpTrajectory.compute((yoTime.getDoubleValue() - phaseStartTime.getDoubleValue()) / desiredGaitPeriod.getDoubleValue());
    }
 
    private void doControl()
@@ -595,8 +589,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       desiredStancePose.add(desiredStancePoseOffset);
       
       desiredBodyTwist.setToZero();
-      FrameVector icpVelocity = desiredBodyTwist.getYoLinearPart().getFrameTuple();
-      desiredBodyTwist.getYoLinearPart().set(icpVelocity.getX(), icpVelocity.getY(), 0.0);
       
       bodyLinearAcceleration.setToZero();
       bodyLinearAcceleration.getYoX().add(kp_x.getDoubleValue() * (desiredStancePose.getX() - stancePose.getX()));
@@ -606,11 +598,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       bodyLinearAcceleration.getYoZ().add(kp_z.getDoubleValue() * (desiredStancePose.getZ() - stancePose.getZ()));
       bodyLinearAcceleration.getYoZ().add(kd_z.getDoubleValue() * (desiredBodyTwist.getLinearPartZ() - bodyTwist.getLinearPartZ()));
       
-      desiredBodyForce.setToZero();
-      desiredBodyForce.add(0.0, 0.0, GRAVITY);
-      desiredBodyForce.add(bodyLinearAcceleration);
-      desiredBodyForce.scale(ESTIMATED_MASS);
-      
       bodyAngularAcceleration.setToZero();
       bodyAngularAcceleration.getYoX().add(kp_roll.getDoubleValue() * (desiredStancePose.getRoll() - stancePose.getRoll()));
       bodyAngularAcceleration.getYoX().add(kd_roll.getDoubleValue() * (desiredBodyTwist.getAngularPartX() - bodyTwist.getAngularPartX()));
@@ -619,11 +606,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       bodyAngularAcceleration.getYoZ().add(kp_yaw.getDoubleValue() * (desiredStancePose.getYaw() - stancePose.getYaw()));
       bodyAngularAcceleration.getYoZ().add(kd_yaw.getDoubleValue() * (desiredBodyTwist.getAngularPartZ() - bodyTwist.getAngularPartZ()));
       
-      desiredBodyTorque.setToZero();
-      desiredBodyTorque.add(bodyAngularAcceleration);
-      desiredBodyTorque.scale(ESTIMATED_ROTATIONAL_INERTIA);
-      
-      desiredBodyWrench.set(desiredBodyForce.getFrameTuple(), desiredBodyTorque.getFrameTuple());
+      desiredBodyWrench.setToZero();
+      desiredBodyWrench.getYoLinearPart().add(0.0, 0.0, GRAVITY);
+      desiredBodyWrench.getYoLinearPart().add(bodyLinearAcceleration);
+      desiredBodyWrench.getYoLinearPart().scale(ESTIMATED_MASS);
+      desiredBodyWrench.getYoAngularPart().add(bodyAngularAcceleration);
+      desiredBodyWrench.getYoAngularPart().scale(ESTIMATED_ROTATIONAL_INERTIA);
    }
 
    private void calculateBasisVectors(RobotQuadrant robotQuadrant, YoFrameVector footToCoMVector)
@@ -660,18 +648,13 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    {
       for (RobotQuadrant robotQuadrant : currentGaitPhase.getEnumValue().swingQuadrants())
       {
-         vmcFootForcesWorld.get(robotQuadrant).setToZero();
-         vmcFootForcesWorld.get(robotQuadrant).getYoX().add(kp_swing.getX() * (desiredFootPositions.get(robotQuadrant).getX() - footPositions.get(robotQuadrant).getX()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoX().add(kd_swing.getX() * (desiredFootVelocities.get(robotQuadrant).getX() - footVelocities.get(robotQuadrant).getX()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoY().add(kp_swing.getY() * (desiredFootPositions.get(robotQuadrant).getY() - footPositions.get(robotQuadrant).getY()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoY().add(kd_swing.getY() * (desiredFootVelocities.get(robotQuadrant).getY() - footVelocities.get(robotQuadrant).getY()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoZ().add(kp_swing.getZ() * (desiredFootPositions.get(robotQuadrant).getZ() - footPositions.get(robotQuadrant).getZ()));
-//         vmcFootForcesWorld.get(robotQuadrant).getYoZ().add(kd_swing.getZ() * (desiredFootVelocities.get(robotQuadrant).getZ() - footVelocities.get(robotQuadrant).getZ()));
-         vmcFootForcesWorld.get(robotQuadrant).getYoZ().add(kd_swing.getZ() * (0.0 - footVelocities.get(robotQuadrant).getZ()));
-         
-         FrameVector frameTupleForFrameChange = vmcFootForcesWorld.get(robotQuadrant).getFrameTuple();
-         frameTupleForFrameChange.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
-         vmcFootForces.get(robotQuadrant).set(frameTupleForFrameChange);
+         vmcFootForces.get(robotQuadrant).setToZero();
+         vmcFootForces.get(robotQuadrant).getYoX().add(kp_swing.getX() * (desiredFootPositions.get(robotQuadrant).getX() - footPositions.get(robotQuadrant).getX()));
+         vmcFootForces.get(robotQuadrant).getYoX().add(kd_swing.getX() * (desiredFootVelocities.get(robotQuadrant).getX() - footVelocities.get(robotQuadrant).getX()));
+         vmcFootForces.get(robotQuadrant).getYoY().add(kp_swing.getY() * (desiredFootPositions.get(robotQuadrant).getY() - footPositions.get(robotQuadrant).getY()));
+         vmcFootForces.get(robotQuadrant).getYoY().add(kd_swing.getY() * (desiredFootVelocities.get(robotQuadrant).getY() - footVelocities.get(robotQuadrant).getY()));
+         vmcFootForces.get(robotQuadrant).getYoZ().add(kp_swing.getZ() * (desiredFootPositions.get(robotQuadrant).getZ() - footPositions.get(robotQuadrant).getZ()));
+         vmcFootForces.get(robotQuadrant).getYoZ().add(kd_swing.getZ() * (desiredFootVelocities.get(robotQuadrant).getZ() - footVelocities.get(robotQuadrant).getZ()));
       }
    }
    
@@ -685,12 +668,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       bodyWrenchMatrix.set(4, 0, desiredBodyWrench.getAngularPartY());
       bodyWrenchMatrix.set(5, 0, desiredBodyWrench.getAngularPartZ());
       
-      basisMatrix.reshape(6, supportPolygon.size() * 4);
-      rhoMatrix.reshape(supportPolygon.size() * 4, 1);
+      basisMatrix.reshape(6, currentSupportPolygon.size() * 4);
+      rhoMatrix.reshape(currentSupportPolygon.size() * 4, 1);
       
-      for (int quadrantIndex = 0; quadrantIndex < supportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
+      for (int quadrantIndex = 0; quadrantIndex < currentSupportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
       {
-         RobotQuadrant robotQuadrant = supportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
+         RobotQuadrant robotQuadrant = currentSupportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
          for (int basisIndex = 0; basisIndex < 4; basisIndex++)
          {
             basisMatrix.set(0, quadrantIndex * 4 + basisIndex, basisForceVectors.get(robotQuadrant)[basisIndex].getX());
@@ -705,24 +688,21 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       solver.setA(basisMatrix);
       solver.solve(bodyWrenchMatrix, rhoMatrix);
       
-      for (int quadrantIndex = 0; quadrantIndex < supportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
+      for (int quadrantIndex = 0; quadrantIndex < currentSupportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
       {
-         RobotQuadrant robotQuadrant = supportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
+         RobotQuadrant robotQuadrant = currentSupportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
          for (int basisIndex = 0; basisIndex < 4; basisIndex++)
          {
             rhoScalars.get(robotQuadrant)[basisIndex] = rhoMatrix.get(quadrantIndex * 4 + basisIndex, 0);
          }
       }
       
-      for (RobotQuadrant robotQuadrant : supportPolygon.getSupportingQuadrantsInOrder())
+      for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
          for (int basisIndex = 0; basisIndex < 4; basisIndex++)
          {
             basisForceVectors.get(robotQuadrant)[basisIndex].scale(rhoScalars.get(robotQuadrant)[basisIndex]);
-            vmcFootForcesWorld.get(robotQuadrant).add(basisForceVectors.get(robotQuadrant)[basisIndex]);
-            FrameVector frameTupleForFrameChange = vmcFootForcesWorld.get(robotQuadrant).getFrameTuple();
-            frameTupleForFrameChange.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
-            vmcFootForces.get(robotQuadrant).set(frameTupleForFrameChange);
+            vmcFootForces.get(robotQuadrant).add(basisForceVectors.get(robotQuadrant)[basisIndex]);
          }
       }
    }
@@ -737,36 +717,21 @@ public class QuadrupedTrotWalkController extends QuadrupedController
 
    private void computeStanceJacobianForLeg(RobotQuadrant robotQuadrant)
    {
-      getFootInBodyZUpFrame(robotQuadrant, footInBodyZUp);
-
-      for (int i = 0; i < oneDofJoints.get(robotQuadrant).size(); i++)
+      for (OneDoFJoint oneDoFJoint : oneDofJoints.get(robotQuadrant))
       {
-         OneDoFJoint oneDoFJoint = oneDofJoints.get(robotQuadrant).get(i);
-         ReferenceFrame jointFrame = oneDoFJoint.getFrameBeforeJoint();
+         jointPosition.setFromReferenceFrame(oneDoFJoint.getFrameBeforeJoint());
          
-         jointInBodyZUp.setToZero(jointFrame);
-         jointInBodyZUp.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
-
-         jointToFootVector.setIncludingFrame(footInBodyZUp);
-         jointToFootVector.sub(jointInBodyZUp);
-
-         vmcRequestedTorqueFromJointXYZ.setToZero(referenceFrames.getCenterOfMassZUpFrame());
-         vmcRequestedTorqueFromJointXYZ.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
-         vmcRequestedTorqueFromJointXYZ.changeFrame(jointFrame);
-
          oneDoFJoint.getJointAxis(jointAxis);
-         double torque = jointAxis.dot(vmcRequestedTorqueFromJointXYZ);
+         jointAxis.changeFrame(ReferenceFrame.getWorldFrame());
          
-         desiredTorques.get(oneDoFJoint.getName()).set(-torque);
-         oneDoFJoint.setTau(-torque);
+         jointToFootVector.set(footPositions.get(robotQuadrant).getFrameTuple());
+         jointToFootVector.sub(jointPosition);
+         
+         vmcRequestedTorqueFromJoint.setToZero();
+         vmcRequestedTorqueFromJoint.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
+         
+         oneDoFJoint.setTau(-jointAxis.dot(vmcRequestedTorqueFromJoint));
       }
-   }
-
-   private void getFootInBodyZUpFrame(RobotQuadrant footQuadrant, FramePoint framePointToPack)
-   {
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(footQuadrant);
-      framePointToPack.setToZero(footFrame);
-      framePointToPack.changeFrame(referenceFrames.getCenterOfMassZUpFrame());
    }
 
    private void clipForces(double max)
@@ -776,7 +741,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          if (vmcFootForces.get(robotQuadrant).getFrameTuple().length() > max)
          {
             vmcFootForces.get(robotQuadrant).scale(max / vmcFootForces.get(robotQuadrant).getFrameTuple().length());
-            vmcFootForcesWorld.get(robotQuadrant).scale(max / vmcFootForcesWorld.get(robotQuadrant).getFrameTuple().length());
          }
       }
    }
@@ -786,7 +750,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          vmcFootForces.get(robotQuadrant).setToZero();
-         vmcFootForcesWorld.get(robotQuadrant).setToZero();
       }
    }
       

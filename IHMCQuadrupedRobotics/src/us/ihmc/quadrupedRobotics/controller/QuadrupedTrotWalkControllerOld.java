@@ -445,7 +445,7 @@ public class QuadrupedTrotWalkControllerOld extends QuadrupedController
       }
 
       //update centroid
-      fourFootSupportPolygon.getCentroid2d(centroid);
+      fourFootSupportPolygon.getCentroid(centroid);
 
       //update relative offset from center of feet to center of body
       double body_x = bodyPoseWorld.getX() - centroid.getX();
