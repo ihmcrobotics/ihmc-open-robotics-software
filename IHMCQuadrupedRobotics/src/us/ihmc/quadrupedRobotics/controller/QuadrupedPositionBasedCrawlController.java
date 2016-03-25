@@ -66,6 +66,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
@@ -348,7 +350,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private DesiredYawRateProvider desiredYawRateProvider;
    private DesiredYawInPlaceProvider desiredYawInPlaceProvider;
    private final QuadrupedControllerInputProviderInterface inputProvider;
-
+   
+   private final TwistCalculator twistCalculator;
+   private final Twist bodyTwist = new Twist();
 
 
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
@@ -368,11 +372,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       turnInPlaceCoMTrajectoryBuffer.set(0.5);
       
       useImuFeedback.set(true);
-      pitchPidController.setProportionalGain(1.0);
+      pitchPidController.setProportionalGain(10.0);
+      pitchPidController.setDerivativeGain(0.4);
       pitchPidController.setIntegralGain(0.4);
       pitchPidController.setMaxIntegralError(0.1);
       
-      rollPidController.setProportionalGain(1.0);
+      rollPidController.setProportionalGain(10.0);
+      rollPidController.setDerivativeGain(0.4);
       rollPidController.setIntegralGain(0.1);
       rollPidController.setMaxIntegralError(0.1);
       
@@ -391,6 +397,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       
       actualRobotRootJoint = actualFullRobotModel.getRootJoint();
+      twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), actualFullRobotModel.getElevator());
       referenceFrames.updateFrames();
       comFrame = referenceFrames.getCenterOfMassFrame();
       
@@ -955,6 +962,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
     */
    private void updateEstimates()
    {
+      twistCalculator.compute();
+      twistCalculator.getTwistOfBody(bodyTwist, actualFullRobotModel.getPelvis());
+      
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);
       actualPitch.set(yawPitchRollArray[1]);
@@ -1141,18 +1151,22 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       desiredCoMPosition.setZ(zHeight);
    }
    
+   private final Vector3d bodyOrienation = new Vector3d();
    private void updateDesiredBodyOrientation()
    {
       filteredDesiredCoMYaw.update();
       filteredDesiredCoMPitch.update();
       filteredDesiredCoMRoll.update();
       
+      bodyTwist.changeFrame(referenceFrames.getBodyFrame());
+      bodyTwist.getAngularPart(bodyOrienation);
+      
       if(useImuFeedback.getBooleanValue())
       {
-         double pitchError = pitchPidController.compute(actualPitch.getDoubleValue(), filteredDesiredCoMPitch.getDoubleValue(), 0.0, 0.0, dt);
+         double pitchError = pitchPidController.compute(actualPitch.getDoubleValue(), filteredDesiredCoMPitch.getDoubleValue(), bodyOrienation.getY(), 0.0, dt);
          desiredCoMPitch.set(filteredDesiredCoMPitch.getDoubleValue() + pitchError);
          
-         double rollError = rollPidController.compute(actualRoll.getDoubleValue(), filteredDesiredCoMRoll.getDoubleValue(), 0.0, 0.0, dt);
+         double rollError = rollPidController.compute(actualRoll.getDoubleValue(), filteredDesiredCoMRoll.getDoubleValue(), bodyOrienation.getX(), 0.0, dt);
          desiredCoMRoll.set(filteredDesiredCoMRoll.getDoubleValue() + rollError);
       }
       else
