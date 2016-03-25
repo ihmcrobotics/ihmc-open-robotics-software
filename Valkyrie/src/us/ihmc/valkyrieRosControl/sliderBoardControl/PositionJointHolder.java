@@ -1,6 +1,7 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.PositionJointHandle;
 
@@ -10,6 +11,7 @@ import us.ihmc.rosControl.PositionJointHandle;
 class PositionJointHolder extends ValkyrieSliderBoardJointHolder
 {
    private final PositionJointHandle handle;
+   private final DeltaLimitedYoVariable positionStepSizeLimiter;
 
    public PositionJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJoint joint, PositionJointHandle handle,
          YoVariableRegistry parentRegistry, double dt)
@@ -17,6 +19,7 @@ class PositionJointHolder extends ValkyrieSliderBoardJointHolder
       super(valkyrieRosControlSliderBoard, joint, parentRegistry, dt);
       this.handle = handle;
 
+      this.positionStepSizeLimiter = new DeltaLimitedYoVariable(handle.getName() + "PositionStepSizeLimiter", registry, 0.15);
       parentRegistry.addChild(registry);
    }
 
@@ -32,10 +35,7 @@ class PositionJointHolder extends ValkyrieSliderBoardJointHolder
       qd.set(joint.getQd());
       tau.set(joint.getTauMeasured());
 
-      double pdOutput = pdController.compute(q.getDoubleValue(), q_d.getDoubleValue(), qd.getDoubleValue(), qd_d.getDoubleValue());
-      jointCommand_pd.set(pdOutput);
-      q_d.set(valkyrieRosControlSliderBoard.masterScaleFactor.getDoubleValue() * (jointCommand_pd.getDoubleValue() + jointCommand_function.getDoubleValue()));
-
-      handle.setDesiredPosition(q_d.getDoubleValue());
+      positionStepSizeLimiter.updateOutput(q.getDoubleValue(), q_d.getDoubleValue());
+      handle.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
    }
 }

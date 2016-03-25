@@ -4,6 +4,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 
 import java.util.Map;
@@ -12,7 +13,8 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
 {
    private final YoPositionJointHandleHolder yoPositionJointHandleHolder;
 
-   private final PIDController pidController;
+   private final DeltaLimitedYoVariable positionStepSizeLimiter;
+
    private final DoubleYoVariable standPrepAngle;
 
    private final double controlDT;
@@ -24,18 +26,12 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
 
       this.controlDT = controlDT;
 
-      String pdControllerBaseName = yoPositionJointHandleHolder.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName + "Command");
+      String positionJumpLimiterBaseName = yoPositionJointHandleHolder.getName();
+      YoVariableRegistry registry = new YoVariableRegistry(positionJumpLimiterBaseName + "Command");
 
-      this.standPrepAngle = new DoubleYoVariable(pdControllerBaseName + "StandPrepAngle", registry);
+      this.standPrepAngle = new DoubleYoVariable(positionJumpLimiterBaseName + "StandPrepAngle", registry);
 
-      pidController = new PIDController(pdControllerBaseName + "StandPrep", registry);
-
-      pidController.setProportionalGain(gains.get("kp"));
-      pidController.setDerivativeGain(gains.get("kd"));
-      pidController.setIntegralGain(gains.get("ki"));
-      pidController.setMaxIntegralError(50.0);
-      pidController.setCumulativeError(0.0);
+      this.positionStepSizeLimiter = new DeltaLimitedYoVariable(positionJumpLimiterBaseName + "PositionStepSizeLimiter", registry, 0.15);
 
       this.standPrepAngle.set(standPrepAngle);
 
@@ -44,7 +40,7 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
 
    public void initialize()
    {
-      pidController.setCumulativeError(0.0);
+      positionStepSizeLimiter.updateOutput(yoPositionJointHandleHolder.getQ(), yoPositionJointHandleHolder.getQ());
    }
 
    public void computeAndUpdateJointPosition(double inStateTime, double factor, double masterGain)
@@ -53,15 +49,16 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
 
       factor = MathTools.clipToMinMax(factor, 0.0, 1.0);
 
-      double q = yoPositionJointHandleHolder.getQ();
-      double qDesired = standPrepAngle.getDoubleValue();
-      double qd = yoPositionJointHandleHolder.getQd();
-      double qdDesired = 0.0;
+      double currentJointAngle = yoPositionJointHandleHolder.getQ();
+      double standPrepDesired = standPrepAngle.getDoubleValue();
 
-      double standPrepPosition = standPrepFactor * masterGain * pidController.compute(q, qDesired, qd, qdDesired, controlDT);
+      double standPrepPosition = standPrepFactor * masterGain * standPrepDesired;
       double controllerPosition = factor * yoPositionJointHandleHolder.getControllerPositionDesired();
 
       double desiredPosition = standPrepPosition + controllerPosition;
-      yoPositionJointHandleHolder.setDesiredPosition(desiredPosition);
+
+      positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
+
+      yoPositionJointHandleHolder.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
    }
 }

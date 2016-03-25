@@ -13,7 +13,6 @@ public class YoPositionJointHandleHolder
    private final OneDoFJoint joint;
    private final DesiredJointData desiredJointData;
 
-   private final DoubleYoVariable positionMeasured;
    private final DoubleYoVariable q;
    private final DoubleYoVariable qd;
 
@@ -29,7 +28,6 @@ public class YoPositionJointHandleHolder
       this.joint = joint;
       this.desiredJointData = desiredJointData;
 
-      this.positionMeasured = new DoubleYoVariable(name + "PositionMeasured", registry);
       this.q = new DoubleYoVariable(name + "_q", registry);
       this.qd = new DoubleYoVariable(name + "_qd", registry);
       this.controllerPositionDesired = new DoubleYoVariable(name + "ControllerPositionDesired", registry);
@@ -42,7 +40,6 @@ public class YoPositionJointHandleHolder
    {
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
-      this.positionMeasured.set(handle.getPosition());
       this.controllerPositionDesired.set(desiredJointData.getPositionDesired());
    }
 
@@ -55,11 +52,6 @@ public class YoPositionJointHandleHolder
    public OneDoFJoint getOneDoFJoint()
    {
       return joint;
-   }
-
-   public double getPositionMeasured()
-   {
-      return positionMeasured.getDoubleValue();
    }
 
    public double getQ()
