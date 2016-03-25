@@ -68,7 +68,7 @@ public class QuadrupedControllerStateMachineBuilder
    {
       controllers
             .add(new QuadrupedPositionBasedCrawlController(commonControllerParameters.getControlDt(), robotParameters,
-                  commonControllerParameters.getFullRobotModel(), commonControllerParameters.getFootSwicthes(),
+                  commonControllerParameters.getFullRobotModel(), null, commonControllerParameters.getFootSwicthes(),
                   legIkCalc, dataProducer, commonControllerParameters.getRobotTimestamp(),
                   commonControllerParameters.getParentRegistry(), commonControllerParameters.getGraphicsListRegistry(),
                   commonControllerParameters.getGraphicsListRegistryForDetachedOverhead()));
