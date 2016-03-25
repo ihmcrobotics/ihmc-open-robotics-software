@@ -328,10 +328,10 @@ public class FootControlModule
       swingState.setFootstep(footstep, swingTime);
    }
 
-   public void setFootTrajectoryMessage(FootTrajectoryCommand footTrajectoryMessage)
+   public void setFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
-      moveViaWaypointsState.handleFootTrajectoryMessage(footTrajectoryMessage, initializeToCurrent);
+      moveViaWaypointsState.handleFootTrajectoryCommand(command, initializeToCurrent);
    }
 
    public void setPredictedToeOffDuration(double predictedToeOffDuration)

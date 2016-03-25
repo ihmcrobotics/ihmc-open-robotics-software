@@ -55,9 +55,9 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
             touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
    }
 
-   public void handleFootTrajectoryMessage(FootTrajectoryCommand footTrajectoryMessage, boolean initializeToCurrent)
+   public void handleFootTrajectoryCommand(FootTrajectoryCommand command, boolean initializeToCurrent)
    {
-      if (footTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (initializeToCurrent)
          {
@@ -86,8 +86,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          orientationTrajectoryGenerator.clear();
       }
 
-      positionTrajectoryGenerator.appendWaypoints(footTrajectoryMessage);
-      orientationTrajectoryGenerator.appendWaypoints(footTrajectoryMessage);
+      positionTrajectoryGenerator.appendWaypoints(command);
+      orientationTrajectoryGenerator.appendWaypoints(command);
    }
 
    @Override

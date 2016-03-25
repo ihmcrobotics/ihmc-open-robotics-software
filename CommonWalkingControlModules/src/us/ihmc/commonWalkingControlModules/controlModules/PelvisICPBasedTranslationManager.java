@@ -157,9 +157,9 @@ public class PelvisICPBasedTranslationManager
       computeDesiredICPOffset();
    }
 
-   public void handleGoHomeMessage(GoHomeCommand message)
+   public void handleGoHomeCommand(GoHomeCommand command)
    {
-      if (isEnabled.getBooleanValue() && message.getRequest(BodyPart.PELVIS))
+      if (isEnabled.getBooleanValue() && command.getRequest(BodyPart.PELVIS))
       {
          goToHome();
       }
@@ -171,11 +171,11 @@ public class PelvisICPBasedTranslationManager
       enable();
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand message)
+   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
       initialPelvisPositionTime.set(yoTime.getDoubleValue());
 
-      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (isRunning.getBooleanValue())
             waypointPositionTrajectoryGenerator.getPosition(tempPosition);
@@ -194,16 +194,16 @@ public class PelvisICPBasedTranslationManager
          waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       }
 
-      waypointPositionTrajectoryGenerator.appendWaypoints(message);
+      waypointPositionTrajectoryGenerator.appendWaypoints(command);
       waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
       waypointPositionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
       isRunning.set(true);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      isTrajectoryStopped.set(message.isStopAllTrajectory());
+      isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
    private void computeDesiredICPOffset()

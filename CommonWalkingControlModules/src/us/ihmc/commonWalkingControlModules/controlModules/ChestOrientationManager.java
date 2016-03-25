@@ -119,11 +119,11 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleChestTrajectoryMessage(ChestTrajectoryCommand message)
+   public void handleChestTrajectoryCommand(ChestTrajectoryCommand command)
    {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
-      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOrientationTrajectoryGenerator.getOrientation(desiredOrientation);
          desiredOrientation.changeFrame(worldFrame);
@@ -139,22 +139,22 @@ public class ChestOrientationManager
          waypointOrientationTrajectoryGenerator.clear();
       }
 
-      waypointOrientationTrajectoryGenerator.appendWaypoints(message);
+      waypointOrientationTrajectoryGenerator.appendWaypoints(command);
       waypointOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
       waypointOrientationTrajectoryGenerator.initialize();
       isTrackingOrientation.set(true);
       isTrajectoryStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      isTrajectoryStopped.set(message.isStopAllTrajectory());
+      isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
-   public void handleGoHomeMessage(GoHomeCommand message)
+   public void handleGoHomeCommand(GoHomeCommand command)
    {
-      if (message.getRequest(BodyPart.CHEST))
-         goToHomeFromCurrentDesired(message.getTrajectoryTime());
+      if (command.getRequest(BodyPart.CHEST))
+         goToHomeFromCurrentDesired(command.getTrajectoryTime());
    }
 
    public void goToHomeFromCurrentDesired(double trajectoryTime)

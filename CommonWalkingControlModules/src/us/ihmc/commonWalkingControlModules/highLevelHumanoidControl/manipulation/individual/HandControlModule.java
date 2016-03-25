@@ -18,10 +18,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
@@ -50,9 +50,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientation
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -369,26 +366,22 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
    }
 
-   public void handleHandTrajectoryMessage(HandTrajectoryCommand handTrajectoryMessage)
+   public void handleHandTrajectoryCommand(HandTrajectoryCommand command)
    {
-      if (handTrajectoryMessage.getRobotSide() != robotSide)
+      if (command.getRobotSide() != robotSide)
       {
-         PrintTools.warn(this, "Received a " + handTrajectoryMessage.getClass().getSimpleName() + " for the wrong side.");
+         PrintTools.warn(this, "Received a " + command.getClass().getSimpleName() + " for the wrong side.");
          return;
       }
 
-      handleHandTrajectoryMessage(handTrajectoryMessage.getBase(), handTrajectoryMessage);
-   }
-
-   private void handleHandTrajectoryMessage(BaseForControl base, TrajectoryPointListInterface<?, ? extends SE3TrajectoryPointInterface<?>> trajectoryPointList)
-   {
+      BaseForControl base = command.getBase();
       ReferenceFrame trajectoryFrame = baseForControlToReferenceFrameMap.get(base);
       if (trajectoryFrame == null)
          throw new RuntimeException("The base: " + base + " is not handled.");
       else if (DEBUG)
          PrintTools.info(this, "Executing hand trajectory in: " + base + ", found corresponding frame: " + trajectoryFrame);
 
-      if (trajectoryPointList.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          computeDesiredFramePose(trajectoryFrame, currentDesiredPose);
          currentDesiredPose.getPoseIncludingFrame(tempPosition, tempOrientation);
@@ -415,8 +408,8 @@ public class HandControlModule
          orientationTrajectoryGenerator.clear();
       }
 
-      positionTrajectoryGenerator.appendWaypoints(trajectoryPointList);
-      orientationTrajectoryGenerator.appendWaypoints(trajectoryPointList);
+      positionTrajectoryGenerator.appendWaypoints(command);
+      orientationTrajectoryGenerator.appendWaypoints(command);
 
       positionTrajectoryGenerator.changeFrame(trajectoryFrame);
       orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
@@ -427,20 +420,20 @@ public class HandControlModule
       executeTaskspaceTrajectory(poseTrajectoryGenerator);
    }
 
-   public void handleArmTrajectoryMessage(ArmTrajectoryCommand armTrajectoryMessage)
+   public void handleArmTrajectoryCommand(ArmTrajectoryCommand command)
    {
-      if (armTrajectoryMessage.getRobotSide() != robotSide)
+      if (command.getRobotSide() != robotSide)
       {
-         PrintTools.warn(this, "Received a " + armTrajectoryMessage.getClass().getSimpleName() + " for the wrong side.");
+         PrintTools.warn(this, "Received a " + command.getClass().getSimpleName() + " for the wrong side.");
          return;
       }
 
-      if (!checkJointspaceTrajectoryPointLists(armTrajectoryMessage.getTrajectoryPointLists()))
+      if (!checkJointspaceTrajectoryPointLists(command.getTrajectoryPointLists()))
          return;
 
       updateJointsAtDesiredPosition();
 
-      int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
+      int numberOfJoints = command.getNumberOfJoints();
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -448,14 +441,14 @@ public class HandControlModule
          MultipleWaypointsTrajectoryGenerator trajectoryGenerator = jointTrajectoryGenerators.get(joint);
          trajectoryGenerator.clear();
 
-         if (armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, 0).getTime() > 1.0e-5)
+         if (command.getJointTrajectoryPoint(jointIndex, 0).getTime() > 1.0e-5)
          {
             double initialPosition = jointsAtDesiredPosition[jointIndex].getQ();
             double initialVelocity = jointsAtDesiredPosition[jointIndex].getQd();
             trajectoryGenerator.appendWaypoint(0.0, initialPosition, initialVelocity);
          }
 
-         SimpleTrajectoryPoint1DList jointTrajectory = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
+         SimpleTrajectoryPoint1DList jointTrajectory = command.getJointTrajectoryPointList(jointIndex);
          trajectoryGenerator.appendWaypoints(jointTrajectory);
          trajectoryGenerator.initialize();
       }
@@ -463,36 +456,36 @@ public class HandControlModule
       executeJointspaceTrajectory(jointTrajectoryGenerators);
    }
 
-   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand armDesiredAccelerationsMessage)
+   public void handleArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
    {
-      if (!checkArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage))
+      if (!checkArmDesiredAccelerationsCommand(command))
          return;
 
       if (userControlModeState == null)
          return;
 
-      switch (armDesiredAccelerationsMessage.getArmControlMode())
+      switch (command.getArmControlMode())
       {
       case IHMC_CONTROL_MODE:
          if (stateMachine.getCurrentStateEnum() == HandControlMode.USER_CONTROL_MODE)
             holdPositionInJointSpace();
          return;
       case USER_CONTROL_MODE:
-         userControlModeState.handleArmDesiredAccelerationsMessage(armDesiredAccelerationsMessage);
+         userControlModeState.handleArmDesiredAccelerationsMessage(command);
          requestedState.set(userControlModeState.getStateEnum());
          stateMachine.checkTransitionConditions();
          return;
       default:
-         throw new RuntimeException("Unknown ArmControlMode: " + armDesiredAccelerationsMessage.getArmControlMode());
+         throw new RuntimeException("Unknown ArmControlMode: " + command.getArmControlMode());
       }
    }
 
-   public void handleHandComplianceControlParametersMessage(HandComplianceControlParametersCommand message)
+   public void handleHandComplianceControlParametersCommand(HandComplianceControlParametersCommand command)
    {
       PrintTools.error(this, "HandComplianceControlParametersControllerCommand is not supported anymore. Needs to be reimplememted.");
    }
 
-   private <T extends TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>>> boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<T> trajectoryPointLists)
+   private boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointLists)
    {
       if (trajectoryPointLists.size() != jointsOriginal.length)
          return false;
@@ -506,7 +499,7 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, TrajectoryPointListInterface<?, ? extends OneDoFTrajectoryPointInterface<?>> trajectoryPointList)
+   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, SimpleTrajectoryPoint1DList trajectoryPointList)
    {
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
       {
@@ -519,16 +512,16 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand armDesiredAccelerationsMessage)
+   private boolean checkArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
    {
-      if (armDesiredAccelerationsMessage.getRobotSide() != robotSide)
+      if (command.getRobotSide() != robotSide)
       {
-         PrintTools.warn(this, "Received a " + armDesiredAccelerationsMessage.getClass().getSimpleName() + " for the wrong side.");
+         PrintTools.warn(this, "Received a " + command.getClass().getSimpleName() + " for the wrong side.");
          return false;
       }
 
-      if (armDesiredAccelerationsMessage.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE
-            && armDesiredAccelerationsMessage.getNumberOfJoints() != jointsOriginal.length)
+      if (command.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE
+            && command.getNumberOfJoints() != jointsOriginal.length)
          return false;
 
       return true;

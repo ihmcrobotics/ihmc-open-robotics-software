@@ -787,19 +787,19 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand pelvisTrajectoryMessage)
+   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
 
-      if (pelvisTrajectoryMessage.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
 
-      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
-         FrameSE3TrajectoryPoint waypoint = pelvisTrajectoryMessage.getTrajectoryPoint(i);
+         FrameSE3TrajectoryPoint waypoint = command.getTrajectoryPoint(i);
          double time = waypoint.getTime();
          desiredPosition.setToZero(worldFrame);
          desiredVelocity.changeFrame(worldFrame);
@@ -820,19 +820,19 @@ public class LookAheadCoMHeightTrajectoryGenerator
       isTrajectoryOffsetStopped.set(false);
    }
 
-   public void handlePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryCommand message)
+   public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       waypointOffsetHeightAboveGroundTrajectoryGenerator.clear();
 
-      if (message.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          waypointOffsetHeightAboveGroundTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
 
-      for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
-         SimpleTrajectoryPoint1D waypoint = message.getTrajectoryPoint(i);
+         SimpleTrajectoryPoint1D waypoint = command.getTrajectoryPoint(i);
          double time = waypoint.getTime();
          double z = waypoint.getPosition();
          double zDot = waypoint.getVelocity();
@@ -850,9 +850,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
       isTrajectoryOffsetStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      isTrajectoryOffsetStopped.set(message.isStopAllTrajectory());
+      isTrajectoryOffsetStopped.set(command.isStopAllTrajectory());
    }
 
    public void initializeDesiredHeightToCurrent()
