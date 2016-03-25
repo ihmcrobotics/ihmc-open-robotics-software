@@ -51,18 +51,43 @@ public enum QuadrupedGaitCycle
       }
    }
    
-   public QuadrupedSupportConfiguration getGaitState(double percentGaitCycle)
+   public QuadrupedSupportConfiguration getGaitPhase(double percentGaitCycle)
    {
       checkPercentGaitCycleForInvalidValue(percentGaitCycle);
       
-      return phaseTransitions[getIndexOfState(percentGaitCycle)].getGaitState();
+      return phaseTransitions[getIndexOfCurrentPhase(percentGaitCycle)].getGaitState();
+   }
+   
+   public QuadrupedSupportConfiguration getNextGaitPhase(double percentGaitCycle)
+   {
+      checkPercentGaitCycleForInvalidValue(percentGaitCycle);
+      
+      return phaseTransitions[getIndexOfNextPhase(percentGaitCycle)].getGaitState();
+   }
+   
+   public double getRemainingPhaseDuration(double percentGaitCycle)
+   {
+      checkPercentGaitCycleForInvalidValue(percentGaitCycle);
+      
+      int currentStateIndex = getIndexOfCurrentPhase(percentGaitCycle);
+      
+      int nextIndex = (currentStateIndex + 1) % phaseTransitions.length;
+      
+      if (nextIndex > currentStateIndex)
+      {
+         return phaseTransitions[nextIndex].getTransitionTime() - percentGaitCycle;
+      }
+      else
+      {
+         return phaseTransitions[nextIndex].getTransitionTime() + (1.0 - percentGaitCycle);
+      }
    }
    
    public double getRemainingSwingDuration(RobotQuadrant robotQuadrant, double percentGaitCycle)
    {
       checkPercentGaitCycleForInvalidValue(percentGaitCycle);
       
-      int currentStateIndex = getIndexOfState(percentGaitCycle);
+      int currentStateIndex = getIndexOfCurrentPhase(percentGaitCycle);
       
       if (!phaseTransitions[currentStateIndex].getGaitState().isSwingQuadrant(robotQuadrant))
       {
@@ -98,28 +123,38 @@ public enum QuadrupedGaitCycle
       }
    }
 
-   private int getIndexOfState(double percentGaitCycle)
+   private int getIndexOfCurrentPhase(double percentGaitCycle)
    {
       int i;
       for (i = 0; i < phaseTransitions.length && phaseTransitions[i].getTransitionTime() <= percentGaitCycle; i++);
       return i - 1;
    }
+   
+   private int getIndexOfNextPhase(double percentGaitCycle)
+   {
+      return (getIndexOfCurrentPhase(percentGaitCycle) + 1) % phaseTransitions.length;
+   }
 
    private void checkPercentGaitCycleForInvalidValue(double percentGaitCycle)
    {
-      if (percentGaitCycle >= 1.0)
+      if (percentGaitCycle >= 1.0 || percentGaitCycle < 0.0 || Double.isNaN(percentGaitCycle))
       {
-         throw new RuntimeException("timeInGait must be < 1.0");
+         throw new RuntimeException("timeInGait must be 0.0 < 1.0");
       }
    }
 
    public RobotQuadrant[] getSupportQuadrants(double percentGaitCycle)
    {
-      return getGaitState(percentGaitCycle).supportQuadrants();
+      return getGaitPhase(percentGaitCycle).supportQuadrants();
    }
 
    public RobotQuadrant[] getSwingQuadrants(double percentGaitCycle)
    {
-      return getGaitState(percentGaitCycle).supportQuadrants();
+      return getGaitPhase(percentGaitCycle).swingQuadrants();
+   }
+
+   public boolean isLastPhase(double percentGaitCycle)
+   {
+      return getIndexOfCurrentPhase(percentGaitCycle) == phaseTransitions.length - 1;
    }
 }

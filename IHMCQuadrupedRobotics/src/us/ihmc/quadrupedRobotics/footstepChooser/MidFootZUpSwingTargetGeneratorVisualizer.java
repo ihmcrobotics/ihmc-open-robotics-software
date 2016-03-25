@@ -266,7 +266,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          fourFootSupportPolygon.setFootstep(robotQuadrant, footPosition);
       }
       
-      fourFootSupportPolygon.getCentroid2d(temporaryCentroid);
+      fourFootSupportPolygon.getCentroid(temporaryCentroid);
       centroid.set(temporaryCentroid);
       nominalYaw.set(fourFootSupportPolygon.getNominalYaw());
       
