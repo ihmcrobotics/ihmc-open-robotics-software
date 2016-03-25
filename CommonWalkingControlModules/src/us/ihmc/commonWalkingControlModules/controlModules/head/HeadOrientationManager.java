@@ -281,7 +281,7 @@ public class HeadOrientationManager
     * the most recent desired joint positions and velocities.
     * @param lowLevelOneDoFJointDesiredDataHolder Data that will be used to update the arm desired configuration. Only a read-only access is needed.
     */
-   public void submitNewArmJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   public void submitNewNeckJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
       newJointDesiredData = lowLevelOneDoFJointDesiredDataHolder;
    }

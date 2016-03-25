@@ -292,19 +292,19 @@ public class BalanceManager
       return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
    }
 
-   public void handleGoHomeMessage(GoHomeCommand message)
+   public void handleGoHomeCommand(GoHomeCommand command)
    {
-      pelvisICPBasedTranslationManager.handleGoHomeMessage(message);
+      pelvisICPBasedTranslationManager.handleGoHomeCommand(command);
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand message)
+   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      pelvisICPBasedTranslationManager.handlePelvisTrajectoryMessage(message);
+      pelvisICPBasedTranslationManager.handlePelvisTrajectoryCommand(command);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      pelvisICPBasedTranslationManager.handleStopAllTrajectoryMessage(message);
+      pelvisICPBasedTranslationManager.handleStopAllTrajectoryCommand(command);
    }
 
    public void initialize()

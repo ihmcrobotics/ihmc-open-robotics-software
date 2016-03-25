@@ -104,11 +104,11 @@ public class FeetManager
       setContactStateForSwing(upcomingSwingSide);
    }
 
-   public void handleFootTrajectoryMessage(FootTrajectoryCommand footTrajectoryMessage)
+   public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      RobotSide robotSide = footTrajectoryMessage.getRobotSide();
+      RobotSide robotSide = command.getRobotSide();
       FootControlModule footControlModule = footControlModules.get(robotSide);
-      footControlModule.setFootTrajectoryMessage(footTrajectoryMessage);
+      footControlModule.setFootTrajectoryCommand(command);
 
       if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_VIA_WAYPOINTS)
          footControlModule.resetCurrentState();
@@ -131,9 +131,9 @@ public class FeetManager
       footControlModules.get(swingSide).requestTouchdownForDisturbanceRecovery();
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      if (!message.isStopAllTrajectory())
+      if (!command.isStopAllTrajectory())
          return;
 
       for (RobotSide robotSide : RobotSide.values)

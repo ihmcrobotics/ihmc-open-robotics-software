@@ -219,10 +219,10 @@ public class PelvisOrientationManager
       goToHomeFromCurrentDesired(defaultTrajectoryTime);
    }
 
-   public void handleGoHomeMessage(GoHomeCommand message)
+   public void handleGoHomeCommand(GoHomeCommand command)
    {
-      if (message.getRequest(BodyPart.PELVIS))
-         goToHomeFromCurrentDesired(message.getTrajectoryTime());
+      if (command.getRequest(BodyPart.PELVIS))
+         goToHomeFromCurrentDesired(command.getTrajectoryTime());
    }
 
    public void goToHomeFromCurrentDesired(double trajectoryTime)
@@ -243,22 +243,22 @@ public class PelvisOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      isTrajectoryStopped.set(message.isStopAllTrajectory());
+      isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand message)
+   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      handleTrajectoryMessage(message);
+      handleTrajectoryCommand(command);
    }
 
-   public void handlePelvisOrientationTrajectoryMessages(PelvisOrientationTrajectoryCommand message)
+   public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {
-      handleTrajectoryMessage(message);
+      handleTrajectoryCommand(command);
    }
 
-   public void handleTrajectoryMessage(TrajectoryPointListInterface<?, ? extends SO3TrajectoryPointInterface<?>> trajectoryPointList)
+   public void handleTrajectoryCommand(TrajectoryPointListInterface<?, ? extends SO3TrajectoryPointInterface<?>> trajectoryPointList)
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
 

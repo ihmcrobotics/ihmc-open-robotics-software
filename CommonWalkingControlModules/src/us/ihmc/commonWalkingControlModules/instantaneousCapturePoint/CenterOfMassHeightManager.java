@@ -135,19 +135,19 @@ public class CenterOfMassHeightManager
       centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
-   public void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand message)
+   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handlePelvisTrajectoryMessage(message);
+      centerOfMassTrajectoryGenerator.handlePelvisTrajectoryCommand(command);
    }
 
-   public void handlePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryCommand message)
+   public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryMessage(message);
+      centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command);
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handleStopAllTrajectoryMessage(message);
+      centerOfMassTrajectoryGenerator.handleStopAllTrajectoryCommand(command);
    }
 
    public void setSupportLeg(RobotSide supportLeg)

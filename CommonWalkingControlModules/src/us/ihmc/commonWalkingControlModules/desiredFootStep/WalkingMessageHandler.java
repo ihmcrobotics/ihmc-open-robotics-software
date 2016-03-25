@@ -86,9 +86,9 @@ public class WalkingMessageHandler
       parentRegistry.addChild(registry);
    }
 
-   public void handleFootstepDataListMessage(FootstepDataListCommand message)
+   public void handleFootstepDataListCommand(FootstepDataListCommand command)
    {
-      if (message.getNumberOfFootsteps() > 0)
+      if (command.getNumberOfFootsteps() > 0)
       {
          upcomingFootsteps.clear();
          currentFootstepIndex.set(0);
@@ -96,32 +96,32 @@ public class WalkingMessageHandler
          clearFootTrajectory();
       }
 
-      double messageTransferTime = message.getTransferTime();
-      double messageSwingTime = message.getSwingTime();
-      if (!Double.isNaN(messageSwingTime) && messageSwingTime > 1.0e-2 && !Double.isNaN(messageTransferTime) && messageTransferTime > 1.0e-2)
+      double commandTransferTime = command.getTransferTime();
+      double commandSwingTime = command.getSwingTime();
+      if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime > 1.0e-2)
       {
-         transferTime.set(messageTransferTime);
-         swingTime.set(messageSwingTime);
+         transferTime.set(commandTransferTime);
+         swingTime.set(commandSwingTime);
       }
 
-      currentNumberOfFootsteps.set(message.getNumberOfFootsteps());
+      currentNumberOfFootsteps.set(command.getNumberOfFootsteps());
 
-      for (int i = 0; i < message.getNumberOfFootsteps(); i++)
+      for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         Footstep newFootstep = createFootstep(message.getFootstep(i));
+         Footstep newFootstep = createFootstep(command.getFootstep(i));
          upcomingFootsteps.add(newFootstep);
       }
       updateVisualization();
    }
 
-   public void handlePauseWalkingMessage(PauseWalkingCommand message)
+   public void handlePauseWalkingCommand(PauseWalkingCommand command)
    {
-      isWalkingPaused.set(message.isPauseRequested());
+      isWalkingPaused.set(command.isPauseRequested());
    }
 
-   public void handleFootTrajectoryMessage(FootTrajectoryCommand message)
+   public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      nextFootTrajectoryForFlamingoStance = message;
+      nextFootTrajectoryForFlamingoStance = command;
    }
 
    public Footstep peek(int i)

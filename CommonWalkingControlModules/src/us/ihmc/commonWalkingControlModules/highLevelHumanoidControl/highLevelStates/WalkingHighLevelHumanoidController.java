@@ -404,8 +404,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (transferToSide == null)
          {
-            consumeManipulationMessages();
-            consumePelvisMessages();
+            consumeManipulationCommands();
+            consumePelvisCommands();
          }
 
          switchToToeOffIfPossible();
@@ -422,14 +422,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             handleAutomaticManipulationAbortOnICPError();
       }
 
-      private void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand message)
+      private void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
       {
          if (transferToSide != null)
             return;
 
-         pelvisOrientationManager.handlePelvisTrajectoryMessage(message);
-         balanceManager.handlePelvisTrajectoryMessage(message);
-         comHeightManager.handlePelvisTrajectoryMessage(message);
+         pelvisOrientationManager.handlePelvisTrajectoryCommand(command);
+         balanceManager.handlePelvisTrajectoryCommand(command);
+         comHeightManager.handlePelvisTrajectoryCommand(command);
       }
 
       private void handleAutomaticManipulationAbortOnICPError()
@@ -660,7 +660,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (isInFlamingoStance.getBooleanValue() && walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
          {
-            feetManager.handleFootTrajectoryMessage(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+            feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
          }
 
          balanceManager.getCapturePoint(capturePoint2d);
@@ -710,8 +710,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (isInFlamingoStance.getBooleanValue())
          {
-            consumePelvisMessages();
-            consumeManipulationMessages();
+            consumePelvisCommands();
+            consumeManipulationCommands();
          }
          else
          {
@@ -739,18 +739,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
-      private void handlePelvisTrajectoryMessage(PelvisTrajectoryCommand message)
+      private void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
       {
          if (!isInFlamingoStance.getBooleanValue() || loadFoot.getBooleanValue())
             return;
 
-         pelvisOrientationManager.handlePelvisTrajectoryMessage(message);
-         balanceManager.handlePelvisTrajectoryMessage(message);
+         pelvisOrientationManager.handlePelvisTrajectoryCommand(command);
+         balanceManager.handlePelvisTrajectoryCommand(command);
       }
 
-      private void handleEndEffectorLoadBearingRequest(EndEffectorLoadBearingCommand message)
+      private void handleEndEffectorLoadBearingCommand(EndEffectorLoadBearingCommand command)
       {
-         if (isInFlamingoStance.getBooleanValue() && message.getRequest(swingSide, EndEffector.FOOT) == LoadBearingRequest.LOAD)
+         if (isInFlamingoStance.getBooleanValue() && command.getRequest(swingSide, EndEffector.FOOT) == LoadBearingRequest.LOAD)
             initiateFootLoadingProcedure(swingSide);
       }
 
@@ -804,7 +804,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else if (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
          {
-            feetManager.handleFootTrajectoryMessage(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+            feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
             isInFlamingoStance.set(true);
             balanceManager.enablePelvisXYControl();
          }
@@ -1166,15 +1166,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       momentumBasedController.update();
 
       manipulationControlModule.submitNewArmJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
+      headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
 
-      consumeHeadMessages();
-      consumeChestMessages();
-      consumePelvisHeightMessages();
+      consumeHeadCommands();
+      consumeChestCommands();
+      consumePelvisHeightCommands();
       consumeGoHomeMessages();
-      consumeEndEffectorLoadBearingMessages();
-      consumeStopAllTrajectoryMessages();
-      consumeFootTrajectoryMessages();
-      consumeAbortWalkingMessages();
+      consumeEndEffectorLoadBearingCommands();
+      consumeStopAllTrajectoryCommands();
+      consumeFootTrajectoryCommands();
+      consumeAbortWalkingCommands();
 
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
@@ -1308,7 +1309,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       hasWalkingControllerBeenInitialized.set(!reinitialize);
    }
 
-   private void consumeHeadMessages()
+   private void consumeHeadCommands()
    {
       if (commandInputManager.isNewCommandAvailable(HeadTrajectoryCommand.class))
          headOrientationManager.handleHeadTrajectoryCommand(commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class));
@@ -1318,36 +1319,36 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          headOrientationManager.handleNeckDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
    }
 
-   private void consumeChestMessages()
+   private void consumeChestCommands()
    {
       if (commandInputManager.isNewCommandAvailable(ChestTrajectoryCommand.class))
-         chestOrientationManager.handleChestTrajectoryMessage(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
+         chestOrientationManager.handleChestTrajectoryCommand(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
    }
 
-   private void consumePelvisMessages()
+   private void consumePelvisCommands()
    {
       if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
          pelvisOrientationManager
-               .handlePelvisOrientationTrajectoryMessages(commandInputManager.pollNewestCommand(PelvisOrientationTrajectoryCommand.class));
+               .handlePelvisOrientationTrajectoryCommands(commandInputManager.pollNewestCommand(PelvisOrientationTrajectoryCommand.class));
 
       if (commandInputManager.isNewCommandAvailable(PelvisTrajectoryCommand.class))
       {
-         PelvisTrajectoryCommand message = commandInputManager.pollNewestCommand(PelvisTrajectoryCommand.class);
+         PelvisTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisTrajectoryCommand.class);
          State<WalkingState> currentState = stateMachine.getCurrentState();
          if (currentState instanceof DoubleSupportState)
-            ((DoubleSupportState) currentState).handlePelvisTrajectoryMessage(message);
+            ((DoubleSupportState) currentState).handlePelvisTrajectoryCommand(command);
          else if (currentState instanceof SingleSupportState)
-            ((SingleSupportState) currentState).handlePelvisTrajectoryMessage(message);
+            ((SingleSupportState) currentState).handlePelvisTrajectoryCommand(command);
       }
    }
 
-   private void consumePelvisHeightMessages()
+   private void consumePelvisHeightCommands()
    {
       if (commandInputManager.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
-         comHeightManager.handlePelvisHeightTrajectoryMessage(commandInputManager.pollNewestCommand(PelvisHeightTrajectoryCommand.class));
+         comHeightManager.handlePelvisHeightTrajectoryCommand(commandInputManager.pollNewestCommand(PelvisHeightTrajectoryCommand.class));
    }
 
-   private void consumeManipulationMessages()
+   private void consumeManipulationCommands()
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {
@@ -1358,10 +1359,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          return;
       }
 
-      manipulationControlModule.handleHandTrajectoryMessages(commandInputManager.pollNewCommands(HandTrajectoryCommand.class));
-      manipulationControlModule.handleArmTrajectoryMessages(commandInputManager.pollNewCommands(ArmTrajectoryCommand.class));
-      manipulationControlModule.handleArmDesiredAccelerationsMessages(commandInputManager.pollNewCommands(ArmDesiredAccelerationsCommand.class));
-      manipulationControlModule.handleHandComplianceControlParametersMessages(commandInputManager.pollNewCommands(HandComplianceControlParametersCommand.class));
+      manipulationControlModule.handleHandTrajectoryCommands(commandInputManager.pollNewCommands(HandTrajectoryCommand.class));
+      manipulationControlModule.handleArmTrajectoryCommands(commandInputManager.pollNewCommands(ArmTrajectoryCommand.class));
+      manipulationControlModule.handleArmDesiredAccelerationsCommands(commandInputManager.pollNewCommands(ArmDesiredAccelerationsCommand.class));
+      manipulationControlModule.handleHandComplianceControlParametersCommands(commandInputManager.pollNewCommands(HandComplianceControlParametersCommand.class));
    }
 
    private void consumeGoHomeMessages()
@@ -1369,53 +1370,52 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (!commandInputManager.isNewCommandAvailable(GoHomeCommand.class))
          return;
 
-      GoHomeCommand message = commandInputManager.pollAndCompileCommands(GoHomeCommand.class);
-      manipulationControlModule.handleGoHomeMessage(message);
-
-      pelvisOrientationManager.handleGoHomeMessage(message);
-      balanceManager.handleGoHomeMessage(message);
-      chestOrientationManager.handleGoHomeMessage(message);
+      GoHomeCommand command = commandInputManager.pollAndCompileCommands(GoHomeCommand.class);
+      manipulationControlModule.handleGoHomeCommand(command);
+      pelvisOrientationManager.handleGoHomeCommand(command);
+      balanceManager.handleGoHomeCommand(command);
+      chestOrientationManager.handleGoHomeCommand(command);
    }
 
-   private void consumeEndEffectorLoadBearingMessages()
+   private void consumeEndEffectorLoadBearingCommands()
    {
       if (!commandInputManager.isNewCommandAvailable(EndEffectorLoadBearingCommand.class))
          return;
 
-      EndEffectorLoadBearingCommand message = commandInputManager.pollAndCompileCommands(EndEffectorLoadBearingCommand.class);
-      manipulationControlModule.handleEndEffectorLoadBearingMessage(message);
+      EndEffectorLoadBearingCommand command = commandInputManager.pollAndCompileCommands(EndEffectorLoadBearingCommand.class);
+      manipulationControlModule.handleEndEffectorLoadBearingCommand(command);
       State<WalkingState> currentState = stateMachine.getCurrentState();
       if (currentState instanceof SingleSupportState)
-         ((SingleSupportState) currentState).handleEndEffectorLoadBearingRequest(message);
+         ((SingleSupportState) currentState).handleEndEffectorLoadBearingCommand(command);
    }
 
-   private void consumeStopAllTrajectoryMessages()
+   private void consumeStopAllTrajectoryCommands()
    {
       if (!commandInputManager.isNewCommandAvailable(StopAllTrajectoryCommand.class))
          return;
 
-      StopAllTrajectoryCommand message = commandInputManager.pollNewestCommand(StopAllTrajectoryCommand.class);
-      manipulationControlModule.handleStopAllTrajectoryMessage(message);
-      chestOrientationManager.handleStopAllTrajectoryMessage(message);
-      feetManager.handleStopAllTrajectoryMessage(message);
-      comHeightManager.handleStopAllTrajectoryMessage(message);
-      balanceManager.handleStopAllTrajectoryMessage(message);
-      pelvisOrientationManager.handleStopAllTrajectoryMessage(message);
+      StopAllTrajectoryCommand command = commandInputManager.pollNewestCommand(StopAllTrajectoryCommand.class);
+      manipulationControlModule.handleStopAllTrajectoryCommand(command);
+      chestOrientationManager.handleStopAllTrajectoryCommand(command);
+      feetManager.handleStopAllTrajectoryCommand(command);
+      comHeightManager.handleStopAllTrajectoryCommand(command);
+      balanceManager.handleStopAllTrajectoryCommand(command);
+      pelvisOrientationManager.handleStopAllTrajectoryCommand(command);
    }
 
-   private void consumeFootTrajectoryMessages()
+   private void consumeFootTrajectoryCommands()
    {
       if (commandInputManager.isNewCommandAvailable(FootTrajectoryCommand.class))
-         walkingMessageHandler.handleFootTrajectoryMessage(commandInputManager.pollNewestCommand(FootTrajectoryCommand.class));
+         walkingMessageHandler.handleFootTrajectoryCommand(commandInputManager.pollNewestCommand(FootTrajectoryCommand.class));
 
       if (commandInputManager.isNewCommandAvailable(PauseWalkingCommand.class))
-         walkingMessageHandler.handlePauseWalkingMessage(commandInputManager.pollNewestCommand(PauseWalkingCommand.class));
+         walkingMessageHandler.handlePauseWalkingCommand(commandInputManager.pollNewestCommand(PauseWalkingCommand.class));
 
       if (commandInputManager.isNewCommandAvailable(FootstepDataListCommand.class))
-         walkingMessageHandler.handleFootstepDataListMessage(commandInputManager.pollNewestCommand(FootstepDataListCommand.class));
+         walkingMessageHandler.handleFootstepDataListCommand(commandInputManager.pollNewestCommand(FootstepDataListCommand.class));
    }
 
-   private void consumeAbortWalkingMessages()
+   private void consumeAbortWalkingCommands()
    {
       if (!commandInputManager.isNewCommandAvailable(AbortWalkingCommand.class))
          return;

@@ -129,11 +129,11 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleEndEffectorLoadBearingMessage(EndEffectorLoadBearingCommand message)
+   public void handleEndEffectorLoadBearingCommand(EndEffectorLoadBearingCommand command)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         LoadBearingRequest request = message.getRequest(robotSide, EndEffector.HAND);
+         LoadBearingRequest request = command.getRequest(robotSide, EndEffector.HAND);
          if (request == LoadBearingRequest.LOAD)
             handControlModules.get(robotSide).requestLoadBearing();
          else if (request == LoadBearingRequest.UNLOAD)
@@ -141,60 +141,60 @@ public class ManipulationControlModule
       }
    }
 
-   public void handleStopAllTrajectoryMessage(StopAllTrajectoryCommand message)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      if (!message.isStopAllTrajectory())
+      if (!command.isStopAllTrajectory())
          return;
       for (RobotSide robotSide : RobotSide.values)
          handControlModules.get(robotSide).holdPositionInJointSpace();
    }
 
-   public void handleGoHomeMessage(GoHomeCommand message)
+   public void handleGoHomeCommand(GoHomeCommand command)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (message.getRequest(robotSide, BodyPart.ARM))
-            goToDefaultState(robotSide, message.getTrajectoryTime());
+         if (command.getRequest(robotSide, BodyPart.ARM))
+            goToDefaultState(robotSide, command.getTrajectoryTime());
       }
    }
 
-   public void handleHandTrajectoryMessages(List<HandTrajectoryCommand> messages)
+   public void handleHandTrajectoryCommands(List<HandTrajectoryCommand> commands)
    {
-      for (int i = 0; i < messages.size(); i++)
+      for (int i = 0; i < commands.size(); i++)
       {
-         HandTrajectoryCommand message = messages.get(i);
-         RobotSide robotSide = message.getRobotSide();
-         handControlModules.get(robotSide).handleHandTrajectoryMessage(message);
+         HandTrajectoryCommand command = commands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         handControlModules.get(robotSide).handleHandTrajectoryCommand(command);
       }
    }
 
-   public void handleArmTrajectoryMessages(List<ArmTrajectoryCommand> messages)
+   public void handleArmTrajectoryCommands(List<ArmTrajectoryCommand> commands)
    {
-      for (int i = 0; i < messages.size(); i++)
+      for (int i = 0; i < commands.size(); i++)
       {
-         ArmTrajectoryCommand message = messages.get(i);
-         RobotSide robotSide = message.getRobotSide();
-         handControlModules.get(robotSide).handleArmTrajectoryMessage(message);
+         ArmTrajectoryCommand command = commands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         handControlModules.get(robotSide).handleArmTrajectoryCommand(command);
       }
    }
 
-   public void handleArmDesiredAccelerationsMessages(List<ArmDesiredAccelerationsCommand> messages)
+   public void handleArmDesiredAccelerationsCommands(List<ArmDesiredAccelerationsCommand> commands)
    {
-      for (int i = 0; i < messages.size(); i++)
+      for (int i = 0; i < commands.size(); i++)
       {
-         ArmDesiredAccelerationsCommand message = messages.get(i);
-         RobotSide robotSide = message.getRobotSide();
-         handControlModules.get(robotSide).handleArmDesiredAccelerationsMessage(message);
+         ArmDesiredAccelerationsCommand command = commands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         handControlModules.get(robotSide).handleArmDesiredAccelerationsCommand(command);
       }
    }
 
-   public void handleHandComplianceControlParametersMessages(List<HandComplianceControlParametersCommand> messages)
+   public void handleHandComplianceControlParametersCommands(List<HandComplianceControlParametersCommand> commands)
    {
-      for (int i = 0; i < messages.size(); i++)
+      for (int i = 0; i < commands.size(); i++)
       {
-         HandComplianceControlParametersCommand message = messages.get(i);
-         RobotSide robotSide = message.getRobotSide();
-         handControlModules.get(robotSide).handleHandComplianceControlParametersMessage(message);
+         HandComplianceControlParametersCommand command = commands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         handControlModules.get(robotSide).handleHandComplianceControlParametersCommand(command);
       }
    }
 
