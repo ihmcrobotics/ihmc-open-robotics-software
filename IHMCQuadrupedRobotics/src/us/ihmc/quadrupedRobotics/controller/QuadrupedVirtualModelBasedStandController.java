@@ -243,7 +243,7 @@ public class QuadrupedVirtualModelBasedStandController extends QuadrupedControll
       // compute support frame (centroid and nominal orientation)
       FramePoint supportCentroid = pool.lease(FramePoint.class);
       FrameOrientation supportOrientation = pool.lease(FrameOrientation.class);
-      supportPolygon.getCentroid2d(supportCentroid);
+      supportPolygon.getCentroid(supportCentroid);
       supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
       supportOrientation.setYawPitchRoll(supportPolygon.getNominalYaw(), 0, 0);
       supportFrame.setPoseAndUpdate(supportCentroid, supportOrientation);
