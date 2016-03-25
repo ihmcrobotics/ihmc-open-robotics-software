@@ -323,6 +323,26 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    {
       this.finalPosition.getFrameTuple(finalPosition);
    }
+   
+   public YoFramePoint getFinalPosition()
+   {
+      return finalPosition;
+   }
+   
+   public YoFramePoint getInitialPosition()
+   {
+      return initialPosition;
+   }
+   
+   public YoFrameVector getInitialVelocity()
+   {
+      return initialVelocity;
+   }
+   
+   public YoFrameVector getFinalVelocity()
+   {
+      return finalVelocity;
+   }
 
    @Override
    public void showVisualization()

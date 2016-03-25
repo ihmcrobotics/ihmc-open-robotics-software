@@ -69,6 +69,21 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
       this.pitch.set(pitch, notifyListeners);
       this.roll.set(roll, notifyListeners);
    }
+   
+   public void setYaw(double yaw)
+   {
+      this.yaw.set(yaw);
+   }
+   
+   public void setPitch(double pitch)
+   {
+      this.pitch.set(pitch);
+   }
+   
+   public void setRoll(double roll)
+   {
+      this.roll.set(roll);
+   }
 
    public void set(Matrix3d rotation)
    {
@@ -192,6 +207,20 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
       yaw.set(Double.NaN);
       pitch.set(Double.NaN);
       roll.set(Double.NaN);
+   }
+
+   public void setToZero()
+   {
+      yaw.set(0.0);
+      pitch.set(0.0);
+      roll.set(0.0);
+   }
+
+   public void add(YoFrameOrientation orientation)
+   {
+      yaw.add(orientation.getYaw());
+      pitch.add(orientation.getPitch());
+      roll.add(orientation.getRoll());
    }
 
    public double[] getYawPitchRoll()
