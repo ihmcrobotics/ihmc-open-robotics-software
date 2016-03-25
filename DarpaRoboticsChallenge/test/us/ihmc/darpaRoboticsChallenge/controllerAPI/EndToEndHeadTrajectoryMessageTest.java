@@ -12,11 +12,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.commonWalkingControlModules.controlModules.head.HeadControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -32,17 +37,17 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test (timeout = 300000)
+   @Test(timeout = 300000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 
       Random random = new Random(564574L);
-      double epsilon = 1.0e-10;
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -75,29 +80,60 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
       desiredRandomChestOrientation.changeFrame(chest.getBodyFixedFrame());
 
-
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      
+      assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), scs);
+   }
 
+   @SuppressWarnings("unchecked")
+   public static HeadControlMode findControllerState(SimulationConstructionSet scs)
+   {
+      String headOrientatManagerName = HeadOrientationManager.class.getSimpleName();
+      String headControlStateName = "headControlState";
+      return ((EnumYoVariable<HeadControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
+   }
+
+   public static double findControllerSwitchTime(SimulationConstructionSet scs)
+   {
+      String headOrientatManagerName = HeadOrientationManager.class.getSimpleName();
+      String headControlStateName = "headControlState";
+      return scs.getVariable(headOrientatManagerName, headControlStateName + "SwitchTime").getValueAsDouble();
+   }
+
+   public static Quat4d findControllerDesiredOrientation(SimulationConstructionSet scs)
+   {
       String headPrefix = "head";
-      String orientationTrajectoryName = headPrefix + "MultipleWaypointsOrientationTrajectoryGenerator";
-      String numberOfWaypointsVarName = headPrefix + "NumberOfWaypoints";
       String subTrajectoryName = headPrefix + "SubTrajectory";
       String currentOrientationVarNamePrefix = subTrajectoryName + "CurrentOrientation";
 
-      double numberOfWaypoints = scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName).getValueAsDouble();
-      assertEquals(2.0, numberOfWaypoints, 0.1);
+      Quat4d desiredOrientation = new Quat4d();
+      desiredOrientation.x = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
+      desiredOrientation.y = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
+      desiredOrientation.z = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
+      desiredOrientation.w = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
+      return desiredOrientation;
+   }
 
-      double trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQx(), trajOutput, epsilon);
-      trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQy(), trajOutput, epsilon);
-      trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQz(), trajOutput, epsilon);
-      trajOutput = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
-      assertEquals(desiredRandomChestOrientation.getQs(), trajOutput, epsilon);
+   public static int findNumberOfWaypoints(SimulationConstructionSet scs)
+   {
+      String headPrefix = "head";
+      String numberOfWaypointsVarName = headPrefix + "NumberOfWaypoints";
+      String orientationTrajectoryName = headPrefix + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
+      return ((IntegerYoVariable) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
+   }
+
+   public static void assertSingleWaypointExecuted(Quat4d desiredOrientation, SimulationConstructionSet scs)
+   {
+      assertEquals(2, findNumberOfWaypoints(scs));
+
+      Quat4d controllerDesiredOrientation = findControllerDesiredOrientation(scs);
+      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.x, EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.y, EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.z, EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getW(), controllerDesiredOrientation.w, EPSILON_FOR_DESIREDS);
    }
 
    @Before

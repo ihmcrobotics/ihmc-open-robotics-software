@@ -15,7 +15,8 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
 
    public void addCommand(InverseDynamicsCommand<?> command)
    {
-      commandList.add(command);
+      if (command != null)
+         commandList.add(command);
    }
 
    public void clear()
@@ -39,6 +40,11 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    public int getNumberOfCommands()
    {
       return commandList.size();
+   }
+
+   public boolean isEmpty()
+   {
+      return commandList.isEmpty();
    }
 
    @Override

@@ -2,40 +2,28 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTrajectoryMessage>
+public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, NeckTrajectoryMessage>
 {
    private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
-   private RobotSide robotSide;
 
-   public ArmTrajectoryCommand()
+   public NeckTrajectoryCommand()
    {
       clear();
    }
 
    public void clear()
    {
-      clear(null);
-   }
-
-   public void clear(RobotSide robotSide)
-   {
-      this.robotSide = robotSide;
       jointTrajectoryInputs.clear();
    }
 
-   public void setRobotSide(RobotSide robotSide)
-   {
-      this.robotSide = robotSide;
-   }
-
-   public void addArmTrajectoryPoint(double trajectoryPointTime, double[] desiredJointPositions, double[] desiredJointVelocities)
+   public void addNeckTrajectoryPoint(double trajectoryPointTime, double[] desiredJointPositions, double[] desiredJointVelocities)
    {
       MathTools.checkIfEqual(desiredJointPositions.length, desiredJointVelocities.length);
       for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
@@ -47,7 +35,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
 
    public void set(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
    {
-      clear(robotSide);
+      clear();
       for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
       {
          SimpleTrajectoryPoint1DList jointTrajectoryInput = jointTrajectoryInputs.add();
@@ -57,31 +45,31 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    }
 
    @Override
-   public void set(ArmTrajectoryMessage message)
+   public void set(NeckTrajectoryMessage message)
    {
-      set(message.getRobotSide(), message.getTrajectoryPointLists());
+      set(message.getTrajectoryPointLists());
    }
 
    @Override
-   public void set(ArmTrajectoryCommand other)
+   public void set(NeckTrajectoryCommand other)
    {
-      set(other.robotSide, other.getTrajectoryPointLists());
+      set(other.getTrajectoryPointLists());
    }
 
-   public void set(RobotSide robotSide, OneJointTrajectoryMessage[] trajectoryPointListArray)
+   public void set(OneJointTrajectoryMessage[] trajectoryPointListArray)
    {
-      clear(robotSide);
+      clear();
       for (int i = 0; i < trajectoryPointListArray.length; i++)
       {
          SimpleTrajectoryPoint1DList simpleTrajectoryPoint1DList = jointTrajectoryInputs.add();
-         OneJointTrajectoryMessage armOneJointTrajectoryMessage = trajectoryPointListArray[i];
-         armOneJointTrajectoryMessage.getTrajectoryPoints(simpleTrajectoryPoint1DList);
+         OneJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
+         oneJointTrajectoryMessage.getTrajectoryPoints(simpleTrajectoryPoint1DList);
       }
    }
 
-   public void set(RobotSide robotSide, RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointListArray)
+   public void set(RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointListArray)
    {
-      clear(robotSide);
+      clear();
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
       {
          set(i, trajectoryPointListArray.get(i));
@@ -104,11 +92,6 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       return jointTrajectoryInputs.get(jointIndex).getNumberOfTrajectoryPoints();
    }
 
-   public RobotSide getRobotSide()
-   {
-      return robotSide;
-   }
-
    public RecyclingArrayList<SimpleTrajectoryPoint1DList> getTrajectoryPointLists()
    {
       return jointTrajectoryInputs;
@@ -125,14 +108,14 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    }
 
    @Override
-   public Class<ArmTrajectoryMessage> getMessageClass()
+   public Class<NeckTrajectoryMessage> getMessageClass()
    {
-      return ArmTrajectoryMessage.class;
+      return NeckTrajectoryMessage.class;
    }
 
    @Override
    public boolean isCommandValid()
    {
-      return robotSide != null && getNumberOfJoints() > 0;
+      return getNumberOfJoints() > 0;
    }
 }

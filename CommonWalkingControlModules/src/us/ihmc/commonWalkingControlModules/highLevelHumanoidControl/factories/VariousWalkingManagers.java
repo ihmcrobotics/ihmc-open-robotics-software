@@ -43,8 +43,11 @@ public class VariousWalkingManagers
 
       if (fullRobotModel.getHead() != null)
       {
-         double headWeight = momentumOptimizationSettings.getHeadWeight();
-         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, headWeight, registry);
+         headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, registry);
+         double headJointspaceWeight = momentumOptimizationSettings.getHeadJointspaceWeight();
+         double headTaskspaceWeight = momentumOptimizationSettings.getHeadTaskspaceWeight();
+         double headUserModeWeight = momentumOptimizationSettings.getHeadUserModeWeight();
+         headOrientationManager.setWeights(headJointspaceWeight, headTaskspaceWeight, headUserModeWeight);
       }
       else
       {
@@ -155,7 +158,7 @@ public class VariousWalkingManagers
 
       if (headOrientationManager != null)
       {
-         ret.addCommand(headOrientationManager.getFeedbackControlCommand());
+         ret.addCommand(headOrientationManager.createFeedbackControlTemplate());
       }
 
       if (chestOrientationManager != null)

@@ -4,29 +4,26 @@ import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between trajectory points.")
-public class ArmOneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<ArmOneJointTrajectoryMessage>
+public class OneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneJointTrajectoryMessage>
 {
    /**
     * Empty constructor for serialization.
     */
-   public ArmOneJointTrajectoryMessage()
+   public OneJointTrajectoryMessage()
    {
       super();
    }
 
-   public ArmOneJointTrajectoryMessage(ArmOneJointTrajectoryMessage trajectory1dMessage)
+   public OneJointTrajectoryMessage(OneJointTrajectoryMessage trajectory1dMessage)
    {
       super(trajectory1dMessage);
    }
 
-   public ArmOneJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
+   public OneJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
    {
       super(trajectoryData);
    }
@@ -36,7 +33,7 @@ public class ArmOneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<Ar
     * @param trajectoryTime how long it takes to reach the desired position.
     * @param desiredPosition desired end point position.
     */
-   public ArmOneJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
+   public OneJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
    {
       super(trajectoryTime, desiredPosition);
    }
@@ -46,24 +43,24 @@ public class ArmOneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<Ar
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */
-   public ArmOneJointTrajectoryMessage(int numberOfTrajectoryPoints)
+   public OneJointTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
    }
 
    @Override
-   public void set(ArmOneJointTrajectoryMessage other)
+   public void set(OneJointTrajectoryMessage other)
    {
       super.set(other);
    }
 
    @Override
-   public boolean epsilonEquals(ArmOneJointTrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(OneJointTrajectoryMessage other, double epsilon)
    {
       return super.epsilonEquals(other, epsilon);
    }
 
-   public ArmOneJointTrajectoryMessage(Random random)
+   public OneJointTrajectoryMessage(Random random)
    {
       super(random);
    }

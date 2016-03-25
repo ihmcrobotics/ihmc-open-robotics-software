@@ -35,6 +35,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeComman
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
@@ -1309,7 +1311,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void consumeHeadMessages()
    {
       if (commandInputManager.isNewCommandAvailable(HeadTrajectoryCommand.class))
-         headOrientationManager.handleHeadTrajectoryMessage(commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class));
+         headOrientationManager.handleHeadTrajectoryCommand(commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class));
+      if (commandInputManager.isNewCommandAvailable(NeckTrajectoryCommand.class))
+         headOrientationManager.handleNeckTrajectoryCommand(commandInputManager.pollNewestCommand(NeckTrajectoryCommand.class));
+      if (commandInputManager.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
+         headOrientationManager.handleNeckDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
    }
 
    private void consumeChestMessages()
