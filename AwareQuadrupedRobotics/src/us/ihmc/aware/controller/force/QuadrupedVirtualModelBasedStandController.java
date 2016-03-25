@@ -41,19 +41,20 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final static String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
    private final static String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
    private final static String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
-   private final static String DCM_POSITION_PROPORTIONAL_GAINS = "dcmPositionProportionalGains";
-   private final static String DCM_POSITION_DERIVATIVE_GAINS = "dcmPositionDerivativeGains";
-   private final static String DCM_POSITION_INTEGRAL_GAINS = "dcmPositionIntegralGains";
-   private final static String DCM_POSITION_MAX_INTEGRAL_ERROR = "dcmPositionMaxIntegralError";
    private final static String COM_POSITION_PROPORTIONAL_GAINS = "comPositionProportionalGains";
    private final static String COM_POSITION_DERIVATIVE_GAINS = "comPositionDerivativeGains";
    private final static String COM_POSITION_INTEGRAL_GAINS = "comPositionIntegralGains";
    private final static String COM_POSITION_MAX_INTEGRAL_ERROR = "comPositionMaxIntegralError";
+   private final static String DCM_POSITION_PROPORTIONAL_GAINS = "dcmPositionProportionalGains";
+   private final static String DCM_POSITION_DERIVATIVE_GAINS = "dcmPositionDerivativeGains";
+   private final static String DCM_POSITION_INTEGRAL_GAINS = "dcmPositionIntegralGains";
+   private final static String DCM_POSITION_MAX_INTEGRAL_ERROR = "dcmPositionMaxIntegralError";
 
    // frames
-   private final QuadrupedReferenceFrames referenceFrames;
    private final PoseReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
+
+   // support utils
    QuadrupedSupportPolygon supportPolygon;
    FramePoint supportCentroid;
    FrameOrientation supportOrientation;
@@ -74,7 +75,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider)
+   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProvider inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -91,17 +92,16 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(BODY_ORIENTATION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(DCM_POSITION_PROPORTIONAL_GAINS, 2, 2, 0);
-      params.setDefault(DCM_POSITION_DERIVATIVE_GAINS, 0, 0, 0);
-      params.setDefault(DCM_POSITION_INTEGRAL_GAINS, 0, 0, 0);
-      params.setDefault(DCM_POSITION_MAX_INTEGRAL_ERROR, 0);
       params.setDefault(COM_POSITION_PROPORTIONAL_GAINS, 0, 0, 5000);
       params.setDefault(COM_POSITION_DERIVATIVE_GAINS, 0, 0, 750);
       params.setDefault(COM_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(COM_POSITION_MAX_INTEGRAL_ERROR, 0);
+      params.setDefault(DCM_POSITION_PROPORTIONAL_GAINS, 2, 2, 0);
+      params.setDefault(DCM_POSITION_DERIVATIVE_GAINS, 0, 0, 0);
+      params.setDefault(DCM_POSITION_INTEGRAL_GAINS, 0, 0, 0);
+      params.setDefault(DCM_POSITION_MAX_INTEGRAL_ERROR, 0);
 
       // frames
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointNameMap, robotParameters.getPhysicalProperties());
       ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
       supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
       worldFrame = ReferenceFrame.getWorldFrame();
@@ -122,11 +122,11 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
 
       // task space controllers
+      this.taskSpaceEstimator = taskSpaceEstimator;
+      this.taskSpaceController = taskSpaceController;
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, jointNameMap, registry, yoGraphicsListRegistry);
-      taskSpaceController = new QuadrupedTaskSpaceController(fullRobotModel, referenceFrames, jointNameMap, robotParameters.getQuadrupedJointLimits(), controlDT, registry, yoGraphicsListRegistry);
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
@@ -196,7 +196,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceSetpoints, taskSpaceEstimates, taskSpaceCommands);
-
    }
 
    @Override public QuadrupedForceControllerEvent process()
