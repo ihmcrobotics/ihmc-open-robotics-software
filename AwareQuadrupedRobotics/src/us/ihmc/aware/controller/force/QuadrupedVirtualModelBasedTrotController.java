@@ -512,7 +512,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       // compute support frame (centroid and nominal orientation)
       supportCentroidEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
       supportOrientationEstimate.changeFrame(supportPolygonEstimate.getReferenceFrame());
-      supportPolygonEstimate.getCentroid2d(supportCentroidEstimate);
+      supportPolygonEstimate.getCentroid(supportCentroidEstimate);
       supportOrientationEstimate.setYawPitchRoll(supportPolygonEstimate.getNominalYaw(), 0, 0);
       supportFrame.setPoseAndUpdate(supportCentroidEstimate, supportOrientationEstimate);
 
