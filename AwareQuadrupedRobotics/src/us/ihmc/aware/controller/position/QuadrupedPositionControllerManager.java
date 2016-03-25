@@ -1,6 +1,7 @@
 package us.ihmc.aware.controller.position;
 
 import us.ihmc.aware.animation.QuadrupedAnimationController;
+import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -31,6 +32,9 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
          QuadrupedRobotParameters parameters)
    {
       ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
+      
+      // Initialize input providers.
+      QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), paramMapRepository, registry);
 
       QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(
             runtimeEnvironment);
@@ -39,7 +43,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
             paramMapRepository);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment,
-            parameters, paramMapRepository);
+            parameters, inputProvider, paramMapRepository);
       QuadrupedController animationController = new QuadrupedAnimationController("***REMOVED***", "***REMOVED***", parameters, runtimeEnvironment);
 
       StateMachineBuilder<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> builder = new StateMachineBuilder<>(

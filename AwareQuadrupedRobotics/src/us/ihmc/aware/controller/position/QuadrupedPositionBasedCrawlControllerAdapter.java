@@ -1,8 +1,7 @@
 package us.ihmc.aware.controller.position;
 
-import us.ihmc.aware.controller.QuadrupedController;
+import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionBasedCrawlController;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -20,7 +19,7 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
    private final QuadrupedPositionBasedCrawlController controller;
 
    public QuadrupedPositionBasedCrawlControllerAdapter(QuadrupedRuntimeEnvironment environment,
-         QuadrupedRobotParameters parameters, ParameterMapRepository paramMapRepository)
+         QuadrupedRobotParameters parameters, QuadrupedControllerInputProvider inputProvider, ParameterMapRepository paramMapRepository)
    {
 //      this.params = paramMapRepository.get(QuadrupedPositionBasedCrawlControllerAdapter.class);
 
@@ -33,7 +32,7 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
 
       // TODO: null foot switches
       this.controller = new QuadrupedPositionBasedCrawlController(environment.getControlDT(), parameters,
-            environment.getFullRobotModel(), null, environment.getLegIkCalculator(),
+            environment.getFullRobotModel(), inputProvider, null, environment.getLegIkCalculator(),
             environment.getGlobalDataProducer(), environment.getRobotTimestamp(), environment.getParentRegistry(),
             environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
