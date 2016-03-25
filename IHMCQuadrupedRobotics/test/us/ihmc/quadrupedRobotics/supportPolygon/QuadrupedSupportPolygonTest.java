@@ -183,27 +183,27 @@ public class QuadrupedSupportPolygonTest
    public void testDistanceInside()
    {
       QuadrupedSupportPolygon simplePolygon = createSimplePolygon();
-      assertEquals("not 0.0 inside", 0.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  0.0, 0.0)), 1e-7);
-      assertEquals("not 0.25 inside", 0.25, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.25,  0.5, 0.0)), 1e-7);
+      assertEquals("not 0.0 inside", 0.0, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.0,  0.0, 0.0)), 1e-7);
+      assertEquals("not 0.25 inside", 0.25, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.25,  0.5, 0.0)), 1e-7);
       assertTrue("should be inside", simplePolygon.isInside(new FramePoint(WORLD, 0.25,  0.5, 0.0)));
       
       FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.5, 0.0);
-      double distance = simplePolygon.distanceInsideInCircle2d(point);
+      double distance = simplePolygon.getDistanceInsideInCircle2d(point);
       assertEquals("not 0.5 inside", 0.5, distance, 1e-7);
       point.set(0.4, 0.5, 1.0);
-      distance = simplePolygon.distanceInsideInCircle2d(point);
+      distance = simplePolygon.getDistanceInsideInCircle2d(point);
       assertEquals("not 0.4 inside", 0.4, distance, 1e-7);
       
       simplePolygon.removeFootstep(RobotQuadrant.FRONT_RIGHT);
-      assertEquals("not 0.05 inside", 0.05, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.06,  0.05, 0.0)), 1e-7);
+      assertEquals("not 0.05 inside", 0.05, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.06,  0.05, 0.0)), 1e-7);
       
       simplePolygon.removeFootstep(RobotQuadrant.FRONT_LEFT);
-      assertEquals("not 0.0 inside", 0.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.06,  0.0, 0.0)), 1e-7);
-      assertEquals("not -0.1 inside", -0.1, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.06,  0.1, 0.0)), 1e-7);
+      assertEquals("not 0.0 inside", 0.0, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.06,  0.0, 0.0)), 1e-7);
+      assertEquals("not -0.1 inside", -0.1, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.06,  0.1, 0.0)), 1e-7);
       
       simplePolygon.removeFootstep(RobotQuadrant.HIND_RIGHT);
-      assertEquals("not 0.0 inside", 0.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  0.0, 0.0)), 1e-7);
-      assertEquals("not -1.0 inside", -1.0, simplePolygon.distanceInside2d(new FramePoint(WORLD, 0.0,  1.0, 0.0)), 1e-7);
+      assertEquals("not 0.0 inside", 0.0, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.0,  0.0, 0.0)), 1e-7);
+      assertEquals("not -1.0 inside", -1.0, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.0,  1.0, 0.0)), 1e-7);
    }
    
    @DeployableTestMethod(estimatedDuration = 0.1)
@@ -293,10 +293,10 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon simplePolygon = createSimplePolygon();
       FramePoint centroid = new FramePoint();
-      simplePolygon.getCentroid2d(centroid);
+      simplePolygon.getCentroid(centroid);
       FramePoint expected = new FramePoint(WORLD, 0.5, 0.5, 0.0);
       assertTrue("not equal expected " + expected + " actual " + centroid, expected.epsilonEquals(centroid, 1e-7));
-      simplePolygon.getCentroid2d(centroid);
+      simplePolygon.getCentroid(centroid);
       assertTrue("not equal expected " + expected + " actual " + centroid, expected.epsilonEquals(centroid, 1e-7));
    }
    
@@ -596,13 +596,13 @@ public class QuadrupedSupportPolygonTest
       QuadrupedSupportPolygon poly = createSimplePolygon();
       FramePoint centroidToPack2d = new FramePoint();
       FramePoint2d centroid2dToPack2d = new FramePoint2d();
-      poly.getCentroid2d(centroidToPack2d);
+      poly.getCentroid(centroidToPack2d);
       poly.getCentroid2d(centroid2dToPack2d);
       assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3d(0.5, 0.5, 0.0), 1e-7));
       assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(0.5, 0.5), 1e-7));
       
       poly.translate(new Vector3d(2.0, -2.0, 0.0));
-      poly.getCentroid2d(centroidToPack2d);
+      poly.getCentroid(centroidToPack2d);
       poly.getCentroid2d(centroid2dToPack2d);
       assertTrue("not centroid", centroidToPack2d.epsilonEquals(new Point3d(2.5, -1.5, 0.0), 1e-7));
       assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(2.5, -1.5), 1e-7));
@@ -1240,7 +1240,7 @@ public class QuadrupedSupportPolygonTest
       
       for (int i = 0; i < reps; i++)
       {
-         createSimplePolygon.getCentroid2d(framePoint);
+         createSimplePolygon.getCentroid(framePoint);
       }
    }
    
@@ -1252,7 +1252,7 @@ public class QuadrupedSupportPolygonTest
       
       for (int i = 0; i < reps; i++)
       {
-         createSimplePolygon.getCentroid2d(framePoint);
+         createSimplePolygon.getCentroid(framePoint);
       }
    }
    

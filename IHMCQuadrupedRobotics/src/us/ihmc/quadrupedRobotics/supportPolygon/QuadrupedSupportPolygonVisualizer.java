@@ -198,7 +198,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       }
       drawSupportPolygon(supportPolygon, currentSupportPolygon);
       
-      supportPolygon.getCentroid2d(centroidFramePoint);
+      supportPolygon.getCentroid(centroidFramePoint);
       centroid.set(centroidFramePoint);
       
       FramePoint centerOfInscribedCircle = new FramePoint();
