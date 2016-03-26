@@ -51,8 +51,11 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private final QuadrupedSupportPolygon tempPolygon = new QuadrupedSupportPolygon();
 
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint weightedCentroid = new YoFramePoint("weightedCentroid", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint centroidFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint weightedCentroidFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final YoGraphicPosition centroidGraphic = new YoGraphicPosition("centroidGraphic", centroid, 0.03, YoAppearance.Chartreuse());
+   private final YoGraphicPosition weightedCentroidGraphic = new YoGraphicPosition("weightedCentroidGraphic", weightedCentroid, 0.01, YoAppearance.Chocolate());
 
    private final YoFramePoint circleCenter = new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition circleCenterGraphic = new YoGraphicPosition("circleCenterGraphic", circleCenter, 0.03, YoAppearance.Green());
@@ -129,6 +132,10 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistry.registerYoGraphic("centroid", centroidGraphic);
       yoGraphicsListRegistry.registerArtifact("centroid", centroidGraphic.createArtifact());
+      
+      yoGraphicsListRegistry.registerYoGraphic("weightedCentroid", weightedCentroidGraphic);
+      yoGraphicsListRegistry.registerArtifact("weightedCentroid", weightedCentroidGraphic.createArtifact());
+      
       yoGraphicsListRegistry.registerArtifact("inscribedCircle", inscribedCircle);
       yoGraphicsListRegistry.registerArtifact("inscribedCircleCenter", circleCenterGraphic.createArtifact());
       yoGraphicsListRegistry.registerArtifact("miniCircle", miniCircle);
@@ -200,6 +207,9 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       
       supportPolygon.getCentroid(centroidFramePoint);
       centroid.set(centroidFramePoint);
+      
+      supportPolygon.getCentroidEqualWeightingEnds(weightedCentroidFramePoint);
+      weightedCentroid.set(weightedCentroidFramePoint);
       
       FramePoint centerOfInscribedCircle = new FramePoint();
       double radius = supportPolygon.getInCircle2d(centerOfInscribedCircle);
