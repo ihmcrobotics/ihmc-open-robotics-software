@@ -468,6 +468,36 @@ public class QuadrupedSupportPolygon implements Serializable
       return closestQuadrant;
    }
 
+
+   /**
+    * if you pick up a leg and want equal weight distribution, pretend that there are two legs on top of eachother
+    * @param centroidToPack
+    */
+   public void getCentroidEqualWeightingEnds(FramePoint centroidToPack)
+   {
+      centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
+      int size = size();
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if(getFootstep(robotQuadrant) != null)
+         {
+            centroidToPack.add(getFootstep(robotQuadrant));
+         }
+         else
+         {
+            FramePoint acrossBodyFootstep = getFootstep(robotQuadrant.getAcrossBodyQuadrant());
+            if(acrossBodyFootstep != null)
+            {
+               centroidToPack.add(acrossBodyFootstep);
+               size++;
+            }
+         }
+      }
+      
+      centroidToPack.scale(1.0 / size);
+   }
+   
    public void getCentroid(FramePoint centroidToPack)
    {
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
