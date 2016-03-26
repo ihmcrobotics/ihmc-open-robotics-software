@@ -94,6 +94,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
    // trajectories
+   private double bodyYawSetpoint;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
 
@@ -251,20 +252,20 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       taskSpaceSetpoints.getComForceFeedforward().setZ(mass * gravity);
 
       // update desired body orientation, angular velocity, and torque
-      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      double bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw();
-      double bodyPitch = RotationTools.computePitch(inputProvider.getBodyOrientationInput());
-      double bodyRoll = RotationTools.computeRoll(inputProvider.getBodyOrientationInput());
       if (trotStateMachine.getState() != TrotState.QUAD_SUPPORT)
       {
-         bodyYaw += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
+         bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
       }
-      taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
+      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
+      taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
+            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + supportPolygon.getNominalPitch(),
+                  RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
       taskSpaceSetpoints.getBodyAngularVelocity().setToZero();
       taskSpaceSetpoints.getComTorqueFeedforward().setToZero();
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceSetpoints, taskSpaceEstimates, taskSpaceCommands);
+      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
    }
 
    @Override public QuadrupedForceControllerEvent process()
@@ -288,7 +289,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             joint.setUnderPositionControl(false);
          }
       }
-      // initialize dcm controller settings
+
+      // initialize dcm controller
       dcmPositionController.setGains(
             params.getVolatileArray(DCM_POSITION_PROPORTIONAL_GAINS),
             params.getVolatileArray(DCM_POSITION_DERIVATIVE_GAINS),
@@ -322,6 +324,11 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       );
       taskSpaceController.reset();
 
+      // initialize body yaw trajectory
+      taskSpaceEstimates.getBodyOrientation().changeFrame(worldFrame);
+      bodyYawSetpoint = taskSpaceEstimates.getBodyOrientation().getYaw();
+
+      // initialize state machine
       trotStateMachine.reset();
    }
 
