@@ -371,7 +371,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       distanceInsideSupportPolygonBeforeSwingingLeg.set(0.02);
       turnInPlaceCoMTrajectoryBuffer.set(0.5);
       
-      useImuFeedback.set(true);
+      useImuFeedback.set(false);
       pitchPidController.setProportionalGain(10.0);
       pitchPidController.setDerivativeGain(0.4);
       pitchPidController.setIntegralGain(0.4);
