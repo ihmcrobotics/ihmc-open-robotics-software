@@ -359,13 +359,7 @@ public class HandControlModule
 
    public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix)
    {
-      executeTaskSpaceTrajectory(poseTrajectory, selectionMatrix, Double.NaN, Double.NaN);
-   }
-
-   public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix,
-         double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
-   {
-      taskSpacePositionControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, percentOfTrajectoryWithOrientationBeingControlled, trajectoryTime);
+      taskSpacePositionControlState.setTrajectory(poseTrajectory);
       taskSpacePositionControlState.setSelectionMatrix(selectionMatrix);
       taskSpacePositionControlState.setControlFrameFixedInEndEffector(handControlFrame);
 
