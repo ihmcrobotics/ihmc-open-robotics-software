@@ -147,7 +147,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
       params.setDefault(DOUBLE_SUPPORT_DURATION, 0.4);
-      params.setDefault(STANCE_WIDTH_NOMINAL, 0.4);
+      params.setDefault(STANCE_WIDTH_NOMINAL, 0.3);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
       params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
 
@@ -348,7 +348,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       nominalCmpPositionAtSoS[0].scale(0.5);
 
       taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw();
+      bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw() + inputProvider.getPlanarVelocityInput().getZ() * params.get(DOUBLE_SUPPORT_DURATION);
       yStance = hindSupportQuadrant.getSide().negateIfLeftSide(params.get(STANCE_WIDTH_NOMINAL));
       xStride = inputProvider.getPlanarVelocityInput().getX() * params.get(DOUBLE_SUPPORT_DURATION);
       yStride = inputProvider.getPlanarVelocityInput().getY() * params.get(DOUBLE_SUPPORT_DURATION) * 2;
@@ -359,7 +359,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       nominalCmpPositionAtSoS[1].add(xOffset, yOffset, 0.0);
 
       taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw() + inputProvider.getPlanarVelocityInput().getZ() * params.get(DOUBLE_SUPPORT_DURATION);
+      bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw() + inputProvider.getPlanarVelocityInput().getZ() * 2 * params.get(DOUBLE_SUPPORT_DURATION);
       yStance = hindSupportQuadrant.getSide().negateIfRightSide(params.get(STANCE_WIDTH_NOMINAL));
       xStride = inputProvider.getPlanarVelocityInput().getX() * params.get(DOUBLE_SUPPORT_DURATION);
       yStride = inputProvider.getPlanarVelocityInput().getY() * params.get(DOUBLE_SUPPORT_DURATION) * 2;
