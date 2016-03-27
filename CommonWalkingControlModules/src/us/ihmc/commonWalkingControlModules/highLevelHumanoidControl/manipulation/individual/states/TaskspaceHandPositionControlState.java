@@ -55,14 +55,11 @@ public class TaskspaceHandPositionControlState extends HandControlState
    private final PoseReferenceFrame trackingFrame;
    private final ReferenceFrame endEffectorFrame;
 
-   private final DoubleYoVariable doneTrajectoryTime;
-   private final DoubleYoVariable holdPositionDuration;
-
    private final YoSE3PIDGainsInterface gains;
    private final DoubleYoVariable weight;
 
-   public TaskspaceHandPositionControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody primaryBase,
-         YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public TaskspaceHandPositionControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody primaryBase, YoSE3PIDGainsInterface gains,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.TASK_SPACE_POSITION);
       this.gains = gains;
@@ -98,9 +95,6 @@ public class TaskspaceHandPositionControlState extends HandControlState
          dynamicGraphicReferenceFrame = null;
       }
 
-      doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
-      holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
-
       privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(primaryBase, endEffector);
    }
 
@@ -112,9 +106,6 @@ public class TaskspaceHandPositionControlState extends HandControlState
    @Override
    public void doAction()
    {
-      if (poseTrajectoryGenerator.isDone())
-         recordDoneTrajectoryTime();
-
       poseTrajectoryGenerator.compute(getTimeInCurrentState());
 
       poseTrajectoryGenerator.getPose(desiredPose);
@@ -135,30 +126,11 @@ public class TaskspaceHandPositionControlState extends HandControlState
    {
       poseTrajectoryGenerator.showVisualization();
       poseTrajectoryGenerator.initialize();
-      doneTrajectoryTime.set(Double.NaN);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
-      holdPositionDuration.set(0.0);
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
-         return false;
-
-      return getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
-   }
-
-   private void recordDoneTrajectoryTime()
-   {
-      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
-      {
-         doneTrajectoryTime.set(getTimeInCurrentState());
-      }
    }
 
    private void updateVisualizers()
@@ -175,11 +147,6 @@ public class TaskspaceHandPositionControlState extends HandControlState
 
       if (poseTrajectoryGenerator.isDone())
          poseTrajectoryGenerator.hideVisualization();
-   }
-
-   public void setHoldPositionDuration(double time)
-   {
-      holdPositionDuration.set(time);
    }
 
    public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator)
