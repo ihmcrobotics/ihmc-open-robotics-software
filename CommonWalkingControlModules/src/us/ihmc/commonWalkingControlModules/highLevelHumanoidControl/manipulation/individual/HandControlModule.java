@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -55,7 +52,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -76,7 +72,6 @@ public class HandControlModule
    private final YoVariableRegistry registry;
 
    private final GenericStateMachine<HandControlMode, HandControlState> stateMachine;
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators;
 
@@ -345,22 +340,9 @@ public class HandControlModule
       newJointDesiredData = lowLevelOneDoFJointDesiredDataHolder;
    }
 
-   public boolean isDone()
-   {
-      return stateMachine.getCurrentState().isDone();
-   }
-
    public void executeTaskspaceTrajectory(PoseTrajectoryGenerator poseTrajectory)
    {
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
-      executeTaskSpaceTrajectory(poseTrajectory, selectionMatrix);
-   }
-
-   public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix)
-   {
       taskSpacePositionControlState.setTrajectory(poseTrajectory);
-      taskSpacePositionControlState.setSelectionMatrix(selectionMatrix);
       taskSpacePositionControlState.setControlFrameFixedInEndEffector(handControlFrame);
 
       requestedState.set(taskSpacePositionControlState.getStateEnum());
@@ -429,7 +411,7 @@ public class HandControlModule
          return;
       }
 
-      if (!checkJointspaceTrajectoryPointLists(command.getTrajectoryPointLists()))
+      if (!checkJointspaceTrajectoryPointLists(jointsOriginal, command.getTrajectoryPointLists()))
          return;
 
       updateJointsAtDesiredPosition();
@@ -459,7 +441,7 @@ public class HandControlModule
 
    public void handleArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
    {
-      if (!checkArmDesiredAccelerationsCommand(command))
+      if (!checkArmDesiredAccelerationsCommand(robotSide, jointsOriginal, command))
          return;
 
       switch (command.getArmControlMode())
@@ -483,21 +465,21 @@ public class HandControlModule
       PrintTools.error(this, "HandComplianceControlParametersControllerCommand is not supported anymore. Needs to be reimplememted.");
    }
 
-   private boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointLists)
+   private static boolean checkJointspaceTrajectoryPointLists(OneDoFJoint[] joints, RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointLists)
    {
-      if (trajectoryPointLists.size() != jointsOriginal.length)
+      if (trajectoryPointLists.size() != joints.length)
          return false;
 
       for (int jointIndex = 0; jointIndex < trajectoryPointLists.size(); jointIndex++)
       {
-         if (!checkJointspaceTrajectoryPointList(jointsOriginal[jointIndex], trajectoryPointLists.get(jointIndex)))
+         if (!checkJointspaceTrajectoryPointList(joints[jointIndex], trajectoryPointLists.get(jointIndex)))
             return false;
       }
 
       return true;
    }
 
-   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, SimpleTrajectoryPoint1DList trajectoryPointList)
+   private static boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, SimpleTrajectoryPoint1DList trajectoryPointList)
    {
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
       {
@@ -510,16 +492,16 @@ public class HandControlModule
       return true;
    }
 
-   private boolean checkArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
+   private static boolean checkArmDesiredAccelerationsCommand(RobotSide robotSide, OneDoFJoint[] joints, ArmDesiredAccelerationsCommand command)
    {
       if (command.getRobotSide() != robotSide)
       {
-         PrintTools.warn(this, "Received a " + command.getClass().getSimpleName() + " for the wrong side.");
+         PrintTools.warn("Received a " + command.getClass().getSimpleName() + " for the wrong side.");
          return false;
       }
 
       if (command.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE
-            && command.getNumberOfJoints() != jointsOriginal.length)
+            && command.getNumberOfJoints() != joints.length)
          return false;
 
       return true;
@@ -699,11 +681,6 @@ public class HandControlModule
          return taskSpacePositionControlState.getReferenceFrame() == worldFrame;
 
       return false;
-   }
-
-   public RobotSide getRobotSide()
-   {
-      return robotSide;
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
