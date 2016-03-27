@@ -68,7 +68,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final static String DOUBLE_SUPPORT_DURATION = "doubleSupportDuration";
    private final static String STANCE_WIDTH_NOMINAL = "stanceWidthNominal";
    private final static String STANCE_LENGTH_NOMINAL = "stanceLengthNominal";
-   private final static String CONTACT_PRESSURE_THRESHOLD = "contactPressureThreshold";
+   private final static String NO_CONTACT_PRESSURE_LIMIT = "noContactPressureLimit";
 
    // frames
    private final PoseReferenceFrame supportFrame;
@@ -149,7 +149,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       params.setDefault(DOUBLE_SUPPORT_DURATION, 0.33);
       params.setDefault(STANCE_WIDTH_NOMINAL, 0.4);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
-      params.setDefault(CONTACT_PRESSURE_THRESHOLD, 75);
+      params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
 
       // frames
       ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
@@ -440,6 +440,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
+            taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
          }
       }
 
@@ -544,6 +545,8 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             // initialize contact state
             taskSpaceControllerSettings.setContactState(swingQuadrant, ContactState.NO_CONTACT);
             taskSpaceControllerSettings.setContactState(supportQuadrant, ContactState.IN_CONTACT);
+            taskSpaceControllerSettings.setPressureUpperLimit(swingQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
+            taskSpaceControllerSettings.setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
          }
       }
 
@@ -570,15 +573,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             taskSpaceSetpoints.getSolePosition(swingQuadrant).changeFrame(worldFrame);
             taskSpaceSetpoints.getSolePosition(swingQuadrant).add(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
             taskSpaceSetpoints.getSolePosition(swingQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
-
-            // disable swing foot position feedback if contact pressure threshold is exceeded
-            taskSpaceCommands.getSoleForce(swingQuadrant).changeFrame(worldFrame);
-            if ((currentTime - initialTime > params.get(DOUBLE_SUPPORT_DURATION))
-            && (taskSpaceCommands.getSoleForce(swingQuadrant).getZ() < -params.get(CONTACT_PRESSURE_THRESHOLD)))
-            {
-               taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(swingQuadrant);
-               taskSpaceSetpoints.getSoleForceFeedforward(swingQuadrant).set(0, 0, -params.get(CONTACT_PRESSURE_THRESHOLD));
-            }
          }
 
          // trigger touch down event
