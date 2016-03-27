@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -35,7 +34,7 @@ import us.ihmc.tools.FormattingTools;
  * @author twan
  *         Date: 5/9/13
  */
-public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
+public class TaskspaceHandPositionControlState extends HandControlState
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -208,43 +207,32 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
          poseTrajectoryGenerator.hideVisualization();
    }
 
-   @Override
    public void setHoldPositionDuration(double time)
    {
       holdPositionDuration.set(time);
    }
 
-   @Override
    public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator)
    {
       this.poseTrajectoryGenerator = poseTrajectoryGenerator;
    }
 
-   @Override
-   public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
-   {
-   }
-
-   @Override
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
       this.selectionMatrix.set(selectionMatrix);
    }
 
-   @Override
    public ReferenceFrame getReferenceFrame()
    {
       return desiredPose.getReferenceFrame();
    }
 
-   @Override
    public ReferenceFrame getTrackingFrame()
    {
       return trackingFrame;
    }
 
-   @Override
    public void setControlFrameFixedInEndEffector(ReferenceFrame controlFrame)
    {
       controlFramePose.setToZero(controlFrame);
@@ -253,7 +241,6 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       trackingFrame.setPoseAndUpdate(controlFramePose);
    }
 
-   @Override
    public void getDesiredPose(FramePose desiredPoseToPack)
    {
       desiredPoseToPack.setIncludingFrame(desiredPose);

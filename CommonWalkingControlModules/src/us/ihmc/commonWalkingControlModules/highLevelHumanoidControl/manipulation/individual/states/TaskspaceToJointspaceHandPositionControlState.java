@@ -30,9 +30,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.tools.FormattingTools;
 
-public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
+public class TaskspaceToJointspaceHandPositionControlState extends State<HandControlMode>
 {
    private final String name;
    private final YoVariableRegistry registry;
@@ -395,19 +396,16 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       }
    }
 
-   @Override
    public void setHoldPositionDuration(double holdPositionDuration)
    {
       this.holdPositionDuration.set(holdPositionDuration);
    }
 
-   @Override
    public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator)
    {
       setTrajectoryWithAngularControlQuality(poseTrajectoryGenerator, Double.NaN, Double.NaN);
    }
 
-   @Override
    public void setTrajectoryWithAngularControlQuality(PoseTrajectoryGenerator poseTrajectoryGenerator, double percentOfTrajectoryWithOrientationBeingControlled,
          double trajectoryTime)
    {
@@ -425,7 +423,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       }
    }
 
-   @Override
    public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
    {
       if (handCompliantControlHelper != null)
@@ -440,24 +437,20 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       handCompliantControlHelper.setCompliantControlFrame(compliantControlFrame);
    }
 
-   @Override
    public void setControlFrameFixedInEndEffector(ReferenceFrame controlFrame)
    {
    }
 
-   @Override
    public void getDesiredPose(FramePose desiredPoseToPack)
    {
       desiredPoseToPack.setIncludingFrame(desiredPose);
    }
 
-   @Override
    public ReferenceFrame getReferenceFrame()
    {
       return desiredPose.getReferenceFrame();
    }
 
-   @Override
    public ReferenceFrame getTrackingFrame()
    {
       return taskspaceToJointspaceCalculator.getControlFrame();
@@ -479,26 +472,22 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       handCompliantControlHelper.reset();
    }
 
-   @Override
    public JointspaceAccelerationCommand getInverseDynamicsCommand()
    {
       return jointspaceAccelerationCommand;
    }
 
-   @Override
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
       this.selectionMatrix.set(selectionMatrix);
    }
 
-   @Override
    public JointspaceFeedbackControlCommand getFeedbackControlCommand()
    {
       return jointspaceFeedbackControlCommand;
    }
 
-   @Override
    public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
    {
       return lowLevelJointDesiredData;
