@@ -15,6 +15,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
@@ -508,6 +509,60 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       
       centroidToPack.scale(1.0 / size());
+   }
+   
+   /**
+    * gets the Centroid of the supplied quadrants and sets the z value to the average between the lowest foot in 
+    * the front and hind in world frame. If no Hinds or no Fronts are supplied it will use the lowest foot given.
+    * If no quadrants are supplied the result will be Zeros in world.
+    */
+   public void getCentroidAveragingLowestZHeightsAcrossEnds(FramePoint centroidToPack)
+   {
+      centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
+      double frontZ = Double.MAX_VALUE;
+      double hindZ = Double.MAX_VALUE;
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         FramePoint footstep = getFootstep(robotQuadrant);
+         centroidToPack.add(footstep);
+         
+         double currentFootZ = footstep.getZ();
+         if(robotQuadrant.isQuadrantInFront() && currentFootZ < frontZ)
+         {
+            frontZ = currentFootZ;
+         }
+         else if(robotQuadrant.isQuadrantInHind() && currentFootZ < hindZ)
+         {
+            hindZ = currentFootZ;
+         }
+      }
+
+      centroidToPack.scale(1.0 / size());
+      
+      double averageZ = 0.0;
+      if(hindZ < Double.MAX_VALUE)
+      {
+         averageZ += hindZ;
+      }
+      if(frontZ < Double.MAX_VALUE)
+      {
+         averageZ += frontZ;
+      }
+      averageZ /= 2.0;
+      centroidToPack.setZ(averageZ);
+   }
+   
+   private final FramePoint tempFramePointForCentroids = new FramePoint();
+   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose framePose)
+   {
+      double nominalPitch = getNominalPitch();
+      double nominalRoll = getNominalRoll();
+      double nominalYaw = getNominalYaw();
+      
+      getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
+      framePose.setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.setPosition(tempFramePointForCentroids);
    }
 
    public void getCentroid2d(FramePoint2d centroidToPack2d)

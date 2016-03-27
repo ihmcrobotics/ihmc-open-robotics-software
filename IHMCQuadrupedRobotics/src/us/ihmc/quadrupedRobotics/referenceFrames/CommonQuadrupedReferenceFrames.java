@@ -59,5 +59,34 @@ public abstract class CommonQuadrupedReferenceFrames implements ReferenceFrames
    }
 
    public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
+   
+   /**
+    * returns the center of the polygon made up using the provided robot quadrants, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw, pitch, and roll
+    * @param feetQuadrants, feet 
+    */
+   public abstract ReferenceFrame getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude);
+
+   /**
+    * returns the center of the polygon made up using the provided robot quadrants, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw
+    */
+   public abstract ReferenceFrame getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude);
+
+   /**
+    * returns the center of the polygon made up using the four feet, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw, pitch, and roll
+    */
+   public abstract ReferenceFrame getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds();
+   
+   /**
+    * returns the center of the four foot polygon, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw
+    */
+   public abstract ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
 }
