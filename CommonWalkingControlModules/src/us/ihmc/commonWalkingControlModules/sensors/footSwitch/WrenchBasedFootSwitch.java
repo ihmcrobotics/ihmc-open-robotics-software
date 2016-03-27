@@ -379,4 +379,11 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       return contactablePlaneBody;
    }
+
+   @Override
+   @Deprecated
+   public void setFootContactState(boolean hasFootHitGround)
+   {
+      
+   }
 }

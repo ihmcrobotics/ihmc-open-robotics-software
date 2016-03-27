@@ -7,6 +7,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import com.sun.glass.ui.Robot;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -315,6 +317,11 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final YoGraphicReferenceFrame leftMidZUpFrameViz;
    private final YoGraphicReferenceFrame rightMidZUpFrameViz;
    
+   private final YoGraphicReferenceFrame centroidWithNominal;
+   private final YoGraphicReferenceFrame centroidZUpWithNominal;
+   private final QuadrantDependentList<YoGraphicReferenceFrame> tripleSupportFrames = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoGraphicReferenceFrame> tripleSupportZUpFrames = new QuadrantDependentList<>();
+   
    public final BooleanYoVariable isVelocityNegative = new BooleanYoVariable("isVelocityNegative", registry);
    public final DoubleYoVariable velocitySign = new DoubleYoVariable("velocitySign", registry);
    
@@ -460,6 +467,15 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
 
       leftMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.LEFT), registry, 0.2);
       rightMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.RIGHT), registry, 0.2);
+      
+      centroidWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
+      centroidZUpWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
+      
+      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         tripleSupportFrames.set(robotQuadrant, new YoGraphicReferenceFrame(referenceFrames.getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(robotQuadrant), registry, 0.1));
+         tripleSupportZUpFrames.set(robotQuadrant, new YoGraphicReferenceFrame(referenceFrames.getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(robotQuadrant), registry, 0.1));
+      }
       
       filteredDesiredCoMYawAlphaBreakFrequency.set(DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY);
       filteredDesiredCoMYawAlpha.set(
@@ -665,6 +681,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       yoGraphicsListRegistry.registerYoGraphic("leftMidZUpFrameViz", leftMidZUpFrameViz);
       yoGraphicsListRegistry.registerYoGraphic("rightMidZUpFrameViz", rightMidZUpFrameViz);
       
+      
+      yoGraphicsListRegistry.registerYoGraphic("centroidWithNominal", centroidWithNominal);
+      yoGraphicsListRegistry.registerYoGraphic("centroidZUpWithNominal", centroidZUpWithNominal);
+      
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("centerOfMassViz", centerOfMassViz);
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("desiredCoMPoseYoGraphic", desiredCoMPoseYoGraphic);
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("comPoseYoGraphic", comPoseYoGraphic);
@@ -693,6 +713,9 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          yoGraphicsListRegistry.registerArtifact("Desired Feet", desiredFootPositionViz.createArtifact());
          yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("Desired Feet", desiredFootPositionViz);
          yoGraphicsListRegistryForDetachedOverhead.registerArtifact("Desired Feet", desiredFootPositionViz.createArtifact());
+         
+         yoGraphicsListRegistry.registerYoGraphic(prefix + "TripleSupportFrame", tripleSupportFrames.get(robotQuadrant));
+         yoGraphicsListRegistry.registerYoGraphic(prefix + "tripleSupportZUpFrames", tripleSupportZUpFrames.get(robotQuadrant));
       }
    }
    
@@ -1074,9 +1097,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassPosition.set(centerOfMassFramePoint);
       drawSupportPolygon(currentSupportPolygon, supportPolygon);
+      centroidWithNominal.update();
+      centroidZUpWithNominal.update();
       
       for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
       {
+         tripleSupportFrames.get(robotQuadrant).update();
+         tripleSupportZUpFrames.get(robotQuadrant).update();
     	  desiredAttachmentFrames.get(robotQuadrant).update();
     	  actualAttachmentFrames.get(robotQuadrant).update();
       }
@@ -2111,6 +2138,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
                comTrajectoryTimeScaleFactor.set(1.0);
             }
          }
+         
+         footSwitches.get(swingQuadrant).setFootContactState(false);
       }
 
       FramePoint tempStartPoint = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -2166,6 +2195,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       @Override
       public void doTransitionOutOfAction()
       {
+         RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
+         footSwitches.get(swingQuadrant).setFootContactState(true);
          //reset this just in case
          comTrajectoryTimeScaleFactor.set(1.0);
       }

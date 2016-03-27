@@ -279,6 +279,14 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
                logDataProcessorHelper.getMeasuredCoP(robotSide, copToPack);
                copToPack.setIncludingFrame(contactableFoot.getSoleFrame(), copToPack.getPointCopy());
             }
+
+            @Override
+            @Deprecated
+            public void setFootContactState(boolean hasFootHitGround)
+            {
+               // TODO Auto-generated method stub
+               
+            }
          };
          
          footSwitches.put(contactableFoot.getRigidBody(), footSwitch);
