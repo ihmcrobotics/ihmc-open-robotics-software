@@ -143,6 +143,11 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       position.setAndMatchFrame(framePoint, notifyListeners);
       orientation.setAndMatchFrame(frameOrientation, notifyListeners);
    }
+   
+   public void setPosition(double x, double y, double z)
+   {
+      position.set(x, y, z);
+   }
 
    public void setXYZ(double x, double y, double z)
    {
