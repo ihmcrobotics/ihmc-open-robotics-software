@@ -263,7 +263,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       {
          updateSupportPolygon(swingLeg, supportPolygonForCentroids);
          FramePose framePose = tripleSupportCentroidPoses.get(swingLeg);
-         supportPolygonForCentroids.getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(framePose);
+         supportPolygonForCentroids.getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(framePose);
          
          PoseReferenceFrame tripleSupportFrame = tripleSupportFrames.get(swingLeg);
          tripleSupportFrame.setPoseAndUpdate(framePose);
