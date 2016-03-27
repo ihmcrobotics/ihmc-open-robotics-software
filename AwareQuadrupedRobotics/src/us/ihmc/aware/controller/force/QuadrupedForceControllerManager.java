@@ -118,6 +118,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
       QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
       QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
+      QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
 
       StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(QuadrupedForceControllerState.class,
             "forceControllerState", registry);
@@ -127,6 +128,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addState(QuadrupedForceControllerState.STAND, standController);
       builder.addState(QuadrupedForceControllerState.STEP, stepController);
       builder.addState(QuadrupedForceControllerState.TROT, trotController);
+      builder.addState(QuadrupedForceControllerState.PACE, paceController);
 
       // Add automatic transitions that lead into the stand state.
       builder.addTransition(QuadrupedForceControllerEvent.JOINTS_INITIALIZED, QuadrupedForceControllerState.JOINT_INITIALIZATION,
@@ -137,10 +139,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.TROT, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.PACE, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STEP);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STEP);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_TROT, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.TROT);
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_TROT, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.TROT);
+      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_PACE, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.PACE);
 
       // Transitions from controllers back to stand prep.
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND_PREP, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STAND_PREP);
