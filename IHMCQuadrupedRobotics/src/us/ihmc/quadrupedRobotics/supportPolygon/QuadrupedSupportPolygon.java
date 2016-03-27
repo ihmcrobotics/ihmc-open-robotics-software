@@ -13,6 +13,8 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -20,6 +22,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
@@ -47,6 +50,11 @@ public class QuadrupedSupportPolygon implements Serializable
    private final FrameVector[] tempVectorsForCommonSupportPolygon = new FrameVector[] {new FrameVector(), new FrameVector()};
    private final Point2d[] tempPointsForCornerCircle = new Point2d[] {new Point2d(), new Point2d(), new Point2d(), new Point2d()};
    private final Vector2d tempVectorForCornerCircle = new Vector2d();
+   
+   private final FrameLineSegment2d tempLineSegment2d = new FrameLineSegment2d();
+   private final FramePoint2d tempFramePoint2dOne = new FramePoint2d();
+   private final FramePoint2d tempFramePoint2dTwo = new FramePoint2d();
+   private final FrameLine2d tempFrameLine2d = new FrameLine2d();
 
    public QuadrupedSupportPolygon()
    {
@@ -391,6 +399,12 @@ public class QuadrupedSupportPolygon implements Serializable
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
    {      
+      updateTempFrameConvexPolygon();
+      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
+   }
+
+   private void updateTempFrameConvexPolygon()
+   {
       tempFrameConvexPolygon2d.clear();
       tempFrameConvexPolygon2d.changeFrame(getReferenceFrame());
       for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
@@ -398,8 +412,6 @@ public class QuadrupedSupportPolygon implements Serializable
          tempFrameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
       }
       tempFrameConvexPolygon2d.update();
-
-      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
    }
 
    /**
@@ -467,6 +479,41 @@ public class QuadrupedSupportPolygon implements Serializable
          }
       }
       return closestQuadrant;
+   }
+   
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
+   {
+      if (size() > 0 && !isInside(pointToSnap.getFrameTuple()))
+      {
+         updateTempFrameConvexPolygon();
+
+         tempFramePoint2dOne.set(pointToSnap.getX(), pointToSnap.getY());
+         tempFrameConvexPolygon2d.getClosestEdge(tempLineSegment2d, tempFramePoint2dOne);
+         tempLineSegment2d.getClosestPointOnLineSegment(tempFramePoint2dTwo, tempFramePoint2dOne);
+         
+         pointToSnap.set(tempFramePoint2dTwo.getX(), tempFramePoint2dTwo.getY(), 0.0);
+      }
+   }
+   
+   public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint pointToSnap, YoFramePoint innerPoint)
+   {
+      if (size() > 0 && !isInside(pointToSnap.getFrameTuple()))
+      {
+         updateTempFrameConvexPolygon();
+
+         tempLineSegment2d.set(ReferenceFrame.getWorldFrame(), innerPoint.getX(), innerPoint.getY(), pointToSnap.getX(), pointToSnap.getY());
+         FramePoint2d[] intersectionWith = tempFrameConvexPolygon2d.intersectionWith(tempLineSegment2d);
+         if (intersectionWith == null || intersectionWith.length < 1)
+         {
+            tempFrameLine2d.set(ReferenceFrame.getWorldFrame(), innerPoint.getX(), innerPoint.getY(), pointToSnap.getX(), pointToSnap.getY());
+            intersectionWith = tempFrameConvexPolygon2d.intersectionWith(tempFrameLine2d);
+         }
+         if (intersectionWith != null)
+         {
+            pointToSnap.setX(intersectionWith[0].getX());
+            pointToSnap.setY(intersectionWith[0].getY());
+         }
+      }
    }
 
 
