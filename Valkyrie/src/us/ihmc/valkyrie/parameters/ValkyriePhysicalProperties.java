@@ -21,7 +21,7 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
    public static final double shinLength = 0.406;
    
    public static final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
-   public static final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<RigidBodyTransform>(new RigidBodyTransform(), new RigidBodyTransform());
+   public static final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<RigidBodyTransform>();
 
    static
    {
@@ -31,6 +31,16 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
 //         soleToAnkleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
          soleToAnkleFrame.setTranslation(new Vector3d(footLength / 2.0 - footBack, 0.0, -ValkyriePhysicalProperties.ankleHeight));
          soleToAnkleFrameTransforms.put(side, soleToAnkleFrame);
+      }
+   }
+
+   static
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyTransform controlFrameToWristTransform = new RigidBodyTransform();
+         controlFrameToWristTransform.setTranslation(0.0, robotSide.negateIfRightSide(0.10), 0.0);
+         handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
       }
    }
 
