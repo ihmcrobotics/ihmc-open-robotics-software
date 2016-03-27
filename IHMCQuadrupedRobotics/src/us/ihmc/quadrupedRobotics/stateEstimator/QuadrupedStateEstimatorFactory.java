@@ -47,7 +47,7 @@ public class QuadrupedStateEstimatorFactory
 
       QuadrupedSensorInformation sensorInformation = robotParameters.getQuadrupedSensorInformation();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
-      robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.STANDING);
+      robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
       ForceSensorDataHolder forceSensorDataHolderToUpdate = null;
 
       Map<RigidBody, ContactablePlaneBody> feetMap = new HashMap<RigidBody, ContactablePlaneBody>();
