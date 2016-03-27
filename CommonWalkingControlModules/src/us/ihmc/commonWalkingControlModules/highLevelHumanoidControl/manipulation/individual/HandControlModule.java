@@ -12,7 +12,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValid
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
@@ -101,14 +105,15 @@ public class HandControlModule
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final double controlDT;
-
    private final StateChangedListener<HandControlMode> stateChangedlistener;
    private final BooleanYoVariable hasHandPoseStatusBeenSent;
 
    private final BooleanYoVariable areAllArmJointEnabled;
 
    private final boolean isAtLeastOneJointPositionControlled;
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
    private final FramePose currentDesiredPose = new FramePose();
 
@@ -149,8 +154,6 @@ public class HandControlModule
             hasHandPoseStatusBeenSent.set(false);
          }
       };
-
-      this.controlDT = momentumBasedController.getControlDT();
 
       fullRobotModel = momentumBasedController.getFullRobotModel();
       hand = fullRobotModel.getHand(robotSide);
@@ -204,21 +207,30 @@ public class HandControlModule
 
       String stateNamePrefix = namePrefix + "Hand";
 
-      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, jointsOriginal, positionControlledJoints, jointspaceGains, controlDT,
+      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, jointsOriginal, jointspaceGains, registry);
+      taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, elevator, hand, chest, taskspaceGains, yoGraphicsListRegistry,
             registry);
-      taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, positionControlledJoints, elevator, hand, chest, taskspaceGains,
-            yoGraphicsListRegistry, registry);
-      userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, positionControlledJoints, momentumBasedController,
-            registry);
+      userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
 
       if (isAtLeastOneJointPositionControlled)
       {
          // TODO Not implemented for position control.
          loadBearingControlState = null;
+
+         jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+         lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+
+         lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(positionControlledJoints);
+         lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(positionControlledJoints, LowLevelJointControlMode.POSITION_CONTROL);
+
+         for (OneDoFJoint positionControlledJoint : positionControlledJoints)
+            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(positionControlledJoint);
       }
       else
       {
          loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController, elevator, hand, registry);
+         jointAccelerationIntegrationCommand = null;
+         lowLevelOneDoFJointDesiredDataHolder = null;
       }
 
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
@@ -311,6 +323,8 @@ public class HandControlModule
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+
+      updateInverseDynamicsCommandList();
    }
 
    private boolean checkIfAtLeastOneJointIsDisabled()
@@ -322,6 +336,13 @@ public class HandControlModule
             return true;
       }
       return false;
+   }
+
+   private void updateInverseDynamicsCommandList()
+   {
+      inverseDynamicsCommandList.clear();
+      inverseDynamicsCommandList.addCommand(jointAccelerationIntegrationCommand);
+      inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
    }
 
    /**
@@ -645,7 +666,10 @@ public class HandControlModule
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return stateMachine.getCurrentState().getInverseDynamicsCommand();
+      if (inverseDynamicsCommandList.isEmpty())
+         return null;
+      else
+         return inverseDynamicsCommandList;
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()
@@ -655,7 +679,7 @@ public class HandControlModule
 
    public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
    {
-      return stateMachine.getCurrentState().getLowLevelJointDesiredData();
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

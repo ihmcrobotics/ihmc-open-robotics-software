@@ -5,10 +5,6 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -21,15 +17,12 @@ public class JointSpaceHandControlState extends HandControlState
    private final OneDoFJoint[] oneDoFJoints;
    private Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectories;
    private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
-   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelJointDesiredData;
 
    private final YoVariableRegistry registry;
    private final YoPIDGains gains;
    private final DoubleYoVariable weight;
 
-   public JointSpaceHandControlState(String namePrefix, OneDoFJoint[] controlledJoints, OneDoFJoint[] positionControlledJoints, YoPIDGains gains, double dt,
-         YoVariableRegistry parentRegistry)
+   public JointSpaceHandControlState(String namePrefix, OneDoFJoint[] controlledJoints, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.JOINT_SPACE);
       this.gains = gains;
@@ -48,26 +41,6 @@ public class JointSpaceHandControlState extends HandControlState
       {
          OneDoFJoint joint = oneDoFJoints[i];
          jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
-      }
-
-      if (positionControlledJoints.length == 0)
-      {
-         lowLevelJointDesiredData = null;
-         jointAccelerationIntegrationCommand = null;
-      }
-      else
-      {
-         lowLevelJointDesiredData = new LowLevelOneDoFJointDesiredDataHolder(positionControlledJoints.length);
-         lowLevelJointDesiredData.registerJointsWithEmptyData(positionControlledJoints);
-         lowLevelJointDesiredData.setJointsControlMode(positionControlledJoints, LowLevelJointControlMode.POSITION_CONTROL);
-
-         jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-
-         for (int i = 0; i < positionControlledJoints.length; i++)
-         {
-            OneDoFJoint joint = positionControlledJoints[i];
-            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
-         }
       }
 
       parentRegistry.addChild(registry);
@@ -143,18 +116,12 @@ public class JointSpaceHandControlState extends HandControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return jointAccelerationIntegrationCommand;
+      return null;
    }
 
    @Override
    public JointspaceFeedbackControlCommand getFeedbackControlCommand()
    {
       return jointspaceFeedbackControlCommand;
-   }
-
-   @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
-   {
-      return lowLevelJointDesiredData;
    }
 }
