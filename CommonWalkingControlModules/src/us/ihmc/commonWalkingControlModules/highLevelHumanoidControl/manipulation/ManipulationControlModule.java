@@ -137,7 +137,7 @@ public class ManipulationControlModule
          if (request == LoadBearingRequest.LOAD)
             handControlModules.get(robotSide).requestLoadBearing();
          else if (request == LoadBearingRequest.UNLOAD)
-            handControlModules.get(robotSide).holdPositionInBase();
+            handControlModules.get(robotSide).holdPositionInChest();
       }
    }
 
@@ -250,7 +250,7 @@ public class ManipulationControlModule
          if (HOLD_POSE_IN_JOINT_SPACE)
             handControlModule.holdPositionInJointSpace();
          else
-            handControlModule.holdPositionInBase();
+            handControlModule.holdPositionInChest();
       }
    }
 
