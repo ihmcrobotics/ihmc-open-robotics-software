@@ -512,7 +512,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          cmpPositionAtEoS.set(dcmPositionAtEoS);
          cmpPositionAtEoS.sub(dcmPositionAtEoSNominal);
          cmpPositionAtEoS.add(cmpPositionAtEoSNominal);
-         cmpPositionAtEoS.setZ(cmpPositionAtSoSNominal.getZ());
+         cmpPositionAtEoS.setZ(cmpPositionAtEoSNominal.getZ());
 
          // compute desired body yaw at end of step
          taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
