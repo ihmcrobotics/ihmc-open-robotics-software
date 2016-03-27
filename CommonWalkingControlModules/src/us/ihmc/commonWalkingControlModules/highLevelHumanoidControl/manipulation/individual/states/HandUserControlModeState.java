@@ -3,12 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
@@ -31,12 +26,8 @@ public class HandUserControlModeState extends HandControlState
    private final DoubleYoVariable yoTime;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
-   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
-   private final LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder;
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-
-   public HandUserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, OneDoFJoint[] positionControlledJoints,
-         MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+   public HandUserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController,
+         YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.USER_CONTROL_MODE);
 
@@ -54,28 +45,11 @@ public class HandUserControlModeState extends HandControlState
       }
 
       jointspaceAccelerationCommand.setWeight(SolverWeightLevels.HIGH);
-      inverseDynamicsCommandList.addCommand(jointspaceAccelerationCommand);
 
       timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfLastUserMesage", registry);
       timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
       abortUserControlMode = new BooleanYoVariable(namePrefix + "AbortUserControlMode", registry);
       yoTime = momentumBasedController.getYoTime();
-
-      if (positionControlledJoints.length > 0)
-      {
-         jointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-         jointDesiredDataHolder.registerJointsWithEmptyData(positionControlledJoints);
-         jointDesiredDataHolder.setJointsControlMode(positionControlledJoints, LowLevelJointControlMode.POSITION_CONTROL);
-         jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-         for (int i = 0; i < positionControlledJoints.length; i++)
-            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(positionControlledJoints[i]);
-         inverseDynamicsCommandList.addCommand(jointAccelerationIntegrationCommand);
-      }
-      else
-      {
-         jointDesiredDataHolder = null;
-         jointAccelerationIntegrationCommand = null;
-      }
    }
 
    public void setWeight(double weight)
@@ -140,18 +114,12 @@ public class HandUserControlModeState extends HandControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return inverseDynamicsCommandList;
+      return jointspaceAccelerationCommand;
    }
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return null;
-   }
-
-   @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
-   {
-      return jointDesiredDataHolder;
    }
 }

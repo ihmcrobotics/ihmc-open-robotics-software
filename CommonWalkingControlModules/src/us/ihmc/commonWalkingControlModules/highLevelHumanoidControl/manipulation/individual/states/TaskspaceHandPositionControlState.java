@@ -5,12 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -22,7 +17,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -41,12 +35,9 @@ public class TaskspaceHandPositionControlState extends HandControlState
    private final String name;
    private final YoVariableRegistry registry;
 
-   private final LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder;
-   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
    // viz stuff:
    private final YoGraphicReferenceFrame dynamicGraphicReferenceFrame;
@@ -74,8 +65,8 @@ public class TaskspaceHandPositionControlState extends HandControlState
    private final YoSE3PIDGainsInterface gains;
    private final DoubleYoVariable weight;
 
-   public TaskspaceHandPositionControlState(String namePrefix, OneDoFJoint[] positionControlledJoints, RigidBody base, RigidBody endEffector,
-         RigidBody primaryBase, YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public TaskspaceHandPositionControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody primaryBase,
+         YoSE3PIDGainsInterface gains, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.TASK_SPACE_POSITION);
       this.gains = gains;
@@ -115,23 +106,6 @@ public class TaskspaceHandPositionControlState extends HandControlState
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
 
       privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(primaryBase, endEffector);
-      inverseDynamicsCommandList.addCommand(privilegedConfigurationCommand);
-
-      if (positionControlledJoints.length > 0)
-      {
-         jointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-         jointDesiredDataHolder.registerJointsWithEmptyData(positionControlledJoints);
-         jointDesiredDataHolder.setJointsControlMode(positionControlledJoints, LowLevelJointControlMode.POSITION_CONTROL);
-         jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-         for (int i = 0; i < positionControlledJoints.length; i++)
-            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(positionControlledJoints[i]);
-         inverseDynamicsCommandList.addCommand(jointAccelerationIntegrationCommand);
-      }
-      else
-      {
-         jointDesiredDataHolder = null;
-         jointAccelerationIntegrationCommand = null;
-      }
    }
 
    public void setWeight(double weight)
@@ -249,18 +223,12 @@ public class TaskspaceHandPositionControlState extends HandControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return inverseDynamicsCommandList;
+      return privilegedConfigurationCommand;
    }
 
    @Override
    public SpatialFeedbackControlCommand getFeedbackControlCommand()
    {
       return spatialFeedbackControlCommand;
-   }
-
-   @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
-   {
-      return jointDesiredDataHolder;
    }
 }
