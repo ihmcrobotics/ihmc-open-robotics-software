@@ -52,7 +52,7 @@ public class QuadrupedTeleopNode implements InputEventCallback
    private InputValueIntegrator comZ;
    private QuadrupedTeleopMode mode;
 
-   public QuadrupedTeleopNode(NetClassList netClassList, PollingInputDevice device) throws IOException
+   public QuadrupedTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
    {
       params.setDefault(PARAM_ROLL_SCALE, 0.15);
       params.setDefault(PARAM_PITCH_SCALE, 0.15);
@@ -66,7 +66,7 @@ public class QuadrupedTeleopNode implements InputEventCallback
       params.setDefault(PARAM_DEFAULT_COM_HEIGHT, 0.55);
 
       // TODO: Don't hardcode localhost
-      this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.CONTROLLER_PORT, netClassList);
+      this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
       this.device = device;
       this.comZ = new InputValueIntegrator(DT, params.get(PARAM_DEFAULT_COM_HEIGHT));
 
