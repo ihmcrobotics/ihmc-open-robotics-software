@@ -1,11 +1,13 @@
 package us.ihmc.aware.parameters;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedRuntimeEnvironment
@@ -22,12 +24,13 @@ public class QuadrupedRuntimeEnvironment
    // TODO: These are currently only for the position-based crawl controller. Can they be moved somewhere else?
    private final GlobalDataProducer globalDataProducer;
    private final QuadrupedLegInverseKinematicsCalculator legIkCalculator;
+   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
 
    private final NetClassList netClassList;
 
    public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
-         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator, NetClassList netClassList)
+         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator, QuadrantDependentList<FootSwitchInterface> footSwitches, NetClassList netClassList)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -37,6 +40,7 @@ public class QuadrupedRuntimeEnvironment
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
       this.globalDataProducer = globalDataProducer;
       this.legIkCalculator = legIkCalculator;
+      this.footSwitches = footSwitches;
       this.netClassList = netClassList;
    }
 
@@ -78,6 +82,11 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedLegInverseKinematicsCalculator getLegIkCalculator()
    {
       return legIkCalculator;
+   }
+
+   public QuadrantDependentList<FootSwitchInterface> getFootSwitches()
+   {
+      return footSwitches;
    }
 
    public NetClassList getNetClassList()
