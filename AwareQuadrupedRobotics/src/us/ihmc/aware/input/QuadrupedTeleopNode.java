@@ -25,6 +25,8 @@ public class QuadrupedTeleopNode implements InputEventCallback
     */
    private static final double DT = 0.01;
 
+   private enum QuadrupedTeleopMode {POSITION, VELOCITY}
+
    private static final String PARAM_ROLL_SCALE = "rollScale";
    private static final String PARAM_PITCH_SCALE = "pitchScale";
    private static final String PARAM_YAW_SCALE = "yawScale";
@@ -47,31 +49,35 @@ public class QuadrupedTeleopNode implements InputEventCallback
    private final PollingInputDevice device;
    private final Map<InputChannel, Double> channels = Collections.synchronizedMap(new EnumMap<InputChannel, Double>(InputChannel.class));
 
-   private InputValueIntegrator comHeight;
+   private InputValueIntegrator comZ;
+   private QuadrupedTeleopMode mode;
 
    public QuadrupedTeleopNode(NetClassList netClassList, PollingInputDevice device) throws IOException
    {
-      params.setDefault(PARAM_ROLL_SCALE, 0.2);
-      params.setDefault(PARAM_PITCH_SCALE, 0.2);
-      params.setDefault(PARAM_YAW_SCALE, 0.4);
+      params.setDefault(PARAM_ROLL_SCALE, 0.15);
+      params.setDefault(PARAM_PITCH_SCALE, 0.15);
+      params.setDefault(PARAM_YAW_SCALE, 0.15);
       params.setDefault(PARAM_X_SCALE, 0.20);
       params.setDefault(PARAM_Y_SCALE, 0.10);
-      params.setDefault(PARAM_VX_SCALE, 1.0);
+      params.setDefault(PARAM_VX_SCALE, 0.1); // 1.0
       params.setDefault(PARAM_VY_SCALE, 0.5);
-      params.setDefault(PARAM_VZ_SCALE, 0.5);
-      params.setDefault(PARAM_WZ_SCALE, 1.0);
+      params.setDefault(PARAM_VZ_SCALE, 0.25);
+      params.setDefault(PARAM_WZ_SCALE, 0.25); // 0.5
       params.setDefault(PARAM_DEFAULT_COM_HEIGHT, 0.55);
 
       // TODO: Don't hardcode localhost
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.CONTROLLER_PORT, netClassList);
       this.device = device;
-      this.comHeight = new InputValueIntegrator(DT, params.get(PARAM_DEFAULT_COM_HEIGHT));
+      this.comZ = new InputValueIntegrator(DT, params.get(PARAM_DEFAULT_COM_HEIGHT));
 
       // Initialize all channels to zero.
       for (InputChannel channel : InputChannel.values())
       {
          channels.put(channel, 0.0);
       }
+
+      // Initialize teleop mode
+      mode = QuadrupedTeleopMode.POSITION;
    }
 
    public void start() throws IOException
@@ -95,22 +101,37 @@ public class QuadrupedTeleopNode implements InputEventCallback
 
    public void update()
    {
-      double roll = (get(InputChannel.RIGHT_TRIGGER) - get(InputChannel.LEFT_TRIGGER)) * params.get(PARAM_ROLL_SCALE);
-      double pitch = get(InputChannel.RIGHT_STICK_Y) * params.get(PARAM_PITCH_SCALE);
-      double yaw = get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_YAW_SCALE);
-      BodyOrientationPacket orientationPacket = new BodyOrientationPacket(yaw, pitch, roll);
+      double bodyYaw = 0.0;
+      double bodyRoll = 0.0;
+      double bodyPitch = get(InputChannel.RIGHT_STICK_Y) * params.get(PARAM_PITCH_SCALE);
+      if (mode == QuadrupedTeleopMode.POSITION)
+      {
+         bodyYaw = get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_YAW_SCALE);
+         bodyRoll = -get(InputChannel.LEFT_STICK_X) * params.get(PARAM_ROLL_SCALE);
+      }
+      BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
       packetCommunicator.send(orientationPacket);
 
-      double vx = get(InputChannel.LEFT_STICK_Y) * params.get(PARAM_VX_SCALE);
-      double vy = get(InputChannel.LEFT_STICK_X) * params.get(PARAM_VY_SCALE);
-      double wz = get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_WZ_SCALE);
-      PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(vx, vy, wz);
+      double xVelocity = 0.0;
+      double yVelocity = 0.0;
+      double yawRate = 0.0;
+      if (mode == QuadrupedTeleopMode.VELOCITY)
+      {
+         xVelocity = get(InputChannel.LEFT_STICK_Y) * params.get(PARAM_VX_SCALE);
+         yVelocity = get(InputChannel.LEFT_STICK_X) * params.get(PARAM_VY_SCALE);
+         yawRate = get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_WZ_SCALE);
+      }
+      PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(xVelocity, yVelocity, yawRate);
       packetCommunicator.send(velocityPacket);
 
-      double x = get(InputChannel.LEFT_STICK_Y) * params.get(PARAM_X_SCALE);
-      double y = get(InputChannel.LEFT_STICK_X) * params.get(PARAM_Y_SCALE);
-      double vz = (get(InputChannel.RIGHT_BUTTON) - get(InputChannel.LEFT_BUTTON)) * params.get(PARAM_VZ_SCALE);
-      ComPositionPacket comPositionPacket = new ComPositionPacket(x, y, comHeight.update(vz));
+      double comX = 0.0;
+      double comY = 0.0;
+      double comZdot = (get(InputChannel.RIGHT_BUTTON) - get(InputChannel.LEFT_BUTTON)) * params.get(PARAM_VZ_SCALE);
+      if (mode == QuadrupedTeleopMode.POSITION)
+      {
+         comX = get(InputChannel.LEFT_STICK_Y) * params.get(PARAM_X_SCALE);
+      }
+      ComPositionPacket comPositionPacket = new ComPositionPacket(comX, comY, comZ.update(comZdot));
       packetCommunicator.send(comPositionPacket);
    }
 
@@ -123,11 +144,36 @@ public class QuadrupedTeleopNode implements InputEventCallback
       // Handle events that should trigger once immediately after the event is triggered.
       switch (e.getChannel())
       {
-      case HOME_BUTTON:
-         if (get(InputChannel.HOME_BUTTON) > 0.5)
+      case BUTTON_A:
+         if (get(InputChannel.BUTTON_A) > 0.5)
+         {
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_STAND);
+            packetCommunicator.send(eventPacket);
+            mode = QuadrupedTeleopMode.POSITION;
+         }
+         break;
+      case BUTTON_X:
+         if (get(InputChannel.BUTTON_X) > 0.5)
+         {
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_PACE);
+            packetCommunicator.send(eventPacket);
+            mode = QuadrupedTeleopMode.VELOCITY;
+         }
+         break;
+      case BUTTON_Y:
+         if (get(InputChannel.BUTTON_Y) > 0.5)
+         {
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_AMBLE);
+            packetCommunicator.send(eventPacket);
+            mode = QuadrupedTeleopMode.VELOCITY;
+         }
+         break;
+      case BUTTON_B:
+         if (get(InputChannel.BUTTON_B) > 0.5)
          {
             QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_TROT);
             packetCommunicator.send(eventPacket);
+            mode = QuadrupedTeleopMode.VELOCITY;
          }
          break;
       }
