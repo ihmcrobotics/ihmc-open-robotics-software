@@ -110,6 +110,7 @@ public class QuadrupedTaskSpaceController
          contactForceOptimization.setContactForceCommand(robotQuadrant, commands.getSoleForce().get(robotQuadrant));
          commands.getSoleForce().get(robotQuadrant).scale(-1.0);
          contactForceOptimization.setContactState(robotQuadrant, settings.getContactState(robotQuadrant));
+         contactForceLimits.setPressureUpperLimit(robotQuadrant, settings.getPressureUpperLimit(robotQuadrant));
       }
       contactForceOptimization.setComForceCommand(commands.getComForce());
       contactForceOptimization.setComTorqueCommand(commands.getComTorque());
@@ -127,7 +128,20 @@ public class QuadrupedTaskSpaceController
          }
          else
          {
-            virtualModelController.setSoleVirtualForce(robotQuadrant, commands.getSoleForce().get(robotQuadrant));
+            commands.getSoleForce(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+            if (commands.getSoleForce(robotQuadrant).getZ() < -settings.getPressureUpperLimit(robotQuadrant))
+            {
+               // apply friction pyramid limits to sole forces if contact conditions are detected during NO_CONTACT state
+               double fx = commands.getSoleForce(robotQuadrant).getX();
+               double fy = commands.getSoleForce(robotQuadrant).getY();
+               double mu = contactForceLimits.getCoefficientOfFriction(robotQuadrant);
+               commands.getSoleForce(robotQuadrant).setX(Math.min(fx, mu * settings.getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
+               commands.getSoleForce(robotQuadrant).setX(Math.max(fx,-mu * settings.getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
+               commands.getSoleForce(robotQuadrant).setY(Math.min(fy, mu * settings.getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
+               commands.getSoleForce(robotQuadrant).setY(Math.max(fy,-mu * settings.getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
+               commands.getSoleForce(robotQuadrant).setZ(-settings.getPressureUpperLimit(robotQuadrant));
+            }
+            virtualModelController.setSoleVirtualForce(robotQuadrant, commands.getSoleForce(robotQuadrant));
             virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
             virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
          }

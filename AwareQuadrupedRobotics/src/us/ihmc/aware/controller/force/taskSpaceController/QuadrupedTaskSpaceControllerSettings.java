@@ -11,11 +11,22 @@ public class QuadrupedTaskSpaceControllerSettings
 {
    public class DoubleWrapper
    {
-      public double value;
+      private double value;
+
+      public double getValue()
+      {
+         return value;
+      }
+
+      public void setValue(double value)
+      {
+         this.value = value;
+      }
    }
 
    // contact state
    private final QuadrantDependentList<ContactState> contactState;
+   private final QuadrantDependentList<DoubleWrapper> pressureUpperLimit;
 
    // command weights
    private final double[] comTorqueCommandWeights;
@@ -40,11 +51,13 @@ public class QuadrupedTaskSpaceControllerSettings
 
    public QuadrupedTaskSpaceControllerSettings()
    {
-      // contact state
+      // contact settings
       contactState = new QuadrantDependentList<>();
+      pressureUpperLimit = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactState.set(robotQuadrant, ContactState.NO_CONTACT);
+         pressureUpperLimit.set(robotQuadrant, new DoubleWrapper());
       }
 
       // command weights
@@ -83,6 +96,7 @@ public class QuadrupedTaskSpaceControllerSettings
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          setContactState(robotQuadrant, ContactState.NO_CONTACT);
+         setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
       }
       setComForceCommandWeights(1.0, 1.0, 1.0);
       setComTorqueCommandWeights(1.0, 1.0, 1.0);
@@ -103,14 +117,10 @@ public class QuadrupedTaskSpaceControllerSettings
       this.contactState.set(robotQuadrant, contactState);
    }
 
-   public void setContactState(QuadrantDependentList<ContactState> contactState)
+   public void setPressureUpperLimit(RobotQuadrant robotQuadrant, double pressureUpperLimit)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         this.contactState.set(robotQuadrant, contactState.get(robotQuadrant));
-      }
+      this.pressureUpperLimit.get(robotQuadrant).setValue(pressureUpperLimit);
    }
-
 
    public void setComTorqueCommandWeights(double[] weights)
    {
@@ -255,11 +265,10 @@ public class QuadrupedTaskSpaceControllerSettings
       return contactState.get(robotQuadrant);
    }
 
-   public QuadrantDependentList<ContactState> getContactState()
+   public double getPressureUpperLimit(RobotQuadrant robotQuadrant)
    {
-      return contactState;
+      return pressureUpperLimit.get(robotQuadrant).getValue();
    }
-
    public void getContactForceOptimizationSettings(QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings)
    {
       contactForceOptimizationSettings.setComForceCommandWeights(comForceCommandWeights);
