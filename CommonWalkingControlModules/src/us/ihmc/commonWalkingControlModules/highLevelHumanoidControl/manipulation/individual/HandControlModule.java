@@ -24,7 +24,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
@@ -61,7 +61,7 @@ public class HandControlModule
 
    private final GenericStateMachine<HandControlMode, HandControlState> stateMachine;
 
-   private final TaskspaceHandPositionControlState taskspaceControlState;
+   private final TaskspaceHandControlState taskspaceControlState;
    private final JointSpaceHandControlState jointspaceControlState;
    private final LoadBearingHandControlState loadBearingControlState;
    private final HandUserControlModeState userControlModeState;
@@ -166,7 +166,7 @@ public class HandControlModule
 
       Map<OneDoFJoint, Double> homeConfiguration = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
       jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, robotSide, homeConfiguration, jointsOriginal, jointspaceGains, registry);
-      taskspaceControlState = new TaskspaceHandPositionControlState(stateNamePrefix, robotSide, elevator, hand, chest, taskspaceGains,
+      taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, robotSide, elevator, hand, chest, taskspaceGains,
             baseForControlToReferenceFrameMap, yoGraphicsListRegistry, registry);
       userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
 
