@@ -6,5 +6,5 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
  */
 public enum HandControlMode
 {
-   JOINT_SPACE, TASK_SPACE_POSITION, LOAD_BEARING, USER_CONTROL_MODE
+   JOINTSPACE, TASKSPACE, LOAD_BEARING, USER_CONTROL_MODE
 }

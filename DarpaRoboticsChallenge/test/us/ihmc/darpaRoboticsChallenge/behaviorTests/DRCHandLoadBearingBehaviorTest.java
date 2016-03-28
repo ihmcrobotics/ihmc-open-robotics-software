@@ -101,8 +101,8 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
       EnumYoVariable<HandControlMode> leftHandControlModule = (EnumYoVariable<HandControlMode>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
       EnumYoVariable<HandControlMode> rightHandControlModule = (EnumYoVariable<HandControlMode>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
       
-      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlMode.JOINT_SPACE));
-      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlMode.JOINT_SPACE));
+      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlMode.JOINTSPACE));
+      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlMode.JOINTSPACE));
       
       double bodyY = 0.0;
 

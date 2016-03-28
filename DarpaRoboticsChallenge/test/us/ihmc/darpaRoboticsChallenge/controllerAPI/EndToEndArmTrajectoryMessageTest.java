@@ -156,7 +156,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          double[] controllerDesiredJointPositions = findControllerDesiredPositions(robotSide, armJoints, scs);
          double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(robotSide, armJoints, scs);
 
-         assertEquals(HandControlMode.JOINT_SPACE, controllerState);
+         assertEquals(HandControlMode.JOINTSPACE, controllerState);
          assertEquals(timeStopSent, switchTime, getRobotModel().getControllerDT());
          assertArrayEquals(actualJointPositions, controllerDesiredJointPositions, 0.01);
          assertArrayEquals(zeroVelocities, controllerDesiredJointVelocities, 1.0e-10);

@@ -138,7 +138,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          
          HandControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
-         assertEquals(HandControlMode.TASK_SPACE_POSITION, controllerState);
+         assertEquals(HandControlMode.TASKSPACE, controllerState);
          
          double timeStopSent = scs.getRobots()[0].getYoTime().getDoubleValue();
          int numberOfJoints = armJoints.length;
@@ -160,7 +160,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(robotSide, armJoints, scs);
          double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(robotSide, armJoints, scs);
 
-         assertEquals(HandControlMode.JOINT_SPACE, controllerState);
+         assertEquals(HandControlMode.JOINTSPACE, controllerState);
          assertEquals(timeStopSent, switchTime, getRobotModel().getControllerDT());
          assertArrayEquals(actualJointPositions, controllerDesiredJointPositions, 0.01);
          assertArrayEquals(zeroVelocities, controllerDesiredJointVelocities, 1.0e-10);
