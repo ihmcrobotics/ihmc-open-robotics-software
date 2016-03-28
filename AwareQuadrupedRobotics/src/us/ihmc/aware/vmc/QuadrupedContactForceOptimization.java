@@ -143,6 +143,11 @@ public class QuadrupedContactForceOptimization
       contactState.set(robotQuadrant, state);
    }
 
+   public ContactState getContactState(RobotQuadrant robotQuadrant)
+   {
+      return contactState.get(robotQuadrant);
+   }
+
    public void solve(QuadrupedContactForceLimits contactForceLimits, QuadrupedContactForceOptimizationSettings optimizationSettings)
    {
       // initialize optimization variables
