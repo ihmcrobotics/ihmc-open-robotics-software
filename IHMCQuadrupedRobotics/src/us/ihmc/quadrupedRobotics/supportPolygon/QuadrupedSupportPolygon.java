@@ -13,12 +13,16 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
@@ -46,6 +50,11 @@ public class QuadrupedSupportPolygon implements Serializable
    private final FrameVector[] tempVectorsForCommonSupportPolygon = new FrameVector[] {new FrameVector(), new FrameVector()};
    private final Point2d[] tempPointsForCornerCircle = new Point2d[] {new Point2d(), new Point2d(), new Point2d(), new Point2d()};
    private final Vector2d tempVectorForCornerCircle = new Vector2d();
+   
+   private final FrameLineSegment2d tempLineSegment2d = new FrameLineSegment2d();
+   private final FramePoint2d tempFramePoint2dOne = new FramePoint2d();
+   private final FramePoint2d tempFramePoint2dTwo = new FramePoint2d();
+   private final FrameLine2d tempFrameLine2d = new FrameLine2d();
 
    public QuadrupedSupportPolygon()
    {
@@ -361,7 +370,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public void yawAboutCentroid(double yaw)
    {
-      getCentroid2d(temporaryFramePoint);
+      getCentroid(temporaryFramePoint);
    
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -390,6 +399,12 @@ public class QuadrupedSupportPolygon implements Serializable
 
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
    {      
+      updateTempFrameConvexPolygon();
+      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
+   }
+
+   private void updateTempFrameConvexPolygon()
+   {
       tempFrameConvexPolygon2d.clear();
       tempFrameConvexPolygon2d.changeFrame(getReferenceFrame());
       for (RobotQuadrant supportingQuadrant : getSupportingQuadrantsInOrder())
@@ -397,8 +412,6 @@ public class QuadrupedSupportPolygon implements Serializable
          tempFrameConvexPolygon2d.addVertexByProjectionOntoXYPlane(getFootstep(supportingQuadrant));
       }
       tempFrameConvexPolygon2d.update();
-
-      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
    }
 
    /**
@@ -467,8 +480,73 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       return closestQuadrant;
    }
+   
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
+   {
+      if (size() > 0 && !isInside(pointToSnap.getFrameTuple()))
+      {
+         updateTempFrameConvexPolygon();
 
-   public void getCentroid2d(FramePoint centroidToPack)
+         tempFramePoint2dOne.set(pointToSnap.getX(), pointToSnap.getY());
+         tempFrameConvexPolygon2d.getClosestEdge(tempLineSegment2d, tempFramePoint2dOne);
+         tempLineSegment2d.getClosestPointOnLineSegment(tempFramePoint2dTwo, tempFramePoint2dOne);
+         
+         pointToSnap.set(tempFramePoint2dTwo.getX(), tempFramePoint2dTwo.getY(), 0.0);
+      }
+   }
+   
+   public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint pointToSnap, YoFramePoint innerPoint)
+   {
+      if (size() > 0 && !isInside(pointToSnap.getFrameTuple()))
+      {
+         updateTempFrameConvexPolygon();
+
+         tempLineSegment2d.set(ReferenceFrame.getWorldFrame(), innerPoint.getX(), innerPoint.getY(), pointToSnap.getX(), pointToSnap.getY());
+         FramePoint2d[] intersectionWith = tempFrameConvexPolygon2d.intersectionWith(tempLineSegment2d);
+         if (intersectionWith == null || intersectionWith.length < 1)
+         {
+            tempFrameLine2d.set(ReferenceFrame.getWorldFrame(), innerPoint.getX(), innerPoint.getY(), pointToSnap.getX(), pointToSnap.getY());
+            intersectionWith = tempFrameConvexPolygon2d.intersectionWith(tempFrameLine2d);
+         }
+         if (intersectionWith != null)
+         {
+            pointToSnap.setX(intersectionWith[0].getX());
+            pointToSnap.setY(intersectionWith[0].getY());
+         }
+      }
+   }
+
+
+   /**
+    * if you pick up a leg and want equal weight distribution, pretend that there are two legs on top of eachother
+    * @param centroidToPack
+    */
+   public void getCentroidEqualWeightingEnds(FramePoint centroidToPack)
+   {
+      centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
+      int size = size();
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if(getFootstep(robotQuadrant) != null)
+         {
+            centroidToPack.add(getFootstep(robotQuadrant));
+         }
+         else
+         {
+            FramePoint acrossBodyFootstep = getFootstep(robotQuadrant.getAcrossBodyQuadrant());
+            if(acrossBodyFootstep != null)
+            {
+               centroidToPack.add(acrossBodyFootstep);
+               size++;
+            }
+         }
+      }
+      
+      centroidToPack.scale(1.0 / size);
+   }
+   
+   public void getCentroid(FramePoint centroidToPack)
    {
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       
@@ -478,6 +556,111 @@ public class QuadrupedSupportPolygon implements Serializable
       }
       
       centroidToPack.scale(1.0 / size());
+   }
+   
+   /**
+    * gets the Centroid of the supplied quadrants and sets the z value to the average between the lowest foot in 
+    * the front and hind in world frame. If no Hinds or no Fronts are supplied it will use the lowest foot given.
+    * If no quadrants are supplied the result will be Zeros in world.
+    */
+   public void getCentroidAveragingLowestZHeightsAcrossEnds(FramePoint centroidToPack)
+   {
+      centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
+      double frontZ = Double.MAX_VALUE;
+      double hindZ = Double.MAX_VALUE;
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         FramePoint footstep = getFootstep(robotQuadrant);
+         centroidToPack.add(footstep);
+         
+         double currentFootZ = footstep.getZ();
+         if(robotQuadrant.isQuadrantInFront() && currentFootZ < frontZ)
+         {
+            frontZ = currentFootZ;
+         }
+         else if(robotQuadrant.isQuadrantInHind() && currentFootZ < hindZ)
+         {
+            hindZ = currentFootZ;
+         }
+      }
+
+      centroidToPack.scale(1.0 / size());
+      
+      double averageZ = 0.0;
+      if(hindZ < Double.MAX_VALUE)
+      {
+         averageZ += hindZ;
+      }
+      if(frontZ < Double.MAX_VALUE)
+      {
+         averageZ += frontZ;
+      }
+      averageZ /= 2.0;
+      centroidToPack.setZ(averageZ);
+   }
+   
+   /**
+    * gets the weighted Centroid of support polyon and sets the z value to the average between the lowest foot in 
+    * the front and hind in world frame. If no Hinds or no Fronts are supplied it will use the lowest foot given.
+    * If no quadrants are available the result will be Zeros in world.
+    */
+   public void getCentroidWithEqualWeightedEndsAveragingLowestZHeightsAcrossEnds(FramePoint centroidToPack)
+   {
+      centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
+      getCentroidEqualWeightingEnds(centroidToPack);
+      
+      double frontZ = Double.MAX_VALUE;
+      double hindZ = Double.MAX_VALUE;
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         FramePoint footstep = getFootstep(robotQuadrant);
+         double currentFootZ = footstep.getZ();
+         if(robotQuadrant.isQuadrantInFront() && currentFootZ < frontZ)
+         {
+            frontZ = currentFootZ;
+         }
+         else if(robotQuadrant.isQuadrantInHind() && currentFootZ < hindZ)
+         {
+            hindZ = currentFootZ;
+         }
+      }
+      
+      double averageZ = 0.0;
+      if(hindZ < Double.MAX_VALUE)
+      {
+         averageZ += hindZ;
+      }
+      if(frontZ < Double.MAX_VALUE)
+      {
+         averageZ += frontZ;
+      }
+      averageZ /= 2.0;
+      centroidToPack.setZ(averageZ);
+   }
+   
+   private final FramePoint tempFramePointForCentroids = new FramePoint();
+   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose framePose)
+   {
+      double nominalPitch = getNominalPitch();
+      double nominalRoll = getNominalRoll();
+      double nominalYaw = getNominalYaw();
+      
+      getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
+      framePose.setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.setPosition(tempFramePointForCentroids);
+   }
+   
+   public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose framePose)
+   {
+      double nominalPitch = getNominalPitch();
+      double nominalRoll = getNominalRoll();
+      double nominalYaw = getNominalYaw();
+      
+      getCentroidWithEqualWeightedEndsAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
+      framePose.setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.setPosition(tempFramePointForCentroids);
    }
 
    public void getCentroid2d(FramePoint2d centroidToPack2d)
@@ -542,7 +725,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public boolean isInside(FramePoint point)
    {
-      if (distanceInside2d(point) > 0.0)
+      if (getDistanceInside2d(point) > 0.0)
       {
          return true;
       }
@@ -561,7 +744,7 @@ public class QuadrupedSupportPolygon implements Serializable
    public boolean isInside(FramePoint2d point)
    {
       temporaryFramePoint.setXY(point);
-      if (distanceInside2d(temporaryFramePoint) > 0.0)
+      if (getDistanceInside2d(temporaryFramePoint) > 0.0)
       {
          return true;
       }
@@ -579,7 +762,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public double distanceInside2d(FramePoint point)
+   public double getDistanceInside2d(FramePoint point)
    {
       if (size() == 1)
       {
@@ -600,7 +783,7 @@ public class QuadrupedSupportPolygon implements Serializable
             FramePoint pointOne = getFootstep(robotQuadrant);
             FramePoint pointTwo = getFootstep(getNextClockwiseSupportingQuadrant(robotQuadrant));
             
-            double distance = computeDistanceToSideOfSegment(point, pointOne, pointTwo);
+            double distance = getDistanceToSideOfSegment(point, pointOne, pointTwo);
             if (distance < closestDistance)
             {
                closestDistance = distance;
@@ -611,7 +794,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
    
-   private double computeDistanceToSideOfSegment(FramePoint point, FramePoint pointOne, FramePoint pointTwo)
+   private double getDistanceToSideOfSegment(FramePoint point, FramePoint pointOne, FramePoint pointTwo)
    {
       double x0 = point.getX();
       double y0 = point.getY();
@@ -728,7 +911,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point
     * @return distance
     */
-   public double distanceInsideInCircle2d(FramePoint point)
+   public double getDistanceInsideInCircle2d(FramePoint point)
    {
       double inCircleRadius = getInCircle2d(tempInCircleCenter);
       double distanceToInCircleCenter = point.getXYPlaneDistance(tempInCircleCenter);

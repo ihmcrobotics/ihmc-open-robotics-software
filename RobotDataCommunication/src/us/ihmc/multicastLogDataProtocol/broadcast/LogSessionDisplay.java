@@ -121,6 +121,54 @@ public class LogSessionDisplay extends JFrame
       }
    }
 
+   public AnnounceRequest getAnnounceRequestByIP(String IPAdress)
+   {
+      Boolean announceRequestFound = false;
+      final LinkedBlockingQueue<AnnounceRequest> request = new LinkedBlockingQueue<>();
+      SwingUtilities.invokeLater(new Runnable()
+      {
+         @Override public void run()
+         {
+            start();
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            PrintTools.info("Showing");
+            setVisible(false);
+         }
+      });
+
+      PrintTools.info("Looking for: " + IPAdress + " to come online");
+      while (!announceRequestFound)
+      {
+         for (int i = 1; i <= model.getRowCount(); i++)
+         {
+            if (model.getValueAt(i - 1, 3).equals(IPAdress))
+            {
+               announceRequestFound = true;
+               try
+               {
+                  request.put((AnnounceRequest) model.getValueAt(i - 1, 1));
+
+                  SwingUtilities.invokeLater(new Runnable()
+                  {
+                     @Override public void run()
+                     {
+                        dispose();
+                     }
+                  });
+
+                  return request.take();
+               }
+               catch (InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         }
+      }
+
+      return null;
+   }
+
    private static AnnounceRequest selectLogSession() throws IOException
    {
       final LinkedBlockingQueue<AnnounceRequest> request = new LinkedBlockingQueue<>();

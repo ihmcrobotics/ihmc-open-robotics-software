@@ -14,6 +14,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.tools.io.logging.LogTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class KinematicsBasedFootSwitch implements FootSwitchInterface
 {
@@ -147,5 +149,11 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       double lowestFootZ = getLowestFootZInWorld();
       fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getDoubleValue() * 2);
       return fixedOnGround.getBooleanValue();
+   }
+
+   @Override
+   @Deprecated
+   public void setFootContactState(boolean hasFootHitGround)
+   {
    }
 }
