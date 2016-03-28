@@ -34,7 +34,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * @author twan
  *         Date: 5/9/13
  */
-public class TaskspaceHandPositionControlState extends HandControlState
+public class TaskspaceHandControlState extends HandControlState
 {
    private static final boolean DEBUG = false;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -72,7 +72,7 @@ public class TaskspaceHandPositionControlState extends HandControlState
 
    private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap;
 
-   public TaskspaceHandPositionControlState(String namePrefix, RobotSide robotSide, RigidBody base, RigidBody endEffector, RigidBody chest,
+   public TaskspaceHandControlState(String namePrefix, RobotSide robotSide, RigidBody base, RigidBody endEffector, RigidBody chest,
          YoSE3PIDGainsInterface gains, Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
