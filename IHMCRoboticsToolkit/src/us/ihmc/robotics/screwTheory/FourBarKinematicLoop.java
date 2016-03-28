@@ -38,6 +38,8 @@ public class FourBarKinematicLoop
    
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
    
+   private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
+   
    private final double[] passiveInteriorAnglesAtZeroConfiguration = new double[3];
    private final double[] passiveJointSigns = new double[3];
    
@@ -81,6 +83,10 @@ public class FourBarKinematicLoop
 
       // Calculator
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
+      
+      // Jacobian solver
+      fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator);
+      fourBarJacobianSolver.setJacobian();
       
       // Initialize interior angle offsets and signs
       initializeInteriorAnglesAtZeroConfigurationAndJointSigns(vectorDAProjected, vectorABProjected, vectorBCProjected, vectorCDProjected);
@@ -348,6 +354,8 @@ public class FourBarKinematicLoop
       }
       
       fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd(), masterJointA.getQdd());
+      
+//      fourBarJacobianSolver.solve(angularVelocityVector, jacobianMatrix, solutionToPack);
       
       passiveJointB.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleABC(), 0));
       passiveJointC.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleBCD(), 1));
