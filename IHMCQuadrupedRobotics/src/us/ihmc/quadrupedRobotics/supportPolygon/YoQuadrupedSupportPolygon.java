@@ -381,6 +381,18 @@ public class YoQuadrupedSupportPolygon
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCentroid(centroidToPack);
    }
+
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
+   {
+      putYoValuesIntoSupportPolygon();
+      quadrupedSupportPolygon.snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap);
+   }
+
+   public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint pointToSnap, YoFramePoint innerPoint)
+   {
+      putYoValuesIntoSupportPolygon();
+      quadrupedSupportPolygon.snapPointToEdgeTowardsInnerPointIfOutside(pointToSnap,  innerPoint);
+   }
    
    public void setWithoutChecks(QuadrupedSupportPolygon quadrupedSupportPolygon)
    {
