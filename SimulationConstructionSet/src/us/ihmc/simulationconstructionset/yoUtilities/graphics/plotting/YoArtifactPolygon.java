@@ -67,9 +67,6 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
    {
       if (isVisible)
       {
-         if (yoConvexPolygon2d.getNumberOfVertices() < 3)
-            return;
-
          graphics.setColor(color);
          
          Stroke previousStroke = ((Graphics2D) graphics).getStroke();
@@ -93,7 +90,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
          if (convexPolygon2d.isEmpty())
                return;
 
-         if (fill)
+         if (fill && convexPolygon2d.getNumberOfVertices() > 2)
          {
             plotterGraphics.fillPolygon(graphics, convexPolygon2d);
          }

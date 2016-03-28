@@ -165,6 +165,12 @@ public class LogDataProcessorHelper
             {
                cops.get(robotSide).getFrameTuple2dIncludingFrame(copToPack);
             }
+
+            @Override
+            @Deprecated
+            public void setFootContactState(boolean hasFootHitGround)
+            {
+            }
          };
          
          footSwitches.put(robotSide, footSwitch);

@@ -82,4 +82,11 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
       return wrenchBasedFootSwitch.getForceMagnitudePastThreshhold();
    }
 
+   @Override
+   @Deprecated
+   public void setFootContactState(boolean hasFootHitGround)
+   {
+      
+   }
+
 }
