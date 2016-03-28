@@ -1165,7 +1165,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       momentumBasedController.update();
 
-      manipulationControlModule.submitNewArmJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
       headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
 
       consumeHeadCommands();

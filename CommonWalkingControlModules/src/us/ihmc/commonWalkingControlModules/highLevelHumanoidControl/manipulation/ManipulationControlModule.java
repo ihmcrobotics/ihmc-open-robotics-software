@@ -39,7 +39,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class ManipulationControlModule
 {
    public static final boolean HOLD_POSE_IN_JOINT_SPACE = true;
-   private static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 2.0;
+   public static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 2.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
@@ -137,7 +137,7 @@ public class ManipulationControlModule
          if (request == LoadBearingRequest.LOAD)
             handControlModules.get(robotSide).requestLoadBearing();
          else if (request == LoadBearingRequest.UNLOAD)
-            handControlModules.get(robotSide).holdPositionInChest();
+            handControlModules.get(robotSide).holdPositionInJointspace();
       }
    }
 
@@ -146,7 +146,7 @@ public class ManipulationControlModule
       if (!command.isStopAllTrajectory())
          return;
       for (RobotSide robotSide : RobotSide.values)
-         handControlModules.get(robotSide).holdPositionInJointSpace();
+         handControlModules.get(robotSide).holdPositionInJointspace();
    }
 
    public void handleGoHomeCommand(GoHomeCommand command)
@@ -208,7 +208,7 @@ public class ManipulationControlModule
 
    public void goToDefaultState(RobotSide robotSide, double trajectoryTime)
    {
-      handControlModules.get(robotSide).goToDefaultState(trajectoryTime);
+      handControlModules.get(robotSide).goHome(trajectoryTime);
    }
 
    public void initializeDesiredToCurrent()
@@ -216,7 +216,7 @@ public class ManipulationControlModule
       hasBeenInitialized.set(true);
       for (RobotSide side : RobotSide.values)
       {
-         handControlModules.get(side).holdPositionInJointSpace();
+         handControlModules.get(side).holdPositionInJointspace();
       }
    }
 
@@ -230,7 +230,7 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          HandControlModule handControlModule = handControlModules.get(robotSide);
-         handControlModule.holdPositionInJointSpace();
+         handControlModule.holdPositionInJointspace();
          handControlModule.resetJointIntegrators();
       }
    }
@@ -239,16 +239,17 @@ public class ManipulationControlModule
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         holdArmCurrentConfiguration(handControlModules.get(robotSide));
+         holdArmCurrentConfiguration(robotSide);
       }
    }
 
-   private void holdArmCurrentConfiguration(HandControlModule handControlModule)
+   private void holdArmCurrentConfiguration(RobotSide robotSide)
    {
+      HandControlModule handControlModule = handControlModules.get(robotSide);
       if (handControlModule.isControllingPoseInWorld())
       {
          if (HOLD_POSE_IN_JOINT_SPACE)
-            handControlModule.holdPositionInJointSpace();
+            handControlModule.holdPositionInJointspace();
          else
             handControlModule.holdPositionInChest();
       }
@@ -260,17 +261,6 @@ public class ManipulationControlModule
       {
          dynamicGraphicReferenceFrames.get(i).update();
       }
-   }
-
-   /**
-    * With the goal of having smooth transitions between control modes,
-    * the {@link ManipulationControlModule} can be aware of the most recent desireds that the low-level controllers are tracking by using this method.
-    * @param lowLevelOneDoFJointDesiredDataHolder Data that will be used to update the arm desired configuration. Only a read-only access is needed.
-    */
-   public void submitNewArmJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-         handControlModules.get(robotSide).submitNewArmJointDesiredConfiguration(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    public boolean isAtLeastOneHandLoadBearing()

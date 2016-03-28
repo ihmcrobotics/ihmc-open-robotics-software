@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import static us.ihmc.robotics.stateMachines.StateMachineTools.addRequestedStateTransition;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
@@ -15,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
@@ -36,18 +37,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -68,35 +57,17 @@ public class HandControlModule
    // It was sending 14,000 variables. This and others reduces it a bit when set to false.
    private static final boolean REGISTER_YOVARIABLES = true;
 
-   private static final boolean DEBUG = false;
-
    private final YoVariableRegistry registry;
 
    private final GenericStateMachine<HandControlMode, HandControlState> stateMachine;
 
-   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators;
-
-   private final Map<OneDoFJoint, Double> defaultArmJointPositions;
-
-   private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
-   private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
-   private final WrapperForPositionAndOrientationTrajectoryGenerators poseTrajectoryGenerator;
-
-   private final TaskspaceHandPositionControlState taskSpacePositionControlState;
-   private final JointSpaceHandControlState jointSpaceHandControlState;
+   private final TaskspaceHandPositionControlState taskspaceControlState;
+   private final JointSpaceHandControlState jointspaceControlState;
    private final LoadBearingHandControlState loadBearingControlState;
    private final HandUserControlModeState userControlModeState;
 
    private final EnumYoVariable<HandControlMode> requestedState;
    private final OneDoFJoint[] jointsOriginal;
-   /**
-    * These joints are cloned from {@link #jointsOriginal}.
-    * Their positions and velocities are set to match the current desireds.
-    * They are used as an easy way to figure out what would be the desired hand pose when the arm is controlled in jointspace.
-    * They are updated by calling {@link #updateJointsAtDesiredPosition()}.
-    */
-   private final OneDoFJoint[] jointsAtDesiredPosition;
-   private LowLevelOneDoFJointDesiredDataHolderReadOnly newJointDesiredData = null;
 
    private final Map<OneDoFJoint, BooleanYoVariable> areJointsEnabled;
    private final String name;
@@ -114,8 +85,6 @@ public class HandControlModule
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
-
-   private final FramePose currentDesiredPose = new FramePose();
 
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame handControlFrame;
@@ -165,12 +134,9 @@ public class HandControlModule
       this.robotSide = robotSide;
 
       jointsOriginal = ScrewTools.createOneDoFJointPath(chest, hand);
-      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(chest, hand);
 
       requestedState = new EnumYoVariable<HandControlMode>(name + "RequestedState", "", registry, HandControlMode.class, true);
       requestedState.set(null);
-
-      defaultArmJointPositions = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
 
       areJointsEnabled = new LinkedHashMap<>();
       for (OneDoFJoint oneDoFJoint : jointsOriginal)
@@ -178,22 +144,8 @@ public class HandControlModule
          areJointsEnabled.put(oneDoFJoint, new BooleanYoVariable(namePrefix + oneDoFJoint.getName() + "IsEnabled", registry));
       }
 
-      jointTrajectoryGenerators = new LinkedHashMap<>();
-
-      for (OneDoFJoint oneDoFJoint : jointsOriginal)
-      {
-         MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(oneDoFJoint.getName(), registry);
-         jointTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
-      }
-
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       stateMachine = new GenericStateMachine<>(name, name + "SwitchTime", HandControlMode.class, yoTime, registry);
-
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix + "Hand", true, worldFrame, registry);
-      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix + "Hand", true, worldFrame, registry);
-      poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
-      positionTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
-      orientationTrajectoryGenerator.registerNewTrajectoryFrame(chestFrame);
 
       RigidBody elevator = fullRobotModel.getElevator();
       String[] positionControlledJointNames = armControlParameters.getPositionControlledJointNames(robotSide);
@@ -207,9 +159,15 @@ public class HandControlModule
 
       String stateNamePrefix = namePrefix + "Hand";
 
-      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, jointsOriginal, jointspaceGains, registry);
-      taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, elevator, hand, chest, taskspaceGains, yoGraphicsListRegistry,
-            registry);
+      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      baseForControlToReferenceFrameMap.put(BaseForControl.CHEST, chestFrame);
+      baseForControlToReferenceFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
+      baseForControlToReferenceFrameMap.put(BaseForControl.WORLD, worldFrame);
+
+      Map<OneDoFJoint, Double> homeConfiguration = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
+      jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, robotSide, homeConfiguration, jointsOriginal, jointspaceGains, registry);
+      taskspaceControlState = new TaskspaceHandPositionControlState(stateNamePrefix, robotSide, elevator, hand, chest, taskspaceGains,
+            baseForControlToReferenceFrameMap, yoGraphicsListRegistry, registry);
       userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
 
       if (isAtLeastOneJointPositionControlled)
@@ -228,20 +186,10 @@ public class HandControlModule
       }
       else
       {
-         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController, elevator, hand, registry);
+         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController, elevator,
+               hand, registry);
          jointAccelerationIntegrationCommand = null;
          lowLevelOneDoFJointDesiredDataHolder = null;
-      }
-
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-      baseForControlToReferenceFrameMap.put(BaseForControl.CHEST, chestFrame);
-      baseForControlToReferenceFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
-      baseForControlToReferenceFrameMap.put(BaseForControl.WORLD, worldFrame);
-
-      for (ReferenceFrame frameToRegister : baseForControlToReferenceFrameMap.values())
-      {
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
-         orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
       }
 
       setupStateMachine();
@@ -249,31 +197,20 @@ public class HandControlModule
 
    private void setupStateMachine()
    {
-      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, jointSpaceHandControlState);
-      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskSpacePositionControlState);
+      List<HandControlState> allStates = new ArrayList<>();
+      allStates.add(jointspaceControlState);
+      allStates.add(taskspaceControlState);
+      allStates.add(userControlModeState);
+      if (loadBearingControlState != null)
+         allStates.add(loadBearingControlState);
 
-      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskSpacePositionControlState);
-      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, jointSpaceHandControlState);
-
-      stateMachine.addState(jointSpaceHandControlState);
-      stateMachine.addState(taskSpacePositionControlState);
-
-      if (!isAtLeastOneJointPositionControlled)
+      for (HandControlState fromState : allStates)
       {
-         addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, loadBearingControlState);
-         addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
-
-         addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
-         addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
-
-         addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, userControlModeState);
-         addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, userControlModeState);
-
-         addRequestedStateTransition(requestedState, false, userControlModeState, taskSpacePositionControlState);
-         addRequestedStateTransition(requestedState, false, userControlModeState, jointSpaceHandControlState);
-
-         stateMachine.addState(loadBearingControlState);
-         stateMachine.addState(userControlModeState);
+         for (HandControlState toState : allStates)
+         {
+            addRequestedStateTransition(requestedState, false, fromState, toState);
+         }
+         stateMachine.addState(fromState);
       }
 
       stateMachine.attachStateChangedListener(stateChangedlistener);
@@ -281,12 +218,12 @@ public class HandControlModule
 
    public void setTaskspaceWeight(double weight)
    {
-      taskSpacePositionControlState.setWeight(weight);
+      taskspaceControlState.setWeight(weight);
    }
 
    public void setJointspaceWeight(double weight)
    {
-      jointSpaceHandControlState.setWeight(weight);
+      jointspaceControlState.setWeight(weight);
    }
 
    public void setUserModeWeight(double weight)
@@ -296,6 +233,7 @@ public class HandControlModule
 
    public void initialize()
    {
+      holdPositionInJointspace();
    }
 
    public void doControl()
@@ -305,7 +243,7 @@ public class HandControlModule
       if (isAtLeastOneJointDisabled && areAllArmJointEnabled.getBooleanValue())
       {
          if (ManipulationControlModule.HOLD_POSE_IN_JOINT_SPACE)
-            holdPositionInJointSpace();
+            holdPositionInJointspace();
          else
             holdPositionInChest();
 
@@ -318,7 +256,7 @@ public class HandControlModule
 
       if (stateMachine.getCurrentStateEnum() == HandControlMode.USER_CONTROL_MODE && userControlModeState.isAbortUserControlModeRequested())
       {
-         holdPositionInJointSpace();
+         holdPositionInJointspace();
       }
 
       stateMachine.checkTransitionConditions();
@@ -345,113 +283,40 @@ public class HandControlModule
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
    }
 
-   /**
-    * In a best effort of having continuity in desireds between states, the low-level data can be used to update the {@link HandControlModule} with 
-    * the most recent desired joint positions and velocities.
-    * @param lowLevelOneDoFJointDesiredDataHolder Data that will be used to update the arm desired configuration. Only a read-only access is needed.
-    */
-   public void submitNewArmJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   public void holdPositionInChest()
    {
-      newJointDesiredData = lowLevelOneDoFJointDesiredDataHolder;
-   }
-
-   public void executeTaskspaceTrajectory(PoseTrajectoryGenerator poseTrajectory)
-   {
-      taskSpacePositionControlState.setTrajectory(poseTrajectory);
-      taskSpacePositionControlState.setControlFrameFixedInEndEffector(handControlFrame);
-
-      requestedState.set(taskSpacePositionControlState.getStateEnum());
-      stateMachine.checkTransitionConditions();
+      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.TASKSPACE;
+      taskspaceControlState.holdPositionInChest(handControlFrame, initializeToCurrent);
+      requestedState.set(taskspaceControlState.getStateEnum());
    }
 
    public void handleHandTrajectoryCommand(HandTrajectoryCommand command)
    {
-      if (command.getRobotSide() != robotSide)
-      {
-         PrintTools.warn(this, "Received a " + command.getClass().getSimpleName() + " for the wrong side.");
-         return;
-      }
+      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.TASKSPACE;
+      boolean success = taskspaceControlState.handleHandTrajectoryCommand(command, handControlFrame, initializeToCurrent);
+      if (success)
+         requestedState.set(taskspaceControlState.getStateEnum());
+   }
 
-      BaseForControl base = command.getBase();
-      ReferenceFrame trajectoryFrame = baseForControlToReferenceFrameMap.get(base);
-      if (trajectoryFrame == null)
-         throw new RuntimeException("The base: " + base + " is not handled.");
-      else if (DEBUG)
-         PrintTools.info(this, "Executing hand trajectory in: " + base + ", found corresponding frame: " + trajectoryFrame);
+   public void holdPositionInJointspace()
+   {
+      jointspaceControlState.holdCurrentConfiguration();
+      requestedState.set(jointspaceControlState.getStateEnum());
+   }
 
-      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
-      {
-         computeDesiredFramePose(trajectoryFrame, currentDesiredPose);
-         currentDesiredPose.getPoseIncludingFrame(tempPosition, tempOrientation);
-         tempPosition.changeFrame(worldFrame);
-         tempLinearVelocity.setToZero(worldFrame);
-         tempOrientation.changeFrame(worldFrame);
-         tempAngularVelocity.setToZero(worldFrame);
-
-         positionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-         orientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-
-         positionTrajectoryGenerator.clear();
-         orientationTrajectoryGenerator.clear();
-
-         positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
-         orientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
-      }
-      else
-      {
-         positionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-         orientationTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-
-         positionTrajectoryGenerator.clear();
-         orientationTrajectoryGenerator.clear();
-      }
-
-      positionTrajectoryGenerator.appendWaypoints(command);
-      orientationTrajectoryGenerator.appendWaypoints(command);
-
-      positionTrajectoryGenerator.changeFrame(trajectoryFrame);
-      orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
-
-      positionTrajectoryGenerator.initialize();
-      orientationTrajectoryGenerator.initialize();
-
-      executeTaskspaceTrajectory(poseTrajectoryGenerator);
+   public void goHome(double trajectoryTime)
+   {
+      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
+      jointspaceControlState.goHome(trajectoryTime, initializeToCurrent);
+      requestedState.set(jointspaceControlState.getStateEnum());
    }
 
    public void handleArmTrajectoryCommand(ArmTrajectoryCommand command)
    {
-      if (command.getRobotSide() != robotSide)
-      {
-         PrintTools.warn(this, "Received a " + command.getClass().getSimpleName() + " for the wrong side.");
-         return;
-      }
-
-      if (!ControllerCommandValidationTools.checkJointspaceTrajectoryPointLists(jointsOriginal, command.getTrajectoryPointLists()))
-         return;
-
-      updateJointsAtDesiredPosition();
-
-      int numberOfJoints = command.getNumberOfJoints();
-
-      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
-      {
-         OneDoFJoint joint = jointsOriginal[jointIndex];
-         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = jointTrajectoryGenerators.get(joint);
-         trajectoryGenerator.clear();
-
-         if (command.getJointTrajectoryPoint(jointIndex, 0).getTime() > 1.0e-5)
-         {
-            double initialPosition = jointsAtDesiredPosition[jointIndex].getQ();
-            double initialVelocity = jointsAtDesiredPosition[jointIndex].getQd();
-            trajectoryGenerator.appendWaypoint(0.0, initialPosition, initialVelocity);
-         }
-
-         SimpleTrajectoryPoint1DList jointTrajectory = command.getJointTrajectoryPointList(jointIndex);
-         trajectoryGenerator.appendWaypoints(jointTrajectory);
-         trajectoryGenerator.initialize();
-      }
-
-      executeJointspaceTrajectory(jointTrajectoryGenerators);
+      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
+      boolean success = jointspaceControlState.handleArmTrajectoryCommand(command, initializeToCurrent);
+      if (success)
+         requestedState.set(jointspaceControlState.getStateEnum());
    }
 
    public void handleArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
@@ -463,7 +328,7 @@ public class HandControlModule
       {
       case IHMC_CONTROL_MODE:
          if (stateMachine.getCurrentStateEnum() == HandControlMode.USER_CONTROL_MODE)
-            holdPositionInJointSpace();
+            holdPositionInJointspace();
          return;
       case USER_CONTROL_MODE:
          userControlModeState.handleArmDesiredAccelerationsMessage(command);
@@ -480,102 +345,6 @@ public class HandControlModule
       PrintTools.error(this, "HandComplianceControlParametersControllerCommand is not supported anymore. Needs to be reimplememted.");
    }
 
-   private final FramePoint tempPosition = new FramePoint();
-   private final FrameVector tempLinearVelocity = new FrameVector();
-   private final FrameVector tempAngularVelocity = new FrameVector();
-   private final FrameOrientation tempOrientation = new FrameOrientation();
-
-   private void computeDesiredFramePose(ReferenceFrame trajectoryFrame, FramePose desiredPoseToPack)
-   {
-      computeDesiredFramePose(trajectoryFrame, handControlFrame, desiredPoseToPack);
-   }
-
-   private final RigidBodyTransform oldTrackingFrameTransform = new RigidBodyTransform();
-   private final RigidBodyTransform newTrackingFrameTransform = new RigidBodyTransform();
-   private final RigidBodyTransform transformFromNewTrackingFrameToOldTrackingFrame = new RigidBodyTransform();
-
-   private void computeDesiredFramePose(ReferenceFrame trajectoryFrame, ReferenceFrame newControlFrame, FramePose desiredPoseToPack)
-   {
-      ReferenceFrame oldControlFrame;
-
-      if (stateMachine.getCurrentState() instanceof TaskspaceHandPositionControlState)
-      {
-         taskSpacePositionControlState.getDesiredPose(desiredPoseToPack);
-         oldControlFrame = taskSpacePositionControlState.getTrackingFrame();
-      }
-      else if (stateMachine.getCurrentState() instanceof JointSpaceHandControlState)
-      {
-         updateJointsAtDesiredPosition();
-         ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
-         oldControlFrame = desiredEndEffectorFrame;
-         desiredPoseToPack.setToZero(desiredEndEffectorFrame);
-      }
-      else
-      {
-         oldControlFrame = newControlFrame;
-         desiredPoseToPack.setToZero(newControlFrame);
-      }
-
-      if (newControlFrame != oldControlFrame)
-      {
-         desiredPoseToPack.getPose(oldTrackingFrameTransform);
-         newControlFrame.getTransformToDesiredFrame(transformFromNewTrackingFrameToOldTrackingFrame, oldControlFrame);
-         newTrackingFrameTransform.multiply(oldTrackingFrameTransform, transformFromNewTrackingFrameToOldTrackingFrame);
-         desiredPoseToPack.setPose(newTrackingFrameTransform);
-      }
-
-      desiredPoseToPack.changeFrame(trajectoryFrame);
-   }
-
-   private void updateJointsAtDesiredPosition()
-   {
-      if (newJointDesiredData != null)
-      {
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-         {
-            OneDoFJoint jointAtDesiredPosition = jointsAtDesiredPosition[i];
-            double q = jointsOriginal[i].getQ();
-            double qd = jointsOriginal[i].getQd();
-
-            if (newJointDesiredData.hasDataForJoint(jointsOriginal[i]))
-            {
-               LowLevelJointDataReadOnly jointDesiredData = newJointDesiredData.getLowLevelJointData(jointsOriginal[i]);
-               
-               double qDesired = jointDesiredData.hasDesiredPosition() ? jointDesiredData.getDesiredPosition() : q;
-               jointAtDesiredPosition.setQ(qDesired);
-               
-               double qdDesired = jointDesiredData.hasDesiredVelocity() ? jointDesiredData.getDesiredVelocity() : qd;
-               jointAtDesiredPosition.setQd(qdDesired);
-            }
-            else
-            {
-               jointAtDesiredPosition.setQ(q);
-               jointAtDesiredPosition.setQd(qd);
-            }
-         }
-
-         newJointDesiredData = null;
-      }
-      else if (stateMachine.getCurrentStateEnum() == HandControlMode.JOINTSPACE && jointSpaceHandControlState.hasJointTrajectories())
-      {
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-         {
-            jointsAtDesiredPosition[i].setQ(jointSpaceHandControlState.getJointDesiredPosition(jointsOriginal[i]));
-            jointsAtDesiredPosition[i].setQd(jointSpaceHandControlState.getJointDesiredVelocity(jointsOriginal[i]));
-         }
-      }
-      else
-      {
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-         {
-            jointsAtDesiredPosition[i].setQ(jointsOriginal[i].getQ());
-            jointsAtDesiredPosition[i].setQd(jointsOriginal[i].getQd());
-         }
-      }
-
-      jointsAtDesiredPosition[0].updateFramesRecursively();
-   }
-
    public void requestLoadBearing()
    {
       if (isAtLeastOneJointPositionControlled)
@@ -586,66 +355,11 @@ public class HandControlModule
       requestedState.set(loadBearingControlState.getStateEnum());
    }
 
-   private void executeJointspaceTrajectory(Map<OneDoFJoint, ? extends DoubleTrajectoryGenerator> trajectoryGenrators)
-   {
-      jointSpaceHandControlState.setTrajectories(trajectoryGenrators);
-      requestedState.set(jointSpaceHandControlState.getStateEnum());
-      stateMachine.checkTransitionConditions();
-   }
-
    public boolean isLoadBearing()
    {
       if (isAtLeastOneJointPositionControlled)
          return false;
       return stateMachine.getCurrentStateEnum() == HandControlMode.LOAD_BEARING;
-   }
-
-   public void holdPositionInChest()
-   {
-      computeDesiredFramePose(chest.getBodyFixedFrame(), currentDesiredPose);
-
-      currentDesiredPose.getPoseIncludingFrame(tempPosition, tempOrientation);
-      tempLinearVelocity.setToZero(chestFrame);
-      tempAngularVelocity.setToZero(chestFrame);
-
-      positionTrajectoryGenerator.clear();
-      positionTrajectoryGenerator.switchTrajectoryFrame(chestFrame);
-      positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempLinearVelocity);
-      orientationTrajectoryGenerator.clear();
-      orientationTrajectoryGenerator.switchTrajectoryFrame(chestFrame);
-      orientationTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
-
-      executeTaskspaceTrajectory(poseTrajectoryGenerator);
-   }
-
-   public void holdPositionInJointSpace()
-   {
-      for (OneDoFJoint oneDoFJoint : jointsOriginal)
-      {
-         MultipleWaypointsTrajectoryGenerator trajectory = jointTrajectoryGenerators.get(oneDoFJoint);
-         trajectory.clear();
-         trajectory.appendWaypoint(0.0, oneDoFJoint.getQ(), 0.0);
-         trajectory.initialize();
-      }
-      executeJointspaceTrajectory(jointTrajectoryGenerators);
-   }
-
-   public void goToDefaultState(double trajectoryTime)
-   {
-      updateJointsAtDesiredPosition();
-
-      for (int jointIndex = 0; jointIndex < jointsOriginal.length; jointIndex++)
-      {
-         OneDoFJoint oneDoFJoint = jointsOriginal[jointIndex];
-         MultipleWaypointsTrajectoryGenerator trajectory = jointTrajectoryGenerators.get(oneDoFJoint);
-         trajectory.clear();
-         double initialPosition = jointsAtDesiredPosition[jointIndex].getQ();
-         double initialVelocity = jointsAtDesiredPosition[jointIndex].getQd();
-         trajectory.appendWaypoint(0.0, initialPosition, initialVelocity);
-         trajectory.appendWaypoint(trajectoryTime, defaultArmJointPositions.get(oneDoFJoint), 0.0);
-         trajectory.initialize();
-      }
-      executeJointspaceTrajectory(jointTrajectoryGenerators);
    }
 
    public void resetJointIntegrators()
@@ -658,8 +372,8 @@ public class HandControlModule
    {
       State<HandControlMode> currentState = stateMachine.getCurrentState();
 
-      if (currentState == taskSpacePositionControlState)
-         return taskSpacePositionControlState.getReferenceFrame() == worldFrame;
+      if (currentState == taskspaceControlState)
+         return taskspaceControlState.getTrajectoryFrame() == worldFrame;
 
       return false;
    }
