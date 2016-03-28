@@ -14,12 +14,14 @@ import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
+import us.ihmc.aware.util.ContactState;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
@@ -36,8 +38,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    private final StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
    private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
+   private final QuadrupedRuntimeEnvironment runtimeEnvironment;
 
    private final AtomicReference<QuadrupedForceControllerEvent> requestedEvent = new AtomicReference<>();
+   private final QuadrupedReferenceFrames referenceFrames;
+   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
+   private final QuadrupedTaskSpaceController taskSpaceController;
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters) throws IOException
    {
@@ -57,8 +63,16 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          }
       });
 
+      // Initialize controller components.
+      this.referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), parameters.getJointMap(), parameters.getPhysicalProperties());
+      this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), registry, runtimeEnvironment.getGraphicsListRegistry());
+      this.taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), parameters.getQuadrupedJointLimits(), runtimeEnvironment.getControlDT(),
+            registry, runtimeEnvironment.getGraphicsListRegistry());
+
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
+      this.runtimeEnvironment = runtimeEnvironment;
+
    }
 
    @Override
@@ -77,6 +91,19 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       }
 
       stateMachine.process();
+
+      // update contact state used for state estimation
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (taskSpaceController.getContactState(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
+         }
+         else
+         {
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(false);
+         }
+      }
    }
 
    @Override
@@ -105,12 +132,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedRobotParameters parameters, ParameterMapRepository paramMapRepository, QuadrupedControllerInputProviderInterface inputProvider)
    {
-      // Initialize controller components.
-      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), parameters.getJointMap(), parameters.getPhysicalProperties());
-      QuadrupedTaskSpaceEstimator taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), registry, runtimeEnvironment.getGraphicsListRegistry());
-      QuadrupedTaskSpaceController taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), parameters.getQuadrupedJointLimits(), runtimeEnvironment.getControlDT(),
-            registry, runtimeEnvironment.getGraphicsListRegistry());
-
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(runtimeEnvironment, parameters);
       QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, parameters,

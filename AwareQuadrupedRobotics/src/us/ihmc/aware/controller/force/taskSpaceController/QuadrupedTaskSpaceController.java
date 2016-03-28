@@ -148,4 +148,9 @@ public class QuadrupedTaskSpaceController
       }
       virtualModelController.compute(jointLimits, virtualModelControllerSettings);
    }
+
+   public ContactState getContactState(RobotQuadrant robotQuadrant)
+   {
+      return contactForceOptimization.getContactState(robotQuadrant);
+   }
 }
