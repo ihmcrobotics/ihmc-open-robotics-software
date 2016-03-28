@@ -37,7 +37,6 @@ public class FourBarCalculatorWithDerivatives
    private final double a, b, c, d;
    private final double minA, maxA;
    
-
    // Angles
    private double angleDAB, angleABC, angleBCD, angleCDA;
 
@@ -337,5 +336,25 @@ public class FourBarCalculatorWithDerivatives
    public double getMaxDAB()
    {
       return maxA;
+   }
+   
+   public double getAB()
+   {
+      return a;
+   }
+   
+   public double getBC()
+   {
+      return b;
+   }
+   
+   public double getCD()
+   {
+      return c;
+   }
+   
+   public double getDA()
+   {
+      return d;
    }
 }
