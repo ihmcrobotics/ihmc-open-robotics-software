@@ -184,4 +184,33 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       
    }
+
+   @Override
+   public ReferenceFrame getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
 }

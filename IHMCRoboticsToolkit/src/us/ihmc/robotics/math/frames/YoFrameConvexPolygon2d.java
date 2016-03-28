@@ -55,6 +55,11 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       convexPolygon2dForReading = new FrameConvexPolygon2d(referenceFrame);
       convexPolygon2dForWriting = new FrameConvexPolygon2d(referenceFrame);
    }
+   
+   public YoFrameConvexPolygon2d(String namePrefix, ReferenceFrame referenceFrame, int maxNumberOfVertices, YoVariableRegistry registry)
+   {
+      this(namePrefix, "", referenceFrame, maxNumberOfVertices, registry);
+   }
 
    public YoFrameConvexPolygon2d(ArrayList<YoFramePoint2d> yoFramePoints, IntegerYoVariable yoNumVertices, ReferenceFrame referenceFrame)
    {

@@ -5,10 +5,10 @@ import javax.vecmath.Tuple3d;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePose extends AbstractReferenceFrameHolder
@@ -143,6 +143,11 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       position.setAndMatchFrame(framePoint, notifyListeners);
       orientation.setAndMatchFrame(frameOrientation, notifyListeners);
    }
+   
+   public void setPosition(double x, double y, double z)
+   {
+      position.set(x, y, z);
+   }
 
    public void setXYZ(double x, double y, double z)
    {
@@ -158,6 +163,22 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    {
       orientation.setYawPitchRoll(yaw, pitch, roll);
    }
+   
+   public void setYaw(double yaw)
+   {
+      orientation.setYaw(yaw);
+   }
+   
+   public void setPitch(double pitch)
+   {
+      orientation.setPitch(pitch);
+   }
+   
+   public void setRoll(double roll)
+   {
+      orientation.setRoll(roll);
+   }
+
 
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
@@ -176,6 +197,12 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       orientation.setToNaN();
    }
 
+   public void setToZero()
+   {
+      position.setToZero();
+      orientation.setToZero();
+   }
+   
    public ReferenceFrame getReferenceFrame()
    {
       return position.getReferenceFrame();
@@ -235,5 +262,11 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    public double getYaw()
    {
       return getOrientation().getYaw().getDoubleValue();
+   }
+
+   public void add(YoFramePose yoFramePose)
+   {
+      getPosition().add(yoFramePose.getPosition());
+      getOrientation().add(yoFramePose.getOrientation());
    }
 }
