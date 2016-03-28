@@ -147,7 +147,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
       params.setDefault(DOUBLE_SUPPORT_DURATION, 0.4);
-      params.setDefault(STANCE_WIDTH_NOMINAL, 0.3);
+      params.setDefault(STANCE_WIDTH_NOMINAL, 0.25);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
       params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
 
