@@ -227,11 +227,26 @@ public class MomentumBasedController
          OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
          OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
 
-         FrameVector pitchJointAxis = anklePitchJoint.getJointAxis();
-         FrameVector rollJointAxis = ankleRollJoint.getJointAxis();
-
-         xSignsForCoPControl.put(robotSide, pitchJointAxis.getY());
-         ySignsForCoPControl.put(robotSide, rollJointAxis.getY());
+         FrameVector pitchJointAxis;
+         FrameVector rollJointAxis;
+         if (anklePitchJoint != null)
+         {
+            pitchJointAxis = anklePitchJoint.getJointAxis();
+            xSignsForCoPControl.put(robotSide, pitchJointAxis.getY());
+         }
+         else
+         {
+            xSignsForCoPControl.put(robotSide, 0.0);
+         }
+         if (ankleRollJoint != null)
+         {
+            rollJointAxis = ankleRollJoint.getJointAxis();
+            ySignsForCoPControl.put(robotSide, rollJointAxis.getY());
+         }
+         else
+         {
+            ySignsForCoPControl.put(robotSide, 0.0);
+         }
 
          copControlScales.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "CoPControlScale", registry));
       }
@@ -416,10 +431,12 @@ public class MomentumBasedController
          desiredTorqueForCoPControl.update(copError);
 
          OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-         anklePitchJoint.setTau(anklePitchJoint.getTau() + desiredTorqueForCoPControl.getX());
+         if (anklePitchJoint != null)
+            anklePitchJoint.setTau(anklePitchJoint.getTau() + desiredTorqueForCoPControl.getX());
 
          OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
-         ankleRollJoint.setTau(ankleRollJoint.getTau() + desiredTorqueForCoPControl.getY());
+         if (ankleRollJoint != null)
+            ankleRollJoint.setTau(ankleRollJoint.getTau() + desiredTorqueForCoPControl.getY());
       }
    }
 
