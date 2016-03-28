@@ -32,7 +32,7 @@ public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPo
 
       // TODO: null foot switches
       this.controller = new QuadrupedPositionBasedCrawlController(environment.getControlDT(), parameters,
-            environment.getFullRobotModel(), inputProvider, null, environment.getLegIkCalculator(),
+            environment.getFullRobotModel(), inputProvider, environment.getFootSwitches(), environment.getLegIkCalculator(),
             environment.getGlobalDataProducer(), environment.getRobotTimestamp(), environment.getParentRegistry(),
             environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
