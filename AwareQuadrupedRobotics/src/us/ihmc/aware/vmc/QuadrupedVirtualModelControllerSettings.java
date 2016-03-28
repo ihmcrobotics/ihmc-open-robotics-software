@@ -7,7 +7,7 @@ public class QuadrupedVirtualModelControllerSettings
 {
    private double defaultJointDamping = 0.0;
    private double defaultJointPositionLimitStiffness = 200.0;
-   private double defaultJointPositionLimitDamping = 20.0;
+   private double defaultJointPositionLimitDamping = 5.0;
    private final TObjectDoubleHashMap<QuadrupedJointName> jointDamping = new TObjectDoubleHashMap<>();
    private final TObjectDoubleHashMap<QuadrupedJointName> jointPositionLimitStiffness = new TObjectDoubleHashMap<>();
    private final TObjectDoubleHashMap<QuadrupedJointName> jointPositionLimitDamping = new TObjectDoubleHashMap<>();
