@@ -556,7 +556,7 @@ public class HandControlModule
 
          newJointDesiredData = null;
       }
-      else if (stateMachine.getCurrentStateEnum() == HandControlMode.JOINT_SPACE && jointSpaceHandControlState.hasJointTrajectories())
+      else if (stateMachine.getCurrentStateEnum() == HandControlMode.JOINTSPACE && jointSpaceHandControlState.hasJointTrajectories())
       {
          for (int i = 0; i < jointsAtDesiredPosition.length; i++)
          {

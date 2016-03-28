@@ -24,7 +24,7 @@ public class JointSpaceHandControlState extends HandControlState
 
    public JointSpaceHandControlState(String namePrefix, OneDoFJoint[] controlledJoints, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      super(HandControlMode.JOINT_SPACE);
+      super(HandControlMode.JOINTSPACE);
       this.gains = gains;
 
       String name = namePrefix + getClass().getSimpleName();

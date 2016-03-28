@@ -61,7 +61,7 @@ public class TaskspaceHandPositionControlState extends HandControlState
    public TaskspaceHandPositionControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody primaryBase, YoSE3PIDGainsInterface gains,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(HandControlMode.TASK_SPACE_POSITION);
+      super(HandControlMode.TASKSPACE);
       this.gains = gains;
 
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";

@@ -96,7 +96,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends State<HandCon
    private TaskspaceToJointspaceHandPositionControlState(String namePrefix, RobotSide robotSide, MomentumBasedController momentumBasedController,
          RigidBody base, RigidBody endEffector, boolean doPositionControl, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      super(HandControlMode.TASK_SPACE_POSITION);
+      super(HandControlMode.TASKSPACE);
 
       name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
