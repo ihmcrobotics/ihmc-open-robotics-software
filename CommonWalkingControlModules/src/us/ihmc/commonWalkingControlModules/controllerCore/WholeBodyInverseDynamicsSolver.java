@@ -219,9 +219,6 @@ public class WholeBodyInverseDynamicsSolver
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);
-
-         joint.setqDesired(desiredPosition);
-         joint.setQdDesired(desiredVelocity);
       }
    }
 

@@ -113,26 +113,7 @@ public class WholeBodyControllerCore
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
 
-      for (int i = 0; i < controlledOneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
-         LowLevelJointDataReadOnly lowLevelJointData = yoLowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
-
-         if (!lowLevelJointData.hasControlMode())
-            throw new NullPointerException("Joint: " + joint.getName() + " has no control mode.");
-
-         switch (lowLevelJointData.getControlMode())
-         {
-         case FORCE_CONTROL:
-            joint.setUnderPositionControl(false);
-            break;
-         case POSITION_CONTROL:
-            joint.setUnderPositionControl(true);
-            break;
-         default:
-            throw new RuntimeException("Unhandled joint control mode: " + lowLevelJointData.getControlMode());
-         }
-      }
+      parseLowLevelDataInOneDoFJoints();
 
       controllerCoreOutput.setRootJointDesiredConfigurationData(yoRootJointDesiredConfigurationData);
       controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(yoLowLevelOneDoFJointDesiredDataHolder);
@@ -167,6 +148,42 @@ public class WholeBodyControllerCore
    {
       numberOfFBControllerEnabled.set(0);
       yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(controlledOneDoFJoints);
+   }
+
+   private void parseLowLevelDataInOneDoFJoints()
+   {
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = controlledOneDoFJoints[i];
+         LowLevelJointDataReadOnly lowLevelJointData = yoLowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
+
+         if (!lowLevelJointData.hasControlMode())
+            throw new NullPointerException("Joint: " + joint.getName() + " has no control mode.");
+
+         switch (lowLevelJointData.getControlMode())
+         {
+         case FORCE_CONTROL:
+            joint.setUnderPositionControl(false);
+            break;
+         case POSITION_CONTROL:
+            joint.setUnderPositionControl(true);
+            break;
+         default:
+            throw new RuntimeException("Unhandled joint control mode: " + lowLevelJointData.getControlMode());
+         }
+
+         if (lowLevelJointData.hasDesiredPosition())
+            joint.setqDesired(lowLevelJointData.getDesiredPosition());
+
+         if (lowLevelJointData.hasDesiredVelocity())
+            joint.setQdDesired(lowLevelJointData.getDesiredVelocity());
+
+         if (lowLevelJointData.hasDesiredAcceleration())
+            joint.setQddDesired(lowLevelJointData.getDesiredAcceleration());
+
+         if (lowLevelJointData.hasDesiredTorque())
+            joint.setTau(lowLevelJointData.getDesiredTorque());
+      }
    }
 
    public ControllerCoreOutputReadOnly getOutputForHighLevelController()
