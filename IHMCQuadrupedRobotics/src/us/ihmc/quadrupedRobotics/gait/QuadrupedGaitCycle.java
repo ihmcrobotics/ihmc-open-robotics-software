@@ -20,6 +20,7 @@ public enum QuadrupedGaitCycle
                          new QuadrupedGaitPhaseTransition(WALK_HIND_LEFT, 0.67), new QuadrupedGaitPhaseTransition(PACE_RIGHT, 0.90)),
    WALKING_TROT(new QuadrupedGaitPhaseTransition(ALL_FOURS, 0.00), new QuadrupedGaitPhaseTransition(TROT_RIGHT, 0.10), new QuadrupedGaitPhaseTransition(ALL_FOURS, 0.50),
                 new QuadrupedGaitPhaseTransition(TROT_LEFT, 0.60)),
+   PERFECT_TROT(new QuadrupedGaitPhaseTransition(TROT_RIGHT, 0.00), new QuadrupedGaitPhaseTransition(TROT_LEFT, 0.50)),
    RUNNING_TROT(new QuadrupedGaitPhaseTransition(TROT_RIGHT, 0.00), new QuadrupedGaitPhaseTransition(FLIGHT, 0.40), new QuadrupedGaitPhaseTransition(TROT_LEFT, 0.50),
                 new QuadrupedGaitPhaseTransition(FLIGHT, 0.90)),
    ROTARY_GALLOP(new QuadrupedGaitPhaseTransition(HIND_LEFT_ONLY, 0.00), new QuadrupedGaitPhaseTransition(BOUND_HIND, 0.10),
