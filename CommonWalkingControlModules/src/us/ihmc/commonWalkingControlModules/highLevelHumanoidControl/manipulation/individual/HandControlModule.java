@@ -71,7 +71,6 @@ public class HandControlModule
 
    private final Map<OneDoFJoint, BooleanYoVariable> areJointsEnabled;
    private final String name;
-   private final RobotSide robotSide;
    private final RigidBody chest, hand;
 
    private final FullHumanoidRobotModel fullRobotModel;
@@ -131,8 +130,6 @@ public class HandControlModule
       chestFrame = chest.getBodyFixedFrame();
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
-      this.robotSide = robotSide;
-
       jointsOriginal = ScrewTools.createOneDoFJointPath(chest, hand);
 
       requestedState = new EnumYoVariable<HandControlMode>(name + "RequestedState", "", registry, HandControlMode.class, true);
@@ -168,7 +165,7 @@ public class HandControlModule
       jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, robotSide, homeConfiguration, jointsOriginal, jointspaceGains, registry);
       taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, robotSide, elevator, hand, chest, taskspaceGains,
             baseForControlToReferenceFrameMap, yoGraphicsListRegistry, registry);
-      userControlModeState = new HandUserControlModeState(stateNamePrefix, robotSide, jointsOriginal, momentumBasedController, registry);
+      userControlModeState = new HandUserControlModeState(stateNamePrefix, jointsOriginal, momentumBasedController, registry);
 
       if (isAtLeastOneJointPositionControlled)
       {
@@ -254,7 +251,7 @@ public class HandControlModule
          areAllArmJointEnabled.set(true);
       }
 
-      if (stateMachine.getCurrentStateEnum() == HandControlMode.USER_CONTROL_MODE && userControlModeState.isAbortUserControlModeRequested())
+      if (stateMachine.getCurrentState().isAbortRequested())
       {
          holdPositionInJointspace();
       }
