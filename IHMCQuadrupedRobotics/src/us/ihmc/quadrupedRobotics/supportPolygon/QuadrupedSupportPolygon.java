@@ -288,7 +288,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public void set(QuadrupedSupportPolygon polygon)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          setFootstep(robotQuadrant, polygon.getFootstep(robotQuadrant));
       }
