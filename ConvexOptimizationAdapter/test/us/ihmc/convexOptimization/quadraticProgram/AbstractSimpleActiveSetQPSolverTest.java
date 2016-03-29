@@ -379,6 +379,78 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(-1.0, solution[0], 1e-7);
       assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
       assertEquals(2.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+      
+      // Minimize x^T * x subject to 1 + 1e-12 <= x <= 1 - 1e-12 (Should give valid solution given a little epsilon to allow for roundoff)
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0 } };
+      costLinearVector = new double[] { 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      variableLowerBounds = new double[] { 1.0 + 1e-12};
+      variableUpperBounds = new double[] { 1.0 - 1e-12};
+      solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
+
+      solution = new double[1];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[0];
+      lagrangeLowerBoundMultipliers = new double[1];
+      lagrangeUpperBoundMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(1, solution.length);
+      assertEquals(1.0, solution[0], 1e-7);
+      assertEquals(2.0, lagrangeLowerBoundMultipliers[0], 1e-7);
+      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+      
+      // Minimize x^T * x subject to -1 + 1e-12 <= x <= -1 - 1e-12 (Should give valid solution given a little epsilon to allow for roundoff)
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0 } };
+      costLinearVector = new double[] { 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      variableLowerBounds = new double[] { -1.0 + 1e-12};
+      variableUpperBounds = new double[] { -1.0 - 1e-12};
+      solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
+
+      solution = new double[1];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[0];
+      lagrangeLowerBoundMultipliers = new double[1];
+      lagrangeUpperBoundMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(1, solution.length);
+      assertEquals(-1.0, solution[0], 1e-7);
+      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
+      assertEquals(2.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+      
+      // Minimize x^T * x subject to 1 + 1e-7 <= x <= 1 - 1e-7 (Should not give valid solution since this is too much to blame on roundoff)
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0 } };
+      costLinearVector = new double[] { 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      variableLowerBounds = new double[] { 1.0 + 1e-7 };
+      variableUpperBounds = new double[] { 1.0 - 1e-7 };
+      solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
+
+      solution = new double[1];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[0];
+      lagrangeLowerBoundMultipliers = new double[1];
+      lagrangeUpperBoundMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      assertEquals(3, numberOfIterations);
+
+      assertEquals(1, solution.length);
+      assertTrue(Double.isNaN(solution[0]));
+      assertTrue(Double.isInfinite(lagrangeLowerBoundMultipliers[0]));
+      assertTrue(Double.isInfinite(lagrangeUpperBoundMultipliers[0]));
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z 
       solver.clear();
@@ -1152,7 +1224,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       int numberOfEqualityConstraints = 10;
       int numberOfInequalityConstraints = 36;
 
-      DenseMatrix64F solution = new DenseMatrix64F(numberOfVariables, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(0, 0);
       DenseMatrix64F lagrangeEqualityMultipliers = new DenseMatrix64F(0, 0);
       DenseMatrix64F lagrangeInequalityMultipliers = new DenseMatrix64F(0, 0);
       DenseMatrix64F lagrangeLowerBoundMultipliers = new DenseMatrix64F(0, 0);
