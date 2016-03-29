@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import static us.ihmc.robotics.stateMachines.StateMachineTools.addRequestedStateTransition;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,8 +88,6 @@ public class HandControlModule
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame handControlFrame;
 
-   private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap = new HashMap<>();
-
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
          YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, YoVariableRegistry parentRegistry)
    {
@@ -157,11 +155,13 @@ public class HandControlModule
       String stateNamePrefix = namePrefix + "Hand";
 
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap = new EnumMap<>(BaseForControl.class);
       baseForControlToReferenceFrameMap.put(BaseForControl.CHEST, chestFrame);
       baseForControlToReferenceFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
       baseForControlToReferenceFrameMap.put(BaseForControl.WORLD, worldFrame);
 
       Map<OneDoFJoint, Double> homeConfiguration = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
+
       jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, robotSide, homeConfiguration, jointsOriginal, jointspaceGains, registry);
       taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, robotSide, elevator, hand, chest, taskspaceGains,
             baseForControlToReferenceFrameMap, yoGraphicsListRegistry, registry);
@@ -328,9 +328,9 @@ public class HandControlModule
             holdPositionInJointspace();
          return;
       case USER_CONTROL_MODE:
-         userControlModeState.handleArmDesiredAccelerationsMessage(command);
-         requestedState.set(userControlModeState.getStateEnum());
-         stateMachine.checkTransitionConditions();
+         boolean success = userControlModeState.handleArmDesiredAccelerationsMessage(command);
+         if (success)
+            requestedState.set(userControlModeState.getStateEnum());
          return;
       default:
          throw new RuntimeException("Unknown ArmControlMode: " + command.getArmControlMode());
