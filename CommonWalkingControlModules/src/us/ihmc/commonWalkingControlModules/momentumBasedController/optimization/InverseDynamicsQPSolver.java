@@ -70,9 +70,9 @@ public class InverseDynamicsQPSolver
       solverInput_f = new DenseMatrix64F(problemSize, 1);
 
       solverInput_Aeq = new DenseMatrix64F(0, problemSize);
-      solverInput_beq = new DenseMatrix64F(0, 0);
+      solverInput_beq = new DenseMatrix64F(0, 1);
       solverInput_Ain = new DenseMatrix64F(0, problemSize);
-      solverInput_bin = new DenseMatrix64F(0, 0);
+      solverInput_bin = new DenseMatrix64F(0, 1);
 
       solverInput_lb = new DenseMatrix64F(problemSize, 1);
       solverInput_ub = new DenseMatrix64F(problemSize, 1);
@@ -140,7 +140,7 @@ public class InverseDynamicsQPSolver
       solverInput_f.zero();
 
       solverInput_Aeq.reshape(0, problemSize);
-      solverInput_beq.reshape(0, 0);
+      solverInput_beq.reshape(0, 1);
 
       if (!firstCall.getBooleanValue())
          addJointJerkRegularization();
