@@ -7,7 +7,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
 public class ExternalForcePoint extends KinematicPoint
 {
    private static final long serialVersionUID = -7715587266631433612L;
@@ -34,11 +33,21 @@ public class ExternalForcePoint extends KinematicPoint
       this(name, null, registry);
    }
 
+   /**
+    * @param name
+    * @param offset in world when all of the robot's joints are at zero
+    * @param robot
+    */
    public ExternalForcePoint(String name, Vector3d offset, Robot robot)
    {
       this(name, offset, robot.getRobotsYoVariableRegistry());
    }
 
+   /**
+    * @param name
+    * @param offset in world when all of the robot's joints are at zero
+    * @param robot
+    */
    public ExternalForcePoint(String name, Vector3d offset, YoVariableRegistry registry)
    {
       super(name, offset, registry);
@@ -296,6 +305,5 @@ public class ExternalForcePoint extends KinematicPoint
       rot.m20 = xAxis.z;
       rot.m21 = yAxis.z;
       rot.m22 = zAxis.z;
-
    }
 }

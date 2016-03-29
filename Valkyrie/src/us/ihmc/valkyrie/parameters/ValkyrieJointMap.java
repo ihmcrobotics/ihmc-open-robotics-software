@@ -56,6 +56,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
+   private final String[] jointNamesBeforeFeet = new String[2];
 
    public ValkyrieJointMap()
    {
@@ -142,6 +143,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
          nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ArmJointName.FIRST_WRIST_PITCH));
       }
+      
+      jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
+      jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
+      
+      
    }
 
    private String getRobotSidePrefix(RobotSide robotSide)
@@ -411,5 +417,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public String getUnsanitizedRootJointInSdf()
    {
       return fullPelvisNameInSdf;
+   }
+
+   @Override
+   public String[] getJointNamesBeforeFeet()
+   {
+      return jointNamesBeforeFeet;
    }
 }

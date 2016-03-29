@@ -124,7 +124,7 @@ public class CaptureRegionCalculatorTest
       
       for (int i=0; i<expectedCaptureRegion.getNumberOfVertices(); i++)
       {
-         FramePoint2d expectedVertex = expectedCaptureRegion.getFrameVertex(i);
+         FramePoint2d expectedVertex = expectedCaptureRegion.getFrameVertexCopy(i);
          
          FramePoint2d actualVertex = captureRegion.getClosestVertexCopy(expectedVertex);
                   

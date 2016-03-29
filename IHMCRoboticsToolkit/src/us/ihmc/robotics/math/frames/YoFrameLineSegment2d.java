@@ -9,7 +9,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameLineSegment2d extends ReferenceFrameHolder
+public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
 {
    private final DoubleYoVariable x0, y0, x1, y1; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;

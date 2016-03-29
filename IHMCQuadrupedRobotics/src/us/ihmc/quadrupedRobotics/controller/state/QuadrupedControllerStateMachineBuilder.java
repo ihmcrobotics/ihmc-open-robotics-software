@@ -13,7 +13,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionBasedCrawlControlle
 import us.ihmc.quadrupedRobotics.controller.QuadrupedStandPrepController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedStandReadyController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedVirtualModelBasedStandController;
-import us.ihmc.quadrupedRobotics.controller.TrotWalkController;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedTrotWalkController;
 import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedCommonControllerParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
@@ -58,7 +58,7 @@ public class QuadrupedControllerStateMachineBuilder
    
    public void addTrotWalkController()
    {
-      controllers.add(new TrotWalkController(robotParameters, commonControllerParameters.getFullRobotModel(), commonControllerParameters.getStateEstimator(),
+      controllers.add(new QuadrupedTrotWalkController(robotParameters, commonControllerParameters.getFullRobotModel(), commonControllerParameters.getFootSwicthes(),
             commonControllerParameters.getControlDt(), commonControllerParameters.getRobotTimestamp(), commonControllerParameters.getParentRegistry(),
             commonControllerParameters.getGraphicsListRegistry()));
    }
@@ -68,7 +68,7 @@ public class QuadrupedControllerStateMachineBuilder
    {
       controllers
             .add(new QuadrupedPositionBasedCrawlController(commonControllerParameters.getControlDt(), robotParameters,
-                  commonControllerParameters.getFullRobotModel(), commonControllerParameters.getStateEstimator(),
+                  commonControllerParameters.getFullRobotModel(), null, commonControllerParameters.getFootSwicthes(),
                   legIkCalc, dataProducer, commonControllerParameters.getRobotTimestamp(),
                   commonControllerParameters.getParentRegistry(), commonControllerParameters.getGraphicsListRegistry(),
                   commonControllerParameters.getGraphicsListRegistryForDetachedOverhead()));

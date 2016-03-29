@@ -17,14 +17,14 @@ public abstract class HandCommandManager
    protected final PacketCommunicator handManagerPacketCommunicator;
    protected final PacketCommunicator packetCommunicator;
 
-   protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
+   protected JavaProcessSpawner spawner = new JavaProcessSpawner(true, true);
 
 
    public HandCommandManager(Class<? extends Object> clazz, RobotSide robotSide)
    {
-      String networkParamProperty = System.getProperty("networkParameterFile", NetworkParameters.defaultParameterFile);
+      String networkParamProperty = System.getProperty("us.ihmc.networkParameterFile", NetworkParameters.defaultParameterFile);
       
-      spawner.spawn(clazz, new String[] {"-DnetworkParameterFile=" + networkParamProperty}, new String[] { "-r", robotSide.getLowerCaseName() });
+      spawner.spawn(clazz, new String[] {"-Dus.ihmc.networkParameterFile=" + networkParamProperty}, new String[] { "-r", robotSide.getLowerCaseName() });
 
       NetworkPorts managerPort = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
       handManagerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(managerPort, new IHMCCommunicationKryoNetClassList());

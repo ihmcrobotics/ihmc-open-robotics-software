@@ -36,9 +36,7 @@ import us.ihmc.simulationconstructionset.Robot;
  * @version 1.0
  */
 public class SpringFlamingoRobot extends Robot
-{
-   private static final long serialVersionUID = -2722107799882903451L;
-   
+{   
    private static final boolean SHOW_MASS_PROPERTIES_GRAPHICS = false;
    private static final boolean SHOW_CARTOON_GRAPHICS = true;
 

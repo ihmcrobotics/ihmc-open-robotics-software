@@ -74,6 +74,16 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointTwist.getLinearPart(linearVelocityToPack);
    }
    
+   public Vector3d getLinearVelocityForReading()
+   {
+      return jointTwist.getLinearPart();
+   }
+   
+   public Vector3d getAngularVelocityForReading()
+   {
+      return jointTwist.getAngularPart();
+   }
+   
    public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.getMatrix(matrix, rowStart);
@@ -198,9 +208,19 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
-   public void getTranslation(Vector3d vectorToPack)
+   public void getTranslation(Tuple3d vectorToPack)
    {
       vectorToPack.set(jointTranslation);
+   }
+   
+   public Tuple3d getTranslationForReading()
+   {
+      return jointTranslation;
+   }
+   
+   public Quat4d getRotationForReading()
+   {
+      return jointRotation;
    }
 
    public void getWrench(Wrench wrenchToPack)
@@ -285,7 +305,21 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointTwist.set(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame(), matrix, rowStart);
    }
    
-   //TODO: Test THIS!!!!
+   //FIXME: FIX THIS!!!!
+   /**
+    * The implementation for this method generates garbage and is wrong.
+    * Do not use it or fix it.
+    * 
+    * The implementation should be something like this:
+    * <p> {@code RigidBodyTransform inverseTransformToRoot = afterJointFrame.getInverseTransformToRoot();}
+    * <p> {@code inverseTransformToRoot.transform(linearVelocityInWorld);}
+    * <p> {@code jointTwist.setLinearPart(linearVelocityInWorld);}
+    *
+    * Sylvain
+    * 
+    * @deprecated
+    * @param linearVelocityInWorld
+    */
    public void setLinearVelocityInWorld(Vector3d linearVelocityInWorld)
    {
       Twist newTwist = new Twist(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), ReferenceFrame.getWorldFrame());

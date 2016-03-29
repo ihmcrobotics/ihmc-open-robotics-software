@@ -5,10 +5,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class WaypointOrientationTrajectoryData extends ReferenceFrameHolder
+public class WaypointOrientationTrajectoryData extends AbstractReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
    private final int numberOfWaypoints;

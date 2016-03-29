@@ -616,7 +616,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       }
    }
 
-   public synchronized void addListOfControlls(Collection<MidiControl> collection)
+   public synchronized void addListOfControls(Collection<MidiControl> collection)
    {
       for (MidiControl control : collection)
       {

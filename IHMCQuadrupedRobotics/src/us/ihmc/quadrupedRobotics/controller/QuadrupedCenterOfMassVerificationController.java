@@ -29,11 +29,15 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
@@ -57,6 +61,8 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
    private DoubleYoVariable footZHeightOnPickUp = new DoubleYoVariable("footZHeightOnPickUp", registry);
    private DoubleYoVariable footZHeightOnTouchdown = new DoubleYoVariable("footZHeightOnTouchdown", registry);
    private DoubleYoVariable timeToSTayInMoveFeetAfterTouchDown = new DoubleYoVariable("timeToSTayInMoveFeetAfterTouchDown", registry);
+   private final SideDependentList<ReferenceFrame> sideDependentMidTrotLineZUpFrames = new SideDependentList<ReferenceFrame>();
+   
 
    public enum COM_ESTIMATE_STATES
    {
@@ -156,6 +162,15 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
 
          YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", legAttachmentFrame, registry);
          desiredFeetPositionsInLegAttachmentFrame.set(robotQuadrant, footPositionInLegAttachementFrame);
+      }
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
+         RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
+         
+         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getFootFrame(hindSoleQuadrant), referenceFrames.getFootFrame(frontSoleQuadrantOppositeSide));
+         sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
 
       //Create State Machine and States
@@ -510,19 +525,33 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
          switch (trotPair)
          {
          case HINDLEFT_FRONTRIGHT:
-            return referenceFrames.getMidTrotLineZUpFrame(RobotQuadrant.HIND_LEFT);
+            return getMidTrotLineZUpFrame(RobotQuadrant.HIND_LEFT);
 
          case HINDRIGHT_FRONTLEFT:
-            return referenceFrames.getMidTrotLineZUpFrame(RobotQuadrant.HIND_RIGHT);
+            return getMidTrotLineZUpFrame(RobotQuadrant.HIND_RIGHT);
 
          default:
             return worldFrame;
          }
       }
+      
+      public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
+      {
+         if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
+         {
+            return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getSide());
+         }
+         return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getOppositeSide());
+      }
 
       @Override
       public void doAction()
       {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            sideDependentMidTrotLineZUpFrames.get(robotSide).update();
+         }
+         
          TrotPair currentTrotPair = frameToIncrementOver.getEnumValue();
          
          CenterOfMassIncrementVariableHolder incrementHolder = incrementHolders.get(currentTrotPair);

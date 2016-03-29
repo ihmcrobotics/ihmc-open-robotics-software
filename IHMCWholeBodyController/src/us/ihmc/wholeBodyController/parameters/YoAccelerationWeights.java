@@ -91,9 +91,19 @@ public class YoAccelerationWeights
       yoLinearAccelerationWeights.setLinearAccelerationWeights(weight);
    }
 
+   public void setXAccelerationWeight(double xWeight)
+   {
+      yoLinearAccelerationWeights.setXAccelerationWeight(xWeight);
+   }
+
+   public void setYAccelerationWeight(double yWeight)
+   {
+      yoLinearAccelerationWeights.setYAccelerationWeight(yWeight);
+   }
+
    public void setXYAccelerationWeights(double xWeight, double yWeight)
    {
-      yoLinearAccelerationWeights.setXYAccelerationWeights(Math.max(xWeight, yWeight));
+      yoLinearAccelerationWeights.setXYAccelerationWeights(xWeight, yWeight);
    }
 
    public void setXYAccelerationWeights(double xyWeights)
@@ -121,9 +131,9 @@ public class YoAccelerationWeights
       return yoAngularAccelerationWeights.getRollAccelerationWeight();
    }
 
-   public double[] getAngularAccelerationWeights()
+   public void getAngularAccelerationWeights(double[] weightsToPack)
    {
-      return yoAngularAccelerationWeights.getAngularAccelerationWeights();
+      yoAngularAccelerationWeights.getAngularAccelerationWeights(weightsToPack);
    }
 
    public double getXAccelerationWeight()
@@ -136,18 +146,13 @@ public class YoAccelerationWeights
       return yoLinearAccelerationWeights.getYAccelerationWeight();
    }
 
-   public double getXYAccelerationWeights()
-   {
-      return yoLinearAccelerationWeights.getXYAccelerationWeights();
-   }
-
    public double getZAccelerationWeight()
    {
       return yoLinearAccelerationWeights.getZAccelerationWeight();
    }
 
-   public double[] getLinearAccelerationWeights()
+   public void getLinearAccelerationWeights(double[] weightsToPack)
    {
-      return yoLinearAccelerationWeights.getLinearAccelerationWeights();
+      yoLinearAccelerationWeights.getLinearAccelerationWeights(weightsToPack);
    }
 }

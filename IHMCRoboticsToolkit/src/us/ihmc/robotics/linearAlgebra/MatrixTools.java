@@ -70,6 +70,19 @@ public class MatrixTools
       }
    }
 
+   public static boolean containsNaN(DenseMatrix64F matrix)
+   {
+      for (int i = 0; i < matrix.numRows; i++)
+      {
+         for (int j = 0; j < matrix.numCols; j++)
+         {
+            if (Double.isNaN(matrix.unsafe_get(i, j)))
+               return true;
+         }
+      }
+      return false;
+   }
+
    /**
     * This method tries to be smart about converting the various yaml fields to DenseMatrix64F
     * @param val
@@ -829,7 +842,7 @@ public class MatrixTools
       tuple3d.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
-   public static void extractFrameTupleFromEJMLVector(FrameTuple<?> frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
+   public static void extractFrameTupleFromEJMLVector(FrameTuple<?, ?> frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
    {
       frameTuple.setToZero(desiredFrame);
       frameTuple.setX(ejmlVector.get(startIndex + 0, 0));
@@ -861,7 +874,7 @@ public class MatrixTools
       ejmlVector.set(startIndex + 2, 0, tuple3d.getZ());
    }
 
-   public static void insertFrameTupleIntoEJMLVector(FrameTuple<?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   public static void insertFrameTupleIntoEJMLVector(FrameTuple<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
    {
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());

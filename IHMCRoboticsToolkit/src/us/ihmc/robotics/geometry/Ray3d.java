@@ -1,7 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -18,12 +16,6 @@ public class Ray3d
       transformToHere.transform(ray3d.getVector(), transformedVector);
 
       return new Ray3d(transformedPoint, transformedVector);
-   }
-
-   public Ray3d(ImmutablePair<Point3d, Vector3d> pair)
-   {
-      this.point = pair.getLeft();
-      this.vector = pair.getRight();
    }
 
    public Ray3d(Point3d point, Vector3d vector)

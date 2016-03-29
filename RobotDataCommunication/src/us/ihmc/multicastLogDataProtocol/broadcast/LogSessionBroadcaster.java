@@ -84,9 +84,18 @@ public class LogSessionBroadcaster extends Thread
          this.sendAddress = new InetSocketAddress(announceGroup, LogDataProtocolSettings.LOG_DATA_ANNOUNCE_PORT);
          this.selector = Selector.open();
          
-         String cameraString = NetworkParameters.getHost(NetworkParameterKeys.loggedCameras);
+         String cameraString;
          
-         if(cameraString != null)
+         if(NetworkParameters.hasKey(NetworkParameterKeys.loggedCameras))
+         {
+            cameraString = NetworkParameters.getHost(NetworkParameterKeys.loggedCameras);
+         }
+         else
+         {
+            cameraString = null;
+         }
+            
+         if(cameraString != null && !cameraString.trim().isEmpty())
          {
             String[] split = cameraString.split(",");
             cameras = new byte[split.length];

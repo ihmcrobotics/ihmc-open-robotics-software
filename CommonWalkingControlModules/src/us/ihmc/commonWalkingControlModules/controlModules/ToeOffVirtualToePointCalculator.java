@@ -264,31 +264,45 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       // TODO: Improve algorithm to find connecting edges to handle all corner cases.
       double epsilon = 1e-6;
       int numberOfPoints = adjustedSupportPolygon.getNumberOfVertices();
-      boolean prevEqualsInsideToe = insideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(numberOfPoints - 1), epsilon);
-      boolean prevEqualsOutsideToe = outsideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(numberOfPoints - 1), epsilon);
-      boolean equalsInsideToe = insideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(0), epsilon);
-      boolean equalsOutsideToe = outsideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(0), epsilon);
+      
+      FramePoint2d firstFrameVertex = new FramePoint2d();
+      FramePoint2d lastFrameVertex = new FramePoint2d();
+      
+      adjustedSupportPolygon.getFrameVertex(0, firstFrameVertex);
+      adjustedSupportPolygon.getFrameVertex(numberOfPoints - 1, lastFrameVertex);
+      
+      boolean prevEqualsInsideToe = insideToe2d.epsilonEquals(lastFrameVertex, epsilon);
+      boolean prevEqualsOutsideToe = outsideToe2d.epsilonEquals(lastFrameVertex, epsilon);
+      boolean equalsInsideToe = insideToe2d.epsilonEquals(firstFrameVertex, epsilon);
+      boolean equalsOutsideToe = outsideToe2d.epsilonEquals(firstFrameVertex, epsilon);
 
       boolean placeVTPOnOutsideToe = false, placeVTPOnInsideToe = false;
       for (int i = 0; i < numberOfPoints; i++)
       {
-         boolean nextEqualsInsideToe = insideToe2d.epsilonEquals(adjustedSupportPolygon.getNextFrameVertex(i), epsilon);
-         boolean nextEqualsOutsideToe = outsideToe2d.epsilonEquals(adjustedSupportPolygon.getNextFrameVertex(i), epsilon);
+         FramePoint2d nextFrameVertex = new FramePoint2d();
+         FramePoint2d previousFrameVertex = new FramePoint2d();
+         
+         adjustedSupportPolygon.getNextFrameVertex(i, nextFrameVertex);
+         adjustedSupportPolygon.getPreviousFrameVertex(i, previousFrameVertex);
+         
+         
+         boolean nextEqualsInsideToe = insideToe2d.epsilonEquals(nextFrameVertex, epsilon);
+         boolean nextEqualsOutsideToe = outsideToe2d.epsilonEquals(nextFrameVertex, epsilon);
 
          if (equalsInsideToe)
          {
             if (prevEqualsOutsideToe)
             {
-               connectingEdgeA = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
+               connectingEdgeA = new FrameLine2d(insideToe2d, nextFrameVertex);
             }
             else if (nextEqualsOutsideToe)
             {
-               connectingEdgeA = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
+               connectingEdgeA = new FrameLine2d(insideToe2d, previousFrameVertex);
             }
             else
             {
-               connectingEdgeA = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
-               connectingEdgeB = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
+               connectingEdgeA = new FrameLine2d(insideToe2d, previousFrameVertex);
+               connectingEdgeB = new FrameLine2d(insideToe2d, nextFrameVertex);
                placeVTPOnInsideToe = true;
             }
          }
@@ -296,16 +310,16 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
          {
             if (prevEqualsInsideToe)
             {
-               connectingEdgeB = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
+               connectingEdgeB = new FrameLine2d(outsideToe2d, nextFrameVertex);
             }
             else if (nextEqualsInsideToe)
             {
-               connectingEdgeB = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
+               connectingEdgeB = new FrameLine2d(outsideToe2d, previousFrameVertex);
             }
             else
             {
-               connectingEdgeA = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
-               connectingEdgeB = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
+               connectingEdgeA = new FrameLine2d(outsideToe2d, nextFrameVertex);
+               connectingEdgeB = new FrameLine2d(outsideToe2d, previousFrameVertex);
                placeVTPOnOutsideToe = true;
             }
          }

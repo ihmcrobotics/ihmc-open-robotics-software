@@ -1,22 +1,24 @@
 package us.ihmc.robotics.geometry;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
+
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
-
 public class FrameLineTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testChangeFrameCopy()
    {
       Random random = new Random(1776L);
@@ -59,7 +61,6 @@ public class FrameLineTest
          resultLines.add(line);
       }
 
-
       // Now compare all sets of 2 vectors. If they are in the same frame, they should have the same values
       for (FrameLine resultLine1 : resultLines)
       {
@@ -76,102 +77,102 @@ public class FrameLineTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetFrameVector()
    {
       Random random = new Random(1234L);
-      
+
       ReferenceFrame world = ReferenceFrame.getWorldFrame();
       ReferenceFrame target = createRandomFrame(world, random);
       ReferenceFrame target2 = createRandomFrame(world, random);
-      
+
       Point3d origin = new Point3d();
       Vector3d direction = new Vector3d(1.0, 2.0, 3.0);
-      
+
       FrameLine line = new FrameLine(world, origin, direction);
       FrameVector vector = new FrameVector(world, direction);
       vector.normalize();
-      
+
       assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
-      
+
       line.changeFrame(target);
       vector.changeFrame(target);
-      
+
       assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
-      
+
       vector.changeFrame(target2);
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetFramePoint()
    {
       Random random = new Random(4567L);
-      
+
       ReferenceFrame world = ReferenceFrame.getWorldFrame();
       ReferenceFrame target = createRandomFrame(world, random);
       ReferenceFrame target2 = createRandomFrame(world, random);
-      
+
       Point3d origin = new Point3d(1.0, 2.0, 3.0);
       Vector3d direction = new Vector3d(2.0, 1.0, 4.0);
-      
+
       FrameLine line = new FrameLine(world, origin, direction);
       FrameVector vector = new FrameVector(world, direction);
       vector.normalize();
-      
+
       assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
-      
+
       line.changeFrame(target);
       vector.changeFrame(target);
-      
+
       assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
-      
+
       vector.changeFrame(target2);
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected=RuntimeException.class)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorA()
    {
       Point3d origin = new Point3d(1.0, 2.0, 3.0);
       Vector3d direction = new Vector3d();
-      
+
       new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected=RuntimeException.class)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorB()
    {
       FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
       FrameVector direction = new FrameVector(ReferenceFrame.getWorldFrame());
-      
+
       new FrameLine(origin, direction);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected=RuntimeException.class)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorC()
    {
       FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
       FrameVector direction = new FrameVector(createRandomFrame(ReferenceFrame.getWorldFrame(), new Random(1231L)), 4.0, 5.0, 6.0);
-      
+
       new FrameLine(origin, direction);
    }
-   
+
    private ReferenceFrame createRandomFrame(ReferenceFrame parentFrame, Random random)
    {
       FrameOrientation orientation = new FrameOrientation(parentFrame, createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0),
-                                   createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0), createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0));
+            createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0), createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0));
 
       OrientationFrame frame = new OrientationFrame(orientation);
 
       return frame;
    }
-   
+
    private double createRandomDouble(Random random, double min, double max)
    {
       return min + random.nextDouble() * (max - min);
@@ -185,5 +186,5 @@ public class FrameLineTest
       }
 
    }
-   
+
 }

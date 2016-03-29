@@ -14,7 +14,7 @@ import org.ajoberstar.grgit.*
 
 project.ext.repo = Grgit.open(projectDir)
 
-version = '0.7.4'
+version = '0.7.5'
 
 project.ext.fullVersion = version
 project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
@@ -59,18 +59,26 @@ repositories {
    }
 }
 
-task publishAllToMavenLocal(type: GradleBuild) << {
+task publishAllToMavenLocal(type: GradleBuild) {
     buildFile "build.gradle"
     def allTasks = new ArrayList<String>()
-    buildType = "LOCAL"
-    project.ext.fullVersion = "LOCAL"
+
     subprojects.each { subproject ->
-//        subproject.buildType = "LOCAL"
-        subproject.ext.fullVersion = "LOCAL"
         allTasks.add(":" + subproject.name + ":publishToMavenLocal")
     }
 
     tasks = allTasks
+}
+
+gradle.taskGraph.whenReady { TaskExecutionGraph graph ->
+    if(graph.hasTask(publishAllToMavenLocal)) {
+      buildType = "LOCAL"
+      project.ext.fullVersion = "LOCAL"
+
+      subprojects.each { subproject ->
+        subproject.ext.fullVersion = "LOCAL"
+      }
+    }
 }
 
 subprojects { subproject ->
@@ -128,6 +136,16 @@ subprojects { subproject ->
             }
         }
     }
+
+   	task testFast(type: Test) {
+		ignoreFailures true
+		include "**/*FastTestSuite.class"
+	}
+
+	task testSlow(type: Test) {
+		ignoreFailures true
+		include "**/*SlowTestSuite.class"
+	}
 }
 
 def getDate() {

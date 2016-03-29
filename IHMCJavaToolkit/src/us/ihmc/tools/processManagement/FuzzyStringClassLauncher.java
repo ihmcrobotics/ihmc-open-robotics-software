@@ -452,7 +452,7 @@ public class FuzzyStringClassLauncher
                if (str != null && !str.toLowerCase().contains("no results"))
                {
                   str = str.substring(str.indexOf("\">") + 2, str.indexOf("</"));
-                  new JavaProcessSpawner(false).spawn(classList.get(str), new String[] { "-Xms2048m", "-Xmx2048m" }, null);
+                  new JavaProcessSpawner(false, true).spawn(classList.get(str), new String[] { "-Xms2048m", "-Xmx2048m" }, null);
                }
             }
          }

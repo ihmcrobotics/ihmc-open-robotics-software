@@ -1,13 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * <p>Title: FrameConvexPolygon2d </p>
@@ -23,25 +23,25 @@ import java.util.List;
  * @author IHMC-Yobotics Biped Team
  * @version 1.0
  */
-public class FrameConvexPolygon2d extends FrameGeometry2d
+public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, ConvexPolygon2d>
 {
-   protected ReferenceFrame referenceFrame;
-   private final FramePoint2d centroid = new FramePoint2d();
-   protected final ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
-   private final List<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
+   protected final ConvexPolygon2d convexPolygon;
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
    
    private Vector2d[] temporaryVectorArray;
 
    private final FramePoint tempPoint = new FramePoint();
+   private final FramePoint2d tempPoint2d = new FramePoint2d();
+   
+   private final FramePoint2d temporaryCentroid = new FramePoint2d();
+
 
    /**
     * Creates an empty convex polygon attached to the world frame.
     */
    public FrameConvexPolygon2d()
    {
-      referenceFrame = ReferenceFrame.getWorldFrame();
-      update();
+      this(ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -50,7 +50,8 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame)
    {
-      this.referenceFrame = referenceFrame;
+      super(referenceFrame, new ConvexPolygon2d());
+      this.convexPolygon = this.getGeometryObject();
       update();
    }
 
@@ -63,11 +64,13 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, List<Point2d> vertices)
    {
+      this(referenceFrame);
       setIncludingFrameAndUpdate(referenceFrame, vertices);
    }
 
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, Point2d[] vertices)
    {
+      this(referenceFrame);
       setIncludingFrameAndUpdate(referenceFrame, vertices);
    }
 
@@ -79,6 +82,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, double[][] vertices)
    {
+      this(referenceFrame);
       setIncludingFrameAndUpdate(referenceFrame, vertices);
    }
 
@@ -91,6 +95,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(List<FramePoint2d> frameVertices)
    {
+      this();
       setIncludingFrameAndUpdate(frameVertices);
    }
 
@@ -103,6 +108,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(FrameTuple2dArrayList<FramePoint2d> frameVertices)
    {
+      this();
       setIncludingFrameAndUpdate(frameVertices);
    }
 
@@ -113,6 +119,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, ConvexPolygon2d otherPolygon)
    {
+      super(referenceFrame, new ConvexPolygon2d());
+      this.convexPolygon = this.getGeometryObject();
+
       setIncludingFrameAndUpdate(referenceFrame, otherPolygon);
    }
 
@@ -122,6 +131,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(FrameConvexPolygon2d otherPolygon)
    {
+      this();
       setIncludingFrameAndUpdate(otherPolygon);
    }
 
@@ -136,6 +146,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public FrameConvexPolygon2d(FrameConvexPolygon2d firstPolygon, FrameConvexPolygon2d secondPolygon)
    {
+      this();
       setIncludingFrameAndUpdate(firstPolygon, secondPolygon);
    }
 
@@ -162,7 +173,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    public void clearAndUpdate(ReferenceFrame referenceFrame)
    {
       convexPolygon.clearAndUpdate();
-      updateFramePoints();
       this.referenceFrame = referenceFrame;
    }
 
@@ -175,8 +185,12 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    public void addVertex(FramePoint2d vertex)
    {
       vertex.checkReferenceFrameMatch(referenceFrame);
-      setOrCreateIncludingFrame(vertex, getNumberOfVertices());
-      convexPolygon.addVertex(vertex.getPoint());
+      addVertex(vertex.getPoint());
+   }
+   
+   public void addVertex(Point2d vertex)
+   {
+      convexPolygon.addVertex(vertex);
    }
 
    /**
@@ -189,7 +203,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    public void addVertex(ReferenceFrame referenceFrame, double x, double y)
    {
       this.referenceFrame.checkReferenceFrameMatch(referenceFrame);
-      setOrCreateIncludingFrame(referenceFrame, x, y, getNumberOfVertices());
       convexPolygon.addVertex(x, y);
    }
 
@@ -200,11 +213,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public void addVertexAndChangeFrame(FramePoint2d newVertex)
    {
-      int vertexIndex = getNumberOfVertices();
-      setOrCreateIncludingFrame(newVertex, vertexIndex);
-      FramePoint2d vertex = frameVertices.get(vertexIndex);
-      vertex.changeFrame(referenceFrame);
-      convexPolygon.addVertex(vertex.getPoint());
+      tempPoint2d.setIncludingFrame(newVertex);
+      tempPoint2d.changeFrame(referenceFrame);
+      convexPolygon.addVertex(tempPoint2d.getPoint());
    }
 
    /**
@@ -214,11 +225,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public void addVertexChangeFrameAndProjectToXYPlane(FramePoint2d newVertex)
    {
-      int vertexIndex = getNumberOfVertices();
-      setOrCreateIncludingFrame(newVertex, vertexIndex);
-      FramePoint2d vertex = frameVertices.get(vertexIndex);
-      vertex.changeFrameAndProjectToXYPlane(referenceFrame);
-      convexPolygon.addVertex(vertex.getPoint());
+      tempPoint2d.setIncludingFrame(newVertex);
+      tempPoint2d.changeFrameAndProjectToXYPlane(referenceFrame);
+      convexPolygon.addVertex(tempPoint2d.getPoint());
    }
 
    /**
@@ -245,9 +254,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       for (int i = 0; i < numberOfVertices; i++)
       {
          FramePoint2d vertex = vertices.get(i);
-         vertex.checkReferenceFrameMatch(referenceFrame);
-         setOrCreateIncludingFrame(vertex, getNumberOfVertices());
-         convexPolygon.addVertex(vertex.getPoint());
+         addVertex(vertex);
       }
    }
 
@@ -263,9 +270,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       for (int i = 0; i < numberOfVertices; i++)
       {
          FramePoint2d vertex = vertices.get(i);
-         vertex.checkReferenceFrameMatch(referenceFrame);
-         setOrCreateIncludingFrame(vertex, getNumberOfVertices());
-         convexPolygon.addVertex(vertex.getPoint());
+         addVertex(vertex);
       }
    }
 
@@ -274,9 +279,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       for (int i = 0; i < vertices.length; i++)
       {
          FramePoint2d vertex = vertices[i];
-         vertex.checkReferenceFrameMatch(referenceFrame);
-         setOrCreateIncludingFrame(vertex, getNumberOfVertices());
-         convexPolygon.addVertex(vertex.getPoint());
+         addVertex(vertex);
       }
    }
 
@@ -306,8 +309,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       for (int i = 0; i < otherPolygon.getNumberOfVertices(); i++)
       {
          Point2d vertex = otherPolygon.getVertex(i);
-         setOrCreateIncludingFrame(vertex, referenceFrame, getNumberOfVertices());
-         convexPolygon.addVertex(vertex);
+         addVertex(vertex);
       }
    }
 
@@ -323,16 +325,14 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
 
       for (int i = 0; i < otherPolygon.getNumberOfVertices(); i++)
       {
-         FramePoint2d vertex = otherPolygon.getFrameVertex(i);
-         setOrCreateIncludingFrame(vertex, getNumberOfVertices());
-         convexPolygon.addVertex(vertex.getPoint());
+         Point2d vertex = otherPolygon.convexPolygon.getVertex(i);
+         convexPolygon.addVertex(vertex);
       }
    }
 
    public void removeVertex(int indexOfVertexToRemove)
    {
       convexPolygon.removeVertex(indexOfVertexToRemove);
-      updateFramePoints();
    }
 
    /**
@@ -341,22 +341,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    public void update()
    {
       convexPolygon.update();
-      updateFramePoints();
-   }
-   
-   /**
-    * Updates the {@code FramePoint}s of this polygon.
-    */
-   public void updateFramePoints()
-   {
-      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
-      {
-         Point2d vertex = convexPolygon.getVertexUnsafe(i);
-         setOrCreateIncludingFrame(vertex, referenceFrame, i);
-      }
-
-      if (convexPolygon.isUpToDate())
-         centroid.setIncludingFrame(referenceFrame, convexPolygon.getCentroid());
    }
 
    /**
@@ -650,45 +634,65 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       update();
    }
 
-   public FramePoint2d getFrameVertex(int vertexIndex)
+   public void getVertex(int vertexIndex, Point2d vertexToPack)
+   {
+      vertexToPack.set(getVertex(vertexIndex));
+   }
+
+   public Point2d getVertex(int vertexIndex)
+   {
+      return convexPolygon.getVertex(vertexIndex);
+   }
+   
+   public FramePoint2d getFrameVertexCopy(int vertexIndex)
+   {
+      FramePoint2d frameVertexCopy = new FramePoint2d();
+      getFrameVertex(vertexIndex, frameVertexCopy);
+      return frameVertexCopy;
+   }
+   
+   public void getFrameVertex(int vertexIndex, FrameTuple2d<?, ?> vertexToPack)
    {
       convexPolygon.checkIfUpToDate();
-      return getFrameVertexUnsafe(vertexIndex);
-   }
-
-   /** Same as getVertex(vertexIndex) but without checking if the polygon has been updated. Be careful when using it! */
-   protected FramePoint2d getFrameVertexUnsafe(int vertexIndex)
-   {
+      
       convexPolygon.checkNonEmpty();
       convexPolygon.checkIndexInBoundaries(vertexIndex);
-      return frameVertices.get(vertexIndex);
+      
+      vertexToPack.setIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex));
+   }
+   
+   public void getFrameVertexXY(int vertexIndex, FramePoint vertexToPack)
+   {
+      convexPolygon.checkIfUpToDate();
+      
+      convexPolygon.checkNonEmpty();
+      convexPolygon.checkIndexInBoundaries(vertexIndex);
+      
+      vertexToPack.setXYIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex));
+   }
+   
+//   public FramePoint2d getFrameVertex(int vertexIndex)
+//   {
+//      convexPolygon.checkIfUpToDate();
+//      return getFrameVertexUnsafe(vertexIndex);
+//   }
+//
+//   /** Same as getVertex(vertexIndex) but without checking if the polygon has been updated. Be careful when using it! */
+//   protected FramePoint2d getFrameVertexUnsafe(int vertexIndex)
+//   {
+//      convexPolygon.checkNonEmpty();
+//      convexPolygon.checkIndexInBoundaries(vertexIndex);
+//      return frameVertices.get(vertexIndex);
+//   }
+
+   public void getNextFrameVertex(int vertexIndex, FramePoint2d vertexToPack)
+   {
+      getFrameVertex(convexPolygon.getNextVertexIndex(vertexIndex), vertexToPack);
    }
 
-   public FramePoint2d getNextFrameVertex(int vertexIndex)
+   public void getPreviousFrameVertex(int vertexIndex, FramePoint2d vertexToPack)
    {
-      return getFrameVertex(convexPolygon.getNextVertexIndex(vertexIndex));
-   }
-
-   public FramePoint2d getPreviousFrameVertex(int vertexIndex)
-   {
-      return getFrameVertex(convexPolygon.getPreviousVertexIndex(vertexIndex));
-   }
-
-   private void setOrCreateIncludingFrame(FramePoint2d framePoint, int i)
-   {
-      setOrCreateIncludingFrame(framePoint.getReferenceFrame(), framePoint.getX(), framePoint.getY(), i);
-   }
-
-   private void setOrCreateIncludingFrame(Point2d point, ReferenceFrame referenceFrame, int i)
-   {
-      setOrCreateIncludingFrame(referenceFrame, point.getX(), point.getY(), i);
-   }
-
-   private void setOrCreateIncludingFrame(ReferenceFrame referenceFrame, double x, double y, int i)
-   {
-      while(i >= frameVertices.size())
-         frameVertices.add(new FramePoint2d());
-      frameVertices.get(i).setIncludingFrame(referenceFrame, x, y);
+      getFrameVertex(convexPolygon.getPreviousVertexIndex(vertexIndex), vertexToPack);
    }
 
    public double getArea()
@@ -698,20 +702,20 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
 
    public void getCentroid(FramePoint2d centroidToPack)
    {
-      convexPolygon.checkIfUpToDate();
-      centroidToPack.setIncludingFrame(centroid);
+      centroidToPack.setIncludingFrame(referenceFrame, convexPolygon.getCentroid());
    }
 
    public FramePoint2d getCentroid()
    {
-      convexPolygon.checkIfUpToDate();
-      return centroid;
+      getCentroid(temporaryCentroid);
+      return temporaryCentroid;
    }
 
    public FramePoint2d getCentroidCopy()
    {
-      convexPolygon.checkIfUpToDate();
-      return new FramePoint2d(centroid);
+      FramePoint2d centroidToReturn = new FramePoint2d();
+      getCentroid(centroidToReturn);
+      return centroidToReturn;
    }
 
    public int getNumberOfVertices()
@@ -739,7 +743,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    public void scale(Point2d pointToScaleAbout, double scaleFactor)
    {
       convexPolygon.scale(pointToScaleAbout, scaleFactor);
-      updateFramePoints();
    }
 
    /**
@@ -759,7 +762,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
     */
    public void scale(double scaleFactor)
    {
-      scale(centroid.getPoint(), scaleFactor);
+      convexPolygon.scale(scaleFactor);
    }
 
    /**
@@ -1003,23 +1006,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    }
 
    @Override
-   public ReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
-   }
-
-   @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      convexPolygon.applyTransform(transform);
-      updateFramePoints();
-   }
-
-   @Override
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
    {
       convexPolygon.applyTransformAndProjectToXYPlane(transform);
-      updateFramePoints();
    }
 
    @Override
@@ -1036,18 +1025,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       FrameConvexPolygon2d copy = new FrameConvexPolygon2d(this);
       copy.applyTransformAndProjectToXYPlane(transform);
       return copy;
-   }
-   
-   @Override
-   public void changeFrame(ReferenceFrame desiredFrame)
-   {
-      // this is in the correct frame already
-      if (desiredFrame == referenceFrame)
-         return;
-
-      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
-      referenceFrame = desiredFrame;
-      applyTransform(temporaryTransformToDesiredFrame);
    }
 
    @Override
@@ -1073,10 +1050,12 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    @Override
    public String toString()
    {
+      FramePoint2d vertex = new FramePoint2d();
+      
       String ret = "";
       for (int i = 0; i < getNumberOfVertices(); i++)
       {
-         FramePoint2d vertex = frameVertices.get(i);
+         this.getFrameVertex(i, vertex);
          ret = ret + vertex.toString() + "\n";
       }
 
@@ -1211,7 +1190,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
       checkReferenceFrameMatch(secondConvexPolygon);
       intersectionToPack.clear(secondConvexPolygon.getReferenceFrame());
       boolean success = convexPolygon.intersectionWith(secondConvexPolygon.convexPolygon, intersectionToPack.convexPolygon);
-      intersectionToPack.updateFramePoints();
 
       return success;
    }
@@ -1326,4 +1304,12 @@ public class FrameConvexPolygon2d extends FrameGeometry2d
    {
       return convexPolygon.isEmpty();
    }
+
+   @Override
+   public void set(FrameConvexPolygon2d other)
+   {
+      convexPolygon.set(other.convexPolygon);
+      update();
+   }
+
 }

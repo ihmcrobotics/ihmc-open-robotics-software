@@ -6,27 +6,28 @@ import net.java.games.input.Component;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.simulationconstructionset.joystick.EnumDependentJoystickMapping;
-import us.ihmc.simulationconstructionset.joystick.EnumYoVariableDependentJoystickInputManager;
+import us.ihmc.simulationconstructionset.joystick.EnumYoVariableDependentInputManager;
 import us.ihmc.simulationconstructionset.joystick.JoystickToYoVariableMapper;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.LogitechExtreme3DMapping;
 import us.ihmc.tools.inputDevices.joystick.mapping.MadCatzFLY5StickMapping;
 import us.ihmc.tools.inputDevices.joystick.mapping.MadCatzV1StickMapping;
+import us.ihmc.tools.inputDevices.joystick.mapping.Thrustmaster16000M;
 
-public class QuadrupedStandPrepJoystickMap implements EnumDependentJoystickMapping
+public class QuadrupedStandPrepJoystickMap implements EnumDependentJoystickMapping<QuadrupedControllerState>
 {
    private final ArrayList<JoystickEventListener> eventListeners = new ArrayList<>();
    private final QuadrupedControllerState controllerEnum = QuadrupedControllerState.STAND_PREP;
    private final JoystickToYoVariableMapper joystickToYoVariableMapper;
 
-   private final Component rightButton6;
-   private final Component rightButton7;
-   private final Component rightButton8;
-   private final Component rightButton9;
+   private final Component button1;
+   private final Component button2;
+   private final Component button3;
+   private final Component button4;
    
    public QuadrupedStandPrepJoystickMap(final YoVariableHolder yoVariableHolder,
-         EnumYoVariableDependentJoystickInputManager<QuadrupedControllerState> joystickManager)
+         EnumYoVariableDependentInputManager<QuadrupedControllerState> joystickManager)
    {
       joystickToYoVariableMapper = new JoystickToYoVariableMapper(yoVariableHolder, eventListeners);
       
@@ -35,46 +36,52 @@ public class QuadrupedStandPrepJoystickMap implements EnumDependentJoystickMappi
       {
 
       case LOGITECH_EXTREME_3D:
-         rightButton6 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_6.getIdentifier());
-         rightButton7 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_7.getIdentifier());
-         rightButton8 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_8.getIdentifier());
-         rightButton9 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_9.getIdentifier());
+         button1 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_6.getIdentifier());
+         button2 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_7.getIdentifier());
+         button3 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_8.getIdentifier());
+         button4 = joystick.findComponent(LogitechExtreme3DMapping.BUTTON_9.getIdentifier());
          break;
       case MAD_CATZ_FLY5_STICK:
-         rightButton6 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_6.getIdentifier());
-         rightButton7 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_7.getIdentifier());
-         rightButton8 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_8.getIdentifier());
-         rightButton9 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_9.getIdentifier());
+         button1 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_6.getIdentifier());
+         button2 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_7.getIdentifier());
+         button3 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_8.getIdentifier());
+         button4 = joystick.findComponent(MadCatzFLY5StickMapping.BUTTON_9.getIdentifier());
+         break;
+      case THRUSTMASTER_16000M:
+         button1 = joystick.findComponent(Thrustmaster16000M.BASE_BUTTON_LEFT_SIDE_UPPER_LEFT.getIdentifier());
+         button2 = joystick.findComponent(Thrustmaster16000M.BASE_BUTTON_LEFT_SIDE_UPPER_CENTER.getIdentifier());
+         button3 = joystick.findComponent(Thrustmaster16000M.BASE_BUTTON_LEFT_SIDE_UPPER_RIGHT.getIdentifier());
+         button4 = joystick.findComponent(Thrustmaster16000M.BASE_BUTTON_LEFT_SIDE_LOWER_LEFT.getIdentifier());
          break;
       case MAD_CATZ_V1_STICK:
-         rightButton6 = joystick.findComponent(MadCatzV1StickMapping.BUTTON_6.getIdentifier());
-         rightButton7 = null;
-         rightButton8 = null;
-         rightButton9 = null;
+         button1 = joystick.findComponent(MadCatzV1StickMapping.BUTTON_6.getIdentifier());
+         button2 = null;
+         button3 = null;
+         button4 = null;
          break;
       case SAITEK_X52:
-         rightButton6 = null;
-         rightButton7 = null;
-         rightButton8 = null;
-         rightButton9 = null;
+         button1 = null;
+         button2 = null;
+         button3 = null;
+         button4 = null;
          break;
       case UNKNOWN:
-         rightButton6 = null;
-         rightButton7 = null;
-         rightButton8 = null;
-         rightButton9 = null;
+         button1 = null;
+         button2 = null;
+         button3 = null;
+         button4 = null;
          break;
       default:
-         rightButton6 = null;
-         rightButton7 = null;
-         rightButton8 = null;
-         rightButton9 = null;
+         button1 = null;
+         button2 = null;
+         button3 = null;
+         button4 = null;
          break;
       }
       
       String controllerStateEnumName = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.QuadrupedControllerStateMachineRequestedState";
-      joystickToYoVariableMapper.mapEnumYoVariableToComponent(rightButton8, controllerStateEnumName, QuadrupedControllerState.POSITION_CRAWL);
-      joystickToYoVariableMapper.mapEnumYoVariableToComponent(rightButton9, controllerStateEnumName, QuadrupedControllerState.TROT_WALK);
+      joystickToYoVariableMapper.mapEnumYoVariableToComponent(button3, controllerStateEnumName, QuadrupedControllerState.POSITION_CRAWL);
+      joystickToYoVariableMapper.mapEnumYoVariableToComponent(button4, controllerStateEnumName, QuadrupedControllerState.TROT_WALK);
    }
 
    @Override
@@ -84,7 +91,7 @@ public class QuadrupedStandPrepJoystickMap implements EnumDependentJoystickMappi
    }
 
    @Override
-   public Enum<?> getEnum()
+   public QuadrupedControllerState getEnum()
    {
       return controllerEnum;
    }

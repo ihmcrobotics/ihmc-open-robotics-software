@@ -24,7 +24,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -37,7 +37,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final String name;
    private final SDFRobot robot;
    private final SixDoFJoint rootJoint;
-   private final CommonHumanoidReferenceFrames referenceFrames;
+   private final ReferenceFrames referenceFrames;
 
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
@@ -50,19 +50,19 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel, null, referenceFrames);
    }
 
    public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         CommonHumanoidReferenceFrames referenceFrames)
+         ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
    public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         CommonHumanoidReferenceFrames referenceFrames)
+         ReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
