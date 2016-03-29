@@ -141,23 +141,18 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    @Override
    public void initialize()
    {
-      if (numberOfWaypoints.getIntegerValue() == 0)
+      if (isEmpty())
       {
          throw new RuntimeException("Trajectory has no waypoints.");
       }
 
       currentWaypointIndex.set(0);
 
-      double timeAtFirstWaypoint = waypoints.get(0).getTime();
-      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
-      {
-         waypoints.get(i).subtractTimeOffset(timeAtFirstWaypoint);
-      }
-
       if (numberOfWaypoints.getIntegerValue() == 1)
       {
-         finalPositionProvider.setValue(waypoints.get(0).getPosition());
-         finalVelocityProvider.setValue(waypoints.get(0).getVelocity());
+         YoOneDoFTrajectoryPoint firstWaypoint = waypoints.get(0);
+         finalPositionProvider.setValue(firstWaypoint.getPosition());
+         finalVelocityProvider.setValue(firstWaypoint.getVelocity());
          trajectoryTimeProvider.setValue(0.0);
          subTrajectory.initialize();
       }
@@ -198,7 +193,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    @Override
    public boolean isDone()
    {
-      if (numberOfWaypoints.getIntegerValue() == 0)
+      if (isEmpty())
          return true;
 
       boolean isLastWaypoint = currentWaypointIndex.getIntegerValue() >= numberOfWaypoints.getIntegerValue() - 2;
@@ -206,6 +201,11 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          return false;
       boolean subTrajectoryIsDone = subTrajectory.isDone();
       return subTrajectoryIsDone;
+   }
+
+   public boolean isEmpty()
+   {
+      return numberOfWaypoints.getIntegerValue() == 0;
    }
 
    @Override
@@ -226,10 +226,25 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       return subTrajectory.getAcceleration();
    }
 
+   public int getCurrentNumberOfWaypoints()
+   {
+      return numberOfWaypoints.getIntegerValue();
+   }
+
+   public int getMaximumNumberOfWaypoints()
+   {
+      return maximumNumberOfWaypoints;
+   }
+
+   public double getLastWaypointTime()
+   {
+      return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
+   }
+
    @Override
    public String toString()
    {
-      if (numberOfWaypoints.getIntegerValue() == 0)
+      if (isEmpty())
          return namePrefix + ": Has no waypoints.";
       else
          return namePrefix + ": number of waypoints = " + numberOfWaypoints.getIntegerValue() + ", current waypoint index = "
