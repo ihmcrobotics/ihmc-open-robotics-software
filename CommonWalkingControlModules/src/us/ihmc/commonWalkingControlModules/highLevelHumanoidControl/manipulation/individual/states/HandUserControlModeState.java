@@ -10,14 +10,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAc
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class HandUserControlModeState extends HandControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
-   private final RobotSide robotSide;
    private final OneDoFJoint[] userControlledJoints;
    private final DoubleYoVariable[] userDesiredJointAccelerations;
    private final DoubleYoVariable timeOfLastUserMesage;
@@ -26,15 +24,13 @@ public class HandUserControlModeState extends HandControlState
    private final DoubleYoVariable yoTime;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
-   public HandUserControlModeState(String namePrefix, RobotSide robotSide, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController,
-         YoVariableRegistry parentRegistry)
+   public HandUserControlModeState(String namePrefix, OneDoFJoint[] userControlledJoints, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.USER_CONTROL_MODE);
 
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      this.robotSide = robotSide;
       this.userControlledJoints = userControlledJoints;
       userDesiredJointAccelerations = new DoubleYoVariable[userControlledJoints.length];
       for (int i = 0; i < userControlledJoints.length; i++)
@@ -57,30 +53,19 @@ public class HandUserControlModeState extends HandControlState
       jointspaceAccelerationCommand.setWeight(weight);
    }
 
-   public void handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand message)
+   public boolean handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand command)
    {
-      if (message.getNumberOfJoints() != userControlledJoints.length)
-      {
-         abortUserControlMode.set(true);
-         return;
-      }
-
-      if (message.getRobotSide() != robotSide)
-      {
-         abortUserControlMode.set(true);
-         return;
-      }
-
       for (int i = 0; i < userControlledJoints.length; i++)
-         userDesiredJointAccelerations[i].set(message.getArmDesiredJointAcceleration(i));
+         userDesiredJointAccelerations[i].set(command.getArmDesiredJointAcceleration(i));
       timeSinceLastUserMesage.set(0.0);
       timeOfLastUserMesage.set(yoTime.getDoubleValue());
+
+      return true;
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      abortUserControlMode.set(false);
    }
 
    @Override
@@ -100,7 +85,8 @@ public class HandUserControlModeState extends HandControlState
       }
    }
 
-   public boolean isAbortUserControlModeRequested()
+   @Override
+   public boolean isAbortRequested()
    {
       return abortUserControlMode.getBooleanValue();
    }
