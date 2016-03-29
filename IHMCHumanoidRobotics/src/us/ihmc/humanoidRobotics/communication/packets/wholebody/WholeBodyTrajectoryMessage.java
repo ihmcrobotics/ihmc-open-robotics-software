@@ -274,6 +274,19 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
    }
 
    @Override
+   public void parseMessageIdToChildren()
+   {
+      leftHandTrajectoryMessage.setUniqueId(uniqueId);
+      rightHandTrajectoryMessage.setUniqueId(uniqueId);
+      leftArmTrajectoryMessage.setUniqueId(uniqueId);
+      rightArmTrajectoryMessage.setUniqueId(uniqueId);
+      chestTrajectoryMessage.setUniqueId(uniqueId);
+      pelvisTrajectoryMessage.setUniqueId(uniqueId);
+      leftFootTrajectoryMessage.setUniqueId(uniqueId);
+      rightFootTrajectoryMessage.setUniqueId(uniqueId);
+   }
+
+   @Override
    public List<Packet<?>> getPackets()
    {
       ArrayList<Packet<?>> wholeBodyPackets = new ArrayList<>();

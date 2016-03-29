@@ -14,6 +14,11 @@ import us.ihmc.communication.packets.Packet;
 public interface MultipleCommandHolder<C extends MultipleCommandHolder<C, M>, M extends Packet<M>> extends Command<C, M>
 {
    /**
+    * Set the command Id of all the children to the Id of this command holder.
+    */
+   public abstract void parseCommandIdToChildren();
+
+   /**
     * @return the list of commands held by this MultipleCommandHolder.
     */
    public abstract List<Command<?, ?>> getControllerCommands();
