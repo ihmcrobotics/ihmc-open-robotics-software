@@ -8,22 +8,22 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
 @ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between trajectory points.")
-public class OneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneJointTrajectoryMessage>
+public class OneDoFJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneDoFJointTrajectoryMessage>
 {
    /**
     * Empty constructor for serialization.
     */
-   public OneJointTrajectoryMessage()
+   public OneDoFJointTrajectoryMessage()
    {
       super();
    }
 
-   public OneJointTrajectoryMessage(OneJointTrajectoryMessage trajectory1dMessage)
+   public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage trajectory1dMessage)
    {
       super(trajectory1dMessage);
    }
 
-   public OneJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
+   public OneDoFJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
    {
       super(trajectoryData);
    }
@@ -33,7 +33,7 @@ public class OneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneJo
     * @param trajectoryTime how long it takes to reach the desired position.
     * @param desiredPosition desired end point position.
     */
-   public OneJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
+   public OneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
    {
       super(trajectoryTime, desiredPosition);
    }
@@ -43,24 +43,24 @@ public class OneJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneJo
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */
-   public OneJointTrajectoryMessage(int numberOfTrajectoryPoints)
+   public OneDoFJointTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
    }
 
    @Override
-   public void set(OneJointTrajectoryMessage other)
+   public void set(OneDoFJointTrajectoryMessage other)
    {
       super.set(other);
    }
 
    @Override
-   public boolean epsilonEquals(OneJointTrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(OneDoFJointTrajectoryMessage other, double epsilon)
    {
       return super.epsilonEquals(other, epsilon);
    }
 
-   public OneJointTrajectoryMessage(Random random)
+   public OneDoFJointTrajectoryMessage(Random random)
    {
       super(random);
    }

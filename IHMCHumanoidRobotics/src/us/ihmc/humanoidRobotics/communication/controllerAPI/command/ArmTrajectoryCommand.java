@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -68,13 +68,13 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       set(other.robotSide, other.getTrajectoryPointLists());
    }
 
-   public void set(RobotSide robotSide, OneJointTrajectoryMessage[] trajectoryPointListArray)
+   public void set(RobotSide robotSide, OneDoFJointTrajectoryMessage[] trajectoryPointListArray)
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.length; i++)
       {
          SimpleTrajectoryPoint1DList simpleTrajectoryPoint1DList = jointTrajectoryInputs.add();
-         OneJointTrajectoryMessage armOneJointTrajectoryMessage = trajectoryPointListArray[i];
+         OneDoFJointTrajectoryMessage armOneJointTrajectoryMessage = trajectoryPointListArray[i];
          armOneJointTrajectoryMessage.getTrajectoryPoints(simpleTrajectoryPoint1DList);
       }
    }

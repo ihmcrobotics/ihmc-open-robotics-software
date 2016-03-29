@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
 @ClassDocumentation("This message commands the controller to move the neck in jointspace to the desired joint angles while going through the specified trajectory points."
       + " A third order polynomial function is used to interpolate between trajectory points."
@@ -18,7 +18,7 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
 {
    @FieldDocumentation("List of points in the trajectory."
          + " The expected joint ordering is from the closest joint to the chest to the closest joint to the head.")
-   public OneJointTrajectoryMessage[] jointTrajectoryMessages;
+   public OneDoFJointTrajectoryMessage[] jointTrajectoryMessages;
 
    /**
     * Empty constructor for serialization.
@@ -37,10 +37,10 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
    {
       setUniqueId(neckTrajectoryMessage.getUniqueId());
       setDestination(neckTrajectoryMessage.getDestination());
-      jointTrajectoryMessages = new OneJointTrajectoryMessage[neckTrajectoryMessage.getNumberOfJoints()];
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[neckTrajectoryMessage.getNumberOfJoints()];
 
       for (int i = 0; i < getNumberOfJoints(); i++)
-         jointTrajectoryMessages[i] = new OneJointTrajectoryMessage(neckTrajectoryMessage.jointTrajectoryMessages[i]);
+         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(neckTrajectoryMessage.jointTrajectoryMessages[i]);
    }
 
    /**
@@ -52,9 +52,9 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
    public NeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      jointTrajectoryMessages = new OneJointTrajectoryMessage[desiredJointPositions.length];
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[desiredJointPositions.length];
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
-         jointTrajectoryMessages[jointIndex] = new OneJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
+         jointTrajectoryMessages[jointIndex] = new OneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
    }
 
    /**
@@ -62,7 +62,7 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param jointTrajectory1DListMessages joint trajectory points to be executed.
     */
-   public NeckTrajectoryMessage(OneJointTrajectoryMessage[] jointTrajectory1DListMessages)
+   public NeckTrajectoryMessage(OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.jointTrajectoryMessages = jointTrajectory1DListMessages;
@@ -70,14 +70,14 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, OneJointTrajectoryMessage)} for each joint afterwards.
+    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param numberOfJoints number of joints that will be executing the message.
     */
    public NeckTrajectoryMessage(int numberOfJoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      jointTrajectoryMessages = new OneJointTrajectoryMessage[numberOfJoints];
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
    }
 
    /**
@@ -90,9 +90,9 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
    public NeckTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      jointTrajectoryMessages = new OneJointTrajectoryMessage[numberOfJoints];
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         jointTrajectoryMessages[i] = new OneJointTrajectoryMessage(numberOfTrajectoryPoints);
+         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(numberOfTrajectoryPoints);
    }
 
    /**
@@ -100,7 +100,7 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
     * @param jointIndex index of the joint that will go through the trajectory points.
     * @param trajectory1DMessage joint trajectory points to be executed.
     */
-   public void setTrajectory1DMessage(int jointIndex, OneJointTrajectoryMessage trajectory1DMessage)
+   public void setTrajectory1DMessage(int jointIndex, OneDoFJointTrajectoryMessage trajectory1DMessage)
    {
       rangeCheck(jointIndex);
       jointTrajectoryMessages[jointIndex] = trajectory1DMessage;
@@ -131,13 +131,13 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
       return jointTrajectoryMessages[jointIndex].getNumberOfTrajectoryPoints();
    }
 
-   public OneJointTrajectoryMessage getJointTrajectoryPointList(int jointIndex)
+   public OneDoFJointTrajectoryMessage getJointTrajectoryPointList(int jointIndex)
    {
       rangeCheck(jointIndex);
       return jointTrajectoryMessages[jointIndex];
    }
 
-   public OneJointTrajectoryMessage[] getTrajectoryPointLists()
+   public OneDoFJointTrajectoryMessage[] getTrajectoryPointLists()
    {
       return jointTrajectoryMessages;
    }
@@ -194,7 +194,7 @@ public class NeckTrajectoryMessage extends IHMCRosApiMessage<NeckTrajectoryMessa
       this(random.nextInt(10) + 1);
 
       for (int i = 0; i < getNumberOfJoints(); i++)
-         setTrajectory1DMessage(i, new OneJointTrajectoryMessage(random));
+         setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
    }
 
    @Override

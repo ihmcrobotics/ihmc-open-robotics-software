@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -56,13 +56,13 @@ public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, Nec
       set(other.getTrajectoryPointLists());
    }
 
-   public void set(OneJointTrajectoryMessage[] trajectoryPointListArray)
+   public void set(OneDoFJointTrajectoryMessage[] trajectoryPointListArray)
    {
       clear();
       for (int i = 0; i < trajectoryPointListArray.length; i++)
       {
          SimpleTrajectoryPoint1DList simpleTrajectoryPoint1DList = jointTrajectoryInputs.add();
-         OneJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
+         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
          oneJointTrajectoryMessage.getTrajectoryPoints(simpleTrajectoryPoint1DList);
       }
    }
