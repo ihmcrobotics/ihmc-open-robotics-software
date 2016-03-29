@@ -199,6 +199,16 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       y.set(newY);
       z.set(newZ);
    }
+   
+   /**
+    * Sets x, y, and z with no checks for reference frame matches.
+    */
+   public final void setWithoutChecks(FrameTuple<?, ?> frameTuple)
+   {
+      x.set(frameTuple.getX());
+      y.set(frameTuple.getY());
+      z.set(frameTuple.getZ());
+   }
 
    public final void set(ReferenceFrame referenceFrame, double x, double y, double z)
    {
