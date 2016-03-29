@@ -25,14 +25,14 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
          + " The expected joint ordering is from the closest joint to the chest to the closest joint to the hand.")
    public OneDoFJointTrajectoryMessage[] jointTrajectoryMessages;
    @FieldDocumentation("When OVERRIDE is chosen:"
-         + "\n - The time of the first waypoint can be zero, in which case the controller will start directly at the first waypoint."
-         + " Otherwise the controller will prepend a first waypoint at the current desired position."
+         + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
+         + " Otherwise the controller will prepend a first trajectory point at the current desired position."
          + "\n When QUEUE is chosen:"
          + "\n - The message must carry the ID of the message it should be queued to."
          + "\n - The very first message of a list of queued messages has to be an OVERRIDE message."
-         + "\n - The waypoint times are relative to the the last waypoint time of the previous message."
+         + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
          + "\n - The controller will queue the joint trajectory messages as a per joint basis."
-         + " The first waypoint has to be greater than zero.")
+         + " The first trajectory point has to be greater than zero.")
    public ExecutionMode executionMode;
    @FieldDocumentation("Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
          + " It is used by the controller to ensure that no message has been lost on the way."
