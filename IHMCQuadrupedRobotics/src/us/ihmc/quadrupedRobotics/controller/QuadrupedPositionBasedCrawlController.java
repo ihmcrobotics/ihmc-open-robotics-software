@@ -2122,8 +2122,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
                comTrajectoryTimeScaleFactor.set(1.0);
             }
          }
-         
-         footSwitches.get(swingQuadrant).setFootContactState(false);
+         if(footSwitches != null)
+         {
+            footSwitches.get(swingQuadrant).setFootContactState(false);
+         }
       }
 
       FramePoint tempStartPoint = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -2180,7 +2182,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       public void doTransitionOutOfAction()
       {
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
-         footSwitches.get(swingQuadrant).setFootContactState(true);
+         if(footSwitches != null)
+         {
+            footSwitches.get(swingQuadrant).setFootContactState(true);
+         }
          //reset this just in case
          comTrajectoryTimeScaleFactor.set(1.0);
       }
