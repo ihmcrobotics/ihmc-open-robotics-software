@@ -131,7 +131,10 @@ public class CommandInputManager
       @SuppressWarnings("unchecked")
       Command<?, M> nextCommand = (Command<?, M>) buffer.next();
       if (nextCommand == null)
+      {
+         PrintTools.warn(this, "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
          return;
+      }
       nextCommand.set(message);
       buffer.commit();
    }
@@ -170,13 +173,16 @@ public class CommandInputManager
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = commandClassToBufferMap.get(command.getClass());
       if (buffer == null)
       {
-         PrintTools.error(this, "The message type " + command.getClass().getSimpleName() + " is not supported.");
+         PrintTools.error(this, "The command type " + command.getClass().getSimpleName() + " is not supported.");
          return;
       }
       @SuppressWarnings("unchecked")
       Command<C, ?> nextModifiableMessage = (Command<C, ?>) buffer.next();
       if (nextModifiableMessage == null)
+      {
+         PrintTools.warn(this, "The buffer for the command: " + command.getClass().getSimpleName() + " is full. Command ignored.");
          return;
+      }
       nextModifiableMessage.set(command);
       buffer.commit();
    }
