@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
@@ -65,6 +64,20 @@ public class FrameTrajectoryPointList<T extends FrameTrajectoryPointList<T, F, S
          // Here we don't want to do setIncludingFrame() in case there is inconsistency in other.
          newTrajectoryPoint.set(other.trajectoryPoints.get(i));
       }
+   }
+
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      for (int i = 0; i < trajectoryPoints.size(); i++)
+         trajectoryPoints.get(i).addTimeOffset(timeOffsetToAdd);
+   }
+
+   @Override
+   public void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      for (int i = 0; i < trajectoryPoints.size(); i++)
+         trajectoryPoints.get(i).subtractTimeOffset(timeOffsetToSubtract);
    }
 
    protected F addAndInitializeTrajectoryPoint()
