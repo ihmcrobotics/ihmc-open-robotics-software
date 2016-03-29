@@ -104,6 +104,12 @@ public class WholeBodyTrajectoryCommand implements MultipleCommandHolder<WholeBo
    }
 
    @Override
+   public void parseCommandIdToChildren()
+   {
+      // TODO implement commandId.
+   }
+
+   @Override
    public List<Command<?, ?>> getControllerCommands()
    {
       return allControllerCommands;
