@@ -12,6 +12,11 @@ public abstract class HandControlState extends State<HandControlMode>
       super(stateEnum);
    }
 
+   public boolean isAbortRequested()
+   {
+      return false;
+   }
+
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
