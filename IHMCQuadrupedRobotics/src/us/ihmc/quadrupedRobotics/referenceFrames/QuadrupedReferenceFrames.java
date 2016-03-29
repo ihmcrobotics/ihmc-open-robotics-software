@@ -46,7 +46,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    
    private final QuadrantDependentList<PoseReferenceFrame> tripleSupportFrames = new QuadrantDependentList<PoseReferenceFrame>();
    private final QuadrantDependentList<FramePose> tripleSupportCentroidPoses = new QuadrantDependentList<FramePose>();
-   private final QuadrantDependentList<ZUpFrame> tripleSupportZupFrames = new QuadrantDependentList<ZUpFrame>();
    
    private final FramePose supportPolygonCentroidWithNominalRotation = new FramePose(ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame supportPolygonCentroidFrameWithNominalRotation;
@@ -55,10 +54,8 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final QuadrantDependentList<ReferenceFrame> legAttachementFrames = new QuadrantDependentList<ReferenceFrame>();
    private final QuadrantDependentList<FramePoint> legAttachementPoints= new QuadrantDependentList<FramePoint>();
 
-   private final SideDependentList<ReferenceFrame> sideDependentMidTrotLineZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
-   private final EndDependentList<ReferenceFrame> endDependentMidFeetZUpFrames = new EndDependentList<ReferenceFrame>();
-   
+
    private final ReferenceFrame centerOfMassFrame;
    private final PoseReferenceFrame centerOfMassFrameWithRotation;
    private final ZUpFrame centerOfMassZUpFrame;
@@ -119,24 +116,11 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       {
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide);
-         RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
          
          MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotSide.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrant));
          sideDependentMidFeetZUpFrames.put(robotSide, midFeetZUpFrame);
-         
-         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrantOppositeSide));
-         sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
       
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         RobotQuadrant leftSoleQuadrant = RobotQuadrant.getQuadrant(robotEnd, RobotSide.LEFT);
-         RobotQuadrant rightSoleQuadrant = RobotQuadrant.getQuadrant(robotEnd, RobotSide.RIGHT);
-         
-         MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotEnd.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame", worldFrame, soleFrames.get(leftSoleQuadrant), soleFrames.get(rightSoleQuadrant));
-         endDependentMidFeetZUpFrames.put(robotEnd, midFeetZUpFrame);
-      }
-             
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       { 
          ReferenceFrame frameBeforeHipRoll = framesBeforeLegJoint.get(robotQuadrant).get(LegJointName.HIP_ROLL);         
@@ -155,10 +139,8 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          
          FramePose tripleSupportCentroidPose = new FramePose(worldFrame);
          PoseReferenceFrame tripleSupport = new PoseReferenceFrame(robotQuadrant.getCamelCaseNameForStartOfExpression() + "TripleSupportFrame", tripleSupportCentroidPose);
-         ZUpFrame tripleSupportZUpFrame = new ZUpFrame(worldFrame, tripleSupport, robotQuadrant.getCamelCaseNameForStartOfExpression() + "TripleSupportZupFrame");
 
          tripleSupportCentroidPoses.set(robotQuadrant, tripleSupportCentroidPose);
-         tripleSupportZupFrames.set(robotQuadrant, tripleSupportZUpFrame);
          tripleSupportFrames.set(robotQuadrant, tripleSupport);
       }
       
@@ -215,14 +197,8 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       for (RobotSide robotSide : RobotSide.values)
       {
          sideDependentMidFeetZUpFrames.get(robotSide).update();
-         sideDependentMidTrotLineZUpFrames.get(robotSide).update();
       }
       
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         endDependentMidFeetZUpFrames.get(robotEnd).update();
-      }
-
       centerOfMassFrame.update();
       
       centerOfMassPose.setToZero(centerOfMassFrame);
@@ -267,9 +243,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          
          PoseReferenceFrame tripleSupportFrame = tripleSupportFrames.get(swingLeg);
          tripleSupportFrame.setPoseAndUpdate(framePose);
-         
-         ZUpFrame tripleSupportZUpFrame = tripleSupportZupFrames.get(swingLeg);
-         tripleSupportZUpFrame.update();
       }
    }
    
@@ -319,22 +292,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    public ReferenceFrame getSideDependentMidFeetZUpFrame(RobotSide robotSide)
    {
       return sideDependentMidFeetZUpFrames.get(robotSide);
-   }
-
-   @Override
-   public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
-   {
-      if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
-      {
-         return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getSide());
-      }
-      return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getOppositeSide());
-   }
-   
-   @Override
-   public ReferenceFrame getEndDependentMidFeetZUpFrame(RobotEnd robotEnd)
-   {
-      return endDependentMidFeetZUpFrames.get(robotEnd);
    }
    
    @Override
@@ -431,16 +388,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       return tripleSupportFrames.get(footToExclude);
    }
 
-   /**
-    * returns the center of the polygon made up using the provided robot quadrants, 
-    * averaging the lowest front and the lowest hind Z values, 
-    * and using the nominal yaw
-    */
-   @Override
-   public ReferenceFrame getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude)
-   {
-      return tripleSupportZupFrames.get(footToExclude);
-   }
 
    /**
     * returns the center of the polygon made up using the four feet, 

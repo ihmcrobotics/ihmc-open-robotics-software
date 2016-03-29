@@ -16,8 +16,6 @@ public abstract class CommonQuadrupedReferenceFrames implements ReferenceFrames
 
    public abstract ReferenceFrame getSideDependentMidFeetZUpFrame(RobotSide robotSide);
 
-   public abstract ReferenceFrame getEndDependentMidFeetZUpFrame(RobotEnd robotEnd);
-
    public abstract ReferenceFrame getRootJointFrame();
 
    public abstract ReferenceFrame getLegAttachmentFrame(RobotQuadrant robotQuadrant);
@@ -58,7 +56,7 @@ public abstract class CommonQuadrupedReferenceFrames implements ReferenceFrames
       return legLengths.get(robotQuadrant);
    }
 
-   public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
+//   public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
    
    /**
     * returns the center of the polygon made up using the provided robot quadrants, 
@@ -73,7 +71,7 @@ public abstract class CommonQuadrupedReferenceFrames implements ReferenceFrames
     * averaging the lowest front and the lowest hind Z values, 
     * and using the nominal yaw
     */
-   public abstract ReferenceFrame getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude);
+//   public abstract ReferenceFrame getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude);
 
    /**
     * returns the center of the polygon made up using the four feet, 

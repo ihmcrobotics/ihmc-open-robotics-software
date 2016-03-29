@@ -123,12 +123,6 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       return soleFrames.get(robotQuadrant);
    }
-
-   @Override
-   public ReferenceFrame getEndDependentMidFeetZUpFrame(RobotEnd robotEnd)
-   {
-      return endDependentMidFeetZUpFrames.get(robotEnd);
-   }
    
    @Override
    public ReferenceFrame getCenterOfMassFrame()
@@ -153,13 +147,6 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
    @Override
    public ReferenceFrame getBodyFrame()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
    {
       // TODO Auto-generated method stub
       return null;
@@ -192,12 +179,6 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       return null;
    }
 
-   @Override
-   public ReferenceFrame getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
 
    @Override
    public ReferenceFrame getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds()
@@ -212,5 +193,6 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       // TODO Auto-generated method stub
       return null;
    }
+
 
 }
