@@ -6,11 +6,11 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
-public class ValkyrieRosControlJointControlCommandCalculator
+public class ValkyrieRosControlEffortJointControlCommandCalculator
 {
-   private final YoJointHandleHolder yoJointHandleHolder;
+   private final YoEffortJointHandleHolder yoEffortJointHandleHolder;
 
    private final PIDController pidController;
    private final DoubleYoVariable tauOff;
@@ -18,14 +18,14 @@ public class ValkyrieRosControlJointControlCommandCalculator
 
    private final double controlDT;
 
-   public ValkyrieRosControlJointControlCommandCalculator(YoJointHandleHolder yoJointHandleHolder, Map<String, Double> gains, double torqueOffset,
+   public ValkyrieRosControlEffortJointControlCommandCalculator(YoEffortJointHandleHolder yoEffortJointHandleHolder, Map<String, Double> gains, double torqueOffset,
          double standPrepAngle, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.yoJointHandleHolder = yoJointHandleHolder;
+      this.yoEffortJointHandleHolder = yoEffortJointHandleHolder;
 
       this.controlDT = controlDT;
 
-      String pdControllerBaseName = yoJointHandleHolder.getName();
+      String pdControllerBaseName = yoEffortJointHandleHolder.getName();
       YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName + "Command");
 
       this.standPrepAngle = new DoubleYoVariable(pdControllerBaseName + "StandPrepAngle", registry);
@@ -57,16 +57,16 @@ public class ValkyrieRosControlJointControlCommandCalculator
 
       factor = MathTools.clipToMinMax(factor, 0.0, 1.0);
 
-      double q = yoJointHandleHolder.getQ();
+      double q = yoEffortJointHandleHolder.getQ();
       double qDesired = standPrepAngle.getDoubleValue();
-      double qd = yoJointHandleHolder.getQd();
+      double qd = yoEffortJointHandleHolder.getQd();
       double qdDesired = 0.0;
 
       double standPrepTau = standPrepFactor * masterGain * pidController.compute(q, qDesired, qd, qdDesired, controlDT);
-      double controllerTau = factor * yoJointHandleHolder.getControllerTauDesired();
+      double controllerTau = factor * yoEffortJointHandleHolder.getControllerTauDesired();
 
       double desiredEffort = standPrepTau + controllerTau + tauOff.getDoubleValue();
-      yoJointHandleHolder.setDesiredEffort(desiredEffort);
+      yoEffortJointHandleHolder.setDesiredEffort(desiredEffort);
    }
 
    public void subtractTorqueOffset(double torqueOffset)
