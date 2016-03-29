@@ -22,6 +22,7 @@ import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
@@ -246,6 +247,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(GoHomeMessage.class);
       
       // Trajectory message fields
+      registerPacketClass(ExecutionMode.class);
       registerPacketClass(BaseForControl.class);
       registerPacketClass(OneDoFJointTrajectoryMessage.class);
       registerPacketClass(TrajectoryPoint1DMessage.class);

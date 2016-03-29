@@ -1,6 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
@@ -11,8 +13,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTrajectoryMessage>
 {
+   private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
    private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
    private RobotSide robotSide;
+   private ExecutionMode executionMode;
+   private long previousCommandId = Packet.INVALID_MESSAGE_ID;
 
    public ArmTrajectoryCommand()
    {
@@ -29,6 +34,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       this.robotSide = robotSide;
       jointTrajectoryInputs.clear();
+      executionMode = null;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -57,16 +63,37 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       }
    }
 
+   public void setCommandId(long commandId)
+   {
+      this.commandId = commandId;
+   }
+
+   public void setExecutionMode(ExecutionMode executionMode)
+   {
+      this.executionMode = executionMode;
+   }
+
+   public void setPreviousCommandId(long previousCommandId)
+   {
+      this.previousCommandId = previousCommandId;
+   }
+
    @Override
    public void set(ArmTrajectoryMessage message)
    {
+      commandId = message.getUniqueId();
       set(message.getRobotSide(), message.getTrajectoryPointLists());
+      executionMode = message.getExecutionMode();
+      previousCommandId = message.getPreviousMessageId();
    }
 
    @Override
    public void set(ArmTrajectoryCommand other)
    {
+      commandId = other.commandId;
       set(other.robotSide, other.getTrajectoryPointLists());
+      executionMode = other.executionMode;
+      previousCommandId = other.previousCommandId;
    }
 
    public void set(RobotSide robotSide, OneDoFJointTrajectoryMessage[] trajectoryPointListArray)
@@ -100,6 +127,11 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       jointTrajectoryInputs.getAndGrowIfNeeded(jointIndex).addTrajectoryPoint(trajectoryPoint);
    }
 
+   public long getCommandId()
+   {
+      return commandId;
+   }
+
    public int getNumberOfJoints()
    {
       return jointTrajectoryInputs.size();
@@ -130,6 +162,16 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       return jointTrajectoryInputs.get(jointIndex);
    }
 
+   public ExecutionMode getExecutionMode()
+   {
+      return executionMode;
+   }
+
+   public long getPreviousCommandId()
+   {
+      return previousCommandId;
+   }
+
    @Override
    public Class<ArmTrajectoryMessage> getMessageClass()
    {
@@ -139,6 +181,6 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    @Override
    public boolean isCommandValid()
    {
-      return robotSide != null && getNumberOfJoints() > 0;
+      return robotSide != null && executionMode != null && getNumberOfJoints() > 0;
    }
 }
