@@ -208,18 +208,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    @Override public void onEntry()
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         for (int i = 0; i < jointNameMap.getLegJointNames().length; i++)
-         {
-            // initialize leg joint mode to force control
-            LegJointName legJointName = jointNameMap.getLegJointNames()[i];
-            String jointName = jointNameMap.getLegJointName(robotQuadrant, legJointName);
-            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
-            joint.setUnderPositionControl(false);
-         }
-      }
-
       // initialize dcm controller settings
       dcmPositionController.setGains(
             params.getVolatileArray(DCM_POSITION_PROPORTIONAL_GAINS),

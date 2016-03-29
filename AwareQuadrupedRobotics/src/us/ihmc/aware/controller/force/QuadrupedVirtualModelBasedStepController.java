@@ -754,18 +754,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       yoBodyOrientationInput.setYawPitchRoll(0.0, 0.0, 0.0);
       yoComHeightInput.set(params.get(COM_HEIGHT_NOMINAL));
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         for (int i = 0; i < jointNameMap.getLegJointNames().length; i++)
-         {
-            // initialize leg joint mode to force control
-            LegJointName legJointName = jointNameMap.getLegJointNames()[i];
-            String jointName = jointNameMap.getLegJointName(robotQuadrant, legJointName);
-            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
-            joint.setUnderPositionControl(false);
-         }
-      }
-
       // initialize controllers and state machines
       virtualModelController.reset();
       for (OneDoFJoint joint : oneDoFJoints)
