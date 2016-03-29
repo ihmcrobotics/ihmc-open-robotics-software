@@ -1,17 +1,33 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class ControllerCommandValidationTools
 {
-   public static boolean checkJointspaceTrajectoryPointLists(OneDoFJoint[] joints, RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointLists)
+   public static boolean checkArmTrajectoryCommand(OneDoFJoint[] joints, ArmTrajectoryCommand command)
+   {
+      return checkOneDoFJointTrajectoryCommandList(joints, command.getTrajectoryPointLists());
+   }
+
+   public static boolean checkNeckTrajectoryCommand(OneDoFJoint[] joints, NeckTrajectoryCommand command)
+   {
+      return checkOneDoFJointTrajectoryCommandList(joints, command.getTrajectoryPointLists());
+   }
+
+   public static boolean checkArmDesiredAccelerationsCommand(OneDoFJoint[] joints, ArmDesiredAccelerationsCommand command)
+   {
+      return command.getArmControlMode() != ArmControlMode.USER_CONTROL_MODE || command.getNumberOfJoints() == joints.length;
+   }
+
+   public static boolean checkOneDoFJointTrajectoryCommandList(OneDoFJoint[] joints, RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists)
    {
       if (trajectoryPointLists.size() != joints.length)
          return false;
@@ -37,19 +53,4 @@ public class ControllerCommandValidationTools
       }
       return true;
    }
-
-   public static boolean checkArmDesiredAccelerationsCommand(RobotSide robotSide, OneDoFJoint[] joints, ArmDesiredAccelerationsCommand command)
-   {
-      if (command.getRobotSide() != robotSide)
-      {
-         PrintTools.warn("Received a " + command.getClass().getSimpleName() + " for the wrong side.");
-         return false;
-      }
-
-      if (command.getArmControlMode() == ArmControlMode.USER_CONTROL_MODE && command.getNumberOfJoints() != joints.length)
-         return false;
-
-      return true;
-   }
-
 }

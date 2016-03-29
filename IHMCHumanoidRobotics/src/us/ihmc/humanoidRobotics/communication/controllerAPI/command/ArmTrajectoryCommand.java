@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -11,7 +11,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTrajectoryMessage>
 {
-   private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
+   private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
    private RobotSide robotSide;
 
    public ArmTrajectoryCommand()
@@ -19,6 +19,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       clear();
    }
 
+   @Override
    public void clear()
    {
       clear(null);
@@ -79,7 +80,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       }
    }
 
-   public void set(RobotSide robotSide, RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointListArray)
+   public void set(RobotSide robotSide, RecyclingArrayList<? extends SimpleTrajectoryPoint1DList> trajectoryPointListArray)
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
@@ -92,6 +93,11 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       SimpleTrajectoryPoint1DList thisJointTrajectoryPointList = jointTrajectoryInputs.getAndGrowIfNeeded(jointIndex);
       thisJointTrajectoryPointList.set(otherTrajectoryPointList);
+   }
+
+   public void appendTrajectoryPoint(int jointIndex, SimpleTrajectoryPoint1D trajectoryPoint)
+   {
+      jointTrajectoryInputs.getAndGrowIfNeeded(jointIndex).addTrajectoryPoint(trajectoryPoint);
    }
 
    public int getNumberOfJoints()
@@ -109,7 +115,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       return robotSide;
    }
 
-   public RecyclingArrayList<SimpleTrajectoryPoint1DList> getTrajectoryPointLists()
+   public RecyclingArrayList<OneDoFJointTrajectoryCommand> getTrajectoryPointLists()
    {
       return jointTrajectoryInputs;
    }
@@ -119,7 +125,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       return jointTrajectoryInputs.get(jointIndex).getTrajectoryPoint(trajectoryPointIndex);
    }
 
-   public SimpleTrajectoryPoint1DList getJointTrajectoryPointList(int jointIndex)
+   public OneDoFJointTrajectoryCommand getJointTrajectoryPointList(int jointIndex)
    {
       return jointTrajectoryInputs.get(jointIndex);
    }

@@ -105,7 +105,7 @@ public class JointSpaceHandControlState extends HandControlState
          return false;
       }
 
-      if (!ControllerCommandValidationTools.checkJointspaceTrajectoryPointLists(controlledJoints, command.getTrajectoryPointLists()))
+      if (!ControllerCommandValidationTools.checkArmTrajectoryCommand(controlledJoints, command))
          return false;
 
       int numberOfJoints = command.getNumberOfJoints();

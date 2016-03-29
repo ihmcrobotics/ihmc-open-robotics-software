@@ -11,7 +11,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, NeckTrajectoryMessage>
 {
-   private final RecyclingArrayList<SimpleTrajectoryPoint1DList> jointTrajectoryInputs = new RecyclingArrayList<>(10, SimpleTrajectoryPoint1DList.class);
+   private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
 
    public NeckTrajectoryCommand()
    {
@@ -67,7 +67,7 @@ public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, Nec
       }
    }
 
-   public void set(RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointListArray)
+   public void set(RecyclingArrayList<? extends SimpleTrajectoryPoint1DList> trajectoryPointListArray)
    {
       clear();
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
@@ -92,7 +92,7 @@ public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, Nec
       return jointTrajectoryInputs.get(jointIndex).getNumberOfTrajectoryPoints();
    }
 
-   public RecyclingArrayList<SimpleTrajectoryPoint1DList> getTrajectoryPointLists()
+   public RecyclingArrayList<OneDoFJointTrajectoryCommand> getTrajectoryPointLists()
    {
       return jointTrajectoryInputs;
    }

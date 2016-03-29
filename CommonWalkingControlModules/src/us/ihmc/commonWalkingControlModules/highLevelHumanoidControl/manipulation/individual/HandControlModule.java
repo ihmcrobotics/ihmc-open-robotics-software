@@ -321,7 +321,7 @@ public class HandControlModule
 
    public void handleArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
    {
-      if (!ControllerCommandValidationTools.checkArmDesiredAccelerationsCommand(robotSide, jointsOriginal, command))
+      if (!ControllerCommandValidationTools.checkArmDesiredAccelerationsCommand(jointsOriginal, command))
          return;
 
       switch (command.getArmControlMode())

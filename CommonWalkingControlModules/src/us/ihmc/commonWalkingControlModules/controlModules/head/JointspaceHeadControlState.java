@@ -3,15 +3,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 import java.util.HashMap;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -50,7 +49,7 @@ public class JointspaceHeadControlState extends HeadControlState
 
    public void handleNeckTrajectoryCommand(NeckTrajectoryCommand command, double[] initialJointPositions)
    {
-      if (!checkJointspaceTrajectoryPointLists(command.getTrajectoryPointLists()))
+      if (!ControllerCommandValidationTools.checkNeckTrajectoryCommand(jointsOriginal, command))
          return;
 
       int numberOfJoints = command.getNumberOfJoints();
@@ -70,33 +69,6 @@ public class JointspaceHeadControlState extends HeadControlState
          trajectoryGenerator.appendWaypoints(jointTrajectory);
          trajectoryGenerator.initialize();
       }
-   }
-
-   private boolean checkJointspaceTrajectoryPointLists(RecyclingArrayList<SimpleTrajectoryPoint1DList> trajectoryPointLists)
-   {
-      if (trajectoryPointLists.size() != jointsOriginal.length)
-         return false;
-
-      for (int jointIndex = 0; jointIndex < trajectoryPointLists.size(); jointIndex++)
-      {
-         if (!checkJointspaceTrajectoryPointList(jointsOriginal[jointIndex], trajectoryPointLists.get(jointIndex)))
-            return false;
-      }
-
-      return true;
-   }
-
-   private boolean checkJointspaceTrajectoryPointList(OneDoFJoint joint, SimpleTrajectoryPoint1DList trajectoryPointList)
-   {
-      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
-      {
-         double waypointPosition = trajectoryPointList.getTrajectoryPoint(i).getPosition();
-         double jointLimitLower = joint.getJointLimitLower();
-         double jointLimitUpper = joint.getJointLimitUpper();
-         if (!MathTools.isInsideBoundsInclusive(waypointPosition, jointLimitLower, jointLimitUpper))
-            return false;
-      }
-      return true;
    }
 
    @Override
