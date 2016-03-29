@@ -44,7 +44,12 @@ public class XboxControllerInputDevice extends PollingInputDevice
 
    public XboxControllerInputDevice() throws NoInputDeviceException
    {
-      this.controller = getFirstControllerByName(CONTROLLER_ID);
+      this(0);
+   }
+
+   public XboxControllerInputDevice(int number) throws NoInputDeviceException
+   {
+      this.controller = getEnumeratedControllerByName(CONTROLLER_ID, number);
    }
 
    @Override
@@ -68,16 +73,24 @@ public class XboxControllerInputDevice extends PollingInputDevice
       }
    }
 
-   private Controller getFirstControllerByName(String name) throws NoInputDeviceException
+   private Controller getEnumeratedControllerByName(String name, int number) throws NoInputDeviceException
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
       // Find the first controller with the matching name.
       for (Controller controller : controllers)
       {
+         System.err.println(Thread.currentThread().getId() + " Found match " + controller.getName() + " " + number);
          if (controller.getName().equals(name))
          {
-            return controller;
+            if (number == 0)
+            {
+               return controller;
+            }
+            else
+            {
+               number--;
+            }
          }
       }
 
