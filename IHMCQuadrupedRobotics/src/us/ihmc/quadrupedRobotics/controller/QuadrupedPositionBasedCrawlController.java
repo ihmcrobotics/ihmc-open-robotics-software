@@ -312,13 +312,10 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    
    private final YoGraphicReferenceFrame desiredCoMPoseYoGraphic = new YoGraphicReferenceFrame(desiredCoMPoseReferenceFrame, registry, 0.45);
    private final YoGraphicReferenceFrame comPoseYoGraphic, feedForwardCoMPoseYoGraphic;
-   private final YoGraphicReferenceFrame leftMidZUpFrameViz;
-   private final YoGraphicReferenceFrame rightMidZUpFrameViz;
    
    private final YoGraphicReferenceFrame centroidWithNominal;
    private final YoGraphicReferenceFrame centroidZUpWithNominal;
    private final QuadrantDependentList<YoGraphicReferenceFrame> tripleSupportFrames = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoGraphicReferenceFrame> tripleSupportZUpFrames = new QuadrantDependentList<>();
    
    public final BooleanYoVariable isVelocityNegative = new BooleanYoVariable("isVelocityNegative", registry);
    public final DoubleYoVariable velocitySign = new DoubleYoVariable("velocitySign", registry);
@@ -463,16 +460,12 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       filteredFeedForwardCenterOfMassOffset = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint("filteredFeedForwardCenterOfMassOffset", "", registry, feedForwardCenterOfMassOffsetAlpha, feedForwardCenterOfMassOffset);
       
 
-      leftMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.LEFT), registry, 0.2);
-      rightMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.RIGHT), registry, 0.2);
-      
       centroidWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
       centroidZUpWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
       
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          tripleSupportFrames.set(robotQuadrant, new YoGraphicReferenceFrame(referenceFrames.getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(robotQuadrant), registry, 0.1));
-         tripleSupportZUpFrames.set(robotQuadrant, new YoGraphicReferenceFrame(referenceFrames.getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(robotQuadrant), registry, 0.1));
       }
       
       filteredDesiredCoMYawAlphaBreakFrequency.set(DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY);
@@ -676,8 +669,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       yoGraphicsListRegistry.registerYoGraphic("desiredCoMPoseYoGraphic", desiredCoMPoseYoGraphic);
       yoGraphicsListRegistry.registerYoGraphic("comPoseYoGraphic", comPoseYoGraphic);
       yoGraphicsListRegistry.registerYoGraphic("feedForwardCoMPoseYoGraphic", feedForwardCoMPoseYoGraphic);
-      yoGraphicsListRegistry.registerYoGraphic("leftMidZUpFrameViz", leftMidZUpFrameViz);
-      yoGraphicsListRegistry.registerYoGraphic("rightMidZUpFrameViz", rightMidZUpFrameViz);
       
       
       yoGraphicsListRegistry.registerYoGraphic("centroidWithNominal", centroidWithNominal);
@@ -686,8 +677,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("centerOfMassViz", centerOfMassViz);
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("desiredCoMPoseYoGraphic", desiredCoMPoseYoGraphic);
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("comPoseYoGraphic", comPoseYoGraphic);
-      yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("leftMidZUpFrameViz", leftMidZUpFrameViz);
-      yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("rightMidZUpFrameViz", rightMidZUpFrameViz);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -713,7 +702,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          yoGraphicsListRegistryForDetachedOverhead.registerArtifact("Desired Feet", desiredFootPositionViz.createArtifact());
          
          yoGraphicsListRegistry.registerYoGraphic(prefix + "TripleSupportFrame", tripleSupportFrames.get(robotQuadrant));
-         yoGraphicsListRegistry.registerYoGraphic(prefix + "tripleSupportZUpFrames", tripleSupportZUpFrames.get(robotQuadrant));
       }
    }
    
@@ -884,13 +872,14 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       feedForwardRootJoint.getTranslation(linearVelocityHolder);
 	   feedForwardRootJoint.setPosition(desiredRootJointPosition.getPoint());
 	   linearVelocityHolder.sub(desiredRootJointPosition.getPoint(), linearVelocityHolder);
-	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocityHolder);
+//	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocityHolder);
 
-	   feedForwardFullRobotModel.updateFrames();
+//	   feedForwardFullRobotModel.updateFrames();
 	   feedForwardReferenceFrames.updateFrames();
    }
 
    private double lastProvidedDesiredYawRate = 0.0;
+   private final FrameVector providedDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    
    private void pollDataProviders()
    {
@@ -939,7 +928,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       {
          if(desiredVelocityProvider != null)
          {
-            FrameVector providedDesiredVelocity = new FrameVector(desiredVelocity.getReferenceFrame());
+            providedDesiredVelocity.setToNaN(desiredVelocity.getReferenceFrame());
             desiredVelocityProvider.get(providedDesiredVelocity);
             desiredVelocity.set(providedDesiredVelocity);
          }
@@ -1085,8 +1074,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private void updateGraphics()
    {
       desiredCoMPoseYoGraphic.update();
-      leftMidZUpFrameViz.update();
-      rightMidZUpFrameViz.update();
       desiredCoMViz.update();
       comPoseYoGraphic.update();
       feedForwardCoMPoseYoGraphic.update();
@@ -1101,7 +1088,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
       {
          tripleSupportFrames.get(robotQuadrant).update();
-         tripleSupportZUpFrames.get(robotQuadrant).update();
     	  desiredAttachmentFrames.get(robotQuadrant).update();
     	  actualAttachmentFrames.get(robotQuadrant).update();
       }
