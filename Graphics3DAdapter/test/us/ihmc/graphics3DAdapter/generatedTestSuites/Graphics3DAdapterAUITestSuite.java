@@ -18,7 +18,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapterTest.class,
    us.ihmc.graphics3DAdapter.jme.JMEGraphics3DWorldTest.class,
    us.ihmc.graphics3DAdapter.jme.JMEMeshDataInterpreterTest.class,
-   us.ihmc.graphics3DAdapter.jme.JMERayCollisionAdapterTest.class,
    us.ihmc.graphics3DAdapter.jme.JMERendererTest.class,
    us.ihmc.graphics3DAdapter.jme.lidar.JMEGPULidarTest.class,
    us.ihmc.graphics3DAdapter.jme.util.JMEPointCloudVisualizerTest.class,

@@ -6,7 +6,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
@@ -431,7 +431,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
       return currentXYDistanceFromTarget.getDoubleValue() * landingSlope.getDoubleValue() < Math.abs(currentPositionToFinalPosition.getZ());
    }
 
-   public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder)
+   public void checkReferenceFrameMatch(AbstractReferenceFrameHolder referenceFrameHolder)
    {
       if (this.referenceFrame != referenceFrameHolder.getReferenceFrame())
       {

@@ -11,6 +11,7 @@ import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -43,13 +44,18 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final QuadrantDependentList<EnumMap<LegJointName, ReferenceFrame>> framesAfterLegJoint = QuadrantDependentList.createListOfEnumMaps(LegJointName.class);
    private final QuadrantDependentList<ReferenceFrame> soleFrames = new QuadrantDependentList<ReferenceFrame>();
    
+   private final QuadrantDependentList<PoseReferenceFrame> tripleSupportFrames = new QuadrantDependentList<PoseReferenceFrame>();
+   private final QuadrantDependentList<FramePose> tripleSupportCentroidPoses = new QuadrantDependentList<FramePose>();
+   
+   private final FramePose supportPolygonCentroidWithNominalRotation = new FramePose(ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame supportPolygonCentroidFrameWithNominalRotation;
+   private final ZUpFrame supportPolygonCentroidZUpFrame;
+   
    private final QuadrantDependentList<ReferenceFrame> legAttachementFrames = new QuadrantDependentList<ReferenceFrame>();
    private final QuadrantDependentList<FramePoint> legAttachementPoints= new QuadrantDependentList<FramePoint>();
 
-   private final SideDependentList<ReferenceFrame> sideDependentMidTrotLineZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
-   private final EndDependentList<ReferenceFrame> endDependentMidFeetZUpFrames = new EndDependentList<ReferenceFrame>();
-   
+
    private final ReferenceFrame centerOfMassFrame;
    private final PoseReferenceFrame centerOfMassFrameWithRotation;
    private final ZUpFrame centerOfMassZUpFrame;
@@ -58,9 +64,11 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final FramePose centerOfFourHipsFramePose;
    private final FramePoint centerOfFourHipsFramePoint = new FramePoint();
    
-   private final PoseReferenceFrame centerOfFourFeetFrame;
+   private final PoseReferenceFrame centerOfFourFeetFrameWithBodyRotation;
    private final FramePose centerOfFourFeetFramePose;
    private final FramePoint centerOfFourFeetFramePoint = new FramePoint();
+   
+   private QuadrupedSupportPolygon supportPolygonForCentroids = new QuadrupedSupportPolygon();
 
    public QuadrupedReferenceFrames(SDFFullRobotModel fullRobotModel, QuadrupedJointNameMap quadrupedJointNameMap, QuadrupedPhysicalProperties quadrupedPhysicalProperties)
    {
@@ -108,24 +116,11 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       {
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide);
-         RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
          
          MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotSide.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrant));
          sideDependentMidFeetZUpFrames.put(robotSide, midFeetZUpFrame);
-         
-         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, soleFrames.get(hindSoleQuadrant), soleFrames.get(frontSoleQuadrantOppositeSide));
-         sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
       
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         RobotQuadrant leftSoleQuadrant = RobotQuadrant.getQuadrant(robotEnd, RobotSide.LEFT);
-         RobotQuadrant rightSoleQuadrant = RobotQuadrant.getQuadrant(robotEnd, RobotSide.RIGHT);
-         
-         MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame(robotEnd.getCamelCaseNameForStartOfExpression() + "MidFeetZUpFrame", worldFrame, soleFrames.get(leftSoleQuadrant), soleFrames.get(rightSoleQuadrant));
-         endDependentMidFeetZUpFrames.put(robotEnd, midFeetZUpFrame);
-      }
-             
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       { 
          ReferenceFrame frameBeforeHipRoll = framesBeforeLegJoint.get(robotQuadrant).get(LegJointName.HIP_ROLL);         
@@ -140,6 +135,13 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          
          legAttachmentFrame.updateTranslation(xyOffsetFromRollToPitch);
          legAttachementFrames.set(robotQuadrant, legAttachmentFrame);
+         
+         
+         FramePose tripleSupportCentroidPose = new FramePose(worldFrame);
+         PoseReferenceFrame tripleSupport = new PoseReferenceFrame(robotQuadrant.getCamelCaseNameForStartOfExpression() + "TripleSupportFrame", tripleSupportCentroidPose);
+
+         tripleSupportCentroidPoses.set(robotQuadrant, tripleSupportCentroidPose);
+         tripleSupportFrames.set(robotQuadrant, tripleSupport);
       }
       
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator());
@@ -155,7 +157,10 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfFourHipsFrame = new PoseReferenceFrame("centerOfFourHipsFrame", bodyFrame);
       
       centerOfFourFeetFramePose = new FramePose(bodyFrame);
-      centerOfFourFeetFrame = new PoseReferenceFrame("centerOfFourFeetFrame", bodyFrame);
+      centerOfFourFeetFrameWithBodyRotation = new PoseReferenceFrame("centerOfFourFeetFrame", bodyFrame);
+      supportPolygonCentroidFrameWithNominalRotation = new PoseReferenceFrame("centerOfFourFeetWithSupportPolygonRotation", supportPolygonCentroidWithNominalRotation);
+      supportPolygonCentroidZUpFrame = new ZUpFrame(worldFrame, supportPolygonCentroidFrameWithNominalRotation, "centerFootPolygonZUp");
+      
       updateHipsCentroid();
       
       initializeCommonValues();
@@ -179,26 +184,93 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfFourHipsFrame.setPoseAndUpdate(centerOfFourHipsFramePose);
    }
    
-   private final FramePoint soleFramePointTemp = new FramePoint();
-   private void updateFeetCentroid()
+   public void updateFrames()
    {
-      centerOfFourFeetFramePose.setToZero(bodyFrame);
-      centerOfFourFeetFramePoint.setToZero(bodyFrame);
+      fullRobotModel.updateFrames();
+      bodyZUpFrame.update();
       
-      for(RobotQuadrant quadrant : RobotQuadrant.values)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ReferenceFrame soleFrame = soleFrames.get(quadrant);
-         soleFramePointTemp.setToZero(soleFrame);
-         
-         soleFramePointTemp.changeFrame(bodyFrame);
-         centerOfFourFeetFramePoint.add(soleFramePointTemp);
-         
+         soleFrames.get(robotQuadrant).update();
       }
-      centerOfFourFeetFramePoint.scale(0.25);
-      centerOfFourFeetFramePose.setPosition(centerOfFourFeetFramePoint);
-      centerOfFourFeetFrame.setPoseAndUpdate(centerOfFourFeetFramePose);
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         sideDependentMidFeetZUpFrames.get(robotSide).update();
+      }
+      
+      centerOfMassFrame.update();
+      
+      centerOfMassPose.setToZero(centerOfMassFrame);
+      centerOfMassPose.changeFrame(bodyFrame);
+      centerOfMassPose.setOrientation(IDENTITY_QUATERNION);
+      
+      centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
+      centerOfMassZUpFrame.update();
+      
+      updateCentroids();
    }
 
+   private void updateCentroids()
+   {
+      updateHipsCentroid();
+      updateCenterOfFeetUsingBodyForRotationPart();
+      updateTripleSupportCentroids();
+      updateCenterOfFeetUsingNominalsForRotationPart();
+   }
+   
+   private void updateCenterOfFeetUsingBodyForRotationPart()
+   {
+      updateSupportPolygon(null,supportPolygonForCentroids);
+      
+      centerOfFourFeetFramePoint.changeFrame(worldFrame);
+      supportPolygonForCentroids.getCentroid(centerOfFourFeetFramePoint);
+      
+      centerOfFourFeetFramePoint.changeFrame(bodyFrame);
+      centerOfFourFeetFramePose.setToZero(bodyFrame);
+      
+      centerOfFourFeetFramePose.setPosition(centerOfFourFeetFramePoint);
+      centerOfFourFeetFrameWithBodyRotation.setPoseAndUpdate(centerOfFourFeetFramePose);
+   }
+   
+   private void updateTripleSupportCentroids()
+   {
+      for(RobotQuadrant swingLeg : RobotQuadrant.values)
+      {
+         updateSupportPolygon(swingLeg, supportPolygonForCentroids);
+         FramePose framePose = tripleSupportCentroidPoses.get(swingLeg);
+         supportPolygonForCentroids.getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(framePose);
+         
+         PoseReferenceFrame tripleSupportFrame = tripleSupportFrames.get(swingLeg);
+         tripleSupportFrame.setPoseAndUpdate(framePose);
+      }
+   }
+   
+   private void updateCenterOfFeetUsingNominalsForRotationPart()
+   {
+      updateSupportPolygon(null, supportPolygonForCentroids);
+      supportPolygonForCentroids.getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(supportPolygonCentroidWithNominalRotation);
+      supportPolygonCentroidFrameWithNominalRotation.setPoseAndUpdate(supportPolygonCentroidWithNominalRotation);
+      supportPolygonCentroidZUpFrame.update();
+   }
+   
+   private final FramePoint soleFramePointTemp = new FramePoint();
+   private void updateSupportPolygon(RobotQuadrant swingFoot, QuadrupedSupportPolygon supportPolygon)
+   {
+      supportPolygon.clear();
+      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if(robotQuadrant.equals(swingFoot))
+         {
+            continue;
+         }
+         ReferenceFrame soleFrame = soleFrames.get(robotQuadrant);
+         soleFramePointTemp.setToZero(soleFrame);
+         soleFramePointTemp.changeFrame(worldFrame);
+         supportPolygon.setFootstep(robotQuadrant, soleFramePointTemp);
+      }
+   }
+   
    public static ReferenceFrame getWorldFrame()
    {
       return worldFrame;
@@ -220,22 +292,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    public ReferenceFrame getSideDependentMidFeetZUpFrame(RobotSide robotSide)
    {
       return sideDependentMidFeetZUpFrames.get(robotSide);
-   }
-
-   @Override
-   public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
-   {
-      if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
-      {
-         return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getSide());
-      }
-      return sideDependentMidTrotLineZUpFrames.get(quadrantAssocaitedWithTrotLine.getOppositeSide());
-   }
-   
-   @Override
-   public ReferenceFrame getEndDependentMidFeetZUpFrame(RobotEnd robotEnd)
-   {
-      return endDependentMidFeetZUpFrames.get(robotEnd);
    }
    
    @Override
@@ -308,40 +364,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       return soleFrames;
    }
-   
-   public void updateFrames()
-   {
-      fullRobotModel.updateFrames();
-      bodyZUpFrame.update();
-      
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         soleFrames.get(robotQuadrant).update();
-      }
-      
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         sideDependentMidFeetZUpFrames.get(robotSide).update();
-         sideDependentMidTrotLineZUpFrames.get(robotSide).update();
-      }
-      
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         endDependentMidFeetZUpFrames.get(robotEnd).update();
-      }
-
-      centerOfMassFrame.update();
-      
-      centerOfMassPose.setToZero(centerOfMassFrame);
-      centerOfMassPose.changeFrame(bodyFrame);
-      centerOfMassPose.setOrientation(IDENTITY_QUATERNION);
-      
-      centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
-      centerOfMassZUpFrame.update();
-      
-      updateHipsCentroid();
-      updateFeetCentroid();
-   }
 
    @Override
    public ReferenceFrame getCenterOfFourHipsFrame()
@@ -351,6 +373,41 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
    public ReferenceFrame getCenterOfFourFeetFrame()
    {
-      return centerOfFourFeetFrame;
+      return centerOfFourFeetFrameWithBodyRotation;
+   }
+   
+   /**
+    * returns the center of the support polygon excluding the specified leg
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw, pitch, and roll
+    * @param feetQuadrants, feet 
+    */
+   @Override
+   public ReferenceFrame getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude)
+   {
+      return tripleSupportFrames.get(footToExclude);
+   }
+
+
+   /**
+    * returns the center of the polygon made up using the four feet, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw, pitch, and roll
+    */
+   @Override
+   public ReferenceFrame getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds()
+   {
+      return supportPolygonCentroidFrameWithNominalRotation;
+   }
+
+   /**
+    * returns the center of the four foot polygon, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw
+    */
+   @Override
+   public ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds()
+   {
+      return supportPolygonCentroidZUpFrame;
    }
 }

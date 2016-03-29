@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
@@ -15,21 +16,10 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.humanoidRobotics.footstep.FootstepVisualizer;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.AbstractFootstepGenerator;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SemiCircularStepValidityMetric;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimpleTranslationalPathParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TranslationFootstepGenerator;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnTranslateTurnFootstepGenerator;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurningThenStraightFootstepGenerator;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TwoSegmentFootstepGenerator;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -39,10 +29,13 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FootstepGeneratorsTest
 {
@@ -129,7 +122,7 @@ public class FootstepGeneratorsTest
    private Visualization allowVisualization = Visualization.NO_VISUALIZATION; // No visualizations for any tests for committing tests
 
    private boolean forceVisualizeAll = false;
-   private double endPositionTolerance = 1e-14;
+   private double endPositionTolerance = 1e-13;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -1607,18 +1600,20 @@ public class FootstepGeneratorsTest
 	@Test(timeout=300000)
    public void RotateTranslateRotate_RandomTest()
    {
+	   Random random = new Random(1789L);
+	   
       //    Visualization vis = Visualization.VISUALIZE;
       Visualization vis = Visualization.NO_VISUALIZATION;
 
       for (int i = 0; i < 100; i++)
       {
-         double startX = Math.random() * 2 - 1;
-         double startY = Math.random() * 2 - 1;
-         double startYaw = Math.random() * 2 * Math.PI;
-         double pathYaw = Math.random() * 2 * Math.PI;
-         double endX = Math.random() * 2 - 1;
-         double endY = Math.random() * 2 - 1;
-         double endYaw = Math.random() * 2 * Math.PI;
+         double startX = RandomTools.generateRandomDouble(random, 1.0);
+         double startY = RandomTools.generateRandomDouble(random, 1.0);
+         double startYaw = RandomTools.generateRandomDouble(random, Math.PI);
+         double pathYaw = RandomTools.generateRandomDouble(random, Math.PI);
+         double endX = RandomTools.generateRandomDouble(random, 1.0);
+         double endY = RandomTools.generateRandomDouble(random, 1.0);
+         double endYaw = RandomTools.generateRandomDouble(random, Math.PI);
 
          String testDescription = String.format("RTR random, (x,y,t):t:(x,y,t) = (%.2f,%.2f,%.2f):%.2f:(%.2f,%.2f,%.2f)", startX, startY, startYaw, pathYaw,
                endX, endY, endYaw);

@@ -51,6 +51,8 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint tempFootPositionSameSideOppositeEnd = new FramePoint();
    private final FramePoint tempFootPositionOppositeSideSameEnd = new FramePoint();
    
+   private final FrameOrientation2d tempOppositeSideOrientation = new FrameOrientation2d();
+   
    private final GlobalTimer getSwingTargetTimer = new GlobalTimer("getSwingTargetTimer", registry);
 
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
@@ -301,7 +303,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromHalfStride);
-      supportPolygon.getCentroid2d(centroid);
+      supportPolygon.getCentroid(centroid);
       desiredSwingFootPositionFromHalfStride.yawAboutPoint(centroid, desiredSwingFootPositionFromHalfStride, deltaYaw);
    }
 
@@ -348,16 +350,15 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       //rotate the foot about the centroid of the predicted foot polygon
       supportPolygon.setFootstep(swingLeg, desiredSwingFootPositionFromOppositeSideFoot);
-      supportPolygon.getCentroid2d(centroid);
+      supportPolygon.getCentroid(centroid);
       desiredSwingFootPositionFromOppositeSideFoot.yawAboutPoint(centroid, desiredSwingFootPositionFromOppositeSideFoot, deltaYaw);
    }
 
    private double calculateOppositeSideOrientationWithRespectToBody(ReferenceFrame oppositeSideZUpFrame)
    {
-      FrameOrientation2d oppositeSideOrientation = new FrameOrientation2d(oppositeSideZUpFrame);
-      oppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
-      double orientationDeltaWithBody = oppositeSideOrientation.getYaw() - Math.PI / 2.0;
-      return orientationDeltaWithBody;
+      tempOppositeSideOrientation.setIncludingFrame(oppositeSideZUpFrame, 0.0);
+      tempOppositeSideOrientation.changeFrame(referenceFrames.getBodyZUpFrame());
+      return tempOppositeSideOrientation.getYaw() - Math.PI / 2.0;
    }
 
    private void updateFeetPositions()

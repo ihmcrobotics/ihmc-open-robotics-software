@@ -1,6 +1,17 @@
-plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.14"
+    }
 }
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
 
 
 
@@ -48,7 +59,7 @@ dependencies {
     compile group: 'org.boofcv', name: 'visualize', version: '0.19'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
     compile group: 'org.apache.poi', name: 'poi', version: '3.9'
-    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160212'
+    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'

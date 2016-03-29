@@ -24,6 +24,7 @@ import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactCircle;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.thread.ThreadTools;
@@ -47,12 +48,22 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private final YoFrameConvexPolygon2d currentSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon currentQuadSupportPolygonArtifact = new YoArtifactPolygon("supportPolygonArtifact", currentSupportPolygon, Color.blue, false);
    
+   private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint desiredCenterOfPressure = new YoFramePoint("desiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint snappedDesiredCenterOfPressure = new YoFramePoint("snappedDesiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
+   private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMassViz", centerOfMass, 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
+   private final YoGraphicPosition desiredCenterOfPressureViz = new YoGraphicPosition("desiredCenterOfPressureViz", desiredCenterOfPressure, 0.01, YoAppearance.DarkSlateBlue(), GraphicType.BALL_WITH_ROTATED_CROSS);
+   private final YoGraphicPosition snappedDesiredCenterOfPressureViz = new YoGraphicPosition("snappedDesiredCenterOfPressureViz", snappedDesiredCenterOfPressure, 0.01, YoAppearance.Orange(), GraphicType.BALL_WITH_ROTATED_CROSS);
+   
    private final QuadrupedSupportPolygon tempCommonSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon tempPolygon = new QuadrupedSupportPolygon();
 
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint weightedCentroid = new YoFramePoint("weightedCentroid", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint centroidFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint weightedCentroidFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final YoGraphicPosition centroidGraphic = new YoGraphicPosition("centroidGraphic", centroid, 0.03, YoAppearance.Chartreuse());
+   private final YoGraphicPosition weightedCentroidGraphic = new YoGraphicPosition("weightedCentroidGraphic", weightedCentroid, 0.01, YoAppearance.Chocolate());
 
    private final YoFramePoint circleCenter = new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition circleCenterGraphic = new YoGraphicPosition("circleCenterGraphic", circleCenter, 0.03, YoAppearance.Green());
@@ -128,7 +139,14 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistry.registerYoGraphic("centroid", centroidGraphic);
+      yoGraphicsListRegistry.registerArtifact("copSnapping", centerOfMassViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("copSnapping", desiredCenterOfPressureViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("copSnapping", snappedDesiredCenterOfPressureViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("centroid", centroidGraphic.createArtifact());
+      
+      yoGraphicsListRegistry.registerYoGraphic("weightedCentroid", weightedCentroidGraphic);
+      yoGraphicsListRegistry.registerArtifact("weightedCentroid", weightedCentroidGraphic.createArtifact());
+      
       yoGraphicsListRegistry.registerArtifact("inscribedCircle", inscribedCircle);
       yoGraphicsListRegistry.registerArtifact("inscribedCircleCenter", circleCenterGraphic.createArtifact());
       yoGraphicsListRegistry.registerArtifact("miniCircle", miniCircle);
@@ -136,7 +154,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       yoGraphicsListRegistry.registerArtifact("currentQuadSupportPolygonArtifact", currentQuadSupportPolygonArtifact);
 
       boolean showOverheadView = true;
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView , yoGraphicsListRegistry);
+      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, "centroidGraphic", yoGraphicsListRegistry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(simulateDT, recordFrequency);
       scs.startOnAThread();
@@ -198,8 +216,16 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       }
       drawSupportPolygon(supportPolygon, currentSupportPolygon);
       
-      supportPolygon.getCentroid2d(centroidFramePoint);
+      supportPolygon.getCentroid(centroidFramePoint);
       centroid.set(centroidFramePoint);
+      
+
+      supportPolygon.getCentroidEqualWeightingEnds(weightedCentroidFramePoint);
+      weightedCentroid.set(weightedCentroidFramePoint);
+
+//      centerOfMass.set(centroid);
+//      desiredCenterOfPressure.set(0.0, 2.0, 0.0);
+//      supportPolygon.snapPointToEdgeTowardsInnerPointIfOutside(snappedDesiredCenterOfPressure, desiredCenterOfPressure, centerOfMass);
       
       FramePoint centerOfInscribedCircle = new FramePoint();
       double radius = supportPolygon.getInCircle2d(centerOfInscribedCircle);

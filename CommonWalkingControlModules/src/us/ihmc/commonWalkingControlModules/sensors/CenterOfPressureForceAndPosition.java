@@ -4,14 +4,14 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
  * Object to hold pressure Point3d and Force Vector3d
  */
-public class CenterOfPressureForceAndPosition extends ReferenceFrameHolder
+public class CenterOfPressureForceAndPosition extends AbstractReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
    private final Point3d centerOfPressure;

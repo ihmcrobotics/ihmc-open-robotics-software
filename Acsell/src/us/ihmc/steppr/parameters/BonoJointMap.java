@@ -66,6 +66,8 @@ public class BonoJointMap implements DRCRobotJointMap
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<String>();
 
+   private final String[] jointNamesBeforeFeet = new String[2];
+   
    public BonoJointMap()
    {
       super();
@@ -108,6 +110,9 @@ public class BonoJointMap implements DRCRobotJointMap
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
       }
+      
+      jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
+      jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
    }
 
    @Override
@@ -321,5 +326,11 @@ public class BonoJointMap implements DRCRobotJointMap
    public String getUnsanitizedRootJointInSdf()
    {
       return pelvisName;
+   }
+   
+   @Override
+   public String[] getJointNamesBeforeFeet()
+   {
+      return jointNamesBeforeFeet;
    }
 }

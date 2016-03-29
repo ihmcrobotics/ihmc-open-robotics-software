@@ -186,7 +186,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
       return new TwoWaypointPositionTrajectorySpecifiedByPoints(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
               initialVelocityProvider, null,  finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
-              arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, null, false, waypoints);
+              arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, 0.0, false, waypoints);
    }
    
    public static class TwoWaypointPositionTrajectorySpecifiedByPoints extends TwoWaypointPositionTrajectoryGenerator
@@ -197,12 +197,11 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
             PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
             VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-            int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry yoGraphicsListRegistry,
-            WalkingControllerParameters walkingControllerParameters, boolean visualize, List<YoFramePoint> waypoints)
+            int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry yoGraphicsListRegistry, double maxSwingHeightFromStanceFoot, boolean visualize,
+            List<YoFramePoint> waypoints)
       {
          super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, stancePositionProvider, finalPositionProvider, finalDesiredVelocityProvider,
-               trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry, walkingControllerParameters,
-               visualize);
+               trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, visualize);
          
          this.referenceFrame = referenceFrame;
          this.waypoints = waypoints;

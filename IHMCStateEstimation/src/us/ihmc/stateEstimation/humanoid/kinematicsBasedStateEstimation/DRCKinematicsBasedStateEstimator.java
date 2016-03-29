@@ -2,12 +2,11 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -25,8 +24,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -77,9 +74,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
-         double gravitationalAcceleration, SideDependentList<FootSwitchInterface> footSwitches,
+         double gravitationalAcceleration, Map<RigidBody, FootSwitchInterface> footSwitches,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
-         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
+         Map<RigidBody, ContactablePlaneBody> feet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
@@ -88,8 +85,15 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
-      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters, gravitationalAcceleration, yoGraphicsListRegistry, registry);
-
+      if(forceSensorDataHolderToUpdate != null)
+      {
+         forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters, gravitationalAcceleration, yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         forceSensorStateUpdater = null;
+      }
+      
       if(USE_NEW_PELVIS_POSE_CORRECTOR)
          this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, yoGraphicsListRegistry, 1000);
       else
@@ -121,17 +125,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, registry);
       
-      Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
-      Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
-      
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
-         footSwitchMap.put(foot, footSwitches.get(robotSide));
-         bipedFeetMap.put(foot, bipedFeet.get(robotSide));
-      }
-
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitchMap, centerOfPressureDataHolderFromController, bipedFeetMap, gravitationalAcceleration, yoTime,
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
       imuOrientationBiasEstimator = new IMUOrientationBiasEstimator(inverseDynamicsStructure, pelvisRotationalStateUpdater.getIMUUsedForEstimation(), estimatorDT, registry);
 
@@ -181,7 +175,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       jointStateUpdater.initialize();
       pelvisRotationalStateUpdater.initialize();
-      forceSensorStateUpdater.initialize();
+      if(forceSensorStateUpdater != null)
+      {
+         forceSensorStateUpdater.initialize();
+      }
       pelvisLinearStateUpdater.initialize();
    }
 
@@ -204,14 +201,20 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          case FROZEN:
             pelvisRotationalStateUpdater.updateForFrozenState();
-            forceSensorStateUpdater.updateForceSensorState();
+            if(forceSensorStateUpdater != null)
+            {
+               forceSensorStateUpdater.updateForceSensorState();
+            }
             pelvisLinearStateUpdater.updateForFrozenState();
             break;
 
          case NORMAL:
          default:
             pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
-            forceSensorStateUpdater.updateForceSensorState();
+            if(forceSensorStateUpdater != null)
+            {
+               forceSensorStateUpdater.updateForceSensorState();
+            }
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
             imuOrientationBiasEstimator.compute(robotMotionStatusFromController.getCurrentRobotMotionStatus());
             break;
@@ -239,7 +242,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
+   public void initializeEstimatorToActual(Tuple3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
       // Do nothing for the orientation since the IMU is trusted

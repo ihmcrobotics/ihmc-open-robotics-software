@@ -578,7 +578,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, footPosition);
       }
-      fourFootSupportPolygon.getCentroid2d(temporaryCentroid);
+      fourFootSupportPolygon.getCentroid(temporaryCentroid);
       centroid.set(temporaryCentroid);
       nominalYaw.set(fourFootSupportPolygon.getNominalYaw());
       

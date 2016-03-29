@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
@@ -28,7 +28,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author not attributable
  * @version 1.0
  */
-public class YoFrameConvexPolygon2d extends ReferenceFrameHolder implements VariableChangedListener
+public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder implements VariableChangedListener
 {
    private final ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
    private final IntegerYoVariable numVertices;
@@ -54,6 +54,11 @@ public class YoFrameConvexPolygon2d extends ReferenceFrameHolder implements Vari
 
       convexPolygon2dForReading = new FrameConvexPolygon2d(referenceFrame);
       convexPolygon2dForWriting = new FrameConvexPolygon2d(referenceFrame);
+   }
+   
+   public YoFrameConvexPolygon2d(String namePrefix, ReferenceFrame referenceFrame, int maxNumberOfVertices, YoVariableRegistry registry)
+   {
+      this(namePrefix, "", referenceFrame, maxNumberOfVertices, registry);
    }
 
    public YoFrameConvexPolygon2d(ArrayList<YoFramePoint2d> yoFramePoints, IntegerYoVariable yoNumVertices, ReferenceFrame referenceFrame)
@@ -252,7 +257,8 @@ public class YoFrameConvexPolygon2d extends ReferenceFrameHolder implements Vari
       {
          for (int i = 0; i < numVertices.getIntegerValue(); i++)
          {
-            yoFramePoints.get(i).set(convexPolygon2dForWriting.getFrameVertex(i));
+            yoFramePoints.get(i).checkReferenceFrameMatch(convexPolygon2dForWriting);
+            yoFramePoints.get(i).set(convexPolygon2dForWriting.getVertex(i));
          }
       }
       catch (Exception e)

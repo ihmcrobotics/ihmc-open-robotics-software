@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameOrientation extends ReferenceFrameHolder
+public class YoFrameOrientation extends AbstractReferenceFrameHolder
 {
    private final DoubleYoVariable yaw, pitch, roll; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;
@@ -68,6 +68,21 @@ public class YoFrameOrientation extends ReferenceFrameHolder
       this.yaw.set(yaw, notifyListeners);
       this.pitch.set(pitch, notifyListeners);
       this.roll.set(roll, notifyListeners);
+   }
+   
+   public void setYaw(double yaw)
+   {
+      this.yaw.set(yaw);
+   }
+   
+   public void setPitch(double pitch)
+   {
+      this.pitch.set(pitch);
+   }
+   
+   public void setRoll(double roll)
+   {
+      this.roll.set(roll);
    }
 
    public void set(Matrix3d rotation)
@@ -161,12 +176,51 @@ public class YoFrameOrientation extends ReferenceFrameHolder
       pitch.set(tempYawPitchRoll[1], notifyListeners);
       roll.set(tempYawPitchRoll[2], notifyListeners);
    }
+   
+   /**
+    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
+    * 
+    * @param referenceFrame
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame, boolean notifyListeners)
+   {
+      tempFrameOrientation.setToZero(referenceFrame);
+      tempFrameOrientation.changeFrame(getReferenceFrame());
+      tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
+      yaw.set(tempYawPitchRoll[0], notifyListeners);
+      pitch.set(tempYawPitchRoll[1], notifyListeners);
+      roll.set(tempYawPitchRoll[2], notifyListeners);
+   }
+   
+   /**
+    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
+    * 
+    * @param referenceFrame
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      setFromReferenceFrame(referenceFrame, true);
+   }
 
    public void setToNaN()
    {
       yaw.set(Double.NaN);
       pitch.set(Double.NaN);
       roll.set(Double.NaN);
+   }
+
+   public void setToZero()
+   {
+      yaw.set(0.0);
+      pitch.set(0.0);
+      roll.set(0.0);
+   }
+
+   public void add(YoFrameOrientation orientation)
+   {
+      yaw.add(orientation.getYaw());
+      pitch.add(orientation.getPitch());
+      roll.add(orientation.getRoll());
    }
 
    public double[] getYawPitchRoll()
@@ -221,6 +275,12 @@ public class YoFrameOrientation extends ReferenceFrameHolder
    {
       FrameOrientation orientation = new FrameOrientation(getReferenceFrame(), yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
       return orientation;
+   }
+   
+   public FrameOrientation getFrameOrientation()
+   {
+      putYoValuesIntoFrameOrientation();
+      return tempFrameOrientation;
    }
 
    public void interpolate(YoFrameOrientation orientationOne, YoFrameOrientation orientationTwo, double alpha)

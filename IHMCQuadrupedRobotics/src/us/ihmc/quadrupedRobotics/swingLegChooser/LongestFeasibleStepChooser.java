@@ -98,7 +98,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          double perfectStanceXOffset = quadrupedControllerParameters.getStanceWidth() / 2;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            actualSupportPolygon.getCentroid2d(temporaryCentroid);
+            actualSupportPolygon.getCentroid(temporaryCentroid);
             temporaryCentroid.add(robotQuadrant.getSide().negateIfLeftSide(perfectStanceXOffset), robotQuadrant.getEnd().negateIfHindEnd(perfectStanceYOffset), 0.0);
             actualPerfectPolygon.setFootstep(robotQuadrant, temporaryCentroid);
          }

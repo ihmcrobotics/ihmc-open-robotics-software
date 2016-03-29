@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
 
-public class SmartCMPProjector
+public class SmartCMPProjector extends CMPProjector
 {
    private boolean VISUALIZE = false;
 
@@ -149,7 +149,8 @@ public class SmartCMPProjector
     * Only problem, sometimes the line CMP-ICP doesn't intersect with the support polygon and the CMP isn't projected.
     * Risk of jumps on the CMP because of the latter.
     */
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d desiredCMP)
+   @Override
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
    {
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
 
@@ -331,6 +332,7 @@ public class SmartCMPProjector
 
 
 
+   @Override
    public boolean getWasCMPProjected()
    {
       return cmpProjected.getBooleanValue();

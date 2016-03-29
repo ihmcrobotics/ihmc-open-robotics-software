@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ScrewTools
-{  
+{
    public static RevoluteJoint addRevoluteJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
@@ -47,9 +47,31 @@ public class ScrewTools
       return joint;
    }
 
-   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis)
+   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis, boolean isPartOfClosedKinematicLoop)
    {
-      return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis);
+      return addPassiveRevoluteJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis, isPartOfClosedKinematicLoop);
+   }
+
+   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3d jointAxis, boolean isPartOfClosedKinematicLoop)
+   {
+      String beforeJointName = "before" + jointName;
+
+      ReferenceFrame parentFrame;
+      if (parentBody.isRootBody())
+         parentFrame = parentBody.getBodyFixedFrame();
+      else
+         parentFrame = parentBody.getParentJoint().getFrameAfterJoint();
+
+      ReferenceFrame frameBeforeJoint = createOffsetFrame(parentFrame, transformToParent, beforeJointName);
+
+      String afterJointName = jointName;
+
+      return new PassiveRevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis), isPartOfClosedKinematicLoop);
+   }
+
+   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d parentJointAxis)
+   {
+      return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), parentJointAxis);
    }
 
    public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3d jointAxis)
@@ -120,7 +142,7 @@ public class ScrewTools
    {
       ArrayList<RigidBody> rigidBodySuccessors = new ArrayList<RigidBody>();
       ArrayList<RigidBody> rigidBodyStack = new ArrayList<RigidBody>();
-      for(InverseDynamicsJoint joint: joints)
+      for (InverseDynamicsJoint joint : joints)
       {
          rigidBodyStack.add(joint.getPredecessor());
       }
@@ -138,7 +160,7 @@ public class ScrewTools
 
       return rigidBodySuccessors.toArray(ret);
    }
-   
+
    public static RigidBody[] computeRigidBodiesAfterThisJoint(InverseDynamicsJoint... joints)
    {
       ArrayList<RigidBody> rigidBodySuccessors = new ArrayList<RigidBody>();
@@ -151,7 +173,7 @@ public class ScrewTools
    public static void computeRigidBodiesAfterThisJoint(ArrayList<RigidBody> rigidBodySuccessorsToPack, InverseDynamicsJoint... joints)
    {
       ArrayList<InverseDynamicsJoint> jointStack = new ArrayList<InverseDynamicsJoint>();
-      for(InverseDynamicsJoint joint: joints)
+      for (InverseDynamicsJoint joint : joints)
       {
          jointStack.add(joint);
       }
@@ -167,20 +189,22 @@ public class ScrewTools
          }
       }
    }
-   
+
    public static void computeRigidBodiesFromRootToThisJoint(ArrayList<RigidBody> rigidBodySuccessorsToPack, InverseDynamicsJoint joint)
    {
       RigidBody predecessorBody = joint.getPredecessor();
-      if (predecessorBody == null) return;
-      if (predecessorBody.isRootBody()) return;
-      
+      if (predecessorBody == null)
+         return;
+      if (predecessorBody.isRootBody())
+         return;
+
       rigidBodySuccessorsToPack.add(predecessorBody);
       InverseDynamicsJoint parentJoint = predecessorBody.getParentJoint();
-      if (parentJoint == null) return;
-      
+      if (parentJoint == null)
+         return;
+
       computeRigidBodiesFromRootToThisJoint(rigidBodySuccessorsToPack, parentJoint);
    }
-   
 
    public static RigidBody[] computeSubtreeSuccessors(RigidBody... bodies)
    {
@@ -191,7 +215,7 @@ public class ScrewTools
    {
       ArrayList<RigidBody> rigidBodySuccessors = new ArrayList<RigidBody>();
       ArrayList<RigidBody> rigidBodyStack = new ArrayList<RigidBody>();
-      for(RigidBody body: bodies)
+      for (RigidBody body : bodies)
       {
          rigidBodyStack.add(body);
       }
@@ -283,11 +307,11 @@ public class ScrewTools
    public static int[] createParentMap(RigidBody[] allRigidBodiesInOrder)
    {
       int[] parentMap = new int[allRigidBodiesInOrder.length];
-      List<RigidBody> rigidBodiesInOrderList = Arrays.asList(allRigidBodiesInOrder);    // this doesn't have to be fast
+      List<RigidBody> rigidBodiesInOrderList = Arrays.asList(allRigidBodiesInOrder); // this doesn't have to be fast
       for (int i = 0; i < allRigidBodiesInOrder.length; i++)
       {
          RigidBody currentBody = allRigidBodiesInOrder[i];
-         if(currentBody.isRootBody())
+         if (currentBody.isRootBody())
          {
             parentMap[i] = -1;
          }
@@ -558,9 +582,9 @@ public class ScrewTools
    public static boolean isAncestor(RigidBody candidateDescendant, RigidBody ancestor)
    {
       RigidBody currentBody = candidateDescendant;
-      while(!currentBody.isRootBody())
+      while (!currentBody.isRootBody())
       {
-         if(currentBody == ancestor)
+         if (currentBody == ancestor)
          {
             return true;
          }
@@ -641,13 +665,11 @@ public class ScrewTools
       return ret;
    }
 
-
    public static SpatialAccelerationVector createGravitationalSpatialAcceleration(RigidBody rootBody, double gravity)
    {
       Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, gravity);
       Vector3d zero = new Vector3d();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
-            rootBody.getBodyFixedFrame(), gravitationalAcceleration, zero);
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), gravitationalAcceleration, zero);
 
       return rootAcceleration;
    }
@@ -743,7 +765,7 @@ public class ScrewTools
       {
          int nDegreesOfFreedom = jointsInOrder[i].getDegreesOfFreedom();
 
-         for (int j = 0; j < jointsToComputeIndicesFor.length; j++)   
+         for (int j = 0; j < jointsToComputeIndicesFor.length; j++)
          {
             if (jointsInOrder[i] == jointsToComputeIndicesFor[j])
             {
@@ -810,7 +832,7 @@ public class ScrewTools
    public static <T extends InverseDynamicsJoint> T[] filterJoints(InverseDynamicsJoint[] source, Class<T> clazz)
    {
       @SuppressWarnings("unchecked")
-      T[] retArray = (T[])Array.newInstance(clazz, ScrewTools.computeNumberOfJointsOfType(clazz, source));
+      T[] retArray = (T[]) Array.newInstance(clazz, ScrewTools.computeNumberOfJointsOfType(clazz, source));
       filterJoints(source, retArray, clazz);
       return retArray;
    }
@@ -840,7 +862,7 @@ public class ScrewTools
          {
             if (joint.getName().equals(jointName))
                ret[index++] = joint;
-         }        
+         }
       }
 
       if (index != jointNames.length)

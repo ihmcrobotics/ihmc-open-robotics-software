@@ -32,7 +32,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author IHMC-Yobotics Biped Team
  * @version 1.0
  */
-public class ConvexPolygon2d implements Geometry2d
+public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 {
    private static final boolean DEBUG = false;
 
@@ -2333,6 +2333,7 @@ public class ConvexPolygon2d implements Geometry2d
       return true;
    }
 
+   @Override
    public boolean epsilonEquals(ConvexPolygon2d convexPolygon, double threshold)
    {
       checkIfUpToDate();
@@ -2563,4 +2564,53 @@ public class ConvexPolygon2d implements Geometry2d
       else
          return (rightEdgeIndex + leftEdgeIndex + 1) / 2;
    }
+
+   @Override
+   public void set(ConvexPolygon2d other)
+   {
+      setAndUpdate(other);
+   }
+
+   @Override
+   public void setToZero()
+   {
+      numberOfVertices = 1;
+      if (clockwiseOrderedListOfPoints.isEmpty()) clockwiseOrderedListOfPoints.add(new Point2d());
+
+      Point2d point = clockwiseOrderedListOfPoints.get(0);
+      point.set(0.0, 0.0);
+
+      isUpToDate = false;
+      update();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      numberOfVertices = 1;
+      if (clockwiseOrderedListOfPoints.isEmpty()) clockwiseOrderedListOfPoints.add(new Point2d());
+ 
+      Point2d point = clockwiseOrderedListOfPoints.get(0);
+      point.set(Double.NaN, Double.NaN);
+
+      isUpToDate = false;
+      update();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      update();
+      
+      for (int i=0; i<numberOfVertices; i++)
+      {
+         Point2d point = clockwiseOrderedListOfPoints.get(i);
+         
+         if (Double.isNaN(point.getX())) return true;
+         if (Double.isNaN(point.getY())) return true;
+      }
+      
+      return false;
+   }
+
 }

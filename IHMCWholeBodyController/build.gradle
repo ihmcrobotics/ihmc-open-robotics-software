@@ -1,6 +1,17 @@
-plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.14"
+    }
 }
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
 
 
 
@@ -37,7 +48,7 @@ dependencies {
 
     compile group: 'commons-net', name: 'commons-net', version: '3.3'
 	compile group: 'org.ejml', name: 'all', version: '0.28'
-	compile group: 'org.yaml', name: 'snakeyaml', version: '1.13' //1.11
+	compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")

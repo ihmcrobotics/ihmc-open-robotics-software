@@ -1,6 +1,9 @@
 package us.ihmc.tools.thread;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.tools.testing.TestPlanTarget.InDevelopment;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -127,7 +130,7 @@ public class ThreadToolsTest
       assertEquals(iterations, counter.get());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {

@@ -806,13 +806,21 @@ public class GeometryTools
       baseVertexC.checkReferenceFrameMatch(commonFrame);
       trianglePlaneNormal.checkReferenceFrameMatch(commonFrame);
 
-      FrameVector baseEdgeAC = new FrameVector(commonFrame);
+      getTopVertexOfIsoscelesTriangle(baseVertexA.getPoint(), baseVertexC.getPoint(), trianglePlaneNormal.getVector(),
+            ccwAngleAboutNormalAtTopVertex, topVertexBToPack.getPoint());
+   }
+   
+   
+   public static void getTopVertexOfIsoscelesTriangle(Point3d baseVertexA, Point3d baseVertexC, Vector3d trianglePlaneNormal,
+         double ccwAngleAboutNormalAtTopVertex, Point3d topVertexBToPack)
+   {
+      Vector3d baseEdgeAC = new Vector3d();
       baseEdgeAC.sub(baseVertexC, baseVertexA);
 
       double legLengthABorCB = getRadiusOfArc(baseEdgeAC.length(), ccwAngleAboutNormalAtTopVertex);
       double lengthOfBisectorOfBase = pythagorasGetCathetus(legLengthABorCB, 0.5 * baseEdgeAC.length());
 
-      FrameVector perpendicularBisector = new FrameVector(commonFrame);
+      Vector3d perpendicularBisector = new Vector3d();
       getPerpendicularToLine(baseEdgeAC, trianglePlaneNormal, lengthOfBisectorOfBase, perpendicularBisector);
 
       topVertexBToPack.interpolate(baseVertexA, baseVertexC, 0.5);
@@ -845,7 +853,12 @@ public class GeometryTools
       ReferenceFrame commonFrame = line.referenceFrame;
       planeNormal.checkReferenceFrameMatch(commonFrame);
 
-      perpendicularVec.setToZero(commonFrame);
+      getPerpendicularToLine(line.getVector(), planeNormal.getVector(), bisectorLengthDesired, perpendicularVec.getVector());
+   }
+   
+   public static void getPerpendicularToLine(Vector3d line, Vector3d planeNormal, double bisectorLengthDesired, Vector3d perpendicularVec)
+   {
+      perpendicularVec.set(0.0, 0.0, 0.0);
       perpendicularVec.cross(planeNormal, line);
       perpendicularVec.scale(1.0 / perpendicularVec.length());
       perpendicularVec.scale(bisectorLengthDesired);

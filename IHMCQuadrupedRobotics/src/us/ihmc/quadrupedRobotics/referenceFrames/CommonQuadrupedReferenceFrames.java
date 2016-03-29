@@ -6,16 +6,15 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
-public abstract class CommonQuadrupedReferenceFrames
+public abstract class CommonQuadrupedReferenceFrames implements ReferenceFrames
 {
    public abstract ReferenceFrame getBodyFrame();
 
    public abstract ReferenceFrame getBodyZUpFrame();
 
    public abstract ReferenceFrame getSideDependentMidFeetZUpFrame(RobotSide robotSide);
-
-   public abstract ReferenceFrame getEndDependentMidFeetZUpFrame(RobotEnd robotEnd);
 
    public abstract ReferenceFrame getRootJointFrame();
 
@@ -57,6 +56,35 @@ public abstract class CommonQuadrupedReferenceFrames
       return legLengths.get(robotQuadrant);
    }
 
-   public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
+//   public abstract ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine);
+   
+   /**
+    * returns the center of the polygon made up using the provided robot quadrants, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw, pitch, and roll
+    * @param feetQuadrants, feet 
+    */
+   public abstract ReferenceFrame getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude);
+
+   /**
+    * returns the center of the polygon made up using the provided robot quadrants, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw
+    */
+//   public abstract ReferenceFrame getZUpTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude);
+
+   /**
+    * returns the center of the polygon made up using the four feet, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw, pitch, and roll
+    */
+   public abstract ReferenceFrame getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds();
+   
+   /**
+    * returns the center of the four foot polygon, 
+    * averaging the lowest front and the lowest hind Z values, 
+    * and using the nominal yaw
+    */
+   public abstract ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
 }

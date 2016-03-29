@@ -1,8 +1,17 @@
-plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.14"
+    }
 }
 
-
+apply plugin: "us.ihmc.gradle.ihmc-build"
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
@@ -46,16 +55,17 @@ dependencies {
 	// compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.1.0-SNAPSHOT'
 	// compile group: 'com.jme3', name: 'jme3-jbullet', version: '3.0.10'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-jbullet', version: '3.1.0-internal2'
+	
 	compile group: 'io.netty', name: 'netty', version: '3.9.0.Final' //'3.5.8.Final'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.boofcv', name: 'all', version: '0.19'
 	compile group: 'org.georegression' , name: 'georegression', version: '0.8'
-	compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160212'
+	compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
 
 	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'org.ddogleg' , name: 'ddogleg', version: '0.7'
-   	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
+   compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
 	compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.51'

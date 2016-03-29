@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -343,17 +343,16 @@ public class PelvisLinearStateUpdater
 	   {
 	      updateTrustedFeetLists();
          yoRootJointPosition.getFrameTuple(rootJointPosition);
-	      kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
-	      
-	      if(numberOfEndEffectorsTrusted == 1)
-	         imuDriftCompensator.esimtateDriftIfPossible(listOfTrustedFeet.get(0));
-	      
-	      if (imuBasedLinearStateCalculator.isEstimationEnabled())
-	      {
-	         computeLinearStateFromMergingMeasurements();
-	      }
-	      else 
-	      {
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
+
+         imuDriftCompensator.esimtateDriftIfPossible(listOfTrustedFeet);
+
+         if (imuBasedLinearStateCalculator.isEstimationEnabled())
+         {
+            computeLinearStateFromMergingMeasurements();
+         }
+         else
+         {
 	         yoRootJointPosition.getFrameTuple(rootJointPosition);
 	         kinematicsBasedLinearStateCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
 	         yoRootJointPosition.set(rootJointPosition);
@@ -562,7 +561,7 @@ public class PelvisLinearStateUpdater
       }
    }
 
-   public void initializeCoMPositionToActual(Point3d initialCoMPosition)
+   public void initializeCoMPositionToActual(Tuple3d initialCoMPosition)
    {
       initializeToActual = true;
       centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);
