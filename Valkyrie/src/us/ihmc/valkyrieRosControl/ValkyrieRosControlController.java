@@ -1,20 +1,11 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.IOException;
-import java.util.HashMap;
-
 import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
@@ -27,10 +18,11 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.rosControl.JointHandle;
-import us.ihmc.rosControl.valkyrie.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.valkyrie.IHMCValkyrieControlJavaBridge;
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.EffortJointHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
+import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
@@ -46,14 +38,17 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
-public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
+import java.io.IOException;
+import java.util.HashMap;
+
+public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {   
-//   private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+//   private static final String[] torqueControlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
 //         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
 //         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
 //         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
 //         "rightWristPitch" };
-	private static final String[] controlledJoints = {
+	private static final String[] torqueControlledJoints = {
 	      "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
 	      "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
 	      "torsoYaw", "torsoPitch", "torsoRoll",
@@ -61,6 +56,8 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 //	      "lowerNeckPitch", "neckYaw", "upperNeckPitch",
 	      "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
 	      };
+
+   private static final String[] positionControlledJoints = { "lowerNeckPitch", "neckYaw", "upperNeckPitch", };
    
 	public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
 	public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
@@ -165,10 +162,16 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
        * Create joints
        */
       
-      HashMap<String, JointHandle> jointHandles = new HashMap<>();
-      for(String joint : controlledJoints)
+      HashMap<String, EffortJointHandle> effortJointHandles = new HashMap<>();
+      for(String joint : torqueControlledJoints)
       {
-         jointHandles.put(joint, createJointHandle(joint));
+         effortJointHandles.put(joint, createEffortJointHandle(joint));
+      }
+
+      HashMap<String, PositionJointHandle> positionJointHandles = new HashMap<>();
+      for(String joint : positionControlledJoints)
+      {
+         positionJointHandles.put(joint, createPositionJointHandle(joint));
       }
       
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
@@ -217,7 +220,7 @@ public class ValkyrieRosControlController extends IHMCValkyrieControlJavaBridge
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters, jointHandles, imuHandles, forceTorqueSensorHandles, robotModel.getSensorInformation());
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters, effortJointHandles, positionJointHandles, imuHandles, forceTorqueSensorHandles, robotModel.getSensorInformation());
       
       /*
        * Create controllers
