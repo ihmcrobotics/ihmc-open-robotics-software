@@ -86,7 +86,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SpigotPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -247,7 +247,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       // Trajectory message fields
       registerPacketClass(BaseForControl.class);
-      registerPacketClass(OneJointTrajectoryMessage.class);
+      registerPacketClass(OneDoFJointTrajectoryMessage.class);
       registerPacketClass(TrajectoryPoint1DMessage.class);
       registerPacketClass(EuclideanTrajectoryPointMessage.class);
       registerPacketClass(SO3TrajectoryPointMessage.class);
@@ -257,8 +257,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(ArmControlMode.class);
       registerPacketField(NeckControlMode.class);
       registerPacketField(BaseForControl.class);
-      registerPacketField(OneJointTrajectoryMessage.class);
-      registerPacketField(OneJointTrajectoryMessage[].class);
+      registerPacketField(OneDoFJointTrajectoryMessage.class);
+      registerPacketField(OneDoFJointTrajectoryMessage[].class);
       registerPacketField(TrajectoryPoint1DMessage.class);
       registerPacketField(TrajectoryPoint1DMessage[].class);
       registerPacketField(EuclideanTrajectoryPointMessage.class);

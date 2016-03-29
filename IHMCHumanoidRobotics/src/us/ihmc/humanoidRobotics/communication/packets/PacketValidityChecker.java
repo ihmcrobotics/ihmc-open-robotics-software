@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAcc
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
@@ -323,11 +323,11 @@ public abstract class PacketValidityChecker
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         OneJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
+         OneDoFJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
          errorMessage = validateOneJointTrajectoryMessage(jointTrajectory1DMessage, false);
          if (errorMessage != null)
          {
-            errorMessage = "Error with the " + jointIndex + " " + OneJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
+            errorMessage = "Error with the " + jointIndex + " " + OneDoFJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
             return errorMessage;
          }
       }
@@ -384,11 +384,11 @@ public abstract class PacketValidityChecker
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         OneJointTrajectoryMessage oneJointTrajectoryMessage = neckTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
+         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = neckTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
          errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
          if (errorMessage != null)
          {
-            errorMessage = "Error with the " + jointIndex + " " + OneJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
+            errorMessage = "Error with the " + jointIndex + " " + OneDoFJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
             return errorMessage;
          }
       }
@@ -767,7 +767,7 @@ public abstract class PacketValidityChecker
 
    private final static double MAX_ACCEPTED_JOINT_VELOCITY = 100.0;
 
-   public static String validateOneJointTrajectoryMessage(OneJointTrajectoryMessage oneJointTrajectoryMessage, boolean checkId)
+   public static String validateOneJointTrajectoryMessage(OneDoFJointTrajectoryMessage oneJointTrajectoryMessage, boolean checkId)
    {
       String errorMessage = validatePacket(oneJointTrajectoryMessage, checkId);
       if (errorMessage != null)
