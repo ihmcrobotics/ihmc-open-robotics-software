@@ -360,6 +360,8 @@ public class FourBarKinematicLoop
       fourBarJacobianSolver.computeJacobian(masterJointA.getQ());
       fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, fourBarCalculator.getAngleDtDAB(), outputJointLinearVelocitiesToPack);
       
+      System.out.println("\nJacobian debugging: \n" + outputJointLinearVelocitiesToPack);
+      
       passiveJointB.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleABC(), 0));
       passiveJointC.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleBCD(), 1));
       passiveJointD.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleCDA(), 2));
