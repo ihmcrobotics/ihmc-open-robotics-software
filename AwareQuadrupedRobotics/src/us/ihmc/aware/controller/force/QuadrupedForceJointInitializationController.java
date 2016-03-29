@@ -3,11 +3,13 @@ package us.ihmc.aware.controller.force;
 import java.util.Arrays;
 
 import com.google.common.primitives.Booleans;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
@@ -15,8 +17,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
  */
 public class QuadrupedForceJointInitializationController implements QuadrupedForceController
 {
-   private final FullRobotModel fullRobotModel;
-   private final QuadrupedRobotParameters parameters;
+   private final SDFFullRobotModel fullRobotModel;
+   private final QuadrupedJointNameMap jointMap;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the
@@ -28,7 +30,7 @@ public class QuadrupedForceJointInitializationController implements QuadrupedFor
          QuadrupedRobotParameters parameters)
    {
       this.fullRobotModel = environment.getFullRobotModel();
-      this.parameters = parameters;
+      this.jointMap = parameters.getJointMap();
       this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];
    }
 
@@ -37,14 +39,16 @@ public class QuadrupedForceJointInitializationController implements QuadrupedFor
    {
       Arrays.fill(initialized, false);
 
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         // Initialize neck joints to position control mode and all other joints to force control mode.
-         // TODO: This is a hack until we have separate neck/body controllers.
-         QuadrupedJointName jointName = parameters.getJointMap().getJointNameForSDFName(joint.getName());
-         JointRole jointRole = parameters.getJointMap().getJointRole(jointName.toString());
-
-         joint.setUnderPositionControl(jointRole == JointRole.NECK);
+         for (int i = 0; i < jointMap.getLegJointNames().length; i++)
+         {
+            // initialize leg joint mode to force control
+            LegJointName legJointName = jointMap.getLegJointNames()[i];
+            String jointName = jointMap.getLegJointName(robotQuadrant, legJointName);
+            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
+            joint.setUnderPositionControl(false);
+         }
       }
    }
 

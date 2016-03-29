@@ -26,9 +26,9 @@ public class XboxControllerInputDevice extends PollingInputDevice
       AXES.put(Component.Identifier.Button.RIGHT_THUMB, new InputChannelConfig(InputChannel.RIGHT_BUTTON, false));
       AXES.put(Component.Identifier.Axis.Z, new InputChannelConfig(InputChannel.LEFT_TRIGGER, false, 0.05, 1));
       AXES.put(Component.Identifier.Axis.RZ, new InputChannelConfig(InputChannel.RIGHT_TRIGGER, false, 0.05, 1));
-      AXES.put(Component.Identifier.Axis.X, new InputChannelConfig(InputChannel.LEFT_STICK_X, true, 0.1, 3));
+      AXES.put(Component.Identifier.Axis.X, new InputChannelConfig(InputChannel.LEFT_STICK_X, true, 0.1, 1));
       AXES.put(Component.Identifier.Axis.Y, new InputChannelConfig(InputChannel.LEFT_STICK_Y, true, 0.1, 1));
-      AXES.put(Component.Identifier.Axis.RX, new InputChannelConfig(InputChannel.RIGHT_STICK_X, true, 0.1, 3));
+      AXES.put(Component.Identifier.Axis.RX, new InputChannelConfig(InputChannel.RIGHT_STICK_X, true, 0.1, 1));
       AXES.put(Component.Identifier.Axis.RY, new InputChannelConfig(InputChannel.RIGHT_STICK_Y, true, 0.1, 1));
       AXES.put(Component.Identifier.Button.A, new InputChannelConfig(InputChannel.BUTTON_A, false));
       AXES.put(Component.Identifier.Button.B, new InputChannelConfig(InputChannel.BUTTON_B, false));
@@ -44,7 +44,12 @@ public class XboxControllerInputDevice extends PollingInputDevice
 
    public XboxControllerInputDevice() throws NoInputDeviceException
    {
-      this.controller = getFirstControllerByName(CONTROLLER_ID);
+      this(0);
+   }
+
+   public XboxControllerInputDevice(int number) throws NoInputDeviceException
+   {
+      this.controller = getEnumeratedControllerByName(CONTROLLER_ID, number);
    }
 
    @Override
@@ -68,16 +73,24 @@ public class XboxControllerInputDevice extends PollingInputDevice
       }
    }
 
-   private Controller getFirstControllerByName(String name) throws NoInputDeviceException
+   private Controller getEnumeratedControllerByName(String name, int number) throws NoInputDeviceException
    {
       Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 
       // Find the first controller with the matching name.
       for (Controller controller : controllers)
       {
+         System.err.println(Thread.currentThread().getId() + " Found match " + controller.getName() + " " + number);
          if (controller.getName().equals(name))
          {
-            return controller;
+            if (number == 0)
+            {
+               return controller;
+            }
+            else
+            {
+               number--;
+            }
          }
       }
 
