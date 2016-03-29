@@ -34,6 +34,20 @@ public class SimpleTrajectoryPointList<P extends TrajectoryPointInterface<P>> im
    }
 
    @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      for (int i = 0; i < trajectoryPoints.size(); i++)
+         trajectoryPoints.get(i).addTimeOffset(timeOffsetToAdd);
+   }
+
+   @Override
+   public void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      for (int i = 0; i < trajectoryPoints.size(); i++)
+         trajectoryPoints.get(i).subtractTimeOffset(timeOffsetToSubtract);
+   }
+
+   @Override
    public int getNumberOfTrajectoryPoints()
    {
       return trajectoryPoints.size();

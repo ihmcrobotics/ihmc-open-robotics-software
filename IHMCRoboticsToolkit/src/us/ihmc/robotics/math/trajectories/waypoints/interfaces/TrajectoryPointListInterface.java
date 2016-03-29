@@ -10,6 +10,10 @@ public interface TrajectoryPointListInterface<T extends TrajectoryPointListInter
 
    public abstract void set(T other);
 
+   public abstract void addTimeOffset(double timeOffsetToAdd);
+
+   public abstract void subtractTimeOffset(double timeOffsetToSubtract);
+
    public abstract int getNumberOfTrajectoryPoints();
 
    public abstract P getTrajectoryPoint(int trajectoryPointIndex);
