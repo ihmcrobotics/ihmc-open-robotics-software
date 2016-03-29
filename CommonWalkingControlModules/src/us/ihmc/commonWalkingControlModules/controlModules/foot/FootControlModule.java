@@ -97,6 +97,7 @@ public class FootControlModule
       DoubleYoVariable time = momentumBasedController.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+      requestedState.set(null);
 
       setupContactStatesMap();
 

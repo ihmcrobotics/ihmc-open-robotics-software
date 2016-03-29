@@ -30,6 +30,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAc
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -162,7 +163,7 @@ public class HandControlModule
 
       Map<OneDoFJoint, Double> homeConfiguration = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
 
-      jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, robotSide, homeConfiguration, jointsOriginal, jointspaceGains, registry);
+      jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, homeConfiguration, jointsOriginal, jointspaceGains, registry);
       taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, robotSide, elevator, hand, chest, taskspaceGains,
             baseForControlToReferenceFrameMap, yoGraphicsListRegistry, registry);
       userControlModeState = new HandUserControlModeState(stateNamePrefix, jointsOriginal, momentumBasedController, registry);
@@ -312,7 +313,10 @@ public class HandControlModule
    {
       boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
       boolean success = jointspaceControlState.handleArmTrajectoryCommand(command, initializeToCurrent);
-      if (success)
+      if (!success)
+         return;
+
+      if (command.getExecutionMode() == ExecutionMode.OVERRIDE || !stateMachine.isCurrentState(HandControlMode.JOINTSPACE))
          requestedState.set(jointspaceControlState.getStateEnum());
    }
 
