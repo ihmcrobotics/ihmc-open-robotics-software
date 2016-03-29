@@ -102,7 +102,7 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+      for (int i = 0; i < numberOfJoints; i++)
          jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(numberOfTrajectoryPoints);
    }
 
