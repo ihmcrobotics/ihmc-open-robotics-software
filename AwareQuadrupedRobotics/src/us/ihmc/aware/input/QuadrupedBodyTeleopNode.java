@@ -18,7 +18,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-public class QuadrupedTeleopNode implements InputEventCallback
+public class QuadrupedBodyTeleopNode implements InputEventCallback
 {
    /**
     * Period at which to send control packets.
@@ -38,28 +38,26 @@ public class QuadrupedTeleopNode implements InputEventCallback
    private static final String PARAM_WZ_SCALE = "wzScale";
    private static final String PARAM_DEFAULT_COM_HEIGHT = "defaultComHeight";
 
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedTeleopNode.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedBodyTeleopNode.class.getSimpleName());
    private final ParameterMapRepository repository = new ParameterMapRepository(registry);
-   private final ParameterMap params = repository.get(QuadrupedTeleopNode.class);
+   private final ParameterMap params = repository.get(QuadrupedBodyTeleopNode.class);
 
+   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
    private final PacketCommunicator packetCommunicator;
-
    private final PollingInputDevice device;
    private final Map<InputChannel, Double> channels = Collections.synchronizedMap(new EnumMap<InputChannel, Double>(InputChannel.class));
 
    private InputValueIntegrator comZ;
    private QuadrupedTeleopMode mode;
 
-   public QuadrupedTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
+   public QuadrupedBodyTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
    {
       params.setDefault(PARAM_ROLL_SCALE, 0.15);
       params.setDefault(PARAM_PITCH_SCALE, 0.15);
       params.setDefault(PARAM_YAW_SCALE, 0.15);
       params.setDefault(PARAM_X_SCALE, 0.20);
       params.setDefault(PARAM_Y_SCALE, 0.10);
-      params.setDefault(PARAM_VX_SCALE, 0.1);
+      params.setDefault(PARAM_VX_SCALE, 1.0);
       params.setDefault(PARAM_VY_SCALE, 0.5);
       params.setDefault(PARAM_VZ_SCALE, 0.25);
       params.setDefault(PARAM_WZ_SCALE, 0.25);
