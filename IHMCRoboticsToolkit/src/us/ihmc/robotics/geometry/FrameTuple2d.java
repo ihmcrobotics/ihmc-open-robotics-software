@@ -352,6 +352,12 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    {
       tuple.sub(tuple1);
    }
+   
+   public final void sub(double dx, double dy)
+   {
+      tuple.x -= dx;
+      tuple.y -= dy;
+   }
 
    /**  
     * Sets the value of this tuple to the difference of tuple1 and tuple2 (this = tuple1 - tuple2).
