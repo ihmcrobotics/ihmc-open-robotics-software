@@ -97,6 +97,12 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       }
    }
 
+   public void clear(ReferenceFrame referenceFrame)
+   {
+      clear();
+      switchTrajectoryFrame(referenceFrame);
+   }
+
    public void appendWaypoint(double timeAtWaypoint, Point3d position, Vector3d linearVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
@@ -195,10 +201,6 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
       currentWaypointIndex.set(0);
 
-      double timeAtFirstWaypoint = waypoints.get(0).getTime();
-      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
-         waypoints.get(i).subtractTimeOffset(timeAtFirstWaypoint);
-
       if (numberOfWaypoints.getIntegerValue() == 1)
       {
          subTrajectory.setTrajectoryParameters(waypoints.get(0), waypoints.get(0));
@@ -233,7 +235,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    @Override
    public boolean isDone()
    {
-      if (numberOfWaypoints.getIntegerValue() == 0)
+      if (isEmpty())
          return true;
 
       boolean isLastWaypoint = currentWaypointIndex.getIntegerValue() >= numberOfWaypoints.getIntegerValue() - 2;
@@ -241,6 +243,11 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          return false;
       boolean subTrajectoryIsDone = subTrajectory.isDone();
       return subTrajectoryIsDone;
+   }
+
+   public boolean isEmpty()
+   {
+      return numberOfWaypoints.getIntegerValue() == 0;
    }
 
    public int getCurrentWaypointIndex()
@@ -280,6 +287,21 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    public void getLinearData(FramePoint positionToPack, FrameVector linearVelocityToPack, FrameVector linearAccelerationToPack)
    {
       subTrajectory.getLinearData(positionToPack, linearVelocityToPack, linearAccelerationToPack);
+   }
+
+   public int getCurrentNumberOfWaypoints()
+   {
+      return numberOfWaypoints.getIntegerValue();
+   }
+
+   public int getMaximumNumberOfWaypoints()
+   {
+      return maximumNumberOfWaypoints;
+   }
+
+   public double getLastWaypointTime()
+   {
+      return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
    }
 
    @Override
