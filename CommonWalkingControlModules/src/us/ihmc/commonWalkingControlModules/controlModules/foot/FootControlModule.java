@@ -338,7 +338,7 @@ public class FootControlModule
       swingState.setFootstep(footstep, swingTime);
    }
 
-   public void setFootTrajectoryCommand(FootTrajectoryCommand command)
+   public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
       moveViaWaypointsState.handleFootTrajectoryCommand(command, initializeToCurrent);
