@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
@@ -41,7 +42,7 @@ public class WalkingMessageHandler
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
 
-   private FootTrajectoryCommand nextFootTrajectoryForFlamingoStance;
+   private final SideDependentList<CommandArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -75,6 +76,8 @@ public class WalkingMessageHandler
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame(sidePrefix + "FootstepAtCurrentLocation", worldFrame);
          Footstep footstepAtCurrentLocation = new Footstep(endEffector, robotSide, soleFrame, poseReferenceFrame);
          footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
+
+         upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new CommandArrayDeque<>(FootTrajectoryCommand.class));
       }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
@@ -119,9 +122,13 @@ public class WalkingMessageHandler
       isWalkingPaused.set(command.isPauseRequested());
    }
 
-   public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
+   public void handleFootTrajectoryCommand(List<FootTrajectoryCommand> commands)
    {
-      nextFootTrajectoryForFlamingoStance = command;
+      for (int i = 0; i < commands.size(); i++)
+      {
+         FootTrajectoryCommand command = commands.get(i);
+         upcomingFootTrajectoryCommandListForFlamingoStance.get(command.getRobotSide()).addLast(command);
+      }
    }
 
    public Footstep peek(int i)
@@ -145,19 +152,9 @@ public class WalkingMessageHandler
       }
    }
 
-   public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance()
-   {
-      FootTrajectoryCommand ret = nextFootTrajectoryForFlamingoStance;
-      nextFootTrajectoryForFlamingoStance = null;
-      return ret;
-   }
-
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
    {
-      if (!hasFootTrajectoryForFlamingoStance(swingSide))
-         return null;
-      else
-         return pollFootTrajectoryForFlamingoStance();
+      return upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
    }
 
    public void insertNextFootstep(Footstep newNextFootstep)
@@ -181,12 +178,17 @@ public class WalkingMessageHandler
 
    public boolean hasFootTrajectoryForFlamingoStance()
    {
-      return nextFootTrajectoryForFlamingoStance != null;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (hasFootTrajectoryForFlamingoStance(robotSide))
+            return true;
+      }
+      return false;
    }
 
    public boolean hasFootTrajectoryForFlamingoStance(RobotSide swingSide)
    {
-      return hasFootTrajectoryForFlamingoStance() && nextFootTrajectoryForFlamingoStance.getRobotSide() == swingSide;
+      return !upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
    }
 
    public boolean isWalkingPaused()
@@ -194,9 +196,15 @@ public class WalkingMessageHandler
       return isWalkingPaused.getBooleanValue();
    }
 
+   public void clearFootTrajectory(RobotSide robotSide)
+   {
+      upcomingFootTrajectoryCommandListForFlamingoStance.get(robotSide).clear();
+   }
+
    public void clearFootTrajectory()
    {
-      nextFootTrajectoryForFlamingoStance = null;
+      for (RobotSide robotSide : RobotSide.values)
+         clearFootTrajectory(robotSide);
    }
 
    public void clearFootsteps()

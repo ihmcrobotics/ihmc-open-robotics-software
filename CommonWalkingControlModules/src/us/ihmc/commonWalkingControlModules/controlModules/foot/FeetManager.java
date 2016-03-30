@@ -119,7 +119,7 @@ public class FeetManager
    {
       RobotSide robotSide = command.getRobotSide();
       FootControlModule footControlModule = footControlModules.get(robotSide);
-      footControlModule.setFootTrajectoryCommand(command);
+      footControlModule.handleFootTrajectoryCommand(command);
 
       if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_VIA_WAYPOINTS)
          footControlModule.resetCurrentState();

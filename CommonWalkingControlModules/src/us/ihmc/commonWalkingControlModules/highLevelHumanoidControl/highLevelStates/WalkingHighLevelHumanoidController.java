@@ -712,6 +712,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             consumePelvisCommands();
             consumeManipulationCommands();
+            walkingMessageHandler.clearFootTrajectory(supportSide);
          }
          else
          {
@@ -1405,7 +1406,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void consumeFootTrajectoryCommands()
    {
       if (commandInputManager.isNewCommandAvailable(FootTrajectoryCommand.class))
-         walkingMessageHandler.handleFootTrajectoryCommand(commandInputManager.pollNewestCommand(FootTrajectoryCommand.class));
+         walkingMessageHandler.handleFootTrajectoryCommand(commandInputManager.pollNewCommands(FootTrajectoryCommand.class));
 
       if (commandInputManager.isNewCommandAvailable(PauseWalkingCommand.class))
          walkingMessageHandler.handlePauseWalkingCommand(commandInputManager.pollNewestCommand(PauseWalkingCommand.class));
