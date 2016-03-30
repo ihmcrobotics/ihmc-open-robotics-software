@@ -32,7 +32,7 @@ repositories {
 }
 
 
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
+
 
 dependencies 
 {
@@ -45,8 +45,8 @@ dependencies
   compile ihmc.getProjectDependency(":RobotDataCommunication")
   compile ihmc.getProjectDependency(":SensorProcessing")
   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-  testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
-  testCompile ihmc.getProjectDependency(":IHMCQuadrupedRobotics").sourceSets.test.output
+  testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+  testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
   compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
   compile ihmc.getProjectDependency(":EtherlabWrapper")
