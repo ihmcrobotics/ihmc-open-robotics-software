@@ -137,7 +137,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, parameters,
             paramMapRepository);
       QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
-      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
+      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
       QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
       QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
 

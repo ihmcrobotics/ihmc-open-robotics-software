@@ -265,6 +265,11 @@ public class QuadrupedTaskSpaceControllerSettings
       return contactState.get(robotQuadrant);
    }
 
+   public QuadrantDependentList<ContactState> getContactState()
+   {
+      return contactState;
+   }
+
    public double getPressureUpperLimit(RobotQuadrant robotQuadrant)
    {
       return pressureUpperLimit.get(robotQuadrant).getValue();
