@@ -121,9 +121,7 @@ public class FeetManager
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.handleFootTrajectoryCommand(command);
 
-      if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_VIA_WAYPOINTS)
-         footControlModule.resetCurrentState();
-      else
+      if (footControlModule.getCurrentConstraintType() != ConstraintType.MOVE_VIA_WAYPOINTS)
          setContactStateForMoveViaWaypoints(robotSide);
    }
 

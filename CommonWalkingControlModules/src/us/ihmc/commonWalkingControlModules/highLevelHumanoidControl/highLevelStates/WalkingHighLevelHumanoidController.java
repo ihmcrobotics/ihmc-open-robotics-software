@@ -660,7 +660,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (isInFlamingoStance.getBooleanValue() && walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
          {
-            feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+            while(walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
+               feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
          }
 
          balanceManager.getCapturePoint(capturePoint2d);

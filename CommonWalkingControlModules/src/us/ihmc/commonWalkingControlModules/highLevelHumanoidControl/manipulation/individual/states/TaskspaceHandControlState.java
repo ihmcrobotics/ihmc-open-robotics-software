@@ -168,13 +168,11 @@ public class TaskspaceHandControlState extends HandControlState
       updateControlFrameAndDesireds(newControlFrame, initializeToCurrent, initialTrajectoryPoint);
       initialTrajectoryPoint.changeFrame(chestFrame);
 
-      positionTrajectoryGenerator.clear();
-      positionTrajectoryGenerator.switchTrajectoryFrame(chestFrame);
+      positionTrajectoryGenerator.clear(chestFrame);
+      orientationTrajectoryGenerator.clear(chestFrame);
       positionTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
-      positionTrajectoryGenerator.initialize();
-      orientationTrajectoryGenerator.clear();
-      orientationTrajectoryGenerator.switchTrajectoryFrame(chestFrame);
       orientationTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
+      positionTrajectoryGenerator.initialize();
       positionTrajectoryGenerator.initialize();
 
       isReadyToHandleQueuedCommands.set(false);
@@ -203,6 +201,7 @@ public class TaskspaceHandControlState extends HandControlState
       {
          PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
                + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         isReadyToHandleQueuedCommands.set(false);
          clearCommandQueue(INVALID_MESSAGE_ID);
          abortTaskspaceControlState.set(true);
          return false;
