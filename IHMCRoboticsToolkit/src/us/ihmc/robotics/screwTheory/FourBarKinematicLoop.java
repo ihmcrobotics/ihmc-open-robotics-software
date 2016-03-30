@@ -18,10 +18,19 @@ public class FourBarKinematicLoop
 {
    /*
     * Representation of the four bar with name correspondences. This name
-    * convention matches the one used in the FourBarCalculator from fastRunner
+    * convention matches the one used in the FourBarCalculatorWithDerivatives
     * 
-    * masterL master=A--------B |\ /| | \ / | | \ / | | \/ | | /\ | | / \ | | /
-    * \ | |/ \| D--------C
+    *              masterL
+    *     master=A--------B
+    *            |\      /|
+    *            | \    / |
+    *            |  \  /  |
+    *            |   \/   |
+    *            |   /\   |
+    *            |  /  \  |
+    *            | /    \ |
+    *            |/      \|
+    *            D--------C
     */
    private static final boolean DEBUG = false;
 
@@ -352,7 +361,7 @@ public class FourBarKinematicLoop
       fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd(), masterJointA.getQdd());
 
       fourBarJacobianSolver.computeJacobian(masterJointA.getQ());
-      outputJointLinearVelocitiesToPack = fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, inputJointAngularVelocities, outputJointLinearVelocitiesToPack);
+      fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, inputJointAngularVelocities, outputJointLinearVelocitiesToPack);
 
       System.out.println("\nJacobian debugging: \n" + outputJointLinearVelocitiesToPack);
 
