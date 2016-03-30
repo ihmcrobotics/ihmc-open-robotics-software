@@ -60,9 +60,20 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry, true);
+   }
+
+   public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
+   {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      SmartCMPProjectorTwo smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry);
+      CMPProjector smartCMPProjector;
+      if (use2DProjection)
+         smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry);
+      else
+         smartCMPProjector = new SmartCMPPlanarProjector(parentRegistry);
       icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, registry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 

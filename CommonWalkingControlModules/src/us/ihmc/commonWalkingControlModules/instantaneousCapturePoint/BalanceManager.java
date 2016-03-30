@@ -99,6 +99,12 @@ public class BalanceManager
    public BalanceManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry)
    {
+      this(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, parentRegistry, true);
+   }
+
+   public BalanceManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+         CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry, boolean use2DCMPProjection)
+   {
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
 
@@ -120,7 +126,7 @@ public class BalanceManager
       bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
       icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
-            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry);
+            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);

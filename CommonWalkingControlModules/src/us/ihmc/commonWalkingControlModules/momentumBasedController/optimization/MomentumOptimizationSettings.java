@@ -59,6 +59,11 @@ public class MomentumOptimizationSettings
       defaultFootWeight = swing;
    }
 
+   public void setPelvisWeight(double weight)
+   {
+      pelvisWeight = weight;
+   }
+
    public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY,
          double angularMomentumWeightZ)
    {
@@ -98,14 +103,29 @@ public class MomentumOptimizationSettings
       copWeight.set(weightX, weightY);
    }
 
+   public void setCoPWeight(Vector2d weight)
+   {
+      copWeight.set(weight);
+   }
+
    public void setCoPRateDefaultWeight(double weightX, double weightY)
    {
       copRateDefaultWeight.set(weightX, weightY);
    }
 
+   public void setCoPRateDefaultWeight(Vector2d weight)
+   {
+      copRateDefaultWeight.set(weight);
+   }
+
    public void setCoPRateHighWeight(double weightX, double weightY)
    {
       copRateHighWeight.set(weightX, weightY);
+   }
+
+   public void setCoPRateHighWeight(Vector2d weight)
+   {
+      copRateHighWeight.set(weight);
    }
 
    public Vector3d getLinearMomentumWeight()
