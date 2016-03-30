@@ -1,21 +1,22 @@
 package us.ihmc.robotics.screwTheory;
 
-import javax.vecmath.Vector3d;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
 
 public class FourBarKinematicLoopJacobianSolver
 {
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
-   private Vector3d jacobian;
+   private DenseMatrix64F jacobian;
 
    public FourBarKinematicLoopJacobianSolver(FourBarCalculatorWithDerivatives fourBarCalculator)
    {
       this.fourBarCalculator = fourBarCalculator;
-      jacobian = new Vector3d();
+      jacobian = new DenseMatrix64F();
    }
 
-   public Vector3d computeJacobian(double fourBarInputJoint_q)
+   public DenseMatrix64F computeJacobian(double fourBarInputJoint_q)
    {
       double ab = fourBarCalculator.getAB();
       double bc = fourBarCalculator.getBC();
@@ -26,14 +27,13 @@ public class FourBarKinematicLoopJacobianSolver
       double j21 = bc * Math.sin(fourBarInputJoint_q);
       double j31 = 0.5;
 
-      jacobian.set(j11, j21, j31);
+      jacobian = new DenseMatrix64F(3, 1, true, new double[]{j11,j21, j31});
       return jacobian;
    }
 
-   public Vector3d solveLinearVelFromAngularVel(Vector3d jacobian, double fourBarInputJoint_qd)
+   public DenseMatrix64F solveLinearVelFromAngularVel(DenseMatrix64F jacobian, DenseMatrix64F fourBarInputJoint_qd, DenseMatrix64F resultToPack)
    {
-      jacobian.scale(fourBarInputJoint_qd); 
-      System.out.println(fourBarInputJoint_qd);
-      return jacobian;
+      CommonOps.mult(jacobian, fourBarInputJoint_qd, resultToPack); 
+      return resultToPack;
    }
 }
