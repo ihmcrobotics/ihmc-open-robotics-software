@@ -42,8 +42,8 @@ repositories {
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCRoboticsToolkit"))
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCJavaToolkit"))
+
+
 
 dependencies {
     compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
@@ -75,8 +75,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-    testCompile ihmc.getProjectDependency(":IHMCJavaToolkit").sourceSets.test.output
-    testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
+    testCompile ihmc.getProjectTestDependency(":IHMCJavaToolkit")
+    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 
 jar {
