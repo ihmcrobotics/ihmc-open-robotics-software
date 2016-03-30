@@ -166,8 +166,8 @@ public class HandControlModule
       Map<OneDoFJoint, Double> homeConfiguration = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
 
       jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, homeConfiguration, jointsOriginal, jointspaceGains, registry);
-      taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, robotSide, elevator, hand, chest, taskspaceGains,
-            baseForControlToReferenceFrameMap, yoGraphicsListRegistry, registry);
+      taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, elevator, hand, chest, taskspaceGains, baseForControlToReferenceFrameMap,
+            yoGraphicsListRegistry, registry);
       userControlModeState = new HandUserControlModeState(stateNamePrefix, jointsOriginal, momentumBasedController, registry);
 
       if (isAtLeastOneJointPositionControlled)
@@ -297,10 +297,25 @@ public class HandControlModule
 
    public void handleHandTrajectoryCommand(HandTrajectoryCommand command)
    {
-      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.TASKSPACE;
-      boolean success = taskspaceControlState.handleHandTrajectoryCommand(command, handControlFrame, initializeToCurrent);
-      if (success)
-         requestedState.set(taskspaceControlState.getStateEnum());
+      boolean success;
+
+      switch (command.getExecutionMode())
+      {
+      case OVERRIDE:
+         boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.TASKSPACE;
+         success = taskspaceControlState.handleHandTrajectoryCommand(command, handControlFrame, initializeToCurrent);
+         if (success)
+            requestedState.set(taskspaceControlState.getStateEnum());
+         return;
+      case QUEUE:
+         success = taskspaceControlState.queueHandTrajectoryCommand(command);
+         if (!success)
+            holdPositionInJointspace();
+         return;
+      default:
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         return;
+      }
    }
 
    public void holdPositionInJointspace()
@@ -318,13 +333,25 @@ public class HandControlModule
 
    public void handleArmTrajectoryCommand(ArmTrajectoryCommand command)
    {
-      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
-      boolean success = jointspaceControlState.handleArmTrajectoryCommand(command, initializeToCurrent);
-      if (!success)
-         return;
+      boolean success;
 
-      if (command.getExecutionMode() == ExecutionMode.OVERRIDE || !stateMachine.isCurrentState(HandControlMode.JOINTSPACE))
-         requestedState.set(jointspaceControlState.getStateEnum());
+      switch (command.getExecutionMode())
+      {
+      case OVERRIDE:
+         boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
+         success = jointspaceControlState.handleArmTrajectoryCommand(command, initializeToCurrent);
+         if (success)
+            requestedState.set(jointspaceControlState.getStateEnum());
+         return;
+      case QUEUE:
+         success = jointspaceControlState.queueArmTrajectoryCommand(command);
+         if (!success)
+            holdPositionInJointspace();
+         return;
+      default:
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         return;
+      }
    }
 
    public void handleArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
