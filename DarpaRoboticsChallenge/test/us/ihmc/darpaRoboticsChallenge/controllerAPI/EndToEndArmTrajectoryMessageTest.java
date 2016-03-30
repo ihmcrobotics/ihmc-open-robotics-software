@@ -55,7 +55,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
-   public void testSingleWaypoint() throws Exception
+   public void testSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 
@@ -108,7 +108,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
-   public void testMultipleWaypoints() throws Exception
+   public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 
@@ -190,7 +190,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    @DeployableTestMethod(estimatedDuration = 50.0)
    @Test(timeout = 300000)
-   public void testMessageWithTooManyPoints() throws Exception
+   public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage();
 
@@ -757,7 +757,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   private void assertNumberOfWaypoints(OneDoFJoint[] armJoints, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
+   public static void assertNumberOfWaypoints(OneDoFJoint[] armJoints, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
    {
       for (int i = 0; i < armJoints.length; i++)
       {

@@ -244,6 +244,12 @@ public class ArmTrajectoryMessage extends IHMCRosApiMessage<ArmTrajectoryMessage
          return false;
       }
 
+      if (executionMode != other.executionMode)
+         return false;
+
+      if (executionMode == ExecutionMode.OVERRIDE && previousMessageId != other.previousMessageId)
+         return false;
+
       for (int i = 0; i < this.jointTrajectoryMessages.length; i++)
       {
          if (!this.jointTrajectoryMessages[i].epsilonEquals(other.jointTrajectoryMessages[i], epsilon))

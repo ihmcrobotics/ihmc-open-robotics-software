@@ -25,6 +25,7 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class JointSpaceHandControlState extends HandControlState
 {
@@ -40,6 +41,7 @@ public class JointSpaceHandControlState extends HandControlState
    private final BooleanYoVariable abortJointspaceControlState;
    private final LongYoVariable lastCommandId;
 
+   private final BooleanYoVariable isReadyToHandleQueuedCommands;
    private final Map<OneDoFJoint, IntegerYoVariable> numberOfQueuedCommands = new HashMap<>();
    private final Map<OneDoFJoint, CommandArrayDeque<OneDoFJointTrajectoryCommand>> commandQueues = new LinkedHashMap<>();
 
@@ -77,6 +79,7 @@ public class JointSpaceHandControlState extends HandControlState
          commandQueues.put(joint, new CommandArrayDeque<>(OneDoFJointTrajectoryCommand.class));
       }
 
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
       abortJointspaceControlState = new BooleanYoVariable(namePrefix + "AbortJointspaceControlState", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
@@ -102,6 +105,9 @@ public class JointSpaceHandControlState extends HandControlState
          trajectory.appendWaypoint(trajectoryTime, homeConfiguration.get(joint), 0.0);
          trajectory.initialize();
       }
+
+      isReadyToHandleQueuedCommands.set(false);
+      clearCommandQueues(INVALID_MESSAGE_ID);
    }
 
    public void holdCurrentConfiguration()
@@ -113,6 +119,9 @@ public class JointSpaceHandControlState extends HandControlState
          trajectory.appendWaypoint(0.0, oneDoFJoint.getQ(), 0.0);
          trajectory.initialize();
       }
+
+      isReadyToHandleQueuedCommands.set(false);
+      clearCommandQueues(INVALID_MESSAGE_ID);
    }
 
    public boolean handleArmTrajectoryCommand(ArmTrajectoryCommand command, boolean initializeToCurrent)
@@ -120,15 +129,11 @@ public class JointSpaceHandControlState extends HandControlState
       if (!ControllerCommandValidationTools.checkArmTrajectoryCommand(controlledJoints, command))
          return false;
 
-      int numberOfJoints = command.getNumberOfJoints();
-
-      if (command.getExecutionMode() == ExecutionMode.QUEUE)
-         return queueArmTrajectoryCommand(command);
-
-      lastCommandId.set(command.getCommandId());
-      clearCommandQueues();
+      isReadyToHandleQueuedCommands.set(true);
+      clearCommandQueues(command.getCommandId());
 
       RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryCommands = command.getTrajectoryPointLists();
+      int numberOfJoints = command.getNumberOfJoints();
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -139,13 +144,22 @@ public class JointSpaceHandControlState extends HandControlState
       return true;
    }
 
-   private boolean queueArmTrajectoryCommand(ArmTrajectoryCommand command)
+   public boolean queueArmTrajectoryCommand(ArmTrajectoryCommand command)
    {
+      if (!isReadyToHandleQueuedCommands.getBooleanValue())
+      {
+         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         return false;
+      }
+
       long previousCommandId = command.getPreviousCommandId();
-      
+
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
-         clearCommandQueues();
+         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
+               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         isReadyToHandleQueuedCommands.set(false);
+         clearCommandQueues(INVALID_MESSAGE_ID);
          abortJointspaceControlState.set(true);
          return false;
       }
@@ -158,6 +172,15 @@ public class JointSpaceHandControlState extends HandControlState
 
          OneDoFJointTrajectoryCommand jointTrajectoryCommand = command.getJointTrajectoryPointList(jointIndex);
 
+         if (jointTrajectoryCommand.getTrajectoryPoint(0).getTime() < 1.0e-5)
+         {
+            PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+            isReadyToHandleQueuedCommands.set(false);
+            clearCommandQueues(INVALID_MESSAGE_ID);
+            abortJointspaceControlState.set(true);
+            return false;
+         }
+
          localCommand.set(jointTrajectoryCommand);
          localCommand.setCommandId(command.getCommandId());
       }
@@ -165,34 +188,6 @@ public class JointSpaceHandControlState extends HandControlState
       lastCommandId.set(command.getCommandId());
 
       return true;
-   }
-
-   private int queueExcedingTrajectoryPointsIfNeeded(int jointIndex, OneDoFJointTrajectoryCommand command)
-   {
-      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
-
-      OneDoFJoint joint = controlledJoints[jointIndex];
-      MultipleWaypointsTrajectoryGenerator jointTrajectoryGenerator = jointTrajectoryGenerators.get(joint);
-      int maximumNumberOfWaypoints = jointTrajectoryGenerator.getMaximumNumberOfWaypoints();
-      maximumNumberOfWaypoints -= jointTrajectoryGenerator.getCurrentNumberOfWaypoints();
-
-      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
-         return numberOfTrajectoryPoints;
-
-      OneDoFJointTrajectoryCommand commandForExcedent = commandQueues.get(joint).addFirst();
-      numberOfQueuedCommands.get(joint).increment();
-      commandForExcedent.clear();
-      commandForExcedent.setCommandId(command.getCommandId());
-
-      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-      {
-         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
-      }
-
-      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
-
-      return maximumNumberOfWaypoints;
    }
 
    @Override
@@ -264,6 +259,34 @@ public class JointSpaceHandControlState extends HandControlState
       trajectoryGenerator.initialize();
    }
 
+   private int queueExcedingTrajectoryPointsIfNeeded(int jointIndex, OneDoFJointTrajectoryCommand command)
+   {
+      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+
+      OneDoFJoint joint = controlledJoints[jointIndex];
+      MultipleWaypointsTrajectoryGenerator jointTrajectoryGenerator = jointTrajectoryGenerators.get(joint);
+      int maximumNumberOfWaypoints = jointTrajectoryGenerator.getMaximumNumberOfWaypoints();
+      maximumNumberOfWaypoints -= jointTrajectoryGenerator.getCurrentNumberOfWaypoints();
+
+      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
+         return numberOfTrajectoryPoints;
+
+      OneDoFJointTrajectoryCommand commandForExcedent = commandQueues.get(joint).addFirst();
+      numberOfQueuedCommands.get(joint).increment();
+      commandForExcedent.clear();
+      commandForExcedent.setCommandId(command.getCommandId());
+
+      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+
+      return maximumNumberOfWaypoints;
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
@@ -275,7 +298,7 @@ public class JointSpaceHandControlState extends HandControlState
       abortJointspaceControlState.set(false);
    }
 
-   private void clearCommandQueues()
+   private void clearCommandQueues(long lastCommandId)
    {
       for (int i = 0; i < controlledJoints.length; i++)
       {
@@ -283,6 +306,7 @@ public class JointSpaceHandControlState extends HandControlState
          commandQueues.get(joint).clear();
          numberOfQueuedCommands.get(joint).set(0);
       }
+      this.lastCommandId.set(lastCommandId);
    }
 
    @Override
@@ -312,6 +336,11 @@ public class JointSpaceHandControlState extends HandControlState
    public boolean isAbortRequested()
    {
       return abortJointspaceControlState.getBooleanValue();
+   }
+
+   public boolean isReadyToHandleQueuedCommands()
+   {
+      return isReadyToHandleQueuedCommands.getBooleanValue();
    }
 
    public double getJointDesiredPosition(OneDoFJoint joint)

@@ -32,9 +32,11 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
 
    public void clear(RobotSide robotSide)
    {
-      this.robotSide = robotSide;
+      commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       jointTrajectoryInputs.clear();
+      this.robotSide = robotSide;
       executionMode = null;
+      previousCommandId = Packet.INVALID_MESSAGE_ID;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -81,8 +83,8 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    @Override
    public void set(ArmTrajectoryMessage message)
    {
-      commandId = message.getUniqueId();
       set(message.getRobotSide(), message.getTrajectoryPointLists());
+      commandId = message.getUniqueId();
       executionMode = message.getExecutionMode();
       previousCommandId = message.getPreviousMessageId();
    }
@@ -90,8 +92,8 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    @Override
    public void set(ArmTrajectoryCommand other)
    {
-      commandId = other.commandId;
       set(other.robotSide, other.getTrajectoryPointLists());
+      commandId = other.commandId;
       executionMode = other.executionMode;
       previousCommandId = other.previousCommandId;
    }
@@ -111,9 +113,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       clear(robotSide);
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
-      {
          set(i, trajectoryPointListArray.get(i));
-      }
    }
 
    public void set(int jointIndex, SimpleTrajectoryPoint1DList otherTrajectoryPointList)
