@@ -1,7 +1,6 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -19,18 +18,15 @@ import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderI
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceController
@@ -72,13 +68,8 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final static String NO_CONTACT_PRESSURE_LIMIT = "noContactPressureLimit";
 
    // frames
-   private final PoseReferenceFrame supportFrame;
+   private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
-
-   // support
-   QuadrupedSupportPolygon supportPolygon;
-   FramePoint supportCentroid;
-   FrameOrientation supportOrientation;
 
    // dcm controller
    private final FramePoint dcmPositionEstimate;
@@ -152,17 +143,8 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
 
       // frames
       ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
-      supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
+      supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
-
-      // support
-      supportPolygon = new QuadrupedSupportPolygon();
-      supportCentroid = new FramePoint();
-      supportOrientation = new FrameOrientation();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         supportPolygon.setFootstep(robotQuadrant, new FramePoint());
-      }
 
       // dcm controller
       dcmPositionEstimate = new FramePoint();
@@ -214,25 +196,6 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
       dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
-
-      // compute support frame
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(supportPolygon.getReferenceFrame());
-         supportPolygon.setFootstep(robotQuadrant, taskSpaceEstimates.getSolePosition().get(robotQuadrant));
-         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-      }
-      double minFrontFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_RIGHT).getZ());
-      double minHindFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_RIGHT).getZ());
-
-      // compute support frame (centroid and nominal orientation)
-      supportCentroid.changeFrame(supportPolygon.getReferenceFrame());
-      supportPolygon.getCentroid(supportCentroid);
-      supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
-      supportCentroid.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
-      supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
-      supportOrientation.setYawPitchRoll(supportPolygon.getNominalYaw(), 0.0, 0.0);
-      supportFrame.setPoseAndUpdate(supportCentroid, supportOrientation);
    }
 
    private void updateSetpoints()
