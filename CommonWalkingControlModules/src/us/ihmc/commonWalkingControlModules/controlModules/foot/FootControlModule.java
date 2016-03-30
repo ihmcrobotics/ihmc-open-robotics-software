@@ -192,6 +192,15 @@ public class FootControlModule
       holdPositionState.setWeight(defaultFootWeight);
    }
 
+   public void setWeights(Vector3d highAngularFootWeight, Vector3d highLinearFootWeight, Vector3d defaultAngularFootWeight, Vector3d defaultLinearFootWeight)
+   {
+      swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      holdPositionState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+   }
+
    public void replanTrajectory(Footstep footstep, double swingTime)
    {
       swingState.replanTrajectory(footstep, swingTime);

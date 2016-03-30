@@ -14,6 +14,8 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.FormattingTools;
 
+import javax.vecmath.Vector3d;
+
 /**
  * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
  * this can either be a movement along a straight line or (in case of walking) a swing motion.
@@ -69,6 +71,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public void setWeight(double weight)
    {
       spatialFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
+   public void setWeights(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
    }
 
    /**

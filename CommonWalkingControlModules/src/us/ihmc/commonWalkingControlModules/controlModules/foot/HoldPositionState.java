@@ -73,6 +73,11 @@ public class HoldPositionState extends AbstractFootControlState
       spatialFeedbackControlCommand.setWeightForSolver(weight);
    }
 
+   public void setWeights(Vector3d angular, Vector3d linear)
+   {
+      spatialFeedbackControlCommand.setWeightsForSolver(angular, linear);
+   }
+
    @Override
    public void doTransitionIntoAction()
    {

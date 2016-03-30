@@ -33,6 +33,8 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
+import javax.vecmath.Vector3d;
+
 public class OnToesState extends AbstractFootControlState
 {
    private static final boolean USE_TOEOFF_TRAJECTORY = false;
@@ -147,6 +149,12 @@ public class OnToesState extends AbstractFootControlState
    {
       pointFeedbackControlCommand.setWeightForSolver(weight);
       orientationFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
+   public void setWeights(Vector3d angular, Vector3d linear)
+   {
+      pointFeedbackControlCommand.setWeightsForSolver(linear);
+      orientationFeedbackControlCommand.setWeightsForSolver(angular);
    }
 
    @Override

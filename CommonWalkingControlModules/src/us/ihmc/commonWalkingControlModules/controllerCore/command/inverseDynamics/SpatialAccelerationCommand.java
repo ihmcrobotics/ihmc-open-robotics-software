@@ -99,6 +99,15 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       }
    }
 
+   public void setOrientationWeights(Vector3d angular)
+   {
+      weightVector.set(0, 0, angular.getX());
+      weightVector.set(1, 0, angular.getY());
+      weightVector.set(2, 0, angular.getZ());
+
+      hasWeight = angular.getX() != HARD_CONSTRAINT && angular.getY() != HARD_CONSTRAINT && angular.getZ() != HARD_CONSTRAINT;
+   }
+
    public void setWeights(Vector3d angular, Vector3d linear)
    {
       weightVector.set(0, 0, angular.getX());

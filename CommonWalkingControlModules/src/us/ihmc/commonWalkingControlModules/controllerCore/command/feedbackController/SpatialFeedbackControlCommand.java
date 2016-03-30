@@ -170,6 +170,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       spatialAccelerationCommand.setWeight(weight);
    }
 
+   public void setWeightsForSolver(Vector3d angular, Vector3d linear)
+   {
+      spatialAccelerationCommand.setWeights(angular, linear);
+   }
+
    public void setAlphaTaskPriorityForSolver(double alpha)
    {
       spatialAccelerationCommand.setAlphaTaskPriority(alpha);
