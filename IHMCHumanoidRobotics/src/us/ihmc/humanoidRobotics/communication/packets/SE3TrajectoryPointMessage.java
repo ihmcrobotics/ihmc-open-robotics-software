@@ -13,13 +13,11 @@ import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.transformables.Transformable;
 
 @ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one trajectory point. "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and EuclideanTrajectoryPointMessage (rotational)")
 public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPointMessage> implements Transformable
-//      implements SE3TrajectoryPointInterface<SE3TrajectoryPointMessage>, TransformableDataObject<SE3TrajectoryPointMessage>
 {
    @FieldDocumentation("Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
