@@ -43,6 +43,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final double gravity;
    private final double mass;
    private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
    private final ParameterMap params;
@@ -93,7 +94,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
-   // trajectories
+   // planning
    private double bodyYawSetpoint;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
@@ -108,8 +109,6 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       TIMEOUT
    }
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters,
          ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
@@ -177,7 +176,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
 
-      // trajectories
+      // planning
       swingFootTrajectory = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

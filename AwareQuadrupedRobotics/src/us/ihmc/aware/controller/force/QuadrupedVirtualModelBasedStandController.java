@@ -34,6 +34,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final double gravity;
    private final double mass;
    private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
    private final ParameterMap params;
@@ -72,8 +73,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
    {

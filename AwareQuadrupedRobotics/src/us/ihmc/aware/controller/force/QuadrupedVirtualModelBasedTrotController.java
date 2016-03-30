@@ -43,6 +43,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final double gravity;
    private final double mass;
    private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
    private final ParameterMap params;
@@ -93,7 +94,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
-   // trajectories
+   // planning
    private double bodyYawSetpoint;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
@@ -108,8 +109,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       TIMEOUT
    }
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters,
          ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
@@ -171,13 +170,13 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       dcmVelocitySetpoint = new FrameVector();
       dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
 
-      // task space controllers
+      // task space controller
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
 
-      // trajectories
+      // planning
       swingFootTrajectory = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
