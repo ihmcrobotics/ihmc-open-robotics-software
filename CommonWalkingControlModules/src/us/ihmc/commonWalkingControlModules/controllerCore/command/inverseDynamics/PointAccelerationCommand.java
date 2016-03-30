@@ -9,13 +9,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+
+import javax.vecmath.Vector3d;
 
 public class PointAccelerationCommand implements InverseDynamicsCommand<PointAccelerationCommand>
 {
    private boolean hasWeight;
-   private double weight;
    private final FramePoint bodyFixedPointToControl = new FramePoint();
    private final FrameVector desiredAcceleration = new FrameVector();
+   private final DenseMatrix64F weightVector = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(3);
 
    private RigidBody base;
@@ -69,7 +72,7 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
       bodyFixedPointToControl.setIncludingFrame(other.bodyFixedPointToControl);
       desiredAcceleration.setIncludingFrame(other.desiredAcceleration);
       selectionMatrix.set(selectionMatrix);
-      setWeight(other.weight);
+      setWeights(other.getWeightVector());
 
       base = other.base;
       endEffector = other.endEffector;
@@ -96,8 +99,36 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
 
    public void setWeight(double weight)
    {
-      this.weight = weight;
+      for (int i = 0; i < 3; i++)
+         weightVector.set(i, 0, weight);
       hasWeight = weight != HARD_CONSTRAINT;
+   }
+
+   public void setWeights(DenseMatrix64F weight)
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         weightVector.set(i, 0, weight.get(i, 0));
+         hasWeight = weight.get(i, 0) != HARD_CONSTRAINT && hasWeight;
+      }
+   }
+
+   public void setWeights( double linearX, double linearY, double linearZ)
+   {
+      weightVector.set(0, 0, linearX);
+      weightVector.set(1, 0, linearY);
+      weightVector.set(2, 0, linearZ);
+
+      hasWeight = linearX != HARD_CONSTRAINT && linearY != HARD_CONSTRAINT && linearZ != HARD_CONSTRAINT;
+   }
+
+   public void setWeights(Vector3d weight)
+   {
+      weightVector.set(0, 0, weight.getX());
+      weightVector.set(1, 0, weight.getY());
+      weightVector.set(2, 0, weight.getZ());
+
+      hasWeight = weight.getX() != HARD_CONSTRAINT && weight.getY() != HARD_CONSTRAINT && weight.getZ() != HARD_CONSTRAINT;
    }
 
    public void removeWeight()
@@ -110,9 +141,17 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
       return hasWeight;
    }
 
-   public double getWeight()
+   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
    {
-      return weight;
+      weightMatrixToPack.reshape(3, 3);
+      CommonOps.setIdentity(weightMatrixToPack);
+      for (int i = 0; i < 3; i++)
+         weightMatrixToPack.set(i, i, weightVector.get(i, 0));
+   }
+
+   public DenseMatrix64F getWeightVector()
+   {
+      return weightVector;
    }
 
    public RigidBody getBase()
