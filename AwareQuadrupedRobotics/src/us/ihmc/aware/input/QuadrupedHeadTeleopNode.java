@@ -46,11 +46,11 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
 
    public QuadrupedHeadTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
    {
-      params.setDefault(PARAM_PROXIMAL_NECK_YAW_SCALE, 0.75);
-      params.setDefault(PARAM_PROXIMAL_NECK_PITCH_SCALE, 0.75);
+      params.setDefault(PARAM_PROXIMAL_NECK_YAW_SCALE, 0.9);
+      params.setDefault(PARAM_PROXIMAL_NECK_PITCH_SCALE, 0.9);
       params.setDefault(PARAM_PROXIMAL_NECK_ROLL_SCALE, 0.5);
-      params.setDefault(PARAM_DISTAL_NECK_YAW_SCALE, 0.75);
-      params.setDefault(PARAM_DISTAL_NECK_PITCH_SCALE, 0.75);
+      params.setDefault(PARAM_DISTAL_NECK_YAW_SCALE, 0.9);
+      params.setDefault(PARAM_DISTAL_NECK_PITCH_SCALE, 0.9);
       params.setDefault(PARAM_DISTAL_NECK_ROLL_SCALE, 0.4);
 
       // TODO: Don't hardcode localhost
