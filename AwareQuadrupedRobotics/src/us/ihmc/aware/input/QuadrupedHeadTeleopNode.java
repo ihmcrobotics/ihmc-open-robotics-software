@@ -49,9 +49,9 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
       params.setDefault(PARAM_PROXIMAL_NECK_YAW_SCALE, 0.9);
       params.setDefault(PARAM_PROXIMAL_NECK_PITCH_SCALE, 0.9);
       params.setDefault(PARAM_PROXIMAL_NECK_ROLL_SCALE, 0.5);
-      params.setDefault(PARAM_DISTAL_NECK_YAW_SCALE, 0.9);
-      params.setDefault(PARAM_DISTAL_NECK_PITCH_SCALE, 0.9);
-      params.setDefault(PARAM_DISTAL_NECK_ROLL_SCALE, 0.4);
+      params.setDefault(PARAM_DISTAL_NECK_YAW_SCALE, 0.8);
+      params.setDefault(PARAM_DISTAL_NECK_PITCH_SCALE, 0.8);
+      params.setDefault(PARAM_DISTAL_NECK_ROLL_SCALE, 0.5);
 
       // TODO: Don't hardcode localhost
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
