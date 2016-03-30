@@ -7,6 +7,8 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.StringUtils;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -18,10 +20,21 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class EuclideanTrajectoryPointCalculator
 {
+   private static final boolean DEBUG = false;
+
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
    private final RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(20, FrameEuclideanTrajectoryPoint.class);
    private final EnumMap<Direction, YoPolynomial> polynomials = new EnumMap<>(Direction.class);
+
+   private boolean useWeightMethod = false;
+   private double minWeight = Double.NaN;
+   private double maxWeight = Double.NaN;
+   private double weightMethodPow = 4.0;
+   private final TDoubleArrayList subLengths = new TDoubleArrayList();
+   private final TDoubleArrayList waypointDistanceFromStart = new TDoubleArrayList();
+   private final TDoubleArrayList weightedSubLengths = new TDoubleArrayList();
+   private final TDoubleArrayList weights = new TDoubleArrayList();
 
    public EuclideanTrajectoryPointCalculator()
    {
@@ -71,6 +84,33 @@ public class EuclideanTrajectoryPointCalculator
       trajectoryPoints.add().setIncludingFrame(referenceFrame, time, position, linearVelocity);
    }
 
+   public void enableWeightMethod(double maxWeight, double minWeight)
+   {
+      MathTools.checkIfInRange(minWeight, 1.0-3, 100.0);
+      MathTools.checkIfInRange(maxWeight, 1.0-3, 100.0);
+
+      this.useWeightMethod = true;
+      double weightRatio = maxWeight / minWeight;
+      this.minWeight = 1.0;
+      this.maxWeight = weightRatio;
+   }
+
+   /**
+    * The weight method can be used to give more time to the waypoints that are at
+    * @param weightMethodPow
+    */
+   public void setWeightMethodPow(double weightMethodPow)
+   {
+      this.weightMethodPow = weightMethodPow;
+   }
+
+   public void disableWeightMethod()
+   {
+      this.useWeightMethod = false;
+      minWeight = Double.NaN;
+      maxWeight = Double.NaN;
+   }
+
    public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double trajectoryTime)
    {
       int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
@@ -84,21 +124,75 @@ public class EuclideanTrajectoryPointCalculator
       }
 
       double totalLength = 0.0;
+      subLengths.reset();
+      waypointDistanceFromStart.reset();
+      waypointDistanceFromStart.add(0.0);
 
       for (int i = 0; i < numberOfTrajectoryPoints - 1; i++)
       {
-         totalLength += trajectoryPoints.get(i).positionDistance(trajectoryPoints.get(i + 1));
+         double subLength = trajectoryPoints.get(i).positionDistance(trajectoryPoints.get(i + 1));
+         subLengths.add(subLength);
+         totalLength += subLength;
+         waypointDistanceFromStart.add(totalLength);
+         if (DEBUG)
+            System.out.println("Sub length: " + i + ": " + subLength);
       }
 
       trajectoryPoints.get(0).setTime(firstTrajectoryPointTime);
       trajectoryPoints.get(trajectoryPoints.size() - 1).setTime(firstTrajectoryPointTime + trajectoryTime);
-      double time = firstTrajectoryPointTime;
 
-      for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
+
+      if (useWeightMethod)
       {
-         double subLength = trajectoryPoints.get(i).positionDistance(trajectoryPoints.get(i - 1));
-         time += trajectoryTime * (subLength / totalLength);
-         trajectoryPoints.get(i).setTime(time);
+         double weightedTotalLength = 0.0;
+         double halfTotalLength = totalLength / 2.0;
+         weightedSubLengths.reset();
+
+         for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         {
+            double distanceFromMiddle = Math.abs(waypointDistanceFromStart.get(i) - halfTotalLength);
+            double distanceFromMiddleNormalized = Math.pow(distanceFromMiddle / halfTotalLength, weightMethodPow);
+            double weight = distanceFromMiddleNormalized * maxWeight + (1.0 - distanceFromMiddleNormalized) * minWeight;
+            weights.add(weight);
+         }
+
+         for (int i = 0; i < numberOfTrajectoryPoints - 1; i++)
+         {
+            double weightedSubLength = 0.5 * (weights.get(i) + weights.get(i + 1)) * subLengths.get(i);
+            weightedSubLengths.add(weightedSubLength);
+            weightedTotalLength += weightedSubLength;
+            if (DEBUG)
+               System.out.println("Weighted sub length: " + i + ": " + weightedSubLength);
+         }
+
+         if (DEBUG)
+         {
+            System.out.println(totalLength);
+            System.out.println(weightedTotalLength);
+         }
+         
+         double time = firstTrajectoryPointTime;
+
+         for (int i = 1; i <= numberOfTrajectoryPoints - 1; i++)
+         {
+            double weightedSubLength = weightedSubLengths.get(i - 1);
+            double relativeTime = trajectoryTime * (weightedSubLength / weightedTotalLength);
+            if (DEBUG)
+               System.out.println("Relative time: " + i + ": " + relativeTime);
+            time += relativeTime;
+            trajectoryPoints.get(i).setTime(time);
+         }
+      }
+      else
+      {
+         double time = firstTrajectoryPointTime;
+
+         for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
+         {
+            double subLength = subLengths.get(i);
+            time += trajectoryTime * (subLength / totalLength);
+            trajectoryPoints.get(i).setTime(time);
+         }
       }
    }
 
