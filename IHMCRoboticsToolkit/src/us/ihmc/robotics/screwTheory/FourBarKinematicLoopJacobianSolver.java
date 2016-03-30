@@ -30,10 +30,10 @@ public class FourBarKinematicLoopJacobianSolver
       return jacobian;
    }
 
-   public void solveLinearVelFromAngularVel(Vector3d jacobian, double fourBarInputJoint_qd, Vector3d solutionToPack)
+   public Vector3d solveLinearVelFromAngularVel(Vector3d jacobian, double fourBarInputJoint_qd)
    {
       jacobian.scale(fourBarInputJoint_qd); 
       System.out.println(fourBarInputJoint_qd);
-      solutionToPack = jacobian;
+      return jacobian;
    }
 }
