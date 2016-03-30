@@ -23,8 +23,10 @@ public class MomentumOptimizationSettings
    private double headUserModeWeight  = 1.0;
    private double chestWeight = 50.0; //10.0;
    private double pelvisWeight = 5.0;
-   private double defaultFootWeight = 10.0;
-   private double highFootWeight = 50.0;
+   private Vector3d defaultAngularFootWeight = new Vector3d(10.0, 10.0, 10.0);
+   private Vector3d defaultLinearFootWeight = new Vector3d(10.0, 10.0, 10.0);
+   private Vector3d highAngularFootWeight = new Vector3d(50.0, 50.0, 50.0);
+   private Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
    private double handUserModeWeight = 50.0;
    private double handJointspaceWeight = 1.0;
    private double handTaskspaceWeight = 1.0;
@@ -55,8 +57,18 @@ public class MomentumOptimizationSettings
 
    public void setFootWeights(double support, double swing)
    {
-      highFootWeight = support;
-      defaultFootWeight = swing;
+      highLinearFootWeight.set(support, support, support);
+      highAngularFootWeight.set(support, support, support);
+      defaultLinearFootWeight.set(swing, swing, swing);
+      defaultAngularFootWeight.set(swing, swing, swing);
+   }
+
+   public void setFootWeights(Vector3d supportAngular, Vector3d supportLinear, Vector3d swingAngular, Vector3d swingLinear)
+   {
+      highLinearFootWeight.set(supportLinear);
+      highAngularFootWeight.set(supportAngular);
+      defaultLinearFootWeight.set(swingLinear);
+      defaultAngularFootWeight.set(swingAngular);
    }
 
    public void setPelvisWeight(double weight)
@@ -208,14 +220,24 @@ public class MomentumOptimizationSettings
       return pelvisWeight;
    }
 
-   public double getDefaultFootWeight()
+   public Vector3d getDefaultLinearFootWeight()
    {
-      return defaultFootWeight;
+      return defaultLinearFootWeight;
    }
 
-   public double getHighFootWeight()
+   public Vector3d getDefaultAngularFootWeight()
    {
-      return highFootWeight;
+      return defaultAngularFootWeight;
+   }
+
+   public Vector3d getHighLinearFootWeight()
+   {
+      return highLinearFootWeight;
+   }
+
+   public Vector3d getHighAngularFootWeight()
+   {
+      return highAngularFootWeight;
    }
 
    public double getHandUserModeWeight()

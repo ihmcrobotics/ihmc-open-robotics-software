@@ -11,6 +11,8 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+import javax.vecmath.Vector3d;
+
 public class FullyConstrainedState extends AbstractFootControlState
 {
    private final FrameVector fullyConstrainedNormalContactVector;
@@ -37,6 +39,11 @@ public class FullyConstrainedState extends AbstractFootControlState
    public void setWeight(double weight)
    {
       spatialAccelerationCommand.setWeight(weight);
+   }
+
+   public void setWeights(Vector3d angular, Vector3d linear)
+   {
+      spatialAccelerationCommand.setWeights(angular, linear);
    }
 
    @Override

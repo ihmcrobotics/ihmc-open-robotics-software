@@ -24,6 +24,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
+import javax.vecmath.Vector3d;
+
 public class FeetManager
 {
    private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
@@ -77,6 +79,15 @@ public class FeetManager
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
          footControlModule.setWeights(highFootWeight, defaultFootWeight);
+      }
+   }
+
+   public void setWeights(Vector3d highAngularFootWeight, Vector3d highLinearFootWeight, Vector3d defaultAngularFootWeight, Vector3d defaultLinearFootWeight)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
       }
    }
 

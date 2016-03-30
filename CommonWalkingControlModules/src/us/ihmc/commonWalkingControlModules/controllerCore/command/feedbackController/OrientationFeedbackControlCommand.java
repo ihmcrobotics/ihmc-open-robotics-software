@@ -96,6 +96,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.setWeight(weight);
    }
 
+   public void setWeightsForSolver(Vector3d weight)
+   {
+      spatialAccelerationCommand.setOrientationWeights(weight);
+   }
+
    public void setAlphaTaskPriorityForSolver(double alpha)
    {
       spatialAccelerationCommand.setAlphaTaskPriority(alpha);

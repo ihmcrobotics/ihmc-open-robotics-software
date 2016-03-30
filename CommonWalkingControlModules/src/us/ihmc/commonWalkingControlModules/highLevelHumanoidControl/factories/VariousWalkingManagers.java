@@ -19,6 +19,8 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import javax.vecmath.Vector3d;
+
 public class VariousWalkingManagers
 {
    private final BalanceManager balanceManager;
@@ -81,9 +83,11 @@ public class VariousWalkingManagers
       }
 
       feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, registry);
-      double highFootWeight = momentumOptimizationSettings.getHighFootWeight();
-      double defaultFootWeight = momentumOptimizationSettings.getDefaultFootWeight();
-      feetManager.setWeights(highFootWeight, defaultFootWeight);
+      Vector3d highLinearFootWeight = momentumOptimizationSettings.getHighLinearFootWeight();
+      Vector3d highAngularFootWeight = momentumOptimizationSettings.getHighAngularFootWeight();
+      Vector3d defaultLinearFootWeight = momentumOptimizationSettings.getDefaultLinearFootWeight();
+      Vector3d defaultAngularFootWeight = momentumOptimizationSettings.getDefaultAngularFootWeight();
+      feetManager.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
 
       pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, registry);
       pelvisOrientationManager.setWeight(momentumOptimizationSettings.getPelvisWeight());

@@ -67,6 +67,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       pointAccelerationCommand.setWeight(weight);
    }
 
+   public void setWeightsForSolver(Vector3d weight)
+   {
+      pointAccelerationCommand.setWeights(weight);
+   }
+
    public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
