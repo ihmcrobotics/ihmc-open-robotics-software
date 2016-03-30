@@ -11,6 +11,8 @@ buildscript {
    }
 }
 
+apply plugin: "us.ihmc.gradle.ihmc-build"
+
 sourceCompatibility = 1.7
 version = '1.0'
 
