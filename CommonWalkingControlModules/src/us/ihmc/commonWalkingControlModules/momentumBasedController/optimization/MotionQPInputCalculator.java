@@ -242,8 +242,13 @@ public class MotionQPInputCalculator
       motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
       if (commandToConvert.getHasWeight())
       {
-         motionQPInputToPack.setUseWeightScalar(true);
-         motionQPInputToPack.setWeight(commandToConvert.getWeight());
+         // Compute the weight: W = S * W * S^T
+         motionQPInputToPack.setUseWeightScalar(false);
+         tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+         commandToConvert.getWeightMatrix(tempTaskWeight);
+         tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+         CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
       RigidBody base = commandToConvert.getBase();
@@ -300,8 +305,13 @@ public class MotionQPInputCalculator
       motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
       if (commandToConvert.getHasWeight())
       {
-         motionQPInputToPack.setUseWeightScalar(true);
-         motionQPInputToPack.setWeight(commandToConvert.getWeight());
+         // Compute the weight: W = S * W * S^T
+         motionQPInputToPack.setUseWeightScalar(false);
+         tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+         commandToConvert.getWeightMatrix(tempTaskWeight);
+         tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+         CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
       SpatialAccelerationVector spatialAcceleration = commandToConvert.getSpatialAcceleration();

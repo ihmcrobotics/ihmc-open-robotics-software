@@ -14,11 +14,13 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
 
+import javax.vecmath.Vector3d;
+
 public class SpatialAccelerationCommand implements InverseDynamicsCommand<SpatialAccelerationCommand>
 {
    private boolean hasWeight;
-   private double weight;
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
+   private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(SpatialAccelerationVector.SIZE);
 
    private RigidBody base;
@@ -74,8 +76,40 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
    public void setWeight(double weight)
    {
-      this.weight = weight;
+      for(int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+         weightVector.set(i, 0, weight);
       hasWeight = weight != HARD_CONSTRAINT;
+   }
+
+   public void setWeight(double angular, double linear)
+   {
+      for(int i = 0; i < 3; i++)
+         weightVector.set(i, 0, angular);
+      for(int i = 3; i < SpatialAccelerationVector.SIZE; i++)
+         weightVector.set(i, 0, linear);
+      hasWeight = angular != HARD_CONSTRAINT && linear != HARD_CONSTRAINT;
+   }
+
+   public void setWeights(DenseMatrix64F weight)
+   {
+      for(int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+      {
+         weightVector.set(i, 0, weight.get(i, 0));
+         hasWeight = weight.get(i, 0) != HARD_CONSTRAINT && hasWeight;
+      }
+   }
+
+   public void setWeights(Vector3d angular, Vector3d linear)
+   {
+      weightVector.set(0, 0, angular.getX());
+      weightVector.set(1, 0, angular.getY());
+      weightVector.set(2, 0, angular.getZ());
+      weightVector.set(3, 0, linear.getX());
+      weightVector.set(4, 0, linear.getY());
+      weightVector.set(5, 0, linear.getZ());
+
+      hasWeight = angular.getX() != HARD_CONSTRAINT && angular.getY() != HARD_CONSTRAINT && angular.getZ() != HARD_CONSTRAINT;
+      hasWeight = linear.getX() != HARD_CONSTRAINT && linear.getY() != HARD_CONSTRAINT && linear.getZ() != HARD_CONSTRAINT && hasWeight;
    }
 
    public void setAlphaTaskPriority(double alpha)
@@ -105,7 +139,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public void set(SpatialAccelerationCommand other)
    {
       hasWeight = other.hasWeight;
-      weight = other.weight;
+      setWeights(other.getWeightVector());
       alphaTaskPriority = other.alphaTaskPriority;
 
       spatialAcceleration.set(other.getSpatialAcceleration());
@@ -158,9 +192,17 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       return hasWeight;
    }
 
-   public double getWeight()
+   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
    {
-      return weight;
+      weightMatrixToPack.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+      CommonOps.setIdentity(weightMatrixToPack);
+      for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+         weightMatrixToPack.set(i, i, weightVector.get(i, 0));
+   }
+
+   public DenseMatrix64F getWeightVector()
+   {
+      return weightVector;
    }
 
    public SpatialAccelerationVector getSpatialAcceleration()
