@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -34,6 +35,7 @@ import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.StateMachineTools;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class FootControlModule
 {
@@ -340,8 +342,22 @@ public class FootControlModule
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
-      moveViaWaypointsState.handleFootTrajectoryCommand(command, initializeToCurrent);
+      switch (command.getExecutionMode())
+      {
+      case OVERRIDE:
+         boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
+         moveViaWaypointsState.handleFootTrajectoryCommand(command, initializeToCurrent);
+         resetCurrentState();
+         break;
+      case QUEUE:
+         boolean success = moveViaWaypointsState.queueHandTrajectoryCommand(command);
+         if (!success)
+            moveViaWaypointsState.holdCurrentPosition();
+         return;
+      default:
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         return;
+      }
    }
 
    public void setPredictedToeOffDuration(double predictedToeOffDuration)
