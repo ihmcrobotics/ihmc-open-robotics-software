@@ -23,8 +23,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 {
    private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final QuadrupedJointNameMap jointNameMap;
    private final double controlDT;
    private final double gravity;
    private final double mass;
@@ -68,8 +66,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      this.yoGraphicsListRegistry = runtimeEnvironment.getGraphicsListRegistry();
-      this.jointNameMap = robotParameters.getJointMap();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
