@@ -95,10 +95,6 @@ public class EuclideanTrajectoryPointCalculator
       this.maxWeight = weightRatio;
    }
 
-   /**
-    * The weight method can be used to give more time to the waypoints that are at
-    * @param weightMethodPow
-    */
    public void setWeightMethodPow(double weightMethodPow)
    {
       this.weightMethodPow = weightMethodPow;
