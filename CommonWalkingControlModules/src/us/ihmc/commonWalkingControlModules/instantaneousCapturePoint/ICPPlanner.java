@@ -728,6 +728,16 @@ public class ICPPlanner
       return isDoubleSupport.getBooleanValue();
    }
 
+   public boolean isInStanding()
+   {
+      return isStanding.getBooleanValue();
+   }
+
+   public boolean isInInitialTranfer()
+   {
+      return isInitialTransfer.getBooleanValue();
+   }
+
    public void getSingleSupportInitialCapturePointPosition(FramePoint capturePointPositionToPack)
    {
       singleSupportInitialICP.getFrameTupleIncludingFrame(capturePointPositionToPack);
