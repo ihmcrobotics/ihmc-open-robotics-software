@@ -10,7 +10,7 @@ import us.ihmc.acsell.springs.HystereticSpringCalculator;
 import us.ihmc.acsell.springs.HystereticSpringProperties;
 import us.ihmc.acsell.springs.LinearSpringCalculator;
 import us.ihmc.acsell.springs.SpringCalculator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -66,7 +66,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final EnumMap<StepprJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredJointQ = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumYoVariable<WalkingState>  yoWalkingState = new EnumYoVariable<WalkingState>("sow_walkingState", registry, WalkingState.class);
+   private final EnumYoVariable<WalkingStateEnum>  yoWalkingState = new EnumYoVariable<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
    
    private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
    
@@ -88,7 +88,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final EnumMap<StepprJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, EnumYoVariable<JointControlMode>>(
          StepprJoint.class);
          
-   private WalkingState currentWalkingState;
+   private WalkingStateEnum currentWalkingState;
 
    public StepprOutputWriter(DRCRobotModel robotModel)
    {
@@ -315,7 +315,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       {
         yoAngleSpring.get(joint).set(q);
         leftAnkleSpringCalculator.update(q);
-        return (USE_LEFT_ANKLE_SPRING && (currentWalkingState != WalkingState.RIGHT_SUPPORT)) ? 
+        return (USE_LEFT_ANKLE_SPRING && (currentWalkingState != WalkingStateEnum.WALKING_RIGHT_SUPPORT)) ? 
               leftAnkleSpringCalculator.getSpringForce() : 
               leftAnkleSpringCalculator.getSpringForce()*0.75;
       }
@@ -323,7 +323,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       {
         yoAngleSpring.get(joint).set(q);
         rightAnkleSpringCalculator.update(q);
-        return (USE_RIGHT_ANKLE_SPRING && (currentWalkingState != WalkingState.LEFT_SUPPORT)) ?
+        return (USE_RIGHT_ANKLE_SPRING && (currentWalkingState != WalkingStateEnum.WALKING_LEFT_SUPPORT)) ?
               rightAnkleSpringCalculator.getSpringForce() :
               rightAnkleSpringCalculator.getSpringForce()*0.75;
       }
@@ -354,9 +354,9 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    @Override
    public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
    {
-      if(newState instanceof WalkingState)
+      if(newState instanceof WalkingStateEnum)
       {
-         currentWalkingState = (WalkingState)newState;
+         currentWalkingState = (WalkingStateEnum)newState;
          yoWalkingState.set(currentWalkingState);
       }
    }
@@ -365,7 +365,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    public void controllerFailed(FrameVector2d framevector)
    {
       enableOutput.set(false);
-      yoWalkingState.set(WalkingState.DOUBLE_SUPPORT);
+      yoWalkingState.set(WalkingStateEnum.TO_STANDING);
       //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
       //((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
