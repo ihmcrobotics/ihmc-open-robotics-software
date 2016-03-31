@@ -32,6 +32,7 @@ import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -794,7 +795,8 @@ public class GenericRosMessageConverter
    
    public static <E extends Enum<E>> E convertByteToEnum(Class<E> enumClass, byte ordinal)
    {
-      return enumClass.getEnumConstants()[ordinal];
+      E[] enumConstants = enumClass.getEnumConstants();
+      return enumConstants[MathTools.clipToMinMax(ordinal, 0, enumConstants.length - 1)];
    }
    
    public static byte convertEnumToByte(Enum<?> val)
