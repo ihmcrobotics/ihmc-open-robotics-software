@@ -60,6 +60,9 @@ repositories {
 }
 
 task performRelease(type: GradleBuild) {
+   if (!buildType.equals("RELEASE")) {
+      return
+   }
    buildFile "build.gradle"
    startParameter gradle.startParameter
    tasks = ["bintrayUpload", ":RobotDataCommunication:publishLoggerDistributionToBintray"]
