@@ -50,6 +50,8 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
 
+import javax.vecmath.Vector3d;
+
 public class HandControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -217,6 +219,11 @@ public class HandControlModule
    public void setTaskspaceWeight(double weight)
    {
       taskspaceControlState.setWeight(weight);
+   }
+
+   public void setTaskspaceWeights(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      taskspaceControlState.setWeights(angularWeight, linearWeight);
    }
 
    public void setJointspaceWeight(double weight)

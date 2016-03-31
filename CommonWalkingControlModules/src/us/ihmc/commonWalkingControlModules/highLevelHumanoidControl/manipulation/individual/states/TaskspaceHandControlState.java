@@ -17,7 +17,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -29,6 +31,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
+
+import javax.vecmath.Vector3d;
 
 /**
  * @author twan
@@ -67,7 +71,10 @@ public class TaskspaceHandControlState extends HandControlState
    private final ReferenceFrame chestFrame;
 
    private final YoSE3PIDGainsInterface gains;
-   private final DoubleYoVariable weight;
+   private final YoFrameVector yoAngularWeight;
+   private final YoFrameVector yoLinearWeight;
+   private final Vector3d angularWeight = new Vector3d();
+   private final Vector3d linearWeight = new Vector3d();
    private final RobotSide robotSide;
 
    private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap;
@@ -87,8 +94,12 @@ public class TaskspaceHandControlState extends HandControlState
       endEffectorFrame = endEffector.getBodyFixedFrame();
       chestFrame = chest.getBodyFixedFrame();
 
-      weight = new DoubleYoVariable(namePrefix + "TaskspaceWeight", registry);
-      weight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
+      yoAngularWeight = new YoFrameVector(namePrefix + "AngularTaskspaceWeight", null, registry);
+      yoLinearWeight = new YoFrameVector(namePrefix + "LinearTaskspaceWeight", null, registry);
+      yoAngularWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
+      yoLinearWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
+      yoAngularWeight.get(angularWeight);
+      yoLinearWeight.get(linearWeight);
 
       spatialFeedbackControlCommand.set(base, endEffector);
       spatialFeedbackControlCommand.setPrimaryBase(chest);
@@ -125,7 +136,14 @@ public class TaskspaceHandControlState extends HandControlState
 
    public void setWeight(double weight)
    {
-      this.weight.set(weight);
+      yoAngularWeight.set(weight, weight, weight);
+      yoLinearWeight.set(weight, weight, weight);
+   }
+
+   public void setWeights(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      yoAngularWeight.set(angularWeight);
+      yoLinearWeight.set(linearWeight);
    }
 
    public void holdPositionInChest(ReferenceFrame newControlFrame, boolean initializeToCurrent)
@@ -218,7 +236,9 @@ public class TaskspaceHandControlState extends HandControlState
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, desiredLinearVelocity);
       spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       spatialFeedbackControlCommand.setGains(gains);
-      spatialFeedbackControlCommand.setWeightForSolver(weight.getDoubleValue());
+      yoAngularWeight.get(angularWeight);
+      yoLinearWeight.get(linearWeight);
+      spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
    }
 
    @Override

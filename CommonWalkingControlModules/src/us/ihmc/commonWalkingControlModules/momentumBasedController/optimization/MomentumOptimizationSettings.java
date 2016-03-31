@@ -31,7 +31,8 @@ public class MomentumOptimizationSettings
    private double headUserModeWeight  = 1.0;
    private double handUserModeWeight = 50.0;
    private double handJointspaceWeight = 1.0;
-   private double handTaskspaceWeight = 1.0;
+   private Vector3d handAngularTaskspaceWeight = new Vector3d(1.0, 1.0, 1.0);
+   private Vector3d handLinearTaskspaceWeight = new Vector3d(1.0, 1.0, 1.0);
 
    public MomentumOptimizationSettings()
    {
@@ -59,7 +60,8 @@ public class MomentumOptimizationSettings
    public void setManipulationWeights(double jointspace, double taskspace, double userMode)
    {
       handJointspaceWeight = jointspace;
-      handTaskspaceWeight = taskspace;
+      handAngularTaskspaceWeight.set(taskspace, taskspace, taskspace);
+      handLinearTaskspaceWeight.set(taskspace, taskspace, taskspace);
       handUserModeWeight = userMode;
    }
 
@@ -263,8 +265,13 @@ public class MomentumOptimizationSettings
       return handJointspaceWeight;
    }
 
-   public double getHandTaskspaceWeight()
+   public Vector3d getHandAngularTaskspaceWeight()
    {
-      return handTaskspaceWeight;
+      return handAngularTaskspaceWeight;
+   }
+
+   public Vector3d getHandLinearTaskspaceWeight()
+   {
+      return handLinearTaskspaceWeight;
    }
 }

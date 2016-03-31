@@ -73,9 +73,10 @@ public class VariousWalkingManagers
          // Setup arm+hand manipulation state machines
          manipulationControlModule = new ManipulationControlModule(armControlParameters, momentumBasedController, registry);
          double handJointspaceWeight = momentumOptimizationSettings.getHandJointspaceWeight();
-         double handTaskspaceWeight = momentumOptimizationSettings.getHandTaskspaceWeight();
+         Vector3d handAngularTaskspaceWeight = momentumOptimizationSettings.getHandAngularTaskspaceWeight();
+         Vector3d handLinearTaskspaceWeight = momentumOptimizationSettings.getHandLinearTaskspaceWeight();
          double handUserModeWeight = momentumOptimizationSettings.getHandUserModeWeight();
-         manipulationControlModule.setWeights(handJointspaceWeight, handTaskspaceWeight, handUserModeWeight);
+         manipulationControlModule.setWeights(handJointspaceWeight, handAngularTaskspaceWeight, handLinearTaskspaceWeight, handUserModeWeight);
       }
       else
       {
