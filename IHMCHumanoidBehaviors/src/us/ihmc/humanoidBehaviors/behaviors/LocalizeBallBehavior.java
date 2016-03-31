@@ -41,16 +41,12 @@ public class LocalizeBallBehavior extends BehaviorInterface
    private DoubleYoVariable ballZ = new DoubleYoVariable("ballZ", registry);
    private DoubleYoVariable totalBallsFound = new DoubleYoVariable("totalBallsFound", registry);
    private DoubleYoVariable smallestBallFound = new DoubleYoVariable("smallestBallFound", registry);
-   
 
-   
-   
-   
    ExecutorService executorService = Executors.newFixedThreadPool(2);
-//   final int pointDropFactor = 4;
+   //   final int pointDropFactor = 4;
    private final static boolean DEBUG = false;
 
-
+   private final float BALL_RADIUS = 0.127f;
 
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
@@ -61,8 +57,6 @@ public class LocalizeBallBehavior extends BehaviorInterface
       super(outgoingCommunicationBridge);
       this.attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
       this.humanoidReferenceFrames = referenceFrames;
-
-    
 
    }
 
@@ -104,22 +98,18 @@ public class LocalizeBallBehavior extends BehaviorInterface
    private void findBallsAndSaveResult(Point3f[] points)
    {
       ArrayList<Sphere3D_F64> balls = detectBalls(points);
-      
-     
+
       totalBallsFound.set(getNumberOfBallsFound());
       smallestBallFound.set(getSmallestRadius());
 
-
-      
       int id = 4;
       for (Sphere3D_F64 ball : balls)
       {
-    	  id++;
+         id++;
          RigidBodyTransform t = new RigidBodyTransform();
          t.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
          sendPacketToNetworkProcessor(new DetectedObjectPacket(t, 4));
       }
-
 
       if (balls.size() > 0)
       {
@@ -139,10 +129,7 @@ public class LocalizeBallBehavior extends BehaviorInterface
       }
 
    }
-   
-   
-   
-   
+
    public ArrayList<Sphere3D_F64> detectBalls(Point3f[] fullPoints)
    {
 
@@ -154,13 +141,12 @@ public class LocalizeBallBehavior extends BehaviorInterface
          pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
       }
 
-//    filters =7; angleTolerance =0.9143273078940257; distanceThreashold = 0.08726045545980951; numNeighbors =41; maxDisance = 0.09815802524093345;
+      //    filters =7; angleTolerance =0.9143273078940257; distanceThreashold = 0.08726045545980951; numNeighbors =41; maxDisance = 0.09815802524093345;
 
-      
       // find plane
       ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(7, 0.9143273078940257, 0.08726045545980951, CloudShapeTypes.SPHERE);
       configRansac.minimumPoints = 30;
-      PointCloudShapeFinder findSpheres = FactoryPointCloudShape.ransacSingleAll( new ConfigSurfaceNormals(41, 0.09815802524093345), configRansac);
+      PointCloudShapeFinder findSpheres = FactoryPointCloudShape.ransacSingleAll(new ConfigSurfaceNormals(41, 0.09815802524093345), configRansac);
 
       PrintStream out = System.out;
       System.setOut(new PrintStream(new OutputStream()
@@ -182,7 +168,7 @@ public class LocalizeBallBehavior extends BehaviorInterface
       List<Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<Shape>()
       {
-         
+
          @Override
          public int compare(Shape o1, Shape o2)
          {
@@ -201,7 +187,7 @@ public class LocalizeBallBehavior extends BehaviorInterface
          Sphere3D_F64 sphereParams = (Sphere3D_F64) sphere.getParameters();
          PrintTools.debug(DEBUG, this, "sphere radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
 
-         if ((sphereParams.getRadius() < 0.152)&&(sphereParams.getRadius() > 0.102))// soccer ball -
+         if ((sphereParams.getRadius() < BALL_RADIUS + 0.025f) && (sphereParams.getRadius() > BALL_RADIUS - 0.025f))// soccer ball -
          {
             foundBalls.add(sphereParams);
             PrintTools.debug(DEBUG, this, "------Found Soccer Ball radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
@@ -214,15 +200,18 @@ public class LocalizeBallBehavior extends BehaviorInterface
       return foundBalls;
 
    }
+
    private double ballsFound = 0;
    private double smallestRadius = 0;
+
    public double getNumberOfBallsFound()
    {
-	   return ballsFound;
+      return ballsFound;
    }
+
    public double getSmallestRadius()
    {
-	   return smallestRadius;
+      return smallestRadius;
    }
 
    @Override

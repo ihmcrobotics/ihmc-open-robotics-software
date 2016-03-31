@@ -3,14 +3,14 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.rosControl.JointHandle;
+import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder.DesiredJointData;
 
-public class YoJointHandleHolder
+public class YoEffortJointHandleHolder
 {
    private final String name;
-   private final JointHandle handle;
+   private final EffortJointHandle handle;
    private final OneDoFJoint joint;
    private final DesiredJointDataHolder.DesiredJointData desiredJointData;
 
@@ -22,7 +22,7 @@ public class YoJointHandleHolder
    private final DoubleYoVariable controllerTauDesired;
    private final DoubleYoVariable tauDesired;
 
-   public YoJointHandleHolder(JointHandle handle, OneDoFJoint joint, DesiredJointData desiredJointData, YoVariableRegistry parentRegistry)
+   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, DesiredJointData desiredJointData, YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
