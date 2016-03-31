@@ -157,28 +157,15 @@ public class FeetManager
       return footControlModules.get(robotSide).isInFlatSupportState();
    }
 
-   public void correctCoMHeight(RobotSide trailingLeg, FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeight(FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
-      RobotSide[] leadingLegFirst;
-      if (trailingLeg != null)
-         leadingLegFirst = new RobotSide[] {trailingLeg.getOppositeSide(), trailingLeg};
-      else
-         leadingLegFirst = RobotSide.values;
-
       for (RobotSide robotSide : RobotSide.values)
       {
          footControlModules.get(robotSide).updateLegSingularityModule();
       }
 
-      // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame,
-               footSwitches.get(robotSide).computeFootLoadPercentage());
-      }
-
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
-      for (RobotSide robotSide : leadingLegFirst)
+      for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
          footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);

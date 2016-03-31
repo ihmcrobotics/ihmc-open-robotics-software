@@ -13,7 +13,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -83,8 +83,8 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-         WalkingState walkingState = ((EnumYoVariable<WalkingState>)scs.getVariable("WalkingHighLevelHumanoidController", "walkingState")).getEnumValue();
-         assertEquals(WalkingState.DOUBLE_SUPPORT, walkingState);
+         WalkingStateEnum walkingState = ((EnumYoVariable<WalkingStateEnum>)scs.getVariable("WalkingHighLevelHumanoidController", "walkingState")).getEnumValue();
+         assertEquals(WalkingStateEnum.STANDING, walkingState);
          ConstraintType footState = ((EnumYoVariable<ConstraintType>)scs.getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootState")).getEnumValue();
          assertEquals(ConstraintType.FULL, footState);
       }

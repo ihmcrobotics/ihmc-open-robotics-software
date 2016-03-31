@@ -180,8 +180,8 @@ public class CenterOfMassHeightManager
 
    private final Twist currentPelvisTwist = new Twist();
 
-   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, RobotSide trailingLeg,
-         boolean isRecoveringFromPush, FeetManager feetManager)
+   public double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+         FeetManager feetManager)
    {
       solve(coMHeightPartialDerivatives, isInDoubleSupport);
 
@@ -244,8 +244,7 @@ public class CenterOfMassHeightManager
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
 
-      if (feetManager != null)
-         feetManager.correctCoMHeight(trailingLeg, desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
+      feetManager.correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
 
       comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());

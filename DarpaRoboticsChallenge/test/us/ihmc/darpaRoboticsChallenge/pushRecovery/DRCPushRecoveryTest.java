@@ -15,7 +15,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -350,8 +350,8 @@ public abstract class DRCPushRecoveryTest
          String prefix = fullRobotModel.getFoot(robotSide).getName();
          @SuppressWarnings("unchecked") final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix
                                                                                                      + "FootControlModule", prefix + "State");
-         @SuppressWarnings("unchecked") final EnumYoVariable<WalkingState> walkingState =
-            (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         @SuppressWarnings("unchecked") final EnumYoVariable<WalkingStateEnum> walkingState =
+            (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -388,11 +388,11 @@ public abstract class DRCPushRecoveryTest
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<WalkingState> walkingState;
+      private final EnumYoVariable<WalkingStateEnum> walkingState;
 
       private final RobotSide side;
 
-      public DoubleSupportStartCondition(EnumYoVariable<WalkingState> walkingState, RobotSide side)
+      public DoubleSupportStartCondition(EnumYoVariable<WalkingStateEnum> walkingState, RobotSide side)
       {
          this.walkingState = walkingState;
          this.side = side;
@@ -403,11 +403,11 @@ public abstract class DRCPushRecoveryTest
       {
          if (side == RobotSide.LEFT)
          {
-            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT);
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
          }
          else
          {
-            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
          }
       }
    }
