@@ -9,7 +9,6 @@ import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -53,21 +52,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public RobotSide robotSide;
    @FieldDocumentation("Specifies whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
    public BaseForControl baseForControl;
-   @FieldDocumentation("When OVERRIDE is chosen:"
-         + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
-         + " Otherwise the controller will prepend a first trajectory point at the current desired position."
-         + "\n When QUEUE is chosen:"
-         + "\n - The message must carry the ID of the message it should be queued to."
-         + "\n - The very first message of a list of queued messages has to be an OVERRIDE message."
-         + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
-         + "\n - The controller will queue the joint trajectory messages as a per joint basis."
-         + " The first trajectory point has to be greater than zero.")
-   public ExecutionMode executionMode;
-   @FieldDocumentation("Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
-         + " It is used by the controller to ensure that no message has been lost on the way."
-         + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
-         + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
-   public long previousMessageId = INVALID_MESSAGE_ID;
 
    /**
     * Empty constructor for serialization.
@@ -77,7 +61,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      executionMode = ExecutionMode.OVERRIDE;
    }
 
    /**
@@ -91,7 +74,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       setDestination(handTrajectoryMessage.getDestination());
       robotSide = handTrajectoryMessage.robotSide;
       baseForControl = handTrajectoryMessage.baseForControl;
-      executionMode = handTrajectoryMessage.executionMode;
    }
 
    /**
@@ -122,7 +104,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.baseForControl = base;
-      executionMode = ExecutionMode.OVERRIDE;
    }
 
    /**
@@ -139,7 +120,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.baseForControl = base;
-      executionMode = ExecutionMode.OVERRIDE;
    }
 
    @Override
@@ -149,19 +129,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       robotSide = other.robotSide;
       baseForControl = other.baseForControl;
       executionMode = other.executionMode;
-   }
-
-   /**
-    * Set how the controller should consume this message:
-    * <li> {@link ExecutionMode#OVERRIDE}: this message will override any previous message, including canceling any active execution of a message.
-    * <li> {@link ExecutionMode#QUEUE}: this message is queued and will be executed once all the previous messages are done.
-    * @param executionMode
-    * @param previousMessageId when queuing, one needs to provide the ID of the message this message should be queued to.
-    */
-   public void setExecutionMode(ExecutionMode executionMode, long previousMessageId)
-   {
-      this.executionMode = executionMode;
-      this.previousMessageId = previousMessageId;
    }
 
    public RobotSide getRobotSide()
@@ -174,27 +141,12 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       return baseForControl;
    }
 
-   public ExecutionMode getExecutionMode()
-   {
-      return executionMode;
-   }
-
-   public long getPreviousMessageId()
-   {
-      return previousMessageId;
-   }
-
    @Override
    public boolean epsilonEquals(HandTrajectoryMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)
          return false;
       if (baseForControl != other.baseForControl)
-         return false;
-      if (executionMode != other.executionMode)
-         return false;
-
-      if (executionMode == ExecutionMode.OVERRIDE && previousMessageId != other.previousMessageId)
          return false;
 
       return super.epsilonEquals(other, epsilon);
