@@ -32,6 +32,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReference
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
+import javax.vecmath.Vector3d;
+
 /**
  * @author twan
  *         Date: 5/13/13
@@ -79,6 +81,17 @@ public class ManipulationControlModule
          HandControlModule handControlModule = handControlModules.get(robotSide);
          handControlModule.setJointspaceWeight(jointspaceWeight);
          handControlModule.setTaskspaceWeight(taskspaceWeight);
+         handControlModule.setUserModeWeight(userControlModeWeight);
+      }
+   }
+
+   public void setWeights(double jointspaceWeight, Vector3d angularTaskspaceWeight, Vector3d linearTaskspaceWeight, double userControlModeWeight)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         HandControlModule handControlModule = handControlModules.get(robotSide);
+         handControlModule.setJointspaceWeight(jointspaceWeight);
+         handControlModule.setTaskspaceWeights(angularTaskspaceWeight, linearTaskspaceWeight);
          handControlModule.setUserModeWeight(userControlModeWeight);
       }
    }
