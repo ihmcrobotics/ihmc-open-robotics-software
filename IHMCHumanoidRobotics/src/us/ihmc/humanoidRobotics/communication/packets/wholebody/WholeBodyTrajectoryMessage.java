@@ -276,14 +276,22 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
    @Override
    public void parseMessageIdToChildren()
    {
-      leftHandTrajectoryMessage.setUniqueId(uniqueId);
-      rightHandTrajectoryMessage.setUniqueId(uniqueId);
-      leftArmTrajectoryMessage.setUniqueId(uniqueId);
-      rightArmTrajectoryMessage.setUniqueId(uniqueId);
-      chestTrajectoryMessage.setUniqueId(uniqueId);
-      pelvisTrajectoryMessage.setUniqueId(uniqueId);
-      leftFootTrajectoryMessage.setUniqueId(uniqueId);
-      rightFootTrajectoryMessage.setUniqueId(uniqueId);
+      if (leftHandTrajectoryMessage != null)
+         leftHandTrajectoryMessage.setUniqueId(uniqueId);
+      if (rightHandTrajectoryMessage != null)
+         rightHandTrajectoryMessage.setUniqueId(uniqueId);
+      if (leftArmTrajectoryMessage != null)
+         leftArmTrajectoryMessage.setUniqueId(uniqueId);
+      if (rightArmTrajectoryMessage != null)
+         rightArmTrajectoryMessage.setUniqueId(uniqueId);
+      if (chestTrajectoryMessage != null)
+         chestTrajectoryMessage.setUniqueId(uniqueId);
+      if (pelvisTrajectoryMessage != null)
+         pelvisTrajectoryMessage.setUniqueId(uniqueId);
+      if (leftFootTrajectoryMessage != null)
+         leftFootTrajectoryMessage.setUniqueId(uniqueId);
+      if (rightFootTrajectoryMessage != null)
+         rightFootTrajectoryMessage.setUniqueId(uniqueId);
    }
 
    @Override
