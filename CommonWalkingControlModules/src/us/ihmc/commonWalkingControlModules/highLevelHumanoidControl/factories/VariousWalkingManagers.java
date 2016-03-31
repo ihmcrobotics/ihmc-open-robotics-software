@@ -60,8 +60,8 @@ public class VariousWalkingManagers
       {
          double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
          YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
-         double chestWeight = momentumOptimizationSettings.getChestWeight();
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, chestWeight, trajectoryTimeHeadOrientation, registry);
+         Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, chestAngularWeight, trajectoryTimeHeadOrientation, registry);
       }
       else
       {
@@ -90,7 +90,7 @@ public class VariousWalkingManagers
       feetManager.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
 
       pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, registry);
-      pelvisOrientationManager.setWeight(momentumOptimizationSettings.getPelvisWeight());
+      pelvisOrientationManager.setWeights(momentumOptimizationSettings.getPelvisAngularWeight());
    }
 
    public void initializeManagers()

@@ -8,6 +8,14 @@ public class MomentumOptimizationSettings
    private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.005);
    private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
+   private Vector3d defaultAngularFootWeight = new Vector3d(10.0, 10.0, 10.0);
+   private Vector3d defaultLinearFootWeight = new Vector3d(10.0, 10.0, 10.0);
+   private Vector3d highAngularFootWeight = new Vector3d(50.0, 50.0, 50.0);
+   private Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
+
+   private Vector3d chestAngularWeight = new Vector3d(50.0, 50.0, 50.0); //10.0;
+   private Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
+
    private double jointAccelerationWeight = 0.005;
    private double jointJerkWeight = 0.1;
    private double rhoWeight = 0.00001;
@@ -21,12 +29,6 @@ public class MomentumOptimizationSettings
    private double headJointspaceWeight  = 1.0;
    private double headTaskspaceWeight  = 1.0;
    private double headUserModeWeight  = 1.0;
-   private double chestWeight = 50.0; //10.0;
-   private double pelvisWeight = 5.0;
-   private Vector3d defaultAngularFootWeight = new Vector3d(10.0, 10.0, 10.0);
-   private Vector3d defaultLinearFootWeight = new Vector3d(10.0, 10.0, 10.0);
-   private Vector3d highAngularFootWeight = new Vector3d(50.0, 50.0, 50.0);
-   private Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
    private double handUserModeWeight = 50.0;
    private double handJointspaceWeight = 1.0;
    private double handTaskspaceWeight = 1.0;
@@ -44,8 +46,14 @@ public class MomentumOptimizationSettings
 
    public void setBodyWeights(double chestWeight, double pelvisWeight)
    {
-      this.chestWeight = chestWeight;
-      this.pelvisWeight = pelvisWeight;
+      chestAngularWeight.set(chestWeight, chestWeight, chestWeight);
+      pelvisAngularWeight.set(pelvisWeight, pelvisWeight, pelvisWeight);
+   }
+
+   public void setBodyWeights(Vector3d chestAngularWeight, Vector3d pelvisAngularWeight)
+   {
+      chestAngularWeight.set(chestAngularWeight);
+      pelvisAngularWeight.set(pelvisAngularWeight);
    }
 
    public void setManipulationWeights(double jointspace, double taskspace, double userMode)
@@ -73,7 +81,12 @@ public class MomentumOptimizationSettings
 
    public void setPelvisWeight(double weight)
    {
-      pelvisWeight = weight;
+      pelvisAngularWeight.set(weight, weight, weight);
+   }
+
+   public void setPelvisWeights(Vector3d angular)
+   {
+      pelvisAngularWeight.set(angular);
    }
 
    public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY,
@@ -210,14 +223,14 @@ public class MomentumOptimizationSettings
       return headTaskspaceWeight;
    }
 
-   public double getChestWeight()
+   public Vector3d getChestAngularWeight()
    {
-      return chestWeight;
+      return chestAngularWeight;
    }
 
-   public double getPelvisWeight()
+   public Vector3d getPelvisAngularWeight()
    {
-      return pelvisWeight;
+      return pelvisAngularWeight;
    }
 
    public Vector3d getDefaultLinearFootWeight()
