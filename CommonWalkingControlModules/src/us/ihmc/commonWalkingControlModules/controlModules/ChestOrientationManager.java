@@ -15,9 +15,12 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+
+import javax.vecmath.Vector3d;
 
 public class ChestOrientationManager
 {
@@ -42,12 +45,13 @@ public class ChestOrientationManager
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
 
-   private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
+   private final YoFrameVector yoChestAngularWeight = new YoFrameVector("chestWeight", null, registry);
+   private final Vector3d chestAngularWeight = new Vector3d();
 
    private final YoOrientationPIDGainsInterface gains;
 
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, double weight, double trajectoryTime,
-         YoVariableRegistry parentRegistry)
+   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, Vector3d angularWeight,
+         double trajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.gains = gains;
       yoTime = momentumBasedController.getYoTime();
@@ -58,8 +62,9 @@ public class ChestOrientationManager
       RigidBody elevator = fullRobotModel.getElevator();
       chestFrame = chest.getBodyFixedFrame();
 
-      chestWeight.set(weight);
-      orientationFeedbackControlCommand.setWeightForSolver(chestWeight.getDoubleValue());
+      yoChestAngularWeight.set(angularWeight);
+      yoChestAngularWeight.get(chestAngularWeight);
+      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
 
@@ -102,7 +107,8 @@ public class ChestOrientationManager
       feedForwardAngularAcceleration.setToZero(worldFrame);
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       orientationFeedbackControlCommand.setGains(gains);
-      orientationFeedbackControlCommand.setWeightForSolver(chestWeight.getDoubleValue());
+      yoChestAngularWeight.get(chestAngularWeight);
+      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
    }
 
    public void holdCurrentOrientation()

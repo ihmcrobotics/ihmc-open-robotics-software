@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -65,7 +66,8 @@ public class PelvisOrientationManager
    private final DoubleYoVariable yoTime;
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
-   private final DoubleYoVariable pelvisWeight = new DoubleYoVariable("pelvisWeight", registry);
+   private final YoFrameVector yoPelvisAngularWeight = new YoFrameVector("pelvisWeight", null, registry);
+   private final Vector3d pelvisAngularWeight = new Vector3d();
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
@@ -101,9 +103,10 @@ public class PelvisOrientationManager
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody elevator = fullRobotModel.getElevator();
       RigidBody pelvis = fullRobotModel.getPelvis();
-      pelvisWeight.set(SolverWeightLevels.PELVIS_WEIGHT);
+      yoPelvisAngularWeight.set(SolverWeightLevels.PELVIS_WEIGHT, SolverWeightLevels.PELVIS_WEIGHT, SolverWeightLevels.PELVIS_WEIGHT);
+      yoPelvisAngularWeight.get(pelvisAngularWeight);
       orientationFeedbackControlCommand.set(elevator, pelvis);
-      orientationFeedbackControlCommand.setWeightForSolver(pelvisWeight.getDoubleValue());
+      orientationFeedbackControlCommand.setWeightsForSolver(pelvisAngularWeight);
       orientationFeedbackControlCommand.setGains(gains);
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
@@ -133,7 +136,12 @@ public class PelvisOrientationManager
 
    public void setWeight(double weight)
    {
-      pelvisWeight.set(weight);
+      yoPelvisAngularWeight.set(weight, weight, weight);
+   }
+
+   public void setWeights(Vector3d weight)
+   {
+      yoPelvisAngularWeight.set(weight);
    }
 
    public void setTrajectoryTime(double trajectoryTime)
@@ -210,7 +218,8 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.getFrameTupleIncludingFrame(tempAngularAcceleration);
 
       orientationFeedbackControlCommand.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
-      orientationFeedbackControlCommand.setWeightForSolver(pelvisWeight.getDoubleValue());
+      yoPelvisAngularWeight.get(pelvisAngularWeight);
+      orientationFeedbackControlCommand.setWeightsForSolver(pelvisAngularWeight);
       orientationFeedbackControlCommand.setGains(gains);
    }
 
