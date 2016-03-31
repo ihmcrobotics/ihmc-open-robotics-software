@@ -17,6 +17,19 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 {
    @FieldDocumentation("List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
+   @FieldDocumentation("When OVERRIDE is chosen:"
+         + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
+         + " Otherwise the controller will prepend a first trajectory point at the current desired position." + "\n When QUEUE is chosen:"
+         + "\n - The message must carry the ID of the message it should be queued to."
+         + "\n - The very first message of a list of queued messages has to be an OVERRIDE message."
+         + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
+         + "\n - The controller will queue the joint trajectory messages as a per joint basis." + " The first trajectory point has to be greater than zero.")
+   public ExecutionMode executionMode = ExecutionMode.OVERRIDE;
+   @FieldDocumentation("Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
+         + " It is used by the controller to ensure that no message has been lost on the way."
+         + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
+         + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
+   public long previousMessageId = INVALID_MESSAGE_ID;
 
    public AbstractSE3TrajectoryMessage()
    {
@@ -30,13 +43,16 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       {
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(se3TrajectoryMessage.taskspaceTrajectoryPoints[i]);
       }
+      executionMode = se3TrajectoryMessage.executionMode;
+      previousMessageId = se3TrajectoryMessage.previousMessageId;
    }
 
    public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
    {
       Vector3d zeroLinearVelocity = new Vector3d();
       Vector3d zeroAngularVelocity = new Vector3d();
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
+      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {
+            new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
    }
 
    public AbstractSE3TrajectoryMessage(int numberOfTrajectoryPoints)
@@ -50,19 +66,22 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          throw new RuntimeException("Must the same number of waypoints.");
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
+      executionMode = other.executionMode;
+      previousMessageId = other.previousMessageId;
    }
 
    public void getTrajectoryPoints(FrameSE3TrajectoryPointList trajectoryPointListToPack)
    {
       trajectoryPointListToPack.clear(ReferenceFrame.getWorldFrame());
-      
+
       SE3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.length;
 
-      for (int i=0; i<numberOfPoints; i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages[i];
-         trajectoryPointListToPack.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation, se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
+         trajectoryPointListToPack.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation,
+               se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
       }
    }
 
@@ -75,7 +94,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity,
+         Vector3d angularVelocity)
    {
       rangeCheck(trajectoryPointIndex);
       taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
@@ -86,6 +106,19 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    {
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i].applyTransform(transform);
+   }
+
+   /**
+    * Set how the controller should consume this message:
+    * <li> {@link ExecutionMode#OVERRIDE}: this message will override any previous message, including canceling any active execution of a message.
+    * <li> {@link ExecutionMode#QUEUE}: this message is queued and will be executed once all the previous messages are done.
+    * @param executionMode
+    * @param previousMessageId when queuing, one needs to provide the ID of the message this message should be queued to.
+    */
+   public void setExecutionMode(ExecutionMode executionMode, long previousMessageId)
+   {
+      this.executionMode = executionMode;
+      this.previousMessageId = previousMessageId;
    }
 
    public final int getNumberOfTrajectoryPoints()
@@ -114,6 +147,16 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       return getLastTrajectoryPoint().time;
    }
 
+   public ExecutionMode getExecutionMode()
+   {
+      return executionMode;
+   }
+
+   public long getPreviousMessageId()
+   {
+      return previousMessageId;
+   }
+
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
@@ -125,6 +168,10 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    public boolean epsilonEquals(T other, double epsilon)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
+         return false;
+      if (executionMode != other.executionMode)
+         return false;
+      if (executionMode == ExecutionMode.OVERRIDE && previousMessageId != other.previousMessageId)
          return false;
 
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
