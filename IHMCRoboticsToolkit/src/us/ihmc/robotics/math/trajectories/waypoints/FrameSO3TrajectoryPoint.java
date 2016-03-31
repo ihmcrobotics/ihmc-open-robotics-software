@@ -223,6 +223,27 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
    }
 
+   public double get(Quat4d orientationToPack, Vector3d angularVelocityToPack)
+   {
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      return getTime();
+   }
+
+   public double get(FrameOrientation orientationToPack, FrameVector angularVelocityToPack)
+   {
+      getOrientation(orientationToPack);
+      getAngularVelocity(angularVelocityToPack);
+      return getTime();
+   }
+
+   public double getIncludingFrame(FrameOrientation orientationToPack, FrameVector angularVelocityToPack)
+   {
+      getOrientationIncludingFrame(orientationToPack);
+      getAngularVelocityIncludingFrame(angularVelocityToPack);
+      return getTime();
+   }
+
    @Override
    public String toString()
    {
