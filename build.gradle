@@ -14,7 +14,7 @@ import org.ajoberstar.grgit.*
 
 project.ext.repo = Grgit.open(projectDir)
 
-version = '0.7.6'
+version = '0.7.7'
 
 project.ext.fullVersion = version
 project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
@@ -60,9 +60,6 @@ repositories {
 }
 
 task performRelease(type: GradleBuild) {
-   if (!buildType.equals("RELEASE")) {
-      throw new GradleException("Cannot perform release unless -PbuildType=RELEASE")
-   }
    buildFile "build.gradle"
    startParameter gradle.startParameter
    tasks = ["bintrayUpload", ":RobotDataCommunication:publishLoggerDistributionToBintray"]
@@ -86,6 +83,12 @@ gradle.taskGraph.whenReady { TaskExecutionGraph graph ->
 
       subprojects.each { subproject ->
          subproject.ext.fullVersion = "LOCAL"
+      }
+   }
+
+   if (graph.hasTask(performRelease)) {
+      if (!buildType.equals("RELEASE")) {
+         throw new GradleException("Cannot perform release unless -PbuildType=RELEASE")
       }
    }
 }
