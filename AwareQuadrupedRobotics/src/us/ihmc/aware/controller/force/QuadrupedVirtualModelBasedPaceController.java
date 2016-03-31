@@ -2,6 +2,7 @@ package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
+import us.ihmc.aware.controller.common.GroundPlaneEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
@@ -15,26 +16,21 @@ import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceController
 {
    private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final QuadrupedJointNameMap jointNameMap;
    private final double controlDT;
    private final double gravity;
    private final double mass;
@@ -87,6 +83,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
 
    // planning
    private double bodyYawSetpoint;
+   private final GroundPlaneEstimator groundPlaneEstimator;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
 
@@ -106,8 +103,6 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      this.yoGraphicsListRegistry = runtimeEnvironment.getGraphicsListRegistry();
-      this.jointNameMap = robotParameters.getJointMap();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
@@ -159,6 +154,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
 
       // planning
+      groundPlaneEstimator = new GroundPlaneEstimator();
       swingFootTrajectory = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -220,7 +216,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       }
       taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
       taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
-            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + supportPolygon.getNominalPitch(),
+            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
                   RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
       taskSpaceSetpoints.getBodyAngularVelocity().setToZero();
       taskSpaceSetpoints.getComTorqueFeedforward().setToZero();
@@ -354,16 +350,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       footholdPosition.setIncludingFrame(cmpPosition);
       footholdPosition.changeFrame(worldFrame);
       footholdPosition.add(xOffset, yOffset, 0.0);
-
-      // compute foothold height based on estimated ground slope
-      taskSpaceEstimates.getSolePosition(robotQuadrant).changeFrame(worldFrame);
-      double xStride = footholdPosition.getX() - taskSpaceEstimates.getSolePosition(robotQuadrant).getX();
-      double yStride = footholdPosition.getY() - taskSpaceEstimates.getSolePosition(robotQuadrant).getY();
-      xOffset = Math.cos(-bodyYaw) * xStride - Math.sin(-bodyYaw) * yStride;
-      yOffset = Math.sin(-bodyYaw) * xStride + Math.cos(-bodyYaw) * yStride;
-      footholdPosition.setZ(taskSpaceEstimates.getSolePosition(robotQuadrant).getZ());
-      footholdPosition.add(0, 0, -xOffset * Math.tan(supportPolygon.getNominalPitch()));
-      footholdPosition.add(0, 0, yOffset * Math.tan(supportPolygon.getNominalRoll()));
+      groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
    }
 
    private class QuadSupportState implements StateMachineState<TrotEvent>
