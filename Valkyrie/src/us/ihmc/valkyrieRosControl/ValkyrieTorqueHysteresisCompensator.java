@@ -8,13 +8,13 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
 public class ValkyrieTorqueHysteresisCompensator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("TorqueHysteresisCompensator");
 
-   private final List<YoJointHandleHolder> processedJointHandles = new ArrayList<>();
+   private final List<YoEffortJointHandleHolder> processedJointHandles = new ArrayList<>();
    private final List<TorqueHysteresisCompensatorYoVariable> hysteresisCompensators = new ArrayList<>();
 
    private final DoubleYoVariable torqueHysteresisAmplitude = new DoubleYoVariable("torqueHysteresisAmplitude", registry);
@@ -29,7 +29,7 @@ public class ValkyrieTorqueHysteresisCompensator
     */
    private final String[] jointShortNamesToProcess = new String[]{"Hip", "Knee", "Torso", "Shoulder", "Elbow"};
 
-   public ValkyrieTorqueHysteresisCompensator(List<YoJointHandleHolder> yoJointHandleHolders, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public ValkyrieTorqueHysteresisCompensator(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
@@ -39,7 +39,7 @@ public class ValkyrieTorqueHysteresisCompensator
       rampUpTime.set(1.0);
       rampDownTime.set(0.1);
 
-      for (YoJointHandleHolder jointHandle : yoJointHandleHolders)
+      for (YoEffortJointHandleHolder jointHandle : yoEffortJointHandleHolders)
       {
          OneDoFJoint joint = jointHandle.getOneDoFJoint();
          String jointName = joint.getName();
@@ -58,7 +58,7 @@ public class ValkyrieTorqueHysteresisCompensator
       for (int i = 0; i < processedJointHandles.size(); i++)
       {
          TorqueHysteresisCompensatorYoVariable hysteresisCompensator = hysteresisCompensators.get(i);
-         YoJointHandleHolder jointHandle = processedJointHandles.get(i);
+         YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
          
          jointHandle.getOneDoFJoint().setQddDesired(jointHandle.getControllerQddDesired());
          hysteresisCompensator.update();
