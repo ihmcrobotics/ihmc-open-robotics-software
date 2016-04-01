@@ -92,14 +92,17 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
    public void setWeights(DenseMatrix64F weight)
    {
+      hasWeight = true;
+
       for(int i = 0; i < SpatialAccelerationVector.SIZE; i++)
       {
          weightVector.set(i, 0, weight.get(i, 0));
-         hasWeight = weight.get(i, 0) != HARD_CONSTRAINT && hasWeight;
+         if (weight.get(i, 0) == HARD_CONSTRAINT)
+            hasWeight = false;
       }
    }
 
-   public void setOrientationWeights(Vector3d angular)
+   public void setAngularWeights(Vector3d angular)
    {
       weightVector.set(0, 0, angular.getX());
       weightVector.set(1, 0, angular.getY());
@@ -119,6 +122,12 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
       hasWeight = angular.getX() != HARD_CONSTRAINT && angular.getY() != HARD_CONSTRAINT && angular.getZ() != HARD_CONSTRAINT;
       hasWeight = linear.getX() != HARD_CONSTRAINT && linear.getY() != HARD_CONSTRAINT && linear.getZ() != HARD_CONSTRAINT && hasWeight;
+   }
+
+   public void setLinearWeightsToZero()
+   {
+      for (int i = 3; i < SpatialAccelerationVector.SIZE; i++)
+         weightVector.set(i, 0, 0.0);
    }
 
    public void setAlphaTaskPriority(double alpha)
