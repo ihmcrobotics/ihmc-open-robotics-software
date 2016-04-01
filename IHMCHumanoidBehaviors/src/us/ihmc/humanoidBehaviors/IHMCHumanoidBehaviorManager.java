@@ -10,7 +10,6 @@ import us.ihmc.humanoidBehaviors.behaviors.KickBallBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizeDrillBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TalkAndMoveHandsBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
@@ -191,10 +190,6 @@ public class IHMCHumanoidBehaviorManager
       TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
             tippingDetectedBoolean, yoDoubleSupport, wholeBodyControllerParameters);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
-
-      RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
-            wristSensors, yoTime, wholeBodyControllerParameters);
-      dispatcher.addBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, wholeBodyControllerParameters
             .getWalkingControllerParameters().getAnkleHeight());

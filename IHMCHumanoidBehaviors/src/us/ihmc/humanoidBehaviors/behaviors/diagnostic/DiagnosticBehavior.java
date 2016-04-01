@@ -21,7 +21,7 @@ import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspCylinderBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
@@ -44,10 +44,9 @@ import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.GraspCylinderPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -127,7 +126,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<HandTrajectoryBehavior> handTrajectoryBehaviors = new SideDependentList<>();
    private final SideDependentList<GoHomeBehavior> armGoHomeBehaviors = new SideDependentList<>();
    private final FootTrajectoryBehavior footPoseBehavior;
-   private final ChestOrientationBehavior chestOrientationBehavior;
+   private final ChestTrajectoryBehavior chestTrajectoryBehavior;
+   private final GoHomeBehavior chestGoHomeBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
    private final FootstepListBehavior footstepListBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
@@ -349,8 +349,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
 
-      chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
-      registry.addChild(chestOrientationBehavior.getYoVariableRegistry());
+      chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      registry.addChild(chestTrajectoryBehavior.getYoVariableRegistry());
+
+      chestGoHomeBehavior = new GoHomeBehavior(outgoingCommunicationBridge, yoTime);
+      registry.addChild(chestGoHomeBehavior.getYoVariableRegistry());
 
       pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
       registry.addChild(pelvisPoseBehavior.getYoVariableRegistry());
@@ -2051,23 +2054,22 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void submitChestHomeCommand(boolean parallelize)
    {
-      ChestOrientationPacket homeChestPacket = PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime.getDoubleValue());
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(homeChestPacket, yoTime, chestOrientationBehavior,
-            sleepTimeBetweenPoses.getDoubleValue());
+      GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.CHEST, trajectoryTime.getDoubleValue());
+      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior, yoTime, sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, chestOrientationTask);
+         pipeLine.submitTaskForPallelPipesStage(chestGoHomeBehavior, goHomeTask);
       else
-         pipeLine.submitSingleTaskStage(chestOrientationTask);
+         pipeLine.submitSingleTaskStage(goHomeTask);
    }
 
    private void submitDesiredChestOrientation(boolean parallelize, double yaw, double pitch, double roll)
    {
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, yaw, pitch, roll);
       desiredChestOrientation.changeFrame(worldFrame);
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestTrajectoryBehavior,
             trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, chestOrientationTask);
+         pipeLine.submitTaskForPallelPipesStage(chestTrajectoryBehavior, chestOrientationTask);
       else
          pipeLine.submitSingleTaskStage(chestOrientationTask);
    }
@@ -2883,7 +2885,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       isPaused.set(true);
       pelvisPoseBehavior.pause();
-      chestOrientationBehavior.pause();
+      chestTrajectoryBehavior.pause();
       for (RobotSide robotSide : RobotSide.values)
       {
          handTrajectoryBehaviors.get(robotSide).pause();
@@ -2896,7 +2898,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       isPaused.set(false);
       pelvisPoseBehavior.resume();
-      chestOrientationBehavior.resume();
+      chestTrajectoryBehavior.resume();
       for (RobotSide robotSide : RobotSide.values)
       {
          handTrajectoryBehaviors.get(robotSide).pause();

@@ -2,14 +2,14 @@ package us.ihmc.atlas.behaviorTests;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCChestOrientationBehaviorTest;
+import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCChestTrajectoryBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.VideoA})
-public class AtlasChestOrientationBehaviorTest extends DRCChestOrientationBehaviorTest
+public class AtlasChestOrientationBehaviorTest extends DRCChestTrajectoryBehaviorTest
 {
    private final AtlasRobotModel robotModel;
    

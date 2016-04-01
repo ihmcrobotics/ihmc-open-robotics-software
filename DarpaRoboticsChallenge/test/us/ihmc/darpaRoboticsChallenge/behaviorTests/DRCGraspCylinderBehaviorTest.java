@@ -66,7 +66,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
    @AfterClass
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestTrajectoryBehaviorTest.class + " after class.");
    }
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
