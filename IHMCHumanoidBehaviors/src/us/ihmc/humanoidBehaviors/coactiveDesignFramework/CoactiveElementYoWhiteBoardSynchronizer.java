@@ -75,4 +75,57 @@ public class CoactiveElementYoWhiteBoardSynchronizer
       yoWhiteBoard.readData();
    }
 
+   public void startASynchronizerOnAThread(long millisecondsBetweenDataWrites)
+   {
+      SynchronizerRunnable synchronizerRunnable = new SynchronizerRunnable(this, millisecondsBetweenDataWrites);
+      Thread thread = new Thread(synchronizerRunnable);
+      thread.start();
+   }
+
+   private class SynchronizerRunnable implements Runnable
+   {
+      private static final boolean DEBUG = false;
+
+      private final CoactiveElementYoWhiteBoardSynchronizer synchronizer;
+      private final long millisecondsBetweenDataWrites;
+
+      SynchronizerRunnable(CoactiveElementYoWhiteBoardSynchronizer synchronizer, long millisecondsBetweenDataWrites)
+      {
+         this.synchronizer = synchronizer;
+         this.millisecondsBetweenDataWrites = millisecondsBetweenDataWrites;
+      }
+
+      @Override
+      public void run()
+      {
+         while (true)
+         {
+            try
+            {
+               if (DEBUG)
+                  System.out.println("Writing Data");
+               synchronizer.writeData();
+               {
+                  if (DEBUG)
+                     System.out.println("Reading Data");
+                  synchronizer.readData();
+               }
+            }
+            catch (Exception e)
+            {
+               if (DEBUG)
+                  System.out.println("Exception: " + e);
+            }
+
+            try
+            {
+               Thread.sleep(millisecondsBetweenDataWrites);
+            }
+            catch (InterruptedException e)
+            {
+            }
+         }
+      }
+   }
+
 }
