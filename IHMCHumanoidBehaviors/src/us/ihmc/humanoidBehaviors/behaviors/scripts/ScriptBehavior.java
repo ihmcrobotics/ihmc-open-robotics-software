@@ -11,7 +11,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBeha
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
@@ -31,6 +31,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
@@ -76,7 +77,7 @@ public class ScriptBehavior extends BehaviorInterface
          PrimitiveBehaviorType.class, true);
 
    private final FootstepListBehavior footstepListBehavior;
-   private final HandPoseBehavior handPoseBehavior;
+   private final HandTrajectoryBehavior handTrajectoryBehavior;
    private final EndEffectorLoadBearingBehavior endEffectorLoadBearingBehavior;
    private final HeadOrientationBehavior headOrientationBehavior;
    private final PelvisHeightTrajectoryBehavior comHeightBehavior;
@@ -108,7 +109,7 @@ public class ScriptBehavior extends BehaviorInterface
       {
          footstepListBehavior = null;
       }
-      handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      handTrajectoryBehavior = new HandTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       endEffectorLoadBearingBehavior = new EndEffectorLoadBearingBehavior(outgoingCommunicationBridge);
       headOrientationBehavior = new HeadOrientationBehavior(outgoingCommunicationBridge, yoTime);
       comHeightBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
@@ -149,7 +150,7 @@ public class ScriptBehavior extends BehaviorInterface
    {
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.IDLE, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOTSTEP_LIST, footstepListBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_TRAJECTORY, handPoseBehavior);
+      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_TRAJECTORY, handTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING, endEffectorLoadBearingBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HEAD_ORIENTATION, headOrientationBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.COM_HEIGHT, comHeightBehavior);
@@ -447,8 +448,8 @@ public class ScriptBehavior extends BehaviorInterface
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.HAND_TRAJECTORY))
       {
-         handPoseBehavior.initialize();
-         handPoseBehavior.setInput((HandPosePacket) inputPacket.getScriptObject());
+         handTrajectoryBehavior.initialize();
+         handTrajectoryBehavior.setInput((HandTrajectoryMessage) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING))
       {
@@ -561,7 +562,7 @@ public class ScriptBehavior extends BehaviorInterface
    public void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
       footstepListBehavior.consumeObjectFromNetworkProcessor(object);
-      handPoseBehavior.consumeObjectFromNetworkProcessor(object);
+      handTrajectoryBehavior.consumeObjectFromNetworkProcessor(object);
       endEffectorLoadBearingBehavior.consumeObjectFromNetworkProcessor(object);
       headOrientationBehavior.consumeObjectFromNetworkProcessor(object);
       comHeightBehavior.consumeObjectFromNetworkProcessor(object);
@@ -576,7 +577,7 @@ public class ScriptBehavior extends BehaviorInterface
    public void passReceivedControllerObjectToChildBehaviors(Object object)
    {
       footstepListBehavior.consumeObjectFromController(object);
-      handPoseBehavior.consumeObjectFromController(object);
+      handTrajectoryBehavior.consumeObjectFromController(object);
       endEffectorLoadBearingBehavior.consumeObjectFromController(object);
       headOrientationBehavior.consumeObjectFromController(object);
       comHeightBehavior.consumeObjectFromController(object);
