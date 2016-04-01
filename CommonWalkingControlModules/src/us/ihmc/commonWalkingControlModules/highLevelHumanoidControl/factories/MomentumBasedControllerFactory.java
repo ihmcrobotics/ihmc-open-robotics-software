@@ -200,6 +200,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          double defaultTrajectoryTime = 1.0;
          SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
          userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager, momentumBasedController.getFullRobotModel(),
+               momentumBasedController.getReferenceFrames(),
                contactableFeet, walkingControllerParameters, defaultTrajectoryTime, registry);
       }
       else
