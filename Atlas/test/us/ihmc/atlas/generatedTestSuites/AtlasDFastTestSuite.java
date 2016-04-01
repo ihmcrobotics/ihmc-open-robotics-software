@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHeadTrajectoryBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.FooTest.class,
    us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
