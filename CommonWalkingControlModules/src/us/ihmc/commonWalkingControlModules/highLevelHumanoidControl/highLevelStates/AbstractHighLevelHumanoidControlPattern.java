@@ -70,16 +70,16 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
 
-   protected final HighLevelControlManagerFactory variousWalkingManagers;
+   protected final HighLevelControlManagerFactory managerFactory;
 
    protected final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   public AbstractHighLevelHumanoidControlPattern(HighLevelControlManagerFactory variousWalkingManagers, MomentumBasedController momentumBasedController,
+   public AbstractHighLevelHumanoidControlPattern(HighLevelControlManagerFactory managerFactory, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
    {
       super(controllerState);
 
-      this.variousWalkingManagers = variousWalkingManagers;
+      this.managerFactory = managerFactory;
 
       this.yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
@@ -97,11 +97,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       allOneDoFjoints = fullRobotModel.getOneDoFJoints();
 
-      this.pelvisOrientationManager = variousWalkingManagers.getPelvisOrientationManager();
-      this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
-      this.manipulationControlModule = variousWalkingManagers.getManipulationControlModule();
-      this.feetManager = variousWalkingManagers.getFeetManager();
+      this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
+      this.headOrientationManager = managerFactory.getOrCreatedHeadOrientationManager();
+      this.chestOrientationManager = managerFactory.getOrCreateChestOrientationManager();
+      this.manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
+      this.feetManager = managerFactory.getOrCreateFeetManager();
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -195,7 +195,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       }
 
       momentumBasedController.initialize();
-      variousWalkingManagers.initializeManagers();
+      managerFactory.initializeManagers();
    }
 
    public void doMotionControl()

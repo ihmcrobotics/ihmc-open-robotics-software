@@ -139,13 +139,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-         HighLevelControlManagerFactory variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
+         HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
          MomentumBasedController momentumBasedController)
    {
-      super(variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
+      super(managerFactory, momentumBasedController, walkingControllerParameters, controllerState);
 
-      balanceManager = variousWalkingManagers.getBalanceManager();
-      comHeightManager = variousWalkingManagers.getCenterOfMassHeightManager();
+      balanceManager = managerFactory.getOrCreateBalanceManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
