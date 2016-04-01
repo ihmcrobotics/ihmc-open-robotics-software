@@ -11,7 +11,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       extends FrameSE3TrajectoryPointList implements Command<T, M>
 {
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-   private ExecutionMode executionMode;
+   private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private long previousCommandId = Packet.INVALID_MESSAGE_ID;
 
    public SE3TrajectoryControllerCommand()
@@ -23,7 +23,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
       super.clear();
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-      executionMode = null;
+      executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
    }
 
@@ -32,7 +32,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
       super.clear(referenceFrame);
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-      executionMode = null;
+      executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
    }
 

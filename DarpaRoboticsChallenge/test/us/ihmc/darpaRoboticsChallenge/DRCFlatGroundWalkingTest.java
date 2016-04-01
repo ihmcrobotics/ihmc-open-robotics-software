@@ -86,7 +86,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 
-   private static final double yawingTimeDuration = 0.1;
+   private static final double yawingTimeDuration = 0.5;
    private static final double standingTimeDuration = 1.0;
    private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
@@ -141,8 +141,11 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 //    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
       DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
 
-      DoubleYoVariable userDesiredPelvisYaw = (DoubleYoVariable) scs.getVariable("userDesiredPelvisYaw");
-      DoubleYoVariable userPelvisTrajectoryTime = (DoubleYoVariable) scs.getVariable("userDesiredPelvisTrajectoryTime");
+      BooleanYoVariable userUpdateDesiredPelvisPose = (BooleanYoVariable) scs.getVariable("userUpdateDesiredPelvisPose");
+      BooleanYoVariable userDoPelvisPose = (BooleanYoVariable) scs.getVariable("userDoPelvisPose");
+      DoubleYoVariable userDesiredPelvisPoseYaw = (DoubleYoVariable) scs.getVariable("userDesiredPelvisPoseYaw");
+      DoubleYoVariable userDesiredPelvisPoseTrajectoryTime = (DoubleYoVariable) scs.getVariable("userDesiredPelvisPoseTrajectoryTime");
+
       DoubleYoVariable icpErrorX = (DoubleYoVariable) scs.getVariable("icpErrorX");
       DoubleYoVariable icpErrorY = (DoubleYoVariable) scs.getVariable("icpErrorY");
 
@@ -152,15 +155,21 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       if (doPelvisYawWarmup)
       {
-         userPelvisTrajectoryTime.set(0.0);
-         userDesiredPelvisYaw.set(Math.PI/4.0);
-
+         userDesiredPelvisPoseTrajectoryTime.set(0.0);
+         userUpdateDesiredPelvisPose.set(true);
+         blockingSimulationRunner.simulateAndBlock(0.1);
+         
+         double startingYaw = userDesiredPelvisPoseYaw.getDoubleValue();
+         userDesiredPelvisPoseYaw.set(startingYaw + Math.PI/4.0);
+         userDoPelvisPose.set(true);
+         
          blockingSimulationRunner.simulateAndBlock(yawingTimeDuration);
 
          double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
 
-         userDesiredPelvisYaw.set(0.0);
+         userDesiredPelvisPoseYaw.set(startingYaw);
+         userDoPelvisPose.set(true);         
          blockingSimulationRunner.simulateAndBlock(yawingTimeDuration + 0.3);
 
          icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
